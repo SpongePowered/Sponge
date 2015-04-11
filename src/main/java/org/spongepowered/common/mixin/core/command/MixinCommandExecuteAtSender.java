@@ -49,16 +49,12 @@ public abstract class MixinCommandExecuteAtSender implements CommandSource, ICom
 
     @Override
     public void sendMessage(Text... messages) {
-        for (Text message : messages) {
-            addChatMessage(((SpongeText) message).toComponent());
-        }
+        ((CommandSource) this.field_174802_b).sendMessage(messages);
     }
 
     @Override
     public void sendMessage(Iterable<Text> messages) {
-        for (Text message : messages) {
-            addChatMessage(((SpongeText) message).toComponent());
-        }
+        ((CommandSource) this.field_174802_b).sendMessage(messages);
     }
 
     @Override

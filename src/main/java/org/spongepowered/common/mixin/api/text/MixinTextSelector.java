@@ -30,13 +30,15 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Locale;
+
 @Mixin(value = Text.Selector.class, remap = false)
 public abstract class MixinTextSelector extends MixinText {
 
     @Shadow protected org.spongepowered.api.text.selector.Selector selector;
 
     @Override
-    protected ChatComponentStyle createComponent() {
+    protected ChatComponentStyle createComponent(Locale locale) {
         return new ChatComponentSelector(this.selector.toPlain());
     }
 }

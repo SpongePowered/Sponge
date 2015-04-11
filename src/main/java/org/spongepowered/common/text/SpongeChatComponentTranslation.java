@@ -22,24 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.text;
+package org.spongepowered.common.text;
 
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatComponentText;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.text.translation.Translation;
 
-import java.util.Locale;
+public interface SpongeChatComponentTranslation {
 
-@Mixin(value = Text.Literal.class, remap = false)
-public abstract class MixinTextLiteral extends MixinText {
-
-    @Shadow protected String content;
-
-    @Override
-    protected ChatComponentStyle createComponent(Locale locale) {
-        return new ChatComponentText(this.content);
-    }
-
+    void setTranslation(Translation translation);
 }
