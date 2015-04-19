@@ -1,0 +1,54 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            name = 'forge'
+            url = 'http://files.minecraftforge.net/maven'
+        }
+        maven {
+            name = 'sonatype-snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+        maven {
+            name = 'minecrell-snapshots'
+            url = 'http://repo.minecrell.net/snapshots'
+        }
+    }
+
+    dependencies {
+        classpath 'net.minecrell:VanillaGradle:1.0.1-SNAPSHOT'
+        classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
+            exclude module: 'guava'
+        }
+    }
+}
+
+version = '0.1-SNAPSHOT' // TODO: ???
+
+ext.common = project
+apply plugin: 'net.minecrell.vanilla.base'
+ext.minecraftPlugin = plugins.getPlugin('net.minecrell.vanilla.base')
+apply from: 'gradle/minecraft.gradle'
+
+dependencies {
+    compile api
+    compile('org.spongepowered:mixin:0.3-SNAPSHOT') {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+    }
+
+    compile('com.zaxxer:HikariCP-java6:2.3.6') {
+        exclude module: 'slf4j-api'
+    }
+
+    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
+    runtime 'org.mariadb.jdbc:mariadb-java-client:1.1.8'
+    runtime 'com.h2database:h2:1.4.187'
+    runtime 'org.xerial:sqlite-jdbc:3.8.7'
+}
+
+// Add Javadocs for example sources
+javadoc {
+    source 'src/example/java'
+}
