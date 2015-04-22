@@ -36,7 +36,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulators.tileentities.BeaconData;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.meta.SpongeBeaconData;
+import org.spongepowered.common.data.manipulators.tiles.SpongeBeaconData;
 
 public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
 

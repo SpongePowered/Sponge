@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.registry;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
@@ -35,19 +37,72 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.world.*;
+import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderHell;
+import net.minecraft.world.WorldProviderSurface;
+import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.GameRegistry;
-import org.spongepowered.api.attribute.*;
+import org.spongepowered.api.attribute.Attribute;
+import org.spongepowered.api.attribute.AttributeBuilder;
+import org.spongepowered.api.attribute.AttributeCalculator;
+import org.spongepowered.api.attribute.AttributeModifierBuilder;
+import org.spongepowered.api.attribute.Operation;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.tile.*;
-import org.spongepowered.api.block.tile.carrier.*;
+import org.spongepowered.api.block.tile.Banner;
+import org.spongepowered.api.block.tile.CommandBlock;
+import org.spongepowered.api.block.tile.DaylightDetector;
+import org.spongepowered.api.block.tile.EnchantmentTable;
+import org.spongepowered.api.block.tile.EndPortal;
+import org.spongepowered.api.block.tile.EnderChest;
+import org.spongepowered.api.block.tile.MobSpawner;
+import org.spongepowered.api.block.tile.Note;
+import org.spongepowered.api.block.tile.Sign;
+import org.spongepowered.api.block.tile.Skull;
+import org.spongepowered.api.block.tile.TileEntityType;
+import org.spongepowered.api.block.tile.carrier.BrewingStand;
+import org.spongepowered.api.block.tile.carrier.Chest;
+import org.spongepowered.api.block.tile.carrier.Dispenser;
+import org.spongepowered.api.block.tile.carrier.Dropper;
+import org.spongepowered.api.block.tile.carrier.Furnace;
+import org.spongepowered.api.block.tile.carrier.Hopper;
 import org.spongepowered.api.data.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulators.tileentities.BannerData;
-import org.spongepowered.api.data.types.*;
+import org.spongepowered.api.data.manipulators.tileentities.BeaconData;
+import org.spongepowered.api.data.manipulators.tileentities.SignData;
+import org.spongepowered.api.data.types.Career;
+import org.spongepowered.api.data.types.Careers;
+import org.spongepowered.api.data.types.CoalType;
+import org.spongepowered.api.data.types.CoalTypes;
+import org.spongepowered.api.data.types.Comparison;
+import org.spongepowered.api.data.types.DirtType;
+import org.spongepowered.api.data.types.DisguisedBlockType;
+import org.spongepowered.api.data.types.GoldenApple;
+import org.spongepowered.api.data.types.Hinge;
+import org.spongepowered.api.data.types.HorseColor;
+import org.spongepowered.api.data.types.HorseStyle;
+import org.spongepowered.api.data.types.HorseVariant;
+import org.spongepowered.api.data.types.OcelotType;
+import org.spongepowered.api.data.types.PlantType;
+import org.spongepowered.api.data.types.PortionType;
+import org.spongepowered.api.data.types.PrismarineType;
+import org.spongepowered.api.data.types.Profession;
+import org.spongepowered.api.data.types.Professions;
+import org.spongepowered.api.data.types.QuartzType;
+import org.spongepowered.api.data.types.RabbitType;
+import org.spongepowered.api.data.types.RailDirection;
+import org.spongepowered.api.data.types.SandstoneType;
+import org.spongepowered.api.data.types.SkeletonType;
+import org.spongepowered.api.data.types.SlabType;
+import org.spongepowered.api.data.types.StairShape;
+import org.spongepowered.api.data.types.StoneType;
+import org.spongepowered.api.data.types.TreeType;
+import org.spongepowered.api.data.types.WallType;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
@@ -56,7 +111,11 @@ import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.entity.player.gamemode.GameModes;
-import org.spongepowered.api.item.*;
+import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.item.Enchantments;
+import org.spongepowered.api.item.FireworkEffectBuilder;
+import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOfferBuilder;
@@ -73,7 +132,14 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.ObjectiveBuilder;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.api.stats.*;
+import org.spongepowered.api.stats.BlockStatistic;
+import org.spongepowered.api.stats.EntityStatistic;
+import org.spongepowered.api.stats.ItemStatistic;
+import org.spongepowered.api.stats.Statistic;
+import org.spongepowered.api.stats.StatisticBuilder;
+import org.spongepowered.api.stats.StatisticFormat;
+import org.spongepowered.api.stats.StatisticGroup;
+import org.spongepowered.api.stats.TeamStatistic;
 import org.spongepowered.api.stats.achievement.Achievement;
 import org.spongepowered.api.stats.achievement.AchievementBuilder;
 import org.spongepowered.api.status.Favicon;
@@ -90,7 +156,9 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.*;
+import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.WorldBuilder;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
@@ -103,10 +171,18 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
+import org.spongepowered.common.data.builders.tiles.SpongeBannerDataBuilder;
+import org.spongepowered.common.data.builders.tiles.SpongeBeaconDataBuilder;
+import org.spongepowered.common.data.builders.tiles.SpongeSignDataBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
-import org.spongepowered.common.entity.*;
+import org.spongepowered.common.entity.SpongeCareer;
+import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.entity.SpongeEntityMeta;
+import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.entity.player.gamemode.SpongeGameMode;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
@@ -115,7 +191,23 @@ import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 import org.spongepowered.common.rotation.SpongeRotation;
 import org.spongepowered.common.service.persistence.builders.block.data.SpongePatternLayerBuilder;
-import org.spongepowered.common.service.persistence.builders.block.tile.*;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeBannerBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeBrewingStandBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeChestBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeCommandBlockBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeComparatorBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeDaylightBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeDispenserBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeDropperBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeEnchantmentTableBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeEndPortalBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeEnderChestBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeFurnaceBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeHopperBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeMobSpawnerBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeNoteBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeSignBuilder;
+import org.spongepowered.common.service.persistence.builders.block.tile.SpongeSkullBuilder;
 import org.spongepowered.common.status.SpongeFavicon;
 import org.spongepowered.common.text.SpongeTextFactory;
 import org.spongepowered.common.text.chat.SpongeChatType;
@@ -127,17 +219,21 @@ import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.SpongeWorldBuilder;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Map;
+import java.util.UUID;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
@@ -557,7 +653,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public DataManipulatorRegistry getManipulatorRegistry() {
-        throw new UnsupportedOperationException(); //TODO
+        return SpongeManipulatorRegistry.getInstance();
     }
 
     @Override
@@ -1159,6 +1255,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private void setupSerialization() {
         Game game = Sponge.getGame();
         SerializationService service = game.getServiceManager().provide(SerializationService.class).get();
+        SpongeManipulatorRegistry dataRegistry = SpongeManipulatorRegistry.getInstance();
         // TileEntities
         service.registerBuilder(Banner.class, new SpongeBannerBuilder(game));
         service.registerBuilder(BannerData.PatternLayer.class, new SpongePatternLayerBuilder(game));
@@ -1178,6 +1275,19 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(Note.class, new SpongeNoteBuilder(game));
         service.registerBuilder(Sign.class, new SpongeSignBuilder(game));
         service.registerBuilder(Skull.class, new SpongeSkullBuilder(game));
+
+        SpongeBannerDataBuilder bannerDataBuilder = new SpongeBannerDataBuilder();
+        service.registerBuilder(BannerData.class, bannerDataBuilder);
+        dataRegistry.register(BannerData.class, bannerDataBuilder);
+
+        SpongeSignDataBuilder signBuilder = new SpongeSignDataBuilder();
+        service.registerBuilder(SignData.class, signBuilder);
+        dataRegistry.register(SignData.class, signBuilder);
+
+        SpongeBeaconDataBuilder beaconDataBuilder = new SpongeBeaconDataBuilder();
+        service.registerBuilder(BeaconData.class, beaconDataBuilder);
+        dataRegistry.register(BeaconData.class, beaconDataBuilder);
+        dataRegistry.registerSetter(BeaconData.class, beaconDataBuilder);
 
         // User
         // TODO someone needs to write a User implementation...

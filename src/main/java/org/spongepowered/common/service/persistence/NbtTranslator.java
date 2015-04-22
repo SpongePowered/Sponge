@@ -25,6 +25,8 @@
 package org.spongepowered.common.service.persistence;
 
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Lists;
@@ -62,6 +64,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private NbtTranslator() { } // #NOPE
 
     private static NBTTagCompound containerToCompound(final DataView container) {
+        checkNotNull(container);
         NBTTagCompound compound = new NBTTagCompound();
         containerToCompound(container, compound);
         return compound;
@@ -70,6 +73,8 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private static void containerToCompound(final DataView container, final NBTTagCompound compound) {
         // We don't need to get deep values since all nested DataViews will be found
         // from the instance of checks.
+        checkNotNull(container);
+        checkNotNull(compound);
         for (Map.Entry<DataQuery, Object> entry : container.getValues(false).entrySet()) {
             Object value = entry.getValue();
             String key = entry.getKey().asString('.');
@@ -85,6 +90,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     @SuppressWarnings("unchecked")
     private static NBTBase getBaseFromObject(Object value) {
+        checkNotNull(value);
         if (value instanceof Byte) {
             return new NBTTagByte((Byte) value);
         } else if (value instanceof Short) {
@@ -137,6 +143,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     @SuppressWarnings("unchecked")
     private static DataContainer getViewFromCompound(NBTTagCompound compound) {
+        checkNotNull(compound);
         DataContainer container = new MemoryDataContainer();
         for (String key : (Set<String>) compound.getKeySet()) {
             NBTBase base = compound.getTag(key);
@@ -148,6 +155,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void setInternal(NBTBase base, byte type, DataView view, String key) {
+        checkNotNull(base);
+        checkNotNull(view);
+        checkNotNull(key);
+        checkArgument(!key.isEmpty());
+        checkArgument(type > 0);
         if (type == 1) {
             view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getByte());
         } else if (type == 2) {

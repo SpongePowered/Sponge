@@ -25,6 +25,8 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.world.Location;
 
 public interface IMixinEntity {
 
@@ -45,4 +47,23 @@ public interface IMixinEntity {
     void setActivatedTick(long tick);
 
     void inactiveTick();
+
+    NBTTagCompound getSpongeData();
+
+    boolean teleportEntity(Entity entity, Location location, int currentDim, int targetDim, boolean forced);
+
+    /**
+     * Read extra data (SpongeData) from the entity's NBT tag.
+     *
+     * @param compound The SpongeData compound to read from
+     */
+    void readFromNbt(NBTTagCompound compound);
+
+    /**
+     * Write extra data (SpongeData) to the entity's NBT tag.
+     *
+     * @param compound The SpongeData compound to write to
+     */
+    void writeToNbt(NBTTagCompound compound);
+
 }

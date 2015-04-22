@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.item;
 
-import static org.spongepowered.common.service.persistence.NbtTranslator.getInstance;
-
 import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulators.SingleValueData;
@@ -39,7 +36,6 @@ import org.spongepowered.api.data.manipulators.items.DurabilityData;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.item.data.AbstractItemData;
 
 import java.util.Collection;
 import java.util.Set;
@@ -102,12 +98,7 @@ public final class ItemsHelper {
     }
 
     public static DataTransactionResult setData(ItemStack stack, DataManipulator<?> data) {
-        if (data instanceof AbstractItemData) {
-            return ((AbstractItemData) data).putData((net.minecraft.item.ItemStack) stack);
-        } else {
-            NBTTagCompound compound = ((net.minecraft.item.ItemStack) stack).getTagCompound();
-            getInstance().translateContainerToData(compound, data.toContainer());
-            return SUCCESS_NO_REPLACEMENTS;
-        }
+
+        return SUCCESS_NO_REPLACEMENTS; // TODO
     }
 }

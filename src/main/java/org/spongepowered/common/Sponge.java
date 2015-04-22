@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.io.File;
 
@@ -71,6 +72,10 @@ public class Sponge {
 
     public static Game getGame() {
         return getInstance().game;
+    }
+
+    public static SpongeGameRegistry getSpongeRegistry() {
+        return ((SpongeGameRegistry) getInstance().game.getRegistry());
     }
 
     public static Logger getLogger() {
