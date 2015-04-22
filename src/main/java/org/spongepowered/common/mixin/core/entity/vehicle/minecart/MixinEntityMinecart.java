@@ -31,45 +31,21 @@ import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinMinecart;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VectorSerializer;
 
 @NonnullByDefault
 @Mixin(EntityMinecart.class)
-public abstract class MixinEntityMinecart extends MixinEntity implements Minecart {
-
-    @Shadow(remap = false)
-    public abstract double getDragAir();
-    @Shadow(remap = false)
-    public abstract double getMaxSpeed();
+public abstract class MixinEntityMinecart extends MixinEntity implements Minecart, IMixinMinecart {
 
     private double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
     private Vector3d airborneMod = new Vector3d(0.5D, 0.5D, 0.5D);
     private Vector3d derailedMod = new Vector3d(0.5D, 0.5D, 0.5D);
-
-    // this method overwrites the vanilla accessor for maximum speed
-    @Overwrite
-    public double getMaximumSpeed() {
-        return this.maxSpeed;
-    }
-
-    // this method overwrites vanilla behavior to allow for a custom deceleration rate on all three axes when airborne
-    @Inject(method = "moveDerailedMinecart()V", at = @At(value = "FIELD", target = "net.minecraft.entity.Entity.onGround:Z", ordinal = 2))
-    public void implementCustomAirborneDeceleration(CallbackInfo ci) {
-        if (!this.isOnGround()) {
-            this.motionX /= this.getDragAir();
-            this.motionY /= this.getDragAir();
-            this.motionZ /= this.getDragAir();
-            this.motionX *= this.airborneMod.getX();
-            this.motionY *= this.airborneMod.getY();
-            this.motionZ *= this.airborneMod.getZ();
-        }
-    }
 
     // this method overwrites vanilla behavior to allow for a custom deceleration rate when derailed
     @Inject(method = "moveDerailedMinecart()V", at = @At(value = "INVOKE", target = "net.minecraft.entity.Entity.moveEntity(DDD)V"))
@@ -110,7 +86,7 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
 
     @Override
     public double getPotentialMaxSpeed() {
-        return this.getMaxSpeed();
+        return this.getMaximumMinecartSpeed();
     }
 
     @Override

@@ -74,7 +74,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
@@ -351,14 +350,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     long weatherStartTime;
-
-    @Inject(method = "updateWeatherBody()V", remap = false, at = {
-            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThundering(Z)V"),
-            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRaining(Z)V")
-    })
-    private void onUpdateWeatherBody(CallbackInfo ci) {
-        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
-    }
 
     @Override
     public long getRunningDuration() {
