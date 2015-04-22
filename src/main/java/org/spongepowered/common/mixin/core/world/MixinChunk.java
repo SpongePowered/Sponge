@@ -36,6 +36,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.gen.BiomeBuffer;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -131,4 +132,15 @@ public abstract class MixinChunk implements Chunk {
     public org.spongepowered.api.world.World getWorld() {
         return (org.spongepowered.api.world.World) this.worldObj;
     }
+
+    @Override
+    public Location getFullBlock(Vector3i position) {
+        return getFullBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public Location getFullBlock(int x, int y, int z) {
+        return getWorld().getFullBlock(xPosition * 16 + x, y, zPosition * 16 + z);
+    }
+
 }

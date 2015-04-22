@@ -174,6 +174,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public void setBlockType(Vector3i position, BlockType type) {
+        setBlockType(position.getX(), position.getY(), position.getZ(), type);
+    }
+
+    @Override
+    public void setBlockType(int x, int y, int z, BlockType type) {
+        setBlock(x, y, z, type.getDefaultState());
+    }
+
+    @Override
     public void setBlock(Vector3i position, BlockState block) {
         SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), position, block);
     }
