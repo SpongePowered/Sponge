@@ -22,18 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataManipulatorBuilder;
+import org.spongepowered.api.service.persistence.DataBuilder;
 
-public interface IMixinWorldType {
+public interface SpongeDataUtil<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T>, DataSetter<T>, DataRemover<T> {
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
-
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
-
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
 }

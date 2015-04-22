@@ -22,18 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.utils;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.service.persistence.InvalidDataException;
 
-public interface IMixinWorldType {
+public class DataUtil {
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
-
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
-
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+    public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
+        if (!dataView.contains(query)) {
+            throw new InvalidDataException("Missing data for query: " + query.asString('.'));
+        } else {
+            return dataView;
+        }
+    }
 }

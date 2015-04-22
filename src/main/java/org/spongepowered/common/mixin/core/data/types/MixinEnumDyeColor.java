@@ -22,18 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.data.types;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import net.minecraft.item.EnumDyeColor;
+import org.spongepowered.api.data.types.DyeColor;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IMixinWorldType {
+import java.awt.Color;
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
+@NonnullByDefault
+@Mixin(net.minecraft.item.EnumDyeColor.class)
+public class MixinEnumDyeColor implements DyeColor {
 
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
+    @Shadow
+    private String name;
 
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String getId() {
+        return this.name;
+    }
+
+    @Override
+    public Color getColor() {
+        return new Color(((EnumDyeColor) (Object) this).getMapColor().colorValue);
+    }
+
 }

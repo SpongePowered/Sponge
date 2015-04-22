@@ -40,17 +40,10 @@ import org.spongepowered.api.data.manipulators.items.DurabilityData;
 public class SpongeDurabilityData extends AbstractDataManipulator<DurabilityData> implements DurabilityData {
 
     private int durability;
-    private int maxDurability;
+    private int maxDurability = 0;
     private boolean breakable = true;
 
     public SpongeDurabilityData() {
-
-    }
-
-    public SpongeDurabilityData(ItemStack stack) {
-        this.durability = checkNotNull(stack).getItemDamage();
-        this.maxDurability = stack.getItem().getMaxDamage();
-        this.breakable = stack.isItemStackDamageable();
     }
 
     @Override
@@ -63,6 +56,11 @@ public class SpongeDurabilityData extends AbstractDataManipulator<DurabilityData
         checkArgument(durability >= 0);
         checkArgument(durability < this.maxDurability);
         this.durability = durability;
+    }
+
+    public void setMaxDurability(int durability) {
+        checkArgument(durability >= 0);
+        this.maxDurability = durability;
     }
 
     @Override

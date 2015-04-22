@@ -22,18 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.builders.tiles;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import com.google.common.base.Optional;
+import org.spongepowered.api.block.tile.Banner;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.service.persistence.DataBuilder;
+import org.spongepowered.api.service.persistence.InvalidDataException;
 
-public interface IMixinWorldType {
+public class SpongeBannerBuilder implements DataBuilder<Banner> {
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
-
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
-
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+    @Override
+    public Optional<Banner> build(DataView container) throws InvalidDataException {
+        return null;
+    }
 }

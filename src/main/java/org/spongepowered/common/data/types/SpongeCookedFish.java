@@ -22,18 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.types;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface IMixinWorldType {
+import org.spongepowered.api.data.types.CookedFish;
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
+public class SpongeCookedFish implements CookedFish {
 
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
+    private final String id;
+    private final String name;
 
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+    public SpongeCookedFish(String id, String name) {
+        this.id = checkNotNull(id);
+        this.name = checkNotNull(name);
+    }
+
+    @Override
+    public String getId() {
+        return "cooked" + this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }

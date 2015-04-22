@@ -35,29 +35,14 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(net.minecraft.village.MerchantRecipe.class)
 public abstract class MixinMerchantRecipe implements TradeOffer {
 
-    @Shadow
-    public abstract net.minecraft.item.ItemStack getItemToBuy();
-
-    @Shadow
-    public abstract boolean hasSecondItemToBuy();
-
-    @Shadow
-    public abstract net.minecraft.item.ItemStack getSecondItemToBuy();
-
-    @Shadow
-    public abstract net.minecraft.item.ItemStack getItemToSell();
-
-    @Shadow
-    public abstract int getToolUses();
-
-    @Shadow
-    public abstract int getMaxTradeUses();
-
-    @Shadow
-    public abstract boolean isRecipeDisabled();
-
-    @Shadow
-    public abstract boolean getRewardsExp();
+    @Shadow public abstract net.minecraft.item.ItemStack getItemToBuy();
+    @Shadow public abstract boolean hasSecondItemToBuy();
+    @Shadow public abstract net.minecraft.item.ItemStack getSecondItemToBuy();
+    @Shadow public abstract net.minecraft.item.ItemStack getItemToSell();
+    @Shadow public abstract int getToolUses();
+    @Shadow public abstract int getMaxTradeUses();
+    @Shadow public abstract boolean isRecipeDisabled();
+    @Shadow public abstract boolean getRewardsExp();
 
     @Override
     public ItemStack getFirstBuyingItem() {

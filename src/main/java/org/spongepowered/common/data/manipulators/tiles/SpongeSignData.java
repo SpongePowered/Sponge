@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulators.tiles;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.common.data.manipulators.tiles.TileManipulatorUtility.fillSignData;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -46,12 +47,12 @@ public class SpongeSignData extends AbstractDataManipulator<SignData> implements
 
     @Override
     public Optional<SignData> fill(DataHolder dataHolder) {
-        return null;
+        return Optional.absent();
     }
 
     @Override
     public Optional<SignData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
+        return Optional.absent();
     }
 
     @Override

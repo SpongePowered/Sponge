@@ -42,79 +42,49 @@ import java.util.List;
 @Implements(@Interface(iface = WorldBorder.class, prefix = "border$"))
 public abstract class MixinWorldBorder implements WorldBorder {
 
-    @Shadow
-    private int warningTime;
+    @Shadow private int warningTime;
+    @Shadow private int warningDistance;
+    @Shadow private double startDiameter;
+    @Shadow private double endDiameter;
+    @Shadow private long endTime;
+    @Shadow private long startTime;
 
-    @Shadow
-    private int warningDistance;
 
-    @Shadow
-    private double startDiameter;
-
-    @Shadow
-    private double endDiameter;
-
-    @Shadow
-    private long endTime;
-
-    @Shadow
-    private long startTime;
-
-    @Shadow
-    public abstract double getDamageBuffer();
-
+    @Shadow public abstract double getCenterX();
+    @Shadow public abstract double getCenterZ();
+    @Shadow public abstract double getTargetSize();
+    @Shadow public abstract void setTransition(double newSize);
+    @Shadow public abstract void setTransition(double oldSize, double newSize, long time);
+    @Shadow public abstract long getTimeUntilTarget();
+    @Shadow public abstract EnumBorderStatus getStatus();
+    @Shadow public abstract double getDamageBuffer();
     @Shadow
     public abstract void setDamageBuffer(double buffer);
-
     @Shadow(prefix = "shadow$")
     public abstract double shadow$getDamageAmount();
-
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setDamageAmount(double amount);
-
-    @Shadow
+    @Shadow(prefix = "shadow$")
     public abstract int shadow$getWarningTime();
-
-    @Shadow
+    @Shadow(prefix = "shadow$")
     public abstract void shadow$setWarningTime(int time);
-
-    @Shadow
+    @Shadow(prefix = "shadow$")
     public abstract int shadow$getWarningDistance();
-
-    @Shadow
+    @Shadow(prefix = "shadow$")
     public abstract void shadow$setWarningDistance(int distance);
-
-    @Shadow
-    public abstract double getCenterX();
-
-    @Shadow
-    public abstract double getCenterZ();
-
-    @Shadow
-    public abstract double getTargetSize();
-
-    @Shadow
-    public abstract void setTransition(double newSize);
-
-    @Shadow
-    public abstract void setTransition(double oldSize, double newSize, long time);
-
-    @Shadow
-    public abstract long getTimeUntilTarget();
-
-    @Shadow
-    public abstract EnumBorderStatus getStatus();
 
     @SuppressWarnings("rawtypes")
     @Shadow
     public abstract List getListeners();
 
-    public int border$getWarningTime() {
+    @Override
+    public int getWarningTime() {
         return this.warningTime;
     }
 
     @SuppressWarnings("rawtypes")
-    public void border$setWarningTime(int time) {
+    @Override
+    public void setWarningTime(int time) {
         this.warningTime = time;
         Iterator var2 = this.getListeners().iterator();
 
@@ -124,12 +94,14 @@ public abstract class MixinWorldBorder implements WorldBorder {
         }
     }
 
-    public int border$getWarningDistance() {
+    @Override
+    public int getWarningDistance() {
         return this.warningDistance;
     }
 
     @SuppressWarnings("rawtypes")
-    public void border$setWarningDistance(int distance) {
+    @Override
+    public void setWarningDistance(int distance) {
         this.warningDistance = distance;
         Iterator var2 = this.getListeners().iterator();
 
@@ -139,11 +111,13 @@ public abstract class MixinWorldBorder implements WorldBorder {
         }
     }
 
-    public double border$getNewDiameter() {
+    @Override
+    public double getNewDiameter() {
         return getTargetSize();
     }
 
-    public double border$getDiameter() {
+    @Override
+    public double getDiameter() {
         if (this.getStatus() != EnumBorderStatus.STATIONARY) {
             double time = (float) (System.currentTimeMillis() - this.startTime) / (float) (this.endTime - this.startTime);
 
@@ -157,39 +131,48 @@ public abstract class MixinWorldBorder implements WorldBorder {
         return this.startDiameter;
     }
 
-    public void border$setDiameter(double diameter) {
+    @Override
+    public void setDiameter(double diameter) {
         setTransition(diameter);
     }
 
-    public void border$setDiameter(double diameter, long time) {
+    @Override
+    public void setDiameter(double diameter, long time) {
         setTransition(getDiameter(), diameter, time);
     }
 
-    public void border$setDiameter(double startDiameter, double endDiameter, long time) {
+    @Override
+    public void setDiameter(double startDiameter, double endDiameter, long time) {
         setTransition(startDiameter, endDiameter, time);
     }
 
-    public long border$getTimeRemaining() {
+    @Override
+    public long getTimeRemaining() {
         return getTimeUntilTarget();
     }
 
-    public Vector3d border$getCenter() {
+    @Override
+    public Vector3d getCenter() {
         return new Vector3d(getCenterX(), 0, getCenterZ());
     }
 
-    public double border$getDamageThreshold() {
+    @Override
+    public double getDamageThreshold() {
         return getDamageBuffer();
     }
 
-    public void border$setDamageThreshold(double distance) {
+    @Override
+    public void setDamageThreshold(double distance) {
         setDamageBuffer(distance);
     }
 
-    public int border$getDamageAmount() {
+    @Override
+    public int getDamageAmount() {
         return ((int) shadow$getDamageAmount());
     }
 
-    public void border$setDamageAmount(int damage) {
+    @Override
+    public void setDamageAmount(int damage) {
         shadow$setDamageAmount(damage);
     }
 }

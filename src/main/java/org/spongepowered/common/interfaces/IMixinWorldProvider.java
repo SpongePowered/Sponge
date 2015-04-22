@@ -31,4 +31,6 @@ public interface IMixinWorldProvider {
     void setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config);
 
     SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig();
+
+    int getAverageGroundLevel();
 }

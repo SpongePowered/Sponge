@@ -22,18 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.data.types;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import net.minecraft.item.ItemFishFood;
+import org.spongepowered.api.data.types.Fish;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IMixinWorldType {
+@Mixin(ItemFishFood.FishType.class)
+public class MixinFishType implements Fish {
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
+    @Shadow
+    private String unlocalizedName;
 
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
+    @Override
+    public String getId() {
+        return "raw." + this.unlocalizedName;
+    }
 
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+    @Override
+    public String getName() {
+        return this.unlocalizedName;
+    }
 }

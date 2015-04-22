@@ -24,16 +24,11 @@
  */
 package org.spongepowered.common.interfaces;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 
-public interface IMixinWorldType {
+public interface IMixinServer {
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
+    AnvilSaveHandler getHandler(String worldName);
 
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
-
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+    void initialSpongeWorldChunkLoad();
 }

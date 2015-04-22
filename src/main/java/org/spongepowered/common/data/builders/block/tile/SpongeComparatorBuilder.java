@@ -22,18 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.builders.block.tile;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import com.google.common.base.Optional;
+import net.minecraft.tileentity.TileEntityComparator;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.block.tile.Comparator;
+import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.data.DataView;
 
-public interface IMixinWorldType {
+public class SpongeComparatorBuilder extends AbstractTileBuilder<Comparator> {
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
+    public SpongeComparatorBuilder(Game game) {
+        super(game);
+    }
 
-    SpongeWorldGenerator createGenerator(World world, DataContainer settings);
-
-    SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<Comparator> build(DataView container) throws InvalidDataException {
+        Optional<Comparator> comparatorOptional = super.build(container);
+        if (!comparatorOptional.isPresent()) {
+            throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
+        }
+        ((TileEntityComparator) comparatorOptional.get()).validate();
+        return Optional.of(comparatorOptional.get());
+    }
 }
