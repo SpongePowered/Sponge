@@ -31,8 +31,8 @@ import static org.spongepowered.common.configuration.SpongeConfig.Type.GLOBAL;
 import com.google.inject.Injector;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
-import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.io.File;

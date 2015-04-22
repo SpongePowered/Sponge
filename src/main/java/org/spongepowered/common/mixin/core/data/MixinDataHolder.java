@@ -36,9 +36,9 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.DataSetter;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
-import org.spongepowered.common.data.DataSetter;
 
 import java.util.Collection;
 

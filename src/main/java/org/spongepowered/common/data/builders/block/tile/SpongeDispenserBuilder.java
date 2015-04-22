@@ -28,9 +28,9 @@ import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntityDispenser;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tile.carrier.Dispenser;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.service.persistence.InvalidDataException;
 
 public class SpongeDispenserBuilder extends SpongeLockableBuilder<Dispenser> {
 

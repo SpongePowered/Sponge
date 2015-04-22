@@ -25,9 +25,9 @@
 package org.spongepowered.common.interfaces;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.common.configuration.SpongeConfig;
 
 public interface IMixinWorld {

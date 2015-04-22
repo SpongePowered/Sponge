@@ -28,7 +28,6 @@ import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntityDropper;
 import net.minecraft.world.IWorldNameable;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;

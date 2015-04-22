@@ -28,8 +28,8 @@ import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntityEnderChest;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tile.EnderChest;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.service.persistence.InvalidDataException;
 
 public class SpongeEnderChestBuilder extends AbstractTileBuilder<EnderChest> {
 

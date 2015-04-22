@@ -25,11 +25,9 @@
 package org.spongepowered.common.data.manipulators.items;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Optional;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
