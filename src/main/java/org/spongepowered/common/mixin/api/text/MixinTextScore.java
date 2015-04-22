@@ -25,26 +25,23 @@
 package org.spongepowered.common.mixin.api.text;
 
 import com.google.common.base.Optional;
-import net.minecraft.util.ChatComponentScore;
-import net.minecraft.util.ChatComponentStyle;
+import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Locale;
-
 @Mixin(value = Text.Score.class, remap = false)
 public abstract class MixinTextScore extends MixinText {
 
-    @Shadow protected Object score;
+    @Shadow protected Score score;
     @Shadow protected Optional<String> override;
 
-    @Override
+    /*@Override
     protected ChatComponentStyle createComponent(Locale locale) {
         ChatComponentScore component = new ChatComponentScore(null, null); // TODO
         if (this.override.isPresent()) {
             component.setValue(this.override.get());
         }
         return component;
-    }
+    }*/
 }
