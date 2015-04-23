@@ -84,6 +84,7 @@ import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -139,6 +140,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<Chunk> getChunk(Vector3i position) {
+        if (!SpongeChunkLayout.instance.isValidChunk(position)) {
+            return Optional.absent();
+        }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.theChunkProviderServer.chunkExists(position.getX(), position.getZ())) {
@@ -149,6 +153,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<Chunk> loadChunk(Vector3i position, boolean shouldGenerate) {
+        if (!SpongeChunkLayout.instance.isValidChunk(position)) {
+            return Optional.absent();
+        }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.theChunkProviderServer.chunkExists(position.getX(), position.getZ()) || shouldGenerate) {

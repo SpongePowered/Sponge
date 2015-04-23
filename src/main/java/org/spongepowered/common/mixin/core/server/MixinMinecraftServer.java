@@ -41,6 +41,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,6 +50,7 @@ import org.spongepowered.common.interfaces.IMixinServer;
 import org.spongepowered.common.interfaces.Subjectable;
 import org.spongepowered.common.text.SpongeText;
 import org.spongepowered.common.text.SpongeTextFactory;
+import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -99,6 +101,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
             }
         }
         return Optional.absent();
+    }
+
+    @Override
+    public ChunkLayout getChunkLayout() {
+        return SpongeChunkLayout.instance;
     }
 
     @Override
