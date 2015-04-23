@@ -40,6 +40,7 @@ import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.interfaces.Subjectable;
 
 import java.util.Collections;
@@ -167,9 +168,9 @@ public abstract class MixinSubject implements CommandSource, ICommandSender {
     @Override
     public boolean canCommandSenderUseCommand(int permissionLevel, String commandName) {
         for (CommandMapping mapping : Sponge.getGame().getCommandDispatcher().getAll(commandName)) {
-            /* TODO if (mapping.getCallable() instanceof MinecraftCommandWrapper) { // best we can do :/
+            if (mapping.getCallable() instanceof MinecraftCommandWrapper) { // best we can do :/
                 return hasPermission(((MinecraftCommandWrapper) mapping.getCallable()).getCommandPermission());
-            }*/
+            }
         }
         return ((Subjectable) this).permDefault(commandName).asBoolean();
     }

@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.interfaces;
 
+import net.minecraft.command.ICommand;
 import org.spongepowered.api.Game;
+import org.spongepowered.common.command.MinecraftCommandWrapper;
 
 public interface IMixinServerCommandManager {
 
     void registerLowPriorityCommands(Game game);
 
     void registerEarlyCommands(Game game);
+
+    MinecraftCommandWrapper wrapCommand(ICommand command);
 }

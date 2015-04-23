@@ -131,6 +131,7 @@
         "server.MixinNetHandlerHandshakeTCP",
         "server.MixinNetHandlerPlayServer",
         "server.MixinNetworkManager",
+        "server.MixinServerCommandManager",
         "status.MixinMinecraftProtocolVersionIdentifier",
         "status.MixinNetHandlerStatusServer",
         "status.MixinPingResponseHandler",
