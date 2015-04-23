@@ -84,18 +84,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
 
+    @Override
     public GameProfile getProfile() {
         return (GameProfile) getGameProfile();
     }
 
+    @Override
     public String getName() {
         return getGameProfile().getName();
     }
 
+    @Override
     public boolean isOnline() {
         return true;
     }
 
+    @Override
     public Optional<Player> getPlayer() {
         return Optional.of((Player) this);
     }
@@ -104,46 +108,56 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return ((SpongeChatComponent) getDisplayName()).toText();
     }
 
+    @Override
     public Locale getLocale() {
         return LocaleUtils.toLocale(this.translator);
     }
 
+    @Override
     public void sendMessage(Text... messages) {
         sendMessage(ChatTypes.CHAT, messages);
     }
 
+    @Override
     public void sendMessage(Iterable<Text> messages) {
         sendMessage(ChatTypes.CHAT, messages);
     }
 
+    @Override
     public void sendMessage(ChatType type, Text... messages) {
         for (Text text : messages) {
             this.playerNetServerHandler.sendPacket(new S02PacketChat(((SpongeText) text).toComponent(getLocale()), ((SpongeChatType) type).getByteId()));
         }
     }
 
+    @Override
     public void sendMessage(ChatType type, Iterable<Text> messages) {
         for (Text text : messages) {
             this.playerNetServerHandler.sendPacket(new S02PacketChat(((SpongeText) text).toComponent(getLocale()), ((SpongeChatType) type).getByteId()));
         }
     }
 
+    @Override
     public void sendTitle(Title title) {
         ((SpongeTitle) title).send((EntityPlayerMP) (Object) this);
     }
 
+    @Override
     public void resetTitle() {
         sendTitle(Titles.RESET);
     }
 
+    @Override
     public void clearTitle() {
         sendTitle(Titles.CLEAR);
     }
 
+    @Override
     public void spawnParticles(ParticleEffect particleEffect, Vector3d position) {
         this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
     }
 
+    @Override
     public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
         checkNotNull(particleEffect, "The particle effect cannot be null!");
         checkNotNull(position, "The position cannot be null");
@@ -164,6 +178,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
+    @Override
     public PlayerConnection getConnection() {
         return (PlayerConnection) this.playerNetServerHandler;
     }
