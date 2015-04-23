@@ -36,7 +36,7 @@ import java.net.Proxy;
 @Mixin(DedicatedServer.class)
 public abstract class MixinDedicatedServer extends MinecraftServer {
 
-    @Shadow public boolean guiIsEnabled;
+    @Shadow private boolean guiIsEnabled;
 
     public MixinDedicatedServer(Proxy proxy, File workDir) {
         super(proxy, workDir);
@@ -52,7 +52,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     @Overwrite
     public void setGuiEnabled() {
         //MinecraftServerGui.createServerGui(this);
-        this.guiIsEnabled = true;
+        this.guiIsEnabled = false;
     }
 
 }
