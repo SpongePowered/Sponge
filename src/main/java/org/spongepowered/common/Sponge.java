@@ -31,6 +31,7 @@ import static org.spongepowered.common.configuration.SpongeConfig.Type.GLOBAL;
 import com.google.inject.Injector;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
@@ -39,6 +40,7 @@ import java.io.File;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
@@ -56,14 +58,22 @@ public class Sponge {
     private final Game game;
     private final Logger logger;
 
+    private final PluginContainer plugin;
+    private final PluginContainer minecraftPlugin;
+
     @Inject
-    public Sponge(Injector injector, Game game, Logger logger) {
+    public Sponge(Injector injector, Game game, Logger logger,
+            @Named("Sponge") PluginContainer plugin, @Named("Minecraft") PluginContainer minecraftPlugin) {
+
         checkState(instance == null, "Sponge was already initialized");
         instance = this;
 
         this.injector = checkNotNull(injector, "injector");
         this.game = checkNotNull(game, "game");
         this.logger = checkNotNull(logger, "logger");
+
+        this.plugin = checkNotNull(plugin, "plugin");
+        this.minecraftPlugin = checkNotNull(minecraftPlugin, "minecraftPlugin");
     }
 
     public static Injector getInjector() {
@@ -80,6 +90,14 @@ public class Sponge {
 
     public static Logger getLogger() {
         return getInstance().logger;
+    }
+
+    public static PluginContainer getPlugin() {
+        return getInstance().plugin;
+    }
+
+    public static PluginContainer getMinecraftPlugin() {
+        return getInstance().minecraftPlugin;
     }
 
     private static final File gameDir = SpongeLaunch.getGameDirectory();

@@ -43,7 +43,6 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
@@ -120,10 +119,10 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         return super.registerCommand(command);
     }
 
-    /*@Override // This must be implemented in each implementation
+    @Override
     public MinecraftCommandWrapper wrapCommand(ICommand command) {
-        return new MinecraftCommandWrapper((PluginContainer) Sponge.getInstance(), command); // TODO: How?
-    }*/
+        return new MinecraftCommandWrapper(Sponge.getMinecraftPlugin(), command);
+    }
 
     private void registerDefaultPermissions(Game game, MinecraftCommandWrapper cmd) {
         Optional<PermissionService> perms = game.getServiceManager().provide(PermissionService.class);
