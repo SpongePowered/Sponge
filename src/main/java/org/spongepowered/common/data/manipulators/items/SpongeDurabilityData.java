@@ -34,14 +34,16 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.items.DurabilityData;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-public class SpongeDurabilityData extends AbstractDataManipulator<DurabilityData> implements DurabilityData {
+public class SpongeDurabilityData extends SpongeAbstractData<DurabilityData> implements DurabilityData {
 
     private int durability;
     private int maxDurability = 0;
     private boolean breakable = true;
 
     public SpongeDurabilityData() {
+        super(DurabilityData.class);
     }
 
     @Override
@@ -84,18 +86,4 @@ public class SpongeDurabilityData extends AbstractDataManipulator<DurabilityData
         return container;
     }
 
-    @Override
-    public Optional<DurabilityData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<DurabilityData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<DurabilityData> from(DataContainer container) {
-        return null;
-    }
 }

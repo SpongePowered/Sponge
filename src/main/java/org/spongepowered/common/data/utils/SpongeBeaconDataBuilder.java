@@ -48,6 +48,11 @@ public class SpongeBeaconDataBuilder implements SpongeDataUtil<BeaconData> {
     }
 
     @Override
+    public Optional<BeaconData> fillData(DataHolder holder, BeaconData manipulator, DataPriority priority) {
+        return null;
+    }
+
+    @Override
     public Optional<BeaconData> createFrom(DataHolder dataHolder) {
         SpongeBeaconData beaconData = new SpongeBeaconData();
         beaconData.setPrimaryEffect(PotionEffectTypes.ABSORPTION);

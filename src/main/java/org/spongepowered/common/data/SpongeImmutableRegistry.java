@@ -28,28 +28,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.MapMaker;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataManipulatorBuilder;
-import org.spongepowered.api.data.DataManipulatorRegistry;
+import org.spongepowered.api.data.ImmutableDataBuilder;
+import org.spongepowered.api.data.ImmutableDataHolder;
+import org.spongepowered.api.data.ImmutableDataRegistry;
 
 import java.util.Map;
 
-public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
+public class SpongeImmutableRegistry implements ImmutableDataRegistry {
 
-    private static final SpongeManipulatorRegistry instance = new SpongeManipulatorRegistry();
+    private final static SpongeImmutableRegistry instance = new SpongeImmutableRegistry();
 
-    private final Map<Class<? extends DataManipulator<?>>, DataManipulatorBuilder<?>> builderMap = new MapMaker().concurrencyLevel(4).makeMap();
-    private final Map<Class<? extends DataManipulator<?>>, SpongeDataUtil<?>> setterMap = new MapMaker().concurrencyLevel(4).makeMap();
-
-    private SpongeManipulatorRegistry() {
+    private SpongeImmutableRegistry() {
     }
 
-    public static SpongeManipulatorRegistry getInstance() {
+    public static SpongeImmutableRegistry getInstance() {
         return instance;
     }
 
+    private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> builderMap = new MapMaker().concurrencyLevel(4).makeMap();
+
+
     @Override
-    public <T extends DataManipulator<T>> void register(Class<T> manipulatorClass, DataManipulatorBuilder<T> builder) {
+    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> void register(Class<T> manipulatorClass, B builder) {
         if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
             this.builderMap.put(manipulatorClass, checkNotNull(builder));
         } else {
@@ -59,20 +59,7 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<T>> Optional<DataManipulatorBuilder<T>> getBuilder(Class<T> manipulatorClass) {
-        return Optional.fromNullable((DataManipulatorBuilder<T>) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
-    }
-
-    public <T extends DataManipulator<T>> void registerDataUtil(Class<T> manipulatorclass, SpongeDataUtil<T> setter) {
-        if (!this.setterMap.containsKey(checkNotNull(manipulatorclass))) {
-            this.setterMap.put(manipulatorclass, checkNotNull(setter));
-        } else {
-            throw new IllegalStateException("Already registered a DataSetter for the given DataManipulator: " + manipulatorclass.getCanonicalName());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends DataManipulator<T>> Optional<SpongeDataUtil<T>> getUtil(Class<T> manipulatorClass) {
-        return Optional.fromNullable((SpongeDataUtil<T>) (Object) this.setterMap.get(checkNotNull(manipulatorClass)));
+    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> Optional<B> getBuilder(Class<T> manipulatorClass) {
+        return Optional.fromNullable((B) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 }

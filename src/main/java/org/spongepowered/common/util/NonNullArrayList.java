@@ -22,30 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.util;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.item.Enchantment;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
-public class SpongeEnchantment implements DataSerializable {
+public class NonNullArrayList<E> extends ArrayList<E> {
 
-    public final Enchantment enchantment;
-    public final int level;
-
-    public SpongeEnchantment(Enchantment enchantment, int level) {
-        this.enchantment = enchantment;
-        this.level = level;
+    @Override
+    public boolean add(E element) {
+        return super.add(checkNotNull(element, "Element cannot be null"));
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Enchantment"), this.enchantment.getId());
-        container.set(of("Level"), this.level);
-        return container;
+    public void add(int index, E element) {
+        super.add(index, checkNotNull(element, "Element cannot be null"));
     }
+
+    @Override
+    public boolean addAll(Collection<? extends E> collection) {
+        for(Iterator<? extends E> it = collection.iterator(); it.hasNext(); ) {
+            E next = it.next();
+            checkNotNull(next, "Element cannot be null");
+        }
+        return super.addAll(collection);
+    }
+
+    @Override
+    public E set(int index, E element) {
+        return super.set(index, checkNotNull(element, "Element cannot be null"));
+    }
+
 }

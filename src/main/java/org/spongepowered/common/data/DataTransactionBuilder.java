@@ -46,22 +46,11 @@ public final class DataTransactionBuilder {
     }
 
     public static DataTransactionResult fail(final DataManipulator<?> manipulator) {
-        return new DataTransactionResult() {
-            @Override
-            public Type getType() {
-                return Type.FAILURE;
-            }
+        return builder().reject(manipulator).result(DataTransactionResult.Type.FAILURE).build();
+    }
 
-            @Override
-            public Optional<? extends Collection<? extends DataManipulator<?>>> getRejectedData() {
-                return Optional.of(ImmutableList.of(manipulator));
-            }
-
-            @Override
-            public Optional<? extends Collection<? extends DataManipulator<?>>> getReplacedData() {
-                return Optional.absent();
-            }
-        };
+    public static DataTransactionResult successNoData() {
+        return builder().result(DataTransactionResult.Type.SUCCESS).build();
     }
 
     public static DataTransactionBuilder builder() {

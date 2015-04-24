@@ -36,8 +36,8 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.DataSetter;
 import org.spongepowered.common.data.DataTransactionBuilder;
+import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 import java.util.Collection;
@@ -77,7 +77,8 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T>> DataTransactionResult offer(T manipulatorData, DataPriority priority) {
-        Optional<DataSetter<T>> setterOptional = SpongeManipulatorRegistry.getInstance().getSetter((Class<T>) (Class) manipulatorData.getClass());
+        Optional<SpongeDataUtil<T>> setterOptional = SpongeManipulatorRegistry.getInstance().getUtil((Class<T>) (Class) manipulatorData
+                .getClass());
         if (setterOptional.isPresent()) {
             return setterOptional.get().setData(this, manipulatorData, priority);
         }
@@ -85,7 +86,7 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public Collection<? extends DataManipulator<?>> getManipulators() {
+    public Collection<DataManipulator<?>> getManipulators() {
         return null;
     }
 
@@ -95,7 +96,7 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public Collection<? extends Property<?, ?>> getProperties() {
+    public Collection<Property<?, ?>> getProperties() {
         return null;
     }
 

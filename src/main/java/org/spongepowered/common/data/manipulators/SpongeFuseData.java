@@ -24,81 +24,31 @@
  */
 package org.spongepowered.common.data.manipulators;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Optional;
-import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.entities.FuseData;
 
-public class SpongeFuseData extends AbstractDataManipulator<FuseData> implements FuseData {
-
-    private int fuse = 0;
+public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseData {
 
     public SpongeFuseData() {
+        super(FuseData.class, 10, 0, Integer.MAX_VALUE);
     }
 
     @Override
     public int getFuseDuration() {
-        return this.fuse;
+        return this.getValue();
     }
 
     @Override
     public void setFuseDuration(int fuseTicks) {
-        checkArgument(fuseTicks >= this.getMinValue(), "Must be greater than the min value!");
-        checkArgument(fuseTicks <= this.getMaxValue(), "Must be less than the max value!");
-        this.fuse = fuseTicks;
-    }
-
-    @Override
-    public Integer getMinValue() {
-        return 0;
-    }
-
-    @Override
-    public Integer getMaxValue() {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public Integer getValue() {
-        return this.fuse;
-    }
-
-    @Override
-    public void setValue(Integer value) {
-        this.setFuseDuration(checkNotNull(value, "Can not accept null values!"));
-    }
-
-    @Override
-    public Optional<FuseData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<FuseData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<FuseData> from(DataContainer container) {
-        return null;
-    }
-
-    @Override
-    public int compareTo(FuseData o) {
-        return o.getFuseDuration() - this.fuse;
+        this.setValue(fuseTicks);
     }
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(DataQuery.of("Fuse"), this.fuse);
+        container.set(DataQuery.of("Fuse"), this.getValue());
         return container;
     }
 }

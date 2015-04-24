@@ -72,6 +72,7 @@ import org.spongepowered.api.block.tile.carrier.Dropper;
 import org.spongepowered.api.block.tile.carrier.Furnace;
 import org.spongepowered.api.block.tile.carrier.Hopper;
 import org.spongepowered.api.data.DataManipulatorRegistry;
+import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulators.tileentities.BannerData;
 import org.spongepowered.api.data.manipulators.tileentities.BeaconData;
 import org.spongepowered.api.data.manipulators.tileentities.SignData;
@@ -171,6 +172,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.builders.block.data.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.builders.block.tile.SpongeBannerBuilder;
@@ -409,7 +411,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public <T extends CatalogType> Collection<? extends T> getAllOf(Class<T> typeClass) {
+    public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
         Map<String, ? extends CatalogType> tempMap = this.catalogTypeMap.get(checkNotNull(typeClass, "null type class"));
         if (tempMap == null) {
             return Collections.emptyList();
@@ -654,6 +656,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public DataManipulatorRegistry getManipulatorRegistry() {
         return SpongeManipulatorRegistry.getInstance();
+    }
+
+    @Override
+    public ImmutableDataRegistry getImmutableDataRegistry() {
+        return SpongeImmutableRegistry.getInstance();
     }
 
     @Override
@@ -1287,7 +1294,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         SpongeBeaconDataBuilder beaconDataBuilder = new SpongeBeaconDataBuilder();
         service.registerBuilder(BeaconData.class, beaconDataBuilder);
         dataRegistry.register(BeaconData.class, beaconDataBuilder);
-        dataRegistry.registerSetter(BeaconData.class, beaconDataBuilder);
+        dataRegistry.registerDataUtil(BeaconData.class, beaconDataBuilder);
 
         // User
         // TODO someone needs to write a User implementation...

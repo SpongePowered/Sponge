@@ -37,26 +37,18 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.SignData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 import java.util.List;
 
-public class SpongeSignData extends AbstractDataManipulator<SignData> implements SignData {
+public class SpongeSignData extends SpongeAbstractData<SignData> implements SignData {
 
     private final Text[] lines = new Text[] { Texts.of(),  Texts.of(), Texts.of(), Texts.of() };
 
-    @Override
-    public Optional<SignData> fill(DataHolder dataHolder) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<SignData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<SignData> from(DataContainer container) {
-        return null;
+    public SpongeSignData() {
+        super(SignData.class);
     }
 
     @Override

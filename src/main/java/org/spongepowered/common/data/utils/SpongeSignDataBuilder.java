@@ -72,6 +72,11 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
     }
 
     @Override
+    public Optional<SignData> fillData(DataHolder holder, SignData manipulator, DataPriority priority) {
+        return null;
+    }
+
+    @Override
     public DataTransactionResult setData(DataHolder dataHolder, SignData manipulator, DataPriority priority) {
         if (dataHolder instanceof TileEntitySign) {
             final SignData oldData = ((Sign) dataHolder).getSignData();

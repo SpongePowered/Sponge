@@ -24,68 +24,39 @@
  */
 package org.spongepowered.common.data.manipulators.tiles;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.LockableData;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-public class SpongeLockableData implements LockableData {
-
-    private String lockToken;
+public class SpongeLockableData extends AbstractSingleValueData<String, LockableData> implements LockableData {
 
     public SpongeLockableData() {
-    }
-
-    @Override
-    public String getValue() {
-        return null;
-    }
-
-    @Override
-    public void setValue(String value) {
-
-    }
-
-    @Override
-    public Optional<LockableData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<LockableData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<LockableData> from(DataContainer container) {
-        return null;
+        super(LockableData.class, "");
     }
 
     @Override
     public String getLockToken() {
-        return this.lockToken;
+        return this.getValue();
     }
 
     @Override
     public void setLockToken(String token) {
-        checkNotNull(token);
-        this.lockToken = token;
+        setValue(token);
     }
 
     @Override
     public int compareTo(LockableData o) {
-        return this.lockToken.compareTo(o.getLockToken());
+        return this.getValue().compareTo(o.getLockToken());
     }
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("Lock"), this.lockToken);
+        container.set(of("Lock"), this.getValue());
         return container;
     }
+
 }

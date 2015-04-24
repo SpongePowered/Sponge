@@ -24,46 +24,19 @@
  */
 package org.spongepowered.common.data.manipulators.tiles;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
-import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.NoteData;
 import org.spongepowered.api.data.types.NotePitch;
 import org.spongepowered.api.data.types.NotePitches;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-public class SpongeNoteData extends AbstractDataManipulator<NoteData> implements NoteData {
+public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData> implements NoteData {
 
-    private NotePitch pitch = NotePitches.F_SHARP0;
-
-    @Override
-    public NotePitch getValue() {
-        return this.pitch;
-    }
-
-    @Override
-    public void setValue(NotePitch value) {
-        this.pitch = checkNotNull(value);
-    }
-
-    @Override
-    public Optional<NoteData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<NoteData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<NoteData> from(DataContainer container) {
-        return null;
+    public SpongeNoteData() {
+        super(NoteData.class, NotePitches.F_SHARP0);
     }
 
     @Override
@@ -74,7 +47,7 @@ public class SpongeNoteData extends AbstractDataManipulator<NoteData> implements
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("Pitch"), this.pitch.getId());
+        container.set(of("Pitch"), this.value.getId());
         return container;
     }
 

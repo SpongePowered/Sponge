@@ -25,25 +25,27 @@
 package org.spongepowered.common.data.manipulators.tiles;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.manipulators.tiles.TileManipulatorUtility.fillBeaconData;
 
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.BeaconData;
 import org.spongepowered.api.potion.PotionEffectType;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 import javax.annotation.Nullable;
 
-public class SpongeBeaconData implements BeaconData {
+public class SpongeBeaconData extends SpongeAbstractData<BeaconData> implements BeaconData {
 
     @Nullable
     private PotionEffectType primary;
 
     @Nullable
     private PotionEffectType secondary;
+
+    public SpongeBeaconData() {
+        super(BeaconData.class);
+    }
 
     @Override
     public Optional<PotionEffectType> getPrimaryEffect() {
@@ -78,21 +80,6 @@ public class SpongeBeaconData implements BeaconData {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer();
-    }
-
-    @Override
-    public Optional<BeaconData> fill(DataHolder dataHolder) {
-        return fillBeaconData((BeaconData) this, dataHolder) ? Optional.<BeaconData>of(this) : Optional.<BeaconData>absent();
-    }
-
-    @Override
-    public Optional<BeaconData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<BeaconData> from(DataContainer container) {
-        return null;
+        return new MemoryDataContainer(); // TODO
     }
 }

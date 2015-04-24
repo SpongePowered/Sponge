@@ -22,18 +22,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builders.tiles;
+package org.spongepowered.common.data.manipulators;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Optional;
-import org.spongepowered.api.block.tile.Banner;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.service.persistence.DataBuilder;
-import org.spongepowered.api.service.persistence.InvalidDataException;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import org.spongepowered.api.data.manipulators.MappedData;
 
-public class SpongeBannerBuilder implements DataBuilder<Banner> {
+import java.util.Map;
+import java.util.Set;
+
+public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M>> extends SpongeAbstractData<M> implements MappedData<K, V, M> {
+
+    protected Map<K, V> keyValueMap = Maps.newHashMap();
+
+    protected AbstractMappedData(Class<M> manipulatorClass) {
+        super(manipulatorClass);
+    }
 
     @Override
-    public Optional<Banner> build(DataView container) throws InvalidDataException {
-        return null;
+    public Set<K> getKeys() {
+        return ImmutableSet.copyOf(this.keyValueMap.keySet());
+    }
+
+    @Override
+    public Map<K, V> asMap() {
+        return ImmutableMap.copyOf(this.keyValueMap);
+    }
+
+    @Override
+    public Optional<V> get(K key) {
+        return Optional.<V>fromNullable(this.keyValueMap.get(checkNotNull(key)));
+    }
+
+    @Override
+    public void setUnsafe(K key, V value) {
+        this.keyValueMap.put(checkNotNull(key), checkNotNull(value));
+    }
+
+    @Override
+    public void setUnsafe(Map<K, V> mapped) {
+
+    }
+
+    @Override
+    public void remove(K key) {
+        this.keyValueMap.remove(checkNotNull(key));
     }
 }

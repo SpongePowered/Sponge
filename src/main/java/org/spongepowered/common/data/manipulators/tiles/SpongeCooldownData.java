@@ -33,68 +33,29 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.CooldownData;
+import org.spongepowered.common.data.manipulators.AbstractIntData;
 
-public class SpongeCooldownData extends AbstractDataManipulator<CooldownData> implements CooldownData {
+public class SpongeCooldownData extends AbstractIntData<CooldownData> implements CooldownData {
 
-    private int cooldown;
-
-    @Override
-    public Integer getMinValue() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Integer getMaxValue() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Integer getValue() {
-        return getCooldown();
-    }
-
-    @Override
-    public void setValue(Integer value) {
-        setCooldown(value.intValue());
-    }
-
-    @Override
-    public Optional<CooldownData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<CooldownData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<CooldownData> from(DataContainer container) {
-        return null;
-    }
-
-    @Override
-    public int compareTo(CooldownData o) {
-        return 0;
+    public SpongeCooldownData() {
+        super(CooldownData.class, 10, 0, Integer.MAX_VALUE);
     }
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("Cooldown"), this.cooldown);
+        container.set(of("Cooldown"), this.value);
         return container;
     }
 
     @Override
     public int getCooldown() {
-        return this.cooldown;
+        return this.getValue();
     }
 
     @Override
     public void setCooldown(int time) {
-        this.cooldown = time;
+        this.setValue(time);
     }
 
 }

@@ -22,26 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builders.tiles;
+package org.spongepowered.common.data.manipulators;
 
 import static org.spongepowered.api.data.DataQuery.of;
-import static org.spongepowered.common.data.utils.DataUtil.checkDataExists;
 
-import com.google.common.base.Optional;
-import org.spongepowered.api.block.tile.TileEntity;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.service.persistence.DataBuilder;
-import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulators.DyeableData;
+import org.spongepowered.api.data.types.DyeColor;
+import org.spongepowered.api.data.types.DyeColors;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-public abstract class SpongeTileBuilder implements DataBuilder<TileEntity> {
+public class SpongeDyeableData extends AbstractSingleValueData<DyeColor, DyeableData> implements DyeableData {
 
-    private static final DataQuery X_QUERY = of("x");
+    public SpongeDyeableData() {
+        super(DyeableData.class, DyeColors.WHITE);
+    }
 
     @Override
-    public Optional<TileEntity> build(DataView container) throws InvalidDataException {
-        final int x = checkDataExists(container, X_QUERY).getInt(X_QUERY).get();
+    public int compareTo(DyeableData dyeableItemData) {
+        return this.value.getName().compareTo(dyeableItemData.getValue().getName());
+    }
 
-        return null;
+    @Override
+    public DataContainer toContainer() {
+        DataContainer container = new MemoryDataContainer();
+        container.set(of("DyeColor"), this.value.getId());
+        return container;
     }
 }

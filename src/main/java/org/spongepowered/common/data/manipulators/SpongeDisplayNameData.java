@@ -24,29 +24,33 @@
  */
 package org.spongepowered.common.data.manipulators;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.DisplayNameData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.common.text.SpongeText;
 
-public class SpongeDisplayNameData implements DisplayNameData {
+import java.util.Locale;
 
-    private Text displayName = Texts.of();
+public class SpongeDisplayNameData extends AbstractSingleValueData<Text, DisplayNameData> implements DisplayNameData {
+
     private boolean visible = true;
+
+    public SpongeDisplayNameData() {
+        super(DisplayNameData.class, Texts.of());
+    }
 
     @Override
     public Text getDisplayName() {
-        return this.displayName;
+        return this.getValue();
     }
 
     @Override
     public void setDisplayName(Text displayName) {
-        this.displayName = checkNotNull(displayName);
+        setValue(displayName);
     }
 
     @Override
@@ -60,37 +64,15 @@ public class SpongeDisplayNameData implements DisplayNameData {
     }
 
     @Override
-    public Text getValue() {
-        return this.displayName;
-    }
-
-    @Override
-    public void setValue(Text value) {
-        this.displayName = checkNotNull(value);
-    }
-
-    @Override
-    public Optional<DisplayNameData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<DisplayNameData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<DisplayNameData> from(DataContainer container) {
-        return null;
-    }
-
-    @Override
     public int compareTo(DisplayNameData o) {
-        return 0;
+        return 0; // TODO
     }
 
     @Override
     public DataContainer toContainer() {
-        return null;
+        DataContainer container = new MemoryDataContainer();
+        container.set(of("DisplayName"), ((SpongeText) this.getValue()).toJson(Locale.ENGLISH));
+        container.set(of("Visible"), this.visible);
+        return container;
     }
 }

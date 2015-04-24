@@ -27,45 +27,26 @@ package org.spongepowered.common.data.manipulators.tiles;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.BannerData;
 import org.spongepowered.api.data.types.BannerPatternShape;
 import org.spongepowered.api.data.types.DyeColor;
 import org.spongepowered.api.data.types.DyeColors;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 
 import java.util.List;
 
-public class SpongeBannerData extends AbstractDataManipulator<BannerData> implements BannerData {
+public class SpongeBannerData extends SpongeAbstractData<BannerData> implements BannerData {
 
     private List<PatternLayer> patternLayers = Lists.newArrayList();
     private DyeColor baseColor = DyeColors.WHITE;
 
-    @Override
-    public Optional<BannerData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<BannerData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<BannerData> from(DataContainer container) {
-        if (!container.contains(of("BaseColor")) || !container.contains(of("Layers"))) {
-            return Optional.absent();
-        }
-        String baseString = container.getString(of("BaseColor")).get();
-        // TODO stuff.
-        return null;
+    public SpongeBannerData() {
+        super(BannerData.class);
     }
 
     @Override

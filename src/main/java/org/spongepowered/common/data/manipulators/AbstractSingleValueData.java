@@ -22,36 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.BrewingData;
-import org.spongepowered.common.data.manipulators.AbstractIntData;
+import org.spongepowered.api.data.manipulators.SingleValueData;
 
-public class SpongeBrewingData extends AbstractIntData<BrewingData> implements BrewingData {
+public abstract class AbstractSingleValueData<V, T extends SingleValueData<V, T>> extends SpongeAbstractData<T> implements SingleValueData<V, T> {
 
-    public SpongeBrewingData() {
-        super(BrewingData.class, 0, 0, 100);
+    protected V value;
+
+    protected AbstractSingleValueData(Class<T> manipulatorClass, V defaultValue) {
+        super(manipulatorClass);
+        this.value = checkNotNull(defaultValue);
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("RemainingBrewTime"), this.value);
-        return container;
+    public V getValue() {
+        return this.value;
     }
 
     @Override
-    public int getRemainingBrewTime() {
-        return getValue();
+    public void setValue(V value) {
+        this.value = checkNotNull(value);
     }
-
-    @Override
-    public void setRemainingBrewTime(int time) {
-        setValue(time);
-    }
-
 }

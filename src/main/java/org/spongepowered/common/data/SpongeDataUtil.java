@@ -24,10 +24,20 @@
  */
 package org.spongepowered.common.data;
 
+import com.google.common.base.Optional;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataManipulatorBuilder;
+import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.service.persistence.DataBuilder;
 
-public interface SpongeDataUtil<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T>, DataSetter<T>, DataRemover<T> {
+public interface SpongeDataUtil<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T> {
+
+    Optional<T> fillData(DataHolder holder, T manipulator, DataPriority priority);
+
+    DataTransactionResult setData(DataHolder dataHolder, T manipulator, DataPriority priority);
+
+    DataTransactionResult remove(DataHolder dataHolder, T manipulator);
 
 }

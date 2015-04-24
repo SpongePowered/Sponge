@@ -22,36 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.BrewingData;
-import org.spongepowered.common.data.manipulators.AbstractIntData;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
-public class SpongeBrewingData extends AbstractIntData<BrewingData> implements BrewingData {
+public abstract class SpongeAbstractData<T extends DataManipulator<T>> implements DataManipulator<T> {
 
-    public SpongeBrewingData() {
-        super(BrewingData.class, 0, 0, 100);
+    private final Class<T> manipulatorClass;
+
+    protected SpongeAbstractData(Class<T> manipulatorClass) {
+        this.manipulatorClass = checkNotNull(manipulatorClass);
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("RemainingBrewTime"), this.value);
-        return container;
+    public Optional<T> fill(DataHolder dataHolder) {
+        return fill(dataHolder, DataPriority.DATA_HOLDER);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<T> fill(DataHolder dataHolder, DataPriority overlap) {
+        SpongeDataUtil<T> registry = SpongeManipulatorRegistry.getInstance().getUtil(this.manipulatorClass).get();
+        return registry.fillData(dataHolder, (T) (Object) this, overlap);
     }
 
     @Override
-    public int getRemainingBrewTime() {
-        return getValue();
-    }
-
-    @Override
-    public void setRemainingBrewTime(int time) {
-        setValue(time);
+    public Optional<T> from(DataContainer container) {
+        SpongeDataUtil<T> builder = SpongeManipulatorRegistry.getInstance().getUtil(this.manipulatorClass).get();
+        return builder.build(container);
     }
 
 }

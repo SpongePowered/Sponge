@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.data.utils;
 
-import static org.spongepowered.common.data.manipulators.tiles.TileManipulatorUtility.fillBannerData;
-
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
@@ -49,9 +48,8 @@ public class SpongeBannerDataBuilder implements SpongeDataUtil<BannerData> {
     }
 
     @Override
-    public Optional<BannerData> createFrom(DataHolder dataHolder) {
-        BannerData data = create();
-        return fillBannerData(data, dataHolder) ? Optional.of(data) : Optional.<BannerData>absent();
+    public Optional<BannerData> fillData(DataHolder holder, BannerData manipulator, DataPriority priority) {
+        return null;
     }
 
     @Override
@@ -61,6 +59,11 @@ public class SpongeBannerDataBuilder implements SpongeDataUtil<BannerData> {
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder, BannerData manipulator) {
+        return null;
+    }
+
+    @Override
+    public Optional<BannerData> createFrom(DataHolder dataHolder) {
         return null;
     }
 }

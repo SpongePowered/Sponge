@@ -22,26 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.meta;
 
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
+import static org.spongepowered.api.data.DataQuery.of;
 
-/**
- *
- * @param <T>
- */
-public interface DataSetter<T extends DataManipulator<T>> {
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataSerializable;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.item.Enchantment;
 
-    /**
-     *
-     * @param dataHolder
-     * @param manipulator
-     * @param priority
-     * @return
-     */
-    DataTransactionResult setData(DataHolder dataHolder, T manipulator, DataPriority priority);
+public class SpongeEnchantment implements DataSerializable {
 
+    public final Enchantment enchantment;
+    public final int level;
+
+    public SpongeEnchantment(Enchantment enchantment, int level) {
+        this.enchantment = enchantment;
+        this.level = level;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        DataContainer container = new MemoryDataContainer();
+        container.set(of("Enchantment"), this.enchantment.getId());
+        container.set(of("Level"), this.level);
+        return container;
+    }
 }

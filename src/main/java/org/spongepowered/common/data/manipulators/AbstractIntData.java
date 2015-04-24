@@ -22,14 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.manipulators;
 
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataTransactionResult;
+import static com.google.common.base.Preconditions.checkArgument;
 
-public interface DataRemover<T extends DataManipulator<T>> {
+import org.spongepowered.api.data.manipulators.IntData;
 
-    DataTransactionResult remove(DataHolder dataHolder, T manipulator);
+public abstract class AbstractIntData<T extends IntData<T>> extends AbstractSingleValueData<Integer, T> implements IntData<T> {
+
+    private final int minValue;
+    private final int maxValue;
+
+    public AbstractIntData(Class<T> manipulatorClass, Integer defaultValue, int minValue, int maxValue) {
+        super(manipulatorClass, defaultValue);
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+    }
+
+    @Override
+    public void setValue(Integer value) {
+        checkArgument(value >= this.getMinValue(), "Must be greater than the min value!");
+        checkArgument(value <= this.getMaxValue(), "Must be less than the max value!");
+        super.setValue(value);
+    }
+
+    @Override
+    public Integer getMinValue() {
+        return this.minValue;
+    }
+
+    @Override
+    public Integer getMaxValue() {
+        return this.maxValue;
+    }
+
+    @Override
+    public int compareTo(T o) {
+        return o.getValue() - this.getValue();
+    }
 
 }

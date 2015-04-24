@@ -27,32 +27,20 @@ package org.spongepowered.common.data.manipulators.tiles;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Optional;
-import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.FurnaceData;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-public class SpongeFurnaceData extends AbstractDataManipulator<FurnaceData> implements FurnaceData {
+public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implements FurnaceData {
 
     private int remainingBurnTime;
     private int remainingCookTime;
 
-    @Override
-    public Optional<FurnaceData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<FurnaceData> fill(DataHolder dataHolder,
-            DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<FurnaceData> from(DataContainer container) {
-        return null;
+    public SpongeFurnaceData() {
+        super(FurnaceData.class);
     }
 
     @Override

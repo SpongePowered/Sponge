@@ -88,6 +88,11 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
     }
 
     @Override
+    public Optional<DisplayNameData> fillData(DataHolder holder, DisplayNameData manipulator, DataPriority priority) {
+        return null;
+    }
+
+    @Override
     public DataTransactionResult setData(DataHolder dataHolder, DisplayNameData manipulator, DataPriority priority) {
 
         return null;

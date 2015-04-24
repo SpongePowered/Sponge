@@ -35,47 +35,24 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.SkullData;
 import org.spongepowered.api.data.types.SkullType;
+import org.spongepowered.api.data.types.SkullTypes;
 
-public class SpongeSkullData extends AbstractDataManipulator<SkullData> implements SkullData {
+public class SpongeSkullData extends AbstractSingleValueData<SkullType, SkullData> implements SkullData {
 
-    private SkullType type;
-
-    @Override
-    public Optional<SkullData> fill(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<SkullData> fill(DataHolder dataHolder, DataPriority overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<SkullData> from(DataContainer container) {
-        return null;
+    public SpongeSkullData() {
+        super(SkullData.class, SkullTypes.SKELETON);
     }
 
     @Override
     public int compareTo(SkullData o) {
-        return 0;
+        return 0; // TODO
     }
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("Type"), this.type);
+        container.set(of("Type"), this.getValue());
         return container;
-    }
-
-    @Override
-    public SkullType getValue() {
-        return this.type;
-    }
-
-    @Override
-    public void setValue(SkullType value) {
-        Preconditions.checkNotNull(value);
-        this.type = value;
     }
 
 }
