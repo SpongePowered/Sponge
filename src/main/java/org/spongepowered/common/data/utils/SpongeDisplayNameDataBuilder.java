@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.utils;
 
+import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
+
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
@@ -60,6 +63,8 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
                 final DisplayNameData data = create();
                 data.setDisplayName(SpongeTexts.toText(((Entity) dataHolder).getDisplayName()));
                 return Optional.of(data);
+            } else {
+                return Optional.of(create());
             }
         } else if (dataHolder instanceof ItemStack) {
             final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getSubCompound("display", false);
@@ -83,18 +88,28 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder, DisplayNameData manipulator) {
-        return null;
+    public boolean remove(DataHolder dataHolder) {
+        if (dataHolder instanceof ItemStack) {
+            ((ItemStack) dataHolder).clearCustomName();
+            return true;
+        } // todo
+        return false;
     }
 
     @Override
     public Optional<DisplayNameData> fillData(DataHolder holder, DisplayNameData manipulator, DataPriority priority) {
-        return null;
+        return Optional.absent(); // todo
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, DisplayNameData manipulator, DataPriority priority) {
-
-        return null;
+        if (dataHolder instanceof ItemStack) {
+            ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getDisplayName()));
+            return successNoData();
+        } else if (dataHolder instanceof Entity) {
+            ((Entity) dataHolder).setCustomNameTag(Texts.toLegacy(manipulator.getDisplayName()));
+        }
+        return fail(manipulator);
     }
 }

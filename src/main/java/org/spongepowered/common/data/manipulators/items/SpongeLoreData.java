@@ -22,22 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.manipulators.items;
 
-import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataManipulatorBuilder;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.service.persistence.DataBuilder;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulators.items.LoreData;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.data.manipulators.AbstractListData;
 
-public interface SpongeDataUtil<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T> {
+public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
 
-    Optional<T> fillData(DataHolder holder, T manipulator, DataPriority priority);
+    public SpongeLoreData() {
+        super(LoreData.class);
+    }
 
-    DataTransactionResult setData(DataHolder dataHolder, T manipulator, DataPriority priority);
+    @Override
+    public int compareTo(LoreData o) {
+        return 0;
+    }
 
-    boolean remove(DataHolder dataHolder);
-
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer(); // todo later
+    }
 }

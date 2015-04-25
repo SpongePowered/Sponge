@@ -22,33 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.utils.blocks;
+package org.spongepowered.common.data.utils.entities;
+
+import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
 
 import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.blocks.PoweredData;
+import org.spongepowered.api.data.manipulators.entities.CareerData;
+import org.spongepowered.api.data.types.Career;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeBlockUtil;
 import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.blocks.SpongePoweredData;
-import org.spongepowered.common.interfaces.blocks.IMixinPoweredHolder;
+import org.spongepowered.common.data.manipulators.entities.SpongeCareerData;
+import org.spongepowered.common.interfaces.entities.IMixinVillager;
 
-public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlockUtil<PoweredData> {
+public class SpongeCareerDataUtil implements SpongeDataUtil<CareerData> {
 
     @Override
-    public Optional<PoweredData> fillData(DataHolder holder, PoweredData manipulator, DataPriority priority) {
-        return null;
+    public Optional<CareerData> fillData(DataHolder holder, CareerData manipulator, DataPriority priority) {
+        return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
-        return null;
+    public DataTransactionResult setData(DataHolder dataHolder, CareerData manipulator, DataPriority priority) {
+        if (dataHolder instanceof EntityVillager) {
+            final Career career = manipulator.getCareer();
+            ((IMixinVillager) dataHolder).setCareer(career);
+
+            return successNoData(); // todo
+
+        }
+        return fail(manipulator);
     }
 
     @Override
@@ -56,37 +64,25 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
         return false;
     }
 
-    @Override
-    public Optional<PoweredData> build(DataView container) throws InvalidDataException {
-        return null;
-    }
 
     @Override
-    public PoweredData create() {
-        return new SpongePoweredData();
-    }
-
-    @Override
-    public Optional<PoweredData> createFrom(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<PoweredData> fromBlockPos(World world, BlockPos blockPos) {
-        IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState).isCurrentlyPowered(blockState)) {
-            return Optional.of(create());
-        }
+    public Optional<CareerData> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, PoweredData manipulator, DataPriority priority) {
-        return null;
+    public CareerData create() {
+        return new SpongeCareerData();
     }
 
     @Override
-    public boolean remove(World world, BlockPos blockPos) {
-        return false;
+    public Optional<CareerData> createFrom(DataHolder dataHolder) {
+        if (dataHolder instanceof EntityVillager) {
+            final Career career = ((IMixinVillager) dataHolder).getCareer();
+            final CareerData careerData = create();
+            careerData.setCareer(career);
+            return Optional.of(careerData);
+        }
+        return Optional.absent();
     }
 }

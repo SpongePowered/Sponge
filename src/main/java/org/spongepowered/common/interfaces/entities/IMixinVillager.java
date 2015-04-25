@@ -22,22 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.interfaces.entities;
 
-import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataManipulatorBuilder;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.service.persistence.DataBuilder;
+import org.spongepowered.api.data.types.Career;
 
-public interface SpongeDataUtil<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T> {
+public interface IMixinVillager {
 
-    Optional<T> fillData(DataHolder holder, T manipulator, DataPriority priority);
+    void setCareer(Career career);
 
-    DataTransactionResult setData(DataHolder dataHolder, T manipulator, DataPriority priority);
+    Career getCareer();
 
-    boolean remove(DataHolder dataHolder);
+    boolean isPlaying();
+
+    void setPlaying(boolean playing);
 
 }

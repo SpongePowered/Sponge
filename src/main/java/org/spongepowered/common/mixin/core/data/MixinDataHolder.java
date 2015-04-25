@@ -61,6 +61,10 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <T extends DataManipulator<T>> boolean remove(Class<T> manipulatorClass) {
+        Optional<SpongeDataUtil<T>> utilOptional = SpongeManipulatorRegistry.getInstance().getUtil(manipulatorClass);
+        if (utilOptional.isPresent()) {
+            return utilOptional.get().remove(this);
+        }
         return false;
     }
 

@@ -66,7 +66,7 @@ public class SpongeBeaconDataBuilder implements SpongeDataUtil<BeaconData> {
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder, BeaconData manipulator) {
-        return null;
+    public boolean remove(DataHolder dataHolder) {
+        return false;
     }
 }

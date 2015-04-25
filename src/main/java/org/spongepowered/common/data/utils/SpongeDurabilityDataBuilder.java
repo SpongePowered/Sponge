@@ -56,13 +56,13 @@ public class SpongeDurabilityDataBuilder implements SpongeDataUtil<DurabilityDat
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder, DurabilityData manipulator) {
-        return fail(manipulator);
+    public boolean remove(DataHolder dataHolder) {
+        return false;
     }
 
     @Override
     public Optional<DurabilityData> fillData(DataHolder holder, DurabilityData manipulator, DataPriority priority) {
-        return null;
+        return Optional.absent();
     }
 
     @Override

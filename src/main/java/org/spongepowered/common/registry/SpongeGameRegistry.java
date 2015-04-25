@@ -73,6 +73,14 @@ import org.spongepowered.api.block.tile.carrier.Furnace;
 import org.spongepowered.api.block.tile.carrier.Hopper;
 import org.spongepowered.api.data.DataManipulatorRegistry;
 import org.spongepowered.api.data.ImmutableDataRegistry;
+import org.spongepowered.api.data.manipulators.DisplayNameData;
+import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
+import org.spongepowered.api.data.manipulators.blocks.PoweredData;
+import org.spongepowered.api.data.manipulators.entities.CareerData;
+import org.spongepowered.api.data.manipulators.entities.InvulnerabilityData;
+import org.spongepowered.api.data.manipulators.entities.TradeOfferData;
+import org.spongepowered.api.data.manipulators.items.EnchantmentData;
+import org.spongepowered.api.data.manipulators.items.LoreData;
 import org.spongepowered.api.data.manipulators.tileentities.BannerData;
 import org.spongepowered.api.data.manipulators.tileentities.BeaconData;
 import org.spongepowered.api.data.manipulators.tileentities.SignData;
@@ -192,9 +200,28 @@ import org.spongepowered.common.data.builders.block.tile.SpongeMobSpawnerBuilder
 import org.spongepowered.common.data.builders.block.tile.SpongeNoteBuilder;
 import org.spongepowered.common.data.builders.block.tile.SpongeSignBuilder;
 import org.spongepowered.common.data.builders.block.tile.SpongeSkullBuilder;
+import org.spongepowered.common.data.manipulators.SpongeDisplayNameData;
+import org.spongepowered.common.data.manipulators.SpongeTradeOfferData;
+import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;
+import org.spongepowered.common.data.manipulators.blocks.SpongePoweredData;
+import org.spongepowered.common.data.manipulators.entities.SpongeCareerData;
+import org.spongepowered.common.data.manipulators.entities.SpongeInvulnerabilityData;
+import org.spongepowered.common.data.manipulators.items.SpongeEnchantmentItemData;
+import org.spongepowered.common.data.manipulators.items.SpongeLoreData;
+import org.spongepowered.common.data.manipulators.tiles.SpongeBannerData;
+import org.spongepowered.common.data.manipulators.tiles.SpongeBeaconData;
+import org.spongepowered.common.data.manipulators.tiles.SpongeSignData;
 import org.spongepowered.common.data.utils.SpongeBannerDataBuilder;
 import org.spongepowered.common.data.utils.SpongeBeaconDataBuilder;
+import org.spongepowered.common.data.utils.SpongeDisplayNameDataBuilder;
 import org.spongepowered.common.data.utils.SpongeSignDataBuilder;
+import org.spongepowered.common.data.utils.blocks.SpongeDirectionalUtil;
+import org.spongepowered.common.data.utils.blocks.SpongePoweredUtil;
+import org.spongepowered.common.data.utils.entities.SpongeCareerDataUtil;
+import org.spongepowered.common.data.utils.entities.SpongeInvulnerabilityUtil;
+import org.spongepowered.common.data.utils.entities.SpongeTradeOfferUtil;
+import org.spongepowered.common.data.utils.items.SpongeEnchantmentUtil;
+import org.spongepowered.common.data.utils.items.SpongeLoreUtil;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
@@ -1259,6 +1286,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(Difficulties.class, difficultyMappings);
     }
 
+    @SuppressWarnings("unchecked")
     private void setupSerialization() {
         Game game = Sponge.getGame();
         SerializationService service = game.getServiceManager().provide(SerializationService.class).get();
@@ -1286,16 +1314,71 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         SpongeBannerDataBuilder bannerDataBuilder = new SpongeBannerDataBuilder();
         service.registerBuilder(BannerData.class, bannerDataBuilder);
         dataRegistry.register(BannerData.class, bannerDataBuilder);
+        dataRegistry.register((Class<BannerData>) (Class) SpongeBannerData.class, bannerDataBuilder);
 
         SpongeSignDataBuilder signBuilder = new SpongeSignDataBuilder();
         service.registerBuilder(SignData.class, signBuilder);
         dataRegistry.register(SignData.class, signBuilder);
+        dataRegistry.registerDataUtil(SignData.class, signBuilder);
+        dataRegistry.registerDataUtil((Class<SignData>) (Class) SpongeSignData.class, signBuilder);
 
         SpongeBeaconDataBuilder beaconDataBuilder = new SpongeBeaconDataBuilder();
         service.registerBuilder(BeaconData.class, beaconDataBuilder);
         dataRegistry.register(BeaconData.class, beaconDataBuilder);
         dataRegistry.registerDataUtil(BeaconData.class, beaconDataBuilder);
+        dataRegistry.registerDataUtil((Class<BeaconData>) (Class) SpongeBeaconData.class, beaconDataBuilder);
 
+        SpongeTradeOfferUtil tradeOfferUtil = new SpongeTradeOfferUtil();
+        service.registerBuilder(TradeOfferData.class, tradeOfferUtil);
+        dataRegistry.register(TradeOfferData.class, tradeOfferUtil);
+        dataRegistry.registerDataUtil(TradeOfferData.class, tradeOfferUtil);
+        dataRegistry.registerDataUtil((Class<TradeOfferData>) (Class) SpongeTradeOfferData.class, tradeOfferUtil);
+
+        SpongeLoreUtil loreUtil = new SpongeLoreUtil();
+        service.registerBuilder(LoreData.class, loreUtil);
+        dataRegistry.register(LoreData.class, loreUtil);
+        dataRegistry.registerDataUtil(LoreData.class, loreUtil);
+        dataRegistry.registerDataUtil((Class<LoreData>) (Class) SpongeLoreData.class, loreUtil);
+
+        SpongeEnchantmentUtil enchantmentUtil = new SpongeEnchantmentUtil();
+        service.registerBuilder(EnchantmentData.class, enchantmentUtil);
+        dataRegistry.register(EnchantmentData.class, enchantmentUtil);
+        dataRegistry.registerDataUtil(EnchantmentData.class, enchantmentUtil);
+        dataRegistry.registerDataUtil((Class<EnchantmentData>) (Class) SpongeEnchantmentItemData.class, enchantmentUtil);
+
+        SpongeDisplayNameDataBuilder displayNameDataBuilder = new SpongeDisplayNameDataBuilder();
+        service.registerBuilder(DisplayNameData.class, displayNameDataBuilder);
+        dataRegistry.register(DisplayNameData.class, displayNameDataBuilder);
+        dataRegistry.registerDataUtil(DisplayNameData.class, displayNameDataBuilder);
+        dataRegistry.registerDataUtil((Class<DisplayNameData>) (Class) SpongeDisplayNameData.class, displayNameDataBuilder);
+
+        SpongeCareerDataUtil careerDataUtil = new SpongeCareerDataUtil();
+        service.registerBuilder(CareerData.class, careerDataUtil);
+        dataRegistry.register(CareerData.class, careerDataUtil);
+        dataRegistry.registerDataUtil(CareerData.class, careerDataUtil);
+        dataRegistry.registerDataUtil((Class<CareerData>) (Class) SpongeCareerData.class, careerDataUtil);
+
+        SpongeDirectionalUtil directionalUtil = new SpongeDirectionalUtil();
+        service.registerBuilder(DirectionalData.class, directionalUtil);
+        dataRegistry.register(DirectionalData.class, directionalUtil);
+        dataRegistry.registerDataUtil(DirectionalData.class, directionalUtil);
+        dataRegistry.registerDataUtil((Class<DirectionalData>) (Class) SpongeDirectionalData.class, directionalUtil);
+        dataRegistry.registerBlockUtil(DirectionalData.class, directionalUtil);
+        dataRegistry.registerBlockUtil((Class<DirectionalData>) (Class) SpongeDirectionalData.class, directionalUtil);
+
+        SpongePoweredUtil poweredUtil = new SpongePoweredUtil();
+        service.registerBuilder(PoweredData.class, poweredUtil);
+        dataRegistry.register(PoweredData.class, poweredUtil);
+        dataRegistry.registerDataUtil(PoweredData.class, poweredUtil);
+        dataRegistry.registerDataUtil((Class<PoweredData>) (Class) SpongePoweredData.class, poweredUtil);
+        dataRegistry.registerBlockUtil(PoweredData.class, poweredUtil);
+        dataRegistry.registerBlockUtil((Class<PoweredData>) (Class) SpongePoweredData.class, poweredUtil);
+
+        SpongeInvulnerabilityUtil invulnerabilityUtil = new SpongeInvulnerabilityUtil();
+        service.registerBuilder(InvulnerabilityData.class, invulnerabilityUtil);
+        dataRegistry.register(InvulnerabilityData.class, invulnerabilityUtil);
+        dataRegistry.registerDataUtil(InvulnerabilityData.class, invulnerabilityUtil);
+        dataRegistry.registerDataUtil((Class<InvulnerabilityData>) (Class) SpongeInvulnerabilityData.class, invulnerabilityUtil);
         // User
         // TODO someone needs to write a User implementation...
     }

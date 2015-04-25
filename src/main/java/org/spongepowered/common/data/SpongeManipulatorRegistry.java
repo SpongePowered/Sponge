@@ -39,7 +39,7 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
     private static final SpongeManipulatorRegistry instance = new SpongeManipulatorRegistry();
 
     private final Map<Class<? extends DataManipulator<?>>, DataManipulatorBuilder<?>> builderMap = new MapMaker().concurrencyLevel(4).makeMap();
-    private final Map<Class<? extends DataManipulator<?>>, SpongeDataUtil<?>> setterMap = new MapMaker().concurrencyLevel(4).makeMap();
+    private final Map<Class<? extends DataManipulator<?>>, SpongeDataUtil<?>> utilMap = new MapMaker().concurrencyLevel(4).makeMap();
     private final Map<Class<? extends DataManipulator<?>>, SpongeBlockUtil<?>> blockMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     private SpongeManipulatorRegistry() {
@@ -65,8 +65,8 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
     }
 
     public <T extends DataManipulator<T>> void registerDataUtil(Class<T> manipulatorclass, SpongeDataUtil<T> setter) {
-        if (!this.setterMap.containsKey(checkNotNull(manipulatorclass))) {
-            this.setterMap.put(manipulatorclass, checkNotNull(setter));
+        if (!this.utilMap.containsKey(checkNotNull(manipulatorclass))) {
+            this.utilMap.put(manipulatorclass, checkNotNull(setter));
         } else {
             throw new IllegalStateException("Already registered a DataSetter for the given DataManipulator: " + manipulatorclass.getCanonicalName());
         }
@@ -74,7 +74,7 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
 
     @SuppressWarnings("unchecked")
     public <T extends DataManipulator<T>> Optional<SpongeDataUtil<T>> getUtil(Class<T> manipulatorClass) {
-        return Optional.fromNullable((SpongeDataUtil<T>) (Object) this.setterMap.get(checkNotNull(manipulatorClass)));
+        return Optional.fromNullable((SpongeDataUtil<T>) (Object) this.utilMap.get(checkNotNull(manipulatorClass)));
     }
 
     public <T extends DataManipulator<T>> void registerBlockUtil(Class<T> manipulatorclass, SpongeBlockUtil<T> util) {

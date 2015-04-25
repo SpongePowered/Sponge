@@ -24,6 +24,65 @@
  */
 package org.spongepowered.common.data.utils.blocks;
 
-public class SpongeAxisUtil {
+import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
+import com.google.common.base.Optional;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulators.blocks.AxisData;
+import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.SpongeBlockUtil;
+import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.manipulators.blocks.SpongeAxisData;
+
+public class SpongeAxisUtil implements SpongeDataUtil<AxisData>, SpongeBlockUtil<AxisData> {
+
+    @Override
+    public Optional<AxisData> fillData(DataHolder holder, AxisData manipulator, DataPriority priority) {
+        return Optional.absent();
+    }
+
+    @Override
+    public DataTransactionResult setData(DataHolder dataHolder, AxisData manipulator, DataPriority priority) {
+        return fail(manipulator);
+    }
+
+    @Override
+    public boolean remove(DataHolder dataHolder) {
+        return false;
+    }
+
+    @Override
+    public Optional<AxisData> build(DataView container) throws InvalidDataException {
+        return Optional.absent();
+    }
+
+    @Override
+    public AxisData create() {
+        return new SpongeAxisData();
+    }
+
+    @Override
+    public Optional<AxisData> createFrom(DataHolder dataHolder) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<AxisData> fromBlockPos(World world, BlockPos blockPos) {
+        return Optional.absent();
+    }
+
+    @Override
+    public DataTransactionResult setData(World world, BlockPos blockPos, AxisData manipulator, DataPriority priority) {
+        return fail(manipulator);
+    }
+
+    @Override
+    public boolean remove(World world, BlockPos blockPos) {
+        return false;
+    }
 }

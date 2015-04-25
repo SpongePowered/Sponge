@@ -22,47 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.utils;
+package org.spongepowered.common.data.manipulators;
 
-import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.tileentities.BannerData;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.tiles.SpongeBannerData;
+import static org.spongepowered.api.data.DataQuery.of;
 
-public class SpongeBannerDataBuilder implements SpongeDataUtil<BannerData> {
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulators.entities.TradeOfferData;
+import org.spongepowered.api.item.merchant.TradeOffer;
 
-    @Override
-    public Optional<BannerData> build(DataView container) throws InvalidDataException {
-        return null;
+import java.util.List;
+
+public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOfferData> implements TradeOfferData {
+
+    public SpongeTradeOfferData() {
+        super(TradeOfferData.class);
     }
 
     @Override
-    public BannerData create() {
-        return new SpongeBannerData();
+    public List<TradeOffer> getOffers() {
+        return this.getAll();
     }
 
     @Override
-    public Optional<BannerData> fillData(DataHolder holder, BannerData manipulator, DataPriority priority) {
-        return null;
+    public void setOffers(List<TradeOffer> offers) {
+        this.set(offers);
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, BannerData manipulator, DataPriority priority) {
-        return null;
+    public void addOffer(TradeOffer offer) {
+        this.add(offer);
     }
 
     @Override
-    public boolean remove(DataHolder dataHolder) {
-        return false;
+    public int compareTo(TradeOfferData o) {
+        return 0;
     }
 
     @Override
-    public Optional<BannerData> createFrom(DataHolder dataHolder) {
-        return null;
+    public DataContainer toContainer() {
+        MemoryDataContainer container = new MemoryDataContainer();
+        container.set(of("Offers"), this.elementList); // TODO actually make this work... for some reason trade offer is not data serializable...
+        return container;
     }
 }

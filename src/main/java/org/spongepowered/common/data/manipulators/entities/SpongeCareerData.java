@@ -22,47 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.utils;
+package org.spongepowered.common.data.manipulators.entities;
 
-import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.tileentities.BannerData;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.tiles.SpongeBannerData;
+import static org.spongepowered.api.data.DataQuery.of;
 
-public class SpongeBannerDataBuilder implements SpongeDataUtil<BannerData> {
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulators.entities.CareerData;
+import org.spongepowered.api.data.types.Career;
+import org.spongepowered.api.data.types.Careers;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-    @Override
-    public Optional<BannerData> build(DataView container) throws InvalidDataException {
-        return null;
+public class SpongeCareerData extends AbstractSingleValueData<Career, CareerData> implements CareerData {
+
+    public SpongeCareerData() {
+        super(CareerData.class, Careers.FARMER);
     }
 
     @Override
-    public BannerData create() {
-        return new SpongeBannerData();
+    public int compareTo(CareerData o) {
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
-    public Optional<BannerData> fillData(DataHolder holder, BannerData manipulator, DataPriority priority) {
-        return null;
+    public DataContainer toContainer() {
+        DataContainer container = new MemoryDataContainer();
+        container.set(of("Career"), this.value.getId());
+        return container;
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, BannerData manipulator, DataPriority priority) {
-        return null;
+    public Career getCareer() {
+        return this.getValue();
     }
 
     @Override
-    public boolean remove(DataHolder dataHolder) {
-        return false;
-    }
-
-    @Override
-    public Optional<BannerData> createFrom(DataHolder dataHolder) {
-        return null;
+    public void setCareer(Career career) {
+        this.setValue(career);
     }
 }

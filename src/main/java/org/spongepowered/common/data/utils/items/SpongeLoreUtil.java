@@ -22,33 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.utils.blocks;
+package org.spongepowered.common.data.utils.items;
+
+import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
 
 import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.blocks.PoweredData;
+import org.spongepowered.api.data.manipulators.items.LoreData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeBlockUtil;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.blocks.SpongePoweredData;
-import org.spongepowered.common.interfaces.blocks.IMixinPoweredHolder;
+import org.spongepowered.common.data.manipulators.items.SpongeLoreData;
+import org.spongepowered.common.text.SpongeText;
 
-public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlockUtil<PoweredData> {
+import java.util.Locale;
+
+public class SpongeLoreUtil implements SpongeDataUtil<LoreData> {
 
     @Override
-    public Optional<PoweredData> fillData(DataHolder holder, PoweredData manipulator, DataPriority priority) {
-        return null;
+    public Optional<LoreData> fillData(DataHolder holder, LoreData manipulator, DataPriority priority) {
+        if (holder instanceof ItemStack) {
+
+        }
+        return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
-        return null;
+    public DataTransactionResult setData(DataHolder dataHolder, LoreData manipulator, DataPriority priority) {
+        if (dataHolder instanceof ItemStack) {
+            final NBTTagList loreList = new NBTTagList();
+            for (Text text : manipulator.getAll()) {
+                loreList.appendTag(new NBTTagString(((SpongeText) text).toLegacy('\247', Locale.ENGLISH)));
+            }
+            ((ItemStack) dataHolder).getSubCompound("display", true).setTag("Lore", loreList);
+            return successNoData();
+        }
+        return fail(manipulator);
     }
 
     @Override
@@ -57,36 +73,17 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
     }
 
     @Override
-    public Optional<PoweredData> build(DataView container) throws InvalidDataException {
-        return null;
-    }
-
-    @Override
-    public PoweredData create() {
-        return new SpongePoweredData();
-    }
-
-    @Override
-    public Optional<PoweredData> createFrom(DataHolder dataHolder) {
-        return null;
-    }
-
-    @Override
-    public Optional<PoweredData> fromBlockPos(World world, BlockPos blockPos) {
-        IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState).isCurrentlyPowered(blockState)) {
-            return Optional.of(create());
-        }
+    public Optional<LoreData> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, PoweredData manipulator, DataPriority priority) {
-        return null;
+    public LoreData create() {
+        return new SpongeLoreData();
     }
 
     @Override
-    public boolean remove(World world, BlockPos blockPos) {
-        return false;
+    public Optional<LoreData> createFrom(DataHolder dataHolder) {
+        return Optional.absent();
     }
 }

@@ -90,7 +90,7 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder, SignData manipulator) {
+    public boolean remove(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntitySign) {
             final SignData oldData = ((Sign) dataHolder).getSignData();
             DataTransactionBuilder builder = DataTransactionBuilder.builder();
@@ -98,9 +98,8 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
             for (int i = 0; i < 4; i++) {
                 ((TileEntitySign) dataHolder).signText[i] = new ChatComponentText("");
             }
-            builder.result(DataTransactionResult.Type.SUCCESS);
-            return builder.build();
+            return true;
         }
-        return DataTransactionBuilder.fail(manipulator);
+        return false;
     }
 }

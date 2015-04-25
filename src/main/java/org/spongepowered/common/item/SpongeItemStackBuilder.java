@@ -81,20 +81,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
             if (this.itemDataSet == null) {
                 this.itemDataSet = Sets.newHashSet();
             }
-            // Since item data objects are mutable, we don't want ot leak mutable objects!
-            Optional<T> newOptional = ItemsHelper.getClone(itemData, (Class<T>) itemData.getClass());
-            if (!newOptional.isPresent()) {
-                throw new IllegalArgumentException("We could not property clone the data!");
-            }
-            // We have to sanitize the item data so that we don't have duplicates!
-            for (Iterator<DataManipulator<?>> iter = this.itemDataSet.iterator(); iter.hasNext();) {
-                DataManipulator<?> data = iter.next();
-                if (data.getClass().equals(newOptional.get().getClass())) {
-                    iter.remove();
-                }
-            }
-            // Finally, add the item data
-            this.itemDataSet.add(newOptional.get());
+            this.itemDataSet.add(itemData);
             return this;
         }
     }
@@ -141,7 +128,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
 
         if (this.itemDataSet != null) {
             for (DataManipulator<?> data : this.itemDataSet) {
-                ItemsHelper.setData(stack, data);
+                stack.offer((DataManipulator) data);
             }
         }
         return stack;

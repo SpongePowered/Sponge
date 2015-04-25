@@ -55,8 +55,8 @@ public class SpongeDirectionalUtil implements SpongeDataUtil<DirectionalData>, S
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder, DirectionalData manipulator) {
-        return DataTransactionBuilder.successNoData();
+    public boolean remove(DataHolder dataHolder) {
+        return false;
     }
 
     @Override

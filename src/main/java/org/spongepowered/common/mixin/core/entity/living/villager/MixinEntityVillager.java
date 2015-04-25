@@ -30,10 +30,8 @@ import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.types.Career;
 import org.spongepowered.api.data.types.Profession;
 import org.spongepowered.api.entity.living.Human;
-import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.SpongeEntityMeta;
+import org.spongepowered.common.interfaces.entities.IMixinVillager;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityAgeable;
 
 import java.util.List;
@@ -50,8 +49,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.entity.passive.EntityVillager.class)
-@Implements(@Interface(iface = org.spongepowered.api.entity.living.Villager.class, prefix = "villager$"))
-public abstract class MixinEntityVillager extends MixinEntityAgeable {
+public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager {
 
     @Shadow private boolean isPlaying;
     @Shadow private EntityPlayer buyingPlayer;
@@ -65,6 +63,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable {
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
     private Profession profession;
+    private Career spongeCareer;
 
     @SuppressWarnings("unchecked")
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
@@ -87,12 +86,15 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable {
     }
 
     public Career getCareer() {
-        // TODO: Fix GameRegistry for API changes
+        if (this.profession == null) {
+            this.profession = this.spongeCareer.getProfession();
+        }
         return ((List<Career>) Sponge.getGame().getRegistry().getCareers(this.profession)).get(this.careerId);
     }
 
     public void setCareer(Career career) {
         setProfession(((SpongeEntityMeta) career.getProfession()).type);
+        this.spongeCareer = career;
         this.careerId = ((SpongeEntityMeta) career).type;
     }
 
@@ -103,19 +105,4 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable {
     public void setCustomer(@Nullable Human human) {
         this.setCustomer((EntityPlayer) human);
     }
-
-    @SuppressWarnings("unchecked")
-    public List<TradeOffer> getOffers() {
-        return getRecipes(null);
-    }
-
-    public void setOffers(List<TradeOffer> offers) {
-        this.buyingList = (MerchantRecipeList) offers;
-    }
-
-    @SuppressWarnings("unchecked")
-    public void addOffer(TradeOffer offer) {
-        this.buyingList.add(offer);
-    }
-
 }
