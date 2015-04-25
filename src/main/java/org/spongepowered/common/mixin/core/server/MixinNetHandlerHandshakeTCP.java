@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.server.ConnectionInfo;
+import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 @Mixin(NetHandlerHandshakeTCP.class)
 public abstract class MixinNetHandlerHandshakeTCP {
@@ -42,7 +42,7 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
     @Inject(method = "processHandshake", at = @At("HEAD"))
     public void onProcessHandshake(C00Handshake packetIn, CallbackInfo ci) {
-        ConnectionInfo info = (ConnectionInfo) this.networkManager;
+        IMixinNetworkManager info = (IMixinNetworkManager) this.networkManager;
         info.setVersion(packetIn.getProtocolVersion());
         info.setVirtualHost(packetIn.ip, packetIn.port);
     }

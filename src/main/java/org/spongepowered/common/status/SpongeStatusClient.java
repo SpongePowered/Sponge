@@ -29,16 +29,16 @@ import com.google.common.base.Optional;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.status.StatusClient;
-import org.spongepowered.common.server.ConnectionInfo;
+import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 import java.net.InetSocketAddress;
 
 public class SpongeStatusClient implements StatusClient {
 
-    private final ConnectionInfo connection;
+    private final IMixinNetworkManager connection;
 
     public SpongeStatusClient(NetworkManager networkManager) {
-        this.connection = (ConnectionInfo) networkManager;
+        this.connection = (IMixinNetworkManager) networkManager;
     }
 
     @Override

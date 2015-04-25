@@ -30,14 +30,14 @@ import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
-import org.spongepowered.common.server.ConnectionInfo;
+import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 @SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
-public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements ConnectionInfo {
+public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements IMixinNetworkManager {
 
     @Shadow
     public abstract SocketAddress getRemoteAddress();

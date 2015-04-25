@@ -53,7 +53,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.server.ConnectionInfo;
+import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 import java.net.InetSocketAddress;
 
@@ -81,12 +81,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Override
     public InetSocketAddress getAddress() {
-        return ((ConnectionInfo) this.netManager).getAddress();
+        return ((IMixinNetworkManager) this.netManager).getAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return ((ConnectionInfo) this.netManager).getVirtualHost();
+        return ((IMixinNetworkManager) this.netManager).getVirtualHost();
     }
 
     @Override
