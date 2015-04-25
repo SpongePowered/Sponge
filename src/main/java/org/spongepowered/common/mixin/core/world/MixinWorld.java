@@ -595,7 +595,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (blockUtilOptional.isPresent()) {
         	Optional<T> data = blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
         	if(!data.isPresent() && blockUtilOptional.get() instanceof DataManipulatorBuilder) {
-        		data = (Optional<T>) Optional.fromNullable(((DataManipulatorBuilder) blockUtilOptional.get()).create());
+        		data = Optional.<T>fromNullable(((DataManipulatorBuilder<T>) blockUtilOptional.get()).create());
         	}
             return data;
         }
