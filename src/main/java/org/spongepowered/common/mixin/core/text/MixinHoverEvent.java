@@ -41,13 +41,13 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.text.SpongeChatComponent;
-import org.spongepowered.common.text.SpongeHoverEvent;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
 
 import java.util.UUID;
 
 @Mixin(HoverEvent.class)
-public abstract class MixinHoverEvent implements SpongeHoverEvent {
+public abstract class MixinHoverEvent implements IMixinHoverEvent {
 
     @Shadow private HoverEvent.Action action;
     @Shadow private IChatComponent value;
@@ -62,7 +62,7 @@ public abstract class MixinHoverEvent implements SpongeHoverEvent {
                 // This is inefficient, but at least we only need to do it once
                 switch (this.action) {
                     case SHOW_TEXT:
-                        setHandle(TextActions.showText(((SpongeChatComponent) this.value).toText()));
+                        setHandle(TextActions.showText(((IMixinChatComponent) this.value).toText()));
                         break;
                     case SHOW_ACHIEVEMENT:
                         String stat = this.value.getUnformattedText();

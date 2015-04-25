@@ -22,14 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text;
+package org.spongepowered.common.interfaces.text;
 
-import org.spongepowered.api.text.action.ClickAction;
+import org.spongepowered.api.text.translation.Translation;
 
-public interface SpongeClickEvent {
+public interface IMixinChatComponentTranslation {
 
-    ClickAction<?> getHandle();
-
-    void setHandle(ClickAction<?> handle);
-
+    void setTranslation(Translation translation);
 }

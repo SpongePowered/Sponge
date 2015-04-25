@@ -22,23 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text;
+package org.spongepowered.common.interfaces.text;
 
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.text.Text;
 
-import java.util.Iterator;
+import java.util.Locale;
 
-public interface SpongeChatComponent extends IChatComponent {
+public interface IMixinText {
 
-    Iterator<IChatComponent> childrenIterator();
+    IChatComponent toComponent(Locale locale);
 
-    Iterable<IChatComponent> withChildren();
+    String toPlain(Locale locale);
 
-    String toPlain();
+    String toJson(Locale locale);
 
-    String toLegacy(char code);
-
-    Text toText();
+    String toLegacy(char code, Locale locale);
 
 }

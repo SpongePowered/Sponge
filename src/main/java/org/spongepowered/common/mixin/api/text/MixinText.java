@@ -38,8 +38,8 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.SpongeChatComponent;
-import org.spongepowered.common.text.SpongeText;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.action.SpongeClickAction;
 import org.spongepowered.common.text.action.SpongeHoverAction;
 import org.spongepowered.common.text.format.SpongeTextColor;
@@ -50,7 +50,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @Mixin(value = Text.class, remap = false)
-public abstract class MixinText implements SpongeText {
+public abstract class MixinText implements IMixinText {
 
     @Shadow protected TextColor color;
     @Shadow protected TextStyle style;
@@ -101,7 +101,7 @@ public abstract class MixinText implements SpongeText {
             }
 
             for (Text child : this.children) {
-                component.appendSibling(((SpongeText) child).toComponent(locale));
+                component.appendSibling(((IMixinText) child).toComponent(locale));
             }
             this.localizedComponents.put(locale, component);
         }
@@ -119,7 +119,7 @@ public abstract class MixinText implements SpongeText {
 
     @Override
     public String toPlain(Locale locale) {
-        return ((SpongeChatComponent) getHandle(locale)).toPlain();
+        return ((IMixinChatComponent) getHandle(locale)).toPlain();
     }
 
     @Override
@@ -133,7 +133,7 @@ public abstract class MixinText implements SpongeText {
 
     @Override
     public String toLegacy(char code, Locale locale) {
-        return ((SpongeChatComponent) getHandle(locale)).toLegacy(code);
+        return ((IMixinChatComponent) getHandle(locale)).toLegacy(code);
     }
 
 }

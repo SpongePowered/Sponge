@@ -35,8 +35,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.Subjectable;
-import org.spongepowered.common.text.SpongeText;
-import org.spongepowered.common.text.SpongeTextFactory;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
 @NonnullByDefault
@@ -46,14 +45,14 @@ public abstract class MixinCommandBlockLogic implements ICommandSender, CommandB
     @Override
     public void sendMessage(Text... messages) {
         for (Text message : messages) {
-            addChatMessage(((SpongeText) message).toComponent(SpongeTextFactory.getDefaultLocale()));
+            addChatMessage(SpongeTexts.toComponent(message));
         }
     }
 
     @Override
     public void sendMessage(Iterable<Text> messages) {
         for (Text message : messages) {
-            addChatMessage(((SpongeText) message).toComponent(SpongeTextFactory.getDefaultLocale()));
+            addChatMessage(SpongeTexts.toComponent(message));
         }
     }
 

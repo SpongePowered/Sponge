@@ -25,19 +25,45 @@
 package org.spongepowered.common.text;
 
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinText;
 
 import java.util.Locale;
 
-public interface SpongeText {
+public final class SpongeTexts {
 
-    char COLOR_CHAR = '\247';
+    public static final char COLOR_CHAR = '\u00A7';
 
-    IChatComponent toComponent(Locale locale);
+    private SpongeTexts() {
+    }
 
-    String toPlain(Locale locale);
+    public static Locale getDefaultLocale() { // TODO: Get this from the MC client?
+        return Locale.getDefault();
+    }
 
-    String toJson(Locale locale);
+    public static IChatComponent toComponent(Text text) {
+        return toComponent(text, getDefaultLocale());
+    }
 
-    String toLegacy(char code, Locale locale);
+    public static IChatComponent toComponent(Text text, Locale locale) {
+        return ((IMixinText) text).toComponent(locale);
+    }
+
+    public static Text toText(IChatComponent component) {
+        return ((IMixinChatComponent) component).toText();
+    }
+
+    public static String toPlain(IChatComponent component) {
+        return ((IMixinChatComponent) component).toPlain();
+    }
+
+    public static String toLegacy(IChatComponent component) {
+        return toLegacy(component, COLOR_CHAR);
+    }
+
+    public static String toLegacy(IChatComponent component, char code) {
+        return ((IMixinChatComponent) component).toLegacy(code);
+    }
 
 }

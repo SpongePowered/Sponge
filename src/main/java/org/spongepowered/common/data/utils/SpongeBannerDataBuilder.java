@@ -26,7 +26,6 @@ package org.spongepowered.common.data.utils;
 
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;

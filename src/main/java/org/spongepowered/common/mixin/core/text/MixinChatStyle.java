@@ -29,12 +29,12 @@ import net.minecraft.util.EnumChatFormatting;
 import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.SpongeChatStyle;
+import org.spongepowered.common.interfaces.text.IMixinChatStyle;
 
 import java.util.Arrays;
 
 @Mixin(ChatStyle.class)
-public abstract class MixinChatStyle implements SpongeChatStyle {
+public abstract class MixinChatStyle implements IMixinChatStyle {
 
     @Shadow private ChatStyle parentStyle;
 
@@ -62,7 +62,7 @@ public abstract class MixinChatStyle implements SpongeChatStyle {
     @Override
     public char[] asFormattingCode() {
         if (this.isEmpty()) {
-            return this.parentStyle != null ? ((SpongeChatStyle) this.parentStyle).asFormattingCode() : ArrayUtils.EMPTY_CHAR_ARRAY;
+            return this.parentStyle != null ? ((IMixinChatStyle) this.parentStyle).asFormattingCode() : ArrayUtils.EMPTY_CHAR_ARRAY;
         } else {
             char[] buf = new char[6];
             int i = 0;

@@ -22,12 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.title;
+package org.spongepowered.common.interfaces.text;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import org.spongepowered.api.text.action.HoverAction;
 
-public interface SpongeTitle {
+public interface IMixinHoverEvent {
 
-    void send(EntityPlayerMP player);
+    HoverAction<?> getHandle();
+
+    void setHandle(HoverAction<?> handle);
 
 }

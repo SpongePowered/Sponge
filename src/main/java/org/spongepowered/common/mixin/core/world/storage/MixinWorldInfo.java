@@ -60,7 +60,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.player.gamemode.SpongeGameMode;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 

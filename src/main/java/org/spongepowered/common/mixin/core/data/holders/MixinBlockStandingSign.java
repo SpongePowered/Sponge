@@ -32,7 +32,6 @@ import net.minecraft.block.BlockSign;
 import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.DataPriority;

@@ -24,14 +24,10 @@
  */
 package org.spongepowered.common.data.utils.blocks;
 
-import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.base.Optional;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.DataHolder;

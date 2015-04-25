@@ -38,9 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.status.SpongeFavicon;
-import org.spongepowered.common.text.SpongeChatComponent;
-import org.spongepowered.common.text.SpongeText;
-import org.spongepowered.common.text.SpongeTextFactory;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.io.IOException;
 
@@ -72,13 +70,13 @@ public abstract class MixinServerStatusResponse implements StatusPingEvent.Respo
     @Override
     public void setDescription(Text description) {
         this.description = checkNotNull(description, "description");
-        this.serverMotd = ((SpongeText) description).toComponent(SpongeTextFactory.getDefaultLocale()); // TODO: Hope we get sent the locale
+        this.serverMotd = SpongeTexts.toComponent(description); // TODO: Hope we get sent the locale
     }
 
     @Overwrite
     public void setServerDescription(IChatComponent motd) {
         this.serverMotd = checkNotNull(motd, "motd");
-        this.description = ((SpongeChatComponent) motd).toText();
+        this.description = SpongeTexts.toText(motd);
     }
 
     @Override

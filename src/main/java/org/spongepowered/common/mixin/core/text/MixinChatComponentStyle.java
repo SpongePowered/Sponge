@@ -34,18 +34,18 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinChatStyle;
+import org.spongepowered.common.interfaces.text.IMixinClickEvent;
+import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
 import org.spongepowered.common.text.ChatComponentIterable;
-import org.spongepowered.common.text.SpongeChatComponent;
-import org.spongepowered.common.text.SpongeChatStyle;
-import org.spongepowered.common.text.SpongeClickEvent;
-import org.spongepowered.common.text.SpongeHoverEvent;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Iterator;
 import java.util.List;
 
 @Mixin(ChatComponentStyle.class)
-public abstract class MixinChatComponentStyle implements SpongeChatComponent {
+public abstract class MixinChatComponentStyle implements IMixinChatComponent {
 
     @Shadow private ChatStyle style;
     @Shadow protected List<IChatComponent> siblings;
@@ -68,7 +68,7 @@ public abstract class MixinChatComponentStyle implements SpongeChatComponent {
 
     private char[] getFormatting() {
         if (this.formatting == null) {
-            this.formatting = ((SpongeChatStyle) this.style).asFormattingCode();
+            this.formatting = ((IMixinChatStyle) this.style).asFormattingCode();
         }
 
         return this.formatting;
@@ -115,10 +115,10 @@ public abstract class MixinChatComponentStyle implements SpongeChatComponent {
             builder.style(new TextStyle(this.style.bold, this.style.italic, this.style.underlined, this.style.strikethrough, this.style.obfuscated));
 
             if (this.style.chatClickEvent != null) {
-                builder.onClick(((SpongeClickEvent) this.style.chatClickEvent).getHandle());
+                builder.onClick(((IMixinClickEvent) this.style.chatClickEvent).getHandle());
             }
             if (this.style.chatHoverEvent != null) {
-                builder.onHover(((SpongeHoverEvent) this.style.chatHoverEvent).getHandle());
+                builder.onHover(((IMixinHoverEvent) this.style.chatHoverEvent).getHandle());
             }
             if (this.style.insertion != null) {
                 builder.onShiftClick(TextActions.insertText(this.style.insertion));
@@ -126,7 +126,7 @@ public abstract class MixinChatComponentStyle implements SpongeChatComponent {
         }
 
         for (IChatComponent child : this.siblings) {
-            builder.append(((SpongeChatComponent) child).toText());
+            builder.append(((IMixinChatComponent) child).toText());
         }
 
         return builder.build();

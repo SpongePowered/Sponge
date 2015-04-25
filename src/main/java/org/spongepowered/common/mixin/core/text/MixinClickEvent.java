@@ -31,13 +31,13 @@ import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.SpongeClickEvent;
+import org.spongepowered.common.interfaces.text.IMixinClickEvent;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 @Mixin(ClickEvent.class)
-public abstract class MixinClickEvent implements SpongeClickEvent {
+public abstract class MixinClickEvent implements IMixinClickEvent {
 
     @Shadow private ClickEvent.Action action;
     @Shadow private String value;

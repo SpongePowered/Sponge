@@ -25,6 +25,8 @@
 package org.spongepowered.common.text;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
+import static org.spongepowered.common.text.SpongeTexts.getDefaultLocale;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonSyntaxException;
@@ -37,6 +39,8 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Locale;
@@ -49,14 +53,10 @@ public class SpongeTextFactory implements TextFactory {
     @Override
     public Text parseJson(String json) throws IllegalArgumentException {
         try {
-            return ((SpongeChatComponent) IChatComponent.Serializer.jsonToComponent(json)).toText();
+            return ((IMixinChatComponent) IChatComponent.Serializer.jsonToComponent(json)).toText();
         } catch (JsonSyntaxException e) {
             throw new IllegalArgumentException("Failed to parse JSON", e);
         }
-    }
-
-    public static Locale getDefaultLocale() { // TODO: Get this from the MC client?
-        return Locale.getDefault();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class SpongeTextFactory implements TextFactory {
 
     @Override
     public String toPlain(Text text, Locale locale) {
-        return ((SpongeText) text).toPlain(locale);
+        return ((IMixinText) text).toPlain(locale);
     }
 
     @Override
@@ -81,12 +81,12 @@ public class SpongeTextFactory implements TextFactory {
 
     @Override
     public String toJson(Text text, Locale locale) {
-        return ((SpongeText) text).toJson(locale);
+        return ((IMixinText) text).toJson(locale);
     }
 
     @Override
     public char getLegacyChar() {
-        return SpongeText.COLOR_CHAR;
+        return COLOR_CHAR;
     }
 
     private static final ImmutableMap<Character, EnumChatFormatting> CHAR_TO_FORMATTING;
@@ -160,7 +160,7 @@ public class SpongeTextFactory implements TextFactory {
             return Texts.of(text);
         }
 
-        Matcher matcher = (code == SpongeText.COLOR_CHAR ? FORMATTING_PATTERN :
+        Matcher matcher = (code == COLOR_CHAR ? FORMATTING_PATTERN :
                 Pattern.compile(code + "([0-9A-FK-OR])", CASE_INSENSITIVE)).matcher(text);
         if (!matcher.find()) {
             return Texts.of(text);
@@ -169,11 +169,11 @@ public class SpongeTextFactory implements TextFactory {
         return parseLegacyMessage(text, 0, matcher, Texts.builder(""));
     }
 
-    private static final Pattern FORMATTING_PATTERN = Pattern.compile(SpongeText.COLOR_CHAR + "([0-9A-FK-OR])", CASE_INSENSITIVE);
+    private static final Pattern FORMATTING_PATTERN = Pattern.compile(COLOR_CHAR + "([0-9A-FK-OR])", CASE_INSENSITIVE);
 
     @Override
     public String stripLegacyCodes(String text, char code) {
-        if (code == SpongeText.COLOR_CHAR) {
+        if (code == COLOR_CHAR) {
             return FORMATTING_PATTERN.matcher(text).replaceAll("");
         }
 
@@ -182,7 +182,7 @@ public class SpongeTextFactory implements TextFactory {
 
     @Override
     public String replaceLegacyCodes(String text, char from, char to) {
-        if (from == SpongeText.COLOR_CHAR) {
+        if (from == COLOR_CHAR) {
             return FORMATTING_PATTERN.matcher(text).replaceAll(to + "$1");
         }
 
@@ -196,7 +196,7 @@ public class SpongeTextFactory implements TextFactory {
 
     @Override
     public String toLegacy(Text text, char code, Locale locale) {
-        return ((SpongeText) text).toLegacy(code, locale);
+        return ((IMixinText) text).toLegacy(code, locale);
     }
 
 

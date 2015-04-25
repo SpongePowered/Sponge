@@ -26,12 +26,7 @@ package org.spongepowered.common.data.manipulators;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.SkullData;
 import org.spongepowered.api.data.types.SkullType;

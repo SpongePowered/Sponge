@@ -31,7 +31,6 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.DyeableData;
 import org.spongepowered.api.data.types.DyeColor;
 import org.spongepowered.api.data.types.DyeColors;
-import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeDyeableData extends AbstractSingleValueData<DyeColor, DyeableData> implements DyeableData {
 

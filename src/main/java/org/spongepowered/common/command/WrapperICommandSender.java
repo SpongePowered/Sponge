@@ -33,7 +33,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.common.text.SpongeChatComponent;
+import org.spongepowered.common.text.SpongeTexts;
 
 /**
  * Wrapper around a CommandSource that is not part of the base game to allow it to access MC commands.
@@ -57,7 +57,7 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public void addChatMessage(IChatComponent component) {
-        this.source.sendMessage(((SpongeChatComponent) component).toText());
+        this.source.sendMessage(SpongeTexts.toText(component));
     }
 
     @Override

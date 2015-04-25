@@ -27,18 +27,12 @@ package org.spongepowered.common.data.manipulators.tiles;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.SignData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 import java.util.List;

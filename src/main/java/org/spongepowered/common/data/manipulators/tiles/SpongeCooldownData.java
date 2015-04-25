@@ -26,11 +26,7 @@ package org.spongepowered.common.data.manipulators.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
-import org.spongepowered.api.data.AbstractDataManipulator;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.CooldownData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;

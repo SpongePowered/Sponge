@@ -32,16 +32,16 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinChatComponentTranslation;
 import org.spongepowered.common.text.ChatComponentIterable;
-import org.spongepowered.common.text.SpongeChatComponent;
-import org.spongepowered.common.text.SpongeChatComponentTranslation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Iterator;
 import java.util.List;
 
 @Mixin(ChatComponentTranslation.class)
-public abstract class MixinChatComponentTranslation extends MixinChatComponentStyle implements SpongeChatComponentTranslation {
+public abstract class MixinChatComponentTranslation extends MixinChatComponentStyle implements IMixinChatComponentTranslation {
 
     @Shadow private String key;
     @Shadow private Object[] formatArgs;
@@ -78,8 +78,8 @@ public abstract class MixinChatComponentTranslation extends MixinChatComponentSt
     private static Object[] wrapFormatArgs(Object... formatArgs) {
         Object[] ret = new Object[formatArgs.length];
         for (int i = 0; i < formatArgs.length; ++i) {
-            if (formatArgs[i] instanceof SpongeChatComponent) {
-                ret[i] = ((SpongeChatComponent) formatArgs[i]).toText();
+            if (formatArgs[i] instanceof IMixinChatComponent) {
+                ret[i] = ((IMixinChatComponent) formatArgs[i]).toText();
             } else {
                 ret[i] = formatArgs[i];
             }

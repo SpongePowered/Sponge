@@ -39,10 +39,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.manipulators.tiles.SpongeSignData;
-import org.spongepowered.common.text.SpongeChatComponent;
-import org.spongepowered.common.text.SpongeText;
-
-import java.util.Locale;
+import org.spongepowered.common.text.SpongeTexts;
 
 public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
 
@@ -63,7 +60,7 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
             final IChatComponent[] rawTexts = ((TileEntitySign) dataHolder).signText;
             final Text[] signTexts = new Text[rawTexts.length];
             for (int i = 0; i < rawTexts.length; i++) {
-                signTexts[i] = ((SpongeChatComponent) rawTexts[i]).toText();
+                signTexts[i] = SpongeTexts.toText(rawTexts[i]);
             }
             data.setLines(signTexts);
             return Optional.of(data);
@@ -83,7 +80,7 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
             DataTransactionBuilder builder = DataTransactionBuilder.builder();
             builder.replace(oldData);
             for (int i = 0; i < 4; i++) {
-                ((TileEntitySign) dataHolder).signText[i] = ((SpongeText) manipulator.getLine(0)).toComponent(Locale.ENGLISH);
+                ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(manipulator.getLine(0));
             }
             builder.result(DataTransactionResult.Type.SUCCESS);
             return builder.build();

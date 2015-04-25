@@ -30,9 +30,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.text.SpongeText;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Locale;
 
@@ -85,7 +86,7 @@ public class SpongeHoverAction {
                 break;
             }
             case SHOW_TEXT:
-                component = ((SpongeText) action.getResult()).toComponent(locale);
+                component = SpongeTexts.toComponent((Text) action.getResult());
                 break;
             default:
                 throw new AssertionError();

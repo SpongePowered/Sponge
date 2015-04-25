@@ -37,7 +37,6 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeBlockUtil;
 import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.manipulators.blocks.SpongePoweredData;
-import org.spongepowered.common.interfaces.blocks.IMixinDirectionalHolder;
 import org.spongepowered.common.interfaces.blocks.IMixinPoweredHolder;
 
 public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlockUtil<PoweredData> {

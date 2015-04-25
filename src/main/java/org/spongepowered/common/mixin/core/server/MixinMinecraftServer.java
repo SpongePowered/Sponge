@@ -48,8 +48,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinServer;
 import org.spongepowered.common.interfaces.Subjectable;
-import org.spongepowered.common.text.SpongeText;
-import org.spongepowered.common.text.SpongeTextFactory;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
@@ -180,14 +179,14 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @Override
     public void sendMessage(Text... messages) {
         for (Text message : messages) {
-            addChatMessage(((SpongeText) message).toComponent(SpongeTextFactory.getDefaultLocale()));
+            addChatMessage(SpongeTexts.toComponent(message));
         }
     }
 
     @Override
     public void sendMessage(Iterable<Text> messages) {
         for (Text message : messages) {
-            addChatMessage(((SpongeText) message).toComponent(SpongeTextFactory.getDefaultLocale()));
+            addChatMessage(SpongeTexts.toComponent(message));
         }
     }
 

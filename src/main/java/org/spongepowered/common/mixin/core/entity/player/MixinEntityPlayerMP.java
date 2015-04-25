@@ -59,10 +59,9 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.Subjectable;
-import org.spongepowered.common.text.SpongeChatComponent;
-import org.spongepowered.common.text.SpongeText;
+import org.spongepowered.common.interfaces.text.IMixinTitle;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
-import org.spongepowered.common.text.title.SpongeTitle;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
@@ -105,7 +104,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     public Text getDisplayNameApi() {
-        return ((SpongeChatComponent) getDisplayName()).toText();
+        return SpongeTexts.toText(getDisplayName());
     }
 
     @Override
@@ -126,20 +125,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void sendMessage(ChatType type, Text... messages) {
         for (Text text : messages) {
-            this.playerNetServerHandler.sendPacket(new S02PacketChat(((SpongeText) text).toComponent(getLocale()), ((SpongeChatType) type).getByteId()));
+            this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
+                    ((SpongeChatType) type).getByteId()));
         }
     }
 
     @Override
     public void sendMessage(ChatType type, Iterable<Text> messages) {
         for (Text text : messages) {
-            this.playerNetServerHandler.sendPacket(new S02PacketChat(((SpongeText) text).toComponent(getLocale()), ((SpongeChatType) type).getByteId()));
+            this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
+                    ((SpongeChatType) type).getByteId()));
         }
     }
 
     @Override
     public void sendTitle(Title title) {
-        ((SpongeTitle) title).send((EntityPlayerMP) (Object) this);
+        ((IMixinTitle) title).send((EntityPlayerMP) (Object) this);
     }
 
     @Override

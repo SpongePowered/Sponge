@@ -25,15 +25,16 @@
 package org.spongepowered.common.text;
 
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 
 import java.util.Iterator;
 
 public class ChatComponentIterable implements Iterable<IChatComponent> {
 
-    private final SpongeChatComponent component;
+    private final IMixinChatComponent component;
     private final boolean includeSelf;
 
-    public ChatComponentIterable(SpongeChatComponent component, boolean includeSelf) {
+    public ChatComponentIterable(IMixinChatComponent component, boolean includeSelf) {
         this.component = component;
         this.includeSelf = includeSelf;
     }

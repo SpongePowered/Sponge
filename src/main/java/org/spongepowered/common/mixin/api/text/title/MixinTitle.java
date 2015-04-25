@@ -32,13 +32,13 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.SpongeText;
-import org.spongepowered.common.text.title.SpongeTitle;
+import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.interfaces.text.IMixinTitle;
 
 import java.util.Arrays;
 
 @Mixin(value = Title.class, remap = false)
-public abstract class MixinTitle implements SpongeTitle {
+public abstract class MixinTitle implements IMixinTitle {
 
     @Shadow protected Optional<Text> title;
     @Shadow protected Optional<Text> subtitle;
@@ -66,11 +66,11 @@ public abstract class MixinTitle implements SpongeTitle {
                 packets[i++] = new S45PacketTitle(this.fadeIn.or(20), this.stay.or(60), this.fadeOut.or(20));
             }
             if (this.subtitle.isPresent()) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((SpongeText) this.subtitle.get()).toComponent(((Player) player)
+                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent(((Player) player)
                         .getLocale()));
             }
             if (this.title.isPresent()) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.TITLE, ((SpongeText) this.title.get()).toComponent(((Player) player)
+                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent(((Player) player)
                         .getLocale()));
             }
 

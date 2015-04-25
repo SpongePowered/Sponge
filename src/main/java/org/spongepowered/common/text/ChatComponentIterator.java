@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.UnmodifiableIterator;
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -36,11 +37,11 @@ import javax.annotation.Nullable;
 
 public class ChatComponentIterator extends UnmodifiableIterator<IChatComponent> {
 
-    private SpongeChatComponent component;
+    private IMixinChatComponent component;
     private Iterator<IChatComponent> children;
     @Nullable private Iterator<IChatComponent> currentChildIterator;
 
-    public ChatComponentIterator(SpongeChatComponent component) {
+    public ChatComponentIterator(IMixinChatComponent component) {
         this.component = checkNotNull(component, "component");
     }
 
@@ -66,7 +67,7 @@ public class ChatComponentIterator extends UnmodifiableIterator<IChatComponent> 
             this.component = null;
             return result;
         } else if (this.currentChildIterator == null || !this.currentChildIterator.hasNext()) {
-            this.currentChildIterator = ((SpongeChatComponent) this.children.next()).withChildren().iterator();
+            this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
         }
 
         return this.currentChildIterator.next();

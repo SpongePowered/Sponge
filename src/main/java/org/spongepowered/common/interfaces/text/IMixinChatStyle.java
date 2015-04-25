@@ -22,14 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text;
+package org.spongepowered.common.interfaces.text;
 
-import org.spongepowered.api.text.action.HoverAction;
+public interface IMixinChatStyle {
 
-public interface SpongeHoverEvent {
-
-    HoverAction<?> getHandle();
-
-    void setHandle(HoverAction<?> handle);
+    char[] asFormattingCode();
 
 }

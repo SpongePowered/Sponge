@@ -38,7 +38,7 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.manipulators.SpongeDisplayNameData;
-import org.spongepowered.common.text.SpongeChatComponent;
+import org.spongepowered.common.text.SpongeTexts;
 
 public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameData> {
 
@@ -58,7 +58,7 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
         if (dataHolder instanceof Entity) {
             if (((Entity) dataHolder).hasCustomName()) {
                 final DisplayNameData data = create();
-                data.setDisplayName(((SpongeChatComponent) ((Entity) dataHolder).getDisplayName()).toText());
+                data.setDisplayName(SpongeTexts.toText(((Entity) dataHolder).getDisplayName()));
                 return Optional.of(data);
             }
         } else if (dataHolder instanceof ItemStack) {

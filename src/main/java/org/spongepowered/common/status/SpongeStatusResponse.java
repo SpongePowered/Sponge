@@ -25,6 +25,7 @@
 package org.spongepowered.common.status;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
@@ -34,7 +35,7 @@ import org.spongepowered.api.event.server.StatusPingEvent;
 import org.spongepowered.api.status.StatusClient;
 import org.spongepowered.api.status.StatusResponse;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.text.SpongeText;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
 import java.util.regex.Pattern;
@@ -102,11 +103,10 @@ public final class SpongeStatusResponse {
     }
 
     public static String getMotd(ServerStatusResponse response) {
-        // TODO: ((StatusResponse) response).getDescription().toLegacy()
-        return getFirstLine(response.getServerDescription().getUnformattedText());
+        return getFirstLine(SpongeTexts.toLegacy(response.getServerDescription()));
     }
 
-    private static final Pattern STRIP_FORMATTING = Pattern.compile(SpongeText.COLOR_CHAR + "[0-9A-FK-OR]?", CASE_INSENSITIVE);
+    private static final Pattern STRIP_FORMATTING = Pattern.compile(COLOR_CHAR + "[0-9A-FK-OR]?", CASE_INSENSITIVE);
 
     public static String getUnformattedMotd(ServerStatusResponse response) {
         return getFirstLine(STRIP_FORMATTING.matcher(response.getServerDescription().getUnformattedText()).replaceAll(""));

@@ -22,19 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.text;
+package org.spongepowered.common.interfaces.text;
 
-import net.minecraft.util.ChatStyle;
-import org.apache.commons.lang3.ArrayUtils;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.text.IMixinChatStyle;
+import net.minecraft.entity.player.EntityPlayerMP;
 
-@Mixin(targets = "net/minecraft/util/ChatStyle$1")
-public abstract class MixinChatStyleRoot extends ChatStyle implements IMixinChatStyle {
+public interface IMixinTitle {
 
-    @Override
-    public char[] asFormattingCode() {
-        return ArrayUtils.EMPTY_CHAR_ARRAY;
-    }
+    void send(EntityPlayerMP player);
 
 }

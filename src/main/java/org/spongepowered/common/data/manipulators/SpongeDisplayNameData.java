@@ -31,7 +31,6 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.DisplayNameData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.text.SpongeText;
 
 import java.util.Locale;
 
@@ -71,7 +70,7 @@ public class SpongeDisplayNameData extends AbstractSingleValueData<Text, Display
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("DisplayName"), ((SpongeText) this.getValue()).toJson(Locale.ENGLISH));
+        container.set(of("DisplayName"), Texts.toJson(this.getValue(), Locale.ENGLISH));
         container.set(of("Visible"), this.visible);
         return container;
     }
