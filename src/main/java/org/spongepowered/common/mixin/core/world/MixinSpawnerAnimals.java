@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.Random;
 

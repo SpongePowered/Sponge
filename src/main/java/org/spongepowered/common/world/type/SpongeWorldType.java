@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.type;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.world.WorldType;
 
 import java.util.Arrays;

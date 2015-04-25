@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.interfaces.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
 import java.util.Collection;
 import java.util.Collections;

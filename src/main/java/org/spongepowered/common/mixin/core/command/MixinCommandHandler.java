@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
-import org.spongepowered.common.interfaces.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler {

@@ -34,17 +34,19 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.WeightedEntityCollectionValue;
+import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.util.weighted.WeightedCollection;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
+import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeMobSpawnerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeNextEntityToSpawnValue;
-import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectionValue;
+import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+
+import java.util.stream.Collectors;
 
 public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, ImmutableMobSpawnerData> implements MobSpawnerData {
 
@@ -56,12 +58,12 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     private short playerRange;
     private short spawnRange;
     private WeightedSerializableObject<EntitySnapshot> nextEntityToSpawn;
-    private WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entities;
+    private WeightedTable<EntitySnapshot> entities;
 
     public SpongeMobSpawnerData(short remainingDelay, short minimumDelay, short maximumDelay, short count,
                                 short maximumEntities, short playerRange, short spawnRange,
                                 WeightedSerializableObject<EntitySnapshot> nextEntityToSpawn,
-                                WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entities) {
+                                WeightedTable<EntitySnapshot> entities) {
         super(MobSpawnerData.class);
         this.remainingDelay = remainingDelay;
         this.minimumDelay = minimumDelay;
@@ -72,14 +74,14 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         this.spawnRange = spawnRange;
         this.nextEntityToSpawn = checkNotNull(nextEntityToSpawn);
         checkNotNull(entities).forEach(Preconditions::checkNotNull);
-        this.entities = entities;
+        this.entities = entities.stream().collect(Collectors.toCollection(WeightedTable<EntitySnapshot>::new));
         registerGettersAndSetters();
     }
 
     public SpongeMobSpawnerData() {
         this((short) 20, (short) 200, (short) 800, (short) 4, (short) 6, (short) 16, (short) 4,
                 new WeightedSerializableObject<>(new SpongeEntitySnapshotBuilder().type(EntityTypes.PIG).build(), 1),
-                new WeightedCollection<>());
+                new WeightedTable<>());
     }
 
 
@@ -159,8 +161,8 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     @Override
-    public WeightedEntityCollectionValue possibleEntitiesToSpawn() {
-        return new SpongeWeightedEntityCollectionValue(Keys.SPAWNER_ENTITIES, this.entities);
+    public WeightedCollectionValue<EntitySnapshot> possibleEntitiesToSpawn() {
+        return new SpongeWeightedCollectionValue<>(Keys.SPAWNER_ENTITIES, this.entities);
     }
 
     @Override
@@ -267,11 +269,11 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         this.nextEntityToSpawn = checkNotNull(nextEntityToSpawn);
     }
 
-    public WeightedCollection<WeightedSerializableObject<EntitySnapshot>> getEntities() {
+    public WeightedTable<EntitySnapshot> getEntities() {
         return this.entities;
     }
 
-    public void setEntities(WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entities) {
+    public void setEntities(WeightedTable<EntitySnapshot> entities) {
         checkNotNull(entities).forEach(Preconditions::checkNotNull);
         this.entities = entities;
     }

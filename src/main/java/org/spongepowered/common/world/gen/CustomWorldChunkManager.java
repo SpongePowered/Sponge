@@ -62,9 +62,8 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
      * @return The world chunk manager.
      */
     public static WorldChunkManager of(BiomeGenerator biomeGenerator) {
-        if (biomeGenerator instanceof SpongeBiomeGenerator) {
-            // Biome generator set to a wrapper
-            return ((SpongeBiomeGenerator) biomeGenerator).worldChunkManager;
+        if (biomeGenerator instanceof WorldChunkManager) {
+            return ((WorldChunkManager) biomeGenerator);
         }
         // Biome generator set to some custom implementation
         return new CustomWorldChunkManager(biomeGenerator);
@@ -72,11 +71,6 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
 
     private CustomWorldChunkManager(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
-
-        if (this.biomeGenerator instanceof SpongeBiomeGenerator) {
-            throw new AssertionError(getClass() + " can only wrap custom biome generators, "
-                + SpongeBiomeGenerator.class + " is not a custom biome generator");
-        }
     }
 
     public BiomeGenerator getBiomeGenerator() {
@@ -108,8 +102,8 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
         }
 
         // Transform to normal scale
-        int xStartBlock = xStart * 4;
-        int zStartBlock = zStart * 4;
+        int xStartBlock = (xStart + 2) * 4;
+        int zStartBlock = (zStart + 2) * 4;
         int xSizeBlock = xSize * 4;
         int zSizeBlock = zSize * 4;
 

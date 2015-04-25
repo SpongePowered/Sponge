@@ -65,7 +65,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.world.DimensionManager;
@@ -132,9 +132,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private int borderWarningDistance;
     @Shadow private int borderWarningTime;
     @Shadow private GameRules theGameRules;
-    @Shadow public abstract NBTTagCompound getNBTTagCompound();
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Shadow
+    public abstract NBTTagCompound getNBTTagCompound();
+
+    @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstruction(CallbackInfo ci) {
         this.spongeRootLevelNbt = new NBTTagCompound();
         this.spongeNbt = new NBTTagCompound();
@@ -143,7 +145,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
     }
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
         onConstruction(ci);
 
@@ -152,12 +154,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.generatorModifiers = WorldGeneratorRegistry.getInstance().toIds(creationSettings.getGeneratorModifiers());
     }
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
         onConstruction(ci);
     }
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
         onConstruction(ci);
 
@@ -555,7 +557,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public Optional<DataView> getPropertySection(DataQuery path) {
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
             return Optional
-                    .<DataView> of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
+                    .<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
         } else {
             return Optional.empty();
         }

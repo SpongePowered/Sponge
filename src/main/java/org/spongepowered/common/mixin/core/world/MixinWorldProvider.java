@@ -39,8 +39,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.interfaces.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.IMixinWorldType;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.world.DimensionManager;
 

@@ -83,9 +83,9 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.IMixinWorldSettings;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
@@ -386,7 +386,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (dim == 0) {
                 this.setResourcePackFromWorld(this.getFolderName(), worldsavehandler);
             }
-
             ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
             ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
             UUID uuid = ((WorldProperties) worldInfo).getUniqueId();

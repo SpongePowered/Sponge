@@ -75,6 +75,8 @@ import org.spongepowered.api.effect.particle.NoteParticle;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ResizableParticle;
+import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -102,8 +104,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
@@ -122,13 +122,43 @@ import org.spongepowered.api.world.WorldBuilder;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.gen.populator.BigMushroom;
+import org.spongepowered.api.world.gen.populator.BlockBlob;
+import org.spongepowered.api.world.gen.populator.Cactus;
+import org.spongepowered.api.world.gen.populator.DeadBush;
+import org.spongepowered.api.world.gen.populator.DesertWell;
+import org.spongepowered.api.world.gen.populator.DoublePlant;
+import org.spongepowered.api.world.gen.populator.Dungeon;
+import org.spongepowered.api.world.gen.populator.EnderCrystalPlatform;
+import org.spongepowered.api.world.gen.populator.Flower;
+import org.spongepowered.api.world.gen.populator.Forest;
+import org.spongepowered.api.world.gen.populator.Glowstone;
+import org.spongepowered.api.world.gen.populator.IcePath;
+import org.spongepowered.api.world.gen.populator.IceSpike;
+import org.spongepowered.api.world.gen.populator.Lake;
+import org.spongepowered.api.world.gen.populator.Melon;
+import org.spongepowered.api.world.gen.populator.Mushroom;
+import org.spongepowered.api.world.gen.populator.NetherFire;
+import org.spongepowered.api.world.gen.populator.Ore;
+import org.spongepowered.api.world.gen.populator.Pumpkin;
+import org.spongepowered.api.world.gen.populator.RandomBlock;
+import org.spongepowered.api.world.gen.populator.RandomObject;
+import org.spongepowered.api.world.gen.populator.Reed;
+import org.spongepowered.api.world.gen.populator.SeaFloor;
+import org.spongepowered.api.world.gen.populator.Shrub;
+import org.spongepowered.api.world.gen.populator.Vine;
+import org.spongepowered.api.world.gen.populator.WaterLily;
+import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.type.BiomeTreeType;
+import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
+import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.SpongeAttackLivingAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeAvoidEntityAIBuilder;
@@ -145,7 +175,6 @@ import org.spongepowered.common.event.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
-import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.registry.factory.MessageSinkFactoryModule;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.SelectorFactoryModule;
@@ -156,6 +185,7 @@ import org.spongepowered.common.registry.type.ArgumentRegistryModule;
 import org.spongepowered.common.registry.type.ArtRegistryModule;
 import org.spongepowered.common.registry.type.BannerPatternShapeRegistryModule;
 import org.spongepowered.common.registry.type.BigMushroomRegistryModule;
+import org.spongepowered.common.registry.type.BiomeTreeTypeRegistryModule;
 import org.spongepowered.common.registry.type.BiomeTypeRegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.BrickTypeRegistryModule;
@@ -186,12 +216,14 @@ import org.spongepowered.common.registry.type.GoldenAppleRegistryModule;
 import org.spongepowered.common.registry.type.HingeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.LogAxisRegistryModule;
+import org.spongepowered.common.registry.type.MushroomTypeRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 import org.spongepowered.common.registry.type.ObjectiveDisplayModeRegistryModule;
 import org.spongepowered.common.registry.type.OcelotTypeRegistryModule;
 import org.spongepowered.common.registry.type.ParticleRegistryModule;
 import org.spongepowered.common.registry.type.PistonTypeRegistryModule;
 import org.spongepowered.common.registry.type.PlantTypeModuleRegistry;
+import org.spongepowered.common.registry.type.PopulatorObjectRegistryModule;
 import org.spongepowered.common.registry.type.PopulatorTypeRegistryModule;
 import org.spongepowered.common.registry.type.PortionTypeRegistryModule;
 import org.spongepowered.common.registry.type.PotionEffectTypeRegistryModule;
@@ -228,6 +260,32 @@ import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldBuilder;
+import org.spongepowered.common.world.gen.builders.BigMushroomBuilder;
+import org.spongepowered.common.world.gen.builders.BlockBlobBuilder;
+import org.spongepowered.common.world.gen.builders.CactusBuilder;
+import org.spongepowered.common.world.gen.builders.DeadBushBuilder;
+import org.spongepowered.common.world.gen.builders.DesertWellBuilder;
+import org.spongepowered.common.world.gen.builders.DoublePlantBuilder;
+import org.spongepowered.common.world.gen.builders.DungeonBuilder;
+import org.spongepowered.common.world.gen.builders.EnderCrystalPlatformBuilder;
+import org.spongepowered.common.world.gen.builders.FlowerBuilder;
+import org.spongepowered.common.world.gen.builders.ForestBuilder;
+import org.spongepowered.common.world.gen.builders.GlowstoneBuilder;
+import org.spongepowered.common.world.gen.builders.IcePathBuilder;
+import org.spongepowered.common.world.gen.builders.IceSpikeBuilder;
+import org.spongepowered.common.world.gen.builders.LakeBuilder;
+import org.spongepowered.common.world.gen.builders.MelonBuilder;
+import org.spongepowered.common.world.gen.builders.MushroomBuilder;
+import org.spongepowered.common.world.gen.builders.NetherFireBuilder;
+import org.spongepowered.common.world.gen.builders.OreBuilder;
+import org.spongepowered.common.world.gen.builders.PumpkinBuilder;
+import org.spongepowered.common.world.gen.builders.RandomBlockBuilder;
+import org.spongepowered.common.world.gen.builders.RandomObjectBuilder;
+import org.spongepowered.common.world.gen.builders.ReedBuilder;
+import org.spongepowered.common.world.gen.builders.SeaFloorBuilder;
+import org.spongepowered.common.world.gen.builders.ShrubBuilder;
+import org.spongepowered.common.world.gen.builders.VineBuilder;
+import org.spongepowered.common.world.gen.builders.WaterLilyBuilder;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -303,6 +361,32 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new)
             .registerBuilderSupplier(BlockParticle.Builder.class, SpongeParticleEffectBuilder.BuilderBlock::new)
             .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
+            .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
+            .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
+            .registerBuilderSupplier(Cactus.Builder.class, CactusBuilder::new)
+            .registerBuilderSupplier(DeadBush.Builder.class, DeadBushBuilder::new)
+            .registerBuilderSupplier(DesertWell.Builder.class, DesertWellBuilder::new)
+            .registerBuilderSupplier(DoublePlant.Builder.class, DoublePlantBuilder::new)
+            .registerBuilderSupplier(Dungeon.Builder.class, DungeonBuilder::new)
+            .registerBuilderSupplier(EnderCrystalPlatform.Builder.class, EnderCrystalPlatformBuilder::new)
+            .registerBuilderSupplier(Flower.Builder.class, FlowerBuilder::new)
+            .registerBuilderSupplier(Forest.Builder.class, ForestBuilder::new)
+            .registerBuilderSupplier(Glowstone.Builder.class, GlowstoneBuilder::new)
+            .registerBuilderSupplier(IcePath.Builder.class, IcePathBuilder::new)
+            .registerBuilderSupplier(IceSpike.Builder.class, IceSpikeBuilder::new)
+            .registerBuilderSupplier(Lake.Builder.class, LakeBuilder::new)
+            .registerBuilderSupplier(Melon.Builder.class, MelonBuilder::new)
+            .registerBuilderSupplier(Mushroom.Builder.class, MushroomBuilder::new)
+            .registerBuilderSupplier(NetherFire.Builder.class, NetherFireBuilder::new)
+            .registerBuilderSupplier(Ore.Builder.class, OreBuilder::new)
+            .registerBuilderSupplier(Pumpkin.Builder.class, PumpkinBuilder::new)
+            .registerBuilderSupplier(RandomBlock.Builder.class, RandomBlockBuilder::new)
+            .registerBuilderSupplier(RandomObject.Builder.class, RandomObjectBuilder::new)
+            .registerBuilderSupplier(Reed.Builder.class, ReedBuilder::new)
+            .registerBuilderSupplier(SeaFloor.Builder.class, SeaFloorBuilder::new)
+            .registerBuilderSupplier(Shrub.Builder.class, ShrubBuilder::new)
+            .registerBuilderSupplier(Vine.Builder.class, VineBuilder::new)
+            .registerBuilderSupplier(WaterLily.Builder.class, WaterLilyBuilder::new)
             ;
     }
 
@@ -314,6 +398,7 @@ public final class CommonModuleRegistry {
             .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
             .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
             .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())
+            .registerModule(BiomeTreeType.class, new BiomeTreeTypeRegistryModule())
             .registerModule(BiomeType.class, new BiomeTypeRegistryModule())
             .registerModule(BlockType.class, BlockTypeRegistryModule.getInstance())
             .registerModule(BrickType.class, new BrickTypeRegistryModule())
@@ -347,12 +432,14 @@ public final class CommonModuleRegistry {
             .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
             .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
             .registerModule(LogAxis.class, new LogAxisRegistryModule())
+            .registerModule(MushroomType.class, new MushroomTypeRegistryModule())
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
             .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
             .registerModule(ParticleType.class, new ParticleRegistryModule())
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
             .registerModule(PlantType.class, new PlantTypeModuleRegistry())
+            .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
             .registerModule(PopulatorType.class, new PopulatorTypeRegistryModule())
             .registerModule(PortionType.class, new PortionTypeRegistryModule())
             .registerModule(PotionEffectType.class, new PotionEffectTypeRegistryModule())

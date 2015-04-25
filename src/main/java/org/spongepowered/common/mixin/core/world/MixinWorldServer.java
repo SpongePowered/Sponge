@@ -59,8 +59,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinScoreboardSaveData;
-import org.spongepowered.common.interfaces.IMixinWorld;
-import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -91,6 +89,11 @@ public abstract class MixinWorldServer extends MixinWorld {
             ci.cancel();
         }
     }
+    
+    @Inject(method = "init", at = @At("HEAD"))
+    public void beforeInit(CallbackInfoReturnable<World> cir) {
+        updateWorldGenerator();
+    }
 
     @Inject(method = "init", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V", shift = At.Shift.BEFORE),
@@ -104,17 +107,6 @@ public abstract class MixinWorldServer extends MixinWorld {
     public void onInit(CallbackInfoReturnable<World> cir, ScoreboardSaveData scoreboardsavedata) {
         ((IMixinScoreboardSaveData) scoreboardsavedata).setSpongeScoreboard(this.spongeScoreboard);
         this.spongeScoreboard.getScoreboards().add(this.worldScoreboard);
-    }
-
-    @Inject(method = "init", at = @At("RETURN"))
-    public void onPostInit(CallbackInfoReturnable<World> ci) {
-        net.minecraft.world.World world = ci.getReturnValue();
-        if (!((IMixinWorldInfo) world.getWorldInfo()).getIsMod()) {
-            // Run the world generator modifiers in the init method
-            // (the "init" method, not the "<init>" constructor)
-            IMixinWorld mixinWorld = (IMixinWorld) world;
-            mixinWorld.updateWorldGenerator();
-        }
     }
 
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))

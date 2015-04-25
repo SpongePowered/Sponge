@@ -74,8 +74,8 @@ import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.IMixinWorld;
-import org.spongepowered.common.interfaces.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -367,27 +367,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
-        @Override
+    @Override
     public Cause getCurrentPopulateCause() {
         return this.populateCause;
-    }
-
-    @Redirect(method = "populateChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V") )
-    public void onPopulateChunkPre(IChunkProvider chunkProviderServer, IChunkProvider chunkProvider, int x, int z) {
-        if (this.worldObj.isRemote) {
-            chunkProviderServer.populate(chunkProvider, x, z);
-            return;
-        }
-
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        world.setProcessingCaptureCause(true);
-        world.setCapturingTerrainGen(true);
-        this.populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
-        chunkProviderServer.populate(chunkProvider, x, z);
-        world.handlePostTickCaptures(this.populateCause);
-        world.setCapturingTerrainGen(false);
-        world.setProcessingCaptureCause(false);
-        this.populateCause = null;
     }
 
     @Overwrite

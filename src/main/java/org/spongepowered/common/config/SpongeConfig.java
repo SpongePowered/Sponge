@@ -135,6 +135,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String WORLD_INFINITE_WATER_SOURCE = "infinite-water-source";
     public static final String WORLD_KEEP_SPAWN_LOADED = "keep-spawn-loaded";
     public static final String WORLD_LOAD_ON_STARTUP = "load-on-startup";
+    public static final String WORLD_GEN_MODIFIERS = "world-generation-modifiers";
 
     private static final String HEADER = "1.0\n"
             + "\n"
@@ -832,16 +833,26 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class WorldCategory extends Category {
 
-        @Setting(value = WORLD_INFINITE_WATER_SOURCE, comment = "Vanilla water source behavior - is infinite") private boolean infiniteWaterSource =
-                false;
-        @Setting(value = WORLD_FLOWING_LAVA_DECAY, comment = "Lava behaves like vanilla water when source block is removed") private boolean flowingLavaDecay =
-                false;
-        @Setting(value = WORLD_ENABLED, comment = "Enable if this world should be allowed to load.") protected boolean worldEnabled = true;
-        @Setting(value = WORLD_LOAD_ON_STARTUP, comment = "Enable if this world should load on startup.") protected boolean loadOnStartup = true;
-        @Setting(value = WORLD_KEEP_SPAWN_LOADED, comment = "Enable if this world's spawn should remain loaded with no players.") protected boolean keepSpawnLoaded =
-                true;
-        @Setting(value = WORLD_PVP_ENABLED, comment = "Enable if this world allows PVP combat.") protected boolean pvpEnabled = true;
-
+        @Setting(value = WORLD_INFINITE_WATER_SOURCE, comment = "Vanilla water source behavior - is infinite")
+        private boolean infiniteWaterSource = false;
+        
+        @Setting(value = WORLD_FLOWING_LAVA_DECAY, comment = "Lava behaves like vanilla water when source block is removed")
+        private boolean flowingLavaDecay = false;
+        
+        @Setting(value = WORLD_ENABLED, comment = "Enable if this world should be allowed to load.")
+        protected boolean worldEnabled = true;
+        
+        @Setting(value = WORLD_LOAD_ON_STARTUP, comment = "Enable if this world should load on startup.")
+        protected boolean loadOnStartup = true;
+        
+        @Setting(value = WORLD_KEEP_SPAWN_LOADED, comment = "Enable if this world's spawn should remain loaded with no players.")
+        protected boolean keepSpawnLoaded = true;
+        
+        @Setting(value = WORLD_PVP_ENABLED, comment = "Enable if this world allows PVP combat.")
+        protected boolean pvpEnabled = true;
+        
+        @Setting(value = WORLD_GEN_MODIFIERS, comment = "WorldGenerationModifiers to apply to the world")
+        private List<String> worldModifiers = new ArrayList<>();
 
         public boolean hasInfiniteWaterSource() {
             return this.infiniteWaterSource;
@@ -889,6 +900,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPVPEnabled(boolean allow) {
             this.pvpEnabled = allow;
+        }
+        
+        public List<String> getWorldGenModifiers() {
+            return this.worldModifiers;
         }
     }
 

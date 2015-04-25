@@ -38,7 +38,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
-public abstract class SpongeCollectionValue<Element, CollectionType extends Collection<Element>,
+public abstract class SpongeCollectionValue<Element,
+    CollectionType extends Collection<Element>,
     CollectionValueType extends CollectionValue<Element, CollectionType, CollectionValueType, ImmutableType>,
     ImmutableType extends ImmutableCollectionValue<Element, CollectionType, ImmutableType, CollectionValueType>>
     extends SpongeValue<CollectionType> implements CollectionValue<Element, CollectionType, CollectionValueType, ImmutableType> {
