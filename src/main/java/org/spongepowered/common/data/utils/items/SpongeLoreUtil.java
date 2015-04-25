@@ -31,6 +31,7 @@ import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.network.NetHandlerPlayServer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -40,7 +41,7 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.manipulators.items.SpongeLoreData;
-import org.spongepowered.common.text.SpongeText;
+import org.spongepowered.common.interfaces.text.IMixinText;
 
 import java.util.Locale;
 
@@ -59,7 +60,7 @@ public class SpongeLoreUtil implements SpongeDataUtil<LoreData> {
         if (dataHolder instanceof ItemStack) {
             final NBTTagList loreList = new NBTTagList();
             for (Text text : manipulator.getAll()) {
-                loreList.appendTag(new NBTTagString(((SpongeText) text).toLegacy('\247', Locale.ENGLISH)));
+                loreList.appendTag(new NBTTagString(((IMixinText) text).toLegacy('\247', Locale.ENGLISH)));
             }
             ((ItemStack) dataHolder).getSubCompound("display", true).setTag("Lore", loreList);
             return successNoData();
