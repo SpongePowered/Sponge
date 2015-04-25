@@ -50,7 +50,9 @@ public abstract class MixinChatComponentTranslation extends MixinChatComponentSt
     @Override
     public void setTranslation(Translation translation) {
         this.translation = translation;
-        this.key = translation.getId();
+        if (translation instanceof SpongeTranslation) {
+            this.key = translation.getId();
+        }
     }
 
     @Shadow List<IChatComponent> children;
