@@ -304,8 +304,8 @@ public class SpongeHooks {
 
     public static void setBlockState(World world, BlockPos position, BlockState state) {
         if (state instanceof IBlockState) {
-            // 0 is no notify flag. For now not going to notify nearby blocks of update.
-            world.setBlockState(position, (IBlockState) state, 0);
+            // 0 is no notify flag. For now not going to notify nearby blocks of update. -- Why?
+            world.setBlockState(position, (IBlockState) state);
         } else {
             // TODO: Need to figure out what is sensible for other BlockState implementing classes.
             throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
