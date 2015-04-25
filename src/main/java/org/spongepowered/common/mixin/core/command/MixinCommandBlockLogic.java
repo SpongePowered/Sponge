@@ -43,6 +43,11 @@ import org.spongepowered.common.util.VecHelper;
 public abstract class MixinCommandBlockLogic implements ICommandSender, CommandBlockSource, Subjectable {
 
     @Override
+    public String getName() {
+        return getCommandSenderName();
+    }
+
+    @Override
     public void sendMessage(Text... messages) {
         for (Text message : messages) {
             addChatMessage(SpongeTexts.toComponent(message));
