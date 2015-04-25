@@ -34,6 +34,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -46,6 +47,7 @@ import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.WorldInfo;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockState;
@@ -125,6 +127,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract WorldChunkManager getWorldChunkManager();
     @Shadow public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
+    @Shadow public abstract boolean isBlockPowered(BlockPos pos);
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
@@ -246,6 +249,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
         int j = z & 15;
         biomeArray[j << 4 | i] = (byte) (((BiomeGenBase) biome).biomeID & 255);
         chunk.setBiomeArray(biomeArray);
+    }
+    
+    @Override
+    public boolean isBlockPowered(Vector3i position) {
+    	return isBlockPowered(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public boolean isBlockPowered(int x, int y, int z) {
+    	return isBlockPowered(new BlockPos(x, y, z));
     }
 
     @SuppressWarnings("unchecked")

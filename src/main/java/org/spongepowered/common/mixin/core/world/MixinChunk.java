@@ -200,4 +200,15 @@ public abstract class MixinChunk implements Chunk {
         return ((IMixinBlock) getBlock(x, y, z)).getManipulators(this.worldObj, blockPos);
     }
 
+    @Override
+    public boolean contains(Location location) {
+    	if(location.getExtent().equals(this.worldObj)) {
+    		if(location.getX() >= xPosition * 16 && location.getX() < (xPosition + 1)*16 || location.getZ() >= zPosition * 16 && location.getZ() < (zPosition + 1)*16) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
 }
