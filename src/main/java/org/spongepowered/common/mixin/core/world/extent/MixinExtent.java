@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.extent;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
@@ -37,7 +36,8 @@ import org.spongepowered.api.data.Property;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.DataTransactionBuilder;
+import org.spongepowered.common.data.SpongeBlockUtil;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 import java.util.Collection;
 
@@ -50,28 +50,13 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
-        return Optional.absent();
-    }
-
-    @Override
     public <T extends DataManipulator<T>> Optional<T> getOrCreate(Vector3i position, Class<T> manipulatorClass) {
         return getOrCreate(position.getX(), position.getY(), position.getZ(), manipulatorClass);
     }
 
     @Override
-    public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
-        return Optional.absent();
-    }
-
-    @Override
     public <T extends DataManipulator<T>> boolean remove(Vector3i position, Class<T> manipulatorClass) {
         return remove(position.getX(), position.getY(), position.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
-        return false;
     }
 
     @Override
@@ -81,17 +66,18 @@ public abstract class MixinExtent implements Extent {
 
     @Override
     public <T extends DataManipulator<T>> boolean isCompatible(int x, int y, int z, Class<T> manipulatorClass) {
-        return false;
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        return blockUtilOptional.isPresent(); // TODO for now, this is what we have to deal with...
     }
 
     @Override
     public <T extends DataManipulator<T>> DataTransactionResult offer(Vector3i position, T manipulatorData) {
-        return DataTransactionBuilder.successNoData(); // todo
+        return offer(position.getX(), position.getY(), position.getZ(), manipulatorData);
     }
 
     @Override
     public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData) {
-        return DataTransactionBuilder.successNoData(); // todo
+        return offer(x, y, z, manipulatorData, DataPriority.DATA_MANIPULATOR);
     }
 
     @Override
@@ -100,28 +86,13 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
-        return DataTransactionBuilder.successNoData(); // todo
-    }
-
-    @Override
     public Collection<DataManipulator<?>> getManipulators(Vector3i position) {
         return getManipulators(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
-        return ImmutableList.of();
-    }
-
-    @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Vector3i position, Class<T> propertyClass) {
-        return Optional.absent();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
-        return Optional.absent();
+        return getProperty(position.getX(), position.getY(), position.getZ(), propertyClass);
     }
 
     @Override
@@ -130,18 +101,8 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public Collection<Property<?, ?>> getProperties(int x, int y, int z) {
-        return ImmutableList.of();
-    }
-
-    @Override
     public boolean validateRawData(Vector3i position, DataContainer container) {
-        return false;
-    }
-
-    @Override
-    public boolean validateRawData(int x, int y, int z, DataContainer container) {
-        return false;
+        return validateRawData(position.getX(), position.getY(), position.getZ(), container);
     }
 
     @Override
@@ -149,8 +110,4 @@ public abstract class MixinExtent implements Extent {
         setRawData(position.getX(), position.getY(), position.getZ(), container);
     }
 
-    @Override
-    public void setRawData(int x, int y, int z, DataContainer container) throws InvalidDataException {
-
-    }
 }

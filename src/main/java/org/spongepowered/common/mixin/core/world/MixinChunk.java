@@ -24,8 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import static org.spongepowered.common.data.DataTransactionBuilder.builder;
+
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Optional;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -33,6 +37,9 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.gen.BiomeBuffer;
 import org.spongepowered.api.world.Chunk;
@@ -43,11 +50,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.SpongeBlockUtil;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.interfaces.IMixinWorld;
+import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.gen.FastChunkBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeArea;
 
+import java.util.Collection;
 import java.util.List;
 
 @NonnullByDefault
@@ -141,6 +152,52 @@ public abstract class MixinChunk implements Chunk {
     @Override
     public Location getFullBlock(int x, int y, int z) {
         return getWorld().getFullBlock(xPosition * 16 + x, y, zPosition * 16 + z);
+    }
+
+    @Override
+    public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().fromBlockPos(this.worldObj, new BlockPos(x, y, z));
+        }
+        return Optional.absent();
+    }
+
+
+    @Override
+    public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().fromBlockPos(this.worldObj, new BlockPos(x, y, z));
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().remove(this.worldObj, new BlockPos(x, y, z));
+        }
+        return false;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
+                .getClass());
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().setData(this.worldObj, new BlockPos(x, y, z), manipulatorData, priority);
+        }
+        return builder().result(DataTransactionResult.Type.FAILURE).build();
+    }
+
+    @Override
+    public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
+        final BlockPos blockPos = new BlockPos(x, y, z);
+        return ((IMixinBlock) getBlock(x, y, z)).getManipulators(this.worldObj, blockPos);
     }
 
 }

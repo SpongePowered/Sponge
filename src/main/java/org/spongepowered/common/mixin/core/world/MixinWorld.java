@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
@@ -51,6 +52,9 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tile.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
@@ -77,11 +81,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.data.SpongeBlockUtil;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
+import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -556,6 +563,52 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Optional<TileEntity> getTileEntity(Location blockLoc) {
         return getTileEntity(blockLoc.getBlockX(), blockLoc.getBlockY(), blockLoc.getBlockZ());
+    }
+
+    @Override
+    public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+        }
+        return Optional.absent();
+    }
+
+
+    @Override
+    public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().remove((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z));
+        }
+        return false;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
+        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
+                .getClass());
+        if (blockUtilOptional.isPresent()) {
+            return blockUtilOptional.get().setData((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z), manipulatorData, priority);
+        }
+        return builder().result(DataTransactionResult.Type.FAILURE).build();
+    }
+
+    @Override
+    public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
+        final BlockPos blockPos = new BlockPos(x, y, z);
+        return ((IMixinBlock) getBlock(x, y, z).getType()).getManipulators((net.minecraft.world.World) ((Object) this), blockPos);
     }
 
 }

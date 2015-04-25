@@ -25,48 +25,51 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import java.util.Collection;
 
 @NonnullByDefault
 @Mixin(Block.class)
-public abstract class MixinBlock implements BlockType {
+public abstract class MixinBlock implements BlockType, IMixinBlock {
 
-    @Shadow
-    private boolean needsRandomTick;
+    @Shadow private boolean needsRandomTick;
 
+    @Shadow public abstract boolean isBlockNormalCube();
+    @Shadow public abstract boolean getEnableStats();
+    @Shadow public abstract int getLightValue();
+    @Shadow public abstract String getUnlocalizedName();
+    @Shadow public abstract IBlockState getStateFromMeta(int meta);
+    @Shadow public abstract Material getMaterial();
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
 
-    @Shadow
-    public abstract String getUnlocalizedName();
-
-    @Shadow
-    public abstract boolean isBlockNormalCube();
-
-    @Shadow
-    public abstract boolean getEnableStats();
-
-    @Shadow
-    public abstract int getLightValue();
-
-    @Shadow
-    public abstract IBlockState getStateFromMeta(int meta);
-
     @Override
     public String getId() {
+        return Block.blockRegistry.getNameForObject(this).toString();
+    }
+
+    @Override
+    public String getName() {
         return Block.blockRegistry.getNameForObject(this).toString();
     }
 
@@ -121,4 +124,13 @@ public abstract class MixinBlock implements BlockType {
         return Optional.fromNullable((ItemBlock) Item.getItemFromBlock((Block) (Object) this));
     }
 
+    @Override
+    public boolean isGaseous() {
+        return this.getMaterial() == Material.air;
+    }
+
+    @Override
+    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
+        return ImmutableList.of();
+    }
 }
