@@ -34,6 +34,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -46,6 +47,7 @@ import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.WorldInfo;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockState;
@@ -53,6 +55,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tile.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataManipulatorBuilder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -590,7 +593,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
         Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
         if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+        	Optional<T> data = blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+        	if(!data.isPresent() && blockUtilOptional.get() instanceof DataManipulatorBuilder) {
+        		data = (Optional<T>) Optional.fromNullable(((DataManipulatorBuilder) blockUtilOptional.get()).create());
+        	}
+            return data;
         }
         return Optional.absent();
     }

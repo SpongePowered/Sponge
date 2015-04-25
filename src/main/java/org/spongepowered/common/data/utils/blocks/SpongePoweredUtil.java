@@ -25,15 +25,19 @@
 package org.spongepowered.common.data.utils.blocks;
 
 import com.google.common.base.Optional;
+
+import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulators.blocks.PoweredData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeBlockUtil;
 import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.manipulators.blocks.SpongePoweredData;
@@ -74,7 +78,7 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
     @Override
     public Optional<PoweredData> fromBlockPos(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState).isCurrentlyPowered(blockState)) {
+        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState)) {
             return Optional.of(create());
         }
         return Optional.absent();
@@ -82,11 +86,14 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
 
     @Override
     public DataTransactionResult setData(World world, BlockPos blockPos, PoweredData manipulator, DataPriority priority) {
-        return null;
+    	IBlockState blockState = world.getBlockState(blockPos);
+    	world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, true));
+    	return DataTransactionBuilder.successNoData();
     }
 
     @Override
     public boolean remove(World world, BlockPos blockPos) {
-        return false;
+    	IBlockState blockState = world.getBlockState(blockPos);
+        return world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, false));
     }
 }

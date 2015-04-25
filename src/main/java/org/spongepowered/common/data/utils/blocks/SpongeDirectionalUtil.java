@@ -78,7 +78,7 @@ public class SpongeDirectionalUtil implements SpongeDataUtil<DirectionalData>, S
     public Optional<DirectionalData> fromBlockPos(final World world, final BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
         if (blockState.getBlock() instanceof IMixinDirectionalHolder) {
-            return Optional.of(((IMixinDirectionalHolder) blockState).getDirectionalData(blockState));
+            return Optional.of(((IMixinDirectionalHolder) blockState.getBlock()).getDirectionalData(blockState));
         }
         return Optional.absent();
     }

@@ -30,6 +30,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulators.blocks.AxisData;
@@ -75,11 +76,13 @@ public abstract class MixinBlockLever extends Block implements IMixinDirectional
 
     @Override
     public boolean isCurrentlyPowered(IBlockState blockState) {
-        return false;
+        return ((Boolean) blockState.getValue(BlockLever.POWERED)).booleanValue();
     }
 
     @Override
     public DataTransactionResult setPowered(World world, BlockPos blockPos, boolean powered) {
+    	final IBlockState oldBlockState = world.getBlockState(blockPos);
+    	world.setBlockState(blockPos, oldBlockState.withProperty(BlockLever.POWERED, powered));
         return null;
     }
 }
