@@ -5,7 +5,7 @@ ext {
     ciSystem = System.getenv().ciSystem != null ? System.getenv().ciSystem : 'unknown'
     commit = System.getenv().commit != null ? System.getenv().commit : 'unknown'
 
-    apiVersion = '1.1DEV'
+    apiVersion = '2.1DEV'
 }
 
 if (project.ext.has('forgeBuild')) {
