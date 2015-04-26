@@ -27,9 +27,11 @@ package org.spongepowered.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.command.CommandService;
@@ -119,6 +121,11 @@ public abstract class SpongeGame implements Game {
     @Override
     public AsynchronousScheduler getAsyncScheduler() {
         return AsyncScheduler.getInstance();
+    }
+
+    @Override
+    public Server getServer() {
+        return (Server) MinecraftServer.getServer();
     }
 
 }

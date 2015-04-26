@@ -38,7 +38,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.annotation.Nullable;

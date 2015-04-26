@@ -28,7 +28,6 @@ import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -42,9 +41,7 @@ import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.manipulators.items.SpongeEnchantmentItemData;
-import org.spongepowered.common.data.meta.SpongeEnchantment;
 
-import java.util.List;
 import java.util.Map;
 
 public class SpongeEnchantmentUtil implements SpongeDataUtil<EnchantmentData> {
