@@ -77,19 +77,23 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         this.profession = ((List<? extends Profession>) Sponge.getGame().getRegistry().getAllOf(Profession.class)).get(professionId);
     }
 
+    @Override
     public boolean isPlaying() {
         return this.isPlaying;
     }
 
+    @Override
     public void setPlaying(boolean playing) {
         this.isPlaying = playing;
     }
 
+    @Override
     @Overwrite
     public boolean isTrading() {
         return this.buyingPlayer != null;
     }
 
+    @Override
     public Career getCareer() {
         // TODO for some reason, there is some form of validation issue, because villager code
         // is the some really bad code....
@@ -107,6 +111,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         return ((List<Career>) Sponge.getGame().getRegistry().getCareers(this.profession)).get(this.careerId - 1);
     }
 
+    @Override
     public void setCareer(Career career) {
         setProfession(((SpongeEntityMeta) career.getProfession()).type);
         this.buyingList = null;
@@ -115,10 +120,12 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         this.getRecipes(null);
     }
 
+    @Override
     public Optional<Human> getCustomer() {
         return Optional.fromNullable((Human) this.shadow$getCustomer());
     }
 
+    @Override
     public void setCustomer(@Nullable Human human) {
         this.setCustomer((EntityPlayer) human);
     }
