@@ -131,7 +131,6 @@
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "server.MixinMinecraftServer",
-        "server.MixinDedicatedServer",
         "server.MixinNetHandlerHandshakeTCP",
         "server.MixinNetHandlerPlayServer",
         "server.MixinNetworkManager",
@@ -165,6 +164,9 @@
         "world.difficulty.MixinEnumDifficulty",
         "world.extent.MixinExtent",
         "world.storage.MixinWorldInfo"
+    ],
+    "server": [
+        "server.MixinDedicatedServer"
     ],
     "client": [
         "client.server.MixinIntegratedServer"
