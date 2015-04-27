@@ -1,4 +1,4 @@
-ext.common = project(':Common')
+ext.common = project(':SpongeCommon')
 
 ext {
     buildNumber = System.getenv().BUILD_NUMBER != null ? System.getenv().BUILD_NUMBER : '0'
@@ -29,7 +29,7 @@ eclipse {
     classpath {
         file {
             whenMerged { classpath ->
-                def lib = classpath.entries.find { it.path == '/Common' }
+                def lib = classpath.entries.find { it.path == '/SpongeCommon' }
                 def others = classpath.entries.findAll { it != lib }
                 classpath.entries = others + lib
             }
