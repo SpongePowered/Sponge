@@ -62,6 +62,7 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
             if (((Entity) dataHolder).hasCustomName()) {
                 final DisplayNameData data = create();
                 data.setDisplayName(SpongeTexts.toText(((Entity) dataHolder).getDisplayName()));
+                data.setCustomNameVisible(((Entity) dataHolder).getAlwaysRenderNameTag());
                 return Optional.of(data);
             } else {
                 return Optional.of(create());
@@ -75,12 +76,15 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
                 data.setDisplayName(Texts.fromLegacy(displayString));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);
+            } else {
+                return Optional.of(create());
             }
         } else if (dataHolder instanceof IWorldNameable) {
             if (((IWorldNameable) dataHolder).hasCustomName()) {
                 final DisplayNameData data = new SpongeDisplayNameData();
                 final String customName = ((IWorldNameable) dataHolder).getCommandSenderName();
                 data.setDisplayName(Texts.fromLegacy(customName));
+                data.setCustomNameVisible(true);
                 return Optional.of(data);
             }
         }
@@ -109,6 +113,7 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
             return successNoData();
         } else if (dataHolder instanceof Entity) {
             ((Entity) dataHolder).setCustomNameTag(Texts.toLegacy(manipulator.getDisplayName()));
+            ((Entity) dataHolder).setAlwaysRenderNameTag(manipulator.isCustomNameVisible());
         }
         return fail(manipulator);
     }

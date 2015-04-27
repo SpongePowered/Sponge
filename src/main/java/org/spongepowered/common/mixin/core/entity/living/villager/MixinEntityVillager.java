@@ -25,10 +25,12 @@
 package org.spongepowered.common.mixin.core.entity.living.villager;
 
 import com.google.common.base.Optional;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.types.Career;
 import org.spongepowered.api.data.types.Profession;
+import org.spongepowered.api.data.types.Professions;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -39,11 +41,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.interfaces.entities.IMixinVillager;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityAgeable;
 
 import java.util.List;
+import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -54,7 +58,9 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow private boolean isPlaying;
     @Shadow private EntityPlayer buyingPlayer;
     @Shadow private int careerId;
+    @Shadow private int careerLevel;
     @Shadow private MerchantRecipeList buyingList;
+
     @Shadow public abstract int getProfession();
     @Shadow public abstract void setProfession(int professionId);
     @Shadow public abstract void setCustomer(EntityPlayer player);
@@ -68,7 +74,6 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @SuppressWarnings("unchecked")
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
     public void onSetProfession(int professionId, CallbackInfo ci) {
-        // TODO: Fix GameRegistry for API changes
         this.profession = ((List<? extends Profession>) Sponge.getGame().getRegistry().getAllOf(Profession.class)).get(professionId);
     }
 
@@ -86,16 +91,28 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     }
 
     public Career getCareer() {
-        if (this.profession == null) {
-            this.profession = this.spongeCareer.getProfession();
+        // TODO for some reason, there is some form of validation issue, because villager code
+        // is the some really bad code....
+        // At some point might write an overhaul of Villager for better handling
+        // until then... there may be some exceptions thrown at random
+        List<Career> careers = Sponge.getSpongeRegistry().getCareers(this.profession);
+        if (this.careerId == 0 || this.careerId > careers.size()) {
+            this.careerId = new Random().nextInt(careers.size()) + 1;
         }
-        return ((List<Career>) Sponge.getGame().getRegistry().getCareers(this.profession)).get(this.careerId);
+
+        this.getRecipes(null);
+        if (this.profession == Professions.PRIEST) {
+            this.careerId = 1;
+        }
+        return ((List<Career>) Sponge.getGame().getRegistry().getCareers(this.profession)).get(this.careerId - 1);
     }
 
     public void setCareer(Career career) {
         setProfession(((SpongeEntityMeta) career.getProfession()).type);
-        this.spongeCareer = career;
-        this.careerId = ((SpongeEntityMeta) career).type;
+        this.buyingList = null;
+        this.careerId = ((SpongeCareer) career).type + 1;
+        this.careerLevel = 1;
+        this.getRecipes(null);
     }
 
     public Optional<Human> getCustomer() {

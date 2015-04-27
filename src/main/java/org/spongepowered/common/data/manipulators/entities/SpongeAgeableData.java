@@ -22,29 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.weather;
+package org.spongepowered.common.data.manipulators.entities;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulators.entities.AgeableData;
+import org.spongepowered.common.data.manipulators.AbstractIntData;
 
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.weather.Weather;
+public class SpongeAgeableData extends AbstractIntData<AgeableData> implements AgeableData {
 
-@NonnullByDefault
-public class SpongeWeather implements Weather {
-
-    private final String id;
-
-    public SpongeWeather(String id) {
-        this.id = checkNotNull(id);
+    public SpongeAgeableData() {
+        super(AgeableData.class, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
     @Override
-    public String getId() {
-        return "weather." + this.id;
+    public int getAge() {
+        return 0;
     }
 
     @Override
-    public String getName() {
-        return this.id;
+    public void setAge(int age) {
+
+    }
+
+    @Override
+    public void setBaby() {
+
+    }
+
+    @Override
+    public void setAdult() {
+
+    }
+
+    @Override
+    public boolean isBaby() {
+        return false;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return null;
     }
 }
