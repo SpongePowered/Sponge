@@ -163,6 +163,9 @@ public class MinecraftCommandWrapper implements CommandCallable {
     @Override
     @SuppressWarnings("unchecked")
     public List<String> getSuggestions(CommandSource source, String arguments) throws CommandException {
+        if (arguments.length() == 0) {
+            return ImmutableList.of();
+        }
         return this.command.addTabCompletionOptions((ICommandSender) source, splitArgs(arguments), null);
     }
     @SuppressWarnings("unchecked")
