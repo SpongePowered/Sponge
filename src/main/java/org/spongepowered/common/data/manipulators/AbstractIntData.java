@@ -40,10 +40,10 @@ public abstract class AbstractIntData<T extends IntData<T>> extends AbstractSing
     }
 
     @Override
-    public void setValue(Integer value) {
+    public T setValue(Integer value) {
         checkArgument(value >= this.getMinValue(), "Must be greater than the min value!");
         checkArgument(value <= this.getMaxValue(), "Must be less than the max value!");
-        super.setValue(value);
+        return super.setValue(value);
     }
 
     @Override

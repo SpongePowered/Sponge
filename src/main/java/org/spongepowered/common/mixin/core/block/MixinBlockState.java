@@ -30,6 +30,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
 import org.spongepowered.api.block.BlockState;
@@ -49,14 +50,15 @@ import java.util.List;
 @Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)
 public abstract class MixinBlockState extends BlockStateBase implements BlockState {
 
+    @Shadow
+    @SuppressWarnings("rawtypes")
+    private final ImmutableMap properties = null;
+    @Shadow private final Block block = null;
+
     @Override
     public BlockType getType() {
         return (BlockType) getBlock();
     }
-
-    @Shadow
-    @SuppressWarnings("rawtypes")
-    private final ImmutableMap properties = null;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -71,6 +73,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public ImmutableCollection<DataManipulator<?>> getManipulators() {
+
         return null;
     }
 

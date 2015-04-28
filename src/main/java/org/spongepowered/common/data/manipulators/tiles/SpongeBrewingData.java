@@ -50,8 +50,8 @@ public class SpongeBrewingData extends AbstractIntData<BrewingData> implements B
     }
 
     @Override
-    public void setRemainingBrewTime(int time) {
-        setValue(time);
+    public BrewingData setRemainingBrewTime(int time) {
+        return setValue(time);
     }
 
 }

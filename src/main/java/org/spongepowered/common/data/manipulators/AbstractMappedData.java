@@ -34,7 +34,7 @@ import org.spongepowered.api.data.manipulators.MappedData;
 
 import java.util.Map;
 import java.util.Set;
-
+@SuppressWarnings("unchecked")
 public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M>> extends SpongeAbstractData<M> implements MappedData<K, V, M> {
 
     protected Map<K, V> keyValueMap = Maps.newHashMap();
@@ -59,17 +59,23 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M>> ex
     }
 
     @Override
-    public void setUnsafe(K key, V value) {
+    public M setUnsafe(K key, V value) {
         this.keyValueMap.put(checkNotNull(key), checkNotNull(value));
+        return (M) this;
     }
 
     @Override
-    public void setUnsafe(Map<K, V> mapped) {
-
+    public M setUnsafe(Map<K, V> mapped) {
+        this.keyValueMap = Maps.newHashMap();
+        for (Map.Entry<K, V> entry : checkNotNull(mapped).entrySet()) {
+            setUnsafe(entry.getKey(), entry.getValue());
+        }
+        return (M) this;
     }
 
     @Override
-    public void remove(K key) {
+    public M remove(K key) {
         this.keyValueMap.remove(checkNotNull(key));
+        return (M) this;
     }
 }

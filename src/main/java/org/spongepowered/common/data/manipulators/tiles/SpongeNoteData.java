@@ -57,8 +57,8 @@ public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData>
     }
 
     @Override
-    public void setNote(NotePitch note) {
-        setValue(note);
+    public NoteData setNote(NotePitch note) {
+        return setValue(note);
     }
 
 }

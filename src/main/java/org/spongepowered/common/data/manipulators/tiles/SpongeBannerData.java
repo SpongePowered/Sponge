@@ -35,14 +35,14 @@ import org.spongepowered.api.data.manipulators.tileentities.BannerData;
 import org.spongepowered.api.data.types.BannerPatternShape;
 import org.spongepowered.api.data.types.DyeColor;
 import org.spongepowered.api.data.types.DyeColors;
+import org.spongepowered.common.data.manipulators.AbstractListData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 
 import java.util.List;
 
-public class SpongeBannerData extends SpongeAbstractData<BannerData> implements BannerData {
+public class SpongeBannerData extends AbstractListData<BannerData.PatternLayer, BannerData> implements BannerData {
 
-    private List<PatternLayer> patternLayers = Lists.newArrayList();
     private DyeColor baseColor = DyeColors.WHITE;
 
     public SpongeBannerData() {
@@ -58,7 +58,7 @@ public class SpongeBannerData extends SpongeAbstractData<BannerData> implements 
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
         container.set(of("BaseColor"), this.baseColor.getId());
-        container.set(of("Layers"), this.patternLayers);
+        container.set(of("Layers"), this.elementList);
         return container;
     }
 
@@ -68,28 +68,30 @@ public class SpongeBannerData extends SpongeAbstractData<BannerData> implements 
     }
 
     @Override
-    public void setBaseColor(DyeColor color) {
+    public BannerData setBaseColor(DyeColor color) {
         this.baseColor = checkNotNull(color);
+        return this;
     }
 
     @Override
     public List<PatternLayer> getPatternsList() {
-        return ImmutableList.copyOf(this.patternLayers);
+        return ImmutableList.copyOf(this.elementList);
     }
 
     @Override
-    public void clearPatterns() {
-        this.patternLayers.clear();
+    public BannerData clearPatterns() {
+        this.elementList.clear();
+        return this;
     }
 
     @Override
-    public void addPatternLayer(PatternLayer pattern) {
-        this.patternLayers.add(checkNotNull(pattern));
+    public BannerData addPatternLayer(PatternLayer pattern) {
+        return this.add(pattern);
     }
 
     @Override
-    public void addPatternLayer(BannerPatternShape patternShape, DyeColor color) {
-        this.patternLayers.add(new SpongePatternLayer(patternShape, color));
+    public BannerData addPatternLayer(BannerPatternShape patternShape, DyeColor color) {
+        return this.add(new SpongePatternLayer(checkNotNull(patternShape), checkNotNull(color)));
     }
 
 }

@@ -67,12 +67,13 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
     }
 
     @Override
-    public void setLines(Text... lines) {
+    public SignData setLines(Text... lines) {
         for (int i = 0; i < 4; i++) {
             if (lines.length >= i) {
                 this.lines[i] = checkNotNull(lines[i]);
             }
         }
+        return this;
     }
 
     @Override
@@ -81,8 +82,9 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
     }
 
     @Override
-    public void setLine(int index, Text text) throws IndexOutOfBoundsException {
+    public SignData setLine(int index, Text text) throws IndexOutOfBoundsException {
         this.lines[index] = checkNotNull(text);
+        return this;
     }
 
 }

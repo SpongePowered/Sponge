@@ -45,13 +45,13 @@ public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOffe
     }
 
     @Override
-    public void setOffers(List<TradeOffer> offers) {
-        this.set(offers);
+    public TradeOfferData setOffers(List<TradeOffer> offers) {
+        return this.set(offers);
     }
 
     @Override
-    public void addOffer(TradeOffer offer) {
-        this.add(offer);
+    public TradeOfferData addOffer(TradeOffer offer) {
+        return this.add(offer);
     }
 
     @Override

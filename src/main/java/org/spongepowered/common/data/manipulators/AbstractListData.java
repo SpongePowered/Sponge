@@ -34,6 +34,7 @@ import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public abstract class AbstractListData<E, T extends ListData<E, T>> extends SpongeAbstractData<T> implements ListData<E, T> {
 
     protected NonNullArrayList<E> elementList = new NonNullArrayList<E>();
@@ -59,39 +60,45 @@ public abstract class AbstractListData<E, T extends ListData<E, T>> extends Spon
     }
 
     @Override
-    public void set(E... elements) {
+    public T set(E... elements) {
         this.elementList = new NonNullArrayList<E>();
         for (E element : elements) {
             this.elementList.add(element);
         }
+        return (T) this;
     }
 
     @Override
-    public void set(Iterable<E> elements) {
+    public T set(Iterable<E> elements) {
         this.elementList = new NonNullArrayList<E>();
         for (E element : elements) {
             this.elementList.add(element);
         }
+        return (T) this;
     }
 
     @Override
-    public void set(int index, E element) {
+    public T set(int index, E element) {
         this.elementList.set(index, element);
+        return (T) this;
     }
 
     @Override
-    public void add(E element) {
+    public T add(E element) {
         this.elementList.add(checkNotNull(element));
+        return (T) this;
     }
 
     @Override
-    public void add(int index, E element) {
+    public T add(int index, E element) {
         checkArgument(index >= 0);
         this.elementList.add(index, element);
+        return (T) this;
     }
 
     @Override
-    public void remove(int index) {
+    public T remove(int index) {
         this.elementList.remove(index);
+        return (T) this;
     }
 }

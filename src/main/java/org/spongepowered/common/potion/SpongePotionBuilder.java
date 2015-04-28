@@ -28,9 +28,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Optional;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectBuilder;
 import org.spongepowered.api.potion.PotionEffectType;
+import org.spongepowered.api.service.persistence.InvalidDataException;
 
 public class SpongePotionBuilder implements PotionEffectBuilder {
 
@@ -42,6 +46,26 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
 
     public SpongePotionBuilder() {
         reset();
+    }
+
+    @Override
+    public <M extends DataManipulator<M>> PotionEffectBuilder add(M manipulator) {
+        return this; // TODO
+    }
+
+    @Override
+    public PotionEffectBuilder from(PotionEffect holder) {
+        this.potionType = checkNotNull(holder).getType();
+        this.duration = holder.getDuration();
+        this.amplifier = holder.getAmplifier();
+        this.isAmbient = holder.isAmbient();
+        this.showParticles = holder.getShowParticles();
+        return this;
+    }
+
+    @Override
+    public Optional<PotionEffect> build(DataView container) throws InvalidDataException {
+        return Optional.absent(); // TODO
     }
 
     @Override

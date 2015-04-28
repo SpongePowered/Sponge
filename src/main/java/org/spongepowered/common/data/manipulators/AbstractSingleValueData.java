@@ -42,8 +42,10 @@ public abstract class AbstractSingleValueData<V, T extends SingleValueData<V, T>
         return this.value;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void setValue(V value) {
+    public T setValue(V value) {
         this.value = checkNotNull(value);
+        return (T) this;
     }
 }

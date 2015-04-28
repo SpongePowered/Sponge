@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.manipulators.entities;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.entities.AgeableData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
@@ -36,31 +37,32 @@ public class SpongeAgeableData extends AbstractIntData<AgeableData> implements A
 
     @Override
     public int getAge() {
-        return 0;
+        return getValue();
     }
 
     @Override
-    public void setAge(int age) {
-
+    public AgeableData setAge(int age) {
+        return setValue(age);
     }
 
     @Override
-    public void setBaby() {
-
+    public AgeableData setBaby() {
+        return setAge(Integer.MIN_VALUE);
     }
 
     @Override
-    public void setAdult() {
-
+    public AgeableData setAdult() {
+        return setAge(0);
     }
 
     @Override
     public boolean isBaby() {
-        return false;
+        return getAge() < 0;
     }
 
     @Override
     public DataContainer toContainer() {
+        DataContainer container = new MemoryDataContainer();
         return null;
     }
 }

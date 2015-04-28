@@ -30,33 +30,25 @@ import static org.spongepowered.api.data.DataQuery.of;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.items.DurabilityData;
+import org.spongepowered.common.data.manipulators.AbstractIntData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-public class SpongeDurabilityData extends SpongeAbstractData<DurabilityData> implements DurabilityData {
+public class SpongeDurabilityData extends AbstractIntData<DurabilityData> implements DurabilityData {
 
-    private int durability;
-    private int maxDurability = 0;
     private boolean breakable = true;
 
-    public SpongeDurabilityData() {
-        super(DurabilityData.class);
+    public SpongeDurabilityData(int maxDurability) {
+        super(DurabilityData.class, 0, 0, maxDurability);
     }
 
     @Override
     public int getDurability() {
-        return this.durability;
+        return getValue();
     }
 
     @Override
-    public void setDurability(int durability) {
-        checkArgument(durability >= 0);
-        checkArgument(durability < this.maxDurability);
-        this.durability = durability;
-    }
-
-    public void setMaxDurability(int durability) {
-        checkArgument(durability >= 0);
-        this.maxDurability = durability;
+    public DurabilityData setDurability(int durability) {
+        return setValue(durability);
     }
 
     @Override
@@ -65,19 +57,21 @@ public class SpongeDurabilityData extends SpongeAbstractData<DurabilityData> imp
     }
 
     @Override
-    public void setBreakable(boolean breakable) {
+    public DurabilityData setBreakable(boolean breakable) {
         this.breakable = breakable;
+        return this;
     }
 
     @Override
     public int compareTo(DurabilityData o) {
-        return this.breakable ? o.isBreakable() ? 0 : -1 : o.isBreakable() ? 1 : 0;
+        return this.breakable ? o.isBreakable() ? this.getDurability() - o.getDurability() : -1 : o.isBreakable() ? 1 : this.getDurability() - o
+                .getDurability();
     }
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("Durability"), this.durability);
+        container.set(of("Durability"), this.getValue());
         container.set(of("Unbreakable"), this.breakable);
         return container;
     }

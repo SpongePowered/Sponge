@@ -53,8 +53,9 @@ public class SpongeBeaconData extends SpongeAbstractData<BeaconData> implements 
     }
 
     @Override
-    public void setPrimaryEffect(PotionEffectType effect) {
+    public BeaconData setPrimaryEffect(PotionEffectType effect) {
         this.primary = checkNotNull(effect);
+        return this;
     }
 
     @Override
@@ -63,14 +64,16 @@ public class SpongeBeaconData extends SpongeAbstractData<BeaconData> implements 
     }
 
     @Override
-    public void setSecondaryEffect(PotionEffectType effect) {
+    public BeaconData setSecondaryEffect(PotionEffectType effect) {
         this.secondary = checkNotNull(effect);
+        return this;
     }
 
     @Override
-    public void clearEffects() {
+    public BeaconData clearEffects() {
         this.primary = null;
         this.secondary = null;
+        return this;
     }
 
     @Override

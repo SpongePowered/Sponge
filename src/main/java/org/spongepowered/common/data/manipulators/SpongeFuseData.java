@@ -41,8 +41,8 @@ public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseDat
     }
 
     @Override
-    public void setFuseDuration(int fuseTicks) {
-        this.setValue(fuseTicks);
+    public FuseData setFuseDuration(int fuseTicks) {
+        return this.setValue(fuseTicks);
     }
 
     @Override

@@ -22,36 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import com.google.common.base.Optional;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockStateBuilder;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.service.persistence.InvalidDataException;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.CooldownData;
-import org.spongepowered.common.data.manipulators.AbstractIntData;
+public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
-public class SpongeCooldownData extends AbstractIntData<CooldownData> implements CooldownData {
-
-    public SpongeCooldownData() {
-        super(CooldownData.class, 10, 0, Integer.MAX_VALUE);
+    @Override
+    public BlockStateBuilder blockType(BlockType blockType) {
+        return null;
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Cooldown"), this.value);
-        return container;
+    public <M extends DataManipulator<M>> BlockStateBuilder add(M manipulator) {
+        return null;
     }
 
     @Override
-    public int getCooldown() {
-        return this.getValue();
+    public BlockStateBuilder from(BlockState holder) {
+        return null;
     }
 
     @Override
-    public CooldownData setCooldown(int time) {
-        return this.setValue(time);
+    public BlockStateBuilder reset() {
+        return null;
     }
 
+    @Override
+    public BlockState build() {
+        return null;
+    }
+
+    @Override
+    public Optional<BlockState> build(DataView container) throws InvalidDataException {
+        return null;
+    }
 }

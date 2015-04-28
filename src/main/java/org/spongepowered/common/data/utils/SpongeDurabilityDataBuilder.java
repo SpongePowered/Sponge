@@ -27,6 +27,11 @@ package org.spongepowered.common.data.utils;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.base.Optional;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
+import net.minecraft.item.ItemTool;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -40,18 +45,25 @@ public class SpongeDurabilityDataBuilder implements SpongeDataUtil<DurabilityDat
 
     @Override
     public Optional<DurabilityData> build(DataView container) throws InvalidDataException {
-        return null;
+        return Optional.absent();
     }
 
     @Override
     public DurabilityData create() {
-        return new SpongeDurabilityData();
+        return new SpongeDurabilityData(0);
     }
 
     @Override
     public Optional<DurabilityData> createFrom(DataHolder dataHolder) {
-        final SpongeDurabilityData durabilityData = new SpongeDurabilityData();
-
+        if (dataHolder instanceof ItemStack) {
+            final Item item = ((ItemStack) dataHolder).getItem();
+            if (item instanceof ItemTool || item instanceof ItemArmor || item instanceof ItemSword) {
+                final DurabilityData durabilityData = new SpongeDurabilityData(item.getMaxDamage());
+                durabilityData.setDurability(((ItemStack) dataHolder).getItemDamage())
+                        .setBreakable(((ItemStack) dataHolder).isItemStackDamageable());
+                return Optional.of(durabilityData);
+            }
+        }
         return Optional.absent();
     }
 
@@ -67,6 +79,12 @@ public class SpongeDurabilityDataBuilder implements SpongeDataUtil<DurabilityDat
 
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, DurabilityData manipulator, DataPriority priority) {
+        if (dataHolder instanceof ItemStack && (((ItemStack) dataHolder).getItem() instanceof ItemArmor || ((ItemStack) dataHolder).getItem()
+                instanceof ItemSword|| ((ItemStack) dataHolder).getItem() instanceof ItemTool)) {
+            final DurabilityData oldData = createFrom(dataHolder).get();
+            // TODO at a later time.
+
+        }
         return fail(manipulator);
     }
 }

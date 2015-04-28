@@ -48,8 +48,8 @@ public class SpongeDisplayNameData extends AbstractSingleValueData<Text, Display
     }
 
     @Override
-    public void setDisplayName(Text displayName) {
-        setValue(displayName);
+    public DisplayNameData setDisplayName(Text displayName) {
+        return setValue(displayName);
     }
 
     @Override
@@ -58,8 +58,9 @@ public class SpongeDisplayNameData extends AbstractSingleValueData<Text, Display
     }
 
     @Override
-    public void setCustomNameVisible(boolean visible) {
+    public DisplayNameData setCustomNameVisible(boolean visible) {
         this.visible = visible;
+        return this;
     }
 
     @Override

@@ -59,8 +59,9 @@ public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implement
     }
 
     @Override
-    public void setRemainingBurnTime(int time) {
+    public FurnaceData setRemainingBurnTime(int time) {
         this.remainingBurnTime = time;
+        return this;
     }
 
     @Override
@@ -69,8 +70,9 @@ public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implement
     }
 
     @Override
-    public void setRemainingCookTime(int time) {
+    public FurnaceData setRemainingCookTime(int time) {
         this.remainingCookTime = time;
+        return this;
     }
 
 }

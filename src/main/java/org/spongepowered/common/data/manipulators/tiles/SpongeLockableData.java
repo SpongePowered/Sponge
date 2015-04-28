@@ -43,8 +43,8 @@ public class SpongeLockableData extends AbstractSingleValueData<String, Lockable
     }
 
     @Override
-    public void setLockToken(String token) {
-        setValue(token);
+    public LockableData setLockToken(String token) {
+        return setValue(token);
     }
 
     @Override
