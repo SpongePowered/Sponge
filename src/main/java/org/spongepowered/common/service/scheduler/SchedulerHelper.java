@@ -153,7 +153,7 @@ public class SchedulerHelper {
         Iterator<Task> it = subsetCollection.iterator();
 
         while (it.hasNext()) {
-            String pluginId = ((PluginContainer) it.next()).getId();
+            String pluginId = it.next().getOwner().getId();
 
             if (!testOwnerId.equals(pluginId)) {
                 it.remove();
@@ -214,7 +214,7 @@ public class SchedulerHelper {
         Iterator<Task> it = subsetCollection.iterator();
 
         while (it.hasNext()) {
-            String taskName = ((PluginContainer) it.next()).getName();
+            String taskName = it.next().getOwner().getName();
             Matcher matcher = searchPattern.matcher(taskName);
             if (!matcher.matches()) {
                 it.remove();
