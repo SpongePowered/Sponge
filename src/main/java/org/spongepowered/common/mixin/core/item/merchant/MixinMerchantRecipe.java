@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.item.merchant;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
 import com.google.common.base.Optional;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -84,4 +88,14 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
         return getRewardsExp();
     }
 
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+                .set(of("FirstItem"), this.getFirstBuyingItem())
+                .set(of("SecondItem"), this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
+                .set(of("BuyingItem"), this.getItemToBuy())
+                .set(of("GrantsExperience"), this.doesGrantExperience())
+                .set(of("MaxUses"), this.getMaxTradeUses())
+                .set(of("Uses"), this.getUses());
+    }
 }

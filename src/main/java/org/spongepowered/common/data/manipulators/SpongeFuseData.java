@@ -47,8 +47,6 @@ public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseDat
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(DataQuery.of("Fuse"), this.getValue());
-        return container;
+        return new MemoryDataContainer().set(DataQuery.of("Fuse"), this.getValue());
     }
 }

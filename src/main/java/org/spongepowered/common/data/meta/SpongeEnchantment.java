@@ -43,9 +43,6 @@ public class SpongeEnchantment implements DataSerializable {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Enchantment"), this.enchantment.getId());
-        container.set(of("Level"), this.level);
-        return container;
+        return new MemoryDataContainer().set(of("Enchantment"), this.enchantment.getId()).set(of("Level"), this.level);
     }
 }

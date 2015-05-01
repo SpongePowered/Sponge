@@ -46,9 +46,7 @@ public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData>
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Pitch"), this.value.getId());
-        return container;
+        return new MemoryDataContainer().set(of("Pitch"), this.value.getId());
     }
 
     @Override

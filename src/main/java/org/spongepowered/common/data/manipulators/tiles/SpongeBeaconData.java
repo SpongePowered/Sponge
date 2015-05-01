@@ -83,6 +83,6 @@ public class SpongeBeaconData extends SpongeAbstractData<BeaconData> implements 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer(); // TODO
+        return new MemoryDataContainer();
     }
 }

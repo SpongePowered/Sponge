@@ -39,9 +39,7 @@ public class SpongeBrewingData extends AbstractIntData<BrewingData> implements B
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("RemainingBrewTime"), this.value);
-        return container;
+        return new MemoryDataContainer().set(of("RemainingBrewTime"), this.value);
     }
 
     @Override

@@ -70,10 +70,9 @@ public class SpongeDurabilityData extends AbstractIntData<DurabilityData> implem
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Durability"), this.getValue());
-        container.set(of("Unbreakable"), this.breakable);
-        return container;
+        return new MemoryDataContainer().set(of("Durability"), this.value)
+                .set(of("Unbreakable"), this.breakable)
+                .set(of("MaxDurability"), this.getMaxValue());
     }
 
 }

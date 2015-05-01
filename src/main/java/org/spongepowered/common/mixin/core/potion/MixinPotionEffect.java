@@ -82,12 +82,11 @@ public abstract class MixinPotionEffect implements PotionEffect {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("PotionType"), Potion.potionTypes[getPotionID()].getName());
-        container.set(of("Duration"), this.duration);
-        container.set(of("Amplifier"), this.amplifier);
-        container.set(of("Ambience"), this.isAmbient);
-        container.set(of("ShowsParticles"), this.showParticles);
-        return container;
+        return new MemoryDataContainer()
+                .set(of("PotionType"), Potion.potionTypes[getPotionID()].getName())
+                .set(of("Duration"), this.duration)
+                .set(of("Amplifier"), this.amplifier)
+                .set(of("Ambience"), this.isAmbient)
+                .set(of("ShowsParticles"), this.showParticles);
     }
 }

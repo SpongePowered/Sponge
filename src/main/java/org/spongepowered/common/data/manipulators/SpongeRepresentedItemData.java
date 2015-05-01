@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulators;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.RepresentedItemData;
@@ -44,8 +46,6 @@ public class SpongeRepresentedItemData extends AbstractSingleValueData<ItemStack
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-
-        return null;
+        return new MemoryDataContainer().set(of("Item"), this.getValue());
     }
 }

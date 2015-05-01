@@ -39,9 +39,7 @@ public class SpongeCooldownData extends AbstractIntData<CooldownData> implements
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Cooldown"), this.value);
-        return container;
+        return new MemoryDataContainer().set(of("Cooldown"), this.value);
     }
 
     @Override

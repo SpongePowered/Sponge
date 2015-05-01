@@ -46,9 +46,7 @@ public class SpongeCareerData extends AbstractSingleValueData<Career, CareerData
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Career"), this.value.getId());
-        return container;
+        return new MemoryDataContainer().set(of("Career"), this.value.getId());
     }
 
     @Override

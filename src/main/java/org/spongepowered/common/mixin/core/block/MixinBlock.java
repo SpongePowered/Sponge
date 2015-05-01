@@ -129,8 +129,4 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return this.getMaterial() == Material.air;
     }
 
-    @Override
-    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
-        return ImmutableList.of();
-    }
 }

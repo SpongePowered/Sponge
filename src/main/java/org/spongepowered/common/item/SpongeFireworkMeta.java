@@ -79,20 +79,19 @@ public class SpongeFireworkMeta implements FireworkEffect {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Type"), this.shape.getId());
         List<Integer> colors = Lists.newArrayList();
         for (Color color : this.colors) {
             colors.add(color.getRGB());
         }
-        container.set(of("Colors"), colors);
         List<Integer> fades = Lists.newArrayList();
         for (Color color : this.fades) {
             fades.add(color.getRGB());
         }
-        container.set(of("Fades"), fades);
-        container.set(of("Trails"), this.trails);
-        container.set(of("Flickers"), this.flicker);
-        return container;
+        return new MemoryDataContainer()
+                .set(of("Type"), this.shape.getId())
+                .set(of("Colors"), colors)
+                .set(of("Fades"), fades)
+                .set(of("Trails"), this.trails)
+                .set(of("Flickers"), this.flicker);
     }
 }

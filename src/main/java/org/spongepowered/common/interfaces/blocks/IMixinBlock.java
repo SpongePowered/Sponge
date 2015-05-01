@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.interfaces.blocks;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
 
 import java.util.Collection;
@@ -33,5 +36,9 @@ import java.util.Collection;
 public interface IMixinBlock {
 
     Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos);
+
+    ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState);
+
+    BlockState getBlockState();
 
 }

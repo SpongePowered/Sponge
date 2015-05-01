@@ -121,16 +121,12 @@ public class SpongeEnchantmentItemData extends AbstractMappedData<Enchantment, I
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        // We have to use a DataView.
         ImmutableList.Builder<DataView> enchantments = ImmutableList.builder();
         for (Map.Entry<Enchantment, Integer> entry : asMap().entrySet()) {
-            // Since we can't directly create data views.
             SpongeEnchantment enchantment = new SpongeEnchantment(entry.getKey(), entry.getValue());
             enchantments.add(enchantment.toContainer());
         }
-        container.set(of("ench"), enchantments);
-        return container;
+        return new MemoryDataContainer().set(of("Enchantments"), enchantments);
     }
 
     private Set<Enchantment> getIncompatibleEnchantments(final Enchantment query) {

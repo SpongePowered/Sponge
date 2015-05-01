@@ -28,12 +28,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.minecraft.block.BlockSign;
 import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
@@ -41,9 +44,12 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;
 import org.spongepowered.common.interfaces.blocks.IMixinDirectionalHolder;
+import org.spongepowered.common.mixin.core.block.MixinBlock;
+
+import java.util.Collection;
 
 @Mixin(BlockStandingSign.class)
-public abstract class MixinBlockStandingSign extends BlockSign implements IMixinDirectionalHolder {
+public abstract class MixinBlockStandingSign extends MixinBlock implements IMixinDirectionalHolder {
 
     @Override
     public DirectionalData getDirectionalData(IBlockState blockState) {
@@ -72,4 +78,15 @@ public abstract class MixinBlockStandingSign extends BlockSign implements IMixin
     public void reset(World world, BlockPos blockPos) {
         world.getBlockState(blockPos).withProperty(BlockWallSign.FACING, 0);
     }
+
+    @Override
+    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
+        return Lists.<DataManipulator<?>>newArrayList(getDirectionalData(world.getBlockState(blockPos))); // TODO for now.
+    }
+
+    @Override
+    public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<DataManipulator<?>>of(getDirectionalData(blockState)); // TODO for now.
+    }
+
 }

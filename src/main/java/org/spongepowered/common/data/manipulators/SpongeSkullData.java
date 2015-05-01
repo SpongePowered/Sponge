@@ -45,9 +45,7 @@ public class SpongeSkullData extends AbstractSingleValueData<SkullType, SkullDat
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Type"), this.getValue());
-        return container;
+        return new MemoryDataContainer().set(of("Type"), this.getValue());
     }
 
 }

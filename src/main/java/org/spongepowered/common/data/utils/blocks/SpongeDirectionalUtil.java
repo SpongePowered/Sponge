@@ -101,4 +101,12 @@ public class SpongeDirectionalUtil implements SpongeDataUtil<DirectionalData>, S
         }
         return false;
     }
+
+    @Override
+    public Optional<DirectionalData> createFrom(IBlockState blockState) {
+        if (blockState.getBlock() instanceof IMixinDirectionalHolder) {
+            ((IMixinDirectionalHolder) blockState.getBlock()).getDirectionalData(blockState);
+        }
+        return Optional.absent();
+    }
 }

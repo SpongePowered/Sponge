@@ -69,10 +69,7 @@ public class SpongeEntityMeta implements CatalogType {
     }
 
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("id"), this.type);
-        container.set(of("name"), this.name);
-        return container;
+        return new MemoryDataContainer().set(of("id"), this.type).set(of("name"), this.name);
     }
 
     @Override

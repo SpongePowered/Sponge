@@ -45,6 +45,6 @@ public class SpongeAxisData extends AbstractSingleValueData<Axis, AxisData> impl
 
     @Override
     public DataContainer toContainer() {
-        return ((DataContainer) new MemoryDataContainer().set(of("Axis"), this.value.name()));
+        return new MemoryDataContainer().set(of("Axis"), this.value.name());
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.data.utils.blocks;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.base.Optional;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.DataHolder;
@@ -84,5 +85,11 @@ public class SpongeAxisUtil implements SpongeDataUtil<AxisData>, SpongeBlockUtil
     @Override
     public boolean remove(World world, BlockPos blockPos) {
         return false;
+    }
+
+    @Override
+    public Optional<AxisData> createFrom(IBlockState blockState) {
+
+        return Optional.absent();
     }
 }

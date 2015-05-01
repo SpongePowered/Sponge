@@ -29,7 +29,6 @@ import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;

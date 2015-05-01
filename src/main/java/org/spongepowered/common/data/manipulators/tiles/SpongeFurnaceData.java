@@ -47,10 +47,7 @@ public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implement
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("RemainingBurnTime"), this.remainingBurnTime);
-        container.set(of("RemainingCookTime"), this.remainingCookTime);
-        return container;
+        return new MemoryDataContainer().set(of("RemainingBurnTime"), this.remainingBurnTime).set(of("RemainingCookTime"), this.remainingCookTime);
     }
 
     @Override

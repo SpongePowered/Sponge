@@ -91,13 +91,9 @@ public abstract class MixinItemStack implements ItemStack {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("ItemType"), this.getItem().getId());
-        container.set(of("Quantity"), this.getQuantity());
-        List<DataContainer> containerList = Lists.newArrayList();
-        for (DataManipulator<?> itemData : getManipulators()) {
-            containerList.add(itemData.toContainer());
-        }
-        return container;
+        return new MemoryDataContainer()
+                .set(of("ItemType"), this.getItem().getId())
+                .set(of("Quantity"), this.getQuantity())
+                .set(of("Data"), getManipulators());
     }
 }

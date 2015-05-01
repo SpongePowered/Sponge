@@ -45,8 +45,6 @@ public class SpongeDyeableData extends AbstractSingleValueData<DyeColor, Dyeable
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("DyeColor"), this.value.getId());
-        return container;
+        return new MemoryDataContainer().set(of("DyeColor"), this.value.getId());
     }
 }

@@ -411,9 +411,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             return NbtTranslator.getInstance().translateFrom(nbt);
         } catch (NBTException e) {
         }
-        DataContainer container = new MemoryDataContainer();
-        container.set(DataQuery.of("customSettings"), this.generatorOptions);
-        return container;
+        return new MemoryDataContainer().set(DataQuery.of("customSettings"), this.generatorOptions);
     }
 
     @Override

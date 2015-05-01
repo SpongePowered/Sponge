@@ -68,9 +68,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         // a serialized JSON string
         if ((Object) this == WorldType.FLAT) {
             String defaultSettings = FlatGeneratorInfo.getDefaultFlatGenerator().toString();
-            MemoryDataContainer container = new MemoryDataContainer();
-            container.set(STRING_VALUE, defaultSettings);
-            return container;
+            return new MemoryDataContainer().set(STRING_VALUE, defaultSettings);
         }
         if ((Object) this == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to

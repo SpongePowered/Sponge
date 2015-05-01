@@ -86,6 +86,7 @@ import org.spongepowered.api.block.tile.carrier.Hopper;
 import org.spongepowered.api.data.DataManipulatorRegistry;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulators.DisplayNameData;
+import org.spongepowered.api.data.manipulators.PotionEffectData;
 import org.spongepowered.api.data.manipulators.RepresentedItemData;
 import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
 import org.spongepowered.api.data.manipulators.blocks.PoweredData;
@@ -163,6 +164,7 @@ import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferBuilder;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.potion.PotionEffectBuilder;
@@ -240,6 +242,7 @@ import org.spongepowered.common.data.builders.block.tile.SpongeNoteBuilder;
 import org.spongepowered.common.data.builders.block.tile.SpongeSignBuilder;
 import org.spongepowered.common.data.builders.block.tile.SpongeSkullBuilder;
 import org.spongepowered.common.data.manipulators.SpongeDisplayNameData;
+import org.spongepowered.common.data.manipulators.SpongePotionEffectData;
 import org.spongepowered.common.data.manipulators.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulators.SpongeTradeOfferData;
 import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;
@@ -257,6 +260,7 @@ import org.spongepowered.common.data.types.SpongeSkullType;
 import org.spongepowered.common.data.utils.SpongeBannerDataBuilder;
 import org.spongepowered.common.data.utils.SpongeBeaconDataBuilder;
 import org.spongepowered.common.data.utils.SpongeDisplayNameDataBuilder;
+import org.spongepowered.common.data.utils.SpongePotionDataBuilder;
 import org.spongepowered.common.data.utils.SpongeRepresentedItemBuilder;
 import org.spongepowered.common.data.utils.SpongeSignDataBuilder;
 import org.spongepowered.common.data.utils.blocks.SpongeDirectionalUtil;
@@ -1455,6 +1459,15 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.register(RepresentedItemData.class, representedItemBuilder);
         dataRegistry.registerDataUtil(RepresentedItemData.class, representedItemBuilder);
         dataRegistry.registerDataUtil((Class<RepresentedItemData>) (Class) SpongeRepresentedItemData.class, representedItemBuilder);
+
+        SpongePotionDataBuilder potionDataBuilder = new SpongePotionDataBuilder();
+        service.registerBuilder(PotionEffectData.class, potionDataBuilder);
+        dataRegistry.register(PotionEffectData.class, potionDataBuilder);
+        dataRegistry.registerDataUtil(PotionEffectData.class, potionDataBuilder);
+        dataRegistry.registerDataUtil((Class<PotionEffectData>) (Class) SpongePotionEffectData.class, potionDataBuilder);
+
+        SpongeTradeOfferBuilder tradeOfferBuilder = new SpongeTradeOfferBuilder();
+        service.registerBuilder(TradeOffer.class, tradeOfferBuilder);
         // User
         // TODO someone needs to write a User implementation...
     }

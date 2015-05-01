@@ -56,10 +56,7 @@ public class SpongeBannerData extends AbstractListData<BannerData.PatternLayer, 
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("BaseColor"), this.baseColor.getId());
-        container.set(of("Layers"), this.elementList);
-        return container;
+        return new MemoryDataContainer().set(of("BaseColor"), this.baseColor.getId()).set(of("Layers"), this.elementList);
     }
 
     @Override

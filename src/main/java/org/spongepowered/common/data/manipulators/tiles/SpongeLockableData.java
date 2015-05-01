@@ -54,9 +54,7 @@ public class SpongeLockableData extends AbstractSingleValueData<String, Lockable
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("Lock"), this.getValue());
-        return container;
+        return new MemoryDataContainer().set(of("Lock"), this.getValue());
     }
 
 }

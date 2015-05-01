@@ -52,13 +52,11 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
         List<String> jsonLines = Lists.newArrayList();
         for (Text line : lines) {
             jsonLines.add(Texts.toJson(line));
         }
-        container.set(of("Lines"), jsonLines);
-        return container;
+        return  new MemoryDataContainer().set(of("Lines"), jsonLines);
     }
 
     @Override

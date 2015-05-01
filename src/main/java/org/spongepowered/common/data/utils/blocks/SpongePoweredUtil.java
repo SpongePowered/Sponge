@@ -25,12 +25,10 @@
 package org.spongepowered.common.data.utils.blocks;
 
 import com.google.common.base.Optional;
-
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -95,5 +93,14 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
     public boolean remove(World world, BlockPos blockPos) {
     	IBlockState blockState = world.getBlockState(blockPos);
         return world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, false));
+    }
+
+    @Override
+    public Optional<PoweredData> createFrom(IBlockState blockState) {
+        if (blockState.getBlock() instanceof IMixinPoweredHolder) {
+            return ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState) ? Optional.of(create())
+                    : Optional.<PoweredData>absent();
+        }
+        return Optional.absent();
     }
 }

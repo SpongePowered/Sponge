@@ -70,9 +70,8 @@ public class SpongeDisplayNameData extends AbstractSingleValueData<Text, Display
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("DisplayName"), Texts.toJson(this.getValue(), Locale.ENGLISH));
-        container.set(of("Visible"), this.visible);
-        return container;
+        return new MemoryDataContainer()
+                .set(of("DisplayName"), Texts.toJson(this.getValue(), Locale.ENGLISH))
+                .set(of("Visible"), this.visible);
     }
 }

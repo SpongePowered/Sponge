@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulators.entities;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.entities.AgeableData;
@@ -62,7 +64,6 @@ public class SpongeAgeableData extends AbstractIntData<AgeableData> implements A
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        return null;
+        return new MemoryDataContainer().set(of("Age"), this.value);
     }
 }

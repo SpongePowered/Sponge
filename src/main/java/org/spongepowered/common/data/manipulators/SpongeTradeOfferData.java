@@ -61,8 +61,6 @@ public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOffe
 
     @Override
     public DataContainer toContainer() {
-        MemoryDataContainer container = new MemoryDataContainer();
-        container.set(of("Offers"), this.elementList); // TODO actually make this work... for some reason trade offer is not data serializable...
-        return container;
+        return new MemoryDataContainer().set(of("Offers"), this.elementList);
     }
 }

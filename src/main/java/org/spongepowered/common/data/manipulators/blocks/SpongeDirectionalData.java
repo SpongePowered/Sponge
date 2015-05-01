@@ -45,6 +45,6 @@ public class SpongeDirectionalData extends AbstractSingleValueData<Direction, Di
 
     @Override
     public DataContainer toContainer() {
-        return ((DataContainer) new MemoryDataContainer().set(of("Direction"), this.getValue().name()));
+        return new MemoryDataContainer().set(of("Direction"), this.getValue().name());
     }
 }

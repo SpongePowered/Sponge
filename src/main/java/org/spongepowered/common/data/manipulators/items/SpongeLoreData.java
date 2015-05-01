@@ -24,11 +24,18 @@
  */
 package org.spongepowered.common.data.manipulators.items;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
+import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.items.LoreData;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.common.text.SpongeTexts;
+
+import java.util.List;
 
 public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
 
@@ -43,6 +50,10 @@ public class SpongeLoreData extends AbstractListData<Text, LoreData> implements 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer(); // todo later
+        List<String> lore = Lists.newArrayList();
+        for (Text text : this.elementList) {
+            lore.add(Texts.toJson(text));
+        }
+        return new MemoryDataContainer().set(of("Lore"), lore);
     }
 }

@@ -28,6 +28,7 @@ import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.minecraft.block.BlockSign;
 import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
@@ -42,11 +43,12 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;
 import org.spongepowered.common.interfaces.blocks.IMixinDirectionalHolder;
+import org.spongepowered.common.mixin.core.block.MixinBlock;
 
 import java.util.Collection;
 
 @Mixin(BlockWallSign.class)
-public abstract class MixinBlockWallSign extends BlockSign implements IMixinDirectionalHolder {
+public abstract class MixinBlockWallSign extends MixinBlock implements IMixinDirectionalHolder {
 
     @Override
     public DirectionalData getDirectionalData(IBlockState blockState) {
@@ -78,7 +80,12 @@ public abstract class MixinBlockWallSign extends BlockSign implements IMixinDire
 
     @Override
     public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
-        ImmutableList.Builder<DataManipulator<?>> builder = ImmutableList.builder();
-        return null;
+        return Lists.<DataManipulator<?>>newArrayList(getDirectionalData(world.getBlockState(blockPos))); // TODO for now.
     }
+
+    @Override
+    public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<DataManipulator<?>>of(getDirectionalData(blockState)); // TODO for now.
+    }
+
 }
