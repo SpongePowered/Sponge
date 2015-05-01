@@ -36,6 +36,8 @@ public interface IMixinText {
 
     String toJson(Locale locale);
 
+    String getLegacyFormatting();
+
     String toLegacy(char code, Locale locale);
 
 }

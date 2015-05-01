@@ -39,6 +39,7 @@ import org.spongepowered.common.interfaces.text.IMixinChatStyle;
 import org.spongepowered.common.interfaces.text.IMixinClickEvent;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
 import org.spongepowered.common.text.ChatComponentIterable;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Iterator;
@@ -83,6 +84,19 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
         }
 
         return builder.toString();
+    }
+
+    @Override
+    public String getLegacyFormatting() {
+        char[] formatting = getFormatting();
+        char[] buf = new char[formatting.length * 2];
+
+        for (int i = 0; i < formatting.length; i++) {
+            buf[i * 2] = SpongeTexts.COLOR_CHAR;
+            buf[i * 2 + 1] = formatting[i];
+        }
+
+        return new String(buf);
     }
 
     @Override

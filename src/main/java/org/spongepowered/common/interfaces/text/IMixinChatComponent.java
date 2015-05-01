@@ -37,6 +37,8 @@ public interface IMixinChatComponent extends IChatComponent {
 
     String toPlain();
 
+    String getLegacyFormatting();
+
     String toLegacy(char code);
 
     Text toText();

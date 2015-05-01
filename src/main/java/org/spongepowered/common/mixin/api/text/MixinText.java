@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.action.SpongeClickAction;
 import org.spongepowered.common.text.action.SpongeHoverAction;
 import org.spongepowered.common.text.format.SpongeTextColor;
@@ -129,6 +130,11 @@ public abstract class MixinText implements IMixinText {
         }
 
         return this.json;
+    }
+
+    @Override
+    public String getLegacyFormatting() {
+        return ((IMixinChatComponent) getHandle(SpongeTexts.getDefaultLocale())).getLegacyFormatting();
     }
 
     @Override

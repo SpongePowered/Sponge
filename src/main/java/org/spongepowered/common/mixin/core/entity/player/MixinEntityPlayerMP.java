@@ -125,6 +125,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void sendMessage(ChatType type, Text... messages) {
         for (Text text : messages) {
+            if (type == ChatTypes.ACTION_BAR) {
+                text = SpongeTexts.fixActionBarFormatting(text);
+            }
+
             this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
                     ((SpongeChatType) type).getByteId()));
         }
@@ -133,6 +137,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void sendMessage(ChatType type, Iterable<Text> messages) {
         for (Text text : messages) {
+            if (type == ChatTypes.ACTION_BAR) {
+                text = SpongeTexts.fixActionBarFormatting(text);
+            }
+
             this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
                     ((SpongeChatType) type).getByteId()));
         }

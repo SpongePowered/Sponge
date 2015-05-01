@@ -26,6 +26,9 @@ package org.spongepowered.common.text;
 
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
 
@@ -64,6 +67,29 @@ public final class SpongeTexts {
 
     public static String toLegacy(IChatComponent component, char code) {
         return ((IMixinChatComponent) component).toLegacy(code);
+    }
+
+    private static String getLegacyFormatting(Text text) {
+        return ((IMixinText) text).getLegacyFormatting();
+    }
+
+    public static Text fixActionBarFormatting(Text text) {
+        Text result = text;
+        if (!text.getChildren().isEmpty()) {
+            TextBuilder fixed = text.builder().removeAll();
+
+            for (Text child : text.getChildren()) {
+                fixed.append(fixActionBarFormatting(child));
+            }
+
+            result = fixed.build();
+        }
+
+        if (text.getColor() != TextColors.NONE || !text.getStyle().isEmpty()) {
+            result = Texts.builder(getLegacyFormatting(text)).append(result).build();
+        }
+
+        return result;
     }
 
 }
