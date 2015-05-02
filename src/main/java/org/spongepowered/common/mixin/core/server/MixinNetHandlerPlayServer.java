@@ -36,7 +36,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
@@ -54,6 +53,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.network.AbstractNetworkManager;
 
 import java.net.InetSocketAddress;
 
@@ -96,12 +96,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Override
     public void sendCustomPayload(Object plugin, String channel, ChannelBuf dataStream) {
-        throw new UnsupportedOperationException(); // TODO
+        AbstractNetworkManager.instance.sendPayload(channel, (PacketBuffer) dataStream, this.playerEntity);
     }
 
     @Override
     public void sendCustomPayload(Object plugin, String channel, byte[] data) {
-        sendPacket(new S3FPacketCustomPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(data))));
+        AbstractNetworkManager.instance.sendPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(data)), this.playerEntity);
     }
 
     /**

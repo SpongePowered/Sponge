@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.server.MinecraftServer;
@@ -35,6 +38,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.net.ChannelListener;
+import org.spongepowered.api.net.ChannelRegistrationException;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
@@ -48,6 +53,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinServer;
 import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.network.AbstractNetworkManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -226,4 +232,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
 
         initiateShutdown();
     }
+
+    @Override
+    public void registerChannel(Object plugin, ChannelListener listener, String channel) throws ChannelRegistrationException {
+        checkNotNull(plugin, "plugin");
+        checkNotNull(listener, "listener");
+        checkNotNull(channel, "channel");
+        if (channel.length() > 20) {
+            throw new ChannelRegistrationException("Channel name cannot be greater than 20 characters");
+        }
+        checkArgument(Sponge.getGame().getPluginManager().fromInstance(plugin).isPresent(),
+                "Provided plugin argument is not a plugin instance");
+        AbstractNetworkManager.instance.register(channel, listener);
+    }
+
+    @Override
+    public List<String> getRegisteredChannels() {
+        return AbstractNetworkManager.instance.getAllChannels();
+    }
+
 }
