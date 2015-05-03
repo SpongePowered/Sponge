@@ -91,6 +91,7 @@ import org.spongepowered.api.data.manipulators.RepresentedItemData;
 import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
 import org.spongepowered.api.data.manipulators.blocks.PoweredData;
 import org.spongepowered.api.data.manipulators.entities.CareerData;
+import org.spongepowered.api.data.manipulators.entities.FoodData;
 import org.spongepowered.api.data.manipulators.entities.InvulnerabilityData;
 import org.spongepowered.api.data.manipulators.entities.TradeOfferData;
 import org.spongepowered.api.data.manipulators.items.EnchantmentData;
@@ -248,6 +249,7 @@ import org.spongepowered.common.data.manipulators.SpongeTradeOfferData;
 import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;
 import org.spongepowered.common.data.manipulators.blocks.SpongePoweredData;
 import org.spongepowered.common.data.manipulators.entities.SpongeCareerData;
+import org.spongepowered.common.data.manipulators.entities.SpongeFoodData;
 import org.spongepowered.common.data.manipulators.entities.SpongeInvulnerabilityData;
 import org.spongepowered.common.data.manipulators.items.SpongeEnchantmentItemData;
 import org.spongepowered.common.data.manipulators.items.SpongeLoreData;
@@ -266,6 +268,7 @@ import org.spongepowered.common.data.utils.SpongeSignDataBuilder;
 import org.spongepowered.common.data.utils.blocks.SpongeDirectionalUtil;
 import org.spongepowered.common.data.utils.blocks.SpongePoweredUtil;
 import org.spongepowered.common.data.utils.entities.SpongeCareerDataUtil;
+import org.spongepowered.common.data.utils.entities.SpongeFoodDataUtil;
 import org.spongepowered.common.data.utils.entities.SpongeInvulnerabilityUtil;
 import org.spongepowered.common.data.utils.entities.SpongeTradeOfferUtil;
 import org.spongepowered.common.data.utils.items.SpongeEnchantmentUtil;
@@ -1468,6 +1471,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
         SpongeTradeOfferBuilder tradeOfferBuilder = new SpongeTradeOfferBuilder();
         service.registerBuilder(TradeOffer.class, tradeOfferBuilder);
+
+        SpongeFoodDataUtil foodDataUtil = new SpongeFoodDataUtil();
+        service.registerBuilder(FoodData.class, foodDataUtil);
+        dataRegistry.register(FoodData.class, foodDataUtil);
+        dataRegistry.registerDataUtil(FoodData.class, foodDataUtil);
+        dataRegistry.registerDataUtil((Class<FoodData>) (Class) SpongeFoodData.class, foodDataUtil);
         // User
         // TODO someone needs to write a User implementation...
     }

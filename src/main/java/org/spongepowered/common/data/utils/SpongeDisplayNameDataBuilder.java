@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.data.utils;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.IWorldNameable;
@@ -68,6 +70,14 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
                 return Optional.of(create());
             }
         } else if (dataHolder instanceof ItemStack) {
+            if (((ItemStack) dataHolder).getItem() == Items.written_book) {
+                final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
+                final String titleString = mainCompound.getString("title");
+                final DisplayNameData data = create();
+                data.setDisplayName(Texts.fromLegacy(titleString));
+                data.setCustomNameVisible(true);
+                return Optional.of(data);
+            }
             final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getSubCompound("display", false);
             if (mainCompound != null && mainCompound.hasKey("Name", 8)) {
                 final String displayString = mainCompound.getString("Name");
@@ -94,6 +104,9 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
     @Override
     public boolean remove(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
+            if (((ItemStack) dataHolder).getItem() == Items.written_book) {
+                // todo
+            }
             ((ItemStack) dataHolder).clearCustomName();
             return true;
         } // todo
@@ -109,8 +122,17 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, DisplayNameData manipulator, DataPriority priority) {
         if (dataHolder instanceof ItemStack) {
-            ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getDisplayName()));
-            return successNoData();
+            switch (checkNotNull(priority)) {
+                case DATA_MANIPULATOR:
+                    ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getDisplayName()));
+                    return successNoData();
+                case DATA_HOLDER:
+                case POST_MERGE:
+                    // todo
+                default:
+                    return fail(manipulator);
+            }
+
         } else if (dataHolder instanceof Entity) {
             ((Entity) dataHolder).setCustomNameTag(Texts.toLegacy(manipulator.getDisplayName()));
             ((Entity) dataHolder).setAlwaysRenderNameTag(manipulator.isCustomNameVisible());
