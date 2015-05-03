@@ -166,7 +166,8 @@ public class SpongeTextFactory implements TextFactory {
             return Texts.of(text);
         }
 
-        return parseLegacyMessage(text, 0, matcher, Texts.builder(""));
+        TextBuilder.Literal builder = Texts.builder("");
+        return builder.append(parseLegacyMessage(text, 0, matcher, builder)).build();
     }
 
     private static final Pattern FORMATTING_PATTERN = Pattern.compile(COLOR_CHAR + "([0-9A-FK-OR])", CASE_INSENSITIVE);
