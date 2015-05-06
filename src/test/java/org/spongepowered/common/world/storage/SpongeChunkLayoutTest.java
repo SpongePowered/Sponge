@@ -55,6 +55,36 @@ public class SpongeChunkLayoutTest {
         Assert.assertFalse(SpongeChunkLayout.instance.isValidChunk(-1875001, 0, -1875000));
         Assert.assertFalse(SpongeChunkLayout.instance.isValidChunk(-1875000, -1, -1875000));
         Assert.assertFalse(SpongeChunkLayout.instance.isValidChunk(-1875000, 0, -1875001));
+
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(0, 0, 0));
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(new Vector3i(14, 125, 9)));
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(14, 125, 9));
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(15, 255, 15));
+
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(new Vector3i(-1, 0, 0)));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(new Vector3i(0, -1, 0)));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(new Vector3i(0, 0, -1)));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(-1, 0, 0));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(0, -1, 0));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(0, 0, -1));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(16, 255, 15));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(15, 256, 15));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(15, 255, 16));
+
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(0, 0, 0, 0, 0, 0));
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(new Vector3i(30, 125, -7), new Vector3i(1, 0, -1)));
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(30, 125, -7, 1, 0, -1));
+        Assert.assertTrue(SpongeChunkLayout.instance.isInChunk(65, 255, -33, 4, 0, -3));
+
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(new Vector3i(-17, 0, 0), new Vector3i(-1, 0, 0)));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(new Vector3i(0, -257, 0), new Vector3i(0, -1, 0)));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(new Vector3i(0, 0, -17), new Vector3i(0, 0, -1)));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(-17, 0, 0, -1, 0, 0));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(0, -257, 0, 0, -1, 0));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(0, 0, -17, 0, 0, -1));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(32, 255, 31, 1, 0, 1));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(31, 256, 31, 1, 0, 1));
+        Assert.assertFalse(SpongeChunkLayout.instance.isInChunk(31, 255, 32, 1, 0, 1));
     }
 
     @Test

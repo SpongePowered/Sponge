@@ -33,6 +33,7 @@ import org.spongepowered.api.world.storage.ChunkLayout;
 public final class SpongeChunkLayout implements ChunkLayout {
 
     private static final Vector3i CHUNK_SIZE = new Vector3i(16, 256, 16);
+    private static final Vector3i CHUNK_MASK = CHUNK_SIZE.sub(1, 1, 1);
     private static final Vector3i SPACE_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1).div(CHUNK_SIZE);
     private static final Vector3i SPACE_MIN = new Vector3i(-30000000, 0, -30000000).div(CHUNK_SIZE);
     private static final Vector3i SPACE_SIZE = SPACE_MAX.sub(SPACE_MIN).add(1, 1, 1);
@@ -77,6 +78,27 @@ public final class SpongeChunkLayout implements ChunkLayout {
         return x >= SPACE_MIN.getX() && x <= SPACE_MAX.getX()
                 && y >= SPACE_MIN.getY() && y <= SPACE_MAX.getY()
                 && z >= SPACE_MIN.getZ() && z <= SPACE_MAX.getZ();
+    }
+
+    @Override
+    public boolean isInChunk(Vector3i localCoords) {
+        return isInChunk(localCoords.getX(), localCoords.getY(), localCoords.getZ());
+    }
+
+    @Override
+    public boolean isInChunk(int x, int y, int z) {
+        // no bits allowed outside the mask!
+        return (x & ~CHUNK_MASK.getX()) == 0 && (y & ~CHUNK_MASK.getY()) == 0 && (z & ~CHUNK_MASK.getZ()) == 0;
+    }
+
+    @Override
+    public boolean isInChunk(Vector3i worldCoords, Vector3i chunkCoords) {
+        return isInChunk(worldCoords.getX(), worldCoords.getY(), worldCoords.getZ(), chunkCoords.getX(), chunkCoords.getY(), chunkCoords.getZ());
+    }
+
+    @Override
+    public boolean isInChunk(int wx, int wy, int wz, int cx, int cy, int cz) {
+        return isInChunk(wx - (cx << 4), wy - (cy << 8), wz - (cz << 4));
     }
 
     @Override
