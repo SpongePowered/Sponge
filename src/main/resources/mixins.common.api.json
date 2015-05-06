@@ -6,6 +6,7 @@
         "text.MixinTextLiteral",
         "text.MixinTextScore",
         "text.MixinTextSelector",
-        "text.MixinTextTranslatable"
+        "text.MixinTextTranslatable",
+        "text.title.MixinTitle"
     ]
 }
