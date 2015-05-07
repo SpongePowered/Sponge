@@ -29,6 +29,7 @@ import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
@@ -161,7 +162,9 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public Location getFullBlock(int x, int y, int z) {
-        return getWorld().getFullBlock(xPosition * 16 + x, y, zPosition * 16 + z);
+        Preconditions.checkArgument(SpongeChunkLayout.instance.isInChunk(x, y, z, this.xPosition, 0, this.zPosition),
+                "Coordinates are not in the chunk: " + x + ", " + y + ", " + z);
+        return getWorld().getFullBlock(x, y, z);
     }
 
     @Override
