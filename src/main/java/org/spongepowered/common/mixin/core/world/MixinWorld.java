@@ -34,7 +34,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -47,7 +46,6 @@ import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.WorldInfo;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockState;
@@ -125,16 +123,34 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow(prefix = "shadow$")
     public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
-    @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
+
+    @Shadow
+    public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
+
+    @Shadow
+    public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             Predicate<net.minecraft.entity.Entity> filter);
-    @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
-    @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
-    @Shadow public abstract IChunkProvider getChunkProvider();
-    @Shadow public abstract WorldChunkManager getWorldChunkManager();
-    @Shadow public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
-    @Shadow public abstract boolean isBlockPowered(BlockPos pos);
+
+    @Shadow
+    public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
+
+    @Shadow
+    public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
+
+    @Shadow
+    public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
+
+    @Shadow
+    public abstract IChunkProvider getChunkProvider();
+
+    @Shadow
+    public abstract WorldChunkManager getWorldChunkManager();
+
+    @Shadow
+    public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
+
+    @Shadow
+    public abstract boolean isBlockPowered(BlockPos pos);
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
@@ -257,15 +273,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
         biomeArray[j << 4 | i] = (byte) (((BiomeGenBase) biome).biomeID & 255);
         chunk.setBiomeArray(biomeArray);
     }
-    
+
     @Override
     public boolean isBlockPowered(Vector3i position) {
-    	return isBlockPowered(position.getX(), position.getY(), position.getZ());
+        return isBlockPowered(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
     public boolean isBlockPowered(int x, int y, int z) {
-    	return isBlockPowered(new BlockPos(x, y, z));
+        return isBlockPowered(new BlockPos(x, y, z));
     }
 
     @SuppressWarnings("unchecked")
@@ -572,11 +588,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<TileEntity> getTileEntity(int x, int y, int z) {
-        net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x,y,z));
-        if(tileEntity == null) {
+        net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
+        if (tileEntity == null) {
             return Optional.absent();
         } else {
-            return Optional.of((TileEntity)tileEntity);
+            return Optional.of((TileEntity) tileEntity);
         }
     }
 
@@ -599,10 +615,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
         Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
         if (blockUtilOptional.isPresent()) {
-        	Optional<T> data = blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
-        	if(!data.isPresent() && blockUtilOptional.get() instanceof DataManipulatorBuilder) {
-        		data = Optional.<T>fromNullable(((DataManipulatorBuilder<T>) blockUtilOptional.get()).create());
-        	}
+            Optional<T> data = blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+            if (!data.isPresent() && blockUtilOptional.get() instanceof DataManipulatorBuilder) {
+                data = Optional.<T>fromNullable(((DataManipulatorBuilder<T>) blockUtilOptional.get()).create());
+            }
             return data;
         }
         return Optional.absent();
