@@ -34,6 +34,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -111,6 +112,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
     private static final Vector2i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(1, 1);
     private boolean keepSpawnLoaded;
+    // TODO: what am I?
+    private long weatherStartTime;
     public SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
     private volatile Context worldContext;
     private ImmutableList<Populator> populators;
@@ -152,6 +155,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow
     public abstract boolean isBlockPowered(BlockPos pos);
 
+    @Shadow
+    public abstract IBlockState getBlockState(BlockPos pos);
+
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
     public void onGetCollidingBoundingBoxes(net.minecraft.entity.Entity entity, net.minecraft.util.AxisAlignedBB axis,
@@ -173,48 +179,48 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<Chunk> getChunk(Vector3i position) {
-        if (!SpongeChunkLayout.instance.isValidChunk(position)) {
+        return getChunk(position.getX(), position.getY(), position.getZ());
+    }
+
+    // TODO: add int coord overloads in the API
+    public Optional<Chunk> getChunk(int x, int y, int z) {
+        if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return Optional.absent();
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.theChunkProviderServer.chunkExists(position.getX(), position.getZ())) {
-            chunk = worldserver.theChunkProviderServer.provideChunk(position.getX(), position.getZ());
+        if (worldserver.theChunkProviderServer.chunkExists(x, z)) {
+            chunk = worldserver.theChunkProviderServer.provideChunk(x, z);
         }
         return Optional.fromNullable((Chunk) chunk);
     }
 
     @Override
     public Optional<Chunk> loadChunk(Vector3i position, boolean shouldGenerate) {
-        if (!SpongeChunkLayout.instance.isValidChunk(position)) {
+        return loadChunk(position.getX(), position.getY(), position.getZ(), shouldGenerate);
+    }
+
+    // TODO: add int coord overloads in the API
+    public Optional<Chunk> loadChunk(int x, int y, int z, boolean shouldGenerate) {
+        if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return Optional.absent();
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.theChunkProviderServer.chunkExists(position.getX(), position.getZ()) || shouldGenerate) {
-            chunk = worldserver.theChunkProviderServer.loadChunk(position.getX(), position.getZ());
+        if (worldserver.theChunkProviderServer.chunkExists(x, z) || shouldGenerate) {
+            chunk = worldserver.theChunkProviderServer.loadChunk(x, z);
         }
         return Optional.fromNullable((Chunk) chunk);
     }
 
     @Override
-    public BlockState getBlock(Vector3i position) {
-        return getBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public BlockState getBlock(int x, int y, int z) {
-        return (BlockState) ((net.minecraft.world.World) (Object) this).getBlockState(new BlockPos(x, y, z));
+        return (BlockState) getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
-    public BlockType getBlockType(Vector3i position) {
-        return getBlock(position).getType();
-    }
-
-    @Override
-    public void setBlockType(Vector3i position, BlockType type) {
-        setBlockType(position.getX(), position.getY(), position.getZ(), type);
+    public BlockType getBlockType(int x, int y, int z) {
+        return getBlock(x, y, z).getType();
     }
 
     @Override
@@ -223,18 +229,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), position, block);
-    }
-
-    @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), x, y, z, block);
-    }
-
-    @Override
-    public Location getFullBlock(Vector3i position) {
-        return new Location(this, position.toDouble());
     }
 
     @Override
@@ -243,40 +239,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public BiomeType getBiome(Vector2i position) {
-        return getBiome(position.getX(), position.getY());
-    }
-
-    @Override
     public BiomeType getBiome(int x, int z) {
         return (BiomeType) this.getBiomeGenForCoords(new BlockPos(x, 0, z));
     }
 
     @Override
-    public void setBiome(Vector2i position, BiomeType biome) {
-        setBiome(position.getX(), position.getY(), biome);
-    }
-
-    @Override
     public void setBiome(int x, int z, BiomeType biome) {
-        int cx = x >> 4;
-        int cz = z >> 4;
-        IChunkProvider chunkProvider = this.getChunkProvider();
-        if (!chunkProvider.chunkExists(cx, cz)) {
-            return;
+        final Optional<Chunk> chunk = getChunk(x >> 4, 0, z >> 4);
+        if (chunk.isPresent()) {
+            chunk.get().setBiome(x, z, biome);
         }
-        net.minecraft.world.chunk.Chunk chunk = chunkProvider.provideChunk(cx, cz);
-        byte[] biomeArray = chunk.getBiomeArray();
-        // Taken from Chunk#getBiome
-        int i = x & 15;
-        int j = z & 15;
-        biomeArray[j << 4 | i] = (byte) (((BiomeGenBase) biome).biomeID & 255);
-        chunk.setBiomeArray(biomeArray);
-    }
-
-    @Override
-    public boolean isBlockPowered(Vector3i position) {
-        return isBlockPowered(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
@@ -398,8 +370,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         return 0;
     }
-
-    long weatherStartTime;
 
     @Override
     public long getRunningDuration() {
@@ -582,11 +552,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Optional<TileEntity> getTileEntity(Vector3i position) {
-        return getTileEntity(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public Optional<TileEntity> getTileEntity(int x, int y, int z) {
         net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
         if (tileEntity == null) {
@@ -594,11 +559,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } else {
             return Optional.of((TileEntity) tileEntity);
         }
-    }
-
-    @Override
-    public Optional<TileEntity> getTileEntity(Location blockLoc) {
-        return getTileEntity(blockLoc.getBlockX(), blockLoc.getBlockY(), blockLoc.getBlockZ());
     }
 
     @Override

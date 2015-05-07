@@ -30,14 +30,17 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -45,6 +48,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.gen.BiomeBuffer;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -81,6 +85,18 @@ public abstract class MixinChunk implements Chunk {
     @Shadow public int zPosition;
     @Shadow private boolean isChunkLoaded;
     @Shadow private boolean isTerrainPopulated;
+
+    @Shadow
+    public abstract IBlockState getBlockState(BlockPos pos);
+
+    @Shadow
+    public abstract BiomeGenBase getBiome(BlockPos pos, WorldChunkManager chunkManager);
+
+    @Shadow
+    public abstract byte[] getBiomeArray();
+
+    @Shadow
+    public abstract void setBiomeArray(byte[] biomeArray);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -157,11 +173,6 @@ public abstract class MixinChunk implements Chunk {
     }
 
     @Override
-    public Location getFullBlock(Vector3i position) {
-        return getFullBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public Location getFullBlock(int x, int y, int z) {
         Preconditions.checkArgument(SpongeChunkLayout.instance.isInChunk(x, y, z, this.xPosition, 0, this.zPosition),
                 "Coordinates are not in the chunk: " + x + ", " + y + ", " + z);
@@ -212,6 +223,32 @@ public abstract class MixinChunk implements Chunk {
     public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
         final BlockPos blockPos = new BlockPos(x, y, z);
         return ((IMixinBlock) getBlock(x, y, z)).getManipulators(this.worldObj, blockPos);
+    }
+
+    // TODO: for the four following, how do we handle out-of-bounds?
+    @Override
+    public BiomeType getBiome(int x, int z) {
+        return (BiomeType) getBiome(new BlockPos(x, 0, z), worldObj.getWorldChunkManager());
+    }
+
+    @Override
+    public void setBiome(int x, int z, BiomeType biome) {
+        // Taken from Chunk#getBiome
+        byte[] biomeArray = getBiomeArray();
+        int i = x & 15;
+        int j = z & 15;
+        biomeArray[j << 4 | i] = (byte) (((BiomeGenBase) biome).biomeID & 255);
+        setBiomeArray(biomeArray);
+    }
+
+    @Override
+    public BlockState getBlock(int x, int y, int z) {
+        return (BlockState) getBlockState(new BlockPos(x, y, z));
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, BlockState block) {
+        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block);
     }
 
     @Override

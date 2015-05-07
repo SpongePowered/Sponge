@@ -37,6 +37,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.common.Sponge;
@@ -294,18 +295,28 @@ public class SpongeHooks {
         }
     }
 
-    public static void setBlockState(World world, Vector3i position, BlockState state) {
-        setBlockState(world, position.getX(), position.getY(), position.getZ(), state);
-    }
-
     public static void setBlockState(World world, int x, int y, int z, BlockState state) {
         setBlockState(world, new BlockPos(x, y, z), state);
     }
 
     public static void setBlockState(World world, BlockPos position, BlockState state) {
         if (state instanceof IBlockState) {
-            // 0 is no notify flag. For now not going to notify nearby blocks of update. -- Why?
+            // Notify neighbours or not?
             world.setBlockState(position, (IBlockState) state);
+        } else {
+            // TODO: Need to figure out what is sensible for other BlockState implementing classes.
+            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
+        }
+    }
+
+    public static void setBlockState(Chunk chunk, int x, int y, int z, BlockState state) {
+        setBlockState(chunk, new BlockPos(x, y, z), state);
+    }
+
+    public static void setBlockState(Chunk chunk, BlockPos position, BlockState state) {
+        if (state instanceof IBlockState) {
+            // Notify neighbours or not?
+            chunk.setBlockState(position, (IBlockState) state);
         } else {
             // TODO: Need to figure out what is sensible for other BlockState implementing classes.
             throw new UnsupportedOperationException("Custom BlockState implementations are not supported");

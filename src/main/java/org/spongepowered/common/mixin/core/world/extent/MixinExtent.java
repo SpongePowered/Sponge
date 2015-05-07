@@ -24,16 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.world.extent;
 
+import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.tile.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.SpongeBlockUtil;
@@ -110,4 +116,53 @@ public abstract class MixinExtent implements Extent {
         setRawData(position.getX(), position.getY(), position.getZ(), container);
     }
 
+    @Override
+    public BiomeType getBiome(Vector2i position) {
+        return getBiome(position.getX(), position.getY());
+    }
+
+    @Override
+    public void setBiome(Vector2i position, BiomeType biome) {
+        setBiome(position.getX(), position.getY(), biome);
+    }
+
+    @Override
+    public BlockState getBlock(Vector3i position) {
+        return getBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public void setBlock(Vector3i position, BlockState block) {
+        setBlock(position.getX(), position.getY(), position.getZ(), block);
+    }
+
+    @Override
+    public BlockType getBlockType(Vector3i position) {
+        return getBlockType(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public void setBlockType(Vector3i position, BlockType type) {
+        setBlockType(position.getX(), position.getY(), position.getZ(), type);
+    }
+
+    @Override
+    public Location getFullBlock(Vector3i position) {
+        return getFullBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public boolean isBlockPowered(Vector3i position) {
+        return isBlockPowered(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public Optional<TileEntity> getTileEntity(Vector3i position) {
+        return getTileEntity(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public Optional<TileEntity> getTileEntity(Location blockLoc) {
+        return getTileEntity(blockLoc.getBlockX(), blockLoc.getBlockY(), blockLoc.getBlockZ());
+    }
 }
