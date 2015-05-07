@@ -29,12 +29,29 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.configuration.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.ProviderExistsException;
+import org.spongepowered.api.service.command.CommandService;
+import org.spongepowered.api.service.command.SimpleCommandService;
+import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.service.rcon.RconService;
+import org.spongepowered.api.service.scheduler.AsynchronousScheduler;
+import org.spongepowered.api.service.scheduler.SynchronousScheduler;
+import org.spongepowered.api.service.sql.SqlService;
+import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
+import org.spongepowered.common.service.rcon.MinecraftRconService;
+import org.spongepowered.common.service.scheduler.AsyncScheduler;
+import org.spongepowered.common.service.scheduler.SyncScheduler;
+import org.spongepowered.common.service.sql.SqlServiceImpl;
 
 import java.io.File;
 
@@ -74,6 +91,46 @@ public class Sponge {
 
         this.plugin = checkNotNull(plugin, "plugin");
         this.minecraftPlugin = checkNotNull(minecraftPlugin, "minecraftPlugin");
+    }
+
+    public void registerServices() {
+        try {
+            SimpleCommandService commandService = new SimpleCommandService(this.game, new SpongeCommandDisambiguator(this.game));
+            this.game.getServiceManager().setProvider(this.plugin, CommandService.class, commandService);
+        } catch (ProviderExistsException e) {
+            this.logger.warn("Non-Sponge CommandService already registered: " + e.getLocalizedMessage());
+        }
+
+        try {
+            this.game.getServiceManager().setProvider(this.plugin, SqlService.class, new SqlServiceImpl());
+        } catch (ProviderExistsException e) {
+            this.logger.warn("Non-Sponge SqlService already registered: " + e.getLocalizedMessage());
+        }
+
+        try {
+            this.game.getServiceManager().setProvider(this.plugin, SynchronousScheduler.class, SyncScheduler.getInstance());
+            this.game.getServiceManager().setProvider(this.plugin, AsynchronousScheduler.class, AsyncScheduler.getInstance());
+        } catch (ProviderExistsException e) {
+            this.logger.error("Non-Sponge scheduler has been registered. Cannot continue!");
+            throw new ExceptionInInitializerError(e);
+        }
+
+        try {
+            SerializationService serializationService = new SpongeSerializationService();
+            this.game.getServiceManager().setProvider(this.plugin, SerializationService.class, serializationService);
+        } catch (ProviderExistsException e2) {
+            this.logger.warn("Non-Sponge SerializationService already registered: " + e2.getLocalizedMessage());
+        }
+
+        if (this.game.getPlatform() == Platform.SERVER) {
+            try {
+                this.game.getServiceManager().setProvider(this.plugin, RconService.class, new MinecraftRconService((DedicatedServer)
+                        MinecraftServer.getServer()));
+            } catch (ProviderExistsException e) {
+                this.logger.warn("Non-Sponge Rcon service already registered: " + e.getLocalizedMessage());
+            }
+        }
+
     }
 
     public static Injector getInjector() {

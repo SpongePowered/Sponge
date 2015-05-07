@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -53,7 +54,7 @@ import javax.annotation.Nullable;
  * Mixin to provide a common implementation of subject that refers to the installed permissions service for a subject.
  */
 @NonnullByDefault
-@Mixin({EntityPlayerMP.class, CommandBlockLogic.class, MinecraftServer.class})
+@Mixin({EntityPlayerMP.class, CommandBlockLogic.class, MinecraftServer.class, RConConsoleSource.class})
 public abstract class MixinSubject implements CommandSource, ICommandSender {
 
     @Nullable
