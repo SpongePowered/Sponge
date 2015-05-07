@@ -35,7 +35,7 @@ import org.spongepowered.api.util.gen.MutableBlockBuffer;
 import java.util.Arrays;
 
 /**
- * Makes a {@link ChunkPrimer} useable as a {@link MutableBlockBuffer}.
+ * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockBuffer}.
  *
  */
 public final class ChunkPrimerBuffer extends AbstractChunkBuffer {

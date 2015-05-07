@@ -31,15 +31,14 @@ import org.spongepowered.api.util.gen.BiomeBuffer;
 /**
  * Base class for biome areas. This class provides methods for retrieving the
  * size and for range checking.
- *
  */
-abstract class AbstractBiomeArea implements BiomeBuffer {
+public abstract class AbstractBiomeArea implements BiomeBuffer {
 
     protected Vector2i start;
     protected Vector2i size;
     protected Vector2i end;
 
-    AbstractBiomeArea(Vector2i start, Vector2i size) {
+    protected AbstractBiomeArea(Vector2i start, Vector2i size) {
         this.start = Preconditions.checkNotNull(start, "start");
         this.size = Preconditions.checkNotNull(size, "size");
 
@@ -75,5 +74,4 @@ abstract class AbstractBiomeArea implements BiomeBuffer {
     public String toString() {
         return this.getClass().getSimpleName() + "(min = " + this.getBiomeMin() + ", max = " + this.getBiomeMax() + ")";
     }
-
 }

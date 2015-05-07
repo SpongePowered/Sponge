@@ -36,17 +36,16 @@ import java.util.Arrays;
 
 /**
  * Mutable biome area backed by a byte array. Reusable.
- *
- * <p>Using {@link #detach()} the underlying byte array can be accessed. Both
- * the sizeX and sizeZ will be set to 0 by that method, preventing further
- * access to the byte array. The byte array can then be reused by calling
- * {@link #reuse(Vector2i)}.</p>
+ * <p/>
+ * <p>Using {@link #detach()} the underlying byte array can be accessed.
+ * Both the sizeX and sizeZ will be set to 0 by that method, preventing
+ * further access to the byte array. The byte array can then
+ * be reused by calling {@link #reuse(Vector2i)}.</p>
  */
 public final class ByteArrayMutableBiomeArea extends AbstractBiomeArea implements MutableBiomeArea {
 
     private boolean detached;
     private final byte[] biomes;
-
     private final BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
 
     private void checkOpen() {
@@ -65,8 +64,8 @@ public final class ByteArrayMutableBiomeArea extends AbstractBiomeArea implement
 
     @Override
     public void setBiome(int x, int z, BiomeType biome) {
-        checkRange(x, z);
         checkOpen();
+        checkRange(x, z);
 
         this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4] = (byte) ((BiomeGenBase) biome).biomeID;
     }
@@ -96,8 +95,9 @@ public final class ByteArrayMutableBiomeArea extends AbstractBiomeArea implement
     }
 
     /**
-     * Gets whether this biome area is currently detached. When detached,
-     * this object is available for reuse using {@link #reuse(Vector2i)}.
+     * Gets whether this biome area is currently detached. When detached, this
+     * object is available for reuse using {@link #reuse(Vector2i)}.
+     *
      * @return Whether this biome area is detached
      */
     public boolean isDetached() {
@@ -133,5 +133,4 @@ public final class ByteArrayMutableBiomeArea extends AbstractBiomeArea implement
         BiomeType biomeType = (BiomeType) this.biomeById[biomeId & 0xff];
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
-
 }

@@ -25,16 +25,17 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.gen.MutableBlockBuffer;
+import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 /**
  * Base class for block buffers that are exactly one chunk in size.
  *
  */
-abstract class AbstractChunkBuffer implements MutableBlockBuffer {
-
-    private static final Vector3i CHUNK_SIZE = new Vector3i(16, 256, 16);
+public abstract class AbstractChunkBuffer implements MutableBlockBuffer {
 
     private final int chunkX;
     private final int chunkZ;
@@ -42,12 +43,14 @@ abstract class AbstractChunkBuffer implements MutableBlockBuffer {
     private final Vector3i maxBlock;
     private final Vector3i minBlock;
 
-    public AbstractChunkBuffer(int chunkX, int chunkZ) {
+    protected AbstractChunkBuffer(int chunkX, int chunkZ) {
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
 
-        this.minBlock = new Vector3i(chunkX * CHUNK_SIZE.getX(), 0, chunkZ * CHUNK_SIZE.getZ());
-        this.maxBlock = this.minBlock.add(CHUNK_SIZE).sub(Vector3i.ONE);
+        final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
+        Preconditions.checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
+        this.minBlock = worldCoords.get();
+        this.maxBlock = this.minBlock.add(SpongeChunkLayout.CHUNK_SIZE).sub(Vector3i.ONE);
     }
 
     protected void checkRange(int x, int y, int z) {
@@ -70,7 +73,7 @@ abstract class AbstractChunkBuffer implements MutableBlockBuffer {
 
     @Override
     public Vector3i getBlockSize() {
-        return CHUNK_SIZE;
+        return SpongeChunkLayout.CHUNK_SIZE;
     }
 
     @Override
