@@ -57,6 +57,7 @@ import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.gen.FastChunkBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeArea;
+import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Collection;
 import java.util.List;
@@ -65,7 +66,12 @@ import java.util.List;
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class MixinChunk implements Chunk {
 
+    private static final Vector2i BIOME_SIZE = SpongeChunkLayout.CHUNK_SIZE.toVector2(true);
     private Vector3i chunkPos;
+    private Vector3i blockMin;
+    private Vector3i blockMax;
+    private Vector2i biomeMin;
+    private Vector2i biomeMax;
     private ChunkCoordIntPair chunkCoordIntPair;
 
     @Shadow private net.minecraft.world.World worldObj;
@@ -77,6 +83,10 @@ public abstract class MixinChunk implements Chunk {
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
         this.chunkPos = new Vector3i(x, 0, z);
+        this.blockMin = SpongeChunkLayout.instance.toWorld(this.chunkPos).get();
+        this.blockMax = this.blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
+        this.biomeMin = this.blockMin.toVector2(true);
+        this.biomeMax = this.blockMax.toVector2(true);
         this.chunkCoordIntPair = new ChunkCoordIntPair(x, z);
     }
 
@@ -211,4 +221,34 @@ public abstract class MixinChunk implements Chunk {
     	return false;
     }
     
+
+    @Override
+    public Vector2i getBiomeMin() {
+        return this.biomeMin;
+    }
+
+    @Override
+    public Vector2i getBiomeMax() {
+        return this.biomeMax;
+    }
+
+    @Override
+    public Vector2i getBiomeSize() {
+        return BIOME_SIZE;
+    }
+
+    @Override
+    public Vector3i getBlockMin() {
+        return this.blockMin;
+    }
+
+    @Override
+    public Vector3i getBlockMax() {
+        return this.blockMax;
+    }
+
+    @Override
+    public Vector3i getBlockSize() {
+        return SpongeChunkLayout.CHUNK_SIZE;
+    }
 }

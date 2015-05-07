@@ -32,7 +32,7 @@ import org.spongepowered.api.world.storage.ChunkLayout;
 
 public final class SpongeChunkLayout implements ChunkLayout {
 
-    private static final Vector3i CHUNK_SIZE = new Vector3i(16, 256, 16);
+    public static final Vector3i CHUNK_SIZE = new Vector3i(16, 256, 16);
     private static final Vector3i CHUNK_MASK = CHUNK_SIZE.sub(1, 1, 1);
     private static final Vector3i SPACE_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1).div(CHUNK_SIZE);
     private static final Vector3i SPACE_MIN = new Vector3i(-30000000, 0, -30000000).div(CHUNK_SIZE);

@@ -106,6 +106,12 @@ import java.util.UUID;
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld implements World, IMixinWorld {
 
+    private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
+    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
+    private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(1, 1, 1);
+    private static final Vector2i BIOME_MIN = BLOCK_MIN.toVector2(true);
+    private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
+    private static final Vector2i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(1, 1);
     private boolean keepSpawnLoaded;
     public SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
     private volatile Context worldContext;
@@ -629,4 +635,33 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return ((IMixinBlock) getBlock(x, y, z).getType()).getManipulators((net.minecraft.world.World) ((Object) this), blockPos);
     }
 
+    @Override
+    public Vector2i getBiomeMin() {
+        return BIOME_MIN;
+    }
+
+    @Override
+    public Vector2i getBiomeMax() {
+        return BIOME_MAX;
+    }
+
+    @Override
+    public Vector2i getBiomeSize() {
+        return BIOME_SIZE;
+    }
+
+    @Override
+    public Vector3i getBlockMin() {
+        return BLOCK_MIN;
+    }
+
+    @Override
+    public Vector3i getBlockMax() {
+        return BLOCK_MAX;
+    }
+
+    @Override
+    public Vector3i getBlockSize() {
+        return BLOCK_SIZE;
+    }
 }
