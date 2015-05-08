@@ -29,7 +29,7 @@ import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -41,6 +41,7 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -88,6 +89,9 @@ public abstract class MixinChunk implements Chunk {
 
     @Shadow
     public abstract IBlockState getBlockState(BlockPos pos);
+
+    @Shadow(prefix = "shadow$")
+    public abstract Block shadow$getBlock(int x, int y, int z);
 
     @Shadow
     public abstract BiomeGenBase getBiome(BlockPos pos, WorldChunkManager chunkManager);
@@ -173,13 +177,6 @@ public abstract class MixinChunk implements Chunk {
     }
 
     @Override
-    public Location getFullBlock(int x, int y, int z) {
-        Preconditions.checkArgument(SpongeChunkLayout.instance.isInChunk(x, y, z, this.xPosition, 0, this.zPosition),
-                "Coordinates are not in the chunk: " + x + ", " + y + ", " + z);
-        return getWorld().getFullBlock(x, y, z);
-    }
-
-    @Override
     public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
         Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
         if (blockUtilOptional.isPresent()) {
@@ -225,10 +222,10 @@ public abstract class MixinChunk implements Chunk {
         return ((IMixinBlock) getBlock(x, y, z)).getManipulators(this.worldObj, blockPos);
     }
 
-    // TODO: for the four following, how do we handle out-of-bounds?
+    // TODO: for the six following, how do we handle out-of-bounds?
     @Override
     public BiomeType getBiome(int x, int z) {
-        return (BiomeType) getBiome(new BlockPos(x, 0, z), worldObj.getWorldChunkManager());
+        return (BiomeType) getBiome(new BlockPos(x, 0, z), this.worldObj.getWorldChunkManager());
     }
 
     @Override
@@ -249,6 +246,16 @@ public abstract class MixinChunk implements Chunk {
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block);
+    }
+
+    @Override
+    public BlockType getBlockType(int x, int y, int z) {
+        return (BlockType) shadow$getBlock(x, y, z);
+    }
+
+    @Override
+    public void setBlockType(int x, int y, int z, BlockType type) {
+        setBlock(x, y, z, type.getDefaultState());
     }
 
     @Override

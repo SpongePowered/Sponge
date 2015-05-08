@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.extent;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import net.minecraft.world.World;
@@ -149,6 +150,11 @@ public abstract class MixinExtent implements Extent {
     @Override
     public Location getFullBlock(Vector3i position) {
         return getFullBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public Location getFullBlock(int x, int y, int z) {
+        return new Location(this, new Vector3d(x, y, z));
     }
 
     @Override

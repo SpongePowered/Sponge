@@ -141,9 +141,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
 
     @Shadow
-    public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
-
-    @Shadow
     public abstract IChunkProvider getChunkProvider();
 
     @Shadow
@@ -157,6 +154,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow
     public abstract IBlockState getBlockState(BlockPos pos);
+
+    @Shadow
+    public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
@@ -213,6 +213,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.fromNullable((Chunk) chunk);
     }
 
+    // TODO: for the six following, how do we handle out-of-bounds?
     @Override
     public BlockState getBlock(int x, int y, int z) {
         return (BlockState) getBlockState(new BlockPos(x, y, z));
@@ -220,7 +221,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
-        return getBlock(x, y, z).getType();
+        // avoid intermediate object creation from using BlockState
+        return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlock(x, y, z);
     }
 
     @Override
@@ -231,11 +233,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), x, y, z, block);
-    }
-
-    @Override
-    public Location getFullBlock(int x, int y, int z) {
-        return new Location(this, new Vector3d(x, y, z));
     }
 
     @Override
