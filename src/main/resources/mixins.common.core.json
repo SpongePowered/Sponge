@@ -128,6 +128,8 @@
         "item.inventory.MixinContainer",
         "item.inventory.MixinItemStack",
         "item.merchant.MixinMerchantRecipe",
+        "network.rcon.MixinRConConsoleSource",
+        "network.rcon.MixinRConThreadClient",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "server.MixinMinecraftServer",

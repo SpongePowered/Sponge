@@ -168,6 +168,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         }
         return this.command.addTabCompletionOptions((ICommandSender) source, splitArgs(arguments), null);
     }
+
     @SuppressWarnings("unchecked")
     public List<String> getNames() {
         return ImmutableList.<String>builder().add(this.command.getCommandName()).addAll(this.command.getCommandAliases()).build();
