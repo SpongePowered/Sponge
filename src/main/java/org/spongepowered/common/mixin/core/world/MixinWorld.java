@@ -182,7 +182,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return getChunk(position.getX(), position.getY(), position.getZ());
     }
 
-    // TODO: add int coord overloads in the API
+    @Override
     public Optional<Chunk> getChunk(int x, int y, int z) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return Optional.absent();
@@ -200,7 +200,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return loadChunk(position.getX(), position.getY(), position.getZ(), shouldGenerate);
     }
 
-    // TODO: add int coord overloads in the API
+    @Override
     public Optional<Chunk> loadChunk(int x, int y, int z, boolean shouldGenerate) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return Optional.absent();
