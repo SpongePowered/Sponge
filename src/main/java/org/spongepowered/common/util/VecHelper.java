@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util;
 
+import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.BlockPos;
@@ -90,5 +91,13 @@ public final class VecHelper {
     // === Flow Vector --> Rotations ===
     public static Rotations toRotation(Vector3d vector) {
         return new Rotations((float) vector.getX(), (float) vector.getY(), (float) vector.getZ());
+    }
+
+    public static boolean inBounds(int x, int y, Vector2i min, Vector2i max) {
+        return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY();
+    }
+
+    public static boolean inBounds(int x, int y, int z, Vector3i min, Vector3i max) {
+        return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 }

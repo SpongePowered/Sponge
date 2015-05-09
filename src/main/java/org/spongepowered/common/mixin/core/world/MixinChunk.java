@@ -45,6 +45,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.gen.BiomeBuffer;
 import org.spongepowered.api.world.Chunk;
@@ -62,6 +63,7 @@ import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.FastChunkBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeArea;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -222,14 +224,15 @@ public abstract class MixinChunk implements Chunk {
         return ((IMixinBlock) getBlock(x, y, z)).getManipulators(this.worldObj, blockPos);
     }
 
-    // TODO: for the six following, how do we handle out-of-bounds?
     @Override
     public BiomeType getBiome(int x, int z) {
+        checkBiomeBounds(x, z);
         return (BiomeType) getBiome(new BlockPos(x, 0, z), this.worldObj.getWorldChunkManager());
     }
 
     @Override
     public void setBiome(int x, int z, BiomeType biome) {
+        checkBiomeBounds(x, z);
         // Taken from Chunk#getBiome
         byte[] biomeArray = getBiomeArray();
         int i = x & 15;
@@ -240,21 +243,25 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
         return (BlockState) getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
+        checkBlockBounds(x, y, z);
         SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block);
     }
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
         return (BlockType) shadow$getBlock(x, y, z);
     }
 
     @Override
     public void setBlockType(int x, int y, int z, BlockType type) {
+        checkBlockBounds(x, y, z);
         setBlock(x, y, z, type.getDefaultState());
     }
 
@@ -292,5 +299,27 @@ public abstract class MixinChunk implements Chunk {
     @Override
     public Vector3i getBlockSize() {
         return SpongeChunkLayout.CHUNK_SIZE;
+    }
+
+    @Override
+    public boolean containsBiome(int x, int z) {
+        return VecHelper.inBounds(x, z, this.biomeMin, this.biomeMax);
+    }
+
+    @Override
+    public boolean containsBlock(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, this.blockMin, this.blockMax);
+    }
+
+    private void checkBiomeBounds(int x, int z) {
+        if (!containsBiome(x, z)) {
+            throw new PositionOutOfBoundsException(new Vector2i(x, z), this.biomeMin, this.biomeMax);
+        }
+    }
+
+    private void checkBlockBounds(int x, int y, int z) {
+        if (!containsBlock(x, y, z)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.blockMin, this.blockMax);
+        }
     }
 }

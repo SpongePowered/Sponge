@@ -62,6 +62,7 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.service.permission.context.Context;
+import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
@@ -92,6 +93,7 @@ import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -213,39 +215,41 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.fromNullable((Chunk) chunk);
     }
 
-    // TODO: for the six following, how do we handle out-of-bounds?
     @Override
     public BlockState getBlock(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
         return (BlockState) getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
         // avoid intermediate object creation from using BlockState
         return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlock(x, y, z);
     }
 
     @Override
     public void setBlockType(int x, int y, int z, BlockType type) {
+        checkBlockBounds(x, y, z);
         setBlock(x, y, z, type.getDefaultState());
     }
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
+        checkBlockBounds(x, y, z);
         SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), x, y, z, block);
     }
 
     @Override
     public BiomeType getBiome(int x, int z) {
+        checkBiomeBounds(x, z);
         return (BiomeType) this.getBiomeGenForCoords(new BlockPos(x, 0, z));
     }
 
     @Override
     public void setBiome(int x, int z, BiomeType biome) {
-        final Optional<Chunk> chunk = getChunk(x >> 4, 0, z >> 4);
-        if (chunk.isPresent()) {
-            chunk.get().setBiome(x, z, biome);
-        }
+        checkBiomeBounds(x, z);
+        ((Chunk) getChunkFromChunkCoords(x >> 4, z >> 4)).setBiome(x, z, biome);
     }
 
     @Override
@@ -636,5 +640,27 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Vector3i getBlockSize() {
         return BLOCK_SIZE;
+    }
+
+    @Override
+    public boolean containsBiome(int x, int z) {
+        return VecHelper.inBounds(x, z, BIOME_MIN, BIOME_MAX);
+    }
+
+    @Override
+    public boolean containsBlock(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, BLOCK_MIN, BLOCK_MAX);
+    }
+
+    private void checkBiomeBounds(int x, int z) {
+        if (!containsBiome(x, z)) {
+            throw new PositionOutOfBoundsException(new Vector2i(x, z), BIOME_MIN, BIOME_MAX);
+        }
+    }
+
+    private void checkBlockBounds(int x, int y, int z) {
+        if (!containsBlock(x, y, z)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
+        }
     }
 }

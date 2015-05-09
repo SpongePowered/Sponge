@@ -29,6 +29,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.gen.MutableBlockBuffer;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 /**
@@ -74,6 +75,16 @@ public abstract class AbstractChunkBuffer implements MutableBlockBuffer {
     @Override
     public Vector3i getBlockSize() {
         return SpongeChunkLayout.CHUNK_SIZE;
+    }
+
+    @Override
+    public boolean containsBlock(Vector3i position) {
+        return containsBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public boolean containsBlock(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, this.minBlock, this.maxBlock);
     }
 
     @Override

@@ -27,6 +27,7 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.util.gen.BiomeBuffer;
+import org.spongepowered.common.util.VecHelper;
 
 /**
  * Base class for biome areas. This class provides methods for retrieving the
@@ -68,6 +69,14 @@ public abstract class AbstractBiomeArea implements BiomeBuffer {
     @Override
     public Vector2i getBiomeSize() {
         return this.size;
+    }
+
+    public boolean containsBiome(Vector2i position) {
+        return containsBiome(position.getX(), position.getY());
+    }
+
+    public boolean containsBiome(int x, int z) {
+        return VecHelper.inBounds(x, z, this.start, this.end);
     }
 
     @Override

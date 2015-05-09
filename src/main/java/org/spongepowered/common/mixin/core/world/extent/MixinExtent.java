@@ -171,4 +171,14 @@ public abstract class MixinExtent implements Extent {
     public Optional<TileEntity> getTileEntity(Location blockLoc) {
         return getTileEntity(blockLoc.getBlockX(), blockLoc.getBlockY(), blockLoc.getBlockZ());
     }
+
+    @Override
+    public boolean containsBiome(Vector2i position) {
+        return containsBiome(position.getX(), position.getY());
+    }
+
+    @Override
+    public boolean containsBlock(Vector3i position) {
+        return containsBlock(position.getX(), position.getY(), position.getZ());
+    }
 }
