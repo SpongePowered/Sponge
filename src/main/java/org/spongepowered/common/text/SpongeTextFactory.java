@@ -24,28 +24,18 @@
  */
 package org.spongepowered.common.text;
 
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 import static org.spongepowered.common.text.SpongeTexts.getDefaultLocale;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.TextFactory;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
-import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @NonnullByDefault
 public class SpongeTextFactory implements TextFactory {
@@ -89,105 +79,19 @@ public class SpongeTextFactory implements TextFactory {
         return COLOR_CHAR;
     }
 
-    private static final ImmutableMap<Character, EnumChatFormatting> CHAR_TO_FORMATTING;
-
-    static {
-        ImmutableMap.Builder<Character, EnumChatFormatting> builder = ImmutableMap.builder();
-
-        for (EnumChatFormatting formatting : EnumChatFormatting.values()) {
-            builder.put(formatting.formattingCode, formatting);
-        }
-
-        CHAR_TO_FORMATTING = builder.build();
-    }
-
-    private static void applyStyle(TextBuilder builder, char code) {
-        EnumChatFormatting formatting = CHAR_TO_FORMATTING.get(code);
-        if (formatting != null) {
-            switch (formatting) {
-                case BOLD:
-                    builder.style(TextStyles.BOLD);
-                    break;
-                case ITALIC:
-                    builder.style(TextStyles.ITALIC);
-                    break;
-                case UNDERLINE:
-                    builder.style(TextStyles.UNDERLINE);
-                    break;
-                case STRIKETHROUGH:
-                    builder.style(TextStyles.STRIKETHROUGH);
-                    break;
-                case OBFUSCATED:
-                    builder.style(TextStyles.OBFUSCATED);
-                    break;
-                case RESET:
-                    builder.color(TextColors.NONE);
-                    builder.style(TextStyles.RESET);
-                    break;
-                default:
-                    builder.color(SpongeTextColor.of(formatting));
-            }
-        }
-    }
-
-    private static Text.Literal parseLegacyMessage(String text, int pos, Matcher matcher, TextBuilder.Literal parent) {
-        String content = text.substring(pos, matcher.start());
-        parent.content(content);
-
-        TextBuilder.Literal builder = Texts.builder("");
-        applyStyle(builder, matcher.group(1).charAt(0));
-
-        int end = matcher.end();
-        while (true) {
-            if (!matcher.find()) {
-                builder.content(text.substring(end));
-                return builder.build();
-            } else if (end == matcher.start()) {
-                applyStyle(builder, matcher.group(1).charAt(0));
-                end = matcher.end();
-            } else {
-                break;
-            }
-        }
-
-        builder.append(parseLegacyMessage(text, end, matcher, builder));
-        return builder.build();
-    }
-
     @Override
     public Text.Literal parseLegacyMessage(String text, char code) {
-        if (text.length() <= 1) {
-            return Texts.of(text);
-        }
-
-        Matcher matcher = (code == COLOR_CHAR ? FORMATTING_PATTERN :
-                Pattern.compile(code + "([0-9A-FK-OR])", CASE_INSENSITIVE)).matcher(text);
-        if (!matcher.find()) {
-            return Texts.of(text);
-        }
-
-        TextBuilder.Literal builder = Texts.builder("");
-        return builder.append(parseLegacyMessage(text, 0, matcher, builder)).build();
+        return LegacyTexts.parse(text, code);
     }
-
-    private static final Pattern FORMATTING_PATTERN = Pattern.compile(COLOR_CHAR + "([0-9A-FK-OR])", CASE_INSENSITIVE);
 
     @Override
     public String stripLegacyCodes(String text, char code) {
-        if (code == COLOR_CHAR) {
-            return FORMATTING_PATTERN.matcher(text).replaceAll("");
-        }
-
-        return text.replaceAll("(?i)" + code + "[0-9A-FK-OR]", "");
+        return LegacyTexts.strip(text, code);
     }
 
     @Override
     public String replaceLegacyCodes(String text, char from, char to) {
-        if (from == COLOR_CHAR) {
-            return FORMATTING_PATTERN.matcher(text).replaceAll(to + "$1");
-        }
-
-        return text.replaceAll("(?i)" + from + "([0-9A-FK-OR])", to + "$1");
+        return LegacyTexts.replace(text, from, to);
     }
 
     @Override
