@@ -33,6 +33,7 @@ import org.spongepowered.api.block.tile.Banner;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulators.tileentities.BannerData;
+import org.spongepowered.api.data.types.DyeColor;
 import org.spongepowered.api.data.types.DyeColors;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
@@ -52,23 +53,31 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<Banner> build(DataView container) throws InvalidDataException {
-        Optional<Banner> bannerOptional = super.build(container);
+        final Optional<Banner> bannerOptional = super.build(container);
         if (!bannerOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
         }
-        final Banner banner = bannerOptional.get();
+
         if (!container.contains(BASE) || !container.contains(PATTERNS)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
         final SerializationService service = this.game.getServiceManager().provide(SerializationService.class).get();
 
-        BannerData bannerData = new SpongeBannerData();
+        final BannerData bannerData = new SpongeBannerData();
 
-        bannerData.setBaseColor(DyeColors.WHITE); // TODO handle this from registry and datacontainer
-        List<BannerData.PatternLayer> patternsList = container.getSerializableList(PATTERNS, BannerData.PatternLayer.class, service).get();
+        String dyeColorId = container.getString(BASE).get();
+        Optional<DyeColor> colorOptional = this.game.getRegistry().getType(DyeColor.class, dyeColorId);
+        if (!colorOptional.isPresent()) {
+            throw new InvalidDataException("The provided container has an invalid dye color entry!");
+        }
+        bannerData.setBaseColor(colorOptional.get());
+
+        // Now we have to get the patterns list
+        final List<BannerData.PatternLayer> patternsList = container.getSerializableList(PATTERNS, BannerData.PatternLayer.class, service).get();
         for (BannerData.PatternLayer pattern : patternsList) {
             bannerData.addPatternLayer(pattern);
         }
+        final Banner banner = bannerOptional.get();
         banner.offer(bannerData);
         ((TileEntityBanner) banner).validate();
         return Optional.of(banner);

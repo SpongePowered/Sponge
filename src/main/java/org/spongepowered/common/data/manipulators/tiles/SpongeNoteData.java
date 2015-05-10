@@ -59,4 +59,8 @@ public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData>
         return setValue(note);
     }
 
+    @Override
+    public NoteData copy() {
+        return new SpongeNoteData().setValue(this.value);
+    }
 }

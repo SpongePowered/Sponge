@@ -82,6 +82,11 @@ public class SpongeBeaconData extends SpongeAbstractData<BeaconData> implements 
     }
 
     @Override
+    public BeaconData copy() {
+        return new SpongeBeaconData().setPrimaryEffect(this.primary).setSecondaryEffect(this.secondary);
+    }
+
+    @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer();
     }

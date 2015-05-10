@@ -45,6 +45,11 @@ public class SpongeRepresentedItemData extends AbstractSingleValueData<ItemStack
     }
 
     @Override
+    public RepresentedItemData copy() {
+        return new SpongeRepresentedItemData().setValue(new SpongeItemStackBuilder().fromItemStack(this.value).build());
+    }
+
+    @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer().set(of("Item"), this.getValue());
     }

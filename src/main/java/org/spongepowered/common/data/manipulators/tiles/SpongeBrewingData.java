@@ -52,4 +52,8 @@ public class SpongeBrewingData extends AbstractIntData<BrewingData> implements B
         return setValue(time);
     }
 
+    @Override
+    public BrewingData copy() {
+        return new SpongeBrewingData().setValue(this.value);
+    }
 }

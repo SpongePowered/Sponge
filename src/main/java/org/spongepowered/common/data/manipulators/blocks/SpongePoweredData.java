@@ -43,6 +43,11 @@ public class SpongePoweredData extends SpongeAbstractData<PoweredData> implement
     }
 
     @Override
+    public PoweredData copy() {
+        return new SpongePoweredData();
+    }
+
+    @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer().set(of("Powered"), true);
     }

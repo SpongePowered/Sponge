@@ -85,4 +85,8 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
         return this;
     }
 
+    @Override
+    public SignData copy() {
+        return new SpongeSignData().setLines(this.lines);
+    }
 }

@@ -34,6 +34,7 @@ import net.minecraft.client.renderer.EnumFaceDirection;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -101,5 +102,10 @@ public abstract class MixinBlockLever extends MixinBlock implements IMixinDirect
     @Override
     public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<DataManipulator<?>>of(getAxisData(blockState), getDirectionalData(blockState));
+    }
+
+    @Override
+    public BlockState resetDirectionData(BlockState blockState) {
+        return null;
     }
 }

@@ -84,6 +84,16 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     }
 
     @Override
+    public <M extends DataManipulator<M>> Optional<BlockState> withoutData(Class<M> manipulator) {
+        for (final DataManipulator<?> manipulator1 : this.manipulators) {
+            if (manipulator.isInstance(manipulator1)) {
+                return SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulator).get().removeFrom(this);
+            }
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(of("BlockType"), this.getType().getId())

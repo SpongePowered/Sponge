@@ -29,6 +29,7 @@ import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -84,14 +85,14 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
 
     @Override
     public DataTransactionResult setData(World world, BlockPos blockPos, PoweredData manipulator, DataPriority priority) {
-    	IBlockState blockState = world.getBlockState(blockPos);
-    	world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, true));
-    	return DataTransactionBuilder.successNoData();
+        IBlockState blockState = world.getBlockState(blockPos);
+        world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, true));
+        return DataTransactionBuilder.successNoData();
     }
 
     @Override
     public boolean remove(World world, BlockPos blockPos) {
-    	IBlockState blockState = world.getBlockState(blockPos);
+        IBlockState blockState = world.getBlockState(blockPos);
         return world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, false));
     }
 
@@ -100,6 +101,14 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {
             return ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState) ? Optional.of(create())
                     : Optional.<PoweredData>absent();
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<BlockState> removeFrom(IBlockState blockState) {
+        if (blockState.getBlock() instanceof IMixinPoweredHolder) {
+            return Optional.of(((IMixinPoweredHolder) blockState.getBlock()).setUnpowered(blockState));
         }
         return Optional.absent();
     }

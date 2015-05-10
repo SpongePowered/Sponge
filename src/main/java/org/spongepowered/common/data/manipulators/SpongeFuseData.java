@@ -36,6 +36,11 @@ public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseDat
     }
 
     @Override
+    public FuseData copy() {
+        return new SpongeFuseData().setValue(this.value);
+    }
+
+    @Override
     public int getFuseDuration() {
         return this.getValue();
     }

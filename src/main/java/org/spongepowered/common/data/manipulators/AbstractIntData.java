@@ -33,7 +33,7 @@ public abstract class AbstractIntData<T extends IntData<T>> extends AbstractSing
     private final int minValue;
     private final int maxValue;
 
-    public AbstractIntData(Class<T> manipulatorClass, Integer defaultValue, int minValue, int maxValue) {
+    protected AbstractIntData(Class<T> manipulatorClass, Integer defaultValue, int minValue, int maxValue) {
         super(manipulatorClass, defaultValue);
         this.minValue = minValue;
         this.maxValue = maxValue;

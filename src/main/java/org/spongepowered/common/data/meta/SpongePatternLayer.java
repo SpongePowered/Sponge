@@ -54,7 +54,7 @@ public class SpongePatternLayer implements BannerData.PatternLayer {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("id"), this.id.getId()).set(of("color"), this.color.getName());
+        return new MemoryDataContainer().set(of("BannerShapeId"), this.id.getId()).set(of("DyeColor"), this.color.getName());
     }
 
 }

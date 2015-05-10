@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces.blocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
@@ -38,5 +39,7 @@ public interface IMixinDirectionalHolder extends IMixinBlock {
     DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority);
 
     void reset(World world, BlockPos blockPos);
+
+    BlockState resetDirectionData(BlockState blockState);
 
 }

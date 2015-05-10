@@ -63,8 +63,13 @@ import org.spongepowered.api.world.World;
 
 import java.util.Map;
 
-public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tile.TileEntity> implements
-                                                                                                 DataBuilder<T> {
+/**
+ * This is the base abstract {@link DataBuilder} for all vanilla
+ * {@link TileEntity}(ies).
+ *
+ * @param <T> The type of sponge tile entity
+ */
+public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tile.TileEntity> implements DataBuilder<T> {
 
     private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
     protected final Game game;
@@ -79,6 +84,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         this.game = game;
     }
 
+    // We need these mappings for rebuilding a tile entity at the proper location.
     static {
         // These are our known block types. We need to find a way to support the mod ones
         addBlockMapping(TileEntityDropper.class, BlockTypes.DROPPER);
@@ -122,19 +128,23 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         if (!worldOptional.isPresent()) {
             throw new InvalidDataException("The provided container references a world that does not exist!");
         }
-        int x = container.getInt(X_POS).get();
-        int y = container.getInt(Y_POS).get();
-        int z = container.getInt(Z_POS).get();
-        // TODO find a better way to do this... Hopefully with API PR #475
+
         Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.nameToClassMap.get(container.getString(TILE_TYPE).get());
         if (clazz == null) {
-            return Optional.absent(); // TODO throw exception maybe?
+            // TODO do we want to throw an InvalidDataException since the class is not registered?
+            return Optional.absent(); // basically we didn't manage to find the class and the class isn't even registered with MC
         }
+
         BlockType type = classToTypeMap.get(clazz);
         if (type == null) {
             return Optional.absent(); // TODO throw exception maybe?
         }
         // Now we should be ready to actually deserialize the TileEntity with the right block.
+
+        final int x = container.getInt(X_POS).get();
+        final int y = container.getInt(Y_POS).get();
+        final int z = container.getInt(Z_POS).get();
+
         worldOptional.get().getFullBlock(x, y, z).replaceWith(type);
         BlockPos pos = new BlockPos(x, y, z);
         TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).getTileEntity(pos);

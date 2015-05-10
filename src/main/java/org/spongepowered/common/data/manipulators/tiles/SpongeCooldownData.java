@@ -52,4 +52,8 @@ public class SpongeCooldownData extends AbstractIntData<CooldownData> implements
         return this.setValue(time);
     }
 
+    @Override
+    public CooldownData copy() {
+        return new SpongeCooldownData().setValue(this.value);
+    }
 }

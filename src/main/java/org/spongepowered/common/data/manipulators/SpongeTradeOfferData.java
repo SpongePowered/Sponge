@@ -55,6 +55,11 @@ public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOffe
     }
 
     @Override
+    public TradeOfferData copy() {
+        return new SpongeTradeOfferData().set(this.elementList);
+    }
+
+    @Override
     public int compareTo(TradeOfferData o) {
         return 0;
     }

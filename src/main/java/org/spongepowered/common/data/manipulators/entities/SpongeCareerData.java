@@ -58,4 +58,9 @@ public class SpongeCareerData extends AbstractSingleValueData<Career, CareerData
     public CareerData setCareer(Career career) {
         return this.setValue(career);
     }
+
+    @Override
+    public CareerData copy() {
+        return new SpongeCareerData().setValue(this.value);
+    }
 }

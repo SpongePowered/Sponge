@@ -33,14 +33,18 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulators.tileentities.BannerData;
 import org.spongepowered.api.data.types.BannerPatternShape;
+import org.spongepowered.api.data.types.DyeColor;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.common.data.meta.SpongePatternLayer;
 
+/**
+ * The de-facto builder for a {@link BannerData.PatternLayer}.
+ */
 public class SpongePatternLayerBuilder implements DataBuilder<BannerData.PatternLayer> {
 
-    private static final DataQuery ID = of("id");
-    private static final DataQuery COLOR = of("color");
+    private static final DataQuery ID = of("BannerShapeId");
+    private static final DataQuery COLOR = of("DyeColor");
     private final Game game;
 
     public SpongePatternLayerBuilder(Game game) {
@@ -54,16 +58,20 @@ public class SpongePatternLayerBuilder implements DataBuilder<BannerData.Pattern
             throw new InvalidDataException("The provided container does not contain the data to make a PatternLayer!");
         }
         String id = container.getString(ID).get();
+
+        // We can get these pattern shapes from the game registry willy nilly, however, we still need to validate
+        // that the pattern exists, if it doesn't, well, thow an InvalidDataException!
         Optional<BannerPatternShape> shapeOptional = this.game.getRegistry().getType(BannerPatternShape.class, id);
         if (!shapeOptional.isPresent()) {
             throw new InvalidDataException("The provided container has an invalid banner pattern shape entry!");
         }
-        SerializationService service = this.game.getServiceManager().provide(SerializationService.class).get();
-        return Optional.absent();
-//        Optional<DyeColor> colorOptional = container.getSerializable(COLOR, DyeColor.class, service);
-//        if (!colorOptional.isPresent()) {
-//            throw new InvalidDataException("The provided container has an invalid dye color entry!");
-//        }
-//        return Optional.<PatternLayer>of(new SpongePatternLayer(shapeOptional.get(), colorOptional.get()));
+
+        // Now we need to validate the dye color of course...
+        String dyeColorId = container.getString(COLOR).get();
+        Optional<DyeColor> colorOptional = this.game.getRegistry().getType(DyeColor.class, dyeColorId);
+        if (!colorOptional.isPresent()) {
+            throw new InvalidDataException("The provided container has an invalid dye color entry!");
+        }
+        return Optional.<BannerData.PatternLayer>of(new SpongePatternLayer(shapeOptional.get(), colorOptional.get()));
     }
 }

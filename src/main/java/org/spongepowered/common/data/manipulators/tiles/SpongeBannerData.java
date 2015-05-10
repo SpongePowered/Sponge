@@ -91,4 +91,8 @@ public class SpongeBannerData extends AbstractListData<BannerData.PatternLayer, 
         return this.add(new SpongePatternLayer(checkNotNull(patternShape), checkNotNull(color)));
     }
 
+    @Override
+    public BannerData copy() {
+        return new SpongeBannerData().set(this.elementList).setBaseColor(this.baseColor);
+    }
 }

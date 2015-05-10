@@ -120,6 +120,11 @@ public class SpongeEnchantmentItemData extends AbstractMappedData<Enchantment, I
     }
 
     @Override
+    public EnchantmentData copy() {
+        return new SpongeEnchantmentItemData(this.keyValueMap);
+    }
+
+    @Override
     public DataContainer toContainer() {
         ImmutableList.Builder<DataView> enchantments = ImmutableList.builder();
         for (Map.Entry<Enchantment, Integer> entry : asMap().entrySet()) {

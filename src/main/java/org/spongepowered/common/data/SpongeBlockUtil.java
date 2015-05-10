@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -39,6 +40,8 @@ public interface SpongeBlockUtil<T extends DataManipulator<T>> {
     DataTransactionResult setData(World world, BlockPos blockPos, T manipulator, DataPriority priority);
 
     boolean remove(World world, BlockPos blockPos);
+
+    Optional<BlockState> removeFrom(IBlockState blockState);
 
     Optional<T> createFrom(IBlockState blockState);
 

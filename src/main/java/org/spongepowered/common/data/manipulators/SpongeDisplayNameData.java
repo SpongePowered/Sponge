@@ -64,6 +64,11 @@ public class SpongeDisplayNameData extends AbstractSingleValueData<Text, Display
     }
 
     @Override
+    public DisplayNameData copy() {
+        return new SpongeDisplayNameData().setValue(this.value).setCustomNameVisible(this.visible);
+    }
+
+    @Override
     public int compareTo(DisplayNameData o) {
         return 0; // TODO
     }

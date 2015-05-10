@@ -29,68 +29,72 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.FoodData;
+import org.spongepowered.api.data.manipulators.entities.HealthData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-public class SpongeFoodData extends SpongeAbstractData<FoodData> implements FoodData {
+public class SpongeHealthData extends SpongeAbstractData<HealthData> implements HealthData {
 
-    private double exhaustion;
-    private double saturation;
-    private double foodLevel;
+    private double health = 20.0D;
+    private double maxHealth = 20.0D;
 
-    public SpongeFoodData() {
-        super(FoodData.class);
+
+    public SpongeHealthData() {
+        super(HealthData.class);
+    }
+
+    @Override
+    public int compareTo(HealthData o) {
+        return (int) Math.floor((o.getHealth() - this.health) - (o.getMaxHealth() - this.maxHealth));
     }
 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("FoodLevel"), this.foodLevel)
-                .set(of("Saturation"), this.saturation)
-                .set(of("Exhaustion"), this.exhaustion);
+                .set(of("Health"), this.health)
+                .set(of("MaxHealth"), this.maxHealth);
     }
 
     @Override
-    public double getExhaustion() {
-        return this.exhaustion;
-    }
-
-    @Override
-    public FoodData setExhaustion(double exhaustion) {
-        checkArgument(exhaustion >= 0 && exhaustion <= 20);
-        this.exhaustion = exhaustion;
+    public HealthData damage(double amount) {
+        final double newHealth = this.health - amount;
+        if (newHealth < 0) { // we have to validate that we can't have negative health
+            this.health = 0;
+        } else {
+            this.health = newHealth;
+        }
         return this;
     }
 
     @Override
-    public double getSaturation() {
-        return this.saturation;
+    public double getHealth() {
+        return this.health;
     }
 
     @Override
-    public FoodData setSaturation(double saturation) {
-        this.saturation = saturation;
+    public HealthData setHealth(double health) {
+        checkArgument(health <= this.maxHealth, "Cannot set health greater than the max health!");
+        checkArgument(health >= 0, "Health must be greater than or equal to zero!");
+        this.health = health;
         return this;
     }
 
     @Override
-    public double getFoodLevel() {
-        return this.foodLevel;
+    public double getMaxHealth() {
+        return 0;
     }
 
     @Override
-    public FoodData setFoodLevel(double foodLevel) {
-        this.foodLevel = foodLevel;
+    public HealthData setMaxHealth(double maxHealth) {
+        checkArgument(maxHealth > 0);
+        this.maxHealth = maxHealth;
+        if (this.health > this.maxHealth) {
+            this.health = this.maxHealth;
+        }
         return this;
     }
 
     @Override
-    public int compareTo(FoodData o) {
-        return (int) Math.floor((o.getFoodLevel() - this.foodLevel) - (o.getExhaustion() - this.exhaustion) - (o.getSaturation() - this.saturation));
-    }
-
-    @Override
-    public FoodData copy() {
-        return new SpongeFoodData().setExhaustion(this.exhaustion).setFoodLevel(this.foodLevel).setSaturation(this.saturation);
+    public HealthData copy() {
+        return new SpongeHealthData().setMaxHealth(this.maxHealth).setHealth(this.health);
     }
 }

@@ -72,4 +72,8 @@ public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implement
         return this;
     }
 
+    @Override
+    public FurnaceData copy() {
+        return new SpongeFurnaceData().setRemainingBurnTime(this.remainingBurnTime).setRemainingCookTime(this.remainingCookTime);
+    }
 }

@@ -30,6 +30,7 @@ import com.google.common.base.Optional;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -100,6 +101,11 @@ public class SpongeDirectionalUtil implements SpongeDataUtil<DirectionalData>, S
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Optional<BlockState> removeFrom(IBlockState blockState) {
+        return Optional.absent();
     }
 
     @Override

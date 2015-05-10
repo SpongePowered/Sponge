@@ -30,6 +30,7 @@ import com.google.common.base.Optional;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -80,6 +81,11 @@ public class SpongeAxisUtil implements SpongeDataUtil<AxisData>, SpongeBlockUtil
     @Override
     public DataTransactionResult setData(World world, BlockPos blockPos, AxisData manipulator, DataPriority priority) {
         return fail(manipulator);
+    }
+
+    @Override
+    public Optional<BlockState> removeFrom(IBlockState blockState) {
+        return Optional.absent();
     }
 
     @Override

@@ -49,6 +49,11 @@ public class SpongeLoreData extends AbstractListData<Text, LoreData> implements 
     }
 
     @Override
+    public LoreData copy() {
+        return new SpongeLoreData().set(this.elementList);
+    }
+
+    @Override
     public DataContainer toContainer() {
         List<String> lore = Lists.newArrayList();
         for (Text text : this.elementList) {
