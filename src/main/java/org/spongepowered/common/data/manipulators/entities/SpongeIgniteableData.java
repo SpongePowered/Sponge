@@ -22,42 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.entities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.entities.IgniteableData;
+import org.spongepowered.common.data.manipulators.AbstractIntData;
 
-import java.util.List;
+public class SpongeIgniteableData extends AbstractIntData<IgniteableData> implements IgniteableData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
+    private int fireDelay = 10;
 
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeIgniteableData() {
+        super(IgniteableData.class, 0, 0, Integer.MAX_VALUE);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public int getFireTicks() {
+        return this.getValue();
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public IgniteableData setFireTicks(int ticks) {
+        return this.setValue(ticks);
+    }
+
+    @Override
+    public int getFireDelay() {
+        return this.fireDelay;
+    }
+
+    public SpongeIgniteableData setFireDelay(int ticks) {
+        this.fireDelay = ticks;
+        return this;
+    }
+
+    @Override
+    public IgniteableData copy() {
+        return new SpongeIgniteableData().setValue(this.value);
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer().set(of("FireTicks"), this.getValue());
     }
 }

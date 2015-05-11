@@ -22,42 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.entities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.entities.BreathingData;
+import org.spongepowered.common.data.manipulators.AbstractIntData;
 
-import java.util.List;
+public class SpongeBreathingData extends AbstractIntData<BreathingData> implements BreathingData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeBreathingData(int max) {
+        super(BreathingData.class, 0, 0, max);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public int getRemainingAir() {
+        return this.getValue();
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public BreathingData setRemainingAir(int air) {
+        return setValue(air);
+    }
+
+    @Override
+    public int getMaxAir() {
+        return this.getMaxValue();
+    }
+
+    @Override
+    public BreathingData setMaxAir(int air) {
+        return new SpongeBreathingData(air).setValue(this.value);
+    }
+
+    @Override
+    public BreathingData copy() {
+        return new SpongeBreathingData(this.getMaxValue()).setValue(this.value);
+    }
+
+    @Override
+    public int compareTo(BreathingData o) {
+        return (o.getMaxAir() - this.getMaxAir()) - (o.getValue() - this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer()
+                .set(of("RemainingAir"), this.value)
+                .set(of("MaxAir"), this.getMaxValue());
     }
 }

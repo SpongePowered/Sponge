@@ -22,42 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.blocks;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.blocks.StoneData;
+import org.spongepowered.api.data.types.StoneType;
+import org.spongepowered.api.data.types.StoneTypes;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-import java.util.List;
+public class SpongeStoneData extends AbstractSingleValueData<StoneType, StoneData> implements StoneData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeStoneData() {
+        super(StoneData.class, StoneTypes.STONE);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public StoneData copy() {
+        return new SpongeStoneData().setValue(this.value);
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public int compareTo(StoneData o) {
+        return o.getValue().getId().compareTo(this.value.getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer().set(of("StoneType"), this.value.getId());
     }
 }

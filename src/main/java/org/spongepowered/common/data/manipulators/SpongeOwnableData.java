@@ -22,42 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
+import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.OwnableData;
 
-import java.util.List;
+public class SpongeOwnableData extends AbstractSingleValueData<GameProfile, OwnableData> implements OwnableData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeOwnableData(GameProfile profile) {
+        super(OwnableData.class, profile);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public GameProfile getProfile() {
+        return this.getValue();
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public OwnableData setProfile(GameProfile profile) {
+        return this.setValue(profile);
+    }
+
+    @Override
+    public OwnableData copy() {
+        return new SpongeOwnableData(this.getValue());
+    }
+
+    @Override
+    public int compareTo(OwnableData o) {
+        return o.getValue().getUniqueId().compareTo(this.getValue().getUniqueId());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer()
+                .createView(of("OwnerProfile"))
+                .set(of("Uuid"), this.getValue().getUniqueId())
+                .set(of("Name"), this.getValue().getName())
+                .getContainer();
     }
 }

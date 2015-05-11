@@ -22,42 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.blocks;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.blocks.RailDirectionData;
+import org.spongepowered.api.data.types.RailDirection;
+import org.spongepowered.api.data.types.RailDirections;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-import java.util.List;
+public class SpongeRailDirectionData extends AbstractSingleValueData<RailDirection, RailDirectionData> implements RailDirectionData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeRailDirectionData() {
+        super(RailDirectionData.class, RailDirections.NORTH_SOUTH);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public RailDirectionData copy() {
+        return new SpongeRailDirectionData().setValue(this.value);
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public int compareTo(RailDirectionData o) {
+        return o.getValue().getId().compareTo(this.value.getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer().set(of("RailDirection"), this.value.getId());
     }
 }

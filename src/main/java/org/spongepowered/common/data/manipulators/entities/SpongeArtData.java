@@ -22,42 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.entities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.entities.ArtData;
+import org.spongepowered.api.data.types.Art;
+import org.spongepowered.api.data.types.Arts;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-import java.util.List;
+public class SpongeArtData extends AbstractSingleValueData<Art, ArtData> implements ArtData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeArtData() {
+        super(ArtData.class, Arts.ALBAN);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public Art getArt() {
+        return this.value;
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public ArtData setArt(Art art) {
+        return this.setValue(art);
+    }
+
+    @Override
+    public int compareTo(ArtData o) {
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer().set(of("Art"), this.value.getId());
+    }
+
+
+    @Override
+    public ArtData copy() {
+        return new SpongeArtData().setValue(this.value);
     }
 }

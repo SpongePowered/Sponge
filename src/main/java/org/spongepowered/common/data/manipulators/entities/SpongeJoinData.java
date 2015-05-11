@@ -22,42 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.entities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.entities.JoinData;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-import java.util.List;
+import java.util.Date;
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
+public class SpongeJoinData extends SpongeAbstractData<JoinData> implements JoinData {
 
-    public SpongeLoreData() {
-        super(LoreData.class);
+    private final long first;
+    private final long last;
+
+    public SpongeJoinData(long first, long last) {
+        super(JoinData.class);
+        this.first = first;
+        this.last = last;
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public Date getFirstPlayed() {
+        return new Date(this.first);
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public Date getLastPlayed() {
+        return new Date(this.last);
+    }
+
+    @Override
+    public JoinData copy() {
+        return new SpongeJoinData(this.first, this.last);
+    }
+
+    @Override
+    public int compareTo(JoinData o) {
+        return o.getFirstPlayed().compareTo(this.getFirstPlayed()) - o.getLastPlayed().compareTo(this.getLastPlayed());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer()
+                .set(of("FirstTimeJoining"), this.first)
+                .set(of("LastJointime"), this.last);
     }
 }

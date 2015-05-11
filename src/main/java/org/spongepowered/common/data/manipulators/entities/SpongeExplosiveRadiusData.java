@@ -22,42 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.entities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.entities.ExplosiveRadiusData;
+import org.spongepowered.common.data.manipulators.AbstractIntData;
 
-import java.util.List;
+public class SpongeExplosiveRadiusData extends AbstractIntData<ExplosiveRadiusData> implements ExplosiveRadiusData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeExplosiveRadiusData() {
+        super(ExplosiveRadiusData.class, 0, 0, Integer.MAX_VALUE);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public int getExplosionRadius() {
+        return this.getValue();
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public ExplosiveRadiusData setExplosionRadius(int radius) {
+        return this.setValue(radius);
+    }
+
+    @Override
+    public ExplosiveRadiusData copy() {
+        return new SpongeExplosiveRadiusData().setValue(this.value);
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer().set(of("ExplosionRadius"), this.getValue());
     }
 }

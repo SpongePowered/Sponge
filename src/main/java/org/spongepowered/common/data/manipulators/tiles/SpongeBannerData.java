@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.BannerData;
@@ -36,7 +35,6 @@ import org.spongepowered.api.data.types.BannerPatternShape;
 import org.spongepowered.api.data.types.DyeColor;
 import org.spongepowered.api.data.types.DyeColors;
 import org.spongepowered.common.data.manipulators.AbstractListData;
-import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 
 import java.util.List;

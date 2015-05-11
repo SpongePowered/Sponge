@@ -26,38 +26,31 @@ package org.spongepowered.common.data.manipulators.items;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.items.GoldenAppleItemData;
+import org.spongepowered.api.data.types.GoldenApple;
+import org.spongepowered.api.data.types.GoldenApples;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-import java.util.List;
+public class SpongeGoldenAppleData extends AbstractSingleValueData<GoldenApple, GoldenAppleItemData> implements GoldenAppleItemData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeGoldenAppleData() {
+        super(GoldenAppleItemData.class, GoldenApples.GOLDEN_APPLE);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public GoldenAppleItemData copy() {
+        return new SpongeGoldenAppleData().setValue(this.getValue());
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public int compareTo(GoldenAppleItemData o) {
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer().set(of("GoldenAppleType"), this.getValue());
     }
 }

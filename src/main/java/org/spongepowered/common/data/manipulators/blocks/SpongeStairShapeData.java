@@ -22,42 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.blocks;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.blocks.StairShapeData;
+import org.spongepowered.api.data.types.StairShape;
+import org.spongepowered.api.data.types.StairShapes;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-import java.util.List;
+public class SpongeStairShapeData extends AbstractSingleValueData<StairShape, StairShapeData> implements StairShapeData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeStairShapeData() {
+        super(StairShapeData.class, StairShapes.STRAIGHT);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public StairShapeData copy() {
+        return new SpongeStairShapeData().setValue(this.value);
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public int compareTo(StairShapeData o) {
+        return o.getValue().getId().compareTo(this.value.getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer().set(of("StairShape"), this.value.getId());
     }
 }

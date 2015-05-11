@@ -22,42 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.entities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
+import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.entities.VelocityData;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-import java.util.List;
+public class SpongeVelocityData extends AbstractSingleValueData<Vector3d, VelocityData> implements VelocityData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
-
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeVelocityData() {
+        super(VelocityData.class, new Vector3d());
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public Vector3d getVelocity() {
+        return this.getValue();
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public VelocityData setVelocity(Vector3d velocity) {
+        return this.setValue(velocity);
+    }
+
+    @Override
+    public VelocityData copy() {
+        return new SpongeVelocityData().setValue(this.getValue());
+    }
+
+    @Override
+    public int compareTo(VelocityData o) {
+        return o.getValue().compareTo(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer()
+                .set(of("Velocity", "X"), this.getValue().getX())
+                .set(of("Velocity", "Y"), this.getValue().getY())
+                .set(of("Velocity", "Z"), this.getValue().getZ());
     }
 }

@@ -69,7 +69,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends DataManipulator<T>> ItemStackBuilder itemData(final T itemData) throws IllegalArgumentException {
+    public ItemStackBuilder itemData(final DataManipulator<?> itemData) throws IllegalArgumentException {
         checkNotNull(itemData, "Must have a non-null item data!");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
         // Validation is required, we can't let devs set block data on a non-block item!

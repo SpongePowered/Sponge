@@ -22,42 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
+import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulators.AbstractListData;
+import org.spongepowered.api.data.manipulators.entities.EyeLocationData;
 
-import java.util.List;
+public class SpongeEyeLocationData extends SpongeAbstractData<EyeLocationData> implements EyeLocationData {
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
+    private final Vector3d eyeLocation;
+    private final double eyeHeight;
 
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeEyeLocationData(Vector3d location, double eyeHeight) {
+        super(EyeLocationData.class);
+        this.eyeLocation = checkNotNull(location);
+        this.eyeHeight = eyeHeight;
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public int compareTo(EyeLocationData o) {
+        return ((int) Math.floor(o.getEyeHeight() - this.getEyeHeight())) - (int) Math.floor(o.getEyeLocation().distance(this.getEyeLocation()));
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public double getEyeHeight() {
+        return this.eyeHeight;
+    }
+
+    @Override
+    public Vector3d getEyeLocation() {
+        return this.eyeLocation;
+    }
+
+    @Override
+    public EyeLocationData copy() {
+        return new SpongeEyeLocationData(this.eyeLocation, this.eyeHeight);
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
-        }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer()
+                .createView(of("EyeLocation"))
+                .set(of("PosX"), this.eyeLocation.getX())
+                .set(of("PosY"), this.eyeLocation.getY())
+                .set(of("PosZ"), this.eyeLocation.getZ())
+                .getContainer()
+                .set(of("EyeHeight"), this.eyeHeight);
     }
 }

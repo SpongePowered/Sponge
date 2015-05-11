@@ -27,37 +27,37 @@ package org.spongepowered.common.data.manipulators.items;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Lists;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.LoreData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.data.manipulators.items.BreakableData;
 import org.spongepowered.common.data.manipulators.AbstractListData;
 
 import java.util.List;
 
-public class SpongeLoreData extends AbstractListData<Text, LoreData> implements LoreData {
+public class SpongeBreakableData extends AbstractListData<BlockType, BreakableData> implements BreakableData {
 
-    public SpongeLoreData() {
-        super(LoreData.class);
+    public SpongeBreakableData() {
+        super(BreakableData.class);
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public BreakableData copy() {
+        return new SpongeBreakableData().set(this.elementList);
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public int compareTo(BreakableData o) {
+        return o.getAll().size() - this.elementList.size();
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
+        final List<String> blockIds = Lists.newArrayList();
+        for (BlockType blockType : this.elementList) {
+            blockIds.add(blockType.getId());
         }
-        return new MemoryDataContainer().set(of("Lore"), lore);
+        return new MemoryDataContainer()
+                .set(of("BreakableBlockTypes"), blockIds);
     }
 }

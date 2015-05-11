@@ -22,60 +22,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.items;
+package org.spongepowered.common.data.manipulators.entities;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.DurabilityData;
-import org.spongepowered.common.data.manipulators.AbstractIntData;
+import org.spongepowered.api.data.manipulators.entities.InvisibilityData;
+import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-public class SpongeDurabilityData extends AbstractIntData<DurabilityData> implements DurabilityData {
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
 
-    private boolean breakable = true;
+public class SpongeInvisibilityData extends SpongeAbstractData<InvisibilityData> implements InvisibilityData {
 
-    public SpongeDurabilityData(int maxDurability) {
-        super(DurabilityData.class, 0, 0, maxDurability);
+    private final Set<UUID> invisibleTo = Sets.newHashSet();
+
+    public SpongeInvisibilityData() {
+        super(InvisibilityData.class);
+    }
+
+    public SpongeInvisibilityData(Collection<UUID> uuids) {
+        super(InvisibilityData.class);
+        this.invisibleTo.addAll(uuids);
     }
 
     @Override
-    public int getDurability() {
-        return getValue();
+    public boolean isInvisibleTo(Player player) {
+        return this.invisibleTo.contains(player.getUniqueId());
     }
 
     @Override
-    public DurabilityData setDurability(int durability) {
-        return setValue(durability);
-    }
-
-    @Override
-    public boolean isBreakable() {
-        return this.breakable;
-    }
-
-    @Override
-    public DurabilityData setBreakable(boolean breakable) {
-        this.breakable = breakable;
+    public InvisibilityData setInvisibleTo(Player player, boolean invisible) {
+        if (invisible) {
+            this.invisibleTo.add(checkNotNull(player).getUniqueId());
+        } else {
+            this.invisibleTo.remove(checkNotNull(player).getUniqueId());
+        }
         return this;
     }
 
     @Override
-    public int compareTo(DurabilityData o) {
-        return this.breakable ? o.isBreakable() ? this.getDurability() - o.getDurability() : -1 : o.isBreakable() ? 1 : this.getDurability() - o
-                .getDurability();
+    public InvisibilityData copy() {
+        return new SpongeInvisibilityData(this.invisibleTo);
     }
 
     @Override
-    public DurabilityData copy() {
-        return new SpongeDurabilityData(this.getMaxValue()).setValue(this.value).setBreakable(this.breakable);
+    public int compareTo(InvisibilityData o) {
+        return 0;
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Durability"), this.value)
-                .set(of("Unbreakable"), this.breakable)
-                .set(of("MaxDurability"), this.getMaxValue());
+        return new MemoryDataContainer().set(of("InvisiblePlayers"), this.invisibleTo);
     }
-
 }
