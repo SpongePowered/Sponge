@@ -22,10 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server;
+package org.spongepowered.common.mixin.core.network;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
@@ -35,16 +36,24 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.block.tile.Sign;
+import org.spongepowered.api.data.manipulators.tileentities.SignData;
 import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.tile.SignChangeEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.net.ChannelBuf;
 import org.spongepowered.api.net.PlayerConnection;
 import org.spongepowered.api.text.format.TextColors;
@@ -53,26 +62,24 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
-    @Shadow
-    private static Logger logger;
+    @Shadow private static Logger logger;
 
-    @Shadow
-    public NetworkManager netManager;
+    @Shadow public NetworkManager netManager;
 
-    @Shadow
-    public EntityPlayerMP playerEntity;
+    @Shadow public EntityPlayerMP playerEntity;
 
-    @Shadow
-    private MinecraftServer serverController;
+    @Shadow private MinecraftServer serverController;
 
-    @Shadow
-    public abstract void sendPacket(final Packet packetIn);
+    @Shadow public abstract void sendPacket(final Packet packetIn);
 
     @Override
     public Player getPlayer() {
@@ -102,6 +109,45 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Override
     public void sendCustomPayload(Object plugin, String channel, byte[] data) {
         sendPacket(new S3FPacketCustomPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(data))));
+    }
+
+    /**
+     * @Author Zidane
+     *
+     * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
+     * @param packetIn Injected packet param
+     * @param ci Info to provide mixin on how to handle the callback
+     * @param worldserver Injected world param
+     * @param blockpos Injected blockpos param
+     * @param tileentity Injected tilentity param
+     * @param tileentitysign Injected tileentitysign param
+     */
+    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
+    public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
+        ci.cancel();
+        final Optional<SignData> existingSignData = ((Sign) tileentitysign).getData();
+        if (!existingSignData.isPresent()) {
+            // TODO Unsure if this is the best to do here...
+            throw new RuntimeException("Critical error! Sign data not present on sign!");
+        }
+        final SignData changedSignData = existingSignData.get().copy();
+
+        for (int i = 0; i < packetIn.getLines().length; i++) {
+            changedSignData.setLine(i, SpongeTexts.toText(packetIn.getLines()[i]));
+        }
+        // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
+        // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
+        final SignChangeEvent event = SpongeEventFactory.createSignChangeEvent(Sponge.getGame(), new Cause(null, this.playerEntity, null), (Sign)
+                tileentitysign, changedSignData, changedSignData);
+        if (!Sponge.getGame().getEventManager().post(event)) {
+            ((Sign) tileentitysign).offer(event.getNewData());
+        } else {
+            // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
+            // it will be the text of the sign that was showing in the world
+            ((Sign) tileentitysign).offer(existingSignData.get());
+        }
+        tileentitysign.markDirty();
+        worldserver.markBlockForUpdate(blockpos);
     }
 
     /**

@@ -24,56 +24,29 @@
  */
 package org.spongepowered.common.data.manipulators.tiles;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.SignData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 import java.util.List;
 
+@NonnullByDefault
 public class SpongeSignData extends SpongeAbstractData<SignData> implements SignData {
 
-    private final Text[] lines = new Text[] { Texts.of(),  Texts.of(), Texts.of(), Texts.of() };
+    private final List<Text> lines;
 
     public SpongeSignData() {
+        this(Lists.newArrayList(Texts.of(), Texts.of(), Texts.of(), Texts.of()));
+    }
+
+    public SpongeSignData(List<Text> lines) {
         super(SignData.class);
-    }
-
-    @Override
-    public Text[] getLines() {
-        return this.lines;
-    }
-
-    @Override
-    public SignData setLines(Text... lines) {
-        for (int i = 0; i < 4; i++) {
-            if (lines.length >= i) {
-                this.lines[i] = checkNotNull(lines[i]);
-            }
-        }
-        return this;
-    }
-
-    @Override
-    public Text getLine(int index) throws IndexOutOfBoundsException {
-        return this.lines[index];
-    }
-
-    @Override
-    public SignData setLine(int index, Text text) throws IndexOutOfBoundsException {
-        this.lines[index] = checkNotNull(text);
-        return this;
-    }
-
-    @Override
-    public SignData copy() {
-        return new SpongeSignData().setLines(this.lines);
+        this.lines = lines;
     }
 
     @Override
@@ -83,10 +56,39 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
 
     @Override
     public DataContainer toContainer() {
-        List<String> jsonLines = Lists.newArrayList();
+        List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
         for (Text line : this.lines) {
             jsonLines.add(Texts.toJson(line));
         }
-        return  new MemoryDataContainer().set(of("Lines"), jsonLines);
+        return new MemoryDataContainer().set(SignData.LINES, jsonLines);
+    }
+
+    @Override
+    public List<Text> getLines() {
+        return this.lines;
+    }
+
+    @Override
+    public Text getLine(int index) throws IndexOutOfBoundsException {
+        return this.lines.get(index);
+    }
+
+    @Override
+    public SignData setLine(int index, Text text) throws IndexOutOfBoundsException {
+        this.lines.set(index, text);
+        return this;
+    }
+
+    @Override
+    public SignData reset() {
+        for (int i = 0; i < this.lines.size(); i++) {
+            this.lines.set(i, Texts.of());
+        }
+        return this;
+    }
+
+    @Override
+    public SignData copy() {
+        return new SpongeSignData(Lists.newArrayList(this.lines));
     }
 }

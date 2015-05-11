@@ -35,17 +35,29 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulators.tileentities.SignData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeDataUtil;
 import org.spongepowered.common.data.manipulators.tiles.SpongeSignData;
 import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
+import java.util.List;
+
+@NonnullByDefault
+public class SpongeSignDataUtil implements SpongeDataUtil<SignData> {
 
     @Override
     public Optional<SignData> build(DataView container) throws InvalidDataException {
-        return null;
+        final Optional<List<String>> optRawLines  = container.getStringList(SignData.LINES);
+        final SignData data = new SpongeSignData();
+        if (optRawLines.isPresent()) {
+            final List<String> rawLines = optRawLines.get();
+            for (int i = 0; i < rawLines.size(); i++) {
+                data.setLine(i, Texts.of(rawLines.get(i)));
+            }
+        }
+        return Optional.of(data);
     }
 
     @Override
@@ -56,14 +68,12 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
     @Override
     public Optional<SignData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntitySign) {
-            final SignData data = create();
-            final IChatComponent[] rawTexts = ((TileEntitySign) dataHolder).signText;
-            final Text[] signTexts = new Text[rawTexts.length];
-            for (int i = 0; i < rawTexts.length; i++) {
-                signTexts[i] = SpongeTexts.toText(rawTexts[i]);
+            final SignData signData = new SpongeSignData();
+            final IChatComponent[] rawLines = ((TileEntitySign) dataHolder).signText;
+            for (int i = 0; i < rawLines.length; i++) {
+                signData.setLine(i, SpongeTexts.toText(rawLines[i]));
             }
-            data.setLines(signTexts);
-            return Optional.of(data);
+            return Optional.of(signData);
         }
         return Optional.absent();
     }
@@ -76,14 +86,16 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, SignData manipulator, DataPriority priority) {
         if (dataHolder instanceof TileEntitySign) {
-            final SignData oldData = ((Sign) dataHolder).getSignData();
-            DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            builder.replace(oldData);
-            for (int i = 0; i < 4; i++) {
-                ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(manipulator.getLine(0));
+            final Optional<SignData> oldData = ((Sign) dataHolder).getData();
+            if (oldData.isPresent()) {
+                DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                builder.replace(oldData.get());
+                for (int i = 0; i < 4; i++) {
+                    ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(manipulator.getLine(i));
+                }
+                builder.result(DataTransactionResult.Type.SUCCESS);
+                return builder.build();
             }
-            builder.result(DataTransactionResult.Type.SUCCESS);
-            return builder.build();
         }
 
         return DataTransactionBuilder.fail(manipulator);
@@ -92,9 +104,6 @@ public class SpongeSignDataBuilder implements SpongeDataUtil<SignData> {
     @Override
     public boolean remove(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntitySign) {
-            final SignData oldData = ((Sign) dataHolder).getSignData();
-            DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            builder.replace(oldData);
             for (int i = 0; i < 4; i++) {
                 ((TileEntitySign) dataHolder).signText[i] = new ChatComponentText("");
             }
