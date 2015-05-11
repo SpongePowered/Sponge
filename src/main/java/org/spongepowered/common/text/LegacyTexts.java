@@ -173,7 +173,7 @@ public final class LegacyTexts {
         }
 
         Collections.reverse(parts);
-        return Texts.builder("").append(parts).build();
+        return Texts.builder(pos > 0 ? text.substring(0, pos) : "").append(parts).build();
     }
 
     private static boolean applyStyle(TextBuilder builder, EnumChatFormatting formatting) {
