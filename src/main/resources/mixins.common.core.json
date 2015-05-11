@@ -3,6 +3,7 @@
     "minVersion": "0.2",
     "package": "org.spongepowered.common.mixin.core",
     "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.CorePlugin",
     "mixins": [
         "MixinGameProfile",
         "MixinBootstrapAnonInner7",
@@ -128,8 +129,6 @@
         "item.inventory.MixinContainer",
         "item.inventory.MixinItemStack",
         "item.merchant.MixinMerchantRecipe",
-        "network.rcon.MixinRConConsoleSource",
-        "network.rcon.MixinRConThreadClient",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "server.MixinMinecraftServer",
@@ -168,7 +167,9 @@
         "world.storage.MixinWorldInfo"
     ],
     "server": [
-        "server.MixinDedicatedServer"
+        "server.MixinDedicatedServer",
+        "network.rcon.MixinRConConsoleSource",
+        "network.rcon.MixinRConThreadClient"
     ],
     "client": [
         "client.server.MixinIntegratedServer"
