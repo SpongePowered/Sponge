@@ -8,8 +8,8 @@ Common code for official SpongeAPI implementations. It is licensed under the [MI
 * [Issues]
 * [SpongeAPI Wiki]
 * [Sponge Wiki]
-* [Community Chat]: #sponge on irc.esper.net
-* [Development Chat]: #spongedev on irc.esper.net
+* [Community Chat]: [#sponge on irc.esper.net]
+* [Development Chat]: [#spongedev on irc.esper.net]
 
 ## Prerequisites
 * [Java] 6
@@ -40,15 +40,18 @@ Are you a talented programmer looking to contribute some code? We'd love the hel
 * Open a pull request with your changes, following our [guidelines](CONTRIBUTING.md).
 * Please follow the above guidelines for your pull request(s) to be accepted.
 
-[Eclipse]: http://www.eclipse.org/
-[Gradle]: http://www.gradle.org/
-[Homepage]: http://spongepowered.org/
-[IntelliJ]: http://www.jetbrains.com/idea/
-[Issues]: http://issues.spongepowered.org/
+[Eclipse]: https://www.eclipse.org/
+[Gradle]: https://www.gradle.org/
+[Homepage]: https://spongepowered.org/
+[IntelliJ]: https://www.jetbrains.com/idea/
+[Issues]: https://issues.spongepowered.org/
 [SpongeAPI Wiki]: https://github.com/SpongePowered/SpongeAPI/wiki/
 [Sponge Wiki]: https://github.com/SpongePowered/Sponge/wiki/
 [Java]: http://java.oracle.com/
 [Source]: https://github.com/SpongePowered/SpongeCommon/
 [MIT License]: http://www.tldrlegal.com/license/mit-license
-[Community Chat]: https://webchat.esper.net/?channels=sponge
-[Development Chat]: https://webchat.esper.net/?channels=spongedev
+[Community Chat]: http://webchat.esper.net/?channels=sponge
+[Development Chat]: http://webchat.esper.net/?channels=spongedev
+[#sponge on irc.esper.net]: irc://irc.esper.net/#sponge
+[#spongedev on irc.esper.net]: irc://irc.esper.net/#spongedev
+
