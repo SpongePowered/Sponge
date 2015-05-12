@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
@@ -91,7 +92,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public Collection<DataManipulator<?>> getManipulators() {
-        return null;
+        return ImmutableList.of();
     }
 
     @Override
@@ -101,7 +102,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public Collection<Property<?, ?>> getProperties() {
-        return null;
+        return ImmutableList.of();
     }
 
 }
