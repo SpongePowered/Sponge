@@ -26,11 +26,12 @@ package org.spongepowered.common.data.manipulators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.data.manipulators.SingleValueData;
 
 public abstract class AbstractSingleValueData<V, T extends SingleValueData<V, T>> extends SpongeAbstractData<T> implements SingleValueData<V, T> {
 
-    protected V value;
+    private V value;
 
     protected AbstractSingleValueData(Class<T> manipulatorClass, V defaultValue) {
         super(manipulatorClass);
@@ -47,5 +48,25 @@ public abstract class AbstractSingleValueData<V, T extends SingleValueData<V, T>
     public T setValue(V value) {
         this.value = checkNotNull(value);
         return (T) this;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Objects.hashCode(this.value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final AbstractSingleValueData other = (AbstractSingleValueData) obj;
+        return Objects.equal(this.value, other.value);
     }
 }

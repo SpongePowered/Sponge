@@ -46,20 +46,6 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
     }
 
     @Override
-    public int compareTo(SignData o) {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        List<String> jsonLines = Lists.newArrayList();
-        for (Text line : lines) {
-            jsonLines.add(Texts.toJson(line));
-        }
-        return  new MemoryDataContainer().set(of("Lines"), jsonLines);
-    }
-
-    @Override
     public Text[] getLines() {
         return this.lines;
     }
@@ -88,5 +74,19 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
     @Override
     public SignData copy() {
         return new SpongeSignData().setLines(this.lines);
+    }
+
+    @Override
+    public int compareTo(SignData o) {
+        return 0;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        List<String> jsonLines = Lists.newArrayList();
+        for (Text line : this.lines) {
+            jsonLines.add(Texts.toJson(line));
+        }
+        return  new MemoryDataContainer().set(of("Lines"), jsonLines);
     }
 }

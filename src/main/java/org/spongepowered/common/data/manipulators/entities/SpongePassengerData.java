@@ -55,7 +55,7 @@ public class SpongePassengerData extends AbstractSingleValueData<Entity, Passeng
 
     @Override
     public Entity getBaseVehicle() {
-        net.minecraft.entity.Entity vehicle = ((net.minecraft.entity.Entity) this.value);
+        net.minecraft.entity.Entity vehicle = ((net.minecraft.entity.Entity) this.getValue());
         while (vehicle.ridingEntity != null) {
             vehicle = vehicle.ridingEntity;
         }

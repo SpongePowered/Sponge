@@ -43,13 +43,13 @@ public class SpongeLoreData extends AbstractListData<Text, LoreData> implements 
     }
 
     @Override
-    public int compareTo(LoreData o) {
-        return 0;
+    public LoreData copy() {
+        return new SpongeLoreData().set(this.elementList);
     }
 
     @Override
-    public LoreData copy() {
-        return new SpongeLoreData().set(this.elementList);
+    public int compareTo(LoreData o) {
+        return 0;
     }
 
     @Override

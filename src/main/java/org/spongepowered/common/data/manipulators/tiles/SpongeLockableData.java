@@ -48,6 +48,11 @@ public class SpongeLockableData extends AbstractSingleValueData<String, Lockable
     }
 
     @Override
+    public LockableData copy() {
+        return new SpongeLockableData().setValue(this.getValue());
+    }
+
+    @Override
     public int compareTo(LockableData o) {
         return this.getValue().compareTo(o.getLockToken());
     }
@@ -55,10 +60,5 @@ public class SpongeLockableData extends AbstractSingleValueData<String, Lockable
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer().set(of("Lock"), this.getValue());
-    }
-
-    @Override
-    public LockableData copy() {
-        return new SpongeLockableData().setValue(this.value);
     }
 }

@@ -39,13 +39,16 @@ public class SpongeTargetedLocationData extends AbstractSingleValueData<Location
     }
 
     @Override
-    public int compareTo(TargetedLocationData o) {
-        return 0;
+    public TargetedLocationData copy() {
+        return new SpongeTargetedLocationData(this.getValue());
     }
 
     @Override
-    public TargetedLocationData copy() {
-        return new SpongeTargetedLocationData(this.getValue());
+    public int compareTo(TargetedLocationData o) {
+        return (int) Math.floor(o.getValue().getX() - this.getValue().getX())
+                - (int) Math.floor(o.getValue().getY() - this.getValue().getY())
+                - (int) Math.floor(o.getValue().getZ() - this.getValue().getZ())
+                - o.getValue().getExtent().hashCode() - this.getValue().getExtent().hashCode();
     }
 
     @Override

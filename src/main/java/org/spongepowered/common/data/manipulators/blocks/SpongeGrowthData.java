@@ -39,7 +39,7 @@ public class SpongeGrowthData extends AbstractIntData<GrowthData> implements Gro
 
     @Override
     public int getGrowthStage() {
-        return this.value;
+        return this.getValue();
     }
 
     @Override
@@ -54,11 +54,11 @@ public class SpongeGrowthData extends AbstractIntData<GrowthData> implements Gro
 
     @Override
     public GrowthData copy() {
-        return new SpongeGrowthData(this.getMaxStage()).setValue(this.value);
+        return new SpongeGrowthData(this.getMaxStage()).setValue(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Growth"), this.value).set(of("MaxGrowth"), this.getMaxValue());
+        return new MemoryDataContainer().set(of("Growth"), this.getValue()).set(of("MaxGrowth"), this.getMaxValue());
     }
 }

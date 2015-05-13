@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulators;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.data.manipulators.IntData;
 
 public abstract class AbstractIntData<T extends IntData<T>> extends AbstractSingleValueData<Integer, T> implements IntData<T> {
@@ -61,4 +62,24 @@ public abstract class AbstractIntData<T extends IntData<T>> extends AbstractSing
         return o.getValue() - this.getValue();
     }
 
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Objects.hashCode(this.minValue, this.maxValue);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final AbstractIntData other = (AbstractIntData) obj;
+        return Objects.equal(this.minValue, other.minValue)
+                && Objects.equal(this.maxValue, other.maxValue);
+    }
 }

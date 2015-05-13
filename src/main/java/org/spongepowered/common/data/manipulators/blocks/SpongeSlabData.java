@@ -41,16 +41,16 @@ public class SpongeSlabData extends AbstractSingleValueData<SlabType, SlabData> 
 
     @Override
     public SlabData copy() {
-        return new SpongeSlabData().setValue(this.value);
+        return new SpongeSlabData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(SlabData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SlabType"), this.value.getId());
+        return new MemoryDataContainer().set(of("SlabType"), this.getValue().getId());
     }
 }

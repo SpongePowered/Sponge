@@ -49,17 +49,17 @@ public class SpongeColoredData extends AbstractSingleValueData<Color, ColoredDat
     }
 
     @Override
+    public ColoredData copy() {
+        return new SpongeColoredData().setValue(this.getValue());
+    }
+
+    @Override
     public int compareTo(ColoredData o) {
         return o.getValue().getRGB() - this.getValue().getRGB();
     }
 
     @Override
-    public ColoredData copy() {
-        return new SpongeColoredData().setValue(this.value);
-    }
-
-    @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Color"), this.value.getRGB());
+        return new MemoryDataContainer().set(of("Color"), this.getValue().getRGB());
     }
 }

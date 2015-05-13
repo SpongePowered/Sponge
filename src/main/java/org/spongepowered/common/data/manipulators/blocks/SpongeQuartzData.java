@@ -41,16 +41,16 @@ public class SpongeQuartzData extends AbstractSingleValueData<QuartzType, Quartz
 
     @Override
     public QuartzData copy() {
-        return new SpongeQuartzData().setValue(this.value);
+        return new SpongeQuartzData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(QuartzData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("QuartzType"), this.value.getId());
+        return new MemoryDataContainer().set(of("QuartzType"), this.getValue().getId());
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulators.items;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.items.DurabilityData;
@@ -61,21 +62,40 @@ public class SpongeDurabilityData extends AbstractIntData<DurabilityData> implem
     }
 
     @Override
+    public DurabilityData copy() {
+        return new SpongeDurabilityData(this.getMaxValue()).setValue(this.getValue()).setBreakable(this.breakable);
+    }
+
+    @Override
     public int compareTo(DurabilityData o) {
         return this.breakable ? o.isBreakable() ? this.getDurability() - o.getDurability() : -1 : o.isBreakable() ? 1 : this.getDurability() - o
                 .getDurability();
     }
 
     @Override
-    public DurabilityData copy() {
-        return new SpongeDurabilityData(this.getMaxValue()).setValue(this.value).setBreakable(this.breakable);
-    }
-
-    @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Durability"), this.value)
+        return new MemoryDataContainer().set(of("Durability"), this.getValue())
                 .set(of("Unbreakable"), this.breakable)
                 .set(of("MaxDurability"), this.getMaxValue());
     }
 
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Objects.hashCode(this.breakable);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final SpongeDurabilityData other = (SpongeDurabilityData) obj;
+        return Objects.equal(this.breakable, other.breakable);
+    }
 }

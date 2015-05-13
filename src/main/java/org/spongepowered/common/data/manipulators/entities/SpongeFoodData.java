@@ -43,14 +43,6 @@ public class SpongeFoodData extends SpongeAbstractData<FoodData> implements Food
     }
 
     @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer()
-                .set(of("FoodLevel"), this.foodLevel)
-                .set(of("Saturation"), this.saturation)
-                .set(of("Exhaustion"), this.exhaustion);
-    }
-
-    @Override
     public double getExhaustion() {
         return this.exhaustion;
     }
@@ -85,12 +77,23 @@ public class SpongeFoodData extends SpongeAbstractData<FoodData> implements Food
     }
 
     @Override
+    public FoodData copy() {
+        return new SpongeFoodData()
+                .setExhaustion(this.exhaustion)
+                .setFoodLevel(this.foodLevel)
+                .setSaturation(this.saturation);
+    }
+
+    @Override
     public int compareTo(FoodData o) {
         return (int) Math.floor((o.getFoodLevel() - this.foodLevel) - (o.getExhaustion() - this.exhaustion) - (o.getSaturation() - this.saturation));
     }
 
     @Override
-    public FoodData copy() {
-        return new SpongeFoodData().setExhaustion(this.exhaustion).setFoodLevel(this.foodLevel).setSaturation(this.saturation);
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+                .set(of("FoodLevel"), this.foodLevel)
+                .set(of("Saturation"), this.saturation)
+                .set(of("Exhaustion"), this.exhaustion);
     }
 }

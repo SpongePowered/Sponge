@@ -41,16 +41,16 @@ public class SpongeStoneData extends AbstractSingleValueData<StoneType, StoneDat
 
     @Override
     public StoneData copy() {
-        return new SpongeStoneData().setValue(this.value);
+        return new SpongeStoneData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(StoneData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("StoneType"), this.value.getId());
+        return new MemoryDataContainer().set(of("StoneType"), this.getValue().getId());
     }
 }

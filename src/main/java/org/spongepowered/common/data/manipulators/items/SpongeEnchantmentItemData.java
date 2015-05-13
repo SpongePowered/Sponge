@@ -115,13 +115,13 @@ public class SpongeEnchantmentItemData extends AbstractMappedData<Enchantment, I
     }
 
     @Override
-    public int compareTo(EnchantmentData enchantmentData) {
-        return 0; // TODO
+    public EnchantmentData copy() {
+        return new SpongeEnchantmentItemData(this.keyValueMap);
     }
 
     @Override
-    public EnchantmentData copy() {
-        return new SpongeEnchantmentItemData(this.keyValueMap);
+    public int compareTo(EnchantmentData enchantmentData) {
+        return 0; // TODO
     }
 
     @Override

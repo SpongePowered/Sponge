@@ -41,16 +41,16 @@ public class SpongeWallData extends AbstractSingleValueData<WallType, WallData> 
 
     @Override
     public WallData copy() {
-        return new SpongeWallData().setValue(this.value);
+        return new SpongeWallData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(WallData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("WallType"), this.value.getId());
+        return new MemoryDataContainer().set(of("WallType"), this.getValue().getId());
     }
 }

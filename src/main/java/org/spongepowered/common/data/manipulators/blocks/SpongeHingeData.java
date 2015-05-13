@@ -41,16 +41,16 @@ public class SpongeHingeData extends AbstractSingleValueData<Hinge, HingeData> i
 
     @Override
     public HingeData copy() {
-        return new SpongeHingeData().setValue(this.value);
+        return new SpongeHingeData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(HingeData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Hinge"), this.value.getId());
+        return new MemoryDataContainer().set(of("Hinge"), this.getValue().getId());
     }
 }

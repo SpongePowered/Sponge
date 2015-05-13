@@ -41,16 +41,16 @@ public class SpongePortionData extends AbstractSingleValueData<PortionType, Port
 
     @Override
     public PortionData copy() {
-        return new SpongePortionData().setValue(this.value);
+        return new SpongePortionData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(PortionData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Portion"), this.value.getId());
+        return new MemoryDataContainer().set(of("Portion"), this.getValue().getId());
     }
 }

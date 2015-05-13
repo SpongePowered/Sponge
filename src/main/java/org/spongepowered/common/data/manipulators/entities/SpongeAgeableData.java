@@ -69,6 +69,6 @@ public class SpongeAgeableData extends AbstractIntData<AgeableData> implements A
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Age"), this.value);
+        return new MemoryDataContainer().set(of("Age"), this.getValue());
     }
 }

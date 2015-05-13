@@ -40,16 +40,6 @@ public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData>
     }
 
     @Override
-    public int compareTo(NoteData o) {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Pitch"), this.value.getId());
-    }
-
-    @Override
     public NotePitch getNote() {
         return getValue();
     }
@@ -61,6 +51,16 @@ public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData>
 
     @Override
     public NoteData copy() {
-        return new SpongeNoteData().setValue(this.value);
+        return new SpongeNoteData().setValue(this.getValue());
+    }
+
+    @Override
+    public int compareTo(NoteData o) {
+        return 0;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(of("Pitch"), this.getValue().getId());
     }
 }

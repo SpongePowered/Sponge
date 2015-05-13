@@ -39,11 +39,11 @@ public class SpongeLayeredData extends AbstractIntData<LayeredData> implements L
 
     @Override
     public LayeredData copy() {
-        return new SpongeLayeredData(this.getMaxValue()).setValue(this.value);
+        return new SpongeLayeredData(this.getMaxValue()).setValue(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Layer"), this.value).set(of("MaxLayers"), this.getMaxValue());
+        return new MemoryDataContainer().set(of("Layer"), this.getValue()).set(of("MaxLayers"), this.getMaxValue());
     }
 }

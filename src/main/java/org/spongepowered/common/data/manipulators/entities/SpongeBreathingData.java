@@ -54,12 +54,12 @@ public class SpongeBreathingData extends AbstractIntData<BreathingData> implemen
 
     @Override
     public BreathingData setMaxAir(int air) {
-        return new SpongeBreathingData(air).setValue(this.value);
+        return new SpongeBreathingData(air).setValue(this.getValue());
     }
 
     @Override
     public BreathingData copy() {
-        return new SpongeBreathingData(this.getMaxValue()).setValue(this.value);
+        return new SpongeBreathingData(this.getMaxValue()).setValue(this.getValue());
     }
 
     @Override
@@ -70,7 +70,7 @@ public class SpongeBreathingData extends AbstractIntData<BreathingData> implemen
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("RemainingAir"), this.value)
+                .set(of("RemainingAir"), this.getValue())
                 .set(of("MaxAir"), this.getMaxValue());
     }
 }

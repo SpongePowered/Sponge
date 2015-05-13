@@ -41,7 +41,7 @@ public class SpongeArtData extends AbstractSingleValueData<Art, ArtData> impleme
 
     @Override
     public Art getArt() {
-        return this.value;
+        return this.getValue();
     }
 
     @Override
@@ -56,12 +56,12 @@ public class SpongeArtData extends AbstractSingleValueData<Art, ArtData> impleme
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Art"), this.value.getId());
+        return new MemoryDataContainer().set(of("Art"), this.getValue().getId());
     }
 
 
     @Override
     public ArtData copy() {
-        return new SpongeArtData().setValue(this.value);
+        return new SpongeArtData().setValue(this.getValue());
     }
 }

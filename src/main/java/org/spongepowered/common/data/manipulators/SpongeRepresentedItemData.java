@@ -31,6 +31,7 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.RepresentedItemData;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 
 public class SpongeRepresentedItemData extends AbstractSingleValueData<ItemStack, RepresentedItemData> implements RepresentedItemData {
@@ -40,13 +41,13 @@ public class SpongeRepresentedItemData extends AbstractSingleValueData<ItemStack
     }
 
     @Override
-    public int compareTo(RepresentedItemData o) {
-        return 0;
+    public RepresentedItemData copy() {
+        return new SpongeRepresentedItemData().setValue(new SpongeItemStackBuilder().fromItemStack(this.getValue()).build());
     }
 
     @Override
-    public RepresentedItemData copy() {
-        return new SpongeRepresentedItemData().setValue(new SpongeItemStackBuilder().fromItemStack(this.value).build());
+    public int compareTo(RepresentedItemData o) {
+        return ItemStackComparators.ALL.compare(o.getValue(), this.getValue());
     }
 
     @Override

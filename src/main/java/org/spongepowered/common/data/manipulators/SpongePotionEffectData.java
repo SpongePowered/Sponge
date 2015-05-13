@@ -95,6 +95,11 @@ public class SpongePotionEffectData extends AbstractListData<PotionEffect, Potio
     }
 
     @Override
+    public PotionEffectData copy() {
+        return new SpongePotionEffectData().set(this.elementList);
+    }
+
+    @Override
     public int compareTo(PotionEffectData o) {
         return 0;
     }
@@ -102,10 +107,5 @@ public class SpongePotionEffectData extends AbstractListData<PotionEffect, Potio
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer().set(of("Potions"), this.elementList);
-    }
-
-    @Override
-    public PotionEffectData copy() {
-        return new SpongePotionEffectData().set(this.elementList);
     }
 }

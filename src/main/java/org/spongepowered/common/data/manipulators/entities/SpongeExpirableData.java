@@ -39,7 +39,7 @@ public class SpongeExpirableData extends AbstractIntData<ExpirableData> implemen
 
     @Override
     public ExpirableData copy() {
-        return new SpongeExpirableData().setValue(this.value);
+        return new SpongeExpirableData().setValue(this.getValue());
     }
 
     @Override

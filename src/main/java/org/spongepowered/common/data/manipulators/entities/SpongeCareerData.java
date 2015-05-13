@@ -40,16 +40,6 @@ public class SpongeCareerData extends AbstractSingleValueData<Career, CareerData
     }
 
     @Override
-    public int compareTo(CareerData o) {
-        return o.getValue().getId().compareTo(this.getValue().getId());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Career"), this.value.getId());
-    }
-
-    @Override
     public Career getCareer() {
         return this.getValue();
     }
@@ -61,6 +51,16 @@ public class SpongeCareerData extends AbstractSingleValueData<Career, CareerData
 
     @Override
     public CareerData copy() {
-        return new SpongeCareerData().setValue(this.value);
+        return new SpongeCareerData().setValue(this.getValue());
+    }
+
+    @Override
+    public int compareTo(CareerData o) {
+        return o.getValue().getId().compareTo(this.getValue().getId());
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(of("Career"), this.getValue().getId());
     }
 }

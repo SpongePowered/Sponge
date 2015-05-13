@@ -41,16 +41,16 @@ public class SpongeTreeData extends AbstractSingleValueData<TreeType, TreeData> 
 
     @Override
     public TreeData copy() {
-        return new SpongeTreeData().setValue(this.value);
+        return new SpongeTreeData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(TreeData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("TreeType"), this.value.getId());
+        return new MemoryDataContainer().set(of("TreeType"), this.getValue().getId());
     }
 }

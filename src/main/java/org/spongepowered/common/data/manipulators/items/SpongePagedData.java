@@ -43,13 +43,13 @@ public class SpongePagedData extends AbstractListData<Text, PagedData> implement
     }
 
     @Override
-    public int compareTo(PagedData o) {
-        return 0;
+    public PagedData copy() {
+        return new SpongePagedData().set(this.elementList);
     }
 
     @Override
-    public PagedData copy() {
-        return new SpongePagedData().set(this.elementList);
+    public int compareTo(PagedData o) {
+        return 0;
     }
 
     @Override

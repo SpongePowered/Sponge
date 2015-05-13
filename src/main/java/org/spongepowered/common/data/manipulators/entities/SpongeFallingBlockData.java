@@ -117,7 +117,9 @@ public class SpongeFallingBlockData extends SpongeAbstractData<FallingBlockData>
 
     @Override
     public int compareTo(FallingBlockData o) {
-        return 0; // TODO
+        return (o.getBlockState().hashCode() - this.getBlockState().hashCode())
+                - (int) Math.floor(o.getFallDamagePerBlock() - this.getFallDamagePerBlock())
+                - (int) Math.floor(o.getMaxFallDamage() - this.getMaxFallDamage());
     }
 
     @Override

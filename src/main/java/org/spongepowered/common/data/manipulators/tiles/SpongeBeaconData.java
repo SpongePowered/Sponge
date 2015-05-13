@@ -77,13 +77,18 @@ public class SpongeBeaconData extends SpongeAbstractData<BeaconData> implements 
     }
 
     @Override
-    public int compareTo(BeaconData o) {
-        return 0;
+    public BeaconData copy() {
+        return new SpongeBeaconData().setPrimaryEffect(this.primary).setSecondaryEffect(this.secondary);
     }
 
     @Override
-    public BeaconData copy() {
-        return new SpongeBeaconData().setPrimaryEffect(this.primary).setSecondaryEffect(this.secondary);
+    public int compareTo(BeaconData o) {
+        return o.getPrimaryEffect().isPresent() ? this.getPrimaryEffect().isPresent()
+                ? o.getPrimaryEffect().get().getId().compareTo(this.getPrimaryEffect().get().getId())
+                : -1 : this.getPrimaryEffect().isPresent() ? 1
+                : o.getSecondaryEffect().isPresent() ? this.getSecondaryEffect().isPresent()
+                ? o.getSecondaryEffect().get().getId().compareTo(this.getSecondaryEffect().get().getId())
+                : -1 : this.getSecondaryEffect().isPresent() ? 1 : 0;
     }
 
     @Override

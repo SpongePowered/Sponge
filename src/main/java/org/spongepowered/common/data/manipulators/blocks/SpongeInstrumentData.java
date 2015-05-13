@@ -41,16 +41,16 @@ public class SpongeInstrumentData extends AbstractSingleValueData<InstrumentType
 
     @Override
     public InstrumentData copy() {
-        return new SpongeInstrumentData().setValue(this.value);
+        return new SpongeInstrumentData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(InstrumentData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("InstrumentType"), this.value);
+        return new MemoryDataContainer().set(of("InstrumentType"), this.getValue());
     }
 }

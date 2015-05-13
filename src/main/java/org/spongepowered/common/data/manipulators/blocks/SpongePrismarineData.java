@@ -41,16 +41,16 @@ public class SpongePrismarineData extends AbstractSingleValueData<PrismarineType
 
     @Override
     public PrismarineData copy() {
-        return new SpongePrismarineData().setValue(this.value);
+        return new SpongePrismarineData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(PrismarineData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("PrismarineType"), this.value.getId());
+        return new MemoryDataContainer().set(of("PrismarineType"), this.getValue().getId());
     }
 }

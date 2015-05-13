@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -60,4 +61,20 @@ public abstract class SpongeAbstractData<T extends DataManipulator<T>> implement
         return builder.build(container);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.manipulatorClass);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeAbstractData other = (SpongeAbstractData) obj;
+        return Objects.equal(this.manipulatorClass, other.manipulatorClass);
+    }
 }

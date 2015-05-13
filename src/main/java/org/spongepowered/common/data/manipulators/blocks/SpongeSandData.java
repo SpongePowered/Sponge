@@ -41,16 +41,16 @@ public class SpongeSandData extends AbstractSingleValueData<SandType, SandData> 
 
     @Override
     public SandData copy() {
-        return new SpongeSandData().setValue(this.value);
+        return new SpongeSandData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(SandData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SandType"), this.value.getId());
+        return new MemoryDataContainer().set(of("SandType"), this.getValue().getId());
     }
 }

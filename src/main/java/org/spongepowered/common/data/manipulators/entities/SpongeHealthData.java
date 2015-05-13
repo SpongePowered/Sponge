@@ -43,18 +43,6 @@ public class SpongeHealthData extends SpongeAbstractData<HealthData> implements 
     }
 
     @Override
-    public int compareTo(HealthData o) {
-        return (int) Math.floor((o.getHealth() - this.health) - (o.getMaxHealth() - this.maxHealth));
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer()
-                .set(of("Health"), this.health)
-                .set(of("MaxHealth"), this.maxHealth);
-    }
-
-    @Override
     public HealthData damage(double amount) {
         final double newHealth = this.health - amount;
         if (newHealth < 0) { // we have to validate that we can't have negative health
@@ -96,5 +84,17 @@ public class SpongeHealthData extends SpongeAbstractData<HealthData> implements 
     @Override
     public HealthData copy() {
         return new SpongeHealthData().setMaxHealth(this.maxHealth).setHealth(this.health);
+    }
+
+    @Override
+    public int compareTo(HealthData o) {
+        return (int) Math.floor((o.getHealth() - this.health) - (o.getMaxHealth() - this.maxHealth));
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+                .set(of("Health"), this.health)
+                .set(of("MaxHealth"), this.maxHealth);
     }
 }

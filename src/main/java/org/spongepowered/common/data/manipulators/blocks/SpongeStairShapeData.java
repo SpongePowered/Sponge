@@ -41,16 +41,16 @@ public class SpongeStairShapeData extends AbstractSingleValueData<StairShape, St
 
     @Override
     public StairShapeData copy() {
-        return new SpongeStairShapeData().setValue(this.value);
+        return new SpongeStairShapeData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(StairShapeData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("StairShape"), this.value.getId());
+        return new MemoryDataContainer().set(of("StairShape"), this.getValue().getId());
     }
 }

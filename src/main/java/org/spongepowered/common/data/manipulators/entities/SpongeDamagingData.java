@@ -71,11 +71,6 @@ public class SpongeDamagingData extends SpongeAbstractData<DamagingData> impleme
     }
 
     @Override
-    public int compareTo(DamagingData o) {
-        return (int) Math.floor(o.getDamage() - this.damage);
-    }
-
-    @Override
     public DamagingData copy() {
         final DamagingData  damagingData = new SpongeDamagingData();
         damagingData.setDamage(this.damage);
@@ -83,6 +78,11 @@ public class SpongeDamagingData extends SpongeAbstractData<DamagingData> impleme
             damagingData.setDamageForEntity(entry.getKey(), entry.getValue());
         }
         return damagingData;
+    }
+
+    @Override
+    public int compareTo(DamagingData o) {
+        return (int) Math.floor(o.getDamage() - this.damage);
     }
 
     @Override

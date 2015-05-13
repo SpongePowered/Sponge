@@ -41,16 +41,16 @@ public class SpongeDisguisedBlockData extends AbstractSingleValueData<DisguisedB
 
     @Override
     public DisguisedBlockData copy() {
-        return new SpongeDisguisedBlockData().setValue(this.value);
+        return new SpongeDisguisedBlockData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(DisguisedBlockData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DisguisedBlockType"), this.value.getId());
+        return new MemoryDataContainer().set(of("DisguisedBlockType"), this.getValue().getId());
     }
 }

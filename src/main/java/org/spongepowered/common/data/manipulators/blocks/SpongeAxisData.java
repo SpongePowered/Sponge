@@ -39,17 +39,17 @@ public class SpongeAxisData extends AbstractSingleValueData<Axis, AxisData> impl
     }
 
     @Override
+    public AxisData copy() {
+        return new SpongeAxisData().setValue(this.getValue());
+    }
+
+    @Override
     public int compareTo(AxisData o) {
         return o.getValue().ordinal() - this.getValue().ordinal();
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Axis"), this.value.name());
-    }
-
-    @Override
-    public AxisData copy() {
-        return new SpongeAxisData().setValue(this.value);
+        return new MemoryDataContainer().set(of("Axis"), this.getValue().name());
     }
 }

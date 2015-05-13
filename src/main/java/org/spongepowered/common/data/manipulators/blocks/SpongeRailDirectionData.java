@@ -41,16 +41,16 @@ public class SpongeRailDirectionData extends AbstractSingleValueData<RailDirecti
 
     @Override
     public RailDirectionData copy() {
-        return new SpongeRailDirectionData().setValue(this.value);
+        return new SpongeRailDirectionData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(RailDirectionData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("RailDirection"), this.value.getId());
+        return new MemoryDataContainer().set(of("RailDirection"), this.getValue().getId());
     }
 }

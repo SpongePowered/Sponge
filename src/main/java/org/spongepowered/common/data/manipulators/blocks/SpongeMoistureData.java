@@ -39,11 +39,11 @@ public class SpongeMoistureData extends AbstractIntData<MoistureData> implements
 
     @Override
     public MoistureData copy() {
-        return new SpongeMoistureData(this.getMaxValue()).setValue(this.value);
+        return new SpongeMoistureData(this.getMaxValue()).setValue(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Moisture"), this.value).set(of("MaxMoisture"), this.getMaxValue());
+        return new MemoryDataContainer().set(of("Moisture"), this.getValue()).set(of("MaxMoisture"), this.getMaxValue());
     }
 }

@@ -38,17 +38,17 @@ public class SpongeRotationalData extends AbstractSingleValueData<Rotation, Rota
         super(RotationalData.class, Rotations.LEFT);
     }
     @Override
-    public int compareTo(RotationalData o) {
-        return o.getValue().getAngle() - this.value.getAngle();
+    public RotationalData copy() {
+        return new SpongeRotationalData().setValue(this.getValue());
     }
 
     @Override
-    public RotationalData copy() {
-        return new SpongeRotationalData().setValue(this.value);
+    public int compareTo(RotationalData o) {
+        return o.getValue().getAngle() - this.getValue().getAngle();
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Rotation"), this.value.getAngle());
+        return new MemoryDataContainer().set(of("Rotation"), this.getValue().getAngle());
     }
 }

@@ -44,11 +44,6 @@ public class SpongeEyeLocationData extends SpongeAbstractData<EyeLocationData> i
     }
 
     @Override
-    public int compareTo(EyeLocationData o) {
-        return ((int) Math.floor(o.getEyeHeight() - this.getEyeHeight())) - (int) Math.floor(o.getEyeLocation().distance(this.getEyeLocation()));
-    }
-
-    @Override
     public double getEyeHeight() {
         return this.eyeHeight;
     }
@@ -61,6 +56,11 @@ public class SpongeEyeLocationData extends SpongeAbstractData<EyeLocationData> i
     @Override
     public EyeLocationData copy() {
         return new SpongeEyeLocationData(this.eyeLocation, this.eyeHeight);
+    }
+
+    @Override
+    public int compareTo(EyeLocationData o) {
+        return ((int) Math.floor(o.getEyeHeight() - this.getEyeHeight())) - (int) Math.floor(o.getEyeLocation().distance(this.getEyeLocation()));
     }
 
     @Override

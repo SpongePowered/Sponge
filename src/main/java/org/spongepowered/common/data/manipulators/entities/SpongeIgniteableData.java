@@ -61,7 +61,7 @@ public class SpongeIgniteableData extends AbstractIntData<IgniteableData> implem
 
     @Override
     public IgniteableData copy() {
-        return new SpongeIgniteableData().setValue(this.value);
+        return new SpongeIgniteableData().setValue(this.getValue());
     }
 
     @Override

@@ -41,16 +41,16 @@ public class SpongeShrubData extends AbstractSingleValueData<ShrubType, ShrubDat
 
     @Override
     public ShrubData copy() {
-        return new SpongeShrubData().setValue(this.value);
+        return new SpongeShrubData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(ShrubData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("ShrubType"), this.value.getId());
+        return new MemoryDataContainer().set(of("ShrubType"), this.getValue().getId());
     }
 }

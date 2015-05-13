@@ -43,7 +43,7 @@ public class SpongeBigMushroomData extends AbstractSingleValueData<BigMushroomTy
 
     @Override
     public BigMushroomData copy() {
-        return new SpongeBigMushroomData().setValue(this.value);
+        return new SpongeBigMushroomData().setValue(this.getValue());
     }
 
     @Override
@@ -53,6 +53,6 @@ public class SpongeBigMushroomData extends AbstractSingleValueData<BigMushroomTy
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BigMushroomType"), this.value.getId());
+        return new MemoryDataContainer().set(of("BigMushroomType"), this.getValue().getId());
     }
 }

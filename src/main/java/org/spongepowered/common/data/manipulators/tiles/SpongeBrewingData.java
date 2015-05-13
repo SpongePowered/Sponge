@@ -38,11 +38,6 @@ public class SpongeBrewingData extends AbstractIntData<BrewingData> implements B
     }
 
     @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("RemainingBrewTime"), this.value);
-    }
-
-    @Override
     public int getRemainingBrewTime() {
         return getValue();
     }
@@ -54,6 +49,11 @@ public class SpongeBrewingData extends AbstractIntData<BrewingData> implements B
 
     @Override
     public BrewingData copy() {
-        return new SpongeBrewingData().setValue(this.value);
+        return new SpongeBrewingData().setValue(this.getValue());
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(of("RemainingBrewTime"), this.getValue());
     }
 }

@@ -41,16 +41,16 @@ public class SpongeDirtData extends AbstractSingleValueData<DirtType, DirtData> 
 
     @Override
     public DirtData copy() {
-        return new SpongeDirtData().setValue(this.value);
+        return new SpongeDirtData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(DirtData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DirtType"), this.value.getId());
+        return new MemoryDataContainer().set(of("DirtType"), this.getValue().getId());
     }
 }

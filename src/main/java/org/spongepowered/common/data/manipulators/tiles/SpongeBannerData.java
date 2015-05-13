@@ -48,16 +48,6 @@ public class SpongeBannerData extends AbstractListData<BannerData.PatternLayer, 
     }
 
     @Override
-    public int compareTo(BannerData o) {
-        return this.baseColor.getColor().getRGB() - o.getBaseColor().getColor().getRGB(); // TODO maybe also compare the pattern layers
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BaseColor"), this.baseColor.getId()).set(of("Layers"), this.elementList);
-    }
-
-    @Override
     public DyeColor getBaseColor() {
         return this.baseColor;
     }
@@ -92,5 +82,16 @@ public class SpongeBannerData extends AbstractListData<BannerData.PatternLayer, 
     @Override
     public BannerData copy() {
         return new SpongeBannerData().set(this.elementList).setBaseColor(this.baseColor);
+    }
+
+    @Override
+    public int compareTo(BannerData o) {
+        return (this.baseColor.getColor().getRGB() - o.getBaseColor().getColor().getRGB())
+                - (o.getPatternsList().hashCode() - this.getAll().hashCode());
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(of("BaseColor"), this.baseColor.getId()).set(of("Layers"), this.elementList);
     }
 }

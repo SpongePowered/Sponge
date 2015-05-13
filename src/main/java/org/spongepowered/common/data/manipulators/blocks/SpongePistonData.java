@@ -41,16 +41,16 @@ public class SpongePistonData extends AbstractSingleValueData<PistonType, Piston
 
     @Override
     public PistonData copy() {
-        return new SpongePistonData().setValue(this.value);
+        return new SpongePistonData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(PistonData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("PistonType"), this.value.getId());
+        return new MemoryDataContainer().set(of("PistonType"), this.getValue().getId());
     }
 }

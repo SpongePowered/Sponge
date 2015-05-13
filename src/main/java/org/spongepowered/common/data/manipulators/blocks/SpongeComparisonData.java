@@ -41,16 +41,16 @@ public class SpongeComparisonData extends AbstractSingleValueData<Comparison, Co
 
     @Override
     public ComparisonData copy() {
-        return new SpongeComparisonData().setValue(this.value);
+        return new SpongeComparisonData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(ComparisonData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Comparison"), this.value.getId());
+        return new MemoryDataContainer().set(of("Comparison"), this.getValue().getId());
     }
 }

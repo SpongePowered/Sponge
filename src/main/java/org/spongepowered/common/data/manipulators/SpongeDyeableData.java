@@ -39,17 +39,17 @@ public class SpongeDyeableData extends AbstractSingleValueData<DyeColor, Dyeable
     }
 
     @Override
-    public int compareTo(DyeableData dyeableItemData) {
-        return this.value.getName().compareTo(dyeableItemData.getValue().getName());
+    public DyeableData copy() {
+        return new SpongeDyeableData().setValue(this.getValue());
     }
 
     @Override
-    public DyeableData copy() {
-        return new SpongeDyeableData().setValue(this.value);
+    public int compareTo(DyeableData dyeableItemData) {
+        return this.getValue().getName().compareTo(dyeableItemData.getValue().getName());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DyeColor"), this.value.getId());
+        return new MemoryDataContainer().set(of("DyeColor"), this.getValue().getId());
     }
 }

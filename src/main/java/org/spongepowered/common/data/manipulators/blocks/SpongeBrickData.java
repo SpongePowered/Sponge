@@ -41,16 +41,16 @@ public class SpongeBrickData extends AbstractSingleValueData<BrickType, BrickDat
 
     @Override
     public BrickData copy() {
-        return new SpongeBrickData().setValue(this.value);
+        return new SpongeBrickData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(BrickData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BrickType"), this.value.getId());
+        return new MemoryDataContainer().set(of("BrickType"), this.getValue().getId());
     }
 }

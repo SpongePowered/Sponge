@@ -41,16 +41,16 @@ public class SpongeDoublePlantType extends AbstractSingleValueData<DoubleSizePla
 
     @Override
     public DoublePlantData copy() {
-        return new SpongeDoublePlantType().setValue(this.value);
+        return new SpongeDoublePlantType().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(DoublePlantData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DoubleSizePlantType"), this.value.getId());
+        return new MemoryDataContainer().set(of("DoubleSizePlantType"), this.getValue().getId());
     }
 }

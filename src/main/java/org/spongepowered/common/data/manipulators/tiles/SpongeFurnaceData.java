@@ -41,16 +41,6 @@ public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implement
     }
 
     @Override
-    public int compareTo(FurnaceData o) {
-        return (this.remainingBurnTime - o.getRemainingBurnTime()) - (this.remainingCookTime - o.getRemainingCookTime());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("RemainingBurnTime"), this.remainingBurnTime).set(of("RemainingCookTime"), this.remainingCookTime);
-    }
-
-    @Override
     public int getRemainingBurnTime() {
         return this.remainingBurnTime;
     }
@@ -75,5 +65,15 @@ public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implement
     @Override
     public FurnaceData copy() {
         return new SpongeFurnaceData().setRemainingBurnTime(this.remainingBurnTime).setRemainingCookTime(this.remainingCookTime);
+    }
+
+    @Override
+    public int compareTo(FurnaceData o) {
+        return (this.remainingBurnTime - o.getRemainingBurnTime()) - (this.remainingCookTime - o.getRemainingCookTime());
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(of("RemainingBurnTime"), this.remainingBurnTime).set(of("RemainingCookTime"), this.remainingCookTime);
     }
 }

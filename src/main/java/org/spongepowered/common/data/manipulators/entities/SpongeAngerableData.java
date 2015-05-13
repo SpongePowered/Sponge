@@ -49,11 +49,11 @@ public class SpongeAngerableData extends AbstractIntData<AngerableData> implemen
 
     @Override
     public AngerableData copy() {
-        return new SpongeAngerableData().setValue(this.value);
+        return new SpongeAngerableData().setValue(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Anger"), this.value);
+        return new MemoryDataContainer().set(of("Anger"), this.getValue());
     }
 }

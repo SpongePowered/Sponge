@@ -49,7 +49,7 @@ public class SpongeExplosiveRadiusData extends AbstractIntData<ExplosiveRadiusDa
 
     @Override
     public ExplosiveRadiusData copy() {
-        return new SpongeExplosiveRadiusData().setValue(this.value);
+        return new SpongeExplosiveRadiusData().setValue(this.getValue());
     }
 
     @Override

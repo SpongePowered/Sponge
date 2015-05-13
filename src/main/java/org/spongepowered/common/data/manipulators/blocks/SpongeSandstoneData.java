@@ -41,16 +41,16 @@ public class SpongeSandstoneData extends AbstractSingleValueData<SandstoneType, 
 
     @Override
     public SandstoneData copy() {
-        return new SpongeSandstoneData().setValue(this.value);
+        return new SpongeSandstoneData().setValue(this.getValue());
     }
 
     @Override
     public int compareTo(SandstoneData o) {
-        return o.getValue().getId().compareTo(this.value.getId());
+        return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SandstoneType"), this.value.getId());
+        return new MemoryDataContainer().set(of("SandstoneType"), this.getValue().getId());
     }
 }

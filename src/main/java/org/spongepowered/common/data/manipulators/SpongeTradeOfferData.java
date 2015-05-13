@@ -61,7 +61,7 @@ public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOffe
 
     @Override
     public int compareTo(TradeOfferData o) {
-        return 0;
+        return o.getAll().hashCode() - this.getAll().hashCode();
     }
 
     @Override

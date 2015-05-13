@@ -39,11 +39,11 @@ public class SpongeFluidLevelData extends AbstractIntData<FluidLevelData> implem
 
     @Override
     public FluidLevelData copy() {
-        return new SpongeFluidLevelData(this.value, this.getMaxValue());
+        return new SpongeFluidLevelData(this.getValue(), this.getMaxValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("FluidLevel"), this.value);
+        return new MemoryDataContainer().set(of("FluidLevel"), this.getValue());
     }
 }

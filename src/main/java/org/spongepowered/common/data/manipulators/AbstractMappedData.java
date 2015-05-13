@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -77,5 +78,25 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M>> ex
     public M remove(K key) {
         this.keyValueMap.remove(checkNotNull(key));
         return (M) this;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Objects.hashCode(this.keyValueMap);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final AbstractMappedData other = (AbstractMappedData) obj;
+        return Objects.equal(this.keyValueMap, other.keyValueMap);
     }
 }

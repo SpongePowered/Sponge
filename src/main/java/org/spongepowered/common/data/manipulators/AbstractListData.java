@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulators;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.manipulators.ListData;
@@ -100,5 +101,25 @@ public abstract class AbstractListData<E, T extends ListData<E, T>> extends Spon
     public T remove(int index) {
         this.elementList.remove(index);
         return (T) this;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Objects.hashCode(this.elementList);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final AbstractListData other = (AbstractListData) obj;
+        return Objects.equal(this.elementList, other.elementList);
     }
 }

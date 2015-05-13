@@ -57,7 +57,7 @@ public class SpongeSaddleData extends AbstractSingleValueData<ItemStack, SaddleD
 
     @Override
     public SaddleData copy() {
-        return new SpongeSaddleData().setValue(new SpongeItemStackBuilder().fromItemStack(this.value).build());
+        return new SpongeSaddleData().setValue(new SpongeItemStackBuilder().fromItemStack(this.getValue()).build());
     }
 
     @Override
