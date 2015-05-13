@@ -26,15 +26,20 @@ package org.spongepowered.common.data.manipulators;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.MobSpawnerData;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.weighted.WeightedCollection;
 import org.spongepowered.api.util.weighted.WeightedEntity;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -195,11 +200,34 @@ public class SpongeMobSpawnerData extends SpongeAbstractData<MobSpawnerData> imp
 
     @Override
     public int compareTo(MobSpawnerData o) {
-        return 0;
+        return ComparisonChain.start().compare(o.getRemainingDelay(), this.delay)
+                .compare(o.getMinimumSpawnDelay(), this.minDelay)
+                .compare(o.getMaximumSpawnDelay(), this.maxDelay)
+                .compare(o.getSpawnCount(), this.count)
+                .compare(o.getRequiredPlayerRange(), this.range)
+                .compare(o.getSpawnRange(), this.spawnRange)
+                .compare(o.getMaximumNearbyEntities(), this.maxEntities)
+                .result(); // todo compare entities listing
     }
 
     @Override
     public DataContainer toContainer() {
-        return null;
+        List<DataContainer> entities = Lists.newArrayList();
+        for (WeightedEntity entity : this.entities) {
+            final DataContainer container = new MemoryDataContainer();
+            container.set(of("EntityType"), entity.get().getId())
+                    .set(of("Weight"), entity.getWeight())
+                    .set(of("Data"), entity.getAdditionalProperties());
+            entities.add(container);
+        }
+        return new MemoryDataContainer()
+                .set(of("Delay"), this.delay)
+                .set(of("MinDelay"), this.minDelay)
+                .set(of("MaxDelay"), this.maxDelay)
+                .set(of("Count"), this.count)
+                .set(of("MaxEntities"), this.maxEntities)
+                .set(of("PlayerRange"), this.range)
+                .set(of("SpawnRange"), this.spawnRange)
+                .set(of("Entities"), entities);
     }
 }
