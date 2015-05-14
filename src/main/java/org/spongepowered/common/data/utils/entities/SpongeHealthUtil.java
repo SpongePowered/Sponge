@@ -31,6 +31,7 @@ import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
@@ -48,7 +49,19 @@ public class SpongeHealthUtil implements SpongeDataUtil<HealthData> {
 
     @Override
     public Optional<HealthData> fillData(DataHolder holder, HealthData manipulator, DataPriority priority) {
-        return null;
+        // todo for now, we only focus on health to and from entities.
+        if (!(holder instanceof EntityLivingBase)) {
+            return Optional.absent();
+        }
+        switch (checkNotNull(priority)) {
+            case DATA_HOLDER:
+            case PRE_MERGE:
+                manipulator.setMaxHealth(((EntityLivingBase) holder).getMaxHealth())
+                        .setHealth(((EntityLivingBase) holder).getHealth());
+                return Optional.of(manipulator);
+            default :
+                return Optional.of(manipulator);
+        }
     }
 
     @Override
@@ -62,14 +75,36 @@ public class SpongeHealthUtil implements SpongeDataUtil<HealthData> {
                 return builder().reject(manipulator).result(DataTransactionResult.Type.SUCCESS).build();
             case DATA_MANIPULATOR:
             case POST_MERGE:
-
+                final float oldMaxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
+                final float oldHealth = ((EntityLivingBase) dataHolder).getHealth();
+                final HealthData oldData = create().setMaxHealth(oldMaxHealth).setHealth(oldHealth);
+                try {
+                    final float newMaxHealth = (float) manipulator.getMaxHealth();
+                    final float newHealth = (float) manipulator.getHealth();
+                    ((EntityLivingBase) dataHolder).getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(newMaxHealth);
+                    ((EntityLivingBase) dataHolder).setHealth(newHealth);
+                } catch (Exception e) {
+                    // Usually we don't have this type of problem, but at times, health is too high
+                    // and we have to consider there may have been an issue setting these types of things.
+                    ((EntityLivingBase) dataHolder).getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(oldMaxHealth);
+                    ((EntityLivingBase) dataHolder).setHealth(oldHealth);
+                    return builder().reject(manipulator).result(DataTransactionResult.Type.ERROR).build();
+                }
+                return builder().replace(oldData).result(DataTransactionResult.Type.SUCCESS).build();
+            default:
+                return builder().reject(manipulator).result(DataTransactionResult.Type.UNDEFINED).build();
         }
-        return null;
     }
 
     @Override
     public boolean remove(DataHolder dataHolder) {
-        return false; //TODO discuss the possibility of "resetting" health to a default state based on the difficulty level and such.
+        if (!(dataHolder instanceof EntityLivingBase)) {
+            return false;
+        }
+        //TODO discuss the possibility of "resetting" health to a default state based on the difficulty level
+        // and the possibility of resetting based on "entity type".
+        ((EntityLivingBase) dataHolder).setHealth(((EntityLivingBase) dataHolder).getMaxHealth());
+        return true;
     }
 
     @Override
@@ -79,9 +114,6 @@ public class SpongeHealthUtil implements SpongeDataUtil<HealthData> {
         }
         final double health = container.getDouble(HEALTH_QUERY).get();
         final double maxHealth = container.getDouble(MAX_HEALTH_QUERY).get();
-
-        // We should have some validation from setting health and max health instead of blindly sending the
-        // values into the constructor.
         return Optional.of(create().setMaxHealth(maxHealth).setHealth(health));
     }
 

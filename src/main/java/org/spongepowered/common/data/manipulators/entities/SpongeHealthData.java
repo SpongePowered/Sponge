@@ -68,7 +68,7 @@ public class SpongeHealthData extends SpongeAbstractData<HealthData> implements 
 
     @Override
     public double getMaxHealth() {
-        return 0;
+        return this.maxHealth;
     }
 
     @Override
