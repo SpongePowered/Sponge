@@ -46,12 +46,12 @@ public abstract class SpongeSubject implements Subject {
     }
 
     @Override
-    public SubjectData getTransientData() {
-        return getData();
+    public SubjectData getTransientSubjectData() {
+        return getSubjectData();
     }
 
     @Override
-    public abstract MemorySubjectData getData();
+    public abstract MemorySubjectData getSubjectData();
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
@@ -65,11 +65,11 @@ public abstract class SpongeSubject implements Subject {
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        return getDataPermissionValue(getData(), permission);
+        return getDataPermissionValue(getSubjectData(), permission);
     }
 
     protected Tristate getDataPermissionValue(MemorySubjectData subject, String permission) {
-        Tristate res = getData().getNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
+        Tristate res = getSubjectData().getNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
 
         if (res == Tristate.UNDEFINED) {
             for (Subject parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
@@ -90,7 +90,7 @@ public abstract class SpongeSubject implements Subject {
 
     @Override
     public boolean isChildOf(Set<Context> contexts, Subject parent) {
-        return getData().getParents(contexts).contains(parent);
+        return getSubjectData().getParents(contexts).contains(parent);
     }
 
     @Override
@@ -100,7 +100,7 @@ public abstract class SpongeSubject implements Subject {
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
-        return getData().getParents(contexts);
+        return getSubjectData().getParents(contexts);
     }
 
     @Override

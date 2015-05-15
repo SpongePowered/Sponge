@@ -107,7 +107,7 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public MemorySubjectData getData() {
+    public MemorySubjectData getSubjectData() {
         return this.data;
     }
 

@@ -117,7 +117,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public MemorySubjectData getData() {
+        public MemorySubjectData getSubjectData() {
             return this.data;
         }
     }

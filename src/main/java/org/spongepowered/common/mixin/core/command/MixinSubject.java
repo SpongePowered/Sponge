@@ -90,22 +90,22 @@ public abstract class MixinSubject implements CommandSource, ICommandSender {
     }
 
     @Override
-    public SubjectData getData() {
+    public SubjectData getSubjectData() {
         Subject subj = internalSubject();
         if (subj == null) {
             throw new IllegalStateException("No subject present for player " + this);
         } else {
-            return subj.getData();
+            return subj.getSubjectData();
         }
     }
 
     @Override
-    public SubjectData getTransientData() {
+    public SubjectData getTransientSubjectData() {
         Subject subj = internalSubject();
         if (subj == null) {
             throw new IllegalStateException("No subject present for player " + this);
         } else {
-            return subj.getTransientData();
+            return subj.getTransientSubjectData();
         }
     }
 

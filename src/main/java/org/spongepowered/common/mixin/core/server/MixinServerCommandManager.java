@@ -133,7 +133,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
                 return;
             }
             if (service instanceof SpongePermissionService) {
-                ((SpongePermissionService) service).getGroupForOpLevel(opLevel).getTransientData().setPermission(SubjectData.GLOBAL_CONTEXT,
+                ((SpongePermissionService) service).getGroupForOpLevel(opLevel).getTransientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT,
                         cmd.getCommandPermission(), Tristate.TRUE);
             } else if (opLevel == 0) {
                 service.getDefaultData().setPermission(SubjectData.GLOBAL_CONTEXT, cmd.getCommandPermission(),

@@ -77,13 +77,13 @@ public abstract class MixinCommandExecuteAtSender implements CommandSource, ICom
     }
 
     @Override
-    public SubjectData getData() {
-        return ((CommandSource) this.field_174802_b).getData();
+    public SubjectData getSubjectData() {
+        return ((CommandSource) this.field_174802_b).getSubjectData();
     }
 
     @Override
-    public SubjectData getTransientData() {
-        return ((CommandSource) this.field_174802_b).getTransientData();
+    public SubjectData getTransientSubjectData() {
+        return ((CommandSource) this.field_174802_b).getTransientSubjectData();
     }
 
     @Override
