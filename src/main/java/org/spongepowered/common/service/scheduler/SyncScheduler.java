@@ -252,6 +252,7 @@ public class SyncScheduler implements SynchronousScheduler {
         if (nonRepeatingTask == null) {
             Sponge.getLogger().warn(SchedulerLogMessages.CANNOT_MAKE_TASK_WARNING);
         } else {
+            nonRepeatingTask.setTimestamp(this.counter);
             resultTask = this.schedulerHelper.utilityForAddingTask(this.taskMap, nonRepeatingTask);
         }
 
@@ -306,6 +307,7 @@ public class SyncScheduler implements SynchronousScheduler {
         if (nonRepeatingTask == null) {
             Sponge.getLogger().warn(SchedulerLogMessages.CANNOT_MAKE_TASK_WARNING);
         } else {
+            nonRepeatingTask.setTimestamp(this.counter);
             resultTask = this.schedulerHelper.utilityForAddingTask(this.taskMap, nonRepeatingTask);
         }
 
@@ -376,6 +378,7 @@ public class SyncScheduler implements SynchronousScheduler {
         if (repeatingTask == null) {
             Sponge.getLogger().warn(SchedulerLogMessages.CANNOT_MAKE_TASK_WARNING);
         } else {
+            repeatingTask.setTimestamp(this.counter);
             resultTask = this.schedulerHelper.utilityForAddingTask(this.taskMap, repeatingTask);
         }
 
@@ -446,6 +449,7 @@ public class SyncScheduler implements SynchronousScheduler {
         if (repeatingTask == null) {
             Sponge.getLogger().warn(SchedulerLogMessages.CANNOT_MAKE_TASK_WARNING);
         } else {
+            repeatingTask.setTimestamp(this.counter);
             resultTask = this.schedulerHelper.utilityForAddingTask(this.taskMap, repeatingTask);
         }
 
