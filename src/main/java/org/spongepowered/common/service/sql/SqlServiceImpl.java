@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.sql;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -169,6 +170,28 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
         public String getFullUrl() {
             return this.fullUrl;
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ConnectionInfo that = (ConnectionInfo) o;
+            return Objects.equal(this.user, that.user)
+                    && Objects.equal(this.password, that.password)
+                    && Objects.equal(this.driverClassName, that.driverClassName)
+                    && Objects.equal(this.authlessUrl, that.authlessUrl)
+                    && Objects.equal(this.fullUrl, that.fullUrl);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.user, this.password, this.driverClassName, this.authlessUrl, this.fullUrl);
         }
 
         /**
