@@ -24,32 +24,35 @@
  */
 package org.spongepowered.common.data.utils;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
 import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.block.tile.Sign;
+import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.tileentities.SignData;
+import org.spongepowered.api.data.manipulator.tileentity.SignData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.DataTransactionBuilder;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.tiles.SpongeSignData;
+import org.spongepowered.common.data.SpongeDataProcessor;
+import org.spongepowered.common.data.manipulators.tileentities.SpongeSignData;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
-@NonnullByDefault
-public class SpongeSignDataUtil implements SpongeDataUtil<SignData> {
+public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
+
+    private static final DataQuery LINES = of("Lines");
 
     @Override
     public Optional<SignData> build(DataView container) throws InvalidDataException {
-        final Optional<List<String>> optRawLines  = container.getStringList(SpongeSignData.LINES);
+        final Optional<List<String>> optRawLines  = container.getStringList(LINES);
         final SignData data = new SpongeSignData();
         if (optRawLines.isPresent()) {
             final List<String> rawLines = optRawLines.get();
@@ -110,5 +113,10 @@ public class SpongeSignDataUtil implements SpongeDataUtil<SignData> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Optional<SignData> getFrom(DataHolder holder) {
+        return Optional.absent();
     }
 }

@@ -30,7 +30,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.InvisibilityData;
+import org.spongepowered.api.data.manipulator.entity.InvisibilityData;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 

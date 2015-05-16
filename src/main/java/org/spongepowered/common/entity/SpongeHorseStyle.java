@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import org.spongepowered.api.data.types.HorseStyle;
+import org.spongepowered.api.data.type.HorseStyle;
 
 public class SpongeHorseStyle extends SpongeEntityMeta implements HorseStyle {
 

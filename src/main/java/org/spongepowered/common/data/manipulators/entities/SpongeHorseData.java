@@ -29,13 +29,13 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.HorseData;
-import org.spongepowered.api.data.types.HorseColor;
-import org.spongepowered.api.data.types.HorseColors;
-import org.spongepowered.api.data.types.HorseStyle;
-import org.spongepowered.api.data.types.HorseStyles;
-import org.spongepowered.api.data.types.HorseVariant;
-import org.spongepowered.api.data.types.HorseVariants;
+import org.spongepowered.api.data.manipulator.entity.HorseData;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseColors;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeHorseData extends SpongeAbstractData<HorseData> implements HorseData {

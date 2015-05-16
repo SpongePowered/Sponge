@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.AngerableData;
+import org.spongepowered.api.data.manipulator.entity.AngerableData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeAngerableData extends AbstractIntData<AngerableData> implements AngerableData {
+
+    public static final DataQuery ANGER = of("Anger");
 
     public SpongeAngerableData() {
         super(AngerableData.class, 10, 0, Integer.MAX_VALUE);
@@ -54,6 +57,6 @@ public class SpongeAngerableData extends AbstractIntData<AngerableData> implemen
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Anger"), this.getValue());
+        return new MemoryDataContainer().set(ANGER, this.getValue());
     }
 }

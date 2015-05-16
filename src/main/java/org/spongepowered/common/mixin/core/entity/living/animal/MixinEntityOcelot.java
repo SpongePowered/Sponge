@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityOcelot;
-import org.spongepowered.api.data.types.OcelotType;
+import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;

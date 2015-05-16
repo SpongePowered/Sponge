@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.utils.blocks;
 
+import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.base.Optional;
@@ -35,57 +36,42 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.blocks.AxisData;
+import org.spongepowered.api.data.manipulator.block.AttachedData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeBlockUtil;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.blocks.SpongeAxisData;
+import org.spongepowered.common.data.SpongeBlockProcessor;
+import org.spongepowered.common.data.SpongeDataProcessor;
+import org.spongepowered.common.data.manipulators.blocks.SpongeAttachedData;
 
-public class SpongeAxisUtil implements SpongeDataUtil<AxisData>, SpongeBlockUtil<AxisData> {
+public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData>, SpongeBlockProcessor<AttachedData> {
 
     @Override
-    public Optional<AxisData> fillData(DataHolder holder, AxisData manipulator, DataPriority priority) {
+    public Optional<AttachedData> build(DataView container) throws InvalidDataException {
+        if (!container.contains(of("Attached"))) {
+            throw new InvalidDataException("Container doesn't contain correct attached data!");
+        }
+        final boolean attached = container.getBoolean(of("Attatched")).get();
+
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, AxisData manipulator, DataPriority priority) {
+    public AttachedData create() {
+        return new SpongeAttachedData();
+    }
+
+    @Override
+    public Optional<AttachedData> createFrom(DataHolder dataHolder) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<AttachedData> fromBlockPos(World world, BlockPos blockPos) {
+        return Optional.absent();
+    }
+
+    @Override
+    public DataTransactionResult setData(World world, BlockPos blockPos, AttachedData manipulator, DataPriority priority) {
         return fail(manipulator);
-    }
-
-    @Override
-    public boolean remove(DataHolder dataHolder) {
-        return false;
-    }
-
-    @Override
-    public Optional<AxisData> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
-    }
-
-    @Override
-    public AxisData create() {
-        return new SpongeAxisData();
-    }
-
-    @Override
-    public Optional<AxisData> createFrom(DataHolder dataHolder) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<AxisData> fromBlockPos(World world, BlockPos blockPos) {
-        return Optional.absent();
-    }
-
-    @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, AxisData manipulator, DataPriority priority) {
-        return fail(manipulator);
-    }
-
-    @Override
-    public Optional<BlockState> removeFrom(IBlockState blockState) {
-        return Optional.absent();
     }
 
     @Override
@@ -94,8 +80,32 @@ public class SpongeAxisUtil implements SpongeDataUtil<AxisData>, SpongeBlockUtil
     }
 
     @Override
-    public Optional<AxisData> createFrom(IBlockState blockState) {
-
+    public Optional<BlockState> removeFrom(IBlockState blockState) {
         return Optional.absent();
+    }
+
+    @Override
+    public Optional<AttachedData> createFrom(IBlockState blockState) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<AttachedData> getFrom(DataHolder holder) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<AttachedData> fillData(DataHolder holder, AttachedData manipulator, DataPriority priority) {
+        return Optional.absent();
+    }
+
+    @Override
+    public DataTransactionResult setData(DataHolder dataHolder, AttachedData manipulator, DataPriority priority) {
+        return fail(manipulator);
+    }
+
+    @Override
+    public boolean remove(DataHolder dataHolder) {
+        return false;
     }
 }

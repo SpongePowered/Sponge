@@ -22,45 +22,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators.tileentities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.NoteData;
-import org.spongepowered.api.data.types.NotePitch;
-import org.spongepowered.api.data.types.NotePitches;
-import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
+import org.spongepowered.api.data.manipulator.tileentity.FurnaceData;
+import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData> implements NoteData {
+public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implements FurnaceData {
 
-    public SpongeNoteData() {
-        super(NoteData.class, NotePitches.F_SHARP0);
+    public static final DataQuery REMAINING_BURN_TIME = of("RemainingBurnTime");
+    public static final DataQuery REMAINING_COOK_TIME = of("RemainingCookTime");
+    private int remainingBurnTime;
+    private int remainingCookTime;
+
+    public SpongeFurnaceData() {
+        super(FurnaceData.class);
     }
 
     @Override
-    public NotePitch getNote() {
-        return getValue();
+    public int getRemainingBurnTime() {
+        return this.remainingBurnTime;
     }
 
     @Override
-    public NoteData setNote(NotePitch note) {
-        return setValue(note);
+    public FurnaceData setRemainingBurnTime(int time) {
+        this.remainingBurnTime = time;
+        return this;
     }
 
     @Override
-    public NoteData copy() {
-        return new SpongeNoteData().setValue(this.getValue());
+    public int getRemainingCookTime() {
+        return this.remainingCookTime;
     }
 
     @Override
-    public int compareTo(NoteData o) {
-        return 0;
+    public FurnaceData setRemainingCookTime(int time) {
+        this.remainingCookTime = time;
+        return this;
+    }
+
+    @Override
+    public FurnaceData copy() {
+        return new SpongeFurnaceData().setRemainingBurnTime(this.remainingBurnTime).setRemainingCookTime(this.remainingCookTime);
+    }
+
+    @Override
+    public int compareTo(FurnaceData o) {
+        return (this.remainingBurnTime - o.getRemainingBurnTime()) - (this.remainingCookTime - o.getRemainingCookTime());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Pitch"), this.getValue().getId());
+        return new MemoryDataContainer().set(REMAINING_BURN_TIME, this.remainingBurnTime).set(REMAINING_COOK_TIME, this.remainingCookTime);
     }
 }

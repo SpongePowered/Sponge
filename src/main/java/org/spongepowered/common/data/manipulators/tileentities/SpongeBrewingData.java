@@ -22,38 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators.tileentities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.CooldownData;
+import org.spongepowered.api.data.manipulator.tileentity.BrewingData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
-public class SpongeCooldownData extends AbstractIntData<CooldownData> implements CooldownData {
+public class SpongeBrewingData extends AbstractIntData<BrewingData> implements BrewingData {
 
-    public SpongeCooldownData() {
-        super(CooldownData.class, 10, 0, Integer.MAX_VALUE);
+    public static final DataQuery REMAINING_BREW_TIME = of("RemainingBrewTime");
+
+    public SpongeBrewingData() {
+        super(BrewingData.class, 0, 0, 100);
     }
 
     @Override
-    public int getCooldown() {
-        return this.getValue();
+    public int getRemainingBrewTime() {
+        return getValue();
     }
 
     @Override
-    public CooldownData setCooldown(int time) {
-        return this.setValue(time);
+    public BrewingData setRemainingBrewTime(int time) {
+        return setValue(time);
     }
 
     @Override
-    public CooldownData copy() {
-        return new SpongeCooldownData().setValue(this.getValue());
+    public BrewingData copy() {
+        return new SpongeBrewingData().setValue(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Cooldown"), this.getValue());
+        return new MemoryDataContainer().set(REMAINING_BREW_TIME, this.getValue());
     }
 }

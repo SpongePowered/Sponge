@@ -34,15 +34,15 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.blocks.PoweredData;
+import org.spongepowered.api.data.manipulator.block.PoweredData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataTransactionBuilder;
-import org.spongepowered.common.data.SpongeBlockUtil;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeBlockProcessor;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.blocks.SpongePoweredData;
 import org.spongepowered.common.interfaces.blocks.IMixinPoweredHolder;
 
-public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlockUtil<PoweredData> {
+public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>, SpongeBlockProcessor<PoweredData> {
 
     @Override
     public Optional<PoweredData> fillData(DataHolder holder, PoweredData manipulator, DataPriority priority) {
@@ -110,6 +110,11 @@ public class SpongePoweredUtil implements SpongeDataUtil<PoweredData>, SpongeBlo
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {
             return Optional.of(((IMixinPoweredHolder) blockState.getBlock()).setUnpowered(blockState));
         }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<PoweredData> getFrom(DataHolder holder) {
         return Optional.absent();
     }
 }

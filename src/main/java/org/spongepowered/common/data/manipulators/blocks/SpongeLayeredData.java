@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.LayeredData;
+import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeLayeredData extends AbstractIntData<LayeredData> implements LayeredData {

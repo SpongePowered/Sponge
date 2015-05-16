@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.SaddleData;
+import org.spongepowered.api.data.manipulator.entity.SaddleData;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;

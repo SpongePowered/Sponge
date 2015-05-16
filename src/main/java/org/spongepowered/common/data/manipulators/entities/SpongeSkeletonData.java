@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.SkeletonData;
-import org.spongepowered.api.data.types.SkeletonType;
-import org.spongepowered.api.data.types.SkeletonTypes;
+import org.spongepowered.api.data.manipulator.entity.SkeletonData;
+import org.spongepowered.api.data.type.SkeletonType;
+import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeSkeletonData extends AbstractSingleValueData<SkeletonType, SkeletonData> implements SkeletonData {

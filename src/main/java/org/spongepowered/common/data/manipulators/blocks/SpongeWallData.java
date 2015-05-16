@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.WallData;
-import org.spongepowered.api.data.types.WallType;
-import org.spongepowered.api.data.types.WallTypes;
+import org.spongepowered.api.data.manipulator.block.WallData;
+import org.spongepowered.api.data.type.WallType;
+import org.spongepowered.api.data.type.WallTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeWallData extends AbstractSingleValueData<WallType, WallData> implements WallData {

@@ -22,58 +22,76 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators.tileentities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.FurnaceData;
+import org.spongepowered.api.data.manipulator.tileentity.SignData;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
-public class SpongeFurnaceData extends SpongeAbstractData<FurnaceData> implements FurnaceData {
+import java.util.List;
 
-    private int remainingBurnTime;
-    private int remainingCookTime;
+@NonnullByDefault
+public class SpongeSignData extends SpongeAbstractData<SignData> implements SignData {
+    public static final DataQuery LINES = new DataQuery("Lines");
+    private final List<Text> lines;
 
-    public SpongeFurnaceData() {
-        super(FurnaceData.class);
+    public SpongeSignData() {
+        this(Lists.newArrayList(Texts.of(), Texts.of(), Texts.of(), Texts.of()));
+    }
+
+    public SpongeSignData(List<Text> lines) {
+        super(SignData.class);
+        this.lines = lines;
     }
 
     @Override
-    public int getRemainingBurnTime() {
-        return this.remainingBurnTime;
+    public List<Text> getLines() {
+        return this.lines;
     }
 
     @Override
-    public FurnaceData setRemainingBurnTime(int time) {
-        this.remainingBurnTime = time;
+    public Text getLine(int index) throws IndexOutOfBoundsException {
+        return this.lines.get(index);
+    }
+
+    @Override
+    public SignData setLine(int index, Text text) throws IndexOutOfBoundsException {
+        this.lines.set(index, text);
         return this;
     }
 
     @Override
-    public int getRemainingCookTime() {
-        return this.remainingCookTime;
-    }
-
-    @Override
-    public FurnaceData setRemainingCookTime(int time) {
-        this.remainingCookTime = time;
+    public SignData reset() {
+        for (int i = 0; i < this.lines.size(); i++) {
+            this.lines.set(i, Texts.of());
+        }
         return this;
     }
 
     @Override
-    public FurnaceData copy() {
-        return new SpongeFurnaceData().setRemainingBurnTime(this.remainingBurnTime).setRemainingCookTime(this.remainingCookTime);
+    public SignData copy() {
+        return new SpongeSignData(Lists.newArrayList(this.lines));
     }
 
     @Override
-    public int compareTo(FurnaceData o) {
-        return (this.remainingBurnTime - o.getRemainingBurnTime()) - (this.remainingCookTime - o.getRemainingCookTime());
+    public int compareTo(SignData o) {
+        return 0;
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("RemainingBurnTime"), this.remainingBurnTime).set(of("RemainingCookTime"), this.remainingCookTime);
+        List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
+        for (Text line : this.lines) {
+            jsonLines.add(Texts.toJson(line));
+        }
+        return new MemoryDataContainer().set(LINES, jsonLines);
     }
 }

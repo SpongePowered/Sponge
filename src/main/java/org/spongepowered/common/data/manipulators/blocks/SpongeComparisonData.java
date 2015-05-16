@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.ComparisonData;
-import org.spongepowered.api.data.types.Comparison;
-import org.spongepowered.api.data.types.Comparisons;
+import org.spongepowered.api.data.manipulator.block.ComparisonData;
+import org.spongepowered.api.data.type.Comparison;
+import org.spongepowered.api.data.type.Comparisons;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeComparisonData extends AbstractSingleValueData<Comparison, ComparisonData> implements ComparisonData {

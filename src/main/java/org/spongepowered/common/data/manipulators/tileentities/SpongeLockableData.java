@@ -22,33 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.blocks;
+package org.spongepowered.common.data.manipulators.tileentities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.block.OccupiedData;
-import org.spongepowered.common.data.manipulators.SpongeAbstractData;
+import org.spongepowered.api.data.manipulator.tileentity.LockableData;
+import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-public class SpongeSnowedData extends SpongeAbstractData<OccupiedData> implements OccupiedData {
+public class SpongeLockableData extends AbstractSingleValueData<String, LockableData> implements LockableData {
 
-    public SpongeSnowedData() {
-        super(OccupiedData.class);
+    public static final DataQuery LOCK = of("Lock");
+
+    public SpongeLockableData() {
+        super(LockableData.class, "");
     }
 
     @Override
-    public OccupiedData copy() {
-        return new SpongeSnowedData();
+    public String getLockToken() {
+        return this.getValue();
     }
 
     @Override
-    public int compareTo(OccupiedData o) {
-        return 0;
+    public LockableData setLockToken(String token) {
+        return setValue(token);
+    }
+
+    @Override
+    public LockableData copy() {
+        return new SpongeLockableData().setValue(this.getValue());
+    }
+
+    @Override
+    public int compareTo(LockableData o) {
+        return this.getValue().compareTo(o.getLockToken());
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Snowed"), true);
+        return new MemoryDataContainer().set(LOCK, this.getValue());
     }
 }

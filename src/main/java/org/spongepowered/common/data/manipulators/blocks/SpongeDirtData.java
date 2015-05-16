@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.DirtData;
-import org.spongepowered.api.data.types.DirtType;
-import org.spongepowered.api.data.types.DirtTypes;
+import org.spongepowered.api.data.manipulator.block.DirtData;
+import org.spongepowered.api.data.type.DirtType;
+import org.spongepowered.api.data.type.DirtTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeDirtData extends AbstractSingleValueData<DirtType, DirtData> implements DirtData {

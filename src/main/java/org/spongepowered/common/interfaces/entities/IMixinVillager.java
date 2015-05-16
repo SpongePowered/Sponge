@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.interfaces.entities;
 
-import org.spongepowered.api.data.types.Career;
+import org.spongepowered.api.data.type.Career;
 
 public interface IMixinVillager {
 

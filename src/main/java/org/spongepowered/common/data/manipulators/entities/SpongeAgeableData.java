@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.AgeableData;
+import org.spongepowered.api.data.manipulator.entity.AgeableData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeAgeableData extends AbstractIntData<AgeableData> implements AgeableData {
+
+    public static final DataQuery AGE = of("Age");
 
     public SpongeAgeableData() {
         super(AgeableData.class, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -69,6 +72,6 @@ public class SpongeAgeableData extends AbstractIntData<AgeableData> implements A
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Age"), this.getValue());
+        return new MemoryDataContainer().set(AGE, this.getValue());
     }
 }

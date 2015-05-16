@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.InstrumentData;
-import org.spongepowered.api.data.types.InstrumentType;
-import org.spongepowered.api.data.types.InstrumentTypes;
+import org.spongepowered.api.data.manipulator.block.InstrumentData;
+import org.spongepowered.api.data.type.InstrumentType;
+import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeInstrumentData extends AbstractSingleValueData<InstrumentType, InstrumentData> implements InstrumentData {

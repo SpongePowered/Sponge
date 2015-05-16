@@ -24,12 +24,16 @@
  */
 package org.spongepowered.common.data.manipulators;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.FuseData;
+import org.spongepowered.api.data.manipulator.entity.FuseData;
 
 public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseData {
+
+    public static final DataQuery FUSE = of("Fuse");
 
     public SpongeFuseData() {
         super(FuseData.class, 10, 0, Integer.MAX_VALUE);
@@ -52,6 +56,6 @@ public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(DataQuery.of("Fuse"), this.getValue());
+        return new MemoryDataContainer().set(FUSE, this.getValue());
     }
 }

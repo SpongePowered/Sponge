@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.ChargedData;
+import org.spongepowered.api.data.manipulator.entity.ChargedData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeChargedData extends SpongeAbstractData<ChargedData> implements ChargedData {
+
+    public static final DataQuery CHARGED = of("Charged");
 
     public SpongeChargedData() {
         super(ChargedData.class);
@@ -49,6 +52,6 @@ public class SpongeChargedData extends SpongeAbstractData<ChargedData> implement
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Charged"), true);
+        return new MemoryDataContainer().set(CHARGED, true);
     }
 }

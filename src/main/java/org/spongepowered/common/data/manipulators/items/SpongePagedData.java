@@ -28,8 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.PagedData;
+import org.spongepowered.api.data.manipulator.item.PagedData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulators.AbstractListData;
@@ -37,6 +38,8 @@ import org.spongepowered.common.data.manipulators.AbstractListData;
 import java.util.List;
 
 public class SpongePagedData extends AbstractListData<Text, PagedData> implements PagedData {
+
+    public static final DataQuery PAGES = of("Pages");
 
     public SpongePagedData() {
         super(PagedData.class);
@@ -58,6 +61,6 @@ public class SpongePagedData extends AbstractListData<Text, PagedData> implement
         for (Text text : this.elementList) {
             lore.add(Texts.toJson(text));
         }
-        return new MemoryDataContainer().set(of("Pages"), lore);
+        return new MemoryDataContainer().set(PAGES, lore);
     }
 }

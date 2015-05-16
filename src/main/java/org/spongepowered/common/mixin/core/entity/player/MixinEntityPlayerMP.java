@@ -40,7 +40,7 @@ import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.net.PlayerConnection;
+import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;

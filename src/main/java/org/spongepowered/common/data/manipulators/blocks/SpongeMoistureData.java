@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.MoistureData;
+import org.spongepowered.api.data.manipulator.block.MoistureData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeMoistureData extends AbstractIntData<MoistureData> implements MoistureData {

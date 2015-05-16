@@ -37,12 +37,12 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.entities.HealthData;
+import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.entities.SpongeHealthData;
 
-public class SpongeHealthUtil implements SpongeDataUtil<HealthData> {
+public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
 
     private static final DataQuery HEALTH_QUERY = of("Health");
     private static final DataQuery MAX_HEALTH_QUERY = of("MaxHealth");
@@ -130,5 +130,10 @@ public class SpongeHealthUtil implements SpongeDataUtil<HealthData> {
         final double maxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
         final double health = ((EntityLivingBase) dataHolder).getHealth();
         return Optional.of(create().setMaxHealth(maxHealth).setHealth(health));
+    }
+
+    @Override
+    public Optional<HealthData> getFrom(DataHolder holder) {
+        return Optional.absent();
     }
 }

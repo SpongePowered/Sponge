@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.SizeData;
+import org.spongepowered.api.data.manipulator.entity.SizeData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeSizeData extends SpongeAbstractData<SizeData> implements SizeData {

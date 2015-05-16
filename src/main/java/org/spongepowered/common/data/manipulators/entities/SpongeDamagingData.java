@@ -32,7 +32,7 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.DamagingData;
+import org.spongepowered.api.data.manipulator.entity.DamagingData;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 

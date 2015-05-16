@@ -27,10 +27,13 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.WetData;
+import org.spongepowered.api.data.manipulator.WetData;
 
 public class SpongeWetData extends SpongeAbstractData<WetData> implements WetData {
+
+    public static final DataQuery IS_WET = of("IsWet");
 
     public SpongeWetData() {
         super(WetData.class);
@@ -48,6 +51,6 @@ public class SpongeWetData extends SpongeAbstractData<WetData> implements WetDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsWet"), true);
+        return new MemoryDataContainer().set(IS_WET, true);
     }
 }

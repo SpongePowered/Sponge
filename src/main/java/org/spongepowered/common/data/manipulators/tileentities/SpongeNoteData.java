@@ -22,43 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators.tileentities;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.LockableData;
+import org.spongepowered.api.data.manipulator.tileentity.NoteData;
+import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
-public class SpongeLockableData extends AbstractSingleValueData<String, LockableData> implements LockableData {
+public class SpongeNoteData extends AbstractSingleValueData<NotePitch, NoteData> implements NoteData {
 
-    public SpongeLockableData() {
-        super(LockableData.class, "");
+    public static final DataQuery PITCH = of("Pitch");
+
+    public SpongeNoteData() {
+        super(NoteData.class, NotePitches.F_SHARP0);
     }
 
     @Override
-    public String getLockToken() {
-        return this.getValue();
+    public NotePitch getNote() {
+        return getValue();
     }
 
     @Override
-    public LockableData setLockToken(String token) {
-        return setValue(token);
+    public NoteData setNote(NotePitch note) {
+        return setValue(note);
     }
 
     @Override
-    public LockableData copy() {
-        return new SpongeLockableData().setValue(this.getValue());
+    public NoteData copy() {
+        return new SpongeNoteData().setValue(this.getValue());
     }
 
     @Override
-    public int compareTo(LockableData o) {
-        return this.getValue().compareTo(o.getLockToken());
+    public int compareTo(NoteData o) {
+        return 0;
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Lock"), this.getValue());
+        return new MemoryDataContainer().set(PITCH, this.getValue().getId());
     }
 }

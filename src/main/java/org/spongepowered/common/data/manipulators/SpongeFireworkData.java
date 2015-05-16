@@ -28,12 +28,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.FireworkData;
+import org.spongepowered.api.data.manipulator.FireworkData;
 import org.spongepowered.api.item.FireworkEffect;
 
 public class SpongeFireworkData extends AbstractListData<FireworkEffect, FireworkData> implements FireworkData {
 
+    public static final DataQuery FIREWORK_EFFECTS = of("FireworkEffects");
+    public static final DataQuery FLIGHT_MODIFIER = of("FlightModifier");
     private int modifier = 0;
 
     public SpongeFireworkData() {
@@ -65,7 +68,7 @@ public class SpongeFireworkData extends AbstractListData<FireworkEffect, Firewor
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("FireworkEffects"), this.elementList)
-                .set(of("FlightModifier"), this.modifier);
+                .set(FIREWORK_EFFECTS, this.elementList)
+                .set(FLIGHT_MODIFIER, this.modifier);
     }
 }

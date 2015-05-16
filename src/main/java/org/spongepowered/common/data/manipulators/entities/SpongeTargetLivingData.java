@@ -29,7 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.TargetLivingData;
+import org.spongepowered.api.data.manipulator.entity.TargetLivingData;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulators.AbstractListData;
 

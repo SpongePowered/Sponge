@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.RailDirectionData;
-import org.spongepowered.api.data.types.RailDirection;
-import org.spongepowered.api.data.types.RailDirections;
+import org.spongepowered.api.data.manipulator.block.RailDirectionData;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeRailDirectionData extends AbstractSingleValueData<RailDirection, RailDirectionData> implements RailDirectionData {

@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.ShrubData;
-import org.spongepowered.api.data.types.ShrubType;
-import org.spongepowered.api.data.types.ShrubTypes;
+import org.spongepowered.api.data.manipulator.block.ShrubData;
+import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeShrubData extends AbstractSingleValueData<ShrubType, ShrubData> implements ShrubData {

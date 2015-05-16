@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators.items;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.SpawnableData;
+import org.spongepowered.api.data.manipulator.item.SpawnableData;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeSpawnableData extends AbstractSingleValueData<EntityType, SpawnableData> implements SpawnableData {
+
+    public static final DataQuery SPAWNABLE_ENTITY = of("SpawnableEntity");
 
     public SpongeSpawnableData() {
         super(SpawnableData.class, EntityTypes.CREEPER);
@@ -51,6 +54,6 @@ public class SpongeSpawnableData extends AbstractSingleValueData<EntityType, Spa
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SpawnableEntity"), this.getValue().getId());
+        return new MemoryDataContainer().set(SPAWNABLE_ENTITY, this.getValue().getId());
     }
 }

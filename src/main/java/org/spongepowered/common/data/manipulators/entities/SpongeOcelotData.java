@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.OcelotData;
-import org.spongepowered.api.data.types.OcelotType;
-import org.spongepowered.api.data.types.OcelotTypes;
+import org.spongepowered.api.data.manipulator.entity.OcelotData;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeOcelotData extends AbstractSingleValueData<OcelotType, OcelotData> implements OcelotData {

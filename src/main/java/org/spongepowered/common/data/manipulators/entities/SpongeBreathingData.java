@@ -27,11 +27,15 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.BreathingData;
+import org.spongepowered.api.data.manipulator.entity.BreathingData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeBreathingData extends AbstractIntData<BreathingData> implements BreathingData {
+
+    public static final DataQuery REMAINING_AIR = of("RemainingAir");
+    public static final DataQuery MAX_AIR = of("MaxAir");
 
     public SpongeBreathingData(int max) {
         super(BreathingData.class, 0, 0, max);
@@ -70,7 +74,7 @@ public class SpongeBreathingData extends AbstractIntData<BreathingData> implemen
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("RemainingAir"), this.getValue())
-                .set(of("MaxAir"), this.getMaxValue());
+                .set(REMAINING_AIR, this.getValue())
+                .set(MAX_AIR, this.getMaxValue());
     }
 }

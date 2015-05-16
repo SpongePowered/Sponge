@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.TradeOfferData;
+import org.spongepowered.api.data.manipulator.entity.TradeOfferData;
 import org.spongepowered.api.item.merchant.TradeOffer;
 
 import java.util.List;
 
 public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOfferData> implements TradeOfferData {
+
+    public static final DataQuery OFFERS = of("Offers");
 
     public SpongeTradeOfferData() {
         super(TradeOfferData.class);
@@ -66,6 +69,6 @@ public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOffe
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Offers"), this.elementList);
+        return new MemoryDataContainer().set(OFFERS, this.elementList);
     }
 }

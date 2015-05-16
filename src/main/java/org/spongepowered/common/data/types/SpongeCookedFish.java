@@ -26,7 +26,7 @@ package org.spongepowered.common.data.types;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.types.CookedFish;
+import org.spongepowered.api.data.type.CookedFish;
 
 public class SpongeCookedFish implements CookedFish {
 

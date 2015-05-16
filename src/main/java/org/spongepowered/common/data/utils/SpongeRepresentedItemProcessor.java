@@ -34,15 +34,15 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.RepresentedItemData;
+import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.SpongeRepresentedItemData;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 
-public class SpongeRepresentedItemBuilder implements SpongeDataUtil<RepresentedItemData> {
+public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<RepresentedItemData> {
 
     @Override
     public Optional<RepresentedItemData> fillData(DataHolder holder, RepresentedItemData manipulator, DataPriority priority) {
@@ -91,6 +91,11 @@ public class SpongeRepresentedItemBuilder implements SpongeDataUtil<RepresentedI
             old.setValue(clone);
             return Optional.of(old);
         }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<RepresentedItemData> getFrom(DataHolder holder) {
         return Optional.absent();
     }
 }

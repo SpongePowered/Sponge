@@ -56,7 +56,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.SpongeBlockUtil;
+import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.blocks.IMixinBlock;
@@ -178,7 +178,7 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
-        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
+        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
         if (blockUtilOptional.isPresent()) {
             return blockUtilOptional.get().fromBlockPos(this.worldObj, new BlockPos(x, y, z));
         }
@@ -188,7 +188,7 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
         if (blockUtilOptional.isPresent()) {
             return blockUtilOptional.get().fromBlockPos(this.worldObj, new BlockPos(x, y, z));
         }
@@ -197,7 +197,7 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
         if (blockUtilOptional.isPresent()) {
             return blockUtilOptional.get().remove(this.worldObj, new BlockPos(x, y, z));
         }
@@ -208,7 +208,7 @@ public abstract class MixinChunk implements Chunk {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
-        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
+        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
                 .getClass());
         if (blockUtilOptional.isPresent()) {
             return blockUtilOptional.get().setData(this.worldObj, new BlockPos(x, y, z), manipulatorData, priority);

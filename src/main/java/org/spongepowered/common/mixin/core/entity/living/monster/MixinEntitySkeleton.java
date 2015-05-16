@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.types.SkeletonType;
+import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.entity.living.monster.Skeleton;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;

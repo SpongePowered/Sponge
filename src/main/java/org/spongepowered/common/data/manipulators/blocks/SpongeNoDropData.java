@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.NoDropData;
+import org.spongepowered.api.data.manipulator.block.NoDropData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeNoDropData extends SpongeAbstractData<NoDropData> implements NoDropData {

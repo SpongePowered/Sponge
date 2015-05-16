@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import org.spongepowered.api.block.tile.DaylightDetector;
-import org.spongepowered.api.block.tile.TileEntityType;
-import org.spongepowered.api.block.tile.TileEntityTypes;
+import org.spongepowered.api.block.tileentity.DaylightDetector;
+import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.tileentity.TileEntityDaylightDetector.class)

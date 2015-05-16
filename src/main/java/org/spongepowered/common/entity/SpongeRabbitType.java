@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import org.spongepowered.api.data.types.RabbitType;
+import org.spongepowered.api.data.type.RabbitType;
 
 public class SpongeRabbitType extends SpongeEntityMeta implements RabbitType {
 

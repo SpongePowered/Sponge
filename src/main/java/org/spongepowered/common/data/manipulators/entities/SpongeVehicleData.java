@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.VehicleData;
+import org.spongepowered.api.data.manipulator.entity.VehicleData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 

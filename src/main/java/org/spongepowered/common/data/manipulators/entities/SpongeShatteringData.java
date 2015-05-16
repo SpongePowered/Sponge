@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.ShatteringData;
+import org.spongepowered.api.data.manipulator.entity.ShatteringData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeShatteringData extends SpongeAbstractData<ShatteringData> implements ShatteringData {

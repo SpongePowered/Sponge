@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.GriefingData;
+import org.spongepowered.api.data.manipulator.entity.GriefingData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeGriefingData extends SpongeAbstractData<GriefingData> implements GriefingData {

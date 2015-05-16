@@ -27,7 +27,7 @@ package org.spongepowered.common.data.builders.block.tile;
 import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.block.tile.MobSpawner;
+import org.spongepowered.api.block.tileentity.MobSpawner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 

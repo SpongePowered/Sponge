@@ -32,7 +32,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.FallingBlockData;
+import org.spongepowered.api.data.manipulator.entity.FallingBlockData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeFallingBlockData extends SpongeAbstractData<FallingBlockData> implements FallingBlockData {

@@ -29,12 +29,14 @@ import static org.spongepowered.api.data.DataQuery.of;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.BlockItemData;
-import org.spongepowered.common.data.SpongeBlockStateBuilder;
+import org.spongepowered.api.data.manipulator.item.BlockItemData;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeBlockItemData extends AbstractSingleValueData<BlockState, BlockItemData> implements BlockItemData {
+
+    public static final DataQuery BLOCK_STATE = of("BlockState");
 
     public SpongeBlockItemData() {
         super(BlockItemData.class, BlockTypes.STONE.getDefaultState());
@@ -63,6 +65,6 @@ public class SpongeBlockItemData extends AbstractSingleValueData<BlockState, Blo
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BlockState"), this.getValue());
+        return new MemoryDataContainer().set(BLOCK_STATE, this.getValue());
     }
 }

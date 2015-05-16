@@ -39,8 +39,8 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
     private static final SpongeManipulatorRegistry instance = new SpongeManipulatorRegistry();
 
     private final Map<Class<? extends DataManipulator<?>>, DataManipulatorBuilder<?>> builderMap = new MapMaker().concurrencyLevel(4).makeMap();
-    private final Map<Class<? extends DataManipulator<?>>, SpongeDataUtil<?>> utilMap = new MapMaker().concurrencyLevel(4).makeMap();
-    private final Map<Class<? extends DataManipulator<?>>, SpongeBlockUtil<?>> blockMap = new MapMaker().concurrencyLevel(4).makeMap();
+    private final Map<Class<? extends DataManipulator<?>>, SpongeDataProcessor<?>> utilMap = new MapMaker().concurrencyLevel(4).makeMap();
+    private final Map<Class<? extends DataManipulator<?>>, SpongeBlockProcessor<?>> blockMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     private SpongeManipulatorRegistry() {
     }
@@ -54,7 +54,7 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
         if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
             this.builderMap.put(manipulatorClass, checkNotNull(builder));
         } else {
-            throw new IllegalStateException("Already registered the DataManipulatorBuilder for " + manipulatorClass.getCanonicalName());
+            throw new IllegalStateException("Already registered the DataUtil for " + manipulatorClass.getCanonicalName());
         }
     }
 
@@ -64,7 +64,7 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
         return Optional.fromNullable((DataManipulatorBuilder<T>) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 
-    public <T extends DataManipulator<T>> void registerDataUtil(Class<T> manipulatorclass, SpongeDataUtil<T> setter) {
+    public <T extends DataManipulator<T>> void registerDataUtil(Class<T> manipulatorclass, SpongeDataProcessor<T> setter) {
         if (!this.utilMap.containsKey(checkNotNull(manipulatorclass))) {
             this.utilMap.put(manipulatorclass, checkNotNull(setter));
         } else {
@@ -73,21 +73,21 @@ public class SpongeManipulatorRegistry implements DataManipulatorRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends DataManipulator<T>> Optional<SpongeDataUtil<T>> getUtil(Class<T> manipulatorClass) {
-        return Optional.fromNullable((SpongeDataUtil<T>) (Object) this.utilMap.get(checkNotNull(manipulatorClass)));
+    public <T extends DataManipulator<T>> Optional<SpongeDataProcessor<T>> getUtil(Class<T> manipulatorClass) {
+        return Optional.fromNullable((SpongeDataProcessor<T>) (Object) this.utilMap.get(checkNotNull(manipulatorClass)));
     }
 
-    public <T extends DataManipulator<T>> void registerBlockUtil(Class<T> manipulatorclass, SpongeBlockUtil<T> util) {
+    public <T extends DataManipulator<T>> void registerBlockUtil(Class<T> manipulatorclass, SpongeBlockProcessor<T> util) {
         if (!this.blockMap.containsKey(checkNotNull(manipulatorclass))) {
             this.blockMap.put(manipulatorclass, checkNotNull(util));
         } else {
-            throw new IllegalStateException("Already registered a SpongeBlockUtil for the given DataManipulator: " + manipulatorclass
+            throw new IllegalStateException("Already registered a SpongeBlockProcessor for the given DataManipulator: " + manipulatorclass
                     .getCanonicalName());
         }
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends DataManipulator<T>> Optional<SpongeBlockUtil<T>> getBlockUtil(Class<T> manipulatorClass) {
-        return Optional.fromNullable((SpongeBlockUtil<T>) (Object) this.blockMap.get(checkNotNull(manipulatorClass)));
+    public <T extends DataManipulator<T>> Optional<SpongeBlockProcessor<T>> getBlockUtil(Class<T> manipulatorClass) {
+        return Optional.fromNullable((SpongeBlockProcessor<T>) (Object) this.blockMap.get(checkNotNull(manipulatorClass)));
     }
 }

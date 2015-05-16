@@ -28,12 +28,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.types.HorseColor;
-import org.spongepowered.api.data.types.HorseStyle;
-import org.spongepowered.api.data.types.HorseVariant;
-import org.spongepowered.api.data.types.OcelotType;
-import org.spongepowered.api.data.types.RabbitType;
-import org.spongepowered.api.data.types.SkeletonType;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.SkeletonType;
 
 import java.util.Collection;
 import java.util.Map;

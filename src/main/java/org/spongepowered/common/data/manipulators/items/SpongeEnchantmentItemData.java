@@ -35,10 +35,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.EnchantmentData;
+import org.spongepowered.api.data.manipulator.item.EnchantmentData;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.common.data.manipulators.AbstractMappedData;
 import org.spongepowered.common.data.meta.SpongeEnchantment;
@@ -48,6 +49,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class SpongeEnchantmentItemData extends AbstractMappedData<Enchantment, Integer, EnchantmentData> implements EnchantmentData {
+
+    public static final DataQuery ENCHANTMENTS = of("Enchantments");
 
     public SpongeEnchantmentItemData() {
         super(EnchantmentData.class);
@@ -131,7 +134,7 @@ public class SpongeEnchantmentItemData extends AbstractMappedData<Enchantment, I
             SpongeEnchantment enchantment = new SpongeEnchantment(entry.getKey(), entry.getValue());
             enchantments.add(enchantment.toContainer());
         }
-        return new MemoryDataContainer().set(of("Enchantments"), enchantments);
+        return new MemoryDataContainer().set(ENCHANTMENTS, enchantments);
     }
 
     private Set<Enchantment> getIncompatibleEnchantments(final Enchantment query) {

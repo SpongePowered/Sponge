@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import org.spongepowered.api.data.types.HorseVariant;
+import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.text.translation.Translation;
 
 public class SpongeHorseVariant extends SpongeEntityMeta implements HorseVariant {

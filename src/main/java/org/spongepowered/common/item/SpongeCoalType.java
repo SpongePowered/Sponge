@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item;
 
-import org.spongepowered.api.data.types.CoalType;
+import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 
 public class SpongeCoalType extends SpongeEntityMeta implements CoalType {

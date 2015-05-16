@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.PortionData;
-import org.spongepowered.api.data.types.PortionType;
-import org.spongepowered.api.data.types.PortionTypes;
+import org.spongepowered.api.data.manipulator.block.PortionData;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongePortionData extends AbstractSingleValueData<PortionType, PortionData> implements PortionData {

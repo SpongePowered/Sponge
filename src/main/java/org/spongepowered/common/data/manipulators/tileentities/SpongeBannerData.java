@@ -22,18 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators.tileentities;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.BannerData;
-import org.spongepowered.api.data.types.BannerPatternShape;
-import org.spongepowered.api.data.types.DyeColor;
-import org.spongepowered.api.data.types.DyeColors;
+import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.type.BannerPatternShape;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.common.data.manipulators.AbstractListData;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 
@@ -41,6 +42,8 @@ import java.util.List;
 
 public class SpongeBannerData extends AbstractListData<BannerData.PatternLayer, BannerData> implements BannerData {
 
+    public static final DataQuery BASE_COLOR = of("BaseColor");
+    public static final DataQuery LAYERS = of("Layers");
     private DyeColor baseColor = DyeColors.WHITE;
 
     public SpongeBannerData() {
@@ -92,6 +95,6 @@ public class SpongeBannerData extends AbstractListData<BannerData.PatternLayer, 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BaseColor"), this.baseColor.getId()).set(of("Layers"), this.elementList);
+        return new MemoryDataContainer().set(BASE_COLOR, this.baseColor.getId()).set(LAYERS, this.elementList);
     }
 }

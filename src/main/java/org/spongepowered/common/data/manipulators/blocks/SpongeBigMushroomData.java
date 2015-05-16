@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.BigMushroomData;
-import org.spongepowered.api.data.types.BigMushroomType;
-import org.spongepowered.api.data.types.BigMushroomTypes;
+import org.spongepowered.api.data.manipulator.block.BigMushroomData;
+import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeBigMushroomData extends AbstractSingleValueData<BigMushroomType, BigMushroomData> implements BigMushroomData {

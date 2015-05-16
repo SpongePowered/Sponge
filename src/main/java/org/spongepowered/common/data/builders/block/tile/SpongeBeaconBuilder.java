@@ -30,13 +30,13 @@ import com.google.common.base.Optional;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.block.tile.carrier.Beacon;
+import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.tileentities.BeaconData;
+import org.spongepowered.api.data.manipulator.tileentity.BeaconData;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.manipulators.tiles.SpongeBeaconData;
+import org.spongepowered.common.data.manipulators.tileentities.SpongeBeaconData;
 
 public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
 

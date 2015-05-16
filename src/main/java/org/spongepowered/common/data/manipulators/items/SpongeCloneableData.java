@@ -27,11 +27,15 @@ package org.spongepowered.common.data.manipulators.items;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.CloneableData;
+import org.spongepowered.api.data.manipulator.item.CloneableData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeCloneableData extends AbstractIntData<CloneableData> implements CloneableData {
+
+    public static final DataQuery CLONED_GENERATION = of("ClonedGeneration");
+    public static final DataQuery MAX_CLONE_GENERATION = of("MaxCloneGeneration");
 
     public SpongeCloneableData() {
         this(3);
@@ -64,7 +68,7 @@ public class SpongeCloneableData extends AbstractIntData<CloneableData> implemen
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("ClonedGeneration"), this.getValue())
-                .set(of("MaxCloneGeneration"), this.getMaxValue());
+                .set(CLONED_GENERATION, this.getValue())
+                .set(MAX_CLONE_GENERATION, this.getMaxValue());
     }
 }

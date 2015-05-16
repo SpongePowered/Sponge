@@ -30,8 +30,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.DamageableData;
+import org.spongepowered.api.data.manipulator.entity.DamageableData;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
@@ -39,6 +40,8 @@ import java.lang.ref.WeakReference;
 
 public class SpongeDamageableData extends SpongeAbstractData<DamageableData> implements DamageableData {
 
+    public static final DataQuery LAST_ATTACKER = of("LastAttacker");
+    public static final DataQuery LAST_DAMAGE = of("LastDamage");
     private WeakReference<Living> lastAttacker;
     private double lastDamage;
     private int invulnTicks;
@@ -117,8 +120,8 @@ public class SpongeDamageableData extends SpongeAbstractData<DamageableData> imp
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("LastAttacker"), this.lastAttacker.get() == null ? "none" : this.lastAttacker.get().getUniqueId())
-                .set(of("LastDamage"), this.lastDamage)
+                .set(LAST_ATTACKER, this.lastAttacker.get() == null ? "none" : this.lastAttacker.get().getUniqueId())
+                .set(LAST_DAMAGE, this.lastDamage)
                 .set(of("InvulnerabilityTicks"), this.invulnTicks)
                 .set(of("MaxInvulnerabilityTicks"), this.maxInvulnTicks);
     }

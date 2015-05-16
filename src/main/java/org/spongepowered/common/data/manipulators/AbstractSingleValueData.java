@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.data.manipulators.SingleValueData;
+import org.spongepowered.api.data.manipulator.SingleValueData;
 
 public abstract class AbstractSingleValueData<V, T extends SingleValueData<V, T>> extends SpongeAbstractData<T> implements SingleValueData<V, T> {
 

@@ -32,7 +32,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.tile.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
@@ -43,7 +43,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.SpongeBlockUtil;
+import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 import java.util.Collection;
@@ -73,7 +73,7 @@ public abstract class MixinExtent implements Extent {
 
     @Override
     public <T extends DataManipulator<T>> boolean isCompatible(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockUtil<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
+        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
         return blockUtilOptional.isPresent(); // TODO for now, this is what we have to deal with...
     }
 

@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.SkullData;
-import org.spongepowered.api.data.types.SkullType;
-import org.spongepowered.api.data.types.SkullTypes;
+import org.spongepowered.api.data.manipulator.SkullData;
+import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.data.type.SkullTypes;
 
 public class SpongeSkullData extends AbstractSingleValueData<SkullType, SkullData> implements SkullData {
+
+    public static final DataQuery TYPE = of("Type");
 
     public SpongeSkullData() {
         super(SkullData.class, SkullTypes.SKELETON);
@@ -50,6 +53,6 @@ public class SpongeSkullData extends AbstractSingleValueData<SkullType, SkullDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Type"), this.getValue());
+        return new MemoryDataContainer().set(TYPE, this.getValue());
     }
 }

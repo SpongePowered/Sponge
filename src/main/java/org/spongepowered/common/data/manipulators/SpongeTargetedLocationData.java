@@ -28,11 +28,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.TargetedLocationData;
+import org.spongepowered.api.data.manipulator.TargetedLocationData;
 import org.spongepowered.api.world.Location;
 
 public class SpongeTargetedLocationData extends AbstractSingleValueData<Location, TargetedLocationData> implements TargetedLocationData {
+
+    public static final DataQuery LOCATION = of("Location");
 
     public SpongeTargetedLocationData(Location location) {
         super(TargetedLocationData.class, checkNotNull(location));
@@ -53,6 +56,6 @@ public class SpongeTargetedLocationData extends AbstractSingleValueData<Location
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Location"), this.getValue());
+        return new MemoryDataContainer().set(LOCATION, this.getValue());
     }
 }

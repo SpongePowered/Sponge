@@ -35,12 +35,12 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.entities.FoodData;
+import org.spongepowered.api.data.manipulator.entity.FoodData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.entities.SpongeFoodData;
 
-public class SpongeFoodDataUtil implements SpongeDataUtil<FoodData> {
+public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
 
     @Override
     public Optional<FoodData> fillData(DataHolder holder, FoodData manipulator, DataPriority priority) {
@@ -115,5 +115,10 @@ public class SpongeFoodDataUtil implements SpongeDataUtil<FoodData> {
         foodData.setFoodLevel(foodStats.getFoodLevel());
         foodData.setSaturation(foodStats.getSaturationLevel());
         return Optional.of(foodData);
+    }
+
+    @Override
+    public Optional<FoodData> getFrom(DataHolder holder) {
+        return Optional.absent();
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.data.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
+import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
@@ -38,14 +39,14 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.DisplayNameData;
+import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.SpongeDisplayNameData;
 import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameData> {
+public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<DisplayNameData> {
 
     @Override
     public Optional<DisplayNameData> build(DataView container) throws InvalidDataException {
@@ -124,7 +125,11 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
         if (dataHolder instanceof ItemStack) {
             switch (checkNotNull(priority)) {
                 case DATA_MANIPULATOR:
-                    ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getDisplayName()));
+                    if (((ItemStack) dataHolder).getItem() == Items.written_book) {
+                        getTagCompound((ItemStack) dataHolder).setString("title", Texts.toLegacy(manipulator.getDisplayName()));
+                    } else {
+                        ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getDisplayName()));
+                    }
                     return successNoData();
                 case DATA_HOLDER:
                 case POST_MERGE:
@@ -138,5 +143,10 @@ public class SpongeDisplayNameDataBuilder implements SpongeDataUtil<DisplayNameD
             ((Entity) dataHolder).setAlwaysRenderNameTag(manipulator.isCustomNameVisible());
         }
         return fail(manipulator);
+    }
+
+    @Override
+    public Optional<DisplayNameData> getFrom(DataHolder holder) {
+        return Optional.absent();
     }
 }

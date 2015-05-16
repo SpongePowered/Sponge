@@ -22,47 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.utils;
+package org.spongepowered.common.data;
 
 import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataHolder;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.tileentities.BannerData;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.tiles.SpongeBannerData;
 
-public class SpongeBannerDataBuilder implements SpongeDataUtil<BannerData> {
+public interface SpongeBlockProcessor<T extends DataManipulator<T>> {
 
-    @Override
-    public Optional<BannerData> build(DataView container) throws InvalidDataException {
-        return null;
-    }
+    Optional<T> fromBlockPos(World world, BlockPos blockPos);
 
-    @Override
-    public BannerData create() {
-        return new SpongeBannerData();
-    }
+    DataTransactionResult setData(World world, BlockPos blockPos, T manipulator, DataPriority priority);
 
-    @Override
-    public Optional<BannerData> fillData(DataHolder holder, BannerData manipulator, DataPriority priority) {
-        return null;
-    }
+    boolean remove(World world, BlockPos blockPos);
 
-    @Override
-    public DataTransactionResult setData(DataHolder dataHolder, BannerData manipulator, DataPriority priority) {
-        return null;
-    }
+    Optional<BlockState> removeFrom(IBlockState blockState);
 
-    @Override
-    public boolean remove(DataHolder dataHolder) {
-        return false;
-    }
+    Optional<T> createFrom(IBlockState blockState);
 
-    @Override
-    public Optional<BannerData> createFrom(DataHolder dataHolder) {
-        return null;
-    }
 }

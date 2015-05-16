@@ -32,7 +32,9 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.service.persistence.DataBuilder;
 
-public interface SpongeDataUtil<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T> {
+public interface SpongeDataProcessor<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T> {
+
+    Optional<T> getFrom(DataHolder holder);
 
     Optional<T> fillData(DataHolder holder, T manipulator, DataPriority priority);
 

@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.ArtData;
-import org.spongepowered.api.data.types.Art;
-import org.spongepowered.api.data.types.Arts;
+import org.spongepowered.api.data.manipulator.entity.ArtData;
+import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeArtData extends AbstractSingleValueData<Art, ArtData> implements ArtData {
+
+    public static final DataQuery ART = of("Art");
 
     public SpongeArtData() {
         super(ArtData.class, Arts.ALBAN);
@@ -50,18 +53,18 @@ public class SpongeArtData extends AbstractSingleValueData<Art, ArtData> impleme
     }
 
     @Override
+    public ArtData copy() {
+        return new SpongeArtData().setValue(this.getValue());
+    }
+
+    @Override
     public int compareTo(ArtData o) {
         return o.getValue().getId().compareTo(this.getValue().getId());
     }
 
+
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Art"), this.getValue().getId());
-    }
-
-
-    @Override
-    public ArtData copy() {
-        return new SpongeArtData().setValue(this.getValue());
+        return new MemoryDataContainer().set(ART, this.getValue().getId());
     }
 }

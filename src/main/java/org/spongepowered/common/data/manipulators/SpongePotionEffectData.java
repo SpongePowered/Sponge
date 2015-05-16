@@ -28,8 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.PotionEffectData;
+import org.spongepowered.api.data.manipulator.PotionEffectData;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectType;
 
@@ -38,6 +39,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SpongePotionEffectData extends AbstractListData<PotionEffect, PotionEffectData> implements PotionEffectData {
+
+    public static final DataQuery POTIONS = of("Potions");
 
     public SpongePotionEffectData() {
         super(PotionEffectData.class);
@@ -106,6 +109,6 @@ public class SpongePotionEffectData extends AbstractListData<PotionEffect, Potio
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Potions"), this.elementList);
+        return new MemoryDataContainer().set(POTIONS, this.elementList);
     }
 }

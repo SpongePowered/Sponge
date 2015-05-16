@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
+import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 

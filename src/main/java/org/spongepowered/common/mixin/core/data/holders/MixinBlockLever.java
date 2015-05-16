@@ -25,12 +25,8 @@
 package org.spongepowered.common.mixin.core.data.holders;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockLever;
-import net.minecraft.block.BlockStandingSign;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.EnumFaceDirection;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
@@ -38,8 +34,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulators.blocks.AxisData;
-import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
+import org.spongepowered.api.data.manipulator.block.AxisData;
+import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;

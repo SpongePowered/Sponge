@@ -27,16 +27,16 @@ package org.spongepowered.common.mixin.core.block.tiles;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.block.tile.Sign;
-import org.spongepowered.api.block.tile.TileEntityType;
-import org.spongepowered.api.block.tile.TileEntityTypes;
+import org.spongepowered.api.block.tileentity.Sign;
+import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.SignData;
+import org.spongepowered.api.data.manipulator.tileentity.SignData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulators.tiles.SpongeSignData;
-import org.spongepowered.common.data.utils.SpongeSignDataUtil;
+import org.spongepowered.common.data.manipulators.tileentities.SpongeSignData;
+import org.spongepowered.common.data.utils.SpongeSignDataProcessor;
 
 import java.util.List;
 
@@ -64,6 +64,6 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
 
     @Override
     public Optional<SignData> getData() {
-        return new SpongeSignDataUtil().createFrom(this);
+        return new SpongeSignDataProcessor().createFrom(this);
     }
 }

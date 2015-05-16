@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.PersistingData;
+import org.spongepowered.api.data.manipulator.entity.PersistingData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongePersistingData extends SpongeAbstractData<PersistingData> implements PersistingData {

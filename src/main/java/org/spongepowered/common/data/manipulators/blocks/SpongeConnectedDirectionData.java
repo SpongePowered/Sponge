@@ -29,7 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.ConnectedDirectionData;
+import org.spongepowered.api.data.manipulator.block.ConnectedDirectionData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulators.AbstractListData;
 

@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.DisguisedBlockData;
-import org.spongepowered.api.data.types.DisguisedBlockType;
-import org.spongepowered.api.data.types.DisguisedBlockTypes;
+import org.spongepowered.api.data.manipulator.block.DisguisedBlockData;
+import org.spongepowered.api.data.type.DisguisedBlockType;
+import org.spongepowered.api.data.type.DisguisedBlockTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeDisguisedBlockData extends AbstractSingleValueData<DisguisedBlockType, DisguisedBlockData> implements DisguisedBlockData {

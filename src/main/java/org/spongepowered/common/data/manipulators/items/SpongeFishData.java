@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators.items;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.FishData;
-import org.spongepowered.api.data.types.Fish;
-import org.spongepowered.api.data.types.Fishes;
+import org.spongepowered.api.data.manipulator.item.FishData;
+import org.spongepowered.api.data.type.Fish;
+import org.spongepowered.api.data.type.Fishes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeFishData extends AbstractSingleValueData<Fish, FishData> implements FishData {
+
+    public static final DataQuery FISH_TYPE = of("FishType");
 
     public SpongeFishData() {
         super(FishData.class, Fishes.COD);
@@ -51,6 +54,6 @@ public class SpongeFishData extends AbstractSingleValueData<Fish, FishData> impl
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("FishType"), this.getValue());
+        return new MemoryDataContainer().set(FISH_TYPE, this.getValue());
     }
 }

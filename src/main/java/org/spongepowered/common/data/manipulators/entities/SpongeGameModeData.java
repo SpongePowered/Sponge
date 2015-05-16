@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.GameModeData;
+import org.spongepowered.api.data.manipulator.entity.GameModeData;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.entity.player.gamemode.GameModes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;

@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.PistonData;
-import org.spongepowered.api.data.types.PistonType;
-import org.spongepowered.api.data.types.PistonTypes;
+import org.spongepowered.api.data.manipulator.block.PistonData;
+import org.spongepowered.api.data.type.PistonType;
+import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongePistonData extends AbstractSingleValueData<PistonType, PistonData> implements PistonData {

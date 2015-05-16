@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.block.tiles;
 
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
-import org.spongepowered.api.block.tile.MobSpawner;
-import org.spongepowered.api.block.tile.TileEntityType;
-import org.spongepowered.api.block.tile.TileEntityTypes;
+import org.spongepowered.api.block.tileentity.MobSpawner;
+import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

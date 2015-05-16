@@ -31,7 +31,7 @@ import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.rcon.RconLoginEvent;
-import org.spongepowered.api.net.RemoteConnection;
+import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.util.command.source.RconSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

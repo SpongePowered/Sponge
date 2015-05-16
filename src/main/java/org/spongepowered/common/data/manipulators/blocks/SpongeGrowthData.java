@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.GrowthData;
+import org.spongepowered.api.data.manipulator.block.GrowthData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeGrowthData extends AbstractIntData<GrowthData> implements GrowthData {

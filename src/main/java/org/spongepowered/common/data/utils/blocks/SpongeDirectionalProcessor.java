@@ -35,15 +35,15 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
+import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataTransactionBuilder;
-import org.spongepowered.common.data.SpongeBlockUtil;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeBlockProcessor;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;
 import org.spongepowered.common.interfaces.blocks.IMixinDirectionalHolder;
 
-public class SpongeDirectionalUtil implements SpongeDataUtil<DirectionalData>, SpongeBlockUtil<DirectionalData> {
+public class SpongeDirectionalProcessor implements SpongeDataProcessor<DirectionalData>, SpongeBlockProcessor<DirectionalData> {
 
     @Override
     public Optional<DirectionalData> fillData(DataHolder holder, DirectionalData manipulator, DataPriority priority) {
@@ -113,6 +113,11 @@ public class SpongeDirectionalUtil implements SpongeDataUtil<DirectionalData>, S
         if (blockState.getBlock() instanceof IMixinDirectionalHolder) {
             ((IMixinDirectionalHolder) blockState.getBlock()).getDirectionalData(blockState);
         }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<DirectionalData> getFrom(DataHolder holder) {
         return Optional.absent();
     }
 }

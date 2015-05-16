@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.hanging.art;
 
-import org.spongepowered.api.data.types.Art;
+import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

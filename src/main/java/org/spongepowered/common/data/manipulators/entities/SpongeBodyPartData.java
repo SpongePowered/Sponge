@@ -31,18 +31,24 @@ import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.BodyPartRotationalData;
-import org.spongepowered.api.data.types.BodyPart;
-import org.spongepowered.api.data.types.BodyParts;
+import org.spongepowered.api.data.manipulator.entity.BodyPartRotationalData;
+import org.spongepowered.api.data.type.BodyPart;
+import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.manipulators.AbstractMappedData;
 
 import java.util.Map;
 
 public class SpongeBodyPartData extends AbstractMappedData<BodyPart, Vector3d, BodyPartRotationalData> implements BodyPartRotationalData {
+
+    public static final DataQuery BODY_PART_ROTATIONS = of("BodyPartRotations");
+    public static final DataQuery ROTATION_X = of("RotationX");
+    public static final DataQuery ROTATION_Y = of("RotationY");
+    public static final DataQuery ROTATION_Z = of("RotationZ");
 
     public SpongeBodyPartData() {
         super(BodyPartRotationalData.class);
@@ -154,13 +160,13 @@ public class SpongeBodyPartData extends AbstractMappedData<BodyPart, Vector3d, B
 
     @Override
     public DataContainer toContainer() {
-        final DataView internal = new MemoryDataContainer().createView(of("BodyPartRotations"));
+        final DataView internal = new MemoryDataContainer().createView(BODY_PART_ROTATIONS);
         for (Map.Entry<BodyPart, Vector3d> entry : this.keyValueMap.entrySet()) {
             final Vector3d vector3d = entry.getValue();
             internal.createView(of(entry.getKey().getId()))
-                    .set(of("RotationX"), vector3d.getX())
-                    .set(of("RotationY"), vector3d.getY())
-                    .set(of("RotationZ"), vector3d.getZ());
+                    .set(ROTATION_X, vector3d.getX())
+                    .set(ROTATION_Y, vector3d.getY())
+                    .set(ROTATION_Z, vector3d.getZ());
         }
         return internal.getContainer();
     }

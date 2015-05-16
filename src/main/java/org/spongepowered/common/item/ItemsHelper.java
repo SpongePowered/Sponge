@@ -28,11 +28,12 @@ import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulators.SingleValueData;
-import org.spongepowered.api.data.manipulators.items.BlockItemData;
-import org.spongepowered.api.data.manipulators.items.DurabilityData;
+import org.spongepowered.api.data.manipulator.SingleValueData;
+import org.spongepowered.api.data.manipulator.item.BlockItemData;
+import org.spongepowered.api.data.manipulator.item.DurabilityData;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -42,6 +43,16 @@ import java.util.Set;
 
 
 public final class ItemsHelper {
+
+    public static NBTTagCompound getTagCompound(net.minecraft.item.ItemStack itemStack) {
+        NBTTagCompound compound = itemStack.getTagCompound();
+        if (compound == null) {
+            compound = new NBTTagCompound();
+            itemStack.setTagCompound(compound);
+        }
+        return compound;
+    }
+
 
     public static final DataTransactionResult SUCCESS_NO_REPLACEMENTS = new DataTransactionResult() {
         @Override

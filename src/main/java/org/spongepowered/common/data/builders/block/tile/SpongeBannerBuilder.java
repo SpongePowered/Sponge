@@ -29,15 +29,14 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.block.tile.Banner;
+import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.tileentities.BannerData;
-import org.spongepowered.api.data.types.DyeColor;
-import org.spongepowered.api.data.types.DyeColors;
+import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.data.manipulators.tiles.SpongeBannerData;
+import org.spongepowered.common.data.manipulators.tileentities.SpongeBannerData;
 
 import java.util.List;
 

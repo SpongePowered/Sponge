@@ -28,12 +28,16 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.DurabilityData;
+import org.spongepowered.api.data.manipulator.item.DurabilityData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeDurabilityData extends AbstractIntData<DurabilityData> implements DurabilityData {
 
+    public static final DataQuery DURABILITY = of("Durability");
+    public static final DataQuery UNBREAKABLE = of("Unbreakable");
+    public static final DataQuery MAX_DURABILITY = of("MaxDurability");
     private boolean breakable = true;
 
     public SpongeDurabilityData(int maxDurability) {
@@ -74,9 +78,9 @@ public class SpongeDurabilityData extends AbstractIntData<DurabilityData> implem
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Durability"), this.getValue())
-                .set(of("Unbreakable"), this.breakable)
-                .set(of("MaxDurability"), this.getMaxValue());
+        return new MemoryDataContainer().set(DURABILITY, this.getValue())
+                .set(UNBREAKABLE, this.breakable)
+                .set(MAX_DURABILITY, this.getMaxValue());
     }
 
     @Override

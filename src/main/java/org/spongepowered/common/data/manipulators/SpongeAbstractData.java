@@ -32,7 +32,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 public abstract class SpongeAbstractData<T extends DataManipulator<T>> implements DataManipulator<T> {
@@ -51,13 +51,13 @@ public abstract class SpongeAbstractData<T extends DataManipulator<T>> implement
     @SuppressWarnings("unchecked")
     @Override
     public Optional<T> fill(DataHolder dataHolder, DataPriority overlap) {
-        SpongeDataUtil<T> registry = SpongeManipulatorRegistry.getInstance().getUtil(this.manipulatorClass).get();
+        SpongeDataProcessor<T> registry = SpongeManipulatorRegistry.getInstance().getUtil(this.manipulatorClass).get();
         return registry.fillData(dataHolder, (T) (Object) this, overlap);
     }
 
     @Override
     public Optional<T> from(DataContainer container) {
-        SpongeDataUtil<T> builder = SpongeManipulatorRegistry.getInstance().getUtil(this.manipulatorClass).get();
+        SpongeDataProcessor<T> builder = SpongeManipulatorRegistry.getInstance().getUtil(this.manipulatorClass).get();
         return builder.build(container);
     }
 

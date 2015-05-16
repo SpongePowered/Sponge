@@ -28,10 +28,15 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.OwnableData;
+import org.spongepowered.api.data.manipulator.OwnableData;
 
 public class SpongeOwnableData extends AbstractSingleValueData<GameProfile, OwnableData> implements OwnableData {
+
+    public static final DataQuery OWNER_PROFILE = of("OwnerProfile");
+    public static final DataQuery UUID = of("Uuid");
+    public static final DataQuery NAME = of("Name");
 
     public SpongeOwnableData(GameProfile profile) {
         super(OwnableData.class, profile);
@@ -60,9 +65,9 @@ public class SpongeOwnableData extends AbstractSingleValueData<GameProfile, Owna
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .createView(of("OwnerProfile"))
-                .set(of("Uuid"), this.getValue().getUniqueId())
-                .set(of("Name"), this.getValue().getName())
+                .createView(OWNER_PROFILE)
+                .set(UUID, this.getValue().getUniqueId())
+                .set(NAME, this.getValue().getName())
                 .getContainer();
     }
 }

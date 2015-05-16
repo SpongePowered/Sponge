@@ -69,7 +69,7 @@ import java.util.Map;
  *
  * @param <T> The type of sponge tile entity
  */
-public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tile.TileEntity> implements DataBuilder<T> {
+public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> implements DataBuilder<T> {
 
     private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
     protected final Game game;

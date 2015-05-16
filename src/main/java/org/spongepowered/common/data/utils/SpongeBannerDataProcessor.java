@@ -22,27 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.utils;
 
 import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.SpongeDataProcessor;
+import org.spongepowered.common.data.manipulators.tileentities.SpongeBannerData;
 
-public interface SpongeBlockUtil<T extends DataManipulator<T>> {
+public class SpongeBannerDataProcessor implements SpongeDataProcessor<BannerData> {
 
-    Optional<T> fromBlockPos(World world, BlockPos blockPos);
+    @Override
+    public Optional<BannerData> build(DataView container) throws InvalidDataException {
+        return null;
+    }
 
-    DataTransactionResult setData(World world, BlockPos blockPos, T manipulator, DataPriority priority);
+    @Override
+    public BannerData create() {
+        return new SpongeBannerData();
+    }
 
-    boolean remove(World world, BlockPos blockPos);
+    @Override
+    public Optional<BannerData> fillData(DataHolder holder, BannerData manipulator, DataPriority priority) {
+        return Optional.absent();
+    }
 
-    Optional<BlockState> removeFrom(IBlockState blockState);
+    @Override
+    public DataTransactionResult setData(DataHolder dataHolder, BannerData manipulator, DataPriority priority) {
+        return null;
+    }
 
-    Optional<T> createFrom(IBlockState blockState);
+    @Override
+    public boolean remove(DataHolder dataHolder) {
+        return false;
+    }
 
+    @Override
+    public Optional<BannerData> createFrom(DataHolder dataHolder) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<BannerData> getFrom(DataHolder holder) {
+        return Optional.absent();
+    }
 }

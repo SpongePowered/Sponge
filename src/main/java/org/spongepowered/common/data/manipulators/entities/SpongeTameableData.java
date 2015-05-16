@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.TameableData;
+import org.spongepowered.api.data.manipulator.entity.TameableData;
 import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 

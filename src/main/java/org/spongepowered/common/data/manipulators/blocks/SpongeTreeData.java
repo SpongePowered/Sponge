@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.TreeData;
-import org.spongepowered.api.data.types.TreeType;
-import org.spongepowered.api.data.types.TreeTypes;
+import org.spongepowered.api.data.manipulator.block.TreeData;
+import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeTreeData extends AbstractSingleValueData<TreeType, TreeData> implements TreeData {

@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.BrickData;
-import org.spongepowered.api.data.types.BrickType;
-import org.spongepowered.api.data.types.BrickTypes;
+import org.spongepowered.api.data.manipulator.block.BrickData;
+import org.spongepowered.api.data.type.BrickType;
+import org.spongepowered.api.data.type.BrickTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeBrickData extends AbstractSingleValueData<BrickType, BrickData> implements BrickData {

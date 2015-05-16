@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.RabbitData;
-import org.spongepowered.api.data.types.RabbitType;
-import org.spongepowered.api.data.types.RabbitTypes;
+import org.spongepowered.api.data.manipulator.entity.RabbitData;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeRabbitData extends AbstractSingleValueData<RabbitType, RabbitData> implements RabbitData {

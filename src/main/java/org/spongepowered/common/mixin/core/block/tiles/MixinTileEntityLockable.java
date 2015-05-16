@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.LockCode;
-import org.spongepowered.api.block.tile.carrier.TileEntityCarrier;
+import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;

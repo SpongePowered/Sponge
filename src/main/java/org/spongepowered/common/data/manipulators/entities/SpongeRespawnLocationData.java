@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.RespawnLocationData;
+import org.spongepowered.api.data.manipulator.entity.RespawnLocationData;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 

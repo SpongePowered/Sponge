@@ -25,13 +25,12 @@
 package org.spongepowered.common.data.builders.block.tile;
 
 import com.google.common.base.Optional;
-import net.minecraft.tileentity.TileEntityBeacon;
 import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.block.tile.carrier.BrewingStand;
+import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.tileentities.BrewingData;
+import org.spongepowered.api.data.manipulator.tileentity.BrewingData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
 public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStand> {

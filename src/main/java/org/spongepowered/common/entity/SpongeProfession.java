@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import org.spongepowered.api.data.types.Profession;
+import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 

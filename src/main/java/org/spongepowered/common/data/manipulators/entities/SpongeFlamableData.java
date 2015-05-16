@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.FlamableData;
+import org.spongepowered.api.data.manipulator.entity.FlamableData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeFlamableData extends SpongeAbstractData<FlamableData> implements FlamableData {

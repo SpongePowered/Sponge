@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.FluidLevelData;
+import org.spongepowered.api.data.manipulator.block.FluidLevelData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeFluidLevelData extends AbstractIntData<FluidLevelData> implements FluidLevelData {

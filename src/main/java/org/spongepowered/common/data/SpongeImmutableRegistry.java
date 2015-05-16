@@ -53,7 +53,7 @@ public class SpongeImmutableRegistry implements ImmutableDataRegistry {
         if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
             this.builderMap.put(manipulatorClass, checkNotNull(builder));
         } else {
-            throw new IllegalStateException("Already registered the DataManipulatorBuilder for " + manipulatorClass.getCanonicalName());
+            throw new IllegalStateException("Already registered the DataUtil for " + manipulatorClass.getCanonicalName());
         }
     }
 

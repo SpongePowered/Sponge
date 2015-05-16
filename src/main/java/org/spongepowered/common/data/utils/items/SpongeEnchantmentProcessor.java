@@ -36,15 +36,15 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.items.EnchantmentData;
+import org.spongepowered.api.data.manipulator.item.EnchantmentData;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.items.SpongeEnchantmentItemData;
 
 import java.util.Map;
 
-public class SpongeEnchantmentUtil implements SpongeDataUtil<EnchantmentData> {
+public class SpongeEnchantmentProcessor implements SpongeDataProcessor<EnchantmentData> {
 
     @Override
     public Optional<EnchantmentData> fillData(DataHolder holder, EnchantmentData manipulator, DataPriority priority) {
@@ -115,5 +115,10 @@ public class SpongeEnchantmentUtil implements SpongeDataUtil<EnchantmentData> {
     @Override
     public Optional<EnchantmentData> createFrom(DataHolder dataHolder) {
         return null;
+    }
+
+    @Override
+    public Optional<EnchantmentData> getFrom(DataHolder holder) {
+        return Optional.absent();
     }
 }

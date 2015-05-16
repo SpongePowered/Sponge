@@ -22,49 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.utils;
+package org.spongepowered.common.data.utils.items;
 
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
 
 import com.google.common.base.Optional;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
-import net.minecraft.item.ItemTool;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.items.DurabilityData;
+import org.spongepowered.api.data.manipulator.item.LoreData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.items.SpongeDurabilityData;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.data.SpongeDataProcessor;
+import org.spongepowered.common.data.manipulators.items.SpongeLoreData;
+import org.spongepowered.common.interfaces.text.IMixinText;
 
-public class SpongeDurabilityDataBuilder implements SpongeDataUtil<DurabilityData> {
+import java.util.Locale;
 
-    @Override
-    public Optional<DurabilityData> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
-    }
-
-    @Override
-    public DurabilityData create() {
-        return new SpongeDurabilityData(0);
-    }
+public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
 
     @Override
-    public Optional<DurabilityData> createFrom(DataHolder dataHolder) {
-        if (dataHolder instanceof ItemStack) {
-            final Item item = ((ItemStack) dataHolder).getItem();
-            if (item instanceof ItemTool || item instanceof ItemArmor || item instanceof ItemSword) {
-                final DurabilityData durabilityData = new SpongeDurabilityData(item.getMaxDamage());
-                durabilityData.setDurability(((ItemStack) dataHolder).getItemDamage())
-                        .setBreakable(((ItemStack) dataHolder).isItemStackDamageable());
-                return Optional.of(durabilityData);
-            }
+    public Optional<LoreData> fillData(DataHolder holder, LoreData manipulator, DataPriority priority) {
+        if (holder instanceof ItemStack) {
+
         }
         return Optional.absent();
+    }
+
+    @Override
+    public DataTransactionResult setData(DataHolder dataHolder, LoreData manipulator, DataPriority priority) {
+        if (dataHolder instanceof ItemStack) {
+            final NBTTagList loreList = new NBTTagList();
+            for (Text text : manipulator.getAll()) {
+                loreList.appendTag(new NBTTagString(((IMixinText) text).toLegacy('\247', Locale.ENGLISH)));
+            }
+            ((ItemStack) dataHolder).getSubCompound("display", true).setTag("Lore", loreList);
+            return successNoData();
+        }
+        return fail(manipulator);
     }
 
     @Override
@@ -73,18 +73,22 @@ public class SpongeDurabilityDataBuilder implements SpongeDataUtil<DurabilityDat
     }
 
     @Override
-    public Optional<DurabilityData> fillData(DataHolder holder, DurabilityData manipulator, DataPriority priority) {
+    public Optional<LoreData> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, DurabilityData manipulator, DataPriority priority) {
-        if (dataHolder instanceof ItemStack && (((ItemStack) dataHolder).getItem() instanceof ItemArmor || ((ItemStack) dataHolder).getItem()
-                instanceof ItemSword|| ((ItemStack) dataHolder).getItem() instanceof ItemTool)) {
-            final DurabilityData oldData = createFrom(dataHolder).get();
-            // TODO at a later time.
+    public LoreData create() {
+        return new SpongeLoreData();
+    }
 
-        }
-        return fail(manipulator);
+    @Override
+    public Optional<LoreData> createFrom(DataHolder dataHolder) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<LoreData> getFrom(DataHolder holder) {
+        return Optional.absent();
     }
 }

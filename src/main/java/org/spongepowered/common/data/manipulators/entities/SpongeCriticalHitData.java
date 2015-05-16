@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.CriticalHitData;
+import org.spongepowered.api.data.manipulator.entity.CriticalHitData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeCriticalHitData extends SpongeAbstractData<CriticalHitData> implements CriticalHitData {
+
+    public static final DataQuery CRITICAL = of("Critical");
 
     public SpongeCriticalHitData() {
         super(CriticalHitData.class);
@@ -49,6 +52,6 @@ public class SpongeCriticalHitData extends SpongeAbstractData<CriticalHitData> i
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Critical"), true);
+        return new MemoryDataContainer().set(CRITICAL, true);
     }
 }

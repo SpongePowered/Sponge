@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.SandstoneData;
-import org.spongepowered.api.data.types.SandstoneType;
-import org.spongepowered.api.data.types.SandstoneTypes;
+import org.spongepowered.api.data.manipulator.block.SandstoneData;
+import org.spongepowered.api.data.type.SandstoneType;
+import org.spongepowered.api.data.type.SandstoneTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeSandstoneData extends AbstractSingleValueData<SandstoneType, SandstoneData> implements SandstoneData {

@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulators.tiles;
+package org.spongepowered.common.data.manipulators.tileentities;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.tileentities.BeaconData;
+import org.spongepowered.api.data.manipulator.tileentity.BeaconData;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 

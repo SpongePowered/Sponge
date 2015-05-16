@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.DyeableData;
-import org.spongepowered.api.data.types.DyeColor;
-import org.spongepowered.api.data.types.DyeColors;
+import org.spongepowered.api.data.manipulator.DyeableData;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.DyeColors;
 
 public class SpongeDyeableData extends AbstractSingleValueData<DyeColor, DyeableData> implements DyeableData {
+
+    public static final DataQuery DYE_COLOR = of("DyeColor");
 
     public SpongeDyeableData() {
         super(DyeableData.class, DyeColors.WHITE);
@@ -50,6 +53,6 @@ public class SpongeDyeableData extends AbstractSingleValueData<DyeColor, Dyeable
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DyeColor"), this.getValue().getId());
+        return new MemoryDataContainer().set(DYE_COLOR, this.getValue().getId());
     }
 }

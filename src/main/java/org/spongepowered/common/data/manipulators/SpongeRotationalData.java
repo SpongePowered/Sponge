@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.RotationalData;
+import org.spongepowered.api.data.manipulator.RotationalData;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
 
 public class SpongeRotationalData extends AbstractSingleValueData<Rotation, RotationalData> implements RotationalData {
+
+    public static final DataQuery ROTATION = of("Rotation");
 
     public SpongeRotationalData() {
         super(RotationalData.class, Rotations.LEFT);
@@ -49,6 +52,6 @@ public class SpongeRotationalData extends AbstractSingleValueData<Rotation, Rota
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Rotation"), this.getValue().getAngle());
+        return new MemoryDataContainer().set(ROTATION, this.getValue().getAngle());
     }
 }

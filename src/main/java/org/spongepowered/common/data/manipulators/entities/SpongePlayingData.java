@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.PlayingData;
+import org.spongepowered.api.data.manipulator.entity.PlayingData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongePlayingData extends SpongeAbstractData<PlayingData> implements PlayingData {

@@ -24,44 +24,39 @@
  */
 package org.spongepowered.common.data.utils.entities;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.entities.TradeOfferData;
-import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.data.manipulator.entity.CareerData;
+import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.SpongeDataUtil;
-import org.spongepowered.common.data.manipulators.SpongeTradeOfferData;
-import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
+import org.spongepowered.common.data.SpongeDataProcessor;
+import org.spongepowered.common.data.manipulators.entities.SpongeCareerData;
+import org.spongepowered.common.interfaces.entities.IMixinVillager;
 
-public class SpongeTradeOfferUtil implements SpongeDataUtil<TradeOfferData> {
+public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData> {
 
     @Override
-    public Optional<TradeOfferData> fillData(DataHolder holder, TradeOfferData manipulator, DataPriority priority) {
-        return Optional.absent(); // todo
+    public Optional<CareerData> fillData(DataHolder holder, CareerData manipulator, DataPriority priority) {
+        return Optional.absent();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, TradeOfferData manipulator, DataPriority priority) {
-        checkNotNull(manipulator);
-        checkNotNull(priority);
-        if (checkNotNull(dataHolder) instanceof EntityVillager) {
-            final MerchantRecipeList recipeList = ((EntityVillager) dataHolder).getRecipes(null);
-            recipeList.clear();
-            for (TradeOffer offer : manipulator.getOffers()) {
-                recipeList.add((Object) new SpongeTradeOfferBuilder().from(offer).build());
-            }
+    public DataTransactionResult setData(DataHolder dataHolder, CareerData manipulator, DataPriority priority) {
+        if (dataHolder instanceof EntityVillager) {
+            final Career career = manipulator.getCareer();
+            ((IMixinVillager) dataHolder).setCareer(career);
+
             return successNoData(); // todo
+
         }
-        return successNoData(); // todo
+        return fail(manipulator);
     }
 
     @Override
@@ -69,26 +64,30 @@ public class SpongeTradeOfferUtil implements SpongeDataUtil<TradeOfferData> {
         return false;
     }
 
+
     @Override
-    public Optional<TradeOfferData> build(DataView container) throws InvalidDataException {
+    public Optional<CareerData> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public TradeOfferData create() {
-        return new SpongeTradeOfferData();
+    public CareerData create() {
+        return new SpongeCareerData();
     }
 
     @Override
-    public Optional<TradeOfferData> createFrom(DataHolder dataHolder) {
+    public Optional<CareerData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityVillager) {
-            final MerchantRecipeList currentList = ((EntityVillager) dataHolder).getRecipes(null);
-            TradeOfferData data = create();
-            for (Object recipe : currentList) {
-                data.addOffer(new SpongeTradeOfferBuilder().from((TradeOffer) recipe).build());
-            }
-            return Optional.of(data);
+            final Career career = ((IMixinVillager) dataHolder).getCareer();
+            final CareerData careerData = create();
+            careerData.setCareer(career);
+            return Optional.of(careerData);
         }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<CareerData> getFrom(DataHolder holder) {
         return Optional.absent();
     }
 }

@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.PrismarineData;
-import org.spongepowered.api.data.types.PrismarineType;
-import org.spongepowered.api.data.types.PrismarineTypes;
+import org.spongepowered.api.data.manipulator.block.PrismarineData;
+import org.spongepowered.api.data.type.PrismarineType;
+import org.spongepowered.api.data.type.PrismarineTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongePrismarineData extends AbstractSingleValueData<PrismarineType, PrismarineData> implements PrismarineData {

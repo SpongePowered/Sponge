@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.AggressiveData;
+import org.spongepowered.api.data.manipulator.entity.AggressiveData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeAggressiveData extends SpongeAbstractData<AggressiveData> implements AggressiveData {
+
+    public static final DataQuery AGGRESSIVE = of("Aggressive");
 
     public SpongeAggressiveData() {
         super(AggressiveData.class);
@@ -49,6 +52,6 @@ public class SpongeAggressiveData extends SpongeAbstractData<AggressiveData> imp
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Aggressive"), true);
+        return new MemoryDataContainer().set(AGGRESSIVE, true);
     }
 }

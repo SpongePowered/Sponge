@@ -37,11 +37,11 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulators.PotionEffectData;
+import org.spongepowered.api.data.manipulator.PotionEffectData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulators.SpongePotionEffectData;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 
@@ -49,7 +49,7 @@ import java.util.Collection;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class SpongePotionDataBuilder implements SpongeDataUtil<PotionEffectData> {
+public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffectData> {
 
     private static final DataQuery POTION_QUERY = of("Potions");
 
@@ -132,6 +132,11 @@ public class SpongePotionDataBuilder implements SpongeDataUtil<PotionEffectData>
             }
             return Optional.of(data);
         }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<PotionEffectData> getFrom(DataHolder holder) {
         return Optional.absent();
     }
 }

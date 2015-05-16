@@ -29,13 +29,16 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.PlaceableData;
+import org.spongepowered.api.data.manipulator.item.PlaceableData;
 import org.spongepowered.common.data.manipulators.AbstractListData;
 
 import java.util.List;
 
 public class SpongePlaceableData extends AbstractListData<BlockType, PlaceableData> implements PlaceableData {
+
+    public static final DataQuery PLACEABLE_BLOCK_TYPES = of("PlaceableBlockTypes");
 
     public SpongePlaceableData() {
         super(PlaceableData.class);
@@ -59,6 +62,6 @@ public class SpongePlaceableData extends AbstractListData<BlockType, PlaceableDa
         for (BlockType blockType : this.elementList) {
             blockIds.add(blockType.getId());
         }
-        return new MemoryDataContainer().set(of("PlaceableBlockTypes"), blockIds);
+        return new MemoryDataContainer().set(PLACEABLE_BLOCK_TYPES, blockIds);
     }
 }

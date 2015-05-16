@@ -27,14 +27,17 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.RepresentedItemData;
+import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 
 public class SpongeRepresentedItemData extends AbstractSingleValueData<ItemStack, RepresentedItemData> implements RepresentedItemData {
+
+    public static final DataQuery ITEM = of("Item");
 
     public SpongeRepresentedItemData() {
         super(RepresentedItemData.class, new SpongeItemStackBuilder().itemType(ItemTypes.STONE).quantity(1).build());
@@ -52,6 +55,6 @@ public class SpongeRepresentedItemData extends AbstractSingleValueData<ItemStack
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Item"), this.getValue());
+        return new MemoryDataContainer().set(ITEM, this.getValue());
     }
 }

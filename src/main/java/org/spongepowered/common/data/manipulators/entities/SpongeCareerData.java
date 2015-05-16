@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.CareerData;
-import org.spongepowered.api.data.types.Career;
-import org.spongepowered.api.data.types.Careers;
+import org.spongepowered.api.data.manipulator.entity.CareerData;
+import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeCareerData extends AbstractSingleValueData<Career, CareerData> implements CareerData {
+
+    public static final DataQuery CAREER = of("Career");
 
     public SpongeCareerData() {
         super(CareerData.class, Careers.FARMER);
@@ -61,6 +64,6 @@ public class SpongeCareerData extends AbstractSingleValueData<Career, CareerData
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Career"), this.getValue().getId());
+        return new MemoryDataContainer().set(CAREER, this.getValue().getId());
     }
 }

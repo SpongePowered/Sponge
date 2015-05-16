@@ -28,7 +28,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.net.RemoteConnection;
+import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;

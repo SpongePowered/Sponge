@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.manipulators.ListData;
+import org.spongepowered.api.data.manipulator.ListData;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.List;

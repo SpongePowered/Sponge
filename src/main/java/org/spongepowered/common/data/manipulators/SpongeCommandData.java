@@ -30,8 +30,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.CommandData;
+import org.spongepowered.api.data.manipulator.CommandData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 
@@ -39,6 +40,10 @@ import javax.annotation.Nullable;
 
 public class SpongeCommandData extends SpongeAbstractData<CommandData> implements CommandData {
 
+    public static final DataQuery COMMAND = of("Command");
+    public static final DataQuery SUCCESS_COUNT = of("SuccessCount");
+    public static final DataQuery TRACKS_OUTPUT = of("TracksOutput");
+    public static final DataQuery LAST_OUTPUT = of("LastOutput");
     private String command;
     private int success;
     private boolean tracks;
@@ -114,9 +119,9 @@ public class SpongeCommandData extends SpongeAbstractData<CommandData> implement
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("Command"), this.command)
-                .set(of("SuccessCount"), this.success)
-                .set(of("TracksOutput"), this.tracks)
-                .set(of("LastOutput"), this.lastOutput == null ? "" : this.lastOutput.toString());
+                .set(COMMAND, this.command)
+                .set(SUCCESS_COUNT, this.success)
+                .set(TRACKS_OUTPUT, this.tracks)
+                .set(LAST_OUTPUT, this.lastOutput == null ? "" : this.lastOutput.toString());
     }
 }

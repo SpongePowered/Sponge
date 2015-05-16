@@ -29,13 +29,16 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.BreakableData;
+import org.spongepowered.api.data.manipulator.item.BreakableData;
 import org.spongepowered.common.data.manipulators.AbstractListData;
 
 import java.util.List;
 
 public class SpongeBreakableData extends AbstractListData<BlockType, BreakableData> implements BreakableData {
+
+    public static final DataQuery BREAKABLE_BLOCK_TYPES = of("BreakableBlockTypes");
 
     public SpongeBreakableData() {
         super(BreakableData.class);
@@ -58,6 +61,6 @@ public class SpongeBreakableData extends AbstractListData<BlockType, BreakableDa
             blockIds.add(blockType.getId());
         }
         return new MemoryDataContainer()
-                .set(of("BreakableBlockTypes"), blockIds);
+                .set(BREAKABLE_BLOCK_TYPES, blockIds);
     }
 }

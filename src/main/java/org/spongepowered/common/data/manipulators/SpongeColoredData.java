@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.ColoredData;
+import org.spongepowered.api.data.manipulator.ColoredData;
 
 import java.awt.Color;
 
 public class SpongeColoredData extends AbstractSingleValueData<Color, ColoredData> implements ColoredData {
+
+    public static final DataQuery COLOR = of("Color");
 
     public SpongeColoredData() {
         super(ColoredData.class, Color.BLACK);
@@ -60,6 +63,6 @@ public class SpongeColoredData extends AbstractSingleValueData<Color, ColoredDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Color"), this.getValue().getRGB());
+        return new MemoryDataContainer().set(COLOR, this.getValue().getRGB());
     }
 }

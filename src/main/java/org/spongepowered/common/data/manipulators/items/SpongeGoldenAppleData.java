@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators.items;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.GoldenAppleItemData;
-import org.spongepowered.api.data.types.GoldenApple;
-import org.spongepowered.api.data.types.GoldenApples;
+import org.spongepowered.api.data.manipulator.item.GoldenAppleItemData;
+import org.spongepowered.api.data.type.GoldenApple;
+import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeGoldenAppleData extends AbstractSingleValueData<GoldenApple, GoldenAppleItemData> implements GoldenAppleItemData {
+
+    public static final DataQuery GOLDEN_APPLE_TYPE = of("GoldenAppleType");
 
     public SpongeGoldenAppleData() {
         super(GoldenAppleItemData.class, GoldenApples.GOLDEN_APPLE);
@@ -51,6 +54,6 @@ public class SpongeGoldenAppleData extends AbstractSingleValueData<GoldenApple, 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("GoldenAppleType"), this.getValue());
+        return new MemoryDataContainer().set(GOLDEN_APPLE_TYPE, this.getValue());
     }
 }

@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.StairShapeData;
-import org.spongepowered.api.data.types.StairShape;
-import org.spongepowered.api.data.types.StairShapes;
+import org.spongepowered.api.data.manipulator.block.StairShapeData;
+import org.spongepowered.api.data.type.StairShape;
+import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeStairShapeData extends AbstractSingleValueData<StairShape, StairShapeData> implements StairShapeData {

@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.AgentData;
+import org.spongepowered.api.data.manipulator.entity.AgentData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeAgentData extends SpongeAbstractData<AgentData> implements AgentData {
+
+    public static final DataQuery AI_ENABLED = of("AiEnabled");
 
     public SpongeAgentData() {
         super(AgentData.class);
@@ -49,6 +52,6 @@ public class SpongeAgentData extends SpongeAbstractData<AgentData> implements Ag
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("AiEnabled"), true);
+        return new MemoryDataContainer().set(AI_ENABLED, true);
     }
 }

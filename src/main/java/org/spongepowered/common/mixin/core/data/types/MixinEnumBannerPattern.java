@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import org.spongepowered.api.data.types.BannerPatternShape;
+import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

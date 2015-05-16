@@ -35,7 +35,7 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.stats.achievement.Achievement;
+import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Mixin;

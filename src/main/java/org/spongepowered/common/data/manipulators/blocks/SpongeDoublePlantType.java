@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.DoublePlantData;
-import org.spongepowered.api.data.types.DoubleSizePlantType;
-import org.spongepowered.api.data.types.DoubleSizePlantTypes;
+import org.spongepowered.api.data.manipulator.block.DoublePlantData;
+import org.spongepowered.api.data.type.DoubleSizePlantType;
+import org.spongepowered.api.data.type.DoubleSizePlantTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeDoublePlantType extends AbstractSingleValueData<DoubleSizePlantType, DoublePlantData> implements DoublePlantData {

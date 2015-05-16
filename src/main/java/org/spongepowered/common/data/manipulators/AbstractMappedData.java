@@ -31,7 +31,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.manipulators.MappedData;
+import org.spongepowered.api.data.manipulator.MappedData;
 
 import java.util.Map;
 import java.util.Set;

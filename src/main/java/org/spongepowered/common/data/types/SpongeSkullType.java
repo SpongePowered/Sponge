@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.types;
 
-import org.spongepowered.api.data.types.SkullType;
+import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 

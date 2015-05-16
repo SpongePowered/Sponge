@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.HingeData;
-import org.spongepowered.api.data.types.Hinge;
-import org.spongepowered.api.data.types.Hinges;
+import org.spongepowered.api.data.manipulator.block.HingeData;
+import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeHingeData extends AbstractSingleValueData<Hinge, HingeData> implements HingeData {

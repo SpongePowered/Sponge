@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
-import org.spongepowered.api.block.tile.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.service.persistence.InvalidDataException;

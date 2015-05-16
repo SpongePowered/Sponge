@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.entity.hanging;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.world.World;
-import org.spongepowered.api.data.types.Art;
+import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;

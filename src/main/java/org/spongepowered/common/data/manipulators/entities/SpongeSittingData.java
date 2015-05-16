@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.SittingData;
+import org.spongepowered.api.data.manipulator.entity.SittingData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeSittingData extends SpongeAbstractData<SittingData> implements SittingData {

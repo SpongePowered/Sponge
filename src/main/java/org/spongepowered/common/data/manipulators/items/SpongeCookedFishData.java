@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators.items;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.CookedFishItemData;
-import org.spongepowered.api.data.types.CookedFish;
-import org.spongepowered.api.data.types.CookedFishes;
+import org.spongepowered.api.data.manipulator.item.CookedFishItemData;
+import org.spongepowered.api.data.type.CookedFish;
+import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeCookedFishData extends AbstractSingleValueData<CookedFish, CookedFishItemData> implements CookedFishItemData {
+
+    public static final DataQuery COOKED_FISH_TYPE = of("CookedFishType");
 
     public SpongeCookedFishData() {
         super(CookedFishItemData.class, CookedFishes.COD);
@@ -51,6 +54,6 @@ public class SpongeCookedFishData extends AbstractSingleValueData<CookedFish, Co
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("CookedFishType"), this.getValue());
+        return new MemoryDataContainer().set(COOKED_FISH_TYPE, this.getValue());
     }
 }

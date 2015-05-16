@@ -28,9 +28,9 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.StoneData;
-import org.spongepowered.api.data.types.StoneType;
-import org.spongepowered.api.data.types.StoneTypes;
+import org.spongepowered.api.data.manipulator.block.StoneData;
+import org.spongepowered.api.data.type.StoneType;
+import org.spongepowered.api.data.type.StoneTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeStoneData extends AbstractSingleValueData<StoneType, StoneData> implements StoneData {

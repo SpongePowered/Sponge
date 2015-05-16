@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.SignaledOutputData;
+import org.spongepowered.api.data.manipulator.block.SignaledOutputData;
 import org.spongepowered.common.data.manipulators.AbstractIntData;
 
 public class SpongeSignaledOutputData extends AbstractIntData<SignaledOutputData> implements SignaledOutputData {

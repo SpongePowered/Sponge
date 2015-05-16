@@ -29,7 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.VelocityData;
+import org.spongepowered.api.data.manipulator.entity.VelocityData;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeVelocityData extends AbstractSingleValueData<Vector3d, VelocityData> implements VelocityData {

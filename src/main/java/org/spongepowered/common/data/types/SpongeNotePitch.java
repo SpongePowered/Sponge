@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.types;
 
-import org.spongepowered.api.data.types.NotePitch;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 @NonnullByDefault

@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.WhitelistData;
+import org.spongepowered.api.data.manipulator.entity.WhitelistData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeWhitelistData extends SpongeAbstractData<WhitelistData> implements WhitelistData {

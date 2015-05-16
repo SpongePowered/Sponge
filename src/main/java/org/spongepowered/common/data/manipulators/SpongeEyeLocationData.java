@@ -29,11 +29,17 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.EyeLocationData;
+import org.spongepowered.api.data.manipulator.entity.EyeLocationData;
 
 public class SpongeEyeLocationData extends SpongeAbstractData<EyeLocationData> implements EyeLocationData {
 
+    public static final DataQuery EYE_LOCATION = of("EyeLocation");
+    public static final DataQuery POS_X = of("PosX");
+    public static final DataQuery POS_Y = of("PosY");
+    public static final DataQuery POS_Z = of("PosZ");
+    public static final DataQuery EYE_HEIGHT = of("EyeHeight");
     private final Vector3d eyeLocation;
     private final double eyeHeight;
 
@@ -66,11 +72,11 @@ public class SpongeEyeLocationData extends SpongeAbstractData<EyeLocationData> i
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .createView(of("EyeLocation"))
-                .set(of("PosX"), this.eyeLocation.getX())
-                .set(of("PosY"), this.eyeLocation.getY())
-                .set(of("PosZ"), this.eyeLocation.getZ())
+                .createView(EYE_LOCATION)
+                .set(POS_X, this.eyeLocation.getX())
+                .set(POS_Y, this.eyeLocation.getY())
+                .set(POS_Z, this.eyeLocation.getZ())
                 .getContainer()
-                .set(of("EyeHeight"), this.eyeHeight);
+                .set(EYE_HEIGHT, this.eyeHeight);
     }
 }

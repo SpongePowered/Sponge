@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulators.entities;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.entities.BreedableData;
+import org.spongepowered.api.data.manipulator.entity.BreedableData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongeBreedableData extends SpongeAbstractData<BreedableData> implements BreedableData {
+
+    public static final DataQuery BREEDABLE = of("Breedable");
 
     public SpongeBreedableData() {
         super(BreedableData.class);
@@ -49,6 +52,6 @@ public class SpongeBreedableData extends SpongeAbstractData<BreedableData> imple
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Breedable"), true);
+        return new MemoryDataContainer().set(BREEDABLE, true);
     }
 }

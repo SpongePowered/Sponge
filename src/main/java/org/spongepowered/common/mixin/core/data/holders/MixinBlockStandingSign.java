@@ -30,7 +30,6 @@ import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.block.BlockSign;
 import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
@@ -39,7 +38,7 @@ import net.minecraft.world.World;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulators.blocks.DirectionalData;
+import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;

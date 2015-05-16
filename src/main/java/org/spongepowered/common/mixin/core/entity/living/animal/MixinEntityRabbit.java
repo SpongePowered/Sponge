@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityRabbit;
-import org.spongepowered.api.data.types.RabbitType;
+import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.entity.living.animal.Rabbit;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;

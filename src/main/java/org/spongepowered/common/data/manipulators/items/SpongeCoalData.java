@@ -27,13 +27,16 @@ package org.spongepowered.common.data.manipulators.items;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.items.CoalItemData;
-import org.spongepowered.api.data.types.CoalType;
-import org.spongepowered.api.data.types.CoalTypes;
+import org.spongepowered.api.data.manipulator.item.CoalItemData;
+import org.spongepowered.api.data.type.CoalType;
+import org.spongepowered.api.data.type.CoalTypes;
 import org.spongepowered.common.data.manipulators.AbstractSingleValueData;
 
 public class SpongeCoalData extends AbstractSingleValueData<CoalType, CoalItemData> implements CoalItemData {
+
+    public static final DataQuery COAL_TYPE = of("CoalType");
 
     public SpongeCoalData() {
         super(CoalItemData.class, CoalTypes.COAL);
@@ -51,6 +54,6 @@ public class SpongeCoalData extends AbstractSingleValueData<CoalType, CoalItemDa
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("CoalType"), this.getValue());
+        return new MemoryDataContainer().set(COAL_TYPE, this.getValue());
     }
 }

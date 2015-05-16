@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.blocks.PoweredData;
+import org.spongepowered.api.data.manipulator.block.PoweredData;
 import org.spongepowered.common.data.manipulators.SpongeAbstractData;
 
 public class SpongePoweredData extends SpongeAbstractData<PoweredData> implements PoweredData {

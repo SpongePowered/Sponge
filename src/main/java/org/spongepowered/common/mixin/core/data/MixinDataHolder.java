@@ -38,7 +38,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.DataTransactionBuilder;
-import org.spongepowered.common.data.SpongeDataUtil;
+import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 import java.util.Collection;
@@ -48,7 +48,11 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <T extends DataManipulator<T>> Optional<T> getData(Class<T> dataClass) {
-        return getOrCreate(dataClass);
+        Optional<SpongeDataProcessor<T>> builderOptional = SpongeManipulatorRegistry.getInstance().getUtil(dataClass);
+        if (builderOptional.isPresent()) {
+            return builderOptional.get().getFrom(this);
+        }
+        return Optional.absent();
     }
 
     @Override
@@ -62,7 +66,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <T extends DataManipulator<T>> boolean remove(Class<T> manipulatorClass) {
-        Optional<SpongeDataUtil<T>> utilOptional = SpongeManipulatorRegistry.getInstance().getUtil(manipulatorClass);
+        Optional<SpongeDataProcessor<T>> utilOptional = SpongeManipulatorRegistry.getInstance().getUtil(manipulatorClass);
         if (utilOptional.isPresent()) {
             return utilOptional.get().remove(this);
         }
@@ -82,7 +86,7 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T>> DataTransactionResult offer(T manipulatorData, DataPriority priority) {
-        Optional<SpongeDataUtil<T>> setterOptional = SpongeManipulatorRegistry.getInstance().getUtil((Class<T>) (Class) manipulatorData
+        Optional<SpongeDataProcessor<T>> setterOptional = SpongeManipulatorRegistry.getInstance().getUtil((Class<T>) (Class) manipulatorData
                 .getClass());
         if (setterOptional.isPresent()) {
             return setterOptional.get().setData(this, manipulatorData, priority);

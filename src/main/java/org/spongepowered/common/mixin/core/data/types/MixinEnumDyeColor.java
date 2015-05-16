@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.item.EnumDyeColor;
-import org.spongepowered.api.data.types.DyeColor;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

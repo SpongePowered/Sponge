@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulators;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.data.manipulators.IntData;
+import org.spongepowered.api.data.manipulator.IntData;
 
 public abstract class AbstractIntData<T extends IntData<T>> extends AbstractSingleValueData<Integer, T> implements IntData<T> {
 

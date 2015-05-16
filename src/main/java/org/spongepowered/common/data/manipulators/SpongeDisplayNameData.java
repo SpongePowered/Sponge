@@ -27,8 +27,9 @@ package org.spongepowered.common.data.manipulators;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulators.DisplayNameData;
+import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 
@@ -36,6 +37,8 @@ import java.util.Locale;
 
 public class SpongeDisplayNameData extends AbstractSingleValueData<Text, DisplayNameData> implements DisplayNameData {
 
+    public static final DataQuery DISPLAY_NAME = of("DisplayName");
+    public static final DataQuery VISIBLE = of("Visible");
     private boolean visible = true;
 
     public SpongeDisplayNameData() {
@@ -76,7 +79,7 @@ public class SpongeDisplayNameData extends AbstractSingleValueData<Text, Display
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("DisplayName"), Texts.toJson(this.getValue(), Locale.ENGLISH))
-                .set(of("Visible"), this.visible);
+                .set(DISPLAY_NAME, Texts.toJson(this.getValue(), Locale.ENGLISH))
+                .set(VISIBLE, this.visible);
     }
 }
