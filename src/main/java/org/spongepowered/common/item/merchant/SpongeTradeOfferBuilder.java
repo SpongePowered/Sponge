@@ -96,7 +96,7 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
     }
 
     @Override
-    public TradeOfferBuilder setCanGrantExperience(boolean experience) {
+    public TradeOfferBuilder canGrantExperience(boolean experience) {
         this.allowsExperience = experience;
         return this;
     }
@@ -163,7 +163,7 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
         builder.sellingItem(buyingItem)
                 .maxUses(container.getInt(MAX_QUERY).get())
                 .uses(container.getInt(USES_QUERY).get())
-                .setCanGrantExperience(container.getBoolean(EXPERIENCE_QUERY).get());
+                .canGrantExperience(container.getBoolean(EXPERIENCE_QUERY).get());
         return Optional.of(builder.build());
     }
 }
