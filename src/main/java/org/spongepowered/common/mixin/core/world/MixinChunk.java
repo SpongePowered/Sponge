@@ -49,9 +49,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.gen.BiomeBuffer;
 import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -263,12 +261,6 @@ public abstract class MixinChunk implements Chunk {
     public void setBlockType(int x, int y, int z, BlockType type) {
         checkBlockBounds(x, y, z);
         setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
-    public boolean contains(Location location) {
-        final Extent extent = location.getExtent();
-        return (extent == this || extent.equals(this.worldObj)) && SpongeChunkLayout.instance.isInChunk(location.getBlockPosition(), this.chunkPos);
     }
 
     @Override
