@@ -49,7 +49,7 @@ public class SpongeSignDataUtil implements SpongeDataUtil<SignData> {
 
     @Override
     public Optional<SignData> build(DataView container) throws InvalidDataException {
-        final Optional<List<String>> optRawLines  = container.getStringList(SignData.LINES);
+        final Optional<List<String>> optRawLines  = container.getStringList(SpongeSignData.LINES);
         final SignData data = new SpongeSignData();
         if (optRawLines.isPresent()) {
             final List<String> rawLines = optRawLines.get();

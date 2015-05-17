@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulators.tiles;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulators.tileentities.SignData;
 import org.spongepowered.api.text.Text;
@@ -37,7 +38,7 @@ import java.util.List;
 
 @NonnullByDefault
 public class SpongeSignData extends SpongeAbstractData<SignData> implements SignData {
-
+    public static final DataQuery LINES = new DataQuery("Lines");
     private final List<Text> lines;
 
     public SpongeSignData() {
@@ -47,20 +48,6 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
     public SpongeSignData(List<Text> lines) {
         super(SignData.class);
         this.lines = lines;
-    }
-
-    @Override
-    public int compareTo(SignData o) {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
-        for (Text line : this.lines) {
-            jsonLines.add(Texts.toJson(line));
-        }
-        return new MemoryDataContainer().set(SignData.LINES, jsonLines);
     }
 
     @Override
@@ -90,5 +77,19 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
     @Override
     public SignData copy() {
         return new SpongeSignData(Lists.newArrayList(this.lines));
+    }
+
+    @Override
+    public int compareTo(SignData o) {
+        return 0;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
+        for (Text line : this.lines) {
+            jsonLines.add(Texts.toJson(line));
+        }
+        return new MemoryDataContainer().set(LINES, jsonLines);
     }
 }

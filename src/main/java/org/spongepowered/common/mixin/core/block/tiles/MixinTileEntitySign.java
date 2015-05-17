@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulators.tileentities.SignData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulators.tiles.SpongeSignData;
 import org.spongepowered.common.data.utils.SpongeSignDataUtil;
 
 import java.util.List;
@@ -57,7 +58,7 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
         for (IChatComponent line : this.signText) {
             lines.add(IChatComponent.Serializer.componentToJson(line));
         }
-        container.set(SignData.LINES, lines);
+        container.set(SpongeSignData.LINES, lines);
         return container;
     }
 
