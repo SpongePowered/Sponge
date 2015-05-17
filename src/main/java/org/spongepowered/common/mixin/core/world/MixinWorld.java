@@ -35,12 +35,27 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.EntityEnderPearl;
+import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.entity.projectile.EntityPotion;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
@@ -66,6 +81,8 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.projectile.EnderPearl;
+import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -298,28 +315,71 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         Entity entity = null;
 
-        try {
-            entity = ConstructorUtils.invokeConstructor(type.getEntityClass(), this);
-            entity.setLocation(entity.getLocation().setPosition(position));
-        } catch (Exception e) {
-            Sponge.getLogger().error(ExceptionUtils.getStackTrace(e));
+        Class<? extends Entity> entityClass = type.getEntityClass();
+        double x = position.getX();
+        double y = position.getY();
+        double z = position.getZ();
+
+        if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(EntityDragonPart.class)) {
+            // Unable to construct these
+            return Optional.absent();
         }
+
+        net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
+
+        // Not all entities have a single World parameter as their constructor
+        if (entityClass.isAssignableFrom(EntityLightningBolt.class)) {
+            entity = (Entity) new EntityLightningBolt(world, x, y, z);
+        } else if (entityClass.isAssignableFrom(EntityEnderPearl.class)) {
+            EntityArmorStand tempEntity = new EntityArmorStand(world, x, y, z);
+            entity = (Entity) new EntityEnderPearl(world, tempEntity);
+            ((EnderPearl) entity).setShooter(new UnknownProjectileSource());
+        }
+
+        // Some entities need to have non-null fields (and the easiest way to
+        // set them is to use the more specialised constructor).
+        if (entityClass.isAssignableFrom(EntityFallingBlock.class)) {
+            entity = (Entity) new EntityFallingBlock(world, x, y, z, Blocks.sand.getDefaultState());
+        } else if (entityClass.isAssignableFrom(EntityItem.class)) {
+            entity = (Entity) new EntityItem(world, x, y, z, new ItemStack(Blocks.stone));
+        }
+
+        if (entity == null) {
+            try {
+                entity = ConstructorUtils.invokeConstructor(entityClass, this);
+                ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
+            } catch (Exception e) {
+                Sponge.getLogger().error(ExceptionUtils.getStackTrace(e));
+            }
+        }
+
+        if (entity instanceof EntityHanging) {
+            if (((EntityHanging) entity).facingDirection == null) {
+                // TODO Some sort of detection of a valid direction?
+                // i.e scan immediate blocks for something to attach onto.
+                ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
+            }
+            if (!((EntityHanging) entity).onValidSurface()) {
+                return Optional.absent();
+            }
+        }
+
+        // Last chance to fix null fields
+        if (entity instanceof EntityPotion) {
+            // make sure EntityPotion.potionDamage is not null
+            ((EntityPotion) entity).getPotionDamage();
+        } else if (entity instanceof EntityPainting) {
+            // This is default when art is null when reading from NBT, could
+            // choose a random art instead?
+            ((EntityPainting) entity).art = EnumArt.KEBAB;
+        }
+
         return Optional.fromNullable(entity);
     }
 
     @Override
     public Optional<Entity> createEntity(EntityType type, Vector3i position) {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-        Entity entity = null;
-
-        try {
-            entity = ConstructorUtils.invokeConstructor(type.getEntityClass(), this);
-            entity.setLocation(entity.getLocation().setPosition(position.toDouble()));
-        } catch (Exception e) {
-            Sponge.getLogger().error(ExceptionUtils.getStackTrace(e));
-        }
-        return Optional.fromNullable(entity);
+        return this.createEntity(type, position.toDouble());
     }
 
     @Override
@@ -331,6 +391,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
+        if (entity instanceof EntityFishHook && ((EntityFishHook) entity).angler == null) {
+            // TODO MixinEntityFishHook.setShooter makes angler null sometimes,
+            // but that will cause NPE when ticking
+            return false;
+        }
         return spawnEntityInWorld(((net.minecraft.entity.Entity) entity));
     }
 
