@@ -30,10 +30,10 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.gen.layer.IntCache;
-import org.spongepowered.api.util.gen.MutableBiomeArea;
+import org.spongepowered.api.util.gen.MutableBiomeBuffer;
 import org.spongepowered.api.world.gen.BiomeGenerator;
-import org.spongepowered.common.util.gen.ByteArrayMutableBiomeArea;
-import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeArea;
+import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
+import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +51,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
 
     private static final Vector2i CACHED_AREA_SIZE = new Vector2i(40, 40);
 
-    private final ByteArrayMutableBiomeArea areaForGeneration = new ByteArrayMutableBiomeArea(Vector2i.ZERO, CACHED_AREA_SIZE);
+    private final ByteArrayMutableBiomeBuffer areaForGeneration = new ByteArrayMutableBiomeBuffer(Vector2i.ZERO, CACHED_AREA_SIZE);
     final BiomeGenerator biomeGenerator;
 
     /**
@@ -109,7 +109,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
         int zSizeBlock = zSize * 4;
 
         // Get biomes
-        ByteArrayMutableBiomeArea buffer = getBiomeBuffer(xStartBlock, zStartBlock, xSizeBlock, zSizeBlock);
+        ByteArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartBlock, zStartBlock, xSizeBlock, zSizeBlock);
         this.biomeGenerator.generateBiomes(buffer);
 
         // Downscale
@@ -123,14 +123,14 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
         return biomeArrayZoomedOut;
     }
 
-    private ByteArrayMutableBiomeArea getBiomeBuffer(int xStart, int zStart, int xSize, int zSize) {
+    private ByteArrayMutableBiomeBuffer getBiomeBuffer(int xStart, int zStart, int xSize, int zSize) {
         if (xSize == CACHED_AREA_SIZE.getX()
                 && zSize == CACHED_AREA_SIZE.getY()
                 && this.areaForGeneration.isDetached()) {
             this.areaForGeneration.reuse(new Vector2i(xStart, zStart));
             return this.areaForGeneration;
         } else {
-            return new ByteArrayMutableBiomeArea(new Vector2i(xStart, zStart), new Vector2i(xSize, zSize));
+            return new ByteArrayMutableBiomeBuffer(new Vector2i(xStart, zStart), new Vector2i(xSize, zSize));
         }
     }
 
@@ -140,7 +140,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
             rainfallArray = new float[xSize * zSize];
         }
 
-        ByteArrayMutableBiomeArea buffer = getBiomeBuffer(x, z, xSize, zSize);
+        ByteArrayMutableBiomeBuffer buffer = getBiomeBuffer(x, z, xSize, zSize);
         this.biomeGenerator.generateBiomes(buffer);
         byte[] biomes = buffer.detach();
         BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
@@ -169,7 +169,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
         int xSizeSegments = xMaxSegment - xStartSegment + 1;
         int zSizeSegments = zMaxSegment - zStartSegment + 1;
 
-        ByteArrayMutableBiomeArea buffer = getBiomeBuffer(xStartSegment << 2, zStartSegment << 2, xSizeSegments << 2, zSizeSegments << 2);
+        ByteArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment << 2, zStartSegment << 2, xSizeSegments << 2, zSizeSegments << 2);
         this.biomeGenerator.generateBiomes(buffer);
         byte[] biomes = buffer.detach();
 
@@ -200,7 +200,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
         int xSizeSegments = xMaxSegment - xStartSegment + 1;
         int zSizeSegments = zMaxSegment - zStartSegment + 1;
 
-        ByteArrayMutableBiomeArea buffer = getBiomeBuffer(xStartSegment << 2, zStartSegment << 2, xSizeSegments << 2, zSizeSegments << 2);
+        ByteArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment << 2, zStartSegment << 2, xSizeSegments << 2, zSizeSegments << 2);
         this.biomeGenerator.generateBiomes(buffer);
         byte[] biomes = buffer.detach();
 
@@ -227,7 +227,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
             Arrays.fill(biomeArray, BiomeGenBase.ocean);
         }
 
-        MutableBiomeArea biomeArea = new ObjectArrayMutableBiomeArea(biomeArray, new Vector2i(startX, startZ), new Vector2i(sizeX, sizeZ));
+        MutableBiomeBuffer biomeArea = new ObjectArrayMutableBiomeBuffer(biomeArray, new Vector2i(startX, startZ), new Vector2i(sizeX, sizeZ));
         this.biomeGenerator.generateBiomes(biomeArea);
 
         return biomeArray;

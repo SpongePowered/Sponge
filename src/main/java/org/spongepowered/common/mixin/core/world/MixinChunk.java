@@ -65,7 +65,7 @@ import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.FastChunkBuffer;
-import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeArea;
+import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Collection;
@@ -127,7 +127,7 @@ public abstract class MixinChunk implements Chunk {
         if (!populators.isEmpty()) {
             FastChunkBuffer buffer = new FastChunkBuffer((net.minecraft.world.chunk.Chunk) (Object) this);
             BiomeGenBase[] biomeArray = world.getWorldChunkManager().getBiomeGenAt(null, chunkX * 16, chunkZ * 16, 16, 16, true);
-            BiomeBuffer biomes = new ObjectArrayMutableBiomeArea(biomeArray, new Vector2i(chunkX * 16, chunkZ * 16), new Vector2i(16, 16));
+            BiomeBuffer biomes = new ObjectArrayMutableBiomeBuffer(biomeArray, new Vector2i(chunkX * 16, chunkZ * 16), new Vector2i(16, 16));
 
             for (GeneratorPopulator populator : populators) {
                 populator.populate((org.spongepowered.api.world.World) world, buffer, biomes);

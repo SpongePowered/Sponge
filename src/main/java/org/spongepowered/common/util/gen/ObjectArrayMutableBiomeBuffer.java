@@ -27,8 +27,8 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.util.gen.ImmutableBiomeArea;
-import org.spongepowered.api.util.gen.MutableBiomeArea;
+import org.spongepowered.api.util.gen.ImmutableBiomeBuffer;
+import org.spongepowered.api.util.gen.MutableBiomeBuffer;
 import org.spongepowered.api.world.biome.BiomeType;
 
 import java.util.Arrays;
@@ -36,12 +36,12 @@ import java.util.Arrays;
 /**
  * Mutable view of a {@link BiomeGenBase} array.
  *
- * <p>Normally, the {@link ByteArrayMutableBiomeArea} class uses memory more
+ * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
  * efficiently, but when the {@link BiomeGenBase} array is already created (for
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-public final class ObjectArrayMutableBiomeArea extends AbstractBiomeArea implements MutableBiomeArea {
+public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeArea implements MutableBiomeBuffer {
 
     private final BiomeGenBase[] biomes;
 
@@ -53,7 +53,7 @@ public final class ObjectArrayMutableBiomeArea extends AbstractBiomeArea impleme
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayMutableBiomeArea(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
+    public ObjectArrayMutableBiomeBuffer(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
 
         Preconditions.checkNotNull(biomes);
@@ -90,8 +90,8 @@ public final class ObjectArrayMutableBiomeArea extends AbstractBiomeArea impleme
     }
 
     @Override
-    public ImmutableBiomeArea getImmutableClone() {
-        return new ByteArrayImmutableBiomeArea(this.biomes, this.start, this.size);
+    public ImmutableBiomeBuffer getImmutableClone() {
+        return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }
 
 }

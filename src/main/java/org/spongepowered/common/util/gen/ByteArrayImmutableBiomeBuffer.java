@@ -27,7 +27,7 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.util.gen.ImmutableBiomeArea;
+import org.spongepowered.api.util.gen.ImmutableBiomeBuffer;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 
@@ -37,12 +37,12 @@ import java.util.Arrays;
  * Immutable biome area, backed by a byte array. The array passed to the
  * constructor is copied to ensure that the instance is immutable.
  */
-public final class ByteArrayImmutableBiomeArea extends AbstractBiomeArea implements ImmutableBiomeArea {
+public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeArea implements ImmutableBiomeBuffer {
 
     private final BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
     private final byte[] biomes;
 
-    public ByteArrayImmutableBiomeArea(byte[] biomes, Vector2i start, Vector2i size) {
+    public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
 
         int minLength = size.getX() * size.getY();
@@ -50,7 +50,7 @@ public final class ByteArrayImmutableBiomeArea extends AbstractBiomeArea impleme
         this.biomes = Arrays.copyOf(biomes, minLength);
     }
 
-    public ByteArrayImmutableBiomeArea(BiomeGenBase[] biomeGenBases, Vector2i start, Vector2i size) {
+    public ByteArrayImmutableBiomeBuffer(BiomeGenBase[] biomeGenBases, Vector2i start, Vector2i size) {
         super(start, size);
 
         int minLength = size.getX() * size.getY();

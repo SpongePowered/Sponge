@@ -27,8 +27,8 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.util.gen.ImmutableBiomeArea;
-import org.spongepowered.api.util.gen.MutableBiomeArea;
+import org.spongepowered.api.util.gen.ImmutableBiomeBuffer;
+import org.spongepowered.api.util.gen.MutableBiomeBuffer;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 
@@ -42,7 +42,7 @@ import java.util.Arrays;
  * further access to the byte array. The byte array can then
  * be reused by calling {@link #reuse(Vector2i)}.</p>
  */
-public final class ByteArrayMutableBiomeArea extends AbstractBiomeArea implements MutableBiomeArea {
+public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeArea implements MutableBiomeBuffer {
 
     private boolean detached;
     private final byte[] biomes;
@@ -52,7 +52,7 @@ public final class ByteArrayMutableBiomeArea extends AbstractBiomeArea implement
         Preconditions.checkState(!this.detached, "trying to use buffer after it's closed");
     }
 
-    public ByteArrayMutableBiomeArea(Vector2i start, Vector2i size) {
+    public ByteArrayMutableBiomeBuffer(Vector2i start, Vector2i size) {
         super(start, size);
         this.biomes = new byte[size.getX() * size.getY()];
     }
@@ -76,9 +76,9 @@ public final class ByteArrayMutableBiomeArea extends AbstractBiomeArea implement
     }
 
     @Override
-    public ImmutableBiomeArea getImmutableClone() {
+    public ImmutableBiomeBuffer getImmutableClone() {
         checkOpen();
-        return new ByteArrayImmutableBiomeArea(this.biomes, this.start, this.size);
+        return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }
 
     /**
