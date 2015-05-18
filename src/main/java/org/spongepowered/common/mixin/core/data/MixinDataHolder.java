@@ -95,11 +95,6 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators() {
-        return ImmutableList.of();
-    }
-
-    @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
         return null;
     }

@@ -94,6 +94,7 @@ import org.spongepowered.api.data.manipulator.entity.FoodData;
 import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.api.data.manipulator.entity.InvulnerabilityData;
 import org.spongepowered.api.data.manipulator.entity.TradeOfferData;
+import org.spongepowered.api.data.manipulator.item.AuthorData;
 import org.spongepowered.api.data.manipulator.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.item.LoreData;
 import org.spongepowered.api.data.manipulator.item.PagedData;
@@ -250,6 +251,7 @@ import org.spongepowered.common.data.manipulators.entities.SpongeCareerData;
 import org.spongepowered.common.data.manipulators.entities.SpongeFoodData;
 import org.spongepowered.common.data.manipulators.entities.SpongeHealthData;
 import org.spongepowered.common.data.manipulators.entities.SpongeInvulnerabilityData;
+import org.spongepowered.common.data.manipulators.items.SpongeAuthorData;
 import org.spongepowered.common.data.manipulators.items.SpongeEnchantmentItemData;
 import org.spongepowered.common.data.manipulators.items.SpongeLoreData;
 import org.spongepowered.common.data.manipulators.items.SpongePagedData;
@@ -272,6 +274,7 @@ import org.spongepowered.common.data.utils.entities.SpongeFoodDataProcessor;
 import org.spongepowered.common.data.utils.entities.SpongeHealthProcessor;
 import org.spongepowered.common.data.utils.entities.SpongeInvulnerabilityProcessor;
 import org.spongepowered.common.data.utils.entities.SpongeTradeOfferProcessor;
+import org.spongepowered.common.data.utils.items.SpongeAuthorProcessor;
 import org.spongepowered.common.data.utils.items.SpongeEnchantmentProcessor;
 import org.spongepowered.common.data.utils.items.SpongeLoreProcessor;
 import org.spongepowered.common.data.utils.items.SpongePagesProcessor;
@@ -1491,6 +1494,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.register(PagedData.class, pagesUtil);
         dataRegistry.registerDataUtil(PagedData.class, pagesUtil);
         dataRegistry.registerDataUtil((Class<PagedData>) (Class) SpongePagedData.class, pagesUtil);
+
+        SpongeAuthorProcessor authorUtil = new SpongeAuthorProcessor();
+        service.registerBuilder(AuthorData.class, authorUtil);
+        dataRegistry.register(AuthorData.class, authorUtil);
+        dataRegistry.registerDataUtil(AuthorData.class, authorUtil);
+        dataRegistry.registerDataUtil((Class<AuthorData>) (Class) SpongeAuthorData.class, authorUtil);
         // User
         // TODO someone needs to write a User implementation...
     }

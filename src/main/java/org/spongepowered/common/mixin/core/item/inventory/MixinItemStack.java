@@ -26,19 +26,31 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemSword;
+import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulator.DisplayNameData;
+import org.spongepowered.api.data.manipulator.item.AuthorData;
+import org.spongepowered.api.data.manipulator.item.DurabilityData;
+import org.spongepowered.api.data.manipulator.item.PagedData;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -77,6 +89,30 @@ public abstract class MixinItemStack implements ItemStack {
     @Override
     public int getMaxStackQuantity() {
         return getMaxStackSize();
+    }
+
+    @Override
+    public Collection<DataManipulator<?>> getManipulators() {
+        final List<DataManipulator<?>> manipulators = Lists.newArrayList();
+        final Optional<DisplayNameData> optDisplayName = SpongeManipulatorRegistry.getInstance().getUtil(DisplayNameData.class).get().createFrom
+                (this);
+        if (optDisplayName.isPresent()) {
+            manipulators.add(optDisplayName.get());
+        }
+        if (getItem() == Items.written_book || getItem() == Items.writable_book) {
+            final Optional<AuthorData> optAuthor = SpongeManipulatorRegistry.getInstance().getUtil(AuthorData.class).get().createFrom(this);
+            final Optional<PagedData> optPages = SpongeManipulatorRegistry.getInstance().getUtil(PagedData.class).get().createFrom(this);
+            if (optAuthor.isPresent()) {
+                manipulators.add(optAuthor.get());
+            }
+            if (optPages.isPresent()) {
+                manipulators.add(optPages.get());
+            }
+        } else if (getItem() instanceof ItemTool || getItem() instanceof ItemArmor || getItem() instanceof ItemSword) {
+            manipulators.add(SpongeManipulatorRegistry.getInstance().getUtil(DurabilityData.class).get().createFrom(this).get());
+        }
+
+        return Collections.unmodifiableList(manipulators);
     }
 
     @Override
