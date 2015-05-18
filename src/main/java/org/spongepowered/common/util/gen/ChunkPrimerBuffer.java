@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.ChunkPrimer;
@@ -62,8 +61,9 @@ public final class ChunkPrimerBuffer extends AbstractChunkBuffer {
     }
 
     @Override
-    public BlockState getBlock(Vector3i position) {
-        return getBlock(position.getX(), position.getY(), position.getZ());
+    public void setBlock(int x, int y, int z, BlockState block) {
+        checkRange(x, y, z);
+        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
     }
 
     @Override
@@ -72,15 +72,5 @@ public final class ChunkPrimerBuffer extends AbstractChunkBuffer {
         throw new UnsupportedOperationException("Not yet supported");
     }
 
-    @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
-        checkRange(x, y, z);
-        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
-    }
-
-    @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        setBlock(position.getX(), position.getY(), position.getZ(), block);
-    }
 
 }

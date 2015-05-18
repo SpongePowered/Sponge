@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.gen.MutableBlockBuffer;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -85,6 +86,36 @@ public abstract class AbstractChunkBuffer implements MutableBlockBuffer {
     @Override
     public boolean containsBlock(int x, int y, int z) {
         return VecHelper.inBounds(x, y, z, this.minBlock, this.maxBlock);
+    }
+
+    @Override
+    public BlockState getBlock(Vector3i position) {
+        return getBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public void setBlock(Vector3i position, BlockState block) {
+        setBlock(position.getX(), position.getY(), position.getZ(), block);
+    }
+
+    @Override
+    public BlockType getBlockType(Vector3i position) {
+        return getBlockType(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public void setBlockType(Vector3i position, BlockType type) {
+        setBlockType(position.getX(), position.getY(), position.getZ(), type);
+    }
+
+    @Override
+    public BlockType getBlockType(int x, int y, int z) {
+        return getBlock(x, y, z).getType();
+    }
+
+    @Override
+    public void setBlockType(int x, int y, int z, BlockType type) {
+        setBlock(x, y, z, type.getDefaultState());
     }
 
     @Override

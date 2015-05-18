@@ -148,6 +148,11 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
+    public void setBlockType(int x, int y, int z, BlockType type) {
+        setBlock(x, y, z, type.getDefaultState());
+    }
+
+    @Override
     public Location getFullBlock(Vector3i position) {
         return getFullBlock(position.getX(), position.getY(), position.getZ());
     }

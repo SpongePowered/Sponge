@@ -258,12 +258,6 @@ public abstract class MixinChunk implements Chunk {
     }
 
     @Override
-    public void setBlockType(int x, int y, int z, BlockType type) {
-        checkBlockBounds(x, y, z);
-        setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
     public Vector2i getBiomeMin() {
         return this.biomeMin;
     }

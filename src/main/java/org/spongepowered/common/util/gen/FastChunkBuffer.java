@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.Chunk;
@@ -63,16 +62,6 @@ public final class FastChunkBuffer extends AbstractChunkBuffer {
             return BlockTypes.AIR.getDefaultState();
         }
         return (BlockState) section.get(x & 0xf, y & 0xf, z & 0xf);
-    }
-
-    @Override
-    public BlockState getBlock(Vector3i position) {
-        return this.getBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        this.setBlock(position.getX(), position.getY(), position.getZ(), block);
     }
 
     @Override
