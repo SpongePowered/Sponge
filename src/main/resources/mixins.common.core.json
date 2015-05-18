@@ -42,6 +42,7 @@
         "command.MixinCommandBlockLogic",
         "command.MixinCommandExecuteAtSender",
         "command.MixinSubject",
+        "command.MixinPlayerSelector",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityEnderCrystal",
