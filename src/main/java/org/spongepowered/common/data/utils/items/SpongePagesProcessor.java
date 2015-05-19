@@ -154,7 +154,7 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
         if (!(dataHolder instanceof ItemStack)) {
             return Optional.absent();
         }
-        if ((((ItemStack) dataHolder).getItem() != Items.writable_book) || ((ItemStack) dataHolder).getItem() != Items.written_book) {
+        if (!((((ItemStack) dataHolder).getItem() == Items.written_book) || ((ItemStack) dataHolder).getItem() == Items.writable_book)) {
             return Optional.absent();
         }
         if (!((ItemStack) dataHolder).hasTagCompound()) {
