@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin;
 import org.spongepowered.asm.mixin.MixinEnvironment.Side;
 
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import java.util.List;
