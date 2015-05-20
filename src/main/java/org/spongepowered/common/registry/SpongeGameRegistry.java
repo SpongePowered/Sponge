@@ -94,6 +94,7 @@ import org.spongepowered.api.data.manipulator.entity.FoodData;
 import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.api.data.manipulator.entity.InvulnerabilityData;
 import org.spongepowered.api.data.manipulator.entity.TradeOfferData;
+import org.spongepowered.api.data.manipulator.item.AuthorData;
 import org.spongepowered.api.data.manipulator.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.item.LoreData;
 import org.spongepowered.api.data.manipulator.item.PagedData;
@@ -250,12 +251,14 @@ import org.spongepowered.common.data.manipulator.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.entity.SpongeFoodData;
 import org.spongepowered.common.data.manipulator.entity.SpongeHealthData;
 import org.spongepowered.common.data.manipulator.entity.SpongeInvulnerabilityData;
+import org.spongepowered.common.data.manipulator.item.SpongeAuthorData;
 import org.spongepowered.common.data.manipulator.item.SpongeEnchantmentItemData;
 import org.spongepowered.common.data.manipulator.item.SpongeLoreData;
 import org.spongepowered.common.data.manipulator.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
+import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.type.SpongeSkullType;
@@ -1474,6 +1477,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(PagedData.class, pagesProcessor);
         dataRegistry.register(PagedData.class, pagesProcessor);
         dataRegistry.registerDataProcessorAndImpl(PagedData.class, SpongePagedData.class, pagesProcessor);
+
+        SpongeAuthorProcessor authorProcessor = new SpongeAuthorProcessor();
+        service.registerBuilder(AuthorData.class, authorProcessor);
+        dataRegistry.register(AuthorData.class, authorProcessor);
+        dataRegistry.registerDataProcessorAndImpl(AuthorData.class, SpongeAuthorData.class, authorProcessor);
+
         // User
         // TODO someone needs to write a User implementation...
     }
