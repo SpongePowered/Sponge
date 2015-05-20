@@ -177,6 +177,8 @@
         "server.MixinNetworkManager",
         "server.MixinServerCommandManager",
         "server.MixinServerConfigurationManager",
+        "server.network.MixinNetHandlerLoginServer",
+        "server.network.MixinNetHandlerLoginServerAnonThread",
         "status.MixinMinecraftProtocolVersionIdentifier",
         "status.MixinNetHandlerStatusServer",
         "status.MixinPingResponseHandler",
