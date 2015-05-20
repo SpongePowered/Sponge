@@ -93,6 +93,7 @@ import org.spongepowered.api.data.manipulator.entity.CareerData;
 import org.spongepowered.api.data.manipulator.entity.FoodData;
 import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.api.data.manipulator.entity.InvulnerabilityData;
+import org.spongepowered.api.data.manipulator.entity.SkinData;
 import org.spongepowered.api.data.manipulator.entity.TradeOfferData;
 import org.spongepowered.api.data.manipulator.item.AuthorData;
 import org.spongepowered.api.data.manipulator.item.EnchantmentData;
@@ -258,10 +259,7 @@ import org.spongepowered.common.data.manipulator.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
-import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
-import org.spongepowered.common.data.type.SpongeCookedFish;
-import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.data.type.SpongeSkullType;
+import org.spongepowered.common.data.manipulators.entities.SpongeSkinData;
 import org.spongepowered.common.data.processor.SpongeBannerDataProcessor;
 import org.spongepowered.common.data.processor.SpongeBeaconDataProcessor;
 import org.spongepowered.common.data.processor.SpongeDisplayNameDataProcessor;
@@ -275,9 +273,14 @@ import org.spongepowered.common.data.processor.entity.SpongeFoodDataProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeHealthProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeInvulnerabilityProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeTradeOfferProcessor;
+import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.processor.item.SpongeEnchantmentProcessor;
 import org.spongepowered.common.data.processor.item.SpongeLoreProcessor;
 import org.spongepowered.common.data.processor.item.SpongePagesProcessor;
+import org.spongepowered.common.data.type.SpongeCookedFish;
+import org.spongepowered.common.data.type.SpongeNotePitch;
+import org.spongepowered.common.data.type.SpongeSkullType;
+import org.spongepowered.common.data.utils.entities.SpongeSkinDataProcessor;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
@@ -287,6 +290,7 @@ import org.spongepowered.common.entity.SpongeEntityInteractionType;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.entity.living.HumanEntity;
 import org.spongepowered.common.entity.player.gamemode.SpongeGameMode;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
@@ -405,7 +409,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, CookedFish> cookedFishMappings = Maps.newHashMap();
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
     private final Map<String, Art> artMappings = Maps.newHashMap();
-    private final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
+    protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
 
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
@@ -1483,6 +1487,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.register(AuthorData.class, authorProcessor);
         dataRegistry.registerDataProcessorAndImpl(AuthorData.class, SpongeAuthorData.class, authorProcessor);
 
+        SpongeSkinDataProcessor skinDataProcessor = new SpongeSkinDataProcessor();
+        service.registerBuilder(SkinData.class, skinDataProcessor);
+        dataRegistry.register(SkinData.class, skinDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(SkinData.class, SpongeSkinData.class, skinDataProcessor);
+
         // User
         // TODO someone needs to write a User implementation...
     }
@@ -1653,6 +1662,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.entityTypeMappings.put("WEATHER", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class));
         this.entityTypeMappings.put("PLAYER", new SpongeEntityType(-5, "Player", EntityPlayerMP.class));
         this.entityTypeMappings.put("COMPLEX_PART", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class));
+        if (!this.entityTypeMappings.containsKey("HUMAN")) {
+            this.entityTypeMappings.put("HUMAN", new SpongeEntityType(-7, "Human", HumanEntity.class));
+        }
 
         RegistryHelper.mapFields(EntityTypes.class, new Function<String, EntityType>() {
 

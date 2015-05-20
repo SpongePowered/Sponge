@@ -31,6 +31,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -55,12 +56,14 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.entity.living.HumanEntity;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.Subjectable;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
@@ -75,7 +78,6 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)
-@Implements(@Interface(iface = Player.class, prefix = "playermp$"))
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, CommandSource, Subjectable, IMixinEntityPlayerMP {
 
     public int newExperience = 0;
@@ -86,6 +88,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
+
+    @Inject(method = "func_152339_d", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
+    private void onRemoveEntity(Entity entityIn, CallbackInfo ci) {
+        if (entityIn instanceof HumanEntity) {
+            ((HumanEntity) entityIn).onRemovedFrom((EntityPlayerMP) (Object) this);
+        }
+    }
 
     @Override
     public GameProfile getProfile() {
@@ -99,6 +109,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public boolean isOnline() {
+        // TODO This should actually check if the player is online.
+        // A plugin may hold a reference to a player who has since disconnected
         return true;
     }
 
@@ -210,6 +222,28 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public String getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_USER;
+    }
+
+    @Override
+    public String getCustomName() {
+        return this.getGameProfile().getName();
+    }
+
+    @Override
+    public void setCustomName(String name) {
+        throw new UnsupportedOperationException("Cannot set the custom name of a player");
+    }
+
+    @Override
+    public boolean isCustomNameVisible() {
+        return true;
+    }
+
+    @Override
+    public void setCustomNameVisible(boolean visible) {
+        if (!visible) {
+            throw new UnsupportedOperationException("Cannot hide the name of a player");
+        }
     }
 
     @Override
