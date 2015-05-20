@@ -47,11 +47,11 @@ import javax.inject.Singleton;
 @Singleton
 public abstract class SpongeGame implements Game {
 
-    private static final String API_VERSION = Objects.firstNonNull(SpongeGame.class.getPackage().getSpecificationVersion(), "UNKNOWN");
-    private static final String IMPLEMENTATION_VERSION =
+    public static final String API_VERSION = Objects.firstNonNull(SpongeGame.class.getPackage().getSpecificationVersion(), "UNKNOWN");
+    public static final String IMPLEMENTATION_VERSION =
             Objects.firstNonNull(SpongeGame.class.getPackage().getImplementationVersion(), "UNKNOWN");
 
-    private static final MinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
+    public static final MinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
 
     private final PluginManager pluginManager;
     private final EventManager eventManager;
@@ -66,21 +66,6 @@ public abstract class SpongeGame implements Game {
         this.gameRegistry = checkNotNull(gameRegistry, "gameRegistry");
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
-    }
-
-    @Override
-    public String getApiVersion() {
-        return API_VERSION;
-    }
-
-    @Override
-    public String getImplementationVersion() {
-        return IMPLEMENTATION_VERSION;
-    }
-
-    @Override
-    public MinecraftVersion getMinecraftVersion() {
-        return MINECRAFT_VERSION;
     }
 
     @Override
@@ -110,7 +95,7 @@ public abstract class SpongeGame implements Game {
 
     @Override
     public TeleportHelper getTeleportHelper() {
-        return teleportHelper;
+        return this.teleportHelper;
     }
 
     @Override

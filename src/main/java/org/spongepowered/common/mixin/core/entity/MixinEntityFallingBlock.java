@@ -24,61 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityFallingBlock;
-import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.manipulator.entity.FallingBlockData;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
 @Mixin(EntityFallingBlock.class)
 public abstract class MixinEntityFallingBlock extends MixinEntity implements FallingBlock {
 
-    @Shadow public float fallHurtAmount;
-    @Shadow public int fallHurtMax;
-    @Shadow public IBlockState fallTile;
-    @Shadow public boolean shouldDropItem;
-    @Shadow public boolean canSetAsBlock;
-
-    public double getFallDamagePerBlock() {
-        return this.fallHurtAmount;
-    }
-
-    public void setFallDamagePerBlock(double damage) {
-        this.fallHurtAmount = (float) damage;
-    }
-
-    public double getMaxFallDamage() {
-        return this.fallHurtMax;
-    }
-
-    public void setMaxFallDamage(double damage) {
-        this.fallHurtMax = (int) damage;
-    }
-
-    public BlockState getBlockState() {
-        return (BlockState) this.fallTile.getBlock().getBlockState();
-    }
-
-    public void setBlockState(BlockState blockState) {
-        this.fallTile = (net.minecraft.block.state.IBlockState) blockState;
-    }
-
-    public boolean getCanPlaceAsBlock() {
-        return this.canSetAsBlock;
-    }
-
-    public void setCanPlaceAsBlock(boolean placeable) {
-        this.canSetAsBlock = placeable;
-    }
-
-    public boolean getCanDropAsItem() {
-        return this.shouldDropItem;
-    }
-
-    public void setCanDropAsItem(boolean droppable) {
-        this.shouldDropItem = droppable;
+    @Override
+    public FallingBlockData getFallingBlockData() {
+        return getData(FallingBlockData.class).get();
     }
 }

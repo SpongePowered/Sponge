@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.projectile.fireball;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MovingObjectPosition;
+import org.spongepowered.api.data.manipulator.entity.DamagingData;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
@@ -70,6 +71,11 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
     @Override
     public void detonate() {
         this.onImpact(new MovingObjectPosition(null));
+    }
+
+    @Override
+    public DamagingData getDamagingData() {
+        return getData(DamagingData.class).get();
     }
 
     @Override

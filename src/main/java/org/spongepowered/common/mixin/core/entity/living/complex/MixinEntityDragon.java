@@ -24,35 +24,27 @@
  */
 package org.spongepowered.common.mixin.core.entity.living.complex;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityDragonPart;
-import net.minecraft.entity.item.EntityEnderCrystal;
-import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
 
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 @NonnullByDefault
 @Mixin(EntityDragon.class)
-@Implements(@Interface(iface = EnderDragon.class, prefix = "dragon$"))
-public abstract class MixinEntityDragon extends MixinEntityLiving {
+public abstract class MixinEntityDragon extends MixinEntityLiving implements EnderDragon {
 
     @Shadow public EntityDragonPart[] dragonPartArray;
-    @Shadow public EntityEnderCrystal healingEnderCrystal;
 
-    public Set<EnderDragonPart> dragon$getParts() {
+    @Override
+    public Set<EnderDragonPart> getParts() {
         Builder<EnderDragonPart> builder = ImmutableSet.builder();
 
         for (EntityDragonPart part : this.dragonPartArray) {
@@ -60,14 +52,6 @@ public abstract class MixinEntityDragon extends MixinEntityLiving {
         }
 
         return builder.build();
-    }
-
-    public Optional<EnderCrystal> getHealingCrystal() {
-        return Optional.fromNullable((EnderCrystal) this.healingEnderCrystal);
-    }
-
-    public void setHealingCrystal(@Nullable EnderCrystal crystal) {
-        this.healingEnderCrystal = (EntityEnderCrystal) crystal;
     }
 
 }

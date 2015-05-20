@@ -25,11 +25,14 @@
 package org.spongepowered.common.mixin.core.entity.explosive;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.manipulator.entity.ExplosiveRadiusData;
+import org.spongepowered.api.data.manipulator.entity.FuseData;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -55,14 +58,14 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     @Override
     public boolean validateRawData(DataContainer container) {
         boolean doesSuper = super.validateRawData(container);
-        return doesSuper && container.contains(DataQuery.of("Fuse"));
+        return doesSuper && container.contains(of("Fuse"));
     }
 
     @Override
     public void setRawData(DataContainer container) throws InvalidDataException {
         super.setRawData(container);
         try {
-            setFuse(container.getInt(DataQuery.of("Fuse")).get());
+            setFuse(container.getInt(of("Fuse")).get());
         } catch (Exception e) {
             throw new InvalidDataException("Couldn't parse raw data", e);
         }
@@ -70,9 +73,8 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(DataQuery.of("Fuse"), this.fuse);
-        return container;
+        return super.toContainer()
+                .set(of("FuseData"), getFuseData());
     }
 
     @Override

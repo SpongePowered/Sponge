@@ -24,21 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.nbt.NBTTagCompound;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.entity.player.User;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityItem.class)
@@ -50,8 +46,6 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
 
     @Shadow private int delayBeforeCanPickup;
     @Shadow private int age;
-
-    @Shadow public abstract net.minecraft.item.ItemStack getEntityItem();
 
     public int lifespan;
 
@@ -132,17 +126,9 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
         this.infiniteDespawnDelay = true;
     }
 
-    public ItemStack getItemStack() {
-        return (ItemStack) getEntityItem();
-    }
-
-    // TODO: Implement getThrower once some class implements User
-    public Optional<User> getThrower() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setThrower(@Nullable User user) {
-        throw new UnsupportedOperationException();
+    @Override
+    public RepresentedItemData getItemData() {
+        return getData(RepresentedItemData.class).get();
     }
 
     @Override

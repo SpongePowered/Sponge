@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.living;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
@@ -38,6 +40,8 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.entity.DamageableData;
+import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.potion.PotionEffect;
@@ -260,10 +264,19 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
+    public DamageableData getMortalData() {
+        return getData(DamageableData.class).get(); // possibly perform a failsafe?
+    }
 
-        return container;
+    @Override
+    public HealthData getHealthData() {
+        return getData(HealthData.class).get(); // possibly perform a failsafe?
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        // todo actually store more data.
+        return super.toContainer().set(of("HealthData"), getHealthData()).set(of("DamageableData"), getMortalData());
     }
 
 }

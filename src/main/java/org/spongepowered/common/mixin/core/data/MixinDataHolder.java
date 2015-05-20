@@ -43,7 +43,7 @@ import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 import java.util.Collection;
 
-@Mixin({TileEntity.class, Entity.class, ItemStack.class, PotionEffect.class})
+@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, PotionEffect.class}, priority = 999)
 public abstract class MixinDataHolder implements DataHolder {
 
     @Override
@@ -101,7 +101,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return null;
+        return Optional.absent();
     }
 
     @Override

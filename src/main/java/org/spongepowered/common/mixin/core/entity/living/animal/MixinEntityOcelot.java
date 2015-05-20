@@ -25,30 +25,17 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityOcelot;
-import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.manipulator.entity.OcelotData;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.entity.SpongeEntityMeta;
 
 @NonnullByDefault
 @Mixin(EntityOcelot.class)
-@Implements(@Interface(iface = Ocelot.class, prefix = "ocelot$"))
-public abstract class MixinEntityOcelot extends MixinEntityAnimal {
+public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Ocelot {
 
-    @Shadow public abstract int getTameSkin();
-    @Shadow public abstract void setTameSkin(int skin);
-
-    public OcelotType getOcelotType() {
-        return SpongeEntityConstants.OCELOT_IDMAP.get(this.getTameSkin());
+    @Override
+    public OcelotData getOcelotData() {
+        return getData(OcelotData.class).get();
     }
-
-    public void setOcelotType(final OcelotType ocelotType) {
-        this.setTameSkin(((SpongeEntityMeta) ocelotType).type);
-    }
-
 }

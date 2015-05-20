@@ -122,7 +122,7 @@ public class Sponge {
             this.logger.warn("Non-Sponge SerializationService already registered: " + e2.getLocalizedMessage());
         }
 
-        if (this.game.getPlatform() == Platform.SERVER) {
+        if (this.game.getPlatform().getType() == Platform.Type.SERVER) {
             try {
                 this.game.getServiceManager().setProvider(this.plugin, RconService.class, new MinecraftRconService((DedicatedServer)
                         MinecraftServer.getServer()));

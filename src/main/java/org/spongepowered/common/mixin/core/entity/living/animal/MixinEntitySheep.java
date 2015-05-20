@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
+import static org.spongepowered.api.data.DataQuery.of;
+
 import net.minecraft.entity.passive.EntitySheep;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DyeableData;
 import org.spongepowered.api.entity.living.animal.Sheep;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,7 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @NonnullByDefault
 @Mixin(EntitySheep.class)
 @Implements(@Interface(iface = Sheep.class, prefix = "sheep$"))
-public abstract class MixinEntitySheep extends MixinEntityAnimal {
+public abstract class MixinEntitySheep extends MixinEntityAnimal implements Sheep {
 
     @Shadow public abstract boolean getSheared();
 
@@ -53,4 +57,16 @@ public abstract class MixinEntitySheep extends MixinEntityAnimal {
         }
     }
 
+
+    @Override
+    public DyeableData getDyeData() {
+        return getData(DyeableData.class).get();
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+                .set(of("Sheared"), getSheared())
+                .set(of("Dye"), getDyeData());
+    }
 }

@@ -38,7 +38,7 @@ import org.spongepowered.api.data.manipulator.block.AxisData;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulators.blocks.SpongeDirectionalData;
+import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
 import org.spongepowered.common.interfaces.blocks.IMixinAxisHolder;
 import org.spongepowered.common.interfaces.blocks.IMixinDirectionalHolder;
 import org.spongepowered.common.interfaces.blocks.IMixinPoweredHolder;

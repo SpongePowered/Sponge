@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
 
 import net.minecraft.entity.item.EntityMinecartTNT;
+import org.spongepowered.api.data.manipulator.entity.FuseData;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartTNT;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,4 +34,8 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(EntityMinecartTNT.class)
 public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart implements MinecartTNT {
 
+    @Override
+    public FuseData getFuseData() {
+        return getData(FuseData.class).get();
+    }
 }

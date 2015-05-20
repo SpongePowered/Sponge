@@ -25,32 +25,17 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityRabbit;
-import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.manipulator.entity.RabbitData;
 import org.spongepowered.api.entity.living.animal.Rabbit;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.entity.SpongeEntityMeta;
 
 @NonnullByDefault
 @Mixin(EntityRabbit.class)
-@Implements(@Interface(iface = Rabbit.class, prefix = "rabbit$"))
-public abstract class MixinEntityRabbit extends MixinEntityAnimal {
+public abstract class MixinEntityRabbit extends MixinEntityAnimal implements Rabbit {
 
-    @Shadow(prefix = "shadow$")
-    public abstract int shadow$getRabbitType();
-    @Shadow(prefix = "shadow$")
-    public abstract void shadow$setRabbitType(int type);
-
-    public RabbitType getRabbitType() {
-        return SpongeEntityConstants.RABBIT_IDMAP.get(this.shadow$getRabbitType());
+    @Override
+    public RabbitData getRabbitData() {
+        return getData(RabbitData.class).get();
     }
-
-    public void setRabbitType(RabbitType type) {
-        this.shadow$setRabbitType(((SpongeEntityMeta) type).type);
-    }
-
 }

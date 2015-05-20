@@ -25,25 +25,15 @@
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityEndermite;
+import org.spongepowered.api.data.manipulator.entity.ExpirableData;
 import org.spongepowered.api.entity.living.monster.Endermite;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(EntityEndermite.class)
-@Implements(@Interface(iface = Endermite.class, prefix = "endermite$"))
-public abstract class MixinEntityEndermite extends MixinEntityMob {
+public abstract class MixinEntityEndermite extends MixinEntityMob implements Endermite {
 
-    @Shadow private boolean playerSpawned;
-
-    public boolean isPlayerCreated() {
-        return this.playerSpawned;
-    }
-
-    public void setPlayerCreated(boolean playerCreated) {
-        this.playerSpawned = playerCreated;
+    @Override
+    public ExpirableData getExpirableData() {
+        return getData(ExpirableData.class).get();
     }
 }

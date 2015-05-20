@@ -35,8 +35,8 @@ import org.spongepowered.api.data.manipulator.tileentity.SignData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulators.tileentities.SpongeSignData;
-import org.spongepowered.common.data.utils.SpongeSignDataProcessor;
+import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
+import org.spongepowered.common.data.processor.SpongeSignDataProcessor;
 
 import java.util.List;
 

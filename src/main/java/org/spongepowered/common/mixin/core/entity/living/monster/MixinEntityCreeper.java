@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.Shadow;
 @Implements(@Interface(iface = Creeper.class, prefix = "creeper$"))
 public abstract class MixinEntityCreeper extends MixinEntityMob {
 
-    @Shadow private int explosionRadius;
     @Shadow private int timeSinceIgnited;
     @Shadow private int fuseTime = 30;
     @Shadow public abstract boolean getPowered();
@@ -58,31 +57,4 @@ public abstract class MixinEntityCreeper extends MixinEntityMob {
         this.ignite();
     }
 
-    public int getFuseDuration() {
-        return this.fuseTime - this.timeSinceIgnited;
-    }
-
-    public void setFuseDuration(int fuseTicks) {
-        this.timeSinceIgnited = this.fuseTime - fuseTicks;
-    }
-
-    public boolean isPowered() {
-        return getPowered();
-    }
-
-    public void setPowered(boolean powered) {
-        if (powered) {
-            this.dataWatcher.updateObject(17, (byte) 1);
-        } else {
-            this.dataWatcher.updateObject(17, (byte) 0);
-        }
-    }
-
-    public int getExplosionRadius() {
-        return this.explosionRadius;
-    }
-
-    public void setExplosionRadius(int radius) {
-        this.explosionRadius = radius;
-    }
 }

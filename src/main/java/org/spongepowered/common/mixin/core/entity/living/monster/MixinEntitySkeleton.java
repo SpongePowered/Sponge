@@ -25,29 +25,17 @@
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.type.SkeletonType;
+import org.spongepowered.api.data.manipulator.entity.SkeletonData;
 import org.spongepowered.api.entity.living.monster.Skeleton;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.entity.SpongeEntityMeta;
 
 @NonnullByDefault
 @Mixin(EntitySkeleton.class)
-@Implements(@Interface(iface = Skeleton.class, prefix = "skeleton$"))
-public abstract class MixinEntitySkeleton extends MixinEntityMob {
+public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
 
-    @Shadow public abstract void setSkeletonType(int type);
-
-    public SkeletonType getSkeletonType() {
-        return SpongeEntityConstants.SKELETON_IDMAP.get((int) this.dataWatcher.getWatchableObjectByte(13));
+    @Override
+    public SkeletonData getSkeletonData() {
+        return getData(SkeletonData.class).get();
     }
-
-    public void setSkeletonType(SkeletonType skeletonType) {
-        this.setSkeletonType(((SpongeEntityMeta) skeletonType).type);
-    }
-
 }

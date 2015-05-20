@@ -28,66 +28,21 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.entity.AgeableData;
 import org.spongepowered.api.entity.living.Ageable;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(EntityAgeable.class)
-@Implements(@Interface(iface = Ageable.class, prefix = "ageable$"))
-public abstract class MixinEntityAgeable extends MixinEntityLiving {
+public abstract class MixinEntityAgeable extends MixinEntityLiving implements Ageable {
 
-    @Shadow public abstract int getGrowingAge();
-    @Shadow public abstract void setGrowingAge(int age);
-    @Shadow public abstract void setScaleForAge(boolean baby);
-
-    public int getAge() {
-        return getGrowingAge();
-    }
-
-    public void setAge(int age) {
-        setGrowingAge(age);
-    }
-
-    public void setBaby() {
-        if (getGrowingAge() >= 0) {
-            setGrowingAge(-24000);
-        }
-    }
-
-    public void setAdult() {
-        if (getGrowingAge() < 0) {
-            setGrowingAge(0);
-        }
-    }
-
-    public boolean isBaby() {
-        return getGrowingAge() < 0;
-    }
-
-    public boolean canBreed() {
-        return getGrowingAge() == 0;
-    }
-
-    public void setBreeding(boolean breeding) {
-        if (breeding) {
-            setGrowingAge(0);
-        } else if (getGrowingAge() >= 0) {
-            setGrowingAge(6000);
-        }
-    }
-
-    public void setScaleForAge() {
-        setScaleForAge(getGrowingAge() < 0);
+    @Override
+    public AgeableData getAgeData() {
+        return getData(AgeableData.class).get();
     }
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("GrowthAge"), this.getAge());
-        return container;
+        return super.toContainer()
+                .set(of("AgeableData"), getAgeData());
     }
 }
