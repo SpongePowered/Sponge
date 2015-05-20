@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common;
 
+import com.google.common.collect.Maps;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
+
+import java.util.Map;
 
 public abstract class AbstractPlatform implements Platform {
 
@@ -53,4 +56,21 @@ public abstract class AbstractPlatform implements Platform {
     public MinecraftVersion getMinecraftVersion() {
         return this.minecraftVersion;
     }
+
+    @Override
+    public String getName() {
+        return "Sponge";
+    }
+
+    @Override
+    public Map<String, Object> asMap() {
+        final Map<String, Object> map = Maps.newHashMap();
+        map.put("Name", this.getName());
+        map.put("Type", this.getType());
+        map.put("ApiVersion", this.getApiVersion());
+        map.put("ImplementationVersion", this.getVersion());
+        map.put("MinecraftVersion", this.getMinecraftVersion());
+        return map;
+    }
+
 }
