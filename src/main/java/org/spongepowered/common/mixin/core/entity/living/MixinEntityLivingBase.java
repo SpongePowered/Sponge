@@ -34,7 +34,6 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
@@ -103,7 +102,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         Living thisEntity = (Living) this;
         DamageSource source = DamageSource.generic;
         if (thisEntity instanceof Human) {
-            source = net.minecraft.util.DamageSource.causePlayerDamage((EntityPlayerMP) thisEntity);
+            source = net.minecraft.util.DamageSource.causePlayerDamage((EntityPlayer) thisEntity);
         } else {
             source = net.minecraft.util.DamageSource.causeMobDamage((EntityLivingBase) thisEntity);
         }
@@ -123,8 +122,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         Living thisEntity = (Living) this;
         setHealth((float) health);
 
-        if (thisEntity instanceof EntityPlayerMP && health == 0) {
-            ((EntityPlayerMP) thisEntity).onDeath(DamageSource.generic);
+        if (thisEntity instanceof EntityPlayer && health == 0) {
+            ((EntityPlayer) thisEntity).onDeath(DamageSource.generic);
         }
     }
 

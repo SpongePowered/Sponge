@@ -48,6 +48,7 @@
         "entity.MixinEntity",
         "entity.MixinEntityEnderCrystal",
         "entity.MixinEntityItem",
+        "entity.MixinEntityTrackerEntry",
         "entity.MixinEntityXPOrb",
         "entity.MixinEntityFallingBlock",
         "entity.ai.MixinEntityAIMate",
