@@ -208,6 +208,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.selector.SelectorType;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -319,6 +320,7 @@ import org.spongepowered.common.text.SpongeTextFactory;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.text.format.SpongeTextColor;
 import org.spongepowered.common.text.format.SpongeTextStyle;
+import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.weather.SpongeWeather;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -1090,6 +1092,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setTextFactory() {
         RegistryHelper.setFactory(Texts.class, new SpongeTextFactory());
+        RegistryHelper.setFactory(MessageSinks.class, SpongeMessageSinkFactory.INSTANCE);
     }
 
     private void setSelectors() {

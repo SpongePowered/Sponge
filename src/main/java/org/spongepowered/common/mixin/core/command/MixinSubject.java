@@ -40,9 +40,13 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,22 +60,23 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(value = {EntityPlayerMP.class, CommandBlockLogic.class, MinecraftServer.class, RConConsoleSource.class},
         targets = "net/minecraft/tileentity/TileEntitySign$2")
-public abstract class MixinSubject implements CommandSource, ICommandSender {
+public abstract class MixinSubject implements CommandSource, ICommandSender, Subjectable {
 
     @Nullable
     private Subject thisSubject;
 
+    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
+    public void subjectConstructor(CallbackInfo ci) {
+        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
+    }
+
+    @Override
+    public void setSubject(Subject subj) {
+        this.thisSubject = subj;
+    }
+
     @Nullable
     private Subject internalSubject() {
-        if (this.thisSubject == null) {
-            Optional<PermissionService> service = Sponge.getGame().getServiceManager().provide(PermissionService.class);
-            if (service.isPresent()) {
-                SubjectCollection userSubjects = service.get().getSubjects(((Subjectable) this).getSubjectCollectionIdentifier());
-                if (userSubjects != null) {
-                    return this.thisSubject = userSubjects.get(getIdentifier());
-                }
-            }
-        }
         return this.thisSubject;
     }
 
@@ -114,12 +119,12 @@ public abstract class MixinSubject implements CommandSource, ICommandSender {
     public boolean hasPermission(Set<Context> contexts, String permission) {
         Subject subj = internalSubject();
         if (subj == null) {
-            return ((Subjectable) this).permDefault(permission).asBoolean();
+            return this.permDefault(permission).asBoolean();
         } else {
             Tristate ret = getPermissionValue(contexts, permission);
             switch (ret) {
                 case UNDEFINED:
-                    return ((Subjectable) this).permDefault(permission).asBoolean();
+                    return this.permDefault(permission).asBoolean();
                 default:
                     return ret.asBoolean();
             }
@@ -134,7 +139,7 @@ public abstract class MixinSubject implements CommandSource, ICommandSender {
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
         Subject subj = internalSubject();
-        return subj == null ? ((Subjectable) this).permDefault(permission) : subj.getPermissionValue(contexts, permission);
+        return subj == null ? this.permDefault(permission) : subj.getPermissionValue(contexts, permission);
     }
 
     @Override
@@ -174,6 +179,6 @@ public abstract class MixinSubject implements CommandSource, ICommandSender {
                 return hasPermission(((MinecraftCommandWrapper) mapping.getCallable()).getCommandPermission());
             }
         }
-        return ((Subjectable) this).permDefault(commandName).asBoolean();
+        return this.permDefault(commandName).asBoolean();
     }
 }
