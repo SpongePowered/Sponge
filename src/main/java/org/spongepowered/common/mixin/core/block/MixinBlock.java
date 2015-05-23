@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.BlockLiquid;
@@ -36,17 +35,26 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.BlockRandomTickEvent;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.blocks.IMixinBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.VecHelper;
 
-import java.util.Collection;
+import java.util.Random;
 
 @NonnullByDefault
 @Mixin(Block.class)
@@ -117,6 +125,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public void setTickRandomly(boolean tickRandomly) {
         this.needsRandomTick = tickRandomly;
+    }
+
+    @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    public void callRandomTickEvent(World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+        final BlockRandomTickEvent event = SpongeEventFactory.createBlockRandomTick(Sponge.getGame(), null, new Location((Extent)world, VecHelper.toVector(pos))); //TODO Fix null Cause
+        Sponge.getGame().getEventManager().post(event);
+        if(event.isCancelled()) {
+            ci.cancel();
+        }
     }
 
     @Override
