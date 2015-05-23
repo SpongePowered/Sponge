@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.core;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.GameProfile;
-import org.spongepowered.api.entity.player.User;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -41,11 +39,6 @@ public abstract class MixinGameProfile implements GameProfile {
     @Override
     public UUID getUniqueId() {
         return getId();
-    }
-
-    @Override
-    public Optional<User> getUser() {
-        throw new UnsupportedOperationException(); // TODO
     }
 
 }
