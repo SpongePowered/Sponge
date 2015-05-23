@@ -29,13 +29,28 @@ import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
 @NonnullByDefault
 @Mixin(EntityWolf.class)
-@Implements(@Interface(iface = Wolf.class, prefix = "wolf$"))
-public abstract class MixinEntityWolf extends MixinEntityAnimal implements IMixinAggressive {
+@Implements(value = {@Interface(iface = Wolf.class, prefix = "wolf$"), @Interface(iface = IMixinAggressive.class, prefix="soft$")})
+public abstract class MixinEntityWolf extends MixinEntityAnimal{
+    @Shadow(prefix = "shadow$")
+    public abstract boolean shadow$isAngry();
+    @Shadow(prefix = "shadow$")
+    public abstract void shadow$setAngry(boolean angry);
 
+    @Intrinsic
+    public boolean soft$isAngry() {
+        return this.shadow$isAngry();
+    }
+
+    @Intrinsic
+    public void soft$setAngry(boolean angry) {
+        this.shadow$setAngry(angry);
+    }
 }
