@@ -93,7 +93,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         @Override
         public Iterable<CommandSource> getRecipients() {
             // TODO: Non-player subjects?
-            Set<CommandSource> ret = new HashSet<CommandSource>((Collection) MinecraftServer.getServer().getConfigurationManager());
+            Set<CommandSource> ret = new HashSet<CommandSource>((Collection) MinecraftServer.getServer().getConfigurationManager().playerEntityList);
             ret.add((CommandSource) MinecraftServer.getServer());
             return ret;
         }
