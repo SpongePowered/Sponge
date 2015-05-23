@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.JoinData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
@@ -35,6 +36,8 @@ import java.util.Date;
 
 public class SpongeJoinData extends SpongeAbstractData<JoinData> implements JoinData {
 
+    public static final DataQuery FIRST_TIME_JOINING = of("FirstTimeJoining");
+    public static final DataQuery LAST_JOINTIME = of("LastJointime");
     private final long first;
     private final long last;
 
@@ -67,7 +70,7 @@ public class SpongeJoinData extends SpongeAbstractData<JoinData> implements Join
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("FirstTimeJoining"), this.first)
-                .set(of("LastJointime"), this.last);
+                .set(FIRST_TIME_JOINING, this.first)
+                .set(LAST_JOINTIME, this.last);
     }
 }

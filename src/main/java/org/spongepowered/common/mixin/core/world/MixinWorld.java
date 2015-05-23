@@ -95,7 +95,7 @@ import org.spongepowered.common.entity.living.HumanEntity;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
-import org.spongepowered.common.interfaces.blocks.IMixinBlock;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;

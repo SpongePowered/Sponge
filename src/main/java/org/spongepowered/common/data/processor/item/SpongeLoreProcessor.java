@@ -53,16 +53,16 @@ public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
 
     @SuppressWarnings("deprecation")
     @Override
-    public Optional<LoreData> fillData(DataHolder holder, LoreData manipulator, DataPriority priority) {
-        checkNotNull(holder);
+    public Optional<LoreData> fillData(DataHolder dataHolder, LoreData manipulator, DataPriority priority) {
+        checkNotNull(dataHolder);
         checkNotNull(manipulator);
-        if (holder instanceof ItemStack) {
-            if (!((ItemStack) holder).hasTagCompound()) {
+        if (dataHolder instanceof ItemStack) {
+            if (!((ItemStack) dataHolder).hasTagCompound()) {
                 return Optional.of(manipulator);
             }
             switch (checkNotNull(priority)) {
                 case DATA_HOLDER: {
-                    final NBTTagCompound subCompound = ((ItemStack) holder).getSubCompound("display", false);
+                    final NBTTagCompound subCompound = ((ItemStack) dataHolder).getSubCompound("display", false);
                     if (subCompound == null) {
                         return Optional.of(manipulator);
                     }
@@ -77,7 +77,7 @@ public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
                     return Optional.of(manipulator.set(lore));
                 }
                 case POST_MERGE: {
-                    final NBTTagCompound subCompound = ((ItemStack) holder).getSubCompound("display", false);
+                    final NBTTagCompound subCompound = ((ItemStack) dataHolder).getSubCompound("display", false);
                     if (subCompound == null) {
                         return Optional.of(manipulator);
                     }
@@ -91,7 +91,7 @@ public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
                     return Optional.of(manipulator);
                 }
                 case PRE_MERGE: {
-                    final NBTTagCompound subCompound = ((ItemStack) holder).getSubCompound("display", false);
+                    final NBTTagCompound subCompound = ((ItemStack) dataHolder).getSubCompound("display", false);
                     if (subCompound == null) {
                         return Optional.of(manipulator);
                     }
@@ -149,7 +149,7 @@ public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
     }
 
     @Override
-    public Optional<LoreData> getFrom(DataHolder holder) {
+    public Optional<LoreData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

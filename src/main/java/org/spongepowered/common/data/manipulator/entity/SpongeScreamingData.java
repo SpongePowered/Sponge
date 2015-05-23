@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.ScreamingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeScreamingData extends SpongeAbstractData<ScreamingData> implements ScreamingData {
+
+    public static final DataQuery IS_SCREAMING = of("IsScreaming");
 
     public SpongeScreamingData() {
         super(ScreamingData.class);
@@ -49,6 +52,6 @@ public class SpongeScreamingData extends SpongeAbstractData<ScreamingData> imple
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsScreaming"), true);
+        return new MemoryDataContainer().set(IS_SCREAMING, true);
     }
 }

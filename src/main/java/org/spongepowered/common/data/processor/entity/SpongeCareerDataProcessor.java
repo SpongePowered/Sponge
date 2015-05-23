@@ -38,12 +38,12 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.entity.SpongeCareerData;
-import org.spongepowered.common.interfaces.entities.IMixinVillager;
+import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData> {
 
     @Override
-    public Optional<CareerData> fillData(DataHolder holder, CareerData manipulator, DataPriority priority) {
+    public Optional<CareerData> fillData(DataHolder dataHolder, CareerData manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
@@ -87,11 +87,11 @@ public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData
     }
 
     @Override
-    public Optional<CareerData> getFrom(DataHolder holder) {
-        if (!(holder instanceof EntityVillager)) {
+    public Optional<CareerData> getFrom(DataHolder dataHolder) {
+        if (!(dataHolder instanceof EntityVillager)) {
             return Optional.absent();
         } else {
-            return createFrom(holder);
+            return createFrom(dataHolder);
         }
     }
 }

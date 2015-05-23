@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.DisguisedBlockData;
 import org.spongepowered.api.data.type.DisguisedBlockType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.DisguisedBlockTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeDisguisedBlockData extends AbstractSingleValueData<DisguisedBlockType, DisguisedBlockData> implements DisguisedBlockData {
+
+    public static final DataQuery DISGUISED_BLOCK_TYPE = of("DisguisedBlockType");
 
     public SpongeDisguisedBlockData() {
         super(DisguisedBlockData.class, DisguisedBlockTypes.STONE);
@@ -51,6 +54,6 @@ public class SpongeDisguisedBlockData extends AbstractSingleValueData<DisguisedB
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DisguisedBlockType"), this.getValue().getId());
+        return new MemoryDataContainer().set(DISGUISED_BLOCK_TYPE, this.getValue().getId());
     }
 }

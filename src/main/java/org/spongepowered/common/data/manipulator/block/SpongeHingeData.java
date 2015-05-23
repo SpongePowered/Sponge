@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.HingeData;
 import org.spongepowered.api.data.type.Hinge;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeHingeData extends AbstractSingleValueData<Hinge, HingeData> implements HingeData {
+
+    public static final DataQuery HINGE = of("Hinge");
 
     public SpongeHingeData() {
         super(HingeData.class, Hinges.LEFT);
@@ -51,6 +54,6 @@ public class SpongeHingeData extends AbstractSingleValueData<Hinge, HingeData> i
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Hinge"), this.getValue().getId());
+        return new MemoryDataContainer().set(HINGE, this.getValue().getId());
     }
 }

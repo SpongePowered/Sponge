@@ -47,7 +47,7 @@ import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.entity.SkinData;
 import org.spongepowered.common.data.DataTransactionBuilder;
-import org.spongepowered.common.data.manipulators.entities.SpongeSkinData;
+import org.spongepowered.common.data.manipulator.entity.SpongeSkinData;
 import org.spongepowered.common.interfaces.IMixinEntity;
 
 import java.util.ArrayList;

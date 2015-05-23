@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.InstrumentData;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeInstrumentData extends AbstractSingleValueData<InstrumentType, InstrumentData> implements InstrumentData {
+
+    public static final DataQuery INSTRUMENT_TYPE = of("InstrumentType");
 
     public SpongeInstrumentData() {
         super(InstrumentData.class, InstrumentTypes.HARP);
@@ -51,6 +54,6 @@ public class SpongeInstrumentData extends AbstractSingleValueData<InstrumentType
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("InstrumentType"), this.getValue());
+        return new MemoryDataContainer().set(INSTRUMENT_TYPE, this.getValue());
     }
 }

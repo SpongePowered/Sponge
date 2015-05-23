@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -31,10 +34,21 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 public class DataUtil {
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
-        if (!dataView.contains(query)) {
+        if (!checkNotNull(dataView).contains(checkNotNull(query))) {
             throw new InvalidDataException("Missing data for query: " + query.asString('.'));
         } else {
             return dataView;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getData(final DataView dataVew, final DataQuery query, Class<T> data) throws InvalidDataException {
+        checkDataExists(dataVew, query);
+        final Object object = dataVew.get(query).get();
+        if (data.isInstance(object)) {
+            return (T) object;
+        } else {
+            throw new InvalidDataException("Data does not match!");
         }
     }
 }

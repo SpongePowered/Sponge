@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.FlamableData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeFlamableData extends SpongeAbstractData<FlamableData> implements FlamableData {
+
+    public static final DataQuery AFLAME = of("Aflame");
 
     public SpongeFlamableData() {
         super(FlamableData.class);
@@ -49,6 +52,6 @@ public class SpongeFlamableData extends SpongeAbstractData<FlamableData> impleme
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Aflame"), true);
+        return new MemoryDataContainer().set(AFLAME, true);
     }
 }

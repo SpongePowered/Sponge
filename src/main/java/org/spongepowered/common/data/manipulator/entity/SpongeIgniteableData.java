@@ -27,12 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.IgniteableData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeIgniteableData extends AbstractIntData<IgniteableData> implements IgniteableData {
 
+    public static final DataQuery FIRE_TICKS = of("FireTicks");
     private int fireDelay = 10;
 
     public SpongeIgniteableData() {
@@ -66,6 +68,6 @@ public class SpongeIgniteableData extends AbstractIntData<IgniteableData> implem
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("FireTicks"), this.getValue());
+        return new MemoryDataContainer().set(FIRE_TICKS, this.getValue());
     }
 }

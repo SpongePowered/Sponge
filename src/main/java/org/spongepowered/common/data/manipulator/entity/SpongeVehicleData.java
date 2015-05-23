@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.VehicleData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeVehicleData extends AbstractSingleValueData<Entity, VehicleData> implements VehicleData {
+
+    public static final DataQuery LEASH_HOLDER = of("LeashHolder");
 
     public SpongeVehicleData(Entity entity) {
         super(VehicleData.class, entity);
@@ -65,6 +68,6 @@ public class SpongeVehicleData extends AbstractSingleValueData<Entity, VehicleDa
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("LeashHolder"), this.getValue().getUniqueId());
+        return new MemoryDataContainer().set(LEASH_HOLDER, this.getValue().getUniqueId());
     }
 }

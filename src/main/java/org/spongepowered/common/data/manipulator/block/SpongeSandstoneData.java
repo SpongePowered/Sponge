@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.SandstoneData;
 import org.spongepowered.api.data.type.SandstoneType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.SandstoneTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeSandstoneData extends AbstractSingleValueData<SandstoneType, SandstoneData> implements SandstoneData {
+
+    public static final DataQuery SANDSTONE_TYPE = of("SandstoneType");
 
     public SpongeSandstoneData() {
         super(SandstoneData.class, SandstoneTypes.DEFAULT);
@@ -51,6 +54,6 @@ public class SpongeSandstoneData extends AbstractSingleValueData<SandstoneType, 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SandstoneType"), this.getValue().getId());
+        return new MemoryDataContainer().set(SANDSTONE_TYPE, this.getValue().getId());
     }
 }

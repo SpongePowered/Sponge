@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.GriefingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeGriefingData extends SpongeAbstractData<GriefingData> implements GriefingData {
+
+    public static final DataQuery CAN_GRIEF = of("CanGrief");
 
     public SpongeGriefingData() {
         super(GriefingData.class);
@@ -49,6 +52,6 @@ public class SpongeGriefingData extends SpongeAbstractData<GriefingData> impleme
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("CanGrief"), true);
+        return new MemoryDataContainer().set(CAN_GRIEF, true);
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.block;
 
 import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.base.Optional;
 import net.minecraft.block.state.IBlockState;
@@ -34,6 +35,7 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.block.AttachedData;
@@ -41,16 +43,19 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.block.SpongeAttachedData;
+import org.spongepowered.common.interfaces.block.IMixinAttachedHolder;
 
 public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData>, SpongeBlockProcessor<AttachedData> {
 
+    public static final DataQuery ATTACHED = of("Attached");
+
     @Override
     public Optional<AttachedData> build(DataView container) throws InvalidDataException {
-        if (!container.contains(of("Attached"))) {
-            throw new InvalidDataException("Container doesn't contain correct attached data!");
+        checkDataExists(container, ATTACHED);
+        final boolean attached = container.getBoolean(ATTACHED).get();
+        if (attached) {
+            return Optional.of(create());
         }
-        final boolean attached = container.getBoolean(of("Attatched")).get();
-
         return Optional.absent();
     }
 
@@ -66,11 +71,19 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
 
     @Override
     public Optional<AttachedData> fromBlockPos(World world, BlockPos blockPos) {
+        final IBlockState blockState = world.getBlockState(blockPos);
+        if (blockState.getBlock() instanceof IMixinAttachedHolder) {
+            ((IMixinAttachedHolder) blockState.getBlock()).getAttachedData(blockState);
+        }
         return Optional.absent();
     }
 
     @Override
     public DataTransactionResult setData(World world, BlockPos blockPos, AttachedData manipulator, DataPriority priority) {
+        final IBlockState blockState = world.getBlockState(blockPos);
+        if (blockState.getBlock() instanceof IMixinAttachedHolder) {
+            ((IMixinAttachedHolder) blockState.getBlock()).setAttachedData(manipulator, world, blockPos);
+        }
         return fail(manipulator);
     }
 
@@ -90,12 +103,12 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
     }
 
     @Override
-    public Optional<AttachedData> getFrom(DataHolder holder) {
+    public Optional<AttachedData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 
     @Override
-    public Optional<AttachedData> fillData(DataHolder holder, AttachedData manipulator, DataPriority priority) {
+    public Optional<AttachedData> fillData(DataHolder dataHolder, AttachedData manipulator, DataPriority priority) {
         return Optional.absent();
     }
 

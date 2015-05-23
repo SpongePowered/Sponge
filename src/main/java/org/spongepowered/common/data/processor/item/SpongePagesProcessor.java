@@ -59,12 +59,12 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
 
 
     @Override
-    public Optional<PagedData> fillData(DataHolder holder, PagedData manipulator, DataPriority priority) {
-        if (holder instanceof ItemStack) {
-            if (((ItemStack) holder).getItem() != Items.writable_book || ((ItemStack) holder).getItem() != Items.written_book) {
+    public Optional<PagedData> fillData(DataHolder dataHolder, PagedData manipulator, DataPriority priority) {
+        if (dataHolder instanceof ItemStack) {
+            if (((ItemStack) dataHolder).getItem() != Items.writable_book || ((ItemStack) dataHolder).getItem() != Items.written_book) {
                 return Optional.absent();
             }
-            final NBTTagList pageList = ((ItemStack) holder).getTagCompound().getTagList("pages", 8);
+            final NBTTagList pageList = ((ItemStack) dataHolder).getTagCompound().getTagList("pages", 8);
             switch (checkNotNull(priority)) {
                 case DATA_HOLDER:
                     final int count = manipulator.getAll().size();
@@ -169,13 +169,13 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
     }
 
     @Override
-    public Optional<PagedData> getFrom(DataHolder holder) {
-        if (!(holder instanceof ItemStack) || !((ItemStack) holder).hasTagCompound()) {
+    public Optional<PagedData> getFrom(DataHolder dataHolder) {
+        if (!(dataHolder instanceof ItemStack) || !((ItemStack) dataHolder).hasTagCompound()) {
             return Optional.absent();
         }
-        if (((ItemStack) holder).getItem() != Items.written_book) {
+        if (((ItemStack) dataHolder).getItem() != Items.written_book) {
             return Optional.absent();
         }
-        return createFrom(holder);
+        return createFrom(dataHolder);
     }
 }

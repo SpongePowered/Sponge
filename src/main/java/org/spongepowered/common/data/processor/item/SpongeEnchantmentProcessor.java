@@ -47,9 +47,9 @@ import java.util.Map;
 public class SpongeEnchantmentProcessor implements SpongeDataProcessor<EnchantmentData> {
 
     @Override
-    public Optional<EnchantmentData> fillData(DataHolder holder, EnchantmentData manipulator, DataPriority priority) {
-        if (holder instanceof ItemStack && ((ItemStack) holder).isItemEnchanted()) {
-            NBTTagList compound = ((ItemStack) holder).getEnchantmentTagList();
+    public Optional<EnchantmentData> fillData(DataHolder dataHolder, EnchantmentData manipulator, DataPriority priority) {
+        if (dataHolder instanceof ItemStack && ((ItemStack) dataHolder).isItemEnchanted()) {
+            NBTTagList compound = ((ItemStack) dataHolder).getEnchantmentTagList();
             Map<Enchantment, Integer> enchantmentIntegerMap = Maps.newHashMap();
 
             for (int i = 0; i < compound.tagCount(); i++) {
@@ -129,13 +129,13 @@ public class SpongeEnchantmentProcessor implements SpongeDataProcessor<Enchantme
     }
 
     @Override
-    public Optional<EnchantmentData> getFrom(DataHolder holder) {
-        if (!(holder instanceof ItemStack)) {
+    public Optional<EnchantmentData> getFrom(DataHolder dataHolder) {
+        if (!(dataHolder instanceof ItemStack)) {
             return Optional.absent();
         }
-        if (!((ItemStack) holder).isItemEnchanted()) {
+        if (!((ItemStack) dataHolder).isItemEnchanted()) {
             return Optional.absent();
         }
-        return createFrom(holder);
+        return createFrom(dataHolder);
     }
 }

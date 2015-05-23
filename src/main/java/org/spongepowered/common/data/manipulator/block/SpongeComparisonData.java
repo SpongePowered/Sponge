@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.ComparisonData;
 import org.spongepowered.api.data.type.Comparison;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.Comparisons;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeComparisonData extends AbstractSingleValueData<Comparison, ComparisonData> implements ComparisonData {
+
+    public static final DataQuery COMPARISON = of("Comparison");
 
     public SpongeComparisonData() {
         super(ComparisonData.class, Comparisons.COMPARE);
@@ -51,6 +54,6 @@ public class SpongeComparisonData extends AbstractSingleValueData<Comparison, Co
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Comparison"), this.getValue().getId());
+        return new MemoryDataContainer().set(COMPARISON, this.getValue().getId());
     }
 }

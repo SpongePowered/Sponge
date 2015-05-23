@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.PistonData;
 import org.spongepowered.api.data.type.PistonType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongePistonData extends AbstractSingleValueData<PistonType, PistonData> implements PistonData {
+
+    public static final DataQuery PISTON_TYPE = of("PistonType");
 
     public SpongePistonData() {
         super(PistonData.class, PistonTypes.NORMAL);
@@ -51,6 +54,6 @@ public class SpongePistonData extends AbstractSingleValueData<PistonType, Piston
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("PistonType"), this.getValue().getId());
+        return new MemoryDataContainer().set(PISTON_TYPE, this.getValue().getId());
     }
 }

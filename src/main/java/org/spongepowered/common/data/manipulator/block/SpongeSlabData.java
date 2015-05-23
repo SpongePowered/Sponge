@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.SlabData;
 import org.spongepowered.api.data.type.SlabType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeSlabData extends AbstractSingleValueData<SlabType, SlabData> implements SlabData {
+
+    public static final DataQuery SLAB_TYPE = of("SlabType");
 
     public SpongeSlabData() {
         super(SlabData.class, SlabTypes.STONE);
@@ -51,6 +54,6 @@ public class SpongeSlabData extends AbstractSingleValueData<SlabType, SlabData> 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SlabType"), this.getValue().getId());
+        return new MemoryDataContainer().set(SLAB_TYPE, this.getValue().getId());
     }
 }

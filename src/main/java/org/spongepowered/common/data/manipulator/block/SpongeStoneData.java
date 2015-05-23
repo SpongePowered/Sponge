@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.StoneData;
 import org.spongepowered.api.data.type.StoneType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.StoneTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeStoneData extends AbstractSingleValueData<StoneType, StoneData> implements StoneData {
+
+    public static final DataQuery STONE_TYPE = of("StoneType");
 
     public SpongeStoneData() {
         super(StoneData.class, StoneTypes.STONE);
@@ -51,6 +54,6 @@ public class SpongeStoneData extends AbstractSingleValueData<StoneType, StoneDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("StoneType"), this.getValue().getId());
+        return new MemoryDataContainer().set(STONE_TYPE, this.getValue().getId());
     }
 }

@@ -22,20 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.blocks;
+package org.spongepowered.common.interfaces.block;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.AxisData;
+import org.spongepowered.api.data.manipulator.block.DirectionalData;
 
-public interface IMixinAxisHolder extends IMixinBlock {
+public interface IMixinDirectionalHolder extends IMixinBlock {
 
-    AxisData getAxisData(IBlockState blockState);
+    DirectionalData getDirectionalData(IBlockState blockState);
 
-    DataTransactionResult setAxisData(AxisData axisData, World world, BlockPos blockPos);
+    DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority);
 
     void reset(World world, BlockPos blockPos);
+
+    BlockState resetDirectionData(BlockState blockState);
 
 }

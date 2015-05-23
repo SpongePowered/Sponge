@@ -22,20 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.blocks;
+package org.spongepowered.common.interfaces.entity;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.type.Career;
 
-public interface IMixinPoweredHolder extends IMixinBlock {
+public interface IMixinVillager {
 
-    boolean isCurrentlyPowered(IBlockState blockState);
+    void setCareer(Career career);
 
-    DataTransactionResult setPowered(World world, BlockPos blockPos, boolean powered);
+    Career getCareer();
 
-    BlockState setUnpowered(IBlockState blockState);
+    boolean isPlaying();
+
+    void setPlaying(boolean playing);
 
 }

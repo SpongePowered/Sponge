@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.WhitelistData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeWhitelistData extends SpongeAbstractData<WhitelistData> implements WhitelistData {
+
+    public static final DataQuery IS_WHITELISTED = of("IsWhitelisted");
 
     public SpongeWhitelistData() {
         super(WhitelistData.class);
@@ -49,6 +52,6 @@ public class SpongeWhitelistData extends SpongeAbstractData<WhitelistData> imple
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsWhitelisted"), true);
+        return new MemoryDataContainer().set(IS_WHITELISTED, true);
     }
 }

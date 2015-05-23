@@ -28,6 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.TargetLivingData;
 import org.spongepowered.api.entity.living.Living;
@@ -37,6 +38,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class SpongeTargetLivingData extends AbstractListData<Living, TargetLivingData> implements TargetLivingData {
+
+    public static final DataQuery TARGETS = of("Targets");
 
     public SpongeTargetLivingData() {
         super(TargetLivingData.class);
@@ -58,6 +61,6 @@ public class SpongeTargetLivingData extends AbstractListData<Living, TargetLivin
         for (Living living : this.elementList) {
             entityIds.add(living.getUniqueId());
         }
-        return new MemoryDataContainer().set(of("Targets"), entityIds);
+        return new MemoryDataContainer().set(TARGETS, entityIds);
     }
 }

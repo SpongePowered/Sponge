@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeDirectionalData extends AbstractSingleValueData<Direction, DirectionalData> implements DirectionalData {
+
+    public static final DataQuery DIRECTION = of("Direction");
 
     public SpongeDirectionalData() {
         super(DirectionalData.class, Direction.NONE);
@@ -50,6 +53,6 @@ public class SpongeDirectionalData extends AbstractSingleValueData<Direction, Di
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Direction"), this.getValue().name());
+        return new MemoryDataContainer().set(DIRECTION, this.getValue().name());
     }
 }

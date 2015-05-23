@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.NoDropData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeNoDropData extends SpongeAbstractData<NoDropData> implements NoDropData {
+
+    public static final DataQuery NO_DROP = of("NoDrop");
 
     public SpongeNoDropData() {
         super(NoDropData.class);
@@ -49,6 +52,6 @@ public class SpongeNoDropData extends SpongeAbstractData<NoDropData> implements 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("NoDrop"), true);
+        return new MemoryDataContainer().set(NO_DROP, true);
     }
 }

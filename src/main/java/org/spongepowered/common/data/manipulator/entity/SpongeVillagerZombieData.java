@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.VillagerZombieData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeVillagerZombieData extends SpongeAbstractData<VillagerZombieData> implements VillagerZombieData {
+
+    public static final DataQuery IS_VILLAGER_ZOMBIE = of("IsVillagerZombie");
 
     public SpongeVillagerZombieData() {
         super(VillagerZombieData.class);
@@ -49,6 +52,6 @@ public class SpongeVillagerZombieData extends SpongeAbstractData<VillagerZombieD
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsVillagerZombie"), true);
+        return new MemoryDataContainer().set(IS_VILLAGER_ZOMBIE, true);
     }
 }

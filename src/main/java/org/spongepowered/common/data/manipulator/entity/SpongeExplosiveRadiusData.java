@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.ExplosiveRadiusData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeExplosiveRadiusData extends AbstractIntData<ExplosiveRadiusData> implements ExplosiveRadiusData {
+
+    public static final DataQuery EXPLOSION_RADIUS = of("ExplosionRadius");
 
     public SpongeExplosiveRadiusData() {
         super(ExplosiveRadiusData.class, 0, 0, Integer.MAX_VALUE);
@@ -54,6 +57,6 @@ public class SpongeExplosiveRadiusData extends AbstractIntData<ExplosiveRadiusDa
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("ExplosionRadius"), this.getValue());
+        return new MemoryDataContainer().set(EXPLOSION_RADIUS, this.getValue());
     }
 }

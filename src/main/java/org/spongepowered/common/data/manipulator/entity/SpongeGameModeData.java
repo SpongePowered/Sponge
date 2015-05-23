@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.GameModeData;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
@@ -34,6 +35,8 @@ import org.spongepowered.api.entity.player.gamemode.GameModes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeGameModeData extends AbstractSingleValueData<GameMode, GameModeData> implements GameModeData {
+
+    public static final DataQuery GAME_MODE = of("GameMode");
 
     public SpongeGameModeData() {
         super(GameModeData.class, GameModes.SURVIVAL);
@@ -61,6 +64,6 @@ public class SpongeGameModeData extends AbstractSingleValueData<GameMode, GameMo
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("GameMode"), this.getValue().getId());
+        return new MemoryDataContainer().set(GAME_MODE, this.getValue().getId());
     }
 }

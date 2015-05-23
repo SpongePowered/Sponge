@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeTreeData extends AbstractSingleValueData<TreeType, TreeData> implements TreeData {
+
+    public static final DataQuery TREE_TYPE = of("TreeType");
 
     public SpongeTreeData() {
         super(TreeData.class, TreeTypes.OAK);
@@ -51,6 +54,6 @@ public class SpongeTreeData extends AbstractSingleValueData<TreeType, TreeData> 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("TreeType"), this.getValue().getId());
+        return new MemoryDataContainer().set(TREE_TYPE, this.getValue().getId());
     }
 }

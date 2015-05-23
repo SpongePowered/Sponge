@@ -28,11 +28,16 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.VelocityData;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeVelocityData extends AbstractSingleValueData<Vector3d, VelocityData> implements VelocityData {
+
+    public static final DataQuery X_VELOCITY = of("Velocity", "X");
+    public static final DataQuery Y_VELOCITY = of("Velocity", "Y");
+    public static final DataQuery Z_VELOCITY = of("Velocity", "Z");
 
     public SpongeVelocityData() {
         super(VelocityData.class, new Vector3d());
@@ -61,8 +66,8 @@ public class SpongeVelocityData extends AbstractSingleValueData<Vector3d, Veloci
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("Velocity", "X"), this.getValue().getX())
-                .set(of("Velocity", "Y"), this.getValue().getY())
-                .set(of("Velocity", "Z"), this.getValue().getZ());
+                .set(X_VELOCITY, this.getValue().getX())
+                .set(Y_VELOCITY, this.getValue().getY())
+                .set(Z_VELOCITY, this.getValue().getZ());
     }
 }

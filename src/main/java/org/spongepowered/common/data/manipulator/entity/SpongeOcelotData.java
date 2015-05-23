@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.OcelotData;
 import org.spongepowered.api.data.type.OcelotType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeOcelotData extends AbstractSingleValueData<OcelotType, OcelotData> implements OcelotData {
+
+    public static final DataQuery OCELOT_TYPE = of("OcelotType");
 
     public SpongeOcelotData() {
         super(OcelotData.class, OcelotTypes.WILD_OCELOT);
@@ -51,6 +54,6 @@ public class SpongeOcelotData extends AbstractSingleValueData<OcelotType, Ocelot
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("OcelotType"), this.getValue().getId());
+        return new MemoryDataContainer().set(OCELOT_TYPE, this.getValue().getId());
     }
 }

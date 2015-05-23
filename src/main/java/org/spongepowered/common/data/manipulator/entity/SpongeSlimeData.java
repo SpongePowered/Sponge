@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.SlimeData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeSlimeData extends AbstractIntData<SlimeData> implements SlimeData {
+
+    public static final DataQuery SLIME_SIZE = of("SlimeSize");
 
     public SpongeSlimeData() {
         super(SlimeData.class, 0, 0, Integer.MAX_VALUE);
@@ -54,6 +57,6 @@ public class SpongeSlimeData extends AbstractIntData<SlimeData> implements Slime
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SlimeSize"), this.getValue());
+        return new MemoryDataContainer().set(SLIME_SIZE, this.getValue());
     }
 }

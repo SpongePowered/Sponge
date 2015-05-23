@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.RespawnLocationData;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeRespawnLocationData extends AbstractSingleValueData<Location, RespawnLocationData> implements RespawnLocationData {
+
+    public static final DataQuery RESPAWN_LOCATION = of("RespawnLocation");
 
     public SpongeRespawnLocationData(Location defaultLocation) {
         super(RespawnLocationData.class, defaultLocation);
@@ -60,6 +63,6 @@ public class SpongeRespawnLocationData extends AbstractSingleValueData<Location,
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("RespawnLocation"), this.getValue());
+        return new MemoryDataContainer().set(RESPAWN_LOCATION, this.getValue());
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.QuartzData;
 import org.spongepowered.api.data.type.QuartzType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.QuartzTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeQuartzData extends AbstractSingleValueData<QuartzType, QuartzData> implements QuartzData {
+
+    public static final DataQuery QUARTZ_TYPE = of("QuartzType");
 
     public SpongeQuartzData() {
         super(QuartzData.class, QuartzTypes.DEFAULT);
@@ -51,6 +54,6 @@ public class SpongeQuartzData extends AbstractSingleValueData<QuartzType, Quartz
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("QuartzType"), this.getValue().getId());
+        return new MemoryDataContainer().set(QUARTZ_TYPE, this.getValue().getId());
     }
 }

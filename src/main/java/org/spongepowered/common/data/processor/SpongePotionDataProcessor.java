@@ -54,9 +54,9 @@ public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffe
     private static final DataQuery POTION_QUERY = of("Potions");
 
     @Override
-    public Optional<PotionEffectData> fillData(DataHolder holder, PotionEffectData manipulator, DataPriority priority) {
-        if (holder instanceof EntityLivingBase) { // todo priority
-            for (PotionEffect entry : (Collection<PotionEffect>) ((EntityLivingBase) holder).getActivePotionEffects()) {
+    public Optional<PotionEffectData> fillData(DataHolder dataHolder, PotionEffectData manipulator, DataPriority priority) {
+        if (dataHolder instanceof EntityLivingBase) { // todo priority
+            for (PotionEffect entry : (Collection<PotionEffect>) ((EntityLivingBase) dataHolder).getActivePotionEffects()) {
                 manipulator.add(new SpongePotionBuilder().from(((org.spongepowered.api.potion.PotionEffect) entry)).build());
             }
             return Optional.of(manipulator);
@@ -136,7 +136,7 @@ public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffe
     }
 
     @Override
-    public Optional<PotionEffectData> getFrom(DataHolder holder) {
+    public Optional<PotionEffectData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

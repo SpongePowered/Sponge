@@ -22,36 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package org.spongepowered.common.interfaces.block;
 
-package org.spongepowered.common.data.manipulators.entities;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataTransactionResult;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.entity.SkinData;
-import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
+public interface IMixinPoweredHolder extends IMixinBlock {
 
-import java.util.UUID;
+    boolean isCurrentlyPowered(IBlockState blockState);
 
-public class SpongeSkinData extends AbstractSingleValueData<UUID, SkinData> implements SkinData {
+    DataTransactionResult setPowered(World world, BlockPos blockPos, boolean powered);
 
-    public SpongeSkinData(UUID skinUuid) {
-        super(SkinData.class, skinUuid);
-    }
-
-    @Override
-    public SkinData copy() {
-        return new SpongeSkinData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(SkinData o) {
-        return this.getValue().compareTo(o.getValue());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(DataQuery.of("skinUuid"), this.getValue());
-    }
+    BlockState setUnpowered(IBlockState blockState);
 
 }

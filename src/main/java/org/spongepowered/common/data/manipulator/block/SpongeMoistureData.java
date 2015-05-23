@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.MoistureData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeMoistureData extends AbstractIntData<MoistureData> implements MoistureData {
+
+    public static final DataQuery MAX_MOISTURE = of("MaxMoisture");
 
     public SpongeMoistureData(int maxMoisture) {
         super(MoistureData.class, 0, 0, maxMoisture);
@@ -44,6 +47,6 @@ public class SpongeMoistureData extends AbstractIntData<MoistureData> implements
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Moisture"), this.getValue()).set(of("MaxMoisture"), this.getMaxValue());
+        return new MemoryDataContainer().set(of("Moisture"), this.getValue()).set(MAX_MOISTURE, this.getMaxValue());
     }
 }

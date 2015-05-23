@@ -43,14 +43,14 @@ import org.spongepowered.common.data.manipulator.entity.SpongeFoodData;
 public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
 
     @Override
-    public Optional<FoodData> fillData(DataHolder holder, FoodData manipulator, DataPriority priority) {
-        if (!(holder instanceof EntityPlayer)) {
+    public Optional<FoodData> fillData(DataHolder dataHolder, FoodData manipulator, DataPriority priority) {
+        if (!(dataHolder instanceof EntityPlayer)) {
             return Optional.absent();
         }
         switch (checkNotNull(priority)) {
             case DATA_HOLDER:
             case PRE_MERGE:
-                final FoodStats foodStats = ((EntityPlayer) holder).getFoodStats();
+                final FoodStats foodStats = ((EntityPlayer) dataHolder).getFoodStats();
                 manipulator.setExhaustion(foodStats.foodExhaustionLevel);
                 manipulator.setFoodLevel(foodStats.getFoodLevel());
                 manipulator.setSaturation(foodStats.getSaturationLevel());
@@ -118,7 +118,7 @@ public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
     }
 
     @Override
-    public Optional<FoodData> getFrom(DataHolder holder) {
-        return createFrom(holder);
+    public Optional<FoodData> getFrom(DataHolder dataHolder) {
+        return createFrom(dataHolder);
     }
 }

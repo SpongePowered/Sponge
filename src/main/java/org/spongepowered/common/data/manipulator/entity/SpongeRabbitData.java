@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.RabbitData;
 import org.spongepowered.api.data.type.RabbitType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeRabbitData extends AbstractSingleValueData<RabbitType, RabbitData> implements RabbitData {
+
+    public static final DataQuery RABBIT_TYPE = of("RabbitType");
 
     public SpongeRabbitData() {
         super(RabbitData.class, RabbitTypes.BLACK);
@@ -51,6 +54,6 @@ public class SpongeRabbitData extends AbstractSingleValueData<RabbitType, Rabbit
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("RabbitType"), this.getValue().getId());
+        return new MemoryDataContainer().set(RABBIT_TYPE, this.getValue().getId());
     }
 }

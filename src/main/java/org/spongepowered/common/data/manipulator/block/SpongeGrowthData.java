@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.GrowthData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeGrowthData extends AbstractIntData<GrowthData> implements GrowthData {
+
+    public static final DataQuery MAX_GROWTH = of("MaxGrowth");
 
     public SpongeGrowthData(int maxGrowth) {
         super(GrowthData.class, 0, 0, maxGrowth);
@@ -59,6 +62,6 @@ public class SpongeGrowthData extends AbstractIntData<GrowthData> implements Gro
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Growth"), this.getValue()).set(of("MaxGrowth"), this.getMaxValue());
+        return new MemoryDataContainer().set(of("Growth"), this.getValue()).set(MAX_GROWTH, this.getMaxValue());
     }
 }

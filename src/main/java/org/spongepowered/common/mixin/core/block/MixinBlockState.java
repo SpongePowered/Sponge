@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
-import org.spongepowered.common.interfaces.blocks.IMixinBlock;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 
 @NonnullByDefault
 @Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)

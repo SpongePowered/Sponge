@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.ShatteringData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeShatteringData extends SpongeAbstractData<ShatteringData> implements ShatteringData {
+
+    public static final DataQuery WILL_SHATTER = of("WillShatter");
 
     public SpongeShatteringData() {
         super(ShatteringData.class);
@@ -49,6 +52,6 @@ public class SpongeShatteringData extends SpongeAbstractData<ShatteringData> imp
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("WillShatter"), true);
+        return new MemoryDataContainer().set(WILL_SHATTER, true);
     }
 }

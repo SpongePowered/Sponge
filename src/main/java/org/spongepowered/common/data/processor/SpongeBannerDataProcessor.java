@@ -47,7 +47,7 @@ public class SpongeBannerDataProcessor implements SpongeDataProcessor<BannerData
     }
 
     @Override
-    public Optional<BannerData> fillData(DataHolder holder, BannerData manipulator, DataPriority priority) {
+    public Optional<BannerData> fillData(DataHolder dataHolder, BannerData manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
@@ -67,7 +67,7 @@ public class SpongeBannerDataProcessor implements SpongeDataProcessor<BannerData
     }
 
     @Override
-    public Optional<BannerData> getFrom(DataHolder holder) {
+    public Optional<BannerData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

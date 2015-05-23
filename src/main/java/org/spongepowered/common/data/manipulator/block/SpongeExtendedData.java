@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.ExtendedData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeExtendedData extends SpongeAbstractData<ExtendedData> implements ExtendedData {
+
+    public static final DataQuery EXTENDED = of("Extended");
 
     public SpongeExtendedData() {
         super(ExtendedData.class);
@@ -49,6 +52,6 @@ public class SpongeExtendedData extends SpongeAbstractData<ExtendedData> impleme
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Extended"), true);
+        return new MemoryDataContainer().set(EXTENDED, true);
     }
 }

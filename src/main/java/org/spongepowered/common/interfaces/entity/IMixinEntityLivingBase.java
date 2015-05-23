@@ -22,24 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.blocks;
+package org.spongepowered.common.interfaces.entity;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
+public interface IMixinEntityLivingBase {
 
-public interface IMixinDirectionalHolder extends IMixinBlock {
+    double getLastDamage();
 
-    DirectionalData getDirectionalData(IBlockState blockState);
-
-    DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority);
-
-    void reset(World world, BlockPos blockPos);
-
-    BlockState resetDirectionData(BlockState blockState);
+    void setLastDamage(double damage);
 
 }

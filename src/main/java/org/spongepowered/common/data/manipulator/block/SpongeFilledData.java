@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.FilledData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeFilledData extends SpongeAbstractData<FilledData> implements FilledData {
+
+    public static final DataQuery FILLED = of("Filled");
 
     public SpongeFilledData() {
         super(FilledData.class);
@@ -49,6 +52,6 @@ public class SpongeFilledData extends SpongeAbstractData<FilledData> implements 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Filled"), true);
+        return new MemoryDataContainer().set(FILLED, true);
     }
 }

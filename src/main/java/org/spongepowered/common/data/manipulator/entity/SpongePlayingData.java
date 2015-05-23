@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.PlayingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongePlayingData extends SpongeAbstractData<PlayingData> implements PlayingData {
+
+    public static final DataQuery IS_PLAYING = of("IsPlaying");
 
     public SpongePlayingData() {
         super(PlayingData.class);
@@ -49,6 +52,6 @@ public class SpongePlayingData extends SpongeAbstractData<PlayingData> implement
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsPlaying"), true);
+        return new MemoryDataContainer().set(IS_PLAYING, true);
     }
 }

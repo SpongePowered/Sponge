@@ -44,7 +44,7 @@ import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 public class SpongeTradeOfferProcessor implements SpongeDataProcessor<TradeOfferData> {
 
     @Override
-    public Optional<TradeOfferData> fillData(DataHolder holder, TradeOfferData manipulator, DataPriority priority) {
+    public Optional<TradeOfferData> fillData(DataHolder dataHolder, TradeOfferData manipulator, DataPriority priority) {
         return Optional.absent(); // todo
     }
 
@@ -93,7 +93,7 @@ public class SpongeTradeOfferProcessor implements SpongeDataProcessor<TradeOffer
     }
 
     @Override
-    public Optional<TradeOfferData> getFrom(DataHolder holder) {
+    public Optional<TradeOfferData> getFrom(DataHolder dataHolder) {
 
         return Optional.absent();
     }

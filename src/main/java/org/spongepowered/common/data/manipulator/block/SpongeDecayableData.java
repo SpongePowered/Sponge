@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.DecayableData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeDecayableData extends SpongeAbstractData<DecayableData> implements DecayableData {
+
+    public static final DataQuery DECAYABLE = of("Decayable");
 
     public SpongeDecayableData() {
         super(DecayableData.class);
@@ -49,6 +52,6 @@ public class SpongeDecayableData extends SpongeAbstractData<DecayableData> imple
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Decayable"), true);
+        return new MemoryDataContainer().set(DECAYABLE, true);
     }
 }

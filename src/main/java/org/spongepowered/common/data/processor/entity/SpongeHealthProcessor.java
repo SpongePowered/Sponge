@@ -48,16 +48,16 @@ public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
     private static final DataQuery MAX_HEALTH_QUERY = of("MaxHealth");
 
     @Override
-    public Optional<HealthData> fillData(DataHolder holder, HealthData manipulator, DataPriority priority) {
+    public Optional<HealthData> fillData(DataHolder dataHolder, HealthData manipulator, DataPriority priority) {
         // todo for now, we only focus on health to and from entities.
-        if (!(holder instanceof EntityLivingBase)) {
+        if (!(dataHolder instanceof EntityLivingBase)) {
             return Optional.absent();
         }
         switch (checkNotNull(priority)) {
             case DATA_HOLDER:
             case PRE_MERGE:
-                manipulator.setMaxHealth(((EntityLivingBase) holder).getMaxHealth())
-                        .setHealth(((EntityLivingBase) holder).getHealth());
+                manipulator.setMaxHealth(((EntityLivingBase) dataHolder).getMaxHealth())
+                        .setHealth(((EntityLivingBase) dataHolder).getHealth());
                 return Optional.of(manipulator);
             default :
                 return Optional.of(manipulator);
@@ -133,12 +133,12 @@ public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
     }
 
     @Override
-    public Optional<HealthData> getFrom(DataHolder holder) {
-        if (!(holder instanceof EntityLivingBase)) {
+    public Optional<HealthData> getFrom(DataHolder dataHolder) {
+        if (!(dataHolder instanceof EntityLivingBase)) {
             return Optional.absent();
         } else {
             final HealthData data = create();
-            return fillData(holder, data, DataPriority.DATA_HOLDER);
+            return fillData(dataHolder, data, DataPriority.DATA_HOLDER);
         }
     }
 }

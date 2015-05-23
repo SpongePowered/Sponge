@@ -48,7 +48,7 @@ public class SpongeBeaconDataProcessor implements SpongeDataProcessor<BeaconData
     }
 
     @Override
-    public Optional<BeaconData> fillData(DataHolder holder, BeaconData manipulator, DataPriority priority) {
+    public Optional<BeaconData> fillData(DataHolder dataHolder, BeaconData manipulator, DataPriority priority) {
         return null;
     }
 
@@ -61,7 +61,7 @@ public class SpongeBeaconDataProcessor implements SpongeDataProcessor<BeaconData
     }
 
     @Override
-    public Optional<BeaconData> getFrom(DataHolder holder) {
+    public Optional<BeaconData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 

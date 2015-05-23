@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.OrbData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeOrbData extends AbstractIntData<OrbData> implements OrbData {
+
+    public static final DataQuery EXPERIENCE_HELD = of("ExperienceHeld");
 
     public SpongeOrbData() {
         super(OrbData.class, 0, 0, Integer.MAX_VALUE);
@@ -54,6 +57,6 @@ public class SpongeOrbData extends AbstractIntData<OrbData> implements OrbData {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("ExperienceHeld"), this.getValue());
+        return new MemoryDataContainer().set(EXPERIENCE_HELD, this.getValue());
     }
 }

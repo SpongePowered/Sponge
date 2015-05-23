@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.FluidLevelData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeFluidLevelData extends AbstractIntData<FluidLevelData> implements FluidLevelData {
+
+    public static final DataQuery FLUID_LEVEL = of("FluidLevel");
 
     public SpongeFluidLevelData(int defaultValue, int maxValue) {
         super(FluidLevelData.class, defaultValue, 0, maxValue);
@@ -44,6 +47,6 @@ public class SpongeFluidLevelData extends AbstractIntData<FluidLevelData> implem
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("FluidLevel"), this.getValue());
+        return new MemoryDataContainer().set(FLUID_LEVEL, this.getValue());
     }
 }

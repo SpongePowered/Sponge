@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.SleepingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeSleepingData extends SpongeAbstractData<SleepingData> implements SleepingData {
+
+    public static final DataQuery IS_SLEEPING = of("IsSleeping");
 
     public SpongeSleepingData() {
         super(SleepingData.class);
@@ -49,6 +52,6 @@ public class SpongeSleepingData extends SpongeAbstractData<SleepingData> impleme
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsSleeping"), true);
+        return new MemoryDataContainer().set(IS_SLEEPING, true);
     }
 }

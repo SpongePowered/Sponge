@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.AxisData;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeAxisData extends AbstractSingleValueData<Axis, AxisData> implements AxisData {
+
+    public static final DataQuery AXIS = of("Axis");
 
     public SpongeAxisData() {
         super(AxisData.class, Axis.X);
@@ -50,6 +53,6 @@ public class SpongeAxisData extends AbstractSingleValueData<Axis, AxisData> impl
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Axis"), this.getValue().name());
+        return new MemoryDataContainer().set(AXIS, this.getValue().name());
     }
 }

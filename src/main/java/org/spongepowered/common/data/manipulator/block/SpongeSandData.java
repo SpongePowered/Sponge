@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.SandData;
 import org.spongepowered.api.data.type.SandType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.SandTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeSandData extends AbstractSingleValueData<SandType, SandData> implements SandData {
+
+    public static final DataQuery SAND_TYPE = of("SandType");
 
     public SpongeSandData() {
         super(SandData.class, SandTypes.NORMAL);
@@ -51,6 +54,6 @@ public class SpongeSandData extends AbstractSingleValueData<SandType, SandData> 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SandType"), this.getValue().getId());
+        return new MemoryDataContainer().set(SAND_TYPE, this.getValue().getId());
     }
 }

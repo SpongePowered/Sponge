@@ -26,6 +26,8 @@ package org.spongepowered.common.data.processor;
 
 import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
+import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.item.EntityItem;
@@ -39,14 +41,18 @@ import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.SpongeRepresentedItemData;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
 public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<RepresentedItemData> {
 
     @Override
-    public Optional<RepresentedItemData> fillData(DataHolder holder, RepresentedItemData manipulator, DataPriority priority) {
+    public Optional<RepresentedItemData> fillData(DataHolder dataHolder, RepresentedItemData manipulator, DataPriority priority) {
+        // todo
         return Optional.absent();
     }
 
@@ -61,6 +67,12 @@ public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<Repre
             final ItemStack newItem = manipulator.getValue();
             ((EntityItem) dataHolder).setEntityItemStack(((net.minecraft.item.ItemStack) newItem));
             return builder().replace(old).result(DataTransactionResult.Type.SUCCESS).build();
+        } else if (dataHolder instanceof EntityItemFrame) {
+            final ItemStack underlying = ((ItemStack) ((EntityItemFrame) dataHolder).getDisplayedItem().copy());
+            final RepresentedItemData old = create().setValue(underlying);
+            final ItemStack newItem = manipulator.getValue();
+            ((EntityItemFrame) dataHolder).setDisplayedItem(((net.minecraft.item.ItemStack) newItem).copy());
+            return successReplaceData(old);
         }
         return fail(manipulator);
     }
@@ -76,7 +88,10 @@ public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<Repre
 
     @Override
     public Optional<RepresentedItemData> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
+        checkDataExists(container, SpongeRepresentedItemData.ITEM);
+        final ItemStack itemStack = container.getSerializable(SpongeRepresentedItemData.ITEM, ItemStack.class, Sponge.getGame().getServiceManager()
+                .provide(SerializationService.class).get()).get();
+        return Optional.of(create().setValue(itemStack));
     }
 
     @Override
@@ -100,7 +115,18 @@ public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<Repre
     }
 
     @Override
-    public Optional<RepresentedItemData> getFrom(DataHolder holder) {
+    public Optional<RepresentedItemData> getFrom(DataHolder dataHolder) {
+        if (dataHolder instanceof EntityItem) {
+            return createFrom(dataHolder);
+        } else if (dataHolder instanceof EntityItemFrame) {
+            final net.minecraft.item.ItemStack itemStack = ((EntityItemFrame) dataHolder).getDisplayedItem();
+            if (itemStack == null) {
+                return Optional.absent();
+            } else {
+                final RepresentedItemData data = create();
+                return Optional.of(data.setValue((ItemStack) itemStack.copy()));
+            }
+        }
         return Optional.absent();
     }
 }

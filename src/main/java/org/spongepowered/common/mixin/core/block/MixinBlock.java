@@ -50,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.interfaces.blocks.IMixinBlock;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 

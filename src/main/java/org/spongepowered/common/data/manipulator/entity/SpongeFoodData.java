@@ -28,12 +28,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.FoodData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeFoodData extends SpongeAbstractData<FoodData> implements FoodData {
 
+    public static final DataQuery FOOD_LEVEL = of("FoodLevel");
     private double exhaustion;
     private double saturation;
     private double foodLevel;
@@ -92,7 +94,7 @@ public class SpongeFoodData extends SpongeAbstractData<FoodData> implements Food
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("FoodLevel"), this.foodLevel)
+                .set(FOOD_LEVEL, this.foodLevel)
                 .set(of("Saturation"), this.saturation)
                 .set(of("Exhaustion"), this.exhaustion);
     }

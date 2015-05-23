@@ -40,12 +40,12 @@ import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.block.SpongePoweredData;
-import org.spongepowered.common.interfaces.blocks.IMixinPoweredHolder;
+import org.spongepowered.common.interfaces.block.IMixinPoweredHolder;
 
 public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>, SpongeBlockProcessor<PoweredData> {
 
     @Override
-    public Optional<PoweredData> fillData(DataHolder holder, PoweredData manipulator, DataPriority priority) {
+    public Optional<PoweredData> fillData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
         return null;
     }
 
@@ -114,7 +114,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     }
 
     @Override
-    public Optional<PoweredData> getFrom(DataHolder holder) {
+    public Optional<PoweredData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

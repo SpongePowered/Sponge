@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.BrickData;
 import org.spongepowered.api.data.type.BrickType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.BrickTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeBrickData extends AbstractSingleValueData<BrickType, BrickData> implements BrickData {
+
+    public static final DataQuery BRICK_TYPE = of("BrickType");
 
     public SpongeBrickData() {
         super(BrickData.class, BrickTypes.DEFAULT);
@@ -51,6 +54,6 @@ public class SpongeBrickData extends AbstractSingleValueData<BrickType, BrickDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BrickType"), this.getValue().getId());
+        return new MemoryDataContainer().set(BRICK_TYPE, this.getValue().getId());
     }
 }

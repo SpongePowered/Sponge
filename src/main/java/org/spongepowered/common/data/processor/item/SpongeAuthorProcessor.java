@@ -45,27 +45,27 @@ import org.spongepowered.common.data.manipulator.item.SpongeAuthorData;
 public class SpongeAuthorProcessor implements SpongeDataProcessor<AuthorData> {
 
     @Override
-    public Optional<AuthorData> getFrom(DataHolder holder) {
-        if (!(holder instanceof ItemStack)) {
+    public Optional<AuthorData> getFrom(DataHolder dataHolder) {
+        if (!(dataHolder instanceof ItemStack)) {
             return Optional.absent();
         }
-        if (((ItemStack) holder).getItem() != Items.written_book) {
+        if (((ItemStack) dataHolder).getItem() != Items.written_book) {
             return Optional.absent();
         }
-        if (!((ItemStack) holder).hasTagCompound()) {
+        if (!((ItemStack) dataHolder).hasTagCompound()) {
             return Optional.absent();
         }
-        if (!((ItemStack) holder).getTagCompound().hasKey("author")) {
+        if (!((ItemStack) dataHolder).getTagCompound().hasKey("author")) {
             return Optional.absent();
         }
-        final String rawAuthor = ((ItemStack) holder).getTagCompound().getString("author");
+        final String rawAuthor = ((ItemStack) dataHolder).getTagCompound().getString("author");
         return Optional.of(create().setValue(Texts.of(rawAuthor)));
     }
 
     @Override
-    public Optional<AuthorData> fillData(DataHolder holder, AuthorData manipulator, DataPriority priority) {
-        if (holder instanceof org.spongepowered.api.item.inventory.ItemStack) {
-            if (((ItemStack) holder).getItem() != Items.written_book) {
+    public Optional<AuthorData> fillData(DataHolder dataHolder, AuthorData manipulator, DataPriority priority) {
+        if (dataHolder instanceof org.spongepowered.api.item.inventory.ItemStack) {
+            if (((ItemStack) dataHolder).getItem() != Items.written_book) {
                 return Optional.absent();
             }
             switch (checkNotNull(priority)) {
@@ -73,7 +73,7 @@ public class SpongeAuthorProcessor implements SpongeDataProcessor<AuthorData> {
                 case DATA_MANIPULATOR:
                     return Optional.of(manipulator);
                 default:
-                    manipulator.setValue(Texts.of(((ItemStack) holder).getTagCompound().getString("author")));
+                    manipulator.setValue(Texts.of(((ItemStack) dataHolder).getTagCompound().getString("author")));
                     return Optional.of(manipulator);
             }
         }

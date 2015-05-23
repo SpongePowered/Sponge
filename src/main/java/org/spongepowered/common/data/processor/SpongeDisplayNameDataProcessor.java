@@ -115,7 +115,7 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
     }
 
     @Override
-    public Optional<DisplayNameData> fillData(DataHolder holder, DisplayNameData manipulator, DataPriority priority) {
+    public Optional<DisplayNameData> fillData(DataHolder dataHolder, DisplayNameData manipulator, DataPriority priority) {
         return Optional.absent(); // todo
     }
 
@@ -146,7 +146,7 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
     }
 
     @Override
-    public Optional<DisplayNameData> getFrom(DataHolder holder) {
+    public Optional<DisplayNameData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

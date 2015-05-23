@@ -48,6 +48,7 @@ import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityLivingBase.class)
-public abstract class MixinEntityLivingBase extends MixinEntity implements Living {
+public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -192,6 +193,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         this.maxAir = air;
     }
 
+    @Override
     public double getLastDamage() {
         return this.lastDamage;
     }
@@ -247,6 +249,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void setAPIInvisible(boolean invisible) {
         this.setFlag(5, invisible);
     }
+
+
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {

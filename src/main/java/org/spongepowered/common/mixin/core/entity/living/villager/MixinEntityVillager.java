@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.living.villager;
 
 import com.google.common.base.Optional;
-import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.manipulator.entity.CareerData;
@@ -45,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
-import org.spongepowered.common.interfaces.entities.IMixinVillager;
+import org.spongepowered.common.interfaces.entity.IMixinVillager;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityAgeable;
 
 import java.util.List;

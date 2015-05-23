@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.PersistingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongePersistingData extends SpongeAbstractData<PersistingData> implements PersistingData {
+
+    public static final DataQuery WILL_PERSIST = of("WillPersist");
 
     public SpongePersistingData() {
         super(PersistingData.class);
@@ -49,6 +52,6 @@ public class SpongePersistingData extends SpongeAbstractData<PersistingData> imp
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("WillPersist"), true);
+        return new MemoryDataContainer().set(WILL_PERSIST, true);
     }
 }

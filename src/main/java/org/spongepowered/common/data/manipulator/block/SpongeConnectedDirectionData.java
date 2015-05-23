@@ -28,6 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.ConnectedDirectionData;
 import org.spongepowered.api.util.Direction;
@@ -36,6 +37,8 @@ import org.spongepowered.common.data.manipulator.AbstractListData;
 import java.util.List;
 
 public class SpongeConnectedDirectionData extends AbstractListData<Direction, ConnectedDirectionData> implements ConnectedDirectionData {
+
+    public static final DataQuery CONNECTED_DIRECTIONS = of("ConnectedDirections");
 
     public SpongeConnectedDirectionData() {
         super(ConnectedDirectionData.class);
@@ -57,6 +60,6 @@ public class SpongeConnectedDirectionData extends AbstractListData<Direction, Co
         for (Direction direction : this.elementList) {
             directions.add(direction.name());
         }
-        return new MemoryDataContainer().set(of("ConnectedDirections"), directions);
+        return new MemoryDataContainer().set(CONNECTED_DIRECTIONS, directions);
     }
 }

@@ -28,12 +28,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeHealthData extends SpongeAbstractData<HealthData> implements HealthData {
 
+    public static final DataQuery HEALTH = of("Health");
+    public static final DataQuery MAX_HEALTH = of("MaxHealth");
     private double health = 20.0D;
     private double maxHealth = 20.0D;
 
@@ -94,7 +97,7 @@ public class SpongeHealthData extends SpongeAbstractData<HealthData> implements 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("Health"), this.health)
-                .set(of("MaxHealth"), this.maxHealth);
+                .set(HEALTH, this.health)
+                .set(MAX_HEALTH, this.maxHealth);
     }
 }

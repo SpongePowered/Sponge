@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
@@ -40,6 +41,9 @@ import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeHorseData extends SpongeAbstractData<HorseData> implements HorseData {
 
+    public static final DataQuery COLOR = of("Color");
+    public static final DataQuery STYLE = of("Style");
+    public static final DataQuery VARIANT = of("Variant");
     private HorseColor color = HorseColors.BLACK;
     private HorseStyle style = HorseStyles.BLACK_DOTS;
     private HorseVariant variant = HorseVariants.HORSE;
@@ -98,8 +102,8 @@ public class SpongeHorseData extends SpongeAbstractData<HorseData> implements Ho
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("Color"), this.getColor().getId())
-                .set(of("Style"), this.getStyle().getId())
-                .set(of("Variant"), this.getVariant().getId());
+                .set(COLOR, this.getColor().getId())
+                .set(STYLE, this.getStyle().getId())
+                .set(VARIANT, this.getVariant().getId());
     }
 }

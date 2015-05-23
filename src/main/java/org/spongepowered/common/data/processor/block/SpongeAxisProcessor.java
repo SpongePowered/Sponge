@@ -44,7 +44,7 @@ import org.spongepowered.common.data.manipulator.block.SpongeAxisData;
 public class SpongeAxisProcessor implements SpongeDataProcessor<AxisData>, SpongeBlockProcessor<AxisData> {
 
     @Override
-    public Optional<AxisData> fillData(DataHolder holder, AxisData manipulator, DataPriority priority) {
+    public Optional<AxisData> fillData(DataHolder dataHolder, AxisData manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
@@ -74,7 +74,7 @@ public class SpongeAxisProcessor implements SpongeDataProcessor<AxisData>, Spong
     }
 
     @Override
-    public Optional<AxisData> getFrom(DataHolder holder) {
+    public Optional<AxisData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 

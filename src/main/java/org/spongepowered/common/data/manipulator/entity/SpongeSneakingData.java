@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.SneakingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeSneakingData extends SpongeAbstractData<SneakingData> implements SneakingData {
+
+    public static final DataQuery IS_SNEAKING = of("IsSneaking");
 
     public SpongeSneakingData() {
         super(SneakingData.class);
@@ -49,6 +52,6 @@ public class SpongeSneakingData extends SpongeAbstractData<SneakingData> impleme
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsSneaking"), true);
+        return new MemoryDataContainer().set(IS_SNEAKING, true);
     }
 }

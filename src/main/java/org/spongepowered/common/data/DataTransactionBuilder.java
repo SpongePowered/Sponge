@@ -53,6 +53,10 @@ public final class DataTransactionBuilder {
         return builder().result(DataTransactionResult.Type.SUCCESS).build();
     }
 
+    public static DataTransactionResult successReplaceData(final DataManipulator<?> manipulator) {
+        return builder().result(DataTransactionResult.Type.SUCCESS).replace(manipulator).build();
+    }
+
     public static DataTransactionBuilder builder() {
         return new DataTransactionBuilder();
     }

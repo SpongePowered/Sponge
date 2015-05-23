@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.StairShapeData;
 import org.spongepowered.api.data.type.StairShape;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeStairShapeData extends AbstractSingleValueData<StairShape, StairShapeData> implements StairShapeData {
+
+    public static final DataQuery STAIR_SHAPE = of("StairShape");
 
     public SpongeStairShapeData() {
         super(StairShapeData.class, StairShapes.STRAIGHT);
@@ -51,6 +54,6 @@ public class SpongeStairShapeData extends AbstractSingleValueData<StairShape, St
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("StairShape"), this.getValue().getId());
+        return new MemoryDataContainer().set(STAIR_SHAPE, this.getValue().getId());
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.PrismarineData;
 import org.spongepowered.api.data.type.PrismarineType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.PrismarineTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongePrismarineData extends AbstractSingleValueData<PrismarineType, PrismarineData> implements PrismarineData {
+
+    public static final DataQuery PRISMARINE_TYPE = of("PrismarineType");
 
     public SpongePrismarineData() {
         super(PrismarineData.class, PrismarineTypes.ROUGH);
@@ -51,6 +54,6 @@ public class SpongePrismarineData extends AbstractSingleValueData<PrismarineType
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("PrismarineType"), this.getValue().getId());
+        return new MemoryDataContainer().set(PRISMARINE_TYPE, this.getValue().getId());
     }
 }

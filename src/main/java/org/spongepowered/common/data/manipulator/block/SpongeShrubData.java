@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.ShrubData;
 import org.spongepowered.api.data.type.ShrubType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeShrubData extends AbstractSingleValueData<ShrubType, ShrubData> implements ShrubData {
+
+    public static final DataQuery SHRUB_TYPE = of("ShrubType");
 
     public SpongeShrubData() {
         super(ShrubData.class, ShrubTypes.DEAD_BUSH);
@@ -51,6 +54,6 @@ public class SpongeShrubData extends AbstractSingleValueData<ShrubType, ShrubDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("ShrubType"), this.getValue().getId());
+        return new MemoryDataContainer().set(SHRUB_TYPE, this.getValue().getId());
     }
 }

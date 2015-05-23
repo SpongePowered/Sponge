@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.SaddleData;
 import org.spongepowered.api.item.ItemTypes;
@@ -35,6 +36,8 @@ import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 
 public class SpongeSaddleData extends AbstractSingleValueData<ItemStack, SaddleData> implements SaddleData {
+
+    public static final DataQuery SADDLE = of("Saddle");
 
     public SpongeSaddleData() {
         super(SaddleData.class, new SpongeItemStackBuilder().itemType(ItemTypes.STONE).quantity(1).build());
@@ -62,6 +65,6 @@ public class SpongeSaddleData extends AbstractSingleValueData<ItemStack, SaddleD
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Saddle"), this.getValue());
+        return new MemoryDataContainer().set(SADDLE, this.getValue());
     }
 }

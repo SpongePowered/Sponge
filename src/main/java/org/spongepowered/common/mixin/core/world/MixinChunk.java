@@ -59,7 +59,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.interfaces.IMixinWorld;
-import org.spongepowered.common.interfaces.blocks.IMixinBlock;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.FastChunkBuffer;

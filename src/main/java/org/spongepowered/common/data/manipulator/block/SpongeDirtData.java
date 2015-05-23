@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.DirtData;
 import org.spongepowered.api.data.type.DirtType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.DirtTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeDirtData extends AbstractSingleValueData<DirtType, DirtData> implements DirtData {
+
+    public static final DataQuery DIRT_TYPE = of("DirtType");
 
     public SpongeDirtData() {
         super(DirtData.class, DirtTypes.DIRT);
@@ -51,6 +54,6 @@ public class SpongeDirtData extends AbstractSingleValueData<DirtType, DirtData> 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DirtType"), this.getValue().getId());
+        return new MemoryDataContainer().set(DIRT_TYPE, this.getValue().getId());
     }
 }

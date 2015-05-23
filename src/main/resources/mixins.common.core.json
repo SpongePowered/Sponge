@@ -11,6 +11,7 @@
         "block.MixinBehaviorProjectileDispense",
         "block.MixinBlock",
         "block.MixinBlockLeaves",
+        "block.MixinBlockSponge",
         "block.MixinBlockState",
         "block.tiles.MixinTileEntity",
         "block.tiles.MixinTileEntityBanner",

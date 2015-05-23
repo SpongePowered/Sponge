@@ -34,12 +34,48 @@ import org.spongepowered.api.service.persistence.DataBuilder;
 
 public interface SpongeDataProcessor<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T> {
 
-    Optional<T> getFrom(DataHolder holder);
+    /**
+     * Attempts to get the given {@link DataManipulator} of type {@code T} if
+     * and only if the manipulator's required data exists from the
+     * {@link DataHolder}. This is conceptually different from
+     * {@link DataManipulatorBuilder#createFrom(DataHolder)} since a new instance
+     * isn't returned even if the {@link DataManipulator} is applicable.
+     *
+     * <p>This is a processor method for {@link DataHolder#getData(Class)}.</p>
+     *
+     * @param dataHolder The data holder
+     * @return The manipulator, if available
+     */
+    Optional<T> getFrom(DataHolder dataHolder);
 
-    Optional<T> fillData(DataHolder holder, T manipulator, DataPriority priority);
+    /**
+     * Attempts to fill the given {@link DataManipulator}
+     * @param dataHolder
+     * @param manipulator
+     * @param priority
+     * @return
+     */
+    Optional<T> fillData(DataHolder dataHolder, T manipulator, DataPriority priority);
 
+    /**
+     * Sets the data from the {@link DataManipulator} with the given {@link DataPriority}.
+     *
+     * @param dataHolder The data holder to set the data onto
+     * @param manipulator The manipulator to set the data from
+     * @param priority The priority
+     * @return The transaction result
+     */
     DataTransactionResult setData(DataHolder dataHolder, T manipulator, DataPriority priority);
 
+    /**
+     * Attempts to remove the {@link DataManipulator} type from the given {@link DataHolder}.
+     *
+     * <p>If the {@link DataHolder} can not support removing the data outright,
+     * {@code false} should be returned.</p>
+     *
+     * @param dataHolder The data holder to remove the data from
+     * @return If the data was removed successfully
+     */
     boolean remove(DataHolder dataHolder);
 
 }

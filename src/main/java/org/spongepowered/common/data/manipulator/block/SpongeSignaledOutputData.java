@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.SignaledOutputData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeSignaledOutputData extends AbstractIntData<SignaledOutputData> implements SignaledOutputData {
+
+    public static final DataQuery OUTPUT_SIGNAL_STRENGTH = of("OutputSignalStrength");
 
     public SpongeSignaledOutputData() {
         super(SignaledOutputData.class, 0, 0, 15);
@@ -54,6 +57,6 @@ public class SpongeSignaledOutputData extends AbstractIntData<SignaledOutputData
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("OutputSignalStrength"), this.getValue());
+        return new MemoryDataContainer().set(OUTPUT_SIGNAL_STRENGTH, this.getValue());
     }
 }

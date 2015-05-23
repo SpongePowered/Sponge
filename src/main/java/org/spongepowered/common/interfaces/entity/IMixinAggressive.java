@@ -22,20 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.blocks;
+package org.spongepowered.common.interfaces.entity;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.AttachedData;
+public interface IMixinAggressive {
 
-public interface IMixinAttachedHolder {
+    boolean isAngry();
 
-    AttachedData getAxisData(IBlockState blockState);
-
-    DataTransactionResult setAxisData(AttachedData axisData, World world, BlockPos blockPos);
-
-    void reset(World world, BlockPos blockPos);
+    void setAngry(boolean angry);
 
 }

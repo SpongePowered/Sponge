@@ -27,12 +27,16 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.TameableData;
 import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeTameableData extends AbstractSingleValueData<Tamer, TameableData> implements TameableData {
+
+    public static final DataQuery TAMER_UUID = of("Tamer", "Uuid");
+    public static final DataQuery TAMER_NAME = of("Tamer", "Name");
 
     public SpongeTameableData(Tamer tamer) {
         super(TameableData.class, tamer);
@@ -61,7 +65,7 @@ public class SpongeTameableData extends AbstractSingleValueData<Tamer, TameableD
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("Tamer", "Uuid"), this.getValue().getUniqueId())
-                .set(of("Tamer", "Name"), this.getValue().getName());
+                .set(TAMER_UUID, this.getValue().getUniqueId())
+                .set(TAMER_NAME, this.getValue().getName());
     }
 }

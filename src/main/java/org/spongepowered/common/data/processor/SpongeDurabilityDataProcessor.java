@@ -73,7 +73,7 @@ public class SpongeDurabilityDataProcessor implements SpongeDataProcessor<Durabi
     }
 
     @Override
-    public Optional<DurabilityData> fillData(DataHolder holder, DurabilityData manipulator, DataPriority priority) {
+    public Optional<DurabilityData> fillData(DataHolder dataHolder, DurabilityData manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
@@ -89,7 +89,7 @@ public class SpongeDurabilityDataProcessor implements SpongeDataProcessor<Durabi
     }
 
     @Override
-    public Optional<DurabilityData> getFrom(DataHolder holder) {
+    public Optional<DurabilityData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

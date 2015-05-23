@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.SkeletonData;
 import org.spongepowered.api.data.type.SkeletonType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeSkeletonData extends AbstractSingleValueData<SkeletonType, SkeletonData> implements SkeletonData {
+
+    public static final DataQuery SKELETON_TYPE = of("SkeletonType");
 
     public SpongeSkeletonData() {
         super(SkeletonData.class, SkeletonTypes.NORMAL);
@@ -51,6 +54,6 @@ public class SpongeSkeletonData extends AbstractSingleValueData<SkeletonType, Sk
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("SkeletonType"), this.getValue().getId());
+        return new MemoryDataContainer().set(SKELETON_TYPE, this.getValue().getId());
     }
 }

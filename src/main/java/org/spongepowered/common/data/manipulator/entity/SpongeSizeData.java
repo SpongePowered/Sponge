@@ -27,12 +27,16 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.SizeData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeSizeData extends SpongeAbstractData<SizeData> implements SizeData {
 
+    public static final DataQuery BASE = of("Base");
+    public static final DataQuery HEIGHT = of("Height");
+    public static final DataQuery SCALE = of("Scale");
     private final float base;
     private final float height;
     private final float scale;
@@ -73,8 +77,8 @@ public class SpongeSizeData extends SpongeAbstractData<SizeData> implements Size
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("Base"), this.base)
-                .set(of("Height"), this.height)
-                .set(of("Scale"), this.scale);
+                .set(BASE, this.base)
+                .set(HEIGHT, this.height)
+                .set(SCALE, this.scale);
     }
 }

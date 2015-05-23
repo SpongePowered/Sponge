@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.WallData;
 import org.spongepowered.api.data.type.WallType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.WallTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeWallData extends AbstractSingleValueData<WallType, WallData> implements WallData {
+
+    public static final DataQuery WALL_TYPE = of("WallType");
 
     public SpongeWallData() {
         super(WallData.class, WallTypes.NORMAL);
@@ -51,6 +54,6 @@ public class SpongeWallData extends AbstractSingleValueData<WallType, WallData> 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("WallType"), this.getValue().getId());
+        return new MemoryDataContainer().set(WALL_TYPE, this.getValue().getId());
     }
 }

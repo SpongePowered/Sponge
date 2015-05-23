@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor;
+package org.spongepowered.common.data.processor.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
@@ -82,7 +82,7 @@ public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
     }
 
     @Override
-    public Optional<SignData> fillData(DataHolder holder, SignData manipulator, DataPriority priority) {
+    public Optional<SignData> fillData(DataHolder dataHolder, SignData manipulator, DataPriority priority) {
         return null;
     }
 
@@ -116,7 +116,7 @@ public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
     }
 
     @Override
-    public Optional<SignData> getFrom(DataHolder holder) {
+    public Optional<SignData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

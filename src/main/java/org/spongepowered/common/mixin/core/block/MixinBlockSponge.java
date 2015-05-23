@@ -22,23 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.blocks;
+package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
+import net.minecraft.block.BlockSponge;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.entity.IMixinWetHolder;
 
-import java.util.Collection;
+@Mixin(BlockSponge.class)
+public abstract class MixinBlockSponge extends MixinBlock implements IMixinWetHolder {
 
-public interface IMixinBlock {
 
-    Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos);
-
-    ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState);
-
-    BlockState getBlockState();
 
 }

@@ -41,12 +41,12 @@ import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
-import org.spongepowered.common.interfaces.blocks.IMixinDirectionalHolder;
+import org.spongepowered.common.interfaces.block.IMixinDirectionalHolder;
 
 public class SpongeDirectionalProcessor implements SpongeDataProcessor<DirectionalData>, SpongeBlockProcessor<DirectionalData> {
 
     @Override
-    public Optional<DirectionalData> fillData(DataHolder holder, DirectionalData manipulator, DataPriority priority) {
+    public Optional<DirectionalData> fillData(DataHolder dataHolder, DirectionalData manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
@@ -117,7 +117,7 @@ public class SpongeDirectionalProcessor implements SpongeDataProcessor<Direction
     }
 
     @Override
-    public Optional<DirectionalData> getFrom(DataHolder holder) {
+    public Optional<DirectionalData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.InWallData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeInWallData extends SpongeAbstractData<InWallData> implements InWallData {
+
+    public static final DataQuery IN_WALL = of("InWall");
 
     public SpongeInWallData() {
         super(InWallData.class);
@@ -49,6 +52,6 @@ public class SpongeInWallData extends SpongeAbstractData<InWallData> implements 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("InWall"), true);
+        return new MemoryDataContainer().set(IN_WALL, true);
     }
 }

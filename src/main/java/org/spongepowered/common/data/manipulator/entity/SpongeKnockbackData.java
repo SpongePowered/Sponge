@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.KnockbackData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeKnockbackData extends AbstractIntData<KnockbackData> implements KnockbackData {
+
+    public static final DataQuery KNOCKBACK_STRENGTH = of("KnockbackStrength");
 
     public SpongeKnockbackData() {
         super(KnockbackData.class, 0, 0, Integer.MAX_VALUE);
@@ -54,6 +57,6 @@ public class SpongeKnockbackData extends AbstractIntData<KnockbackData> implemen
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("KnockbackStrength"), this.getValue());
+        return new MemoryDataContainer().set(KNOCKBACK_STRENGTH, this.getValue());
     }
 }

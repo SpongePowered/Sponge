@@ -31,20 +31,33 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.entity.IMixinAggressive;
+import org.spongepowered.common.interfaces.entity.IMixinAnger;
 
 @NonnullByDefault
 @Mixin(EntityPigZombie.class)
 @Implements(@Interface(iface = ZombiePigman.class, prefix = "pigzombie$"))
-public abstract class MixinEntityPigZombie extends MixinEntityZombie {
+public abstract class MixinEntityPigZombie extends MixinEntityZombie implements IMixinAggressive, IMixinAnger {
 
     @Shadow private int angerLevel;
 
+    @Override
+    public boolean isAngry() {
+        return this.angerLevel > 0;
+    }
+
+    @Override
+    public void setAngry(boolean angry) {
+        this.angerLevel = 400 + this.rand.nextInt(400);
+    }
+
+    @Override
     public int getAngerLevel() {
         return this.angerLevel;
     }
 
+    @Override
     public void setAngerLevel(int angerLevel) {
-        this.angerLevel = angerLevel;
+        this.angerLevel = angerLevel < 0 ? 0 : angerLevel;
     }
-
 }

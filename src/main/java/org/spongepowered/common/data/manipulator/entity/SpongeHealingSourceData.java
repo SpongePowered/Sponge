@@ -27,12 +27,15 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.HealingSourceData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeHealingSourceData extends AbstractSingleValueData<Entity, HealingSourceData> implements HealingSourceData {
+
+    public static final DataQuery HEALING_SOURCE = of("HealingSource");
 
     public SpongeHealingSourceData(Entity entity) {
         super(HealingSourceData.class, entity);
@@ -50,6 +53,6 @@ public class SpongeHealingSourceData extends AbstractSingleValueData<Entity, Hea
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("HealingSource"), this.getValue().getUniqueId());
+        return new MemoryDataContainer().set(HEALING_SOURCE, this.getValue().getUniqueId());
     }
 }

@@ -29,6 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.InvisibilityData;
 import org.spongepowered.api.entity.player.Player;
@@ -40,6 +41,7 @@ import java.util.UUID;
 
 public class SpongeInvisibilityData extends SpongeAbstractData<InvisibilityData> implements InvisibilityData {
 
+    public static final DataQuery INVISIBLE_PLAYERS = of("InvisiblePlayers");
     private final Set<UUID> invisibleTo = Sets.newHashSet();
 
     public SpongeInvisibilityData() {
@@ -78,6 +80,6 @@ public class SpongeInvisibilityData extends SpongeAbstractData<InvisibilityData>
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("InvisiblePlayers"), this.invisibleTo);
+        return new MemoryDataContainer().set(INVISIBLE_PLAYERS, this.invisibleTo);
     }
 }

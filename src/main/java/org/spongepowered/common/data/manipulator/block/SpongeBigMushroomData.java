@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.BigMushroomData;
 import org.spongepowered.api.data.type.BigMushroomType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeBigMushroomData extends AbstractSingleValueData<BigMushroomType, BigMushroomData> implements BigMushroomData {
+
+    public static final DataQuery BIG_MUSHROOM_TYPE = of("BigMushroomType");
 
     public SpongeBigMushroomData() {
         // We don't really have a "default" mushroom type because the blocks themselves are "technical blocks" and therefor
@@ -53,6 +56,6 @@ public class SpongeBigMushroomData extends AbstractSingleValueData<BigMushroomTy
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BigMushroomType"), this.getValue().getId());
+        return new MemoryDataContainer().set(BIG_MUSHROOM_TYPE, this.getValue().getId());
     }
 }

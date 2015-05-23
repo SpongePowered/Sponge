@@ -41,6 +41,16 @@ public class SpongeAuthorData extends AbstractSingleValueData<Text, AuthorData> 
     }
 
     @Override
+    public Text getAuthor() {
+        return this.getValue();
+    }
+
+    @Override
+    public AuthorData setAuthor(Text author) {
+        return this.setValue(author);
+    }
+
+    @Override
     public AuthorData copy() {
         return new SpongeAuthorData().setValue(this.getValue());
     }
@@ -53,15 +63,5 @@ public class SpongeAuthorData extends AbstractSingleValueData<Text, AuthorData> 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer().set(AUTHOR, getValue());
-    }
-
-    @Override
-    public Text getAuthor() {
-        return this.getValue();
-    }
-
-    @Override
-    public AuthorData setAuthor(Text author) {
-        return this.setValue(author);
     }
 }

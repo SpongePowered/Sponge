@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.FlyingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeFlyingData extends SpongeAbstractData<FlyingData> implements FlyingData {
+
+    public static final DataQuery FLYING = of("Flying");
 
     public SpongeFlyingData() {
         super(FlyingData.class);
@@ -49,6 +52,6 @@ public class SpongeFlyingData extends SpongeAbstractData<FlyingData> implements 
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Flying"), true);
+        return new MemoryDataContainer().set(FLYING, true);
     }
 }

@@ -30,6 +30,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.DamagingData;
@@ -40,6 +41,8 @@ import java.util.Map;
 
 public class SpongeDamagingData extends SpongeAbstractData<DamagingData> implements DamagingData {
 
+    public static final DataQuery ENTITY_TYPE_DAMAGES = of("EntityTypeDamages");
+    public static final DataQuery DAMAGE = of("Damage");
     private double damage;
     private Map<EntityType, Double> damageMap = Maps.newHashMap();
 
@@ -56,7 +59,7 @@ public class SpongeDamagingData extends SpongeAbstractData<DamagingData> impleme
     public DamagingData setDamage(double damage) {
         checkArgument(damage >= 0);
         this.damage = damage;
-        return null;
+        return this;
     }
 
     @Override
@@ -88,8 +91,8 @@ public class SpongeDamagingData extends SpongeAbstractData<DamagingData> impleme
     @Override
     public DataContainer toContainer() {
         final DataView damages = new MemoryDataContainer()
-                .set(of("Damage"), this.damage)
-                .createView(of("EntityTypeDamages"));
+                .set(DAMAGE, this.damage)
+                .createView(ENTITY_TYPE_DAMAGES);
         for (Map.Entry<EntityType, Double> entry : this.damageMap.entrySet()) {
             damages.set(of(entry.getKey().getId()), entry.getValue());
         }

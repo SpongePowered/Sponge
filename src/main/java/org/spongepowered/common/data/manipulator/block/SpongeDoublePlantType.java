@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.block;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.block.DoublePlantData;
 import org.spongepowered.api.data.type.DoubleSizePlantType;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.type.DoubleSizePlantTypes;
 import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
 
 public class SpongeDoublePlantType extends AbstractSingleValueData<DoubleSizePlantType, DoublePlantData> implements DoublePlantData {
+
+    public static final DataQuery DOUBLE_SIZE_PLANT_TYPE = of("DoubleSizePlantType");
 
     public SpongeDoublePlantType() {
         super(DoublePlantData.class, DoubleSizePlantTypes.GRASS);
@@ -51,6 +54,6 @@ public class SpongeDoublePlantType extends AbstractSingleValueData<DoubleSizePla
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("DoubleSizePlantType"), this.getValue().getId());
+        return new MemoryDataContainer().set(DOUBLE_SIZE_PLANT_TYPE, this.getValue().getId());
     }
 }

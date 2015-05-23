@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.ExpirableData;
 import org.spongepowered.common.data.manipulator.AbstractIntData;
 
 public class SpongeExpirableData extends AbstractIntData<ExpirableData> implements ExpirableData {
+
+    public static final DataQuery REMAINING_TICKS = of("RemainingTicks");
 
     public SpongeExpirableData() {
         super(ExpirableData.class, 0, 0, Integer.MAX_VALUE);
@@ -44,6 +47,6 @@ public class SpongeExpirableData extends AbstractIntData<ExpirableData> implemen
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("RemainingTicks"), this.getValue());
+        return new MemoryDataContainer().set(REMAINING_TICKS, this.getValue());
     }
 }

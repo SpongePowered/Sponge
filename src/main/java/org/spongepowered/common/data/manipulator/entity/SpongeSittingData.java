@@ -27,11 +27,14 @@ package org.spongepowered.common.data.manipulator.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.SittingData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeSittingData extends SpongeAbstractData<SittingData> implements SittingData {
+
+    public static final DataQuery IS_SITTING = of("IsSitting");
 
     public SpongeSittingData() {
         super(SittingData.class);
@@ -49,6 +52,6 @@ public class SpongeSittingData extends SpongeAbstractData<SittingData> implement
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("IsSitting"), true);
+        return new MemoryDataContainer().set(IS_SITTING, true);
     }
 }

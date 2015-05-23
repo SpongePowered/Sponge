@@ -31,12 +31,18 @@ import static org.spongepowered.api.data.DataQuery.of;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.FallingBlockData;
 import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeFallingBlockData extends SpongeAbstractData<FallingBlockData> implements FallingBlockData {
 
+    public static final DataQuery BLOCK_STATE = of("BlockState");
+    public static final DataQuery DAMAGE_PER_BLOCK = of("DamagePerBlock");
+    public static final DataQuery MAX_DAMAGE = of("MaxDamage");
+    public static final DataQuery CAN_PLACE = of("CanPlace");
+    public static final DataQuery CAN_DROP = of("CanDrop");
     private BlockState blockState;
     private double damagePerBlock;
     private double maxDamage;
@@ -125,10 +131,10 @@ public class SpongeFallingBlockData extends SpongeAbstractData<FallingBlockData>
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("BlockState"), this.blockState)
-                .set(of("DamagePerBlock"), this.damagePerBlock)
-                .set(of("MaxDamage"), this.maxDamage)
-                .set(of("CanPlace"), this.canPlace)
-                .set(of("CanDrop"), this.canDrop);
+                .set(BLOCK_STATE, this.blockState)
+                .set(DAMAGE_PER_BLOCK, this.damagePerBlock)
+                .set(MAX_DAMAGE, this.maxDamage)
+                .set(CAN_PLACE, this.canPlace)
+                .set(CAN_DROP, this.canDrop);
     }
 }
