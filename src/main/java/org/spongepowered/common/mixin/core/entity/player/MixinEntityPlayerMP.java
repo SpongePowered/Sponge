@@ -31,6 +31,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -49,6 +50,8 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
@@ -86,6 +89,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
+    private MessageSink sink = MessageSinks.toAll();
 
     @Override
     public GameProfile getProfile() {
@@ -148,6 +152,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
                     ((SpongeChatType) type).getByteId()));
         }
+    }
+
+    @Override
+    public void setMessageSink(MessageSink sink) {
+        Preconditions.checkNotNull(sink, "sink");
+        this.sink = sink;
+    }
+
+    @Override
+    public MessageSink getMessageSink() {
+        return this.sink;
     }
 
     @Override
