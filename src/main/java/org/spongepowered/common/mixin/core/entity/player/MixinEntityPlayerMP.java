@@ -62,6 +62,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -89,7 +90,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
-    private MessageSink sink = MessageSinks.toAll();
+    private MessageSink sink = Sponge.getGame().getServer().getBroadcastSink();
 
     @Override
     public GameProfile getProfile() {

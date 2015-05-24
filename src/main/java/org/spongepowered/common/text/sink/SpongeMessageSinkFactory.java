@@ -41,6 +41,7 @@ import org.spongepowered.api.text.sink.MessageSinkFactory;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.common.Sponge;
 
+import java.lang.SuppressWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -53,6 +54,9 @@ import javax.annotation.Nullable;
  * Implementation of factory to create message sinks.
  */
 public class SpongeMessageSinkFactory implements MessageSinkFactory {
+    public static final SpongeMessageSinkFactory INSTANCE = new SpongeMessageSinkFactory();
+
+    private SpongeMessageSinkFactory() {}
 
     private static class PermissionSink extends MessageSink {
         private final String permission;
@@ -93,7 +97,8 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         @Override
         public Iterable<CommandSource> getRecipients() {
             // TODO: Non-player subjects?
-            Set<CommandSource> ret = new HashSet<CommandSource>((Collection) MinecraftServer.getServer().getConfigurationManager().playerEntityList);
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            Set<CommandSource> ret = new HashSet(MinecraftServer.getServer().getConfigurationManager().playerEntityList);
             ret.add((CommandSource) MinecraftServer.getServer());
             return ret;
         }

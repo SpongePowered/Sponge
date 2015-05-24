@@ -1068,7 +1068,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setTextFactory() {
         RegistryHelper.setFactory(Texts.class, new SpongeTextFactory());
-        RegistryHelper.setFactory(MessageSinks.class, new SpongeMessageSinkFactory());
+        RegistryHelper.setFactory(MessageSinks.class, SpongeMessageSinkFactory.INSTANCE);
     }
 
     private void setSelectors() {
