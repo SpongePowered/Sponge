@@ -29,13 +29,18 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.common.configuration.DataSerializableTypeSerializer;
 
 import java.util.Map;
 
 public class SpongeSerializationService implements SerializationService {
+    static {
+        TypeSerializers.registerSerializer(new DataSerializableTypeSerializer());
+    }
 
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
     private boolean registrationComplete = false;

@@ -55,6 +55,8 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameProfile;
@@ -223,6 +225,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
@@ -332,6 +335,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
+    static {
+        TypeSerializers.registerSerializer(new CatalogTypeTypeSerializer());
+    }
 
     private final Map<String, BiomeType> biomeTypeMappings = Maps.newHashMap();
 
