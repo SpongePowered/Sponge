@@ -39,7 +39,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
 @NonnullByDefault
-@Mixin(CommandBlockLogic.class)
+@Mixin(value = CommandBlockLogic.class, targets = "net/minecraft/tileentity/TileEntitySign$2")
 public abstract class MixinCommandBlockLogic implements ICommandSender, CommandBlockSource, Subjectable {
 
     @Override
