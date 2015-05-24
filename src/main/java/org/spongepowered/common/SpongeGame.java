@@ -36,11 +36,9 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.event.EventManager;
-import org.spongepowered.api.service.scheduler.AsynchronousScheduler;
-import org.spongepowered.api.service.scheduler.SynchronousScheduler;
+import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.world.TeleportHelper;
-import org.spongepowered.common.service.scheduler.AsyncScheduler;
-import org.spongepowered.common.service.scheduler.SyncScheduler;
+import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
 import java.io.File;
 
@@ -101,13 +99,8 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public SynchronousScheduler getSyncScheduler() {
-        return SyncScheduler.getInstance();
-    }
-
-    @Override
-    public AsynchronousScheduler getAsyncScheduler() {
-        return AsyncScheduler.getInstance();
+    public SchedulerService getScheduler() {
+        return SpongeScheduler.getInstance();
     }
 
     @Override
