@@ -74,6 +74,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String ENTITY_ACTIVATION_RANGE_AQUATIC = "aquatic-activation-range";
     public static final String ENTITY_ACTIVATION_RANGE_AMBIENT = "ambient-activation-range";
     public static final String ENTITY_ACTIVATION_RANGE_MISC = "misc-activation-range";
+    public static final String ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY = "human-player-list-remove-delay";
 
     // GENERAL
     public static final String GENERAL_DISABLE_WARNINGS = "disable-warnings";
@@ -397,6 +398,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private int maxCountWarnSize = 0;
         @Setting(value = ENTITY_ITEM_DESPAWN_RATE, comment = "Controls the time in ticks for when an item despawns.")
         private int itemDespawnRate = 6000;
+        @Setting(value = ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY,
+                comment = "Number of ticks before the fake player entry of a human is removed from the tab list (range of 0 to 100 ticks).")
+        private int humanPlayerListRemoveDelay = 10;
 
         public int getMaxBoundingBoxSize() {
             return this.maxBoundingBoxSize;
@@ -436,6 +440,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setItemDespawnRate(int itemDespawnRate) {
             this.itemDespawnRate = itemDespawnRate;
+        }
+
+        public int getHumanPlayerListRemoveDelay() {
+            return this.humanPlayerListRemoveDelay;
+        }
+
+        public void setHumanPlayerListRemoveDelay(int delay) {
+            this.humanPlayerListRemoveDelay = Math.max(0, Math.min(delay, 100));
         }
     }
 

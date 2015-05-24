@@ -80,19 +80,14 @@ import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.entity.living.HumanEntity;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
@@ -313,38 +308,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
         return spawnEntityInWorld(((net.minecraft.entity.Entity) entity));
-    }
-
-    /**
-     * @author Simon816
-     *
-     * Don't force Human entities to spawn if chunk is not loaded.
-     */
-    @Inject(method = "spawnEntityInWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isChunkLoaded(IIZ)Z",
-            shift = Shift.BY, by = -5), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void spawnEntityInject1(net.minecraft.entity.Entity entityIn, CallbackInfoReturnable<Boolean> ci, int i, int j, @Coerce boolean flag) {
-        if (entityIn instanceof HumanEntity) {
-            // Ignore that flag = true when entity instanceof EntityPlayer but
-            // is a human
-            if (!entityIn.forceSpawn && !this.isChunkLoaded(i, j, true)) {
-                ci.setReturnValue(false);
-                return;
-            }
-        }
-    }
-
-    /**
-     * @author Simon816
-     *
-     * Don't do EntityPlayer stuff if this is a human.
-     */
-    @Redirect(method = "spawnEntityInWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;updateAllPlayersSleepingFlag()V"))
-    public void spawnEntityInject2(net.minecraft.world.World world, net.minecraft.entity.Entity entityIn) {
-        if (entityIn instanceof HumanEntity) {
-            world.playerEntities.remove(entityIn);
-        } else {
-            world.updateAllPlayersSleepingFlag();
-        }
     }
 
     @Override

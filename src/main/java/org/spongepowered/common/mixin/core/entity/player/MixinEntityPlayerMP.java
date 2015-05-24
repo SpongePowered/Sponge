@@ -63,7 +63,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.entity.living.HumanEntity;
+import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.Subjectable;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
@@ -92,8 +92,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Inject(method = "func_152339_d", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private void onRemoveEntity(Entity entityIn, CallbackInfo ci) {
-        if (entityIn instanceof HumanEntity) {
-            ((HumanEntity) entityIn).onRemovedFrom((EntityPlayerMP) (Object) this);
+        if (entityIn instanceof EntityHuman) {
+            ((EntityHuman) entityIn).onRemovedFrom((EntityPlayerMP) (Object) this);
         }
     }
 
@@ -310,5 +310,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public DataContainer toContainer() {
         return super.toContainer().set(of("JoinData"), getJoinData());
+    }
+
+    @Override
+    public boolean isViewingInventory() {
+        return this.openContainer != null;
     }
 }

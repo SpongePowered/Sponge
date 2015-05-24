@@ -38,6 +38,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
+import net.minecraft.world.World;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.entity.DamageableData;
 import org.spongepowered.api.data.manipulator.entity.HealthData;
@@ -48,6 +49,9 @@ import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
@@ -281,6 +285,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public DataContainer toContainer() {
         // todo actually store more data.
         return super.toContainer().set(of("HealthData"), getHealthData()).set(of("DamageableData"), getMortalData());
+    }
+
+    @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =
+            "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"))
+    public void onDeathSendEntityState(World world, Entity self, byte state) {
+        // Don't send the state if this is a human. Fixes ghost items on client.
+        if (!((Entity) (Object) this instanceof EntityHuman)) {
+            world.setEntityState(self, state);
+        }
     }
 
 }

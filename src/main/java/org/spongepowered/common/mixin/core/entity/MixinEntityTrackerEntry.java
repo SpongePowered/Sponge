@@ -27,11 +27,9 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,7 +38,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.entity.living.HumanEntity;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.RemovePlayerListRunnable;
 
 import java.util.Set;
 
@@ -58,41 +58,46 @@ public abstract class MixinEntityTrackerEntry {
 
     @Redirect(method = "updatePlayerEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onSendSpawnPacket(NetHandlerPlayServer thisCtx, Packet spawnPacket, EntityPlayerMP playerIn) {
-        if (!(this.trackedEntity instanceof HumanEntity)) {
+    public void onSendSpawnPacket(final NetHandlerPlayServer thisCtx, final Packet spawnPacket, final EntityPlayerMP playerIn) {
+        if (!(this.trackedEntity instanceof EntityHuman)) {
             // This is the method call that was @Redirected
             thisCtx.sendPacket(spawnPacket);
             return;
         }
-        HumanEntity human = (HumanEntity) this.trackedEntity;
+        final EntityHuman human = (EntityHuman) this.trackedEntity;
         // Adds the GameProfile to the client
         thisCtx.sendPacket(human.createPlayerListPacket(S38PacketPlayerListItem.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
         thisCtx.sendPacket(spawnPacket);
         // Remove from tab list
-        S38PacketPlayerListItem removePacket = human.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER);
+        final S38PacketPlayerListItem removePacket = human.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER);
         if (human.canRemoveFromListImmediately()) {
             thisCtx.sendPacket(removePacket);
         } else {
-            human.pushPackets(playerIn, new Packet[0]); // Extra delay of 1 tick
-            human.pushPackets(playerIn, removePacket);
+            int delay = Sponge.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
+            Runnable removeTask = new RemovePlayerListRunnable(human, playerIn, removePacket);
+            if (delay == 0) {
+                removeTask.run();
+            } else {
+                Sponge.getGame().getSyncScheduler().runTaskAfter(Sponge.getPlugin(), removeTask, delay);
+            }
         }
     }
 
     // The spawn packet for a human is a player
     @Inject(method = "func_151260_c", at = @At("HEAD"), cancellable = true)
     public void onGetSpawnPacket(CallbackInfoReturnable<Packet> cir) {
-        if (this.trackedEntity instanceof HumanEntity) {
-            cir.setReturnValue(new S0CPacketSpawnPlayer((EntityPlayer) this.trackedEntity));
+        if (this.trackedEntity instanceof EntityHuman) {
+            cir.setReturnValue(((EntityHuman) this.trackedEntity).createSpawnPacket());
         }
     }
 
     @Inject(method = "sendMetadataToAllAssociatedPlayers", at = @At("HEAD"))
     public void onSendMetadata(CallbackInfo ci) {
-        if (!(this.trackedEntity instanceof HumanEntity)) {
+        if (!(this.trackedEntity instanceof EntityHuman)) {
             return;
         }
-        HumanEntity human = (HumanEntity) this.trackedEntity;
+        EntityHuman human = (EntityHuman) this.trackedEntity;
         Packet[] packets = human.popQueuedPackets(null);
         for (EntityPlayerMP player : this.trackingPlayers) {
             if (packets != null) {

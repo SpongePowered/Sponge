@@ -31,7 +31,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,7 +38,7 @@ import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
 
 @NonnullByDefault
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements Human {
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase {
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -125,11 +124,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     public void setFlying(boolean flying) {
         this.capabilities.isFlying = flying;
-    }
-
-    @Override
-    public boolean isViewingInventory() {
-        return this.openContainer != null;
     }
 
 }

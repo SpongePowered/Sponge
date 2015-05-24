@@ -32,14 +32,13 @@ import static org.spongepowered.common.data.DataTransactionBuilder.successNoData
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.entity.SkinData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.entity.SpongeSkinData;
-import org.spongepowered.common.entity.living.HumanEntity;
+import org.spongepowered.common.entity.living.human.EntityHuman;
 
 import java.util.UUID;
 
@@ -62,29 +61,29 @@ public class SpongeSkinDataProcessor implements SpongeDataProcessor<SkinData> {
 
     @Override
     public Optional<SkinData> createFrom(DataHolder dataHolder) {
-        if (!(dataHolder instanceof HumanEntity)) {
+        if (!(dataHolder instanceof EntityHuman)) {
             return Optional.absent();
         }
-        return Optional.of(((HumanEntity) dataHolder).createSkinData());
+        return Optional.of(((EntityHuman) dataHolder).createSkinData());
     }
 
     @Override
     public Optional<SkinData> getFrom(DataHolder holder) {
-        if (!(holder instanceof HumanEntity)) {
+        if (!(holder instanceof EntityHuman)) {
             return Optional.absent();
         }
-        return ((HumanEntity) holder).getSkinData();
+        return ((EntityHuman) holder).getSkinData();
     }
 
     @Override
     public Optional<SkinData> fillData(DataHolder holder, SkinData manipulator, DataPriority priority) {
-        if (!(holder instanceof HumanEntity)) {
+        if (!(holder instanceof EntityHuman)) {
             return Optional.absent();
         }
         switch (checkNotNull(priority)) {
             case DATA_HOLDER:
             case PRE_MERGE:
-                return ((HumanEntity) holder).fillSkinData(manipulator);
+                return ((EntityHuman) holder).fillSkinData(manipulator);
             default:
                 return Optional.absent();
         }
@@ -92,11 +91,11 @@ public class SpongeSkinDataProcessor implements SpongeDataProcessor<SkinData> {
 
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, SkinData manipulator, DataPriority priority) {
-        if (dataHolder instanceof HumanEntity) {
+        if (dataHolder instanceof EntityHuman) {
             switch (checkNotNull(priority)) {
                 case DATA_MANIPULATOR:
                 case PRE_MERGE:
-                    return ((HumanEntity) dataHolder).setSkinData(manipulator);
+                    return ((EntityHuman) dataHolder).setSkinData(manipulator);
                 default:
                     return successNoData();
             }
@@ -106,7 +105,7 @@ public class SpongeSkinDataProcessor implements SpongeDataProcessor<SkinData> {
 
     @Override
     public boolean remove(DataHolder dataHolder) {
-        return dataHolder instanceof HumanEntity && ((HumanEntity) dataHolder).removeSkin();
+        return dataHolder instanceof EntityHuman && ((EntityHuman) dataHolder).removeSkin();
     }
 
 }
