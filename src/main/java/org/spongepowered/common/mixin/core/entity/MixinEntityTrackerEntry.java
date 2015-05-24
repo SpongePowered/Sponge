@@ -27,11 +27,9 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -83,7 +81,7 @@ public abstract class MixinEntityTrackerEntry {
     @Inject(method = "func_151260_c", at = @At("HEAD"), cancellable = true)
     public void onGetSpawnPacket(CallbackInfoReturnable<Packet> cir) {
         if (this.trackedEntity instanceof HumanEntity) {
-            cir.setReturnValue(new S0CPacketSpawnPlayer((EntityPlayer) this.trackedEntity));
+            cir.setReturnValue(((HumanEntity) this.trackedEntity).createSpawnPacket());
         }
     }
 
