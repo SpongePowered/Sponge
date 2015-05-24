@@ -29,16 +29,17 @@ import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.monster.EntityGiantZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.living.HumanEntity;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
 
 // All implementors of ArmorEquipable
-@Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayer.class, EntitySkeleton.class, EntityZombie.class})
+@Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayerMP.class, EntitySkeleton.class, EntityZombie.class, HumanEntity.class})
 @Implements(@Interface(iface = ArmorEquipable.class, prefix = "equipable$"))
 public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
 

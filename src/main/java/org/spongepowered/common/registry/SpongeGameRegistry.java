@@ -264,16 +264,11 @@ import org.spongepowered.common.data.manipulator.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
-import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
-import org.spongepowered.common.data.type.SpongeCookedFish;
-import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.processor.SpongeBannerDataProcessor;
 import org.spongepowered.common.data.processor.SpongeBeaconDataProcessor;
 import org.spongepowered.common.data.processor.SpongeDisplayNameDataProcessor;
 import org.spongepowered.common.data.processor.SpongePotionDataProcessor;
 import org.spongepowered.common.data.processor.SpongeRepresentedItemProcessor;
-import org.spongepowered.common.data.processor.tileentity.SpongeSignDataProcessor;
 import org.spongepowered.common.data.processor.block.SpongeDirectionalProcessor;
 import org.spongepowered.common.data.processor.block.SpongePoweredProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeAgeableDataProcessor;
@@ -282,11 +277,16 @@ import org.spongepowered.common.data.processor.entity.SpongeCareerDataProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeFoodDataProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeHealthProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeInvulnerabilityProcessor;
-import org.spongepowered.common.data.processor.entity.SpongeTradeOfferProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeSkinDataProcessor;
+import org.spongepowered.common.data.processor.entity.SpongeTradeOfferProcessor;
+import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.processor.item.SpongeEnchantmentProcessor;
 import org.spongepowered.common.data.processor.item.SpongeLoreProcessor;
 import org.spongepowered.common.data.processor.item.SpongePagesProcessor;
+import org.spongepowered.common.data.processor.tileentity.SpongeSignDataProcessor;
+import org.spongepowered.common.data.type.SpongeCookedFish;
+import org.spongepowered.common.data.type.SpongeNotePitch;
+import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
@@ -415,7 +415,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, CookedFish> cookedFishMappings = Maps.newHashMap();
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
     private final Map<String, Art> artMappings = Maps.newHashMap();
-    protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
+    private final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
 
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
@@ -1678,9 +1678,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.entityTypeMappings.put("WEATHER", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class));
         this.entityTypeMappings.put("PLAYER", new SpongeEntityType(-5, "Player", EntityPlayerMP.class));
         this.entityTypeMappings.put("COMPLEX_PART", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class));
-        if (!this.entityTypeMappings.containsKey("HUMAN")) {
-            this.entityTypeMappings.put("HUMAN", new SpongeEntityType(-7, "Human", HumanEntity.class));
-        }
+        this.entityTypeMappings.put("HUMAN", new SpongeEntityType(-7, "Human", HumanEntity.class));
 
         RegistryHelper.mapFields(EntityTypes.class, new Function<String, EntityType>() {
 
