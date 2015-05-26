@@ -198,6 +198,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return this.lastDamage;
     }
 
+    @Override
     public void setLastDamage(double damage) {
         this.lastDamage = (float) damage;
     }

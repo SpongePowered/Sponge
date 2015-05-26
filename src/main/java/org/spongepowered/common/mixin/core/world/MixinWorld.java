@@ -81,6 +81,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -321,7 +322,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Inject(method = "spawnEntityInWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isChunkLoaded(IIZ)Z",
             shift = Shift.BY, by = -5), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void spawnEntityInject1(net.minecraft.entity.Entity entityIn, CallbackInfoReturnable<Boolean> ci, int i, int j, boolean flag) {
+    public void spawnEntityInject1(net.minecraft.entity.Entity entityIn, CallbackInfoReturnable<Boolean> ci, int i, int j, @Coerce boolean flag) {
         if (entityIn instanceof HumanEntity) {
             // Ignore that flag = true when entity instanceof EntityPlayer but
             // is a human
