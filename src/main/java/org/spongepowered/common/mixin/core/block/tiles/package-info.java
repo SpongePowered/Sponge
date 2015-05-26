@@ -22,40 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator;
-
-import static org.spongepowered.api.data.DataQuery.of;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.entity.FuseData;
-
-public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseData {
-
-    public static final DataQuery FUSE = of("Fuse");
-
-    public SpongeFuseData() {
-        super(FuseData.class, 10, 0, Integer.MAX_VALUE);
-    }
-
-    @Override
-    public int getFuseDuration() {
-        return this.getValue();
-    }
-
-    @Override
-    public FuseData setFuseDuration(int fuseTicks) {
-        return this.setValue(fuseTicks);
-    }
-
-    @Override
-    public FuseData copy() {
-        return new SpongeFuseData().setValue(this.getValue());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(FUSE, this.getValue());
-    }
-}
+/**
+ * A majority of these interfaces are to aid in manipulating block states and blocks
+ * for a specific {@link org.spongepowered.api.data.DataManipulator}. The one
+ * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
+ * for the benefit of being able to "reset" the block to a "default state".
+ */
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.block.tiles;

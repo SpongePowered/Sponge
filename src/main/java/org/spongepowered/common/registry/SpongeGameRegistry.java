@@ -90,6 +90,7 @@ import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.data.manipulator.PotionEffectData;
 import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.api.data.manipulator.block.PoweredData;
 import org.spongepowered.api.data.manipulator.entity.AgeableData;
 import org.spongepowered.api.data.manipulator.entity.AgentData;
@@ -252,6 +253,7 @@ import org.spongepowered.common.data.manipulator.SpongePotionEffectData;
 import org.spongepowered.common.data.manipulator.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.SpongeTradeOfferData;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
+import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
 import org.spongepowered.common.data.manipulator.block.SpongePoweredData;
 import org.spongepowered.common.data.manipulator.entity.SpongeAgeableData;
 import org.spongepowered.common.data.manipulator.entity.SpongeAgentData;
@@ -267,6 +269,7 @@ import org.spongepowered.common.data.manipulator.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
+import org.spongepowered.common.data.processor.block.SpongeLayeredDataProcessor;
 import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
@@ -1513,6 +1516,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(SkinData.class, skinDataProcessor);
         dataRegistry.register(SkinData.class, skinDataProcessor);
         dataRegistry.registerDataProcessorAndImpl(SkinData.class, SpongeSkinData.class, skinDataProcessor);
+
+        SpongeLayeredDataProcessor layeredDataProcessor = new SpongeLayeredDataProcessor();
+        service.registerBuilder(LayeredData.class, layeredDataProcessor);
+        dataRegistry.register(LayeredData.class, layeredDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(LayeredData.class, SpongeLayeredData.class, layeredDataProcessor);
+        dataRegistry.registerBlockProcessorAndImpl(LayeredData.class, SpongeLayeredData.class, layeredDataProcessor);
 
         // User
         // TODO someone needs to write a User implementation...

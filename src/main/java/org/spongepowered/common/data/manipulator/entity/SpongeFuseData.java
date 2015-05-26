@@ -22,31 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
+package org.spongepowered.common.data.manipulator.entity;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
+import static org.spongepowered.api.data.DataQuery.of;
 
-import java.util.Collection;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulator.entity.FuseData;
+import org.spongepowered.common.data.manipulator.AbstractIntData;
 
-/**
- * The root interface that every {@link Block} is being mixed into, this
- * allows for a simple method call for a desired {@link DataManipulator} to
- * be retrieved from a {@link IBlockState}.
- */
-public interface IMixinBlock {
+public class SpongeFuseData extends AbstractIntData<FuseData> implements FuseData {
 
-    Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos);
+    public static final DataQuery FUSE = of("Fuse");
 
-    ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState);
+    public SpongeFuseData() {
+        super(FuseData.class, 10, 0, Integer.MAX_VALUE);
+    }
 
-    void resetBlockState(World world, BlockPos blockPos);
+    @Override
+    public int getFuseDuration() {
+        return this.getValue();
+    }
 
-    BlockState getDefaultBlockState();
+    @Override
+    public FuseData setFuseDuration(int fuseTicks) {
+        return this.setValue(fuseTicks);
+    }
 
+    @Override
+    public FuseData copy() {
+        return new SpongeFuseData().setValue(this.getValue());
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(FUSE, this.getValue());
+    }
 }

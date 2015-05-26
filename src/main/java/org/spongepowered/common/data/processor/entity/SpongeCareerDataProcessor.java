@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.data.processor.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
+import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityVillager;
@@ -36,25 +38,43 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.entity.SpongeCareerData;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData> {
 
     @Override
     public Optional<CareerData> fillData(DataHolder dataHolder, CareerData manipulator, DataPriority priority) {
-        return Optional.absent();
+        if (!(dataHolder instanceof IMixinVillager)) {
+            return Optional.absent();
+        } else {
+            switch (checkNotNull(priority)) {
+                case DATA_HOLDER:
+                case PRE_MERGE:
+                    final Career career = ((IMixinVillager) dataHolder).getCareer();
+                    return Optional.of(manipulator.setValue(career));
+                default:
+                    return Optional.absent();
+            }
+        }
     }
 
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, CareerData manipulator, DataPriority priority) {
         if (dataHolder instanceof EntityVillager) {
-            final Career career = manipulator.getCareer();
-            ((IMixinVillager) dataHolder).setCareer(career);
-
-            return successNoData(); // todo
-
+            switch (checkNotNull(priority)) {
+                case DATA_MANIPULATOR:
+                case POST_MERGE:
+                    final CareerData oldCareer = getFrom(dataHolder).get();
+                    final Career career = manipulator.getCareer();
+                    ((IMixinVillager) dataHolder).setCareer(career);
+                    return successReplaceData(oldCareer);
+                default:
+                    return successNoData();
+            }
         }
         return fail(manipulator);
     }
@@ -67,7 +87,13 @@ public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData
 
     @Override
     public Optional<CareerData> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
+        final String careerId = DataUtil.getData(container, SpongeCareerData.CAREER, String.class);
+        final Optional<Career> careerOptional = Sponge.getGame().getRegistry().getType(Career.class, careerId);
+        if (careerOptional.isPresent()) {
+            return Optional.of(create().setValue(careerOptional.get()));
+        } else {
+            return Optional.absent();
+        }
     }
 
     @Override

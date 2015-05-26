@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator;
+package org.spongepowered.common.data.manipulator.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
@@ -32,6 +32,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.entity.EyeLocationData;
+import org.spongepowered.common.data.manipulator.SpongeAbstractData;
 
 public class SpongeEyeLocationData extends SpongeAbstractData<EyeLocationData> implements EyeLocationData {
 

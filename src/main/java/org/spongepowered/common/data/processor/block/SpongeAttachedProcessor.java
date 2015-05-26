@@ -43,7 +43,7 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.block.SpongeAttachedData;
-import org.spongepowered.common.interfaces.block.IMixinAttachedHolder;
+import org.spongepowered.common.interfaces.block.IMixinBlockAttachable;
 
 public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData>, SpongeBlockProcessor<AttachedData> {
 
@@ -72,8 +72,8 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
     @Override
     public Optional<AttachedData> fromBlockPos(World world, BlockPos blockPos) {
         final IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinAttachedHolder) {
-            ((IMixinAttachedHolder) blockState.getBlock()).getAttachedData(blockState);
+        if (blockState.getBlock() instanceof IMixinBlockAttachable) {
+            ((IMixinBlockAttachable) blockState.getBlock()).getAttachedData(blockState);
         }
         return Optional.absent();
     }
@@ -81,8 +81,8 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
     @Override
     public DataTransactionResult setData(World world, BlockPos blockPos, AttachedData manipulator, DataPriority priority) {
         final IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinAttachedHolder) {
-            ((IMixinAttachedHolder) blockState.getBlock()).setAttachedData(manipulator, world, blockPos);
+        if (blockState.getBlock() instanceof IMixinBlockAttachable) {
+            ((IMixinBlockAttachable) blockState.getBlock()).setAttachedData(manipulator, world, blockPos);
         }
         return fail(manipulator);
     }

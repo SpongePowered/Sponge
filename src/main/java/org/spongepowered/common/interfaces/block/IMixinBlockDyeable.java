@@ -24,29 +24,20 @@
  */
 package org.spongepowered.common.interfaces.block;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.manipulator.DyeableData;
 
-import java.util.Collection;
+public interface IMixinBlockDyeable extends IMixinBlock {
 
-/**
- * The root interface that every {@link Block} is being mixed into, this
- * allows for a simple method call for a desired {@link DataManipulator} to
- * be retrieved from a {@link IBlockState}.
- */
-public interface IMixinBlock {
+    DyeableData getDyeableData(IBlockState blockState);
 
-    Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos);
+    DataTransactionResult setDyeableData(DyeableData data, World world, BlockPos blockPos, DataPriority priority);
 
-    ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState);
-
-    void resetBlockState(World world, BlockPos blockPos);
-
-    BlockState getDefaultBlockState();
+    BlockState resetDyeableData(BlockState blockState);
 
 }

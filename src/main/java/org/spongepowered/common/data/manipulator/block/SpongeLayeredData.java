@@ -35,6 +35,7 @@ import org.spongepowered.common.data.manipulator.AbstractIntData;
 public class SpongeLayeredData extends AbstractIntData<LayeredData> implements LayeredData {
 
     public static final DataQuery MAX_LAYERS = of("MaxLayers");
+    public static final DataQuery LAYER = of("Layer");
 
     public SpongeLayeredData(int maxLayers) {
         super(LayeredData.class, 0, 0, maxLayers);
@@ -47,6 +48,6 @@ public class SpongeLayeredData extends AbstractIntData<LayeredData> implements L
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Layer"), this.getValue()).set(MAX_LAYERS, this.getMaxValue());
+        return new MemoryDataContainer().set(LAYER, this.getValue()).set(MAX_LAYERS, this.getMaxValue());
     }
 }

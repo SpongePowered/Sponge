@@ -39,15 +39,15 @@ import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
-import org.spongepowered.common.interfaces.block.IMixinAxisHolder;
-import org.spongepowered.common.interfaces.block.IMixinDirectionalHolder;
+import org.spongepowered.common.interfaces.block.IMixinBlockAxisOriented;
+import org.spongepowered.common.interfaces.block.IMixinBlockDirectional;
 import org.spongepowered.common.interfaces.block.IMixinPoweredHolder;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
 
 import java.util.Collection;
 
 @Mixin(BlockLever.class)
-public abstract class MixinBlockLever extends MixinBlock implements IMixinDirectionalHolder, IMixinAxisHolder, IMixinPoweredHolder {
+public abstract class MixinBlockLever extends MixinBlock implements IMixinBlockDirectional, IMixinBlockAxisOriented, IMixinPoweredHolder {
 
     @Override
     public DirectionalData getDirectionalData(IBlockState blockState) {
@@ -63,7 +63,12 @@ public abstract class MixinBlockLever extends MixinBlock implements IMixinDirect
     }
 
     @Override
-    public void reset(World world, BlockPos blockPos) {
+    public BlockState setUnpowered(IBlockState blockState) {
+        return null;
+    }
+
+    @Override
+    public void resetAxis(World world, BlockPos blockPos) {
 
     }
 
@@ -80,7 +85,7 @@ public abstract class MixinBlockLever extends MixinBlock implements IMixinDirect
 
     @Override
     public boolean isCurrentlyPowered(IBlockState blockState) {
-        return ((Boolean) blockState.getValue(BlockLever.POWERED)).booleanValue();
+        return (Boolean) blockState.getValue(BlockLever.POWERED);
     }
 
     @Override

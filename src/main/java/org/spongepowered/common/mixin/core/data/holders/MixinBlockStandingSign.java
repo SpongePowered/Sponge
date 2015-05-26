@@ -31,10 +31,10 @@ import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.BlockStandingSign;
-import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,13 +42,13 @@ import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
-import org.spongepowered.common.interfaces.block.IMixinDirectionalHolder;
+import org.spongepowered.common.interfaces.block.IMixinBlockDirectional;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
 
 import java.util.Collection;
 
 @Mixin(BlockStandingSign.class)
-public abstract class MixinBlockStandingSign extends MixinBlock implements IMixinDirectionalHolder {
+public abstract class MixinBlockStandingSign extends MixinBlock implements IMixinBlockDirectional {
 
     @Override
     public DirectionalData getDirectionalData(IBlockState blockState) {
@@ -74,8 +74,8 @@ public abstract class MixinBlockStandingSign extends MixinBlock implements IMixi
     }
 
     @Override
-    public void reset(World world, BlockPos blockPos) {
-        world.getBlockState(blockPos).withProperty(BlockWallSign.FACING, 0);
+    public BlockState resetDirectionData(BlockState blockState) {
+        return ((BlockState) ((IBlockState) blockState).withProperty(BlockStandingSign.ROTATION, 0));
     }
 
     @Override

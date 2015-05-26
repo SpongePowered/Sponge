@@ -22,24 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
-
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
-
-public interface IMixinDirectionalHolder extends IMixinBlock {
-
-    DirectionalData getDirectionalData(IBlockState blockState);
-
-    DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority);
-
-    void reset(World world, BlockPos blockPos);
-
-    BlockState resetDirectionData(BlockState blockState);
-
-}
+/**
+ * A majority of these interfaces are to aid in manipulating block states and blocks
+ * for a specific {@link org.spongepowered.api.data.DataManipulator}. The one
+ * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
+ * for the benefit of being able to "reset" the block to a "default state".
+ */
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.interfaces.block;

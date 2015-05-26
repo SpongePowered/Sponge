@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.processor.block;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
 import net.minecraft.block.state.IBlockState;
@@ -35,24 +37,28 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
-import org.spongepowered.common.interfaces.block.IMixinBlockDirectional;
+import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
+import org.spongepowered.common.interfaces.block.IMixinBlockLayerable;
 
-public class SpongeDirectionalProcessor implements SpongeDataProcessor<DirectionalData>, SpongeBlockProcessor<DirectionalData> {
+public class SpongeLayeredDataProcessor implements SpongeDataProcessor<LayeredData>, SpongeBlockProcessor<LayeredData> {
 
     @Override
-    public Optional<DirectionalData> fillData(DataHolder dataHolder, DirectionalData manipulator, DataPriority priority) {
+    public Optional<LayeredData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, DirectionalData manipulator, DataPriority priority) {
-        return DataTransactionBuilder.successNoData();
+    public Optional<LayeredData> fillData(DataHolder dataHolder, LayeredData manipulator, DataPriority priority) {
+        return Optional.absent();
+    }
+
+    @Override
+    public DataTransactionResult setData(DataHolder dataHolder, LayeredData manipulator, DataPriority priority) {
+        return fail(manipulator);
     }
 
     @Override
@@ -61,44 +67,45 @@ public class SpongeDirectionalProcessor implements SpongeDataProcessor<Direction
     }
 
     @Override
-    public Optional<DirectionalData> build(DataView container) throws InvalidDataException {
+    public Optional<LayeredData> build(DataView container) throws InvalidDataException {
+        final int maxLayers = getData(container, SpongeLayeredData.MAX_LAYERS, Integer.TYPE);
+        final int layer = getData(container, SpongeLayeredData.LAYER, Integer.TYPE);
+        return Optional.of(new SpongeLayeredData(maxLayers).setValue(layer));
+    }
+
+    @Override
+    public LayeredData create() {
+        return new SpongeLayeredData(1);
+    }
+
+    @Override
+    public Optional<LayeredData> createFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 
     @Override
-    public DirectionalData create() {
-        return new SpongeDirectionalData();
-    }
-
-    @Override
-    public Optional<DirectionalData> createFrom(DataHolder dataHolder) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<DirectionalData> fromBlockPos(final World world, final BlockPos blockPos) {
-        IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinBlockDirectional) {
-            return Optional.of(((IMixinBlockDirectional) blockState.getBlock()).getDirectionalData(blockState));
+    public Optional<LayeredData> fromBlockPos(World world, BlockPos blockPos) {
+        final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
+        if (blockState.getBlock() instanceof IMixinBlockLayerable) {
+            ((IMixinBlockLayerable) blockState.getBlock()).getLayerData(blockState);
         }
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, DirectionalData manipulator, DataPriority priority) {
-        IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinBlockDirectional) {
-            return ((IMixinBlockDirectional) blockState.getBlock()).setDirectionalData(manipulator, world, blockPos, priority);
+    public DataTransactionResult setData(World world, BlockPos blockPos, LayeredData manipulator, DataPriority priority) {
+        final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
+        if (blockState.getBlock() instanceof IMixinBlockLayerable) {
+            ((IMixinBlockLayerable) blockState.getBlock()).setLayerData(checkNotNull(manipulator), world, blockPos, checkNotNull(priority));
         }
         return fail(manipulator);
     }
 
     @Override
     public boolean remove(World world, BlockPos blockPos) {
-        IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinBlockDirectional) {
-//            ((IMixinBlockDirectional) blockState.getBlock()).resetDirectionData(blockState);
-            return true;
+        final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
+        if (blockState.getBlock() instanceof IMixinBlockLayerable) {
+            world.setBlockState(blockPos, (IBlockState) ((IMixinBlockLayerable) blockState.getBlock()).resetLayerData(((BlockState) blockState)));
         }
         return false;
     }
@@ -109,15 +116,10 @@ public class SpongeDirectionalProcessor implements SpongeDataProcessor<Direction
     }
 
     @Override
-    public Optional<DirectionalData> createFrom(IBlockState blockState) {
-        if (blockState.getBlock() instanceof IMixinBlockDirectional) {
-            ((IMixinBlockDirectional) blockState.getBlock()).getDirectionalData(blockState);
+    public Optional<LayeredData> createFrom(IBlockState blockState) {
+        if (checkNotNull(blockState).getBlock() instanceof IMixinBlockLayerable) {
+            ((IMixinBlockLayerable) blockState.getBlock()).getLayerData(blockState);
         }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<DirectionalData> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }
