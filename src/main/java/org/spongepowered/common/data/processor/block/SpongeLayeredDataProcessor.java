@@ -87,7 +87,7 @@ public class SpongeLayeredDataProcessor implements SpongeDataProcessor<LayeredDa
     public Optional<LayeredData> fromBlockPos(World world, BlockPos blockPos) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (blockState.getBlock() instanceof IMixinBlockLayerable) {
-            ((IMixinBlockLayerable) blockState.getBlock()).getLayerData(blockState);
+            return Optional.of(((IMixinBlockLayerable) blockState.getBlock()).getLayerData(blockState));
         }
         return Optional.absent();
     }
@@ -96,7 +96,7 @@ public class SpongeLayeredDataProcessor implements SpongeDataProcessor<LayeredDa
     public DataTransactionResult setData(World world, BlockPos blockPos, LayeredData manipulator, DataPriority priority) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (blockState.getBlock() instanceof IMixinBlockLayerable) {
-            ((IMixinBlockLayerable) blockState.getBlock()).setLayerData(checkNotNull(manipulator), world, blockPos, checkNotNull(priority));
+            return ((IMixinBlockLayerable) blockState.getBlock()).setLayerData(checkNotNull(manipulator), world, blockPos, checkNotNull(priority));
         }
         return fail(manipulator);
     }
@@ -105,7 +105,7 @@ public class SpongeLayeredDataProcessor implements SpongeDataProcessor<LayeredDa
     public boolean remove(World world, BlockPos blockPos) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (blockState.getBlock() instanceof IMixinBlockLayerable) {
-            world.setBlockState(blockPos, (IBlockState) ((IMixinBlockLayerable) blockState.getBlock()).resetLayerData(((BlockState) blockState)));
+            return world.setBlockState(blockPos, (IBlockState) ((IMixinBlockLayerable) blockState.getBlock()).resetLayerData(((BlockState) blockState)));
         }
         return false;
     }
@@ -118,7 +118,7 @@ public class SpongeLayeredDataProcessor implements SpongeDataProcessor<LayeredDa
     @Override
     public Optional<LayeredData> createFrom(IBlockState blockState) {
         if (checkNotNull(blockState).getBlock() instanceof IMixinBlockLayerable) {
-            ((IMixinBlockLayerable) blockState.getBlock()).getLayerData(blockState);
+            return Optional.of(((IMixinBlockLayerable) blockState.getBlock()).getLayerData(blockState));
         }
         return Optional.absent();
     }
