@@ -202,6 +202,6 @@ public class SpongeTeleportHelper implements TeleportHelper {
     private boolean isSafeBodyMaterial(Material material) {
         return (material == Material.air || material == Material.grass || material == Material.plants ||
         material == Material.water || material == Material.redstoneLight || material == Material.circuits ||
-        material == Material.snow || material == Material.portal || material == Material.web);
+        material == Material.snow || material == Material.portal || material == Material.web || material == Material.vine);
     }
 }
