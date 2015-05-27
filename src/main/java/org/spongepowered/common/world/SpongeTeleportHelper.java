@@ -26,6 +26,8 @@ package org.spongepowered.common.world;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.Location;
@@ -177,19 +179,29 @@ public class SpongeTeleportHelper implements TeleportHelper {
                 }
 
                 // We'll fall onto a block, need to make sure its safe
-                if (typeBelowPos != BlockTypes.WATER || typeBelowPos != BlockTypes.FLOWING_WATER || !typeBelowPos.isSolidCube()) {
+                if (typeBelowPos != BlockTypes.AIR && !isSafeFloorMaterial(((Block) typeBelowPos).getMaterial())) {
                     return false;
                 }
 
                 // We'll fall through an air block to another, need to make sure its safe
-                return !(typeBelowPos2 != BlockTypes.WATER || typeBelowPos2 != BlockTypes.FLOWING_WATER || !typeBelowPos2.isSolidCube());
+                return isSafeFloorMaterial(((Block) typeBelowPos2).getMaterial());
             }
 
             //We have a non-air floor, need to ensure its safe
-            return block == BlockTypes.WATER || block == BlockTypes.FLOWING_WATER || block.isSolidCube();
+            return isSafeFloorMaterial(((Block) block).getMaterial());
         }
 
         //We need to make sure the block at our torso or head is safe
-        return block == BlockTypes.AIR || block == BlockTypes.WATER || block == BlockTypes.FLOWING_WATER;
+        return isSafeBodyMaterial(((Block) block).getMaterial());
+    }
+
+    private boolean isSafeFloorMaterial(Material material) {
+        return !(material == Material.cactus || material == Material.fire || material == Material.lava);
+    }
+
+    private boolean isSafeBodyMaterial(Material material) {
+        return (material == Material.air || material == Material.grass || material == Material.plants ||
+        material == Material.water || material == Material.redstoneLight || material == Material.circuits ||
+        material == Material.snow || material == Material.portal || material == Material.web);
     }
 }
