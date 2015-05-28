@@ -26,46 +26,70 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.WorldManager;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.source.ConsoleSource;
+import org.spongepowered.api.world.Dimension;
+import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.interfaces.IMixinServer;
+import org.spongepowered.common.event.SpongeImplEventFactory;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.Subjectable;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
+import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 @NonnullByDefault
 @Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer implements Server, ConsoleSource, Subjectable, IMixinServer {
+public abstract class MixinMinecraftServer implements Server, ConsoleSource, Subjectable, IMixinMinecraftServer {
 
     @Shadow private static Logger logger;
     @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow private int tickCounter;
-
     @Shadow public abstract EnumDifficulty getDifficulty();
     @Shadow public abstract ServerConfigurationManager getConfigurationManager();
     @Shadow public abstract void addChatMessage(IChatComponent message);
@@ -75,6 +99,18 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @Shadow protected abstract void setUserMessage(String message);
     @Shadow protected abstract void outputPercentRemaining(String message, int percent);
     @Shadow protected abstract void clearCurrentTask();
+    @Shadow public WorldServer[] worldServers;
+    @Shadow public Profiler theProfiler;
+    @Shadow private boolean enableBonusChest;
+    @Shadow private boolean worldIsBeingDeleted;
+    @Shadow public abstract boolean canStructuresSpawn();
+    @Shadow public abstract boolean isHardcore();
+    @Shadow public abstract boolean isSinglePlayer();
+    @Shadow public abstract String getFolderName();
+    @Shadow public abstract WorldSettings.GameType getGameType();
+    @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
+    @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
+    @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
 
     @Shadow
     @SideOnly(Side.SERVER)
@@ -84,8 +120,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @SideOnly(Side.SERVER)
     public abstract int getPort();
 
-    private MessageSink broadcastSink = SpongeMessageSinkFactory.INSTANCE.toAll();
-    private MessageSink sourceSink = broadcastSink;
+    private final MessageSink broadcastSink = SpongeMessageSinkFactory.INSTANCE.toAll();
+    private MessageSink sourceSink = this.broadcastSink;
 
     @Override
     public Optional<World> loadWorld(UUID uuid) {
@@ -250,5 +286,296 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
         }
 
         initiateShutdown();
+    }
+
+    @Overwrite
+    protected void loadAllWorlds(String overworldFolder, String unused, long seed, WorldType type, String generator) {
+        this.convertMapIfNeeded(overworldFolder);
+        this.setUserMessage("menu.loadingLevel");
+
+        List<Integer> idList = new LinkedList<Integer>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
+        idList.remove(Integer.valueOf(0));
+        idList.add(0, 0); // load overworld first
+        for (int dim : idList) {
+            WorldProvider provider = WorldProvider.getProviderForDimension(dim);
+            String worldFolder;
+            if (dim == 0) {
+                worldFolder = overworldFolder;
+            } else {
+                worldFolder = Sponge.getSpongeRegistry().getWorldFolder(dim);
+                if (worldFolder != null) {
+                    final Optional<World> optWorld = getWorld(worldFolder);
+                    if (optWorld.isPresent()) {
+                        continue; // world is already loaded
+                    }
+                } else {
+                    worldFolder = ((IMixinWorldProvider) provider).getSaveFolder();
+                    Sponge.getSpongeRegistry().registerWorldDimensionId(dim, worldFolder);
+                }
+            }
+
+            WorldInfo worldInfo;
+            WorldSettings newWorldSettings ;
+            AnvilSaveHandler worldsavehandler;
+
+            if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
+                worldsavehandler =
+                        new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory() :
+                                new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
+            } else {
+                worldsavehandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
+            }
+            worldInfo = worldsavehandler.loadWorldInfo();
+
+            if (worldInfo == null) {
+                newWorldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
+                newWorldSettings.setWorldName(generator);
+
+                if (this.enableBonusChest) {
+                    newWorldSettings.enableBonusChest();
+                }
+
+                worldInfo = new WorldInfo(newWorldSettings, worldFolder);
+                ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
+                if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
+                    ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
+                    ((WorldProperties) worldInfo).setLoadOnStartup(true);
+                    ((WorldProperties) worldInfo).setEnabled(true);
+                    ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
+                    Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+                }
+            } else {
+                worldInfo.setWorldName(worldFolder);
+                newWorldSettings = new WorldSettings(worldInfo);
+            }
+            if (dim == 0) {
+                this.setResourcePackFromWorld(this.getFolderName(), worldsavehandler);
+            }
+
+            ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
+            ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
+            UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
+            Sponge.getSpongeRegistry().registerWorldUniqueId(uuid, worldFolder);
+            final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
+                    this.theProfiler).init();
+
+            world.initialize(newWorldSettings);
+            world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
+
+            if (!this.isSinglePlayer()) {
+                world.getWorldInfo().setGameType(this.getGameType());
+            }
+            Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+            Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createWorldLoad(Sponge.getGame(), (org.spongepowered.api.world.World)
+                    world));
+        }
+
+        this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
+        this.setDifficultyForAllWorlds(this.getDifficulty());
+        this.initialWorldChunkLoad();
+    }
+
+    @Overwrite
+    protected void initialWorldChunkLoad() {
+        for (WorldServer worldserver : DimensionManager.getWorlds()) {
+            WorldProperties worldProperties = ((World) worldserver).getProperties();
+            if (worldProperties.doesKeepSpawnLoaded()) {
+                prepareSpawnArea(worldserver);
+            }
+        }
+
+        this.clearCurrentTask();
+    }
+
+    protected void prepareSpawnArea(WorldServer world) {
+        int i = 0;
+        this.setUserMessage("menu.generatingTerrain");
+        logger.info("Preparing start region for level " + world.provider.getDimensionId());
+        BlockPos blockpos = world.getSpawnPoint();
+        long j = MinecraftServer.getCurrentTimeMillis();
+
+        for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
+            for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
+                long i1 = MinecraftServer.getCurrentTimeMillis();
+
+                if (i1 - j > 1000L) {
+                    this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
+                    j = i1;
+                }
+
+                ++i;
+                world.theChunkProviderServer.loadChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
+            }
+        }
+
+        this.clearCurrentTask();
+    }
+
+    @Override
+    public Optional<World> loadWorld(String worldName) {
+        final Optional<World> optExisting = getWorld(worldName);
+        if (optExisting.isPresent()) {
+            return optExisting;
+        }
+
+        File file = new File(getFolderName(), worldName);
+
+        if ((file.exists()) && (!file.isDirectory())) {
+            throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
+        }
+
+        AnvilSaveHandler savehandler = getHandler(worldName);
+
+        int dim;
+        WorldInfo worldInfo = savehandler.loadWorldInfo();
+        if (worldInfo != null) {
+            // check if enabled
+            if (!((WorldProperties) worldInfo).isEnabled()) {
+                Sponge.getLogger().error("Unable to load world " + worldName + ". World is disabled!");
+                return Optional.absent();
+            }
+            if (!Sponge.getSpongeRegistry().getWorldProperties(((WorldProperties) worldInfo).getUniqueId()).isPresent()) {
+                Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+            } else {
+                worldInfo = (WorldInfo) Sponge.getSpongeRegistry().getWorldProperties(((WorldProperties) worldInfo).getUniqueId()).get();
+            }
+            dim = ((IMixinWorldInfo) worldInfo).getDimensionId();
+            if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+                DimensionManager
+                        .registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+            }
+            if (Sponge.getSpongeRegistry().getWorldFolder(dim) == null) {
+                Sponge.getSpongeRegistry().registerWorldDimensionId(dim, worldName);
+            }
+        } else {
+            return Optional.absent(); // no world data found
+        }
+
+        WorldSettings settings = new WorldSettings(worldInfo);
+
+        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+            DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+        }
+
+        WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
+
+        world.initialize(settings);
+        ((IMixinWorldProvider) world.provider).setDimension(dim);
+
+        world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
+        Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createWorldLoad(Sponge.getGame(), (World) world));
+        if (!isSinglePlayer()) {
+            world.getWorldInfo().setGameType(getGameType());
+        }
+        this.setDifficultyForAllWorlds(this.getDifficulty());
+        if (((WorldProperties) worldInfo).doesKeepSpawnLoaded()) {
+            this.prepareSpawnArea(world);
+        }
+
+        return Optional.of((World) world);
+    }
+
+    @Override
+    public Optional<WorldProperties> createWorld(WorldCreationSettings settings) {
+        String worldName = settings.getWorldName();
+        final Optional<World> optExisting = getWorld(worldName);
+        if (optExisting.isPresent()) {
+            return Optional.of(optExisting.get().getProperties());
+        }
+
+        int dim;
+        AnvilSaveHandler savehandler;
+        if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
+            savehandler =
+                    new AnvilSaveHandler(new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
+                            true);
+
+        } else {
+            savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true);
+        }
+        WorldInfo worldInfo = savehandler.loadWorldInfo();
+
+        if (worldInfo != null) {
+            if (!Sponge.getSpongeRegistry().getWorldProperties(((WorldProperties) worldInfo).getUniqueId()).isPresent()) {
+                Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+                return Optional.of((WorldProperties) worldInfo);
+            } else {
+                return Sponge.getSpongeRegistry().getWorldProperties(((WorldProperties) worldInfo).getUniqueId());
+            }
+        } else {
+            dim = DimensionManager.getNextFreeDimId();
+            worldInfo = new WorldInfo((WorldSettings) (Object) settings, settings.getWorldName());
+            ((WorldProperties) worldInfo).setKeepSpawnLoaded(settings.doesKeepSpawnLoaded());
+            ((WorldProperties) worldInfo).setLoadOnStartup(settings.loadOnStartup());
+            ((WorldProperties) worldInfo).setEnabled(settings.isEnabled());
+            ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
+            ((WorldProperties) worldInfo).setGeneratorModifiers(settings.getGeneratorModifiers());
+            Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+            Sponge.getSpongeRegistry().registerWorldDimensionId(dim, worldName);
+        }
+
+        ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
+        ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
+        UUID uuid = UUID.randomUUID();
+        ((IMixinWorldInfo) worldInfo).setUUID(uuid);
+        Sponge.getSpongeRegistry().registerWorldUniqueId(uuid, worldName);
+
+        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+            DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+        }
+        savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
+
+        Sponge.getGame().getEventManager().post(SpongeEventFactory.createWorldCreate(Sponge.getGame(), (WorldProperties)
+                worldInfo, settings));
+        return Optional.of((WorldProperties) worldInfo);
+    }
+
+    @Override
+    public boolean unloadWorld(World world) {
+        int dim = ((net.minecraft.world.World) world).provider.getDimensionId();
+        if (DimensionManager.getWorldFromDimId(dim) != null) {
+            DimensionManager.unloadWorldFromDimId(((net.minecraft.world.World) world).provider.getDimensionId());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Collection<World> getWorlds() {
+        List<World> worlds = new ArrayList<World>();
+        for (WorldServer worldServer : DimensionManager.getWorlds()) {
+            worlds.add((World) worldServer);
+        }
+        return worlds;
+    }
+
+    @Override
+    public Optional<World> getWorld(UUID uniqueId) {
+        for (WorldServer worldserver : DimensionManager.getWorlds()) {
+            if (((World) worldserver).getUniqueId().equals(uniqueId)) {
+                return Optional.of((World) worldserver);
+            }
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public AnvilSaveHandler getHandler(String worldName) {
+        if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
+            return new AnvilSaveHandler(new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
+                    true);
+        } else {
+            return new AnvilSaveHandler(new File(getFolderName()), worldName, true);
+        }
+    }
+
+    @Overwrite
+    public WorldServer worldServerForDimension(int dim) {
+        WorldServer ret = DimensionManager.getWorldFromDimId(dim);
+        if (ret == null) {
+            DimensionManager.initDimension(dim);
+            ret = DimensionManager.getWorldFromDimId(dim);
+        }
+        return ret;
     }
 }

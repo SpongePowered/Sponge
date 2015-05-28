@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.world.type;
 
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldType;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderEnd;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.world.gen.ChunkProviderHell;
 
-@NonnullByDefault
-@Mixin(WorldProviderEnd.class)
-public abstract class MixinWorldProviderEnd extends WorldProvider {
+public class SpongeWorldTypeNether extends SpongeWorldType {
 
-    @Override
-    public IChunkProvider createChunkGenerator() {
-        if (this.terrainType == WorldType.DEFAULT) {
-            return new ChunkProviderEnd(this.worldObj, this.worldObj.getSeed());
-        } else {
-            return super.createChunkGenerator(); // use custom GeneratorType
-        }
+    public SpongeWorldTypeNether() {
+        super("NETHER");
+    }
+
+    public WorldChunkManager getChunkManager(net.minecraft.world.World world) {
+        return new WorldChunkManagerHell(BiomeGenBase.hell, 0f);
+    }
+
+    public IChunkProvider getChunkGenerator(World world, String generatorOptions) {
+        return new ChunkProviderHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
     }
 }

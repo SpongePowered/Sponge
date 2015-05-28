@@ -45,7 +45,7 @@ import java.util.Collection;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
-public class MixinWorldSettings implements WorldCreationSettings, IMixinWorldSettings {
+public abstract class MixinWorldSettings implements WorldCreationSettings, IMixinWorldSettings {
 
     private DimensionType dimensionType;
     private DataContainer generatorSettings;

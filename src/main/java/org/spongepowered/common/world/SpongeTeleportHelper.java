@@ -162,7 +162,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             return false;
         }
 
-        if (blockPos.getY() > world.getHeight()) {
+        if (blockPos.getY() > world.getDimension().getHeight()) {
             return false;
         }
 

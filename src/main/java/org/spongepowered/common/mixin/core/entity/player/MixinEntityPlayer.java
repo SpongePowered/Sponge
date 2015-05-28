@@ -34,11 +34,12 @@ import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
 
 @NonnullByDefault
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase {
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer {
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -126,5 +127,4 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase {
     public void setFlying(boolean flying) {
         this.capabilities.isFlying = flying;
     }
-
 }

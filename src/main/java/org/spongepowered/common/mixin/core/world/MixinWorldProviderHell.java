@@ -31,14 +31,12 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderHell;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 
 @NonnullByDefault
 @Mixin(WorldProviderHell.class)
 public abstract class MixinWorldProviderHell extends WorldProvider {
 
     @Override
-    @Overwrite
     public IChunkProvider createChunkGenerator() {
         if (this.terrainType == WorldType.DEFAULT) {
             return new ChunkProviderHell(this.worldObj, this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.worldObj.getSeed());

@@ -53,6 +53,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -76,8 +77,10 @@ import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
@@ -101,9 +104,15 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.border.PlayerBorderListener;
+import org.spongepowered.common.world.gen.CustomChunkProviderGenerate;
+import org.spongepowered.common.world.gen.CustomWorldChunkManager;
+import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
+import org.spongepowered.common.world.gen.SpongeGeneratorPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -139,39 +148,35 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow(prefix = "shadow$") public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
 
-    @Shadow
-    public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
-
-    @Shadow
-    public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
+    @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             Predicate<net.minecraft.entity.Entity> filter);
+    @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
+    @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
+    @Shadow public abstract IChunkProvider getChunkProvider();
+    @Shadow public abstract WorldChunkManager getWorldChunkManager();
+    @Shadow public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
+    @Shadow public abstract boolean isBlockPowered(BlockPos pos);
+    @Shadow public abstract IBlockState getBlockState(BlockPos pos);
+    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
+    @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
+    @Shadow private net.minecraft.world.border.WorldBorder worldBorder;
 
-    @Shadow
-    public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
+            CallbackInfo ci) {
+        if (!client) {
+            String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+            this.worldConfig =
+                    new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD, new File(Sponge.getConfigDirectory() + File.separator +
+                            providerName + File.separator + (providerIn.getDimensionId() == 0 ? "DIM0" : Sponge.getSpongeRegistry().getWorldFolder
+                            (providerIn.getDimensionId())), "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
+        }
 
-    @Shadow
-    public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
-
-    @Shadow
-    public abstract IChunkProvider getChunkProvider();
-
-    @Shadow
-    public abstract WorldChunkManager getWorldChunkManager();
-
-    @Shadow
-    public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
-
-    @Shadow
-    public abstract boolean isBlockPowered(BlockPos pos);
-
-    @Shadow
-    public abstract IBlockState getBlockState(BlockPos pos);
-
-    @Shadow
-    public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
-
-    @Shadow
-    public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
+        if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
+            this.worldBorder.addListener(new PlayerBorderListener());
+        }
+    }
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
@@ -423,6 +428,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
+    @Inject(method = "updateWeatherBody()V", remap = false, at = {
+            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThundering(Z)V"),
+            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRaining(Z)V")
+    })
+    private void onUpdateWeatherBody(CallbackInfo ci) {
+        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+    }
+
     @Override
     public Dimension getDimension() {
         return (Dimension) this.provider;
@@ -480,10 +493,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean unloadChunk(Chunk chunk) {
-        if (chunk == null) {
-            return false;
-        }
-        return chunk.unloadChunk();
+        return chunk != null && chunk.unloadChunk();
     }
 
     @Override
@@ -606,10 +616,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
         Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().remove((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z));
-        }
-        return false;
+        return blockUtilOptional.isPresent() && blockUtilOptional.get().remove((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z));
     }
 
 
@@ -668,6 +675,42 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public boolean containsBlock(int x, int y, int z) {
         return VecHelper.inBounds(x, y, z, BLOCK_MIN, BLOCK_MAX);
+    }
+
+    @Override
+    public void setWorldGenerator(WorldGenerator generator) {
+        // Replace biome generator with possible modified one
+        BiomeGenerator biomeGenerator = generator.getBiomeGenerator();
+        WorldServer thisWorld = (WorldServer) (Object) this;
+        thisWorld.provider.worldChunkMgr = CustomWorldChunkManager.of(biomeGenerator);
+
+        // Replace generator populator with possibly modified one
+        GeneratorPopulator generatorPopulator = generator.getBaseGeneratorPopulator();
+        replaceChunkGenerator(CustomChunkProviderGenerate.of(thisWorld, generatorPopulator, biomeGenerator));
+
+        // Replace populators with possibly modified list
+        this.populators = ImmutableList.copyOf(generator.getPopulators());
+        this.generatorPopulators = ImmutableList.copyOf(generator.getGeneratorPopulators());
+    }
+
+    @Override
+    public WorldGenerator getWorldGenerator() {
+        // We have to create a new instance every time to satisfy the contract
+        // of this method, namely that changing the state of the returned
+        // instance does not affect the world without setWorldGenerator being
+        // called
+        ChunkProviderServer serverChunkProvider = (ChunkProviderServer) this.getChunkProvider();
+        WorldServer world = (WorldServer) (Object) this;
+        return new SpongeWorldGenerator(
+                SpongeBiomeGenerator.of(getWorldChunkManager()),
+                SpongeGeneratorPopulator.of(world, serverChunkProvider.serverChunkGenerator),
+                this.generatorPopulators,
+                this.populators);
+    }
+
+    private void replaceChunkGenerator(IChunkProvider provider) {
+        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
+        chunkProviderServer.serverChunkGenerator = provider;
     }
 
     private void checkBiomeBounds(int x, int z) {

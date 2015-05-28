@@ -22,26 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.world.type;
 
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderEnd;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
-@Mixin(WorldProviderEnd.class)
-public abstract class MixinWorldProviderEnd extends WorldProvider {
+import java.util.Arrays;
 
-    @Override
-    public IChunkProvider createChunkGenerator() {
-        if (this.terrainType == WorldType.DEFAULT) {
-            return new ChunkProviderEnd(this.worldObj, this.worldObj.getSeed());
-        } else {
-            return super.createChunkGenerator(); // use custom GeneratorType
+public abstract class SpongeWorldType extends WorldType {
+
+    protected SpongeWorldType(String name) {
+        super(getNextID(), name);
+    }
+
+    private static int getNextID() {
+        for (int x = 0; x < worldTypes.length; x++) {
+            if (worldTypes[x] == null) {
+                return x;
+            }
         }
+
+        int oldLen = worldTypes.length;
+        worldTypes = Arrays.copyOf(worldTypes, oldLen + 16);
+        return oldLen;
     }
 }

@@ -50,6 +50,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -57,6 +58,9 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.player.gamemode.SpongeGameMode;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
@@ -119,33 +123,33 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private GameRules theGameRules;
     @Shadow public abstract NBTTagCompound getNBTTagCompound();
 
-
-
-    private void updateSpongeNbt() {
-        if (this.levelName != null) {
-            this.spongeNbt.setString("LevelName", this.levelName); // for reference
-        }
-        this.spongeNbt.setInteger("dimensionId", this.dimension);
-        if (this.dimensionType != null) {
-            this.spongeNbt.setString("dimensionType", this.dimensionType.getDimensionClass().getName());
-        }
-        if (this.uuid != null) {
-            this.spongeNbt.setLong("uuid_most", this.uuid.getMostSignificantBits());
-            this.spongeNbt.setLong("uuid_least", this.uuid.getLeastSignificantBits());
-        }
-        this.spongeNbt.setBoolean("enabled", this.worldEnabled);
-        this.spongeNbt.setBoolean("keepSpawnLoaded", this.keepSpawnLoaded);
-        this.spongeNbt.setBoolean("loadOnStartup", this.loadOnStartup);
-
-        if (this.generatorModifiers != null) {
-            NBTTagList generatorModifierNbt = new NBTTagList();
-            for (String generatorModifierId : this.generatorModifiers) {
-                generatorModifierNbt.appendTag(new NBTTagString(generatorModifierId));
-            }
-            this.spongeNbt.setTag("generatorModifiers", generatorModifierNbt);
-        }
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruction(CallbackInfo ci) {
+        this.worldEnabled = true;
+        this.spongeRootLevelNbt = new NBTTagCompound();
+        this.spongeNbt = new NBTTagCompound();
+        this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
     }
 
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
+        this.worldEnabled = true;
+        this.spongeRootLevelNbt = new NBTTagCompound();
+        this.spongeNbt = new NBTTagCompound();
+        this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
+
+        WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
+        this.dimensionType = creationSettings.getDimensionType();
+        this.generatorModifiers = WorldGeneratorRegistry.getInstance().toIds(creationSettings.getGeneratorModifiers());
+    }
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    public void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
+        this.worldEnabled = true;
+        this.spongeRootLevelNbt = new NBTTagCompound();
+        this.spongeNbt = new NBTTagCompound();
+        this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
+    }
 
     @Override
     public Vector3i getSpawnPosition() {
@@ -320,7 +324,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Map<String, String> getGameRules() {
-        // TODO Auto-generated method stub
+        // TODO World changes
         return null;
     }
 
@@ -343,8 +347,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public UUID getUniqueId() {
         return this.uuid;
     }
-
-
 
     @Override
     public DataContainer toContainer() {
@@ -409,7 +411,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         try {
             NBTTagCompound nbt = JsonToNBT.getTagFromJson(this.generatorOptions);
             return NbtTranslator.getInstance().translateFrom(nbt);
-        } catch (NBTException e) {
+        } catch (NBTException ignored) {
         }
         return new MemoryDataContainer().set(DataQuery.of("customSettings"), this.generatorOptions);
     }
@@ -441,5 +443,67 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         return this.spongeNbt;
     }
 
+    @Override
+    public void readSpongeNbt(NBTTagCompound nbt) {
+        this.dimension = nbt.getInteger("dimensionId");
+        this.uuid = new UUID(nbt.getLong("uuid_most"), nbt.getLong("uuid_least"));
+        this.worldEnabled = nbt.getBoolean("enabled");
+        this.keepSpawnLoaded = nbt.getBoolean("keepSpawnLoaded");
+        this.loadOnStartup = nbt.getBoolean("loadOnStartup");
+        for (DimensionType type : Sponge.getSpongeRegistry().dimensionClassMappings.values()) {
+            if (type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType"))) {
+                this.dimensionType = type;
+            }
+        }
 
+        // Read generator modifiers
+        NBTTagList generatorModifiersNbt = nbt.getTagList("generatorModifiers", 8);
+        ImmutableList.Builder<String> ids = ImmutableList.builder();
+        for (int i = 0; i < generatorModifiersNbt.tagCount(); i++) {
+            ids.add(generatorModifiersNbt.getStringTagAt(i));
+        }
+        this.generatorModifiers = ids.build();
+    }
+
+    @Override
+    public DataContainer getAdditionalProperties() {
+        NBTTagCompound additionalProperties = (NBTTagCompound) this.spongeRootLevelNbt.copy();
+        additionalProperties.removeTag(Sponge.ECOSYSTEM_NAME);
+        return NbtTranslator.getInstance().translateFrom(additionalProperties);
+    }
+
+    @Override
+    public void setSpongeRootLevelNBT(NBTTagCompound nbt) {
+        this.spongeRootLevelNbt = nbt;
+        if (nbt.hasKey(Sponge.ECOSYSTEM_NAME)) {
+            this.spongeNbt = nbt.getCompoundTag(Sponge.ECOSYSTEM_NAME);
+        } else {
+            this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
+        }
+    }
+
+    private void updateSpongeNbt() {
+        if (this.levelName != null) {
+            this.spongeNbt.setString("LevelName", this.levelName);
+        }
+        this.spongeNbt.setInteger("dimensionId", this.dimension);
+        if (this.dimensionType != null) {
+            this.spongeNbt.setString("dimensionType", this.dimensionType.getDimensionClass().getName());
+        }
+        if (this.uuid != null) {
+            this.spongeNbt.setLong("uuid_most", this.uuid.getMostSignificantBits());
+            this.spongeNbt.setLong("uuid_least", this.uuid.getLeastSignificantBits());
+        }
+        this.spongeNbt.setBoolean("enabled", this.worldEnabled);
+        this.spongeNbt.setBoolean("keepSpawnLoaded", this.keepSpawnLoaded);
+        this.spongeNbt.setBoolean("loadOnStartup", this.loadOnStartup);
+
+        if (this.generatorModifiers != null) {
+            NBTTagList generatorModifierNbt = new NBTTagList();
+            for (String generatorModifierId : this.generatorModifiers) {
+                generatorModifierNbt.appendTag(new NBTTagString(generatorModifierId));
+            }
+            this.spongeNbt.setTag("generatorModifiers", generatorModifierNbt);
+        }
+    }
 }

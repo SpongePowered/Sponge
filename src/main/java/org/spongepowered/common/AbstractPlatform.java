@@ -67,6 +67,7 @@ public abstract class AbstractPlatform implements Platform {
         final Map<String, Object> map = Maps.newHashMap();
         map.put("Name", this.getName());
         map.put("Type", this.getType());
+        map.put("ExecutionType", this.getExecutionType());
         map.put("ApiVersion", this.getApiVersion());
         map.put("ImplementationVersion", this.getVersion());
         map.put("MinecraftVersion", this.getMinecraftVersion());

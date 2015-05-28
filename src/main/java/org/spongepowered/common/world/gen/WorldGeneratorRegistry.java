@@ -29,8 +29,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.Sponge;
@@ -50,8 +48,6 @@ import java.util.Map;
  * @see GameRegistry#registerWorldGeneratorModifier(WorldGeneratorModifier)
  */
 public final class WorldGeneratorRegistry {
-
-    private static final Logger logger = LogManager.getLogger();
 
     public static WorldGeneratorRegistry getInstance() {
         SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
@@ -116,7 +112,7 @@ public final class WorldGeneratorRegistry {
             if (modifier != null) {
                 modifiers.add(modifier);
             } else {
-                logger.error("World generator modifier with id " + id + " not found. Missing plugin?");
+                Sponge.getLogger().error("World generator modifier with id " + id + " not found. Missing plugin?");
             }
         }
         return modifiers;

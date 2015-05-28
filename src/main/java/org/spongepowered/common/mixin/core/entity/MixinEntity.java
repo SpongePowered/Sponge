@@ -29,9 +29,13 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import net.minecraft.entity.DataWatcher;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.Entity;
@@ -51,8 +55,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinEntity;
+import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayDeque;
 import java.util.EnumSet;
@@ -98,7 +104,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow protected DataWatcher dataWatcher;
     @Shadow protected Random rand;
-
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void mountEntity(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setDead();
@@ -454,6 +459,70 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return true;
     }
 
+    // for sponge internal use only
+    @SuppressWarnings("unchecked")
+    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location location, int currentDim, int targetDim, boolean forced) {
+        MinecraftServer mcServer = MinecraftServer.getServer();
+        final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
+        final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
+        if (entity instanceof EntityPlayer) {
+            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
+            fromWorld.getPlayerManager().removePlayer((EntityPlayerMP) entity);
+            mcServer.getConfigurationManager().playerEntityList.remove(entity);
+        } else {
+            fromWorld.getEntityTracker().untrackEntity(entity);
+        }
+
+        entity.worldObj.removePlayerEntityDangerously(entity);
+        entity.dimension = targetDim;
+        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
+        if (forced) {
+            while (!toWorld.getCollidingBoundingBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
+                entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
+            }
+        }
+
+        toWorld.theChunkProviderServer.loadChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
+
+        if (entity instanceof EntityPlayer) {
+            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
+
+            // Support vanilla clients going into custom dimensions
+            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionId(), toWorld, entityplayermp1);
+            if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
+                DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
+            } else {
+                // Send bogus dimension change for same worlds on Vanilla client
+                if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
+                    entityplayermp1.playerNetServerHandler.sendPacket(
+                            new S07PacketRespawn(((clientDimension + 2) % 3) - 1, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                                    entityplayermp1.theItemInWorldManager.getGameType()));
+                }
+            }
+
+            entityplayermp1.playerNetServerHandler.sendPacket(
+                    new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                            entityplayermp1.theItemInWorldManager.getGameType()));
+            entity.setWorld(toWorld);
+            entity.isDead = false;
+            entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
+                    entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
+            entityplayermp1.setSneaking(false);
+            mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
+            toWorld.getPlayerManager().addPlayer(entityplayermp1);
+            toWorld.spawnEntityInWorld(entityplayermp1);
+            mcServer.getConfigurationManager().playerEntityList.add(entityplayermp1);
+            entityplayermp1.theItemInWorldManager.setWorld(toWorld);
+            entityplayermp1.addSelfToInternalCraftingInventory();
+            entityplayermp1.setHealth(entityplayermp1.getHealth());
+        } else {
+            toWorld.spawnEntityInWorld(entity);
+        }
+
+        fromWorld.resetUpdateEntityTick();
+        toWorld.resetUpdateEntityTick();
+        return true;
+    }
 
     /**
      * Hooks into vanilla's writeToNBT to call {@link #writeToNbt}.
@@ -516,8 +585,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("World"), this.getWorld().getUniqueId().toString());
-        // TODO do stuff with more container information
+        container.set(of("world"), ((World) this.worldObj).getUniqueId().toString());
+        container.set(of("x"), this.getLocation().getX());
+        container.set(of("y"), this.getLocation().getY());
+        container.set(of("z"), this.getLocation().getZ());
+        container.set(of("entityType"), this.getClass().getSimpleName());
         return container;
     }
 }

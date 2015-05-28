@@ -326,6 +326,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public boolean usesCustomClient() {
+        return false;
+    }
+
+    @Override
     public JoinData getJoinData() {
         return getData(JoinData.class).get();
     }
@@ -366,6 +371,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.mcScoreboard;
     }
 
+    @Override
     public org.spongepowered.api.scoreboard.Scoreboard getScoreboard() {
         return this.spongeScoreboard;
     }
