@@ -31,11 +31,11 @@ import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.tileentity.SignData;
+import org.spongepowered.api.data.component.tileentity.SignComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.tileentity.SpongeSignDataProcessor;
 
 import java.util.List;
@@ -58,12 +58,12 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
         for (IChatComponent line : this.signText) {
             lines.add(IChatComponent.Serializer.componentToJson(line));
         }
-        container.set(SpongeSignData.LINES, lines);
+        container.set(Tokens.SIGN_TEXT.getQuery(), lines);
         return container;
     }
 
     @Override
-    public Optional<SignData> getData() {
+    public Optional<SignComponent> getData() {
         return new SpongeSignDataProcessor().createFrom(this);
     }
 }

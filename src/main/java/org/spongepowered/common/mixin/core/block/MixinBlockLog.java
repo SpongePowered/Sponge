@@ -28,50 +28,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
 import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
 
-import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLog;
-import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockNewLog;
-import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.LayeredData;
-import org.spongepowered.api.data.manipulator.block.TreeData;
+import org.spongepowered.api.data.component.block.TreeComponent;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.LeafDecayEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
+import org.spongepowered.common.data.component.block.SpongeTreeComponent;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
-import org.spongepowered.common.util.VecHelper;
-import sun.reflect.generics.tree.Tree;
-
-import java.util.Random;
 
 @NonnullByDefault
 @Mixin(BlockLog.class)
 public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTree {
 
     @Override
-    public TreeData getTreeData(IBlockState blockState) {
+    public TreeComponent getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type = null;
         if(blockState.getBlock() instanceof BlockOldLog) {
             type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLog.VARIANT);
@@ -102,14 +83,14 @@ public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTre
                 break;
         }
 
-        return new SpongeTreeData().setValue(treeType);
+        return new SpongeTreeComponent().setValue(treeType);
     }
 
     @Override
-    public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos, DataPriority priority) {
-        final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
+    public DataTransactionResult setTreeData(TreeComponent treeData, World world, BlockPos blockPos, DataPriority priority) {
+        final TreeComponent data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
         switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
+            case COMPONENT:
             case POST_MERGE:
                 BlockPlanks.EnumType treeType = null;
 

@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.core.item.data;
 
 import net.minecraft.item.ItemEditableBook;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.manipulator.DisplayNameData;
-import org.spongepowered.api.data.manipulator.item.AuthorData;
-import org.spongepowered.api.data.manipulator.item.CloneableData;
-import org.spongepowered.api.data.manipulator.item.PagedData;
+import org.spongepowered.api.data.Component;
+import org.spongepowered.api.data.component.base.DisplayNameComponent;
+import org.spongepowered.api.data.component.item.AuthorComponent;
+import org.spongepowered.api.data.component.item.GenerationComponent;
+import org.spongepowered.api.data.component.item.PagedComponent;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;
@@ -39,12 +39,12 @@ import java.util.List;
 public class MixinItemEditableBook extends MixinItem {
 
     @Override
-    public List<DataManipulator<?>> getManipulatorsFor(ItemStack itemStack) {
-        final List<DataManipulator<?>> manipulators = super.getManipulatorsFor(itemStack);
-        manipulators.add(getData(itemStack, AuthorData.class));
-        manipulators.add(getData(itemStack, DisplayNameData.class));
-        manipulators.add(getData(itemStack, PagedData.class));
-        manipulators.add(getData(itemStack, CloneableData.class));
+    public List<Component<?>> getManipulatorsFor(ItemStack itemStack) {
+        final List<Component<?>> manipulators = super.getManipulatorsFor(itemStack);
+        manipulators.add(getData(itemStack, AuthorComponent.class));
+        manipulators.add(getData(itemStack, DisplayNameComponent.class));
+        manipulators.add(getData(itemStack, PagedComponent.class));
+        manipulators.add(getData(itemStack, GenerationComponent.class));
         return manipulators;
     }
 }

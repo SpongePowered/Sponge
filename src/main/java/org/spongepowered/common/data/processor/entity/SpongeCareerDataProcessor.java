@@ -35,19 +35,19 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.CareerData;
+import org.spongepowered.api.data.component.entity.CareerComponent;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeCareerData;
+import org.spongepowered.common.data.component.entity.SpongeCareerComponent;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
-public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData> {
+public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerComponent> {
 
     @Override
-    public Optional<CareerData> fillData(DataHolder dataHolder, CareerData manipulator, DataPriority priority) {
+    public Optional<CareerComponent> fillData(DataHolder dataHolder, CareerComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof IMixinVillager)) {
             return Optional.absent();
         } else {
@@ -63,13 +63,13 @@ public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, CareerData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, CareerComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof EntityVillager) {
             switch (checkNotNull(priority)) {
-                case DATA_MANIPULATOR:
+                case COMPONENT:
                 case POST_MERGE:
-                    final CareerData oldCareer = getFrom(dataHolder).get();
-                    final Career career = manipulator.getCareer();
+                    final CareerComponent oldCareer = getFrom(dataHolder).get();
+                    final Career career = manipulator.getValue();
                     ((IMixinVillager) dataHolder).setCareer(career);
                     return successReplaceData(oldCareer);
                 default:
@@ -86,8 +86,8 @@ public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData
 
 
     @Override
-    public Optional<CareerData> build(DataView container) throws InvalidDataException {
-        final String careerId = DataUtil.getData(container, SpongeCareerData.CAREER, String.class);
+    public Optional<CareerComponent> build(DataView container) throws InvalidDataException {
+        final String careerId = DataUtil.getData(container, SpongeCareerComponent.CAREER, String.class);
         final Optional<Career> careerOptional = Sponge.getGame().getRegistry().getType(Career.class, careerId);
         if (careerOptional.isPresent()) {
             return Optional.of(create().setValue(careerOptional.get()));
@@ -97,23 +97,23 @@ public class SpongeCareerDataProcessor implements SpongeDataProcessor<CareerData
     }
 
     @Override
-    public CareerData create() {
-        return new SpongeCareerData();
+    public CareerComponent create() {
+        return new SpongeCareerComponent();
     }
 
     @Override
-    public Optional<CareerData> createFrom(DataHolder dataHolder) {
+    public Optional<CareerComponent> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityVillager) {
             final Career career = ((IMixinVillager) dataHolder).getCareer();
-            final CareerData careerData = create();
-            careerData.setCareer(career);
+            final CareerComponent careerData = create();
+            careerData.setValue(career);
             return Optional.of(careerData);
         }
         return Optional.absent();
     }
 
     @Override
-    public Optional<CareerData> getFrom(DataHolder dataHolder) {
+    public Optional<CareerComponent> getFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityVillager)) {
             return Optional.absent();
         } else {

@@ -51,10 +51,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.entity.SkinData;
+import org.spongepowered.api.data.component.entity.SkinComponent;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.common.data.DataTransactionBuilder;
-import org.spongepowered.common.data.manipulator.entity.SpongeSkinData;
+import org.spongepowered.common.data.component.entity.SpongeSkinComponent;
 import org.spongepowered.common.interfaces.IMixinEntity;
 
 import java.util.ArrayList;
@@ -292,7 +292,7 @@ public class EntityHuman extends EntityCreature {
         return true;
     }
 
-    public DataTransactionResult setSkinData(SkinData skin) {
+    public DataTransactionResult setSkinData(SkinComponent skin) {
         if (!MinecraftServer.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
             return DataTransactionBuilder.fail(skin);
@@ -309,15 +309,15 @@ public class EntityHuman extends EntityCreature {
         return DataTransactionBuilder.successNoData();
     }
 
-    public Optional<SkinData> getSkinData() {
+    public Optional<SkinComponent> getSkinData() {
         if (this.skinUuid != null) {
-            return Optional.<SkinData>of(new SpongeSkinData(this.skinUuid));
+            return Optional.<SkinComponent>of(new SpongeSkinComponent(this.skinUuid));
         }
         return Optional.absent();
     }
 
-    public SkinData createSkinData() {
-        return this.getSkinData().or(new SpongeSkinData(this.entityUniqueID));
+    public SkinComponent createSkinData() {
+        return this.getSkinData().or(new SpongeSkinComponent(this.entityUniqueID));
     }
 
     public boolean removeSkin() {
@@ -332,7 +332,7 @@ public class EntityHuman extends EntityCreature {
         return true;
     }
 
-    public Optional<SkinData> fillSkinData(SkinData manipulator) {
+    public Optional<SkinComponent> fillSkinData(SkinComponent manipulator) {
         if (this.skinUuid == null) {
             return Optional.absent();
         }

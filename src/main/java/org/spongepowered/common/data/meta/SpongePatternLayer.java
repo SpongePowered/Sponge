@@ -27,13 +27,16 @@ package org.spongepowered.common.data.meta;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.component.tileentity.BannerComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 
-public class SpongePatternLayer implements BannerData.PatternLayer {
+public class SpongePatternLayer implements BannerComponent.PatternLayer {
 
+    public static final DataQuery BANNER_SHAPE_ID = of("BannerShapeId");
     private final BannerPatternShape id;
     private final DyeColor color;
 
@@ -54,7 +57,7 @@ public class SpongePatternLayer implements BannerData.PatternLayer {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("BannerShapeId"), this.id.getId()).set(of("DyeColor"), this.color.getName());
+        return new MemoryDataContainer().set(BANNER_SHAPE_ID, this.id.getId()).set(Tokens.DYE_COLOR.getQuery(), this.color.getName());
     }
 
 }

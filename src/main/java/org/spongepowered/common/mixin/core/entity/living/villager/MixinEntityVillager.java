@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.entity.living.villager;
 import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
-import org.spongepowered.api.data.manipulator.entity.CareerData;
-import org.spongepowered.api.data.manipulator.entity.TradeOfferData;
+import org.spongepowered.api.data.component.entity.CareerComponent;
+import org.spongepowered.api.data.component.entity.TradeOfferComponent;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
@@ -132,12 +132,12 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     }
 
     @Override
-    public TradeOfferData getTradeOfferData() {
-        return getData(TradeOfferData.class).get();
+    public TradeOfferComponent getTradeOfferData() {
+        return getData(TradeOfferComponent.class).get();
     }
 
     @Override
-    public CareerData getCareerData() {
-        return getData(CareerData.class).get();
+    public CareerComponent getCareerData() {
+        return getData(CareerComponent.class).get();
     }
 }

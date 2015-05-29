@@ -49,7 +49,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
-import org.spongepowered.api.data.manipulator.tileentity.SignData;
+import org.spongepowered.api.data.component.tileentity.SignComponent;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
@@ -125,12 +125,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
     public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
-        final Optional<SignData> existingSignData = ((Sign) tileentitysign).getData();
+        final Optional<SignComponent> existingSignData = ((Sign) tileentitysign).getData();
         if (!existingSignData.isPresent()) {
             // TODO Unsure if this is the best to do here...
             throw new RuntimeException("Critical error! Sign data not present on sign!");
         }
-        final SignData changedSignData = existingSignData.get().copy();
+        final SignComponent changedSignData = existingSignData.get().copy();
 
         for (int i = 0; i < packetIn.getLines().length; i++) {
             changedSignData.setLine(i, SpongeTexts.toText(packetIn.getLines()[i]));

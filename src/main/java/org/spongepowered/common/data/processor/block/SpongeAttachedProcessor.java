@@ -38,19 +38,19 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.block.AttachedData;
+import org.spongepowered.api.data.component.block.AttachedComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.block.SpongeAttachedData;
+import org.spongepowered.common.data.component.block.SpongeAttachedComponent;
 import org.spongepowered.common.interfaces.block.IMixinBlockAttachable;
 
-public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData>, SpongeBlockProcessor<AttachedData> {
+public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedComponent>, SpongeBlockProcessor<AttachedComponent> {
 
     public static final DataQuery ATTACHED = of("Attached");
 
     @Override
-    public Optional<AttachedData> build(DataView container) throws InvalidDataException {
+    public Optional<AttachedComponent> build(DataView container) throws InvalidDataException {
         checkDataExists(container, ATTACHED);
         final boolean attached = container.getBoolean(ATTACHED).get();
         if (attached) {
@@ -60,17 +60,17 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
     }
 
     @Override
-    public AttachedData create() {
-        return new SpongeAttachedData();
+    public AttachedComponent create() {
+        return new SpongeAttachedComponent();
     }
 
     @Override
-    public Optional<AttachedData> createFrom(DataHolder dataHolder) {
+    public Optional<AttachedComponent> createFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 
     @Override
-    public Optional<AttachedData> fromBlockPos(World world, BlockPos blockPos) {
+    public Optional<AttachedComponent> fromBlockPos(World world, BlockPos blockPos) {
         final IBlockState blockState = world.getBlockState(blockPos);
         if (blockState.getBlock() instanceof IMixinBlockAttachable) {
             ((IMixinBlockAttachable) blockState.getBlock()).getAttachedData(blockState);
@@ -79,7 +79,7 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, AttachedData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(World world, BlockPos blockPos, AttachedComponent manipulator, DataPriority priority) {
         final IBlockState blockState = world.getBlockState(blockPos);
         if (blockState.getBlock() instanceof IMixinBlockAttachable) {
             ((IMixinBlockAttachable) blockState.getBlock()).setAttachedData(manipulator, world, blockPos);
@@ -98,22 +98,22 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
     }
 
     @Override
-    public Optional<AttachedData> createFrom(IBlockState blockState) {
+    public Optional<AttachedComponent> createFrom(IBlockState blockState) {
         return Optional.absent();
     }
 
     @Override
-    public Optional<AttachedData> getFrom(DataHolder dataHolder) {
+    public Optional<AttachedComponent> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 
     @Override
-    public Optional<AttachedData> fillData(DataHolder dataHolder, AttachedData manipulator, DataPriority priority) {
+    public Optional<AttachedComponent> fillData(DataHolder dataHolder, AttachedComponent manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, AttachedData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, AttachedComponent manipulator, DataPriority priority) {
         return fail(manipulator);
     }
 

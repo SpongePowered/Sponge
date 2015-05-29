@@ -30,20 +30,20 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 
 import java.util.Collection;
 
 /**
  * The root interface that every {@link Block} is being mixed into, this
- * allows for a simple method call for a desired {@link DataManipulator} to
+ * allows for a simple method call for a desired {@link Component} to
  * be retrieved from a {@link IBlockState}.
  */
 public interface IMixinBlock {
 
-    Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos);
+    Collection<Component<?>> getManipulators(World world, BlockPos blockPos);
 
-    ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState);
+    ImmutableList<Component<?>> getManipulators(IBlockState blockState);
 
     void resetBlockState(World world, BlockPos blockPos);
 

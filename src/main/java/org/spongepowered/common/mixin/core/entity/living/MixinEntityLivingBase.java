@@ -40,8 +40,8 @@ import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.entity.DamageableData;
-import org.spongepowered.api.data.manipulator.entity.HealthData;
+import org.spongepowered.api.data.component.entity.DamageableComponent;
+import org.spongepowered.api.data.component.entity.HealthComponent;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.potion.PotionEffect;
@@ -272,19 +272,19 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Override
-    public DamageableData getMortalData() {
-        return getData(DamageableData.class).get(); // possibly perform a failsafe?
+    public DamageableComponent getMortalData() {
+        return getData(DamageableComponent.class).get(); // possibly perform a failsafe?
     }
 
     @Override
-    public HealthData getHealthData() {
-        return getData(HealthData.class).get(); // possibly perform a failsafe?
+    public HealthComponent getHealthData() {
+        return getData(HealthComponent.class).get(); // possibly perform a failsafe?
     }
 
     @Override
     public DataContainer toContainer() {
         // todo actually store more data.
-        return super.toContainer().set(of("HealthData"), getHealthData()).set(of("DamageableData"), getMortalData());
+        return super.toContainer().set(of("HealthData"), getHealthData()).set(of("DamageableComponent"), getMortalData());
     }
 
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =

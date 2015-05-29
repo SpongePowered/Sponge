@@ -34,24 +34,25 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.BreedableData;
+import org.spongepowered.api.data.component.entity.BreedableComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeBreedableData;
+import org.spongepowered.common.data.component.entity.SpongeBreedableComponent;
 import org.spongepowered.common.data.util.DataUtil;
 
-public class SpongeBreedableDataProcessor implements SpongeDataProcessor<BreedableData> {
+public class SpongeBreedableDataProcessor implements SpongeDataProcessor<BreedableComponent> {
 
     @Override
-    public Optional<BreedableData> getFrom(DataHolder dataHolder) {
+    public Optional<BreedableComponent> getFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityAnimal)) {
             return Optional.absent();
         }
-        return ((EntityAnimal) dataHolder).isInLove() ? Optional.of(create()) : Optional.<BreedableData>absent();
+        return ((EntityAnimal) dataHolder).isInLove() ? Optional.of(create()) : Optional.<BreedableComponent>absent();
     }
 
     @Override
-    public Optional<BreedableData> fillData(DataHolder dataHolder, BreedableData manipulator, DataPriority priority) {
+    public Optional<BreedableComponent> fillData(DataHolder dataHolder, BreedableComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof EntityAnimal)) {
             return Optional.absent();
         }
@@ -59,12 +60,12 @@ public class SpongeBreedableDataProcessor implements SpongeDataProcessor<Breedab
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, BreedableData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, BreedableComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof EntityAnimal)) {
             return fail(manipulator);
         }
         switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
+            case COMPONENT:
             case POST_MERGE:
                 final boolean inlove = ((EntityAnimal) dataHolder).isInLove();
                 ((EntityAnimal) dataHolder).setInLove(null);
@@ -84,21 +85,21 @@ public class SpongeBreedableDataProcessor implements SpongeDataProcessor<Breedab
     }
 
     @Override
-    public Optional<BreedableData> build(DataView container) throws InvalidDataException {
-        final boolean breeding = DataUtil.getData(container, SpongeBreedableData.BREEDABLE, Boolean.TYPE);
-        return breeding ? Optional.of(create()) : Optional.<BreedableData>absent();
+    public Optional<BreedableComponent> build(DataView container) throws InvalidDataException {
+        final boolean breeding = DataUtil.getData(container, Tokens.BREEDABLE.getQuery(), Boolean.TYPE);
+        return breeding ? Optional.of(create()) : Optional.<BreedableComponent>absent();
     }
 
     @Override
-    public BreedableData create() {
-        return new SpongeBreedableData();
+    public BreedableComponent create() {
+        return new SpongeBreedableComponent();
     }
 
     @Override
-    public Optional<BreedableData> createFrom(DataHolder dataHolder) {
+    public Optional<BreedableComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityAnimal)) {
             return Optional.absent();
         }
-        return ((EntityAnimal) dataHolder).isInLove() ? Optional.of(create()) : Optional.<BreedableData>absent();
+        return ((EntityAnimal) dataHolder).isInLove() ? Optional.of(create()) : Optional.<BreedableComponent>absent();
     }
 }

@@ -35,11 +35,12 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.DamageableData;
+import org.spongepowered.api.data.component.entity.DamageableComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeDamageableData;
+import org.spongepowered.common.data.component.entity.SpongeDamageableComponent;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
@@ -47,17 +48,16 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class SpongeDamageableDataProcessor implements SpongeDataProcessor<DamageableData> {
+public class SpongeDamageableDataProcessor implements SpongeDataProcessor<DamageableComponent> {
 
     @Override
-    public Optional<DamageableData> getFrom(DataHolder dataHolder) {
+    public Optional<DamageableComponent> getFrom(DataHolder dataHolder) {
         if (!(checkNotNull(dataHolder) instanceof EntityLivingBase)) {
             return Optional.absent();
         }
         final EntityLivingBase attacker = ((EntityLivingBase) dataHolder).getLastAttacker();
         final double lastDamage = ((IMixinEntityLivingBase) dataHolder).getLastDamage();
-        final int invulnTicks = ((EntityLivingBase) dataHolder).hurtResistantTime;
-        final DamageableData data = create().setInvulnerabilityTicks(invulnTicks);
+        final DamageableComponent data = create();
         if (attacker != null) {
             return Optional.of(data.setLastAttacker(((Living) attacker)).setLastDamage(lastDamage));
         } else {
@@ -66,7 +66,7 @@ public class SpongeDamageableDataProcessor implements SpongeDataProcessor<Damage
     }
 
     @Override
-    public Optional<DamageableData> fillData(DataHolder dataHolder, DamageableData manipulator, DataPriority priority) {
+    public Optional<DamageableComponent> fillData(DataHolder dataHolder, DamageableComponent manipulator, DataPriority priority) {
         if (!(checkNotNull(dataHolder) instanceof EntityLivingBase)) {
             return Optional.absent();
         }
@@ -76,8 +76,6 @@ public class SpongeDamageableDataProcessor implements SpongeDataProcessor<Damage
                 @Nullable
                 final EntityLivingBase attacker = ((EntityLivingBase) dataHolder).getLastAttacker();
                 final double lastDamage = ((IMixinEntityLivingBase) dataHolder).getLastDamage();
-                final int invulnTicks = ((EntityLivingBase) dataHolder).hurtResistantTime;
-                manipulator.setInvulnerabilityTicks(invulnTicks);
                 if (attacker != null) {
                     manipulator.setLastAttacker((Living) attacker)
                             .setLastDamage(lastDamage);
@@ -89,15 +87,14 @@ public class SpongeDamageableDataProcessor implements SpongeDataProcessor<Damage
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, DamageableData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, DamageableComponent manipulator, DataPriority priority) {
         if (!(checkNotNull(dataHolder) instanceof EntityLivingBase)) {
             return fail(manipulator);
         }
         switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
+            case COMPONENT:
             case POST_MERGE:
-                final DamageableData old = getFrom(dataHolder).get();
-                ((EntityLivingBase) dataHolder).hurtResistantTime = manipulator.getInvulnerabilityTicks();
+                final DamageableComponent old = getFrom(dataHolder).get();
                 ((EntityLivingBase) dataHolder).setLastAttacker(((EntityLivingBase) manipulator.getLastAttacker().orNull()));
                 ((IMixinEntityLivingBase) dataHolder).setLastDamage(manipulator.getLastDamage().or(0D));
                 return successReplaceData(old);
@@ -118,20 +115,20 @@ public class SpongeDamageableDataProcessor implements SpongeDataProcessor<Damage
     }
 
     @Override
-    public Optional<DamageableData> build(DataView container) throws InvalidDataException {
-        final double lastDamage = DataUtil.getData(container, SpongeDamageableData.LAST_DAMAGE, Double.TYPE);
-        final String lastAttacker = DataUtil.getData(container, SpongeDamageableData.LAST_ATTACKER, String.class);
+    public Optional<DamageableComponent> build(DataView container) throws InvalidDataException {
+        final double lastDamage = DataUtil.getData(container, Tokens.LAST_DAMAGE.getQuery(), Double.TYPE);
+        final String lastAttacker = DataUtil.getData(container, Tokens.LAST_ATTACKER.getQuery(), String.class);
         final UUID attackerUuid = UUID.fromString(lastAttacker); // We can't actually reconstruct this information
         return Optional.of(create().setLastDamage(lastDamage));
     }
 
     @Override
-    public DamageableData create() {
-        return new SpongeDamageableData();
+    public DamageableComponent create() {
+        return new SpongeDamageableComponent();
     }
 
     @Override
-    public Optional<DamageableData> createFrom(DataHolder dataHolder) {
+    public Optional<DamageableComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityLivingBase)) {
             return Optional.absent();
         }

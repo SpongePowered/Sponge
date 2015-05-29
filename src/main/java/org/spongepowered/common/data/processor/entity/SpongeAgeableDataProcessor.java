@@ -36,16 +36,16 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.AgeableData;
+import org.spongepowered.api.data.component.entity.AgeableComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeAgeableData;
+import org.spongepowered.common.data.component.entity.SpongeAgeableComponent;
 
-public class SpongeAgeableDataProcessor implements SpongeDataProcessor<AgeableData> {
+public class SpongeAgeableDataProcessor implements SpongeDataProcessor<AgeableComponent> {
 
     @Override
-    public Optional<AgeableData> getFrom(DataHolder dataHolder) {
+    public Optional<AgeableComponent> getFrom(DataHolder dataHolder) {
         if (!(checkNotNull(dataHolder) instanceof EntityAgeable)) {
             return Optional.absent();
         }
@@ -54,7 +54,7 @@ public class SpongeAgeableDataProcessor implements SpongeDataProcessor<AgeableDa
     }
 
     @Override
-    public Optional<AgeableData> fillData(DataHolder dataHolder, AgeableData manipulator, DataPriority priority) {
+    public Optional<AgeableComponent> fillData(DataHolder dataHolder, AgeableComponent manipulator, DataPriority priority) {
         if (!(checkNotNull(dataHolder) instanceof EntityAgeable)) {
             return Optional.of(manipulator);
         }
@@ -63,7 +63,7 @@ public class SpongeAgeableDataProcessor implements SpongeDataProcessor<AgeableDa
             case PRE_MERGE:
             {
                 final int growth = ((EntityAgeable) dataHolder).getGrowingAge();
-                return Optional.of(manipulator.setAge(growth));
+                return Optional.of(manipulator.setValue(growth));
             }
             default:
                 return Optional.of(manipulator);
@@ -71,7 +71,7 @@ public class SpongeAgeableDataProcessor implements SpongeDataProcessor<AgeableDa
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, AgeableData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, AgeableComponent manipulator, DataPriority priority) {
         if (!(checkNotNull(dataHolder) instanceof EntityAgeable)) {
             return fail(manipulator);
         }
@@ -80,7 +80,7 @@ public class SpongeAgeableDataProcessor implements SpongeDataProcessor<AgeableDa
             case PRE_MERGE:
                 return successNoData();
             default:
-                final AgeableData previous = getFrom(dataHolder).get();
+                final AgeableComponent previous = getFrom(dataHolder).get();
                 final DataTransactionBuilder builder = builder().replace(previous);
                 ((EntityAgeable) dataHolder).setGrowingAge(manipulator.getValue());
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
@@ -93,19 +93,19 @@ public class SpongeAgeableDataProcessor implements SpongeDataProcessor<AgeableDa
     }
 
     @Override
-    public Optional<AgeableData> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, SpongeAgeableData.AGE);
-        final int age = container.getInt(SpongeAgeableData.AGE).get();
+    public Optional<AgeableComponent> build(DataView container) throws InvalidDataException {
+        checkDataExists(container, SpongeAgeableComponent.AGE);
+        final int age = container.getInt(SpongeAgeableComponent.AGE).get();
         return Optional.of(create().setValue(age));
     }
 
     @Override
-    public AgeableData create() {
-        return new SpongeAgeableData();
+    public AgeableComponent create() {
+        return new SpongeAgeableComponent();
     }
 
     @Override
-    public Optional<AgeableData> createFrom(DataHolder dataHolder) {
+    public Optional<AgeableComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityAgeable)) {
             return Optional.absent();
         }

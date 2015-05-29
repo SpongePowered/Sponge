@@ -37,28 +37,29 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.block.TreeData;
+import org.spongepowered.api.data.component.block.TreeComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
+import org.spongepowered.common.data.component.block.SpongeTreeComponent;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 
-public class SpongeTreeDataProcessor implements SpongeDataProcessor<TreeData>, SpongeBlockProcessor<TreeData>  {
+public class SpongeTreeDataProcessor implements SpongeDataProcessor<TreeComponent>, SpongeBlockProcessor<TreeComponent>  {
 
     @Override
-    public Optional<TreeData> getFrom(DataHolder dataHolder) {
+    public Optional<TreeComponent> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 
     @Override
-    public Optional<TreeData> fillData(DataHolder dataHolder, TreeData manipulator, DataPriority priority) {
+    public Optional<TreeComponent> fillData(DataHolder dataHolder, TreeComponent manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, TreeData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, TreeComponent manipulator, DataPriority priority) {
         return fail(manipulator);
     }
 
@@ -68,23 +69,23 @@ public class SpongeTreeDataProcessor implements SpongeDataProcessor<TreeData>, S
     }
 
     @Override
-    public Optional<TreeData> build(DataView container) throws InvalidDataException {
-        final TreeType treeType = getData(container, SpongeTreeData.TREE_TYPE, TreeType.class);
+    public Optional<TreeComponent> build(DataView container) throws InvalidDataException {
+        final TreeType treeType = getData(container, Tokens.TREE_TYPE.getQuery(), TreeType.class);
         return Optional.of(create().setValue(treeType));
     }
 
     @Override
-    public TreeData create() {
-        return new SpongeTreeData();
+    public TreeComponent create() {
+        return new SpongeTreeComponent();
     }
 
     @Override
-    public Optional<TreeData> createFrom(DataHolder dataHolder) {
+    public Optional<TreeComponent> createFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 
     @Override
-    public Optional<TreeData> fromBlockPos(World world, BlockPos blockPos) {
+    public Optional<TreeComponent> fromBlockPos(World world, BlockPos blockPos) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (blockState.getBlock() instanceof IMixinBlockTree) {
             return Optional.of(((IMixinBlockTree) blockState.getBlock()).getTreeData(blockState));
@@ -93,7 +94,7 @@ public class SpongeTreeDataProcessor implements SpongeDataProcessor<TreeData>, S
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, TreeData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(World world, BlockPos blockPos, TreeComponent manipulator, DataPriority priority) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (blockState.getBlock() instanceof IMixinBlockTree) {
             return ((IMixinBlockTree) blockState.getBlock()).setTreeData(checkNotNull(manipulator), world, blockPos, checkNotNull(priority));
@@ -116,7 +117,7 @@ public class SpongeTreeDataProcessor implements SpongeDataProcessor<TreeData>, S
     }
 
     @Override
-    public Optional<TreeData> createFrom(IBlockState blockState) {
+    public Optional<TreeComponent> createFrom(IBlockState blockState) {
         if (checkNotNull(blockState).getBlock() instanceof IMixinBlockTree) {
             return Optional.of(((IMixinBlockTree) blockState.getBlock()).getTreeData(blockState));
         }

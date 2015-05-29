@@ -36,24 +36,24 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.tileentity.SignData;
+import org.spongepowered.api.data.component.tileentity.SignComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
+import org.spongepowered.common.data.component.tileentity.SpongeSignComponent;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
-public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
+public class SpongeSignDataProcessor implements SpongeDataProcessor<SignComponent> {
 
     private static final DataQuery LINES = of("Lines");
 
     @Override
-    public Optional<SignData> build(DataView container) throws InvalidDataException {
+    public Optional<SignComponent> build(DataView container) throws InvalidDataException {
         final Optional<List<String>> optRawLines  = container.getStringList(LINES);
-        final SignData data = new SpongeSignData();
+        final SignComponent data = new SpongeSignComponent();
         if (optRawLines.isPresent()) {
             final List<String> rawLines = optRawLines.get();
             for (int i = 0; i < rawLines.size(); i++) {
@@ -64,14 +64,14 @@ public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
     }
 
     @Override
-    public SignData create() {
-        return new SpongeSignData();
+    public SignComponent create() {
+        return new SpongeSignComponent();
     }
 
     @Override
-    public Optional<SignData> createFrom(DataHolder dataHolder) {
+    public Optional<SignComponent> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntitySign) {
-            final SignData signData = new SpongeSignData();
+            final SignComponent signData = new SpongeSignComponent();
             final IChatComponent[] rawLines = ((TileEntitySign) dataHolder).signText;
             for (int i = 0; i < rawLines.length; i++) {
                 signData.setLine(i, SpongeTexts.toText(rawLines[i]));
@@ -82,14 +82,14 @@ public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
     }
 
     @Override
-    public Optional<SignData> fillData(DataHolder dataHolder, SignData manipulator, DataPriority priority) {
-        return null;
+    public Optional<SignComponent> fillData(DataHolder dataHolder, SignComponent manipulator, DataPriority priority) {
+        return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, SignData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, SignComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof TileEntitySign) {
-            final Optional<SignData> oldData = ((Sign) dataHolder).getData();
+            final Optional<SignComponent> oldData = ((Sign) dataHolder).getData();
             if (oldData.isPresent()) {
                 DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 builder.replace(oldData.get());
@@ -116,7 +116,7 @@ public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
     }
 
     @Override
-    public Optional<SignData> getFrom(DataHolder dataHolder) {
+    public Optional<SignComponent> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

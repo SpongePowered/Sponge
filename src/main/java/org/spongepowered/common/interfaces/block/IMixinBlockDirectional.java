@@ -30,13 +30,13 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.component.block.DirectionalComponent;
 
 public interface IMixinBlockDirectional extends IMixinBlock {
 
-    DirectionalData getDirectionalData(IBlockState blockState);
+    DirectionalComponent getDirectionalData(IBlockState blockState);
 
-    DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority);
+    DataTransactionResult setDirectionalData(DirectionalComponent directionalData, World world, BlockPos blockPos, DataPriority priority);
 
     BlockState resetDirectionData(BlockState blockState);
 

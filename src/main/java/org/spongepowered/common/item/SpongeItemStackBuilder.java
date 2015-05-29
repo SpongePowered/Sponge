@@ -32,7 +32,7 @@ import static org.spongepowered.common.item.ItemsHelper.validateData;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import net.minecraft.item.Item;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 
 public class SpongeItemStackBuilder implements ItemStackBuilder {
     @Nullable
-    private Set<DataManipulator<?>> itemDataSet;
+    private Set<Component<?>> itemDataSet;
     private ItemType type;
     private int quantity;
     private int maxQuantity;
@@ -69,7 +69,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
 
     @Override
     @SuppressWarnings("unchecked")
-    public ItemStackBuilder itemData(final DataManipulator<?> itemData) throws IllegalArgumentException {
+    public ItemStackBuilder itemData(final Component<?> itemData) throws IllegalArgumentException {
         checkNotNull(itemData, "Must have a non-null item data!");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
         // Validation is required, we can't let devs set block data on a non-block item!
@@ -126,8 +126,8 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, damage);
 
         if (this.itemDataSet != null) {
-            for (DataManipulator<?> data : this.itemDataSet) {
-                stack.offer((DataManipulator) data);
+            for (Component<?> data : this.itemDataSet) {
+                stack.offer((Component) data);
             }
         }
         return stack;

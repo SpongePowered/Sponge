@@ -34,38 +34,38 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.LayeredData;
+import org.spongepowered.api.data.component.block.LayeredComponent;
 
 /**
- * This interface provides the necessary information for {@link LayeredData} to be
+ * This interface provides the necessary information for {@link LayeredComponent} to be
  * retrieved from the various blocks that have "layered" information, such as
  * {@link BlockSnow}, {@link BlockCake}.
  */
 public interface IMixinBlockLayerable extends IMixinBlock {
 
     /**
-     * Gets the {@link LayeredData} from the given block state that
+     * Gets the {@link LayeredComponent} from the given block state that
      * is guaranteed to be of the desired "type".
      *
      * @param blockState The block state to retrieve the layered data from
      * @return The layered data
      */
-    LayeredData getLayerData(IBlockState blockState);
+    LayeredComponent getLayerData(IBlockState blockState);
 
     /**
-     * Sets the given {@link LayeredData} onto the block at the given
+     * Sets the given {@link LayeredComponent} onto the block at the given
      * {@link BlockPos} of the given {@link World}. Since the
      * mixed in {@link Block} will have the appropriate {@link IProperty},
      * the transaction should almost always result in success, provided
-     * that the {@link LayeredData} has the correct bounds.
+     * that the {@link LayeredComponent} has the correct bounds.
      *
-     * @param layeredData The layered data
+     * @param layeredComponent The layered data
      * @param world The world
      * @param blockPos The block position to set the layered data onto
      * @param priority The priority of data merging
      * @return The transaction result
      */
-    DataTransactionResult setLayerData(LayeredData layeredData, World world, BlockPos blockPos, DataPriority priority);
+    DataTransactionResult setLayerData(LayeredComponent layeredComponent, World world, BlockPos blockPos, DataPriority priority);
 
     /**
      * Resets the direction on the given {@link BlockState}

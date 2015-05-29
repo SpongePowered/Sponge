@@ -31,7 +31,7 @@ import com.google.common.base.Optional;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.component.tileentity.BannerComponent;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.service.persistence.DataBuilder;
@@ -39,9 +39,9 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 
 /**
- * The de-facto builder for a {@link BannerData.PatternLayer}.
+ * The de-facto builder for a {@link BannerComponent.PatternLayer}.
  */
-public class SpongePatternLayerBuilder implements DataBuilder<BannerData.PatternLayer> {
+public class SpongePatternLayerBuilder implements DataBuilder<BannerComponent.PatternLayer> {
 
     private static final DataQuery ID = of("BannerShapeId");
     private static final DataQuery COLOR = of("DyeColor");
@@ -52,7 +52,7 @@ public class SpongePatternLayerBuilder implements DataBuilder<BannerData.Pattern
     }
 
     @Override
-    public Optional<BannerData.PatternLayer> build(final DataView container) throws InvalidDataException {
+    public Optional<BannerComponent.PatternLayer> build(final DataView container) throws InvalidDataException {
         checkNotNull(container);
         if (!container.contains(ID) || !container.contains(COLOR)) {
             throw new InvalidDataException("The provided container does not contain the data to make a PatternLayer!");
@@ -72,6 +72,6 @@ public class SpongePatternLayerBuilder implements DataBuilder<BannerData.Pattern
         if (!colorOptional.isPresent()) {
             throw new InvalidDataException("The provided container has an invalid dye color entry!");
         }
-        return Optional.<BannerData.PatternLayer>of(new SpongePatternLayer(shapeOptional.get(), colorOptional.get()));
+        return Optional.<BannerComponent.PatternLayer>of(new SpongePatternLayer(shapeOptional.get(), colorOptional.get()));
     }
 }

@@ -35,13 +35,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.component.block.DirectionalComponent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
+import org.spongepowered.common.data.component.block.SpongeDirectionalComponent;
 import org.spongepowered.common.interfaces.block.IMixinBlockDirectional;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
 
@@ -51,22 +51,22 @@ import java.util.Collection;
 public abstract class MixinBlockStandingSign extends MixinBlock implements IMixinBlockDirectional {
 
     @Override
-    public DirectionalData getDirectionalData(IBlockState blockState) {
+    public DirectionalComponent getDirectionalData(IBlockState blockState) {
         final int intDir = (Integer) (Object) blockState.getValue(BlockStandingSign.ROTATION);
-        final DirectionalData directionalData = new SpongeDirectionalData();
+        final DirectionalComponent directionalData = new SpongeDirectionalComponent();
         directionalData.setValue(Direction.values()[(intDir + 8) % 16]);
         return directionalData;
     }
 
     @Override
-    public DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority) {
+    public DataTransactionResult setDirectionalData(DirectionalComponent directionalData, World world, BlockPos blockPos, DataPriority priority) {
         final Direction direction = checkNotNull(directionalData).getValue();
         if (!direction.isSecondaryOrdinal() || !direction.isCardinal() || !direction.isOrdinal()) {
             return fail(directionalData);
         }
         // TODO actually manipulate according to priority
         final IBlockState blockState = world.getBlockState(blockPos);
-        final DirectionalData oldData = getDirectionalData(blockState);
+        final DirectionalComponent oldData = getDirectionalData(blockState);
         final int directionint = (direction.ordinal() + 8) % 16;
         final IBlockState newState = blockState.withProperty(BlockStandingSign.ROTATION, directionint);
         world.setBlockState(blockPos, newState);
@@ -79,13 +79,13 @@ public abstract class MixinBlockStandingSign extends MixinBlock implements IMixi
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
-        return Lists.<DataManipulator<?>>newArrayList(getDirectionalData(world.getBlockState(blockPos))); // TODO for now.
+    public Collection<Component<?>> getManipulators(World world, BlockPos blockPos) {
+        return Lists.<Component<?>>newArrayList(getDirectionalData(world.getBlockState(blockPos))); // TODO for now.
     }
 
     @Override
-    public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<DataManipulator<?>>of(getDirectionalData(blockState)); // TODO for now.
+    public ImmutableList<Component<?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<Component<?>>of(getDirectionalData(blockState)); // TODO for now.
     }
 
 }
