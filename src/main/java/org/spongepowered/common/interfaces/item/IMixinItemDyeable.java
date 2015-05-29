@@ -25,15 +25,15 @@
 package org.spongepowered.common.interfaces.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.manipulator.DyeableData;
+import org.spongepowered.api.data.component.base.DyeableComponent;
 import org.spongepowered.api.data.type.DyeColor;
 
 public interface IMixinItemDyeable extends IMixinItem {
 
-    DyeableData getDyeableData(ItemStack itemStack);
+    DyeableComponent getDyeableData(ItemStack itemStack);
 
     DyeColor getDyeColor(ItemStack itemStack);
 
-    void setDyeableData(ItemStack itemStack, DyeableData data);
+    void setDyeableData(ItemStack itemStack, DyeableComponent data);
 
 }

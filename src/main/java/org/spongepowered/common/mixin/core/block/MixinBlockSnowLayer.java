@@ -35,9 +35,9 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.LayeredData;
+import org.spongepowered.api.data.component.block.LayeredComponent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
+import org.spongepowered.common.data.component.block.SpongeLayeredComponent;
 import org.spongepowered.common.interfaces.block.IMixinBlockLayerable;
 
 @Mixin(BlockSnow.class)
@@ -46,16 +46,16 @@ public abstract class MixinBlockSnowLayer extends MixinBlock implements IMixinBl
     private static final int LAYER_OFFSET = 1;
 
     @Override
-    public LayeredData getLayerData(IBlockState blockState) {
+    public LayeredComponent getLayerData(IBlockState blockState) {
         final int layer = (Integer) blockState.getValue(BlockSnow.LAYERS);
-        return new SpongeLayeredData(7).setValue(layer - LAYER_OFFSET);
+        return new SpongeLayeredComponent(7).setValue(layer - LAYER_OFFSET);
     }
 
     @Override
-    public DataTransactionResult setLayerData(LayeredData layeredData, World world, BlockPos blockPos, DataPriority priority) {
-        final LayeredData data = getLayerData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
+    public DataTransactionResult setLayerData(LayeredComponent layeredData, World world, BlockPos blockPos, DataPriority priority) {
+        final LayeredComponent data = getLayerData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
         switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
+            case COMPONENT:
             case POST_MERGE:
                 final IBlockState blockState = world.getBlockState(blockPos).withProperty(BlockSnow.LAYERS,
                         checkNotNull(layeredData).getValue() + LAYER_OFFSET);

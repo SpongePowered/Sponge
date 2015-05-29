@@ -36,30 +36,30 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.item.DurabilityData;
+import org.spongepowered.api.data.component.item.DurabilityComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.item.SpongeDurabilityData;
+import org.spongepowered.common.data.component.item.SpongeDurabilityComponent;
 
-public class SpongeDurabilityDataProcessor implements SpongeDataProcessor<DurabilityData> {
+public class SpongeDurabilityDataProcessor implements SpongeDataProcessor<DurabilityComponent> {
 
     @Override
-    public Optional<DurabilityData> build(DataView container) throws InvalidDataException {
+    public Optional<DurabilityComponent> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public DurabilityData create() {
-        return new SpongeDurabilityData(0);
+    public DurabilityComponent create() {
+        return new SpongeDurabilityComponent(0);
     }
 
     @Override
-    public Optional<DurabilityData> createFrom(DataHolder dataHolder) {
+    public Optional<DurabilityComponent> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
             final Item item = ((ItemStack) dataHolder).getItem();
             if (item instanceof ItemTool || item instanceof ItemArmor || item instanceof ItemSword) {
-                final DurabilityData durabilityData = new SpongeDurabilityData(item.getMaxDamage());
-                durabilityData.setDurability(((ItemStack) dataHolder).getItemDamage())
+                final DurabilityComponent durabilityData = new SpongeDurabilityComponent(item.getMaxDamage());
+                durabilityData.setValue(((ItemStack) dataHolder).getItemDamage())
                         .setBreakable(((ItemStack) dataHolder).isItemStackDamageable());
                 return Optional.of(durabilityData);
             }
@@ -73,15 +73,15 @@ public class SpongeDurabilityDataProcessor implements SpongeDataProcessor<Durabi
     }
 
     @Override
-    public Optional<DurabilityData> fillData(DataHolder dataHolder, DurabilityData manipulator, DataPriority priority) {
+    public Optional<DurabilityComponent> fillData(DataHolder dataHolder, DurabilityComponent manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, DurabilityData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, DurabilityComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof ItemStack && (((ItemStack) dataHolder).getItem() instanceof ItemArmor || ((ItemStack) dataHolder).getItem()
                 instanceof ItemSword|| ((ItemStack) dataHolder).getItem() instanceof ItemTool)) {
-            final DurabilityData oldData = createFrom(dataHolder).get();
+            final DurabilityComponent oldData = createFrom(dataHolder).get();
             // TODO at a later time.
 
         }
@@ -89,7 +89,7 @@ public class SpongeDurabilityDataProcessor implements SpongeDataProcessor<Durabi
     }
 
     @Override
-    public Optional<DurabilityData> getFrom(DataHolder dataHolder) {
+    public Optional<DurabilityComponent> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

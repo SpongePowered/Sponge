@@ -42,24 +42,24 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.item.PagedData;
+import org.spongepowered.api.data.component.item.PagedComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.item.SpongePagedData;
+import org.spongepowered.common.data.component.item.SpongePagedComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
 
 import java.util.List;
 import java.util.Locale;
 
-public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
+public class SpongePagesProcessor implements SpongeDataProcessor<PagedComponent> {
 
     private static final DataQuery PAGES = of("Pages");
 
 
     @Override
-    public Optional<PagedData> fillData(DataHolder dataHolder, PagedData manipulator, DataPriority priority) {
+    public Optional<PagedComponent> fillData(DataHolder dataHolder, PagedComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof ItemStack) {
             if (((ItemStack) dataHolder).getItem() != Items.writable_book || ((ItemStack) dataHolder).getItem() != Items.written_book) {
                 return Optional.absent();
@@ -93,7 +93,7 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, PagedData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, PagedComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof ItemStack && (((ItemStack) dataHolder).getItem() == Items.writable_book
                 || ((ItemStack) dataHolder).getItem() == Items.written_book)) {
             final NBTTagList loreList = new NBTTagList();
@@ -132,12 +132,12 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
     }
 
     @Override
-    public Optional<PagedData> build(DataView container) throws InvalidDataException {
+    public Optional<PagedComponent> build(DataView container) throws InvalidDataException {
         if (!checkNotNull(container).contains(PAGES)) {
             throw new InvalidDataException("Missing pages to construct a PagedData.");
         }
         final List<String> pages = container.getStringList(PAGES).get();
-        final PagedData data = create();
+        final PagedComponent data = create();
         for (String page : pages) {
             data.add(Texts.parseJson(page));
         }
@@ -145,12 +145,12 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
     }
 
     @Override
-    public PagedData create() {
-        return new SpongePagedData();
+    public PagedComponent create() {
+        return new SpongePagedComponent();
     }
 
     @Override
-    public Optional<PagedData> createFrom(DataHolder dataHolder) {
+    public Optional<PagedComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof ItemStack)) {
             return Optional.absent();
         }
@@ -161,7 +161,7 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
             return Optional.absent();
         }
         final NBTTagList pageList = ((ItemStack) dataHolder).getTagCompound().getTagList("pages", 8);
-        final PagedData data = create();
+        final PagedComponent data = create();
         for (int i = 0; i < pageList.tagCount(); i++) {
             data.add(Texts.parseJson(pageList.getStringTagAt(i)));
         }
@@ -169,7 +169,7 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
     }
 
     @Override
-    public Optional<PagedData> getFrom(DataHolder dataHolder) {
+    public Optional<PagedComponent> getFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof ItemStack) || !((ItemStack) dataHolder).hasTagCompound()) {
             return Optional.absent();
         }

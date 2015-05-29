@@ -27,15 +27,13 @@ package org.spongepowered.common.mixin.core.entity.hanging;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.component.block.DirectionalComponent;
 import org.spongepowered.api.entity.hanging.Hanging;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 
 @NonnullByDefault
 @Mixin(net.minecraft.entity.EntityHanging.class)
@@ -69,8 +67,8 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging 
     }
 
     @Override
-    public DirectionalData getDirectionalData() {
-        return getData(DirectionalData.class).get();
+    public DirectionalComponent getDirectionalData() {
+        return getData(DirectionalComponent.class).get();
     }
 
     @Override

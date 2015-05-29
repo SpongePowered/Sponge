@@ -34,24 +34,24 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.ChargedData;
+import org.spongepowered.api.data.component.entity.ChargedComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeChargedData;
+import org.spongepowered.common.data.component.entity.SpongeChargedComponent;
 import org.spongepowered.common.data.util.DataUtil;
 
-public class SpongeChargedDataProcessor implements SpongeDataProcessor<ChargedData> {
+public class SpongeChargedDataProcessor implements SpongeDataProcessor<ChargedComponent> {
 
     @Override
-    public Optional<ChargedData> getFrom(DataHolder dataHolder) {
+    public Optional<ChargedComponent> getFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityCreeper)) {
             return Optional.absent();
         }
-        return ((EntityCreeper) dataHolder).getPowered() ? Optional.of(create()) : Optional.<ChargedData>absent();
+        return ((EntityCreeper) dataHolder).getPowered() ? Optional.of(create()) : Optional.<ChargedComponent>absent();
     }
 
     @Override
-    public Optional<ChargedData> fillData(DataHolder dataHolder, ChargedData manipulator, DataPriority priority) {
+    public Optional<ChargedComponent> fillData(DataHolder dataHolder, ChargedComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof EntityCreeper)) {
             return Optional.absent();
         }
@@ -59,12 +59,12 @@ public class SpongeChargedDataProcessor implements SpongeDataProcessor<ChargedDa
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, ChargedData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, ChargedComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof EntityCreeper)) {
             return fail(manipulator);
         }
         switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
+            case COMPONENT:
             case POST_MERGE:
                 ((EntityCreeper) dataHolder).getDataWatcher().updateObject(17, 1);
                 return successNoData();
@@ -83,21 +83,21 @@ public class SpongeChargedDataProcessor implements SpongeDataProcessor<ChargedDa
     }
 
     @Override
-    public Optional<ChargedData> build(DataView container) throws InvalidDataException {
-        final boolean charged = DataUtil.getData(container, SpongeChargedData.CHARGED, Boolean.TYPE);
-        return charged ? Optional.of(create()) : Optional.<ChargedData>absent();
+    public Optional<ChargedComponent> build(DataView container) throws InvalidDataException {
+        final boolean charged = DataUtil.getData(container, SpongeChargedComponent.CHARGED, Boolean.TYPE);
+        return charged ? Optional.of(create()) : Optional.<ChargedComponent>absent();
     }
 
     @Override
-    public ChargedData create() {
-        return new SpongeChargedData();
+    public ChargedComponent create() {
+        return new SpongeChargedComponent();
     }
 
     @Override
-    public Optional<ChargedData> createFrom(DataHolder dataHolder) {
+    public Optional<ChargedComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityCreeper)) {
             return Optional.absent();
         }
-        return ((EntityCreeper) dataHolder).getPowered() ? Optional.of(create()) : Optional.<ChargedData>absent();
+        return ((EntityCreeper) dataHolder).getPowered() ? Optional.of(create()) : Optional.<ChargedComponent>absent();
     }
 }

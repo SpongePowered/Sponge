@@ -29,25 +29,25 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.MobSpawnerData;
+import org.spongepowered.api.data.component.base.MobSpawnerComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.SpongeMobSpawnerData;
+import org.spongepowered.common.data.component.base.SpongeMobSpawnerComponent;
 
-public class SpongeMobSpawnerDataProcessor implements SpongeDataProcessor<MobSpawnerData> {
+public class SpongeMobSpawnerDataProcessor implements SpongeDataProcessor<MobSpawnerComponent> {
 
     @Override
-    public Optional<MobSpawnerData> getFrom(DataHolder dataHolder) {
+    public Optional<MobSpawnerComponent> getFrom(DataHolder dataHolder) {
         return null;
     }
 
     @Override
-    public Optional<MobSpawnerData> fillData(DataHolder dataHolder, MobSpawnerData manipulator, DataPriority priority) {
+    public Optional<MobSpawnerComponent> fillData(DataHolder dataHolder, MobSpawnerComponent manipulator, DataPriority priority) {
         return null;
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, MobSpawnerData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, MobSpawnerComponent manipulator, DataPriority priority) {
         return null;
     }
 
@@ -57,17 +57,17 @@ public class SpongeMobSpawnerDataProcessor implements SpongeDataProcessor<MobSpa
     }
 
     @Override
-    public Optional<MobSpawnerData> build(DataView container) throws InvalidDataException {
+    public Optional<MobSpawnerComponent> build(DataView container) throws InvalidDataException {
         return null;
     }
 
     @Override
-    public MobSpawnerData create() {
-        return new SpongeMobSpawnerData();
+    public MobSpawnerComponent create() {
+        return new SpongeMobSpawnerComponent();
     }
 
     @Override
-    public Optional<MobSpawnerData> createFrom(DataHolder dataHolder) {
+    public Optional<MobSpawnerComponent> createFrom(DataHolder dataHolder) {
         return null;
     }
 }

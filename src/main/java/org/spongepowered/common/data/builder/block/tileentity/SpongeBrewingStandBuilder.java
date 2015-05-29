@@ -30,13 +30,13 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.tileentity.BrewingData;
+import org.spongepowered.api.data.component.tileentity.BrewingComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
 public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStand> {
 
     public static final DataQuery NAME_QUERY = new DataQuery("CustomName");
-    public static final DataQuery BREW_TIME_QUERY = new DataQuery("BrewTime");
 
     public SpongeBrewingStandBuilder(Game game) {
         super(game);
@@ -49,7 +49,7 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
         if (!beaconOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
         }
-        if (!container.contains(BREW_TIME_QUERY)) {
+        if (!container.contains(Tokens.REMAINING_BREW_TIME.getQuery())) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
 
@@ -60,8 +60,8 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             ((TileEntityBrewingStand) beacon).setName(container.getString(NAME_QUERY).get());
         }
 
-        final BrewingData brewingData = this.game.getRegistry().getManipulatorRegistry().getBuilder(BrewingData.class).get().create();
-        brewingData.setRemainingBrewTime(container.getInt(BREW_TIME_QUERY).get());
+        final BrewingComponent brewingData = this.game.getRegistry().getComponentRegistry().getBuilder(BrewingComponent.class).get().create();
+        brewingData.setValue(container.getInt(Tokens.REMAINING_BREW_TIME.getQuery()).get());
         beacon.offer(brewingData);
 
         ((TileEntityBrewingStand) beacon).validate();

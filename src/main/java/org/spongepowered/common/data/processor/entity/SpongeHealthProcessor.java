@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 
@@ -34,21 +33,18 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.HealthData;
+import org.spongepowered.api.data.component.entity.HealthComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeHealthData;
+import org.spongepowered.common.data.component.entity.SpongeHealthComponent;
 
-public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
-
-    private static final DataQuery HEALTH_QUERY = of("Health");
-    private static final DataQuery MAX_HEALTH_QUERY = of("MaxHealth");
+public class SpongeHealthProcessor implements SpongeDataProcessor<HealthComponent> {
 
     @Override
-    public Optional<HealthData> fillData(DataHolder dataHolder, HealthData manipulator, DataPriority priority) {
+    public Optional<HealthComponent> fillData(DataHolder dataHolder, HealthComponent manipulator, DataPriority priority) {
         // todo for now, we only focus on health to and from entities.
         if (!(dataHolder instanceof EntityLivingBase)) {
             return Optional.absent();
@@ -65,7 +61,7 @@ public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, HealthData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, HealthComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof EntityLivingBase)) {
             return fail(manipulator);
         }
@@ -73,11 +69,11 @@ public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
             case DATA_HOLDER:
             case PRE_MERGE:
                 return builder().reject(manipulator).result(DataTransactionResult.Type.SUCCESS).build();
-            case DATA_MANIPULATOR:
+            case COMPONENT:
             case POST_MERGE:
                 final float oldMaxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
                 final float oldHealth = ((EntityLivingBase) dataHolder).getHealth();
-                final HealthData oldData = create().setMaxHealth(oldMaxHealth).setHealth(oldHealth);
+                final HealthComponent oldData = create().setMaxHealth(oldMaxHealth).setHealth(oldHealth);
                 try {
                     final float newMaxHealth = (float) manipulator.getMaxHealth();
                     final float newHealth = (float) manipulator.getHealth();
@@ -108,22 +104,22 @@ public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
     }
 
     @Override
-    public Optional<HealthData> build(DataView container) throws InvalidDataException {
-        if (!checkNotNull(container).contains(HEALTH_QUERY) || !container.contains(MAX_HEALTH_QUERY)) {
+    public Optional<HealthComponent> build(DataView container) throws InvalidDataException {
+        if (!checkNotNull(container).contains(Tokens.HEALTH.getQuery()) || !container.contains(Tokens.MAX_HEALTH.getQuery())) {
             throw new InvalidDataException("Not enough data to construct a HealthData");
         }
-        final double health = container.getDouble(HEALTH_QUERY).get();
-        final double maxHealth = container.getDouble(MAX_HEALTH_QUERY).get();
+        final double health = container.getDouble(Tokens.HEALTH.getQuery()).get();
+        final double maxHealth = container.getDouble(Tokens.MAX_HEALTH.getQuery()).get();
         return Optional.of(create().setMaxHealth(maxHealth).setHealth(health));
     }
 
     @Override
-    public HealthData create() {
-        return new SpongeHealthData();
+    public HealthComponent create() {
+        return new SpongeHealthComponent();
     }
 
     @Override
-    public Optional<HealthData> createFrom(DataHolder dataHolder) {
+    public Optional<HealthComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityLivingBase)) {
             return Optional.absent();
         }
@@ -133,11 +129,11 @@ public class SpongeHealthProcessor implements SpongeDataProcessor<HealthData> {
     }
 
     @Override
-    public Optional<HealthData> getFrom(DataHolder dataHolder) {
+    public Optional<HealthComponent> getFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityLivingBase)) {
             return Optional.absent();
         } else {
-            final HealthData data = create();
+            final HealthComponent data = create();
             return fillData(dataHolder, data, DataPriority.DATA_HOLDER);
         }
     }

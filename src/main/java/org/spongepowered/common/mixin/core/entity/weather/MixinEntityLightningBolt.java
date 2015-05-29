@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.weather;
 
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.manipulator.entity.ExpirableData;
+import org.spongepowered.api.data.component.entity.ExpirableComponent;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,8 +50,8 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     @Override
-    public ExpirableData getExpiringData() {
-        return getData(ExpirableData.class).get();
+    public ExpirableComponent getExpiringData() {
+        return getData(ExpirableComponent.class).get();
     }
 
     @Inject(method = "onUpdate()V", at = {@At(value = "NEW", args = "class=net.minecraft.util.BlockPos"),

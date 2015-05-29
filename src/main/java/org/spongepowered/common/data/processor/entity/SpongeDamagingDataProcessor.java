@@ -29,25 +29,25 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.DamagingData;
+import org.spongepowered.api.data.component.entity.DamagingComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeDamagingData;
+import org.spongepowered.common.data.component.entity.SpongeDamagingComponent;
 
-public class SpongeDamagingDataProcessor implements SpongeDataProcessor<DamagingData> {
+public class SpongeDamagingDataProcessor implements SpongeDataProcessor<DamagingComponent> {
 
     @Override
-    public Optional<DamagingData> getFrom(DataHolder dataHolder) {
+    public Optional<DamagingComponent> getFrom(DataHolder dataHolder) {
         return null;
     }
 
     @Override
-    public Optional<DamagingData> fillData(DataHolder dataHolder, DamagingData manipulator, DataPriority priority) {
+    public Optional<DamagingComponent> fillData(DataHolder dataHolder, DamagingComponent manipulator, DataPriority priority) {
         return null;
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, DamagingData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, DamagingComponent manipulator, DataPriority priority) {
         return null;
     }
 
@@ -57,18 +57,18 @@ public class SpongeDamagingDataProcessor implements SpongeDataProcessor<Damaging
     }
 
     @Override
-    public Optional<DamagingData> build(DataView container) throws InvalidDataException {
+    public Optional<DamagingComponent> build(DataView container) throws InvalidDataException {
 
         return null;
     }
 
     @Override
-    public DamagingData create() {
-        return new SpongeDamagingData();
+    public DamagingComponent create() {
+        return new SpongeDamagingComponent();
     }
 
     @Override
-    public Optional<DamagingData> createFrom(DataHolder dataHolder) {
+    public Optional<DamagingComponent> createFrom(DataHolder dataHolder) {
         return null;
     }
 }

@@ -37,24 +37,24 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.PotionEffectData;
+import org.spongepowered.api.data.component.base.PotionEffectComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.SpongePotionEffectData;
+import org.spongepowered.common.data.component.base.SpongePotionEffectComponent;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 
 import java.util.Collection;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffectData> {
+public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffectComponent> {
 
     private static final DataQuery POTION_QUERY = of("Potions");
 
     @Override
-    public Optional<PotionEffectData> fillData(DataHolder dataHolder, PotionEffectData manipulator, DataPriority priority) {
+    public Optional<PotionEffectComponent> fillData(DataHolder dataHolder, PotionEffectComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof EntityLivingBase) { // todo priority
             for (PotionEffect entry : (Collection<PotionEffect>) ((EntityLivingBase) dataHolder).getActivePotionEffects()) {
                 manipulator.add(new SpongePotionBuilder().from(((org.spongepowered.api.potion.PotionEffect) entry)).build());
@@ -65,17 +65,17 @@ public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffe
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, PotionEffectData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, PotionEffectComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof EntityLivingBase) {
             switch (checkNotNull(priority)) {
-                case DATA_MANIPULATOR:
+                case COMPONENT:
                     ((EntityLivingBase) dataHolder).clearActivePotions();
                     for (final org.spongepowered.api.potion.PotionEffect effect : checkNotNull(manipulator).getPotionEffects()) {
                         ((EntityLivingBase) dataHolder).addPotionEffect(((PotionEffect) effect));
                     }
                     break;
                 case DATA_HOLDER:
-                    final PotionEffectData rejectedData = create();
+                    final PotionEffectComponent rejectedData = create();
                     for (final org.spongepowered.api.potion.PotionEffect effect : checkNotNull(manipulator).getPotionEffects()) {
                         if (((EntityLivingBase) dataHolder).isPotionActive(((PotionEffect) effect).getPotionID())) {
                             rejectedData.add(effect);
@@ -103,11 +103,11 @@ public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffe
     }
 
     @Override
-    public Optional<PotionEffectData> build(DataView container) throws InvalidDataException {
+    public Optional<PotionEffectComponent> build(DataView container) throws InvalidDataException {
         if (!checkNotNull(container).contains(POTION_QUERY)) {
             throw new InvalidDataException("Missing data for Potions!");
         } else {
-            final PotionEffectData data = create();
+            final PotionEffectComponent data = create();
             final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
             List<org.spongepowered.api.potion.PotionEffect> effectList = container.getSerializableList(POTION_QUERY,
                     org.spongepowered.api.potion.PotionEffect.class, serializationService).get();
@@ -119,14 +119,14 @@ public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffe
     }
 
     @Override
-    public PotionEffectData create() {
-        return new SpongePotionEffectData();
+    public PotionEffectComponent create() {
+        return new SpongePotionEffectComponent();
     }
 
     @Override
-    public Optional<PotionEffectData> createFrom(DataHolder dataHolder) {
+    public Optional<PotionEffectComponent> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityLivingBase) {
-            final PotionEffectData data = create();
+            final PotionEffectComponent data = create();
             for (PotionEffect entry : (Collection<PotionEffect>) ((EntityLivingBase) dataHolder).getActivePotionEffects()) {
                 data.add(new SpongePotionBuilder().from(((org.spongepowered.api.potion.PotionEffect) entry)).build());
             }
@@ -136,7 +136,7 @@ public class SpongePotionDataProcessor implements SpongeDataProcessor<PotionEffe
     }
 
     @Override
-    public Optional<PotionEffectData> getFrom(DataHolder dataHolder) {
+    public Optional<PotionEffectComponent> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

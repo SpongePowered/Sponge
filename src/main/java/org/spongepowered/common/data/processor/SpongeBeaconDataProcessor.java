@@ -29,44 +29,44 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.tileentity.BeaconData;
+import org.spongepowered.api.data.component.tileentity.BeaconComponent;
 import org.spongepowered.api.potion.PotionEffectTypes;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
+import org.spongepowered.common.data.component.tileentity.SpongeBeaconComponent;
 
-public class SpongeBeaconDataProcessor implements SpongeDataProcessor<BeaconData> {
-
-    @Override
-    public Optional<BeaconData> build(DataView container) throws InvalidDataException {
-        return null;
-    }
+public class SpongeBeaconDataProcessor implements SpongeDataProcessor<BeaconComponent> {
 
     @Override
-    public BeaconData create() {
-        return new SpongeBeaconData();
-    }
-
-    @Override
-    public Optional<BeaconData> fillData(DataHolder dataHolder, BeaconData manipulator, DataPriority priority) {
-        return null;
-    }
-
-    @Override
-    public Optional<BeaconData> createFrom(DataHolder dataHolder) {
-        SpongeBeaconData beaconData = new SpongeBeaconData();
-        beaconData.setPrimaryEffect(PotionEffectTypes.ABSORPTION);
-        beaconData.setSecondaryEffect(PotionEffectTypes.ABSORPTION);
-        return Optional.of((BeaconData) beaconData);
-    }
-
-    @Override
-    public Optional<BeaconData> getFrom(DataHolder dataHolder) {
+    public Optional<BeaconComponent> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, BeaconData manipulator, DataPriority priority) {
+    public BeaconComponent create() {
+        return new SpongeBeaconComponent();
+    }
+
+    @Override
+    public Optional<BeaconComponent> fillData(DataHolder dataHolder, BeaconComponent manipulator, DataPriority priority) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<BeaconComponent> createFrom(DataHolder dataHolder) {
+        SpongeBeaconComponent beaconData = new SpongeBeaconComponent();
+        beaconData.setPrimaryEffect(PotionEffectTypes.ABSORPTION);
+        beaconData.setSecondaryEffect(PotionEffectTypes.ABSORPTION);
+        return Optional.of((BeaconComponent) beaconData);
+    }
+
+    @Override
+    public Optional<BeaconComponent> getFrom(DataHolder dataHolder) {
+        return Optional.absent();
+    }
+
+    @Override
+    public DataTransactionResult setData(DataHolder dataHolder, BeaconComponent manipulator, DataPriority priority) {
         return null;
     }
 

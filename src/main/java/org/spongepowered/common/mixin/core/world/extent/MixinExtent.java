@@ -34,7 +34,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
@@ -52,49 +52,49 @@ import java.util.Collection;
 public abstract class MixinExtent implements Extent {
 
     @Override
-    public <T extends DataManipulator<T>> Optional<T> getData(Vector3i position, Class<T> dataClass) {
+    public <T extends Component<T>> Optional<T> getData(Vector3i position, Class<T> dataClass) {
         return getData(position.getX(), position.getY(), position.getZ(), dataClass);
     }
 
     @Override
-    public <T extends DataManipulator<T>> Optional<T> getOrCreate(Vector3i position, Class<T> manipulatorClass) {
+    public <T extends Component<T>> Optional<T> getOrCreate(Vector3i position, Class<T> manipulatorClass) {
         return getOrCreate(position.getX(), position.getY(), position.getZ(), manipulatorClass);
     }
 
     @Override
-    public <T extends DataManipulator<T>> boolean remove(Vector3i position, Class<T> manipulatorClass) {
+    public <T extends Component<T>> boolean remove(Vector3i position, Class<T> manipulatorClass) {
         return remove(position.getX(), position.getY(), position.getZ(), manipulatorClass);
     }
 
     @Override
-    public <T extends DataManipulator<T>> boolean isCompatible(Vector3i position, Class<T> manipulatorClass) {
+    public <T extends Component<T>> boolean isCompatible(Vector3i position, Class<T> manipulatorClass) {
         return isCompatible(position.getX(), position.getY(), position.getZ(), manipulatorClass);
     }
 
     @Override
-    public <T extends DataManipulator<T>> boolean isCompatible(int x, int y, int z, Class<T> manipulatorClass) {
+    public <T extends Component<T>> boolean isCompatible(int x, int y, int z, Class<T> manipulatorClass) {
         Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
         return blockUtilOptional.isPresent(); // TODO for now, this is what we have to deal with...
     }
 
     @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(Vector3i position, T manipulatorData) {
+    public <T extends Component<T>> DataTransactionResult offer(Vector3i position, T manipulatorData) {
         return offer(position.getX(), position.getY(), position.getZ(), manipulatorData);
     }
 
     @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData) {
-        return offer(x, y, z, manipulatorData, DataPriority.DATA_MANIPULATOR);
+    public <T extends Component<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData) {
+        return offer(x, y, z, manipulatorData, DataPriority.COMPONENT);
     }
 
     @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(Vector3i position, T manipulatorData, DataPriority priority) {
+    public <T extends Component<T>> DataTransactionResult offer(Vector3i position, T manipulatorData, DataPriority priority) {
         return offer(position.getX(), position.getY(), position.getZ(), manipulatorData, priority);
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators(Vector3i position) {
-        return getManipulators(position.getX(), position.getY(), position.getZ());
+    public Collection<Component<?>> getComponents(Vector3i position) {
+        return getComponents(position.getX(), position.getY(), position.getZ());
     }
 
     @Override

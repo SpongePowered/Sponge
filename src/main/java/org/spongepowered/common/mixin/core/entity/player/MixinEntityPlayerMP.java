@@ -40,9 +40,9 @@ import net.minecraft.util.FoodStats;
 import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DisplayNameData;
-import org.spongepowered.api.data.manipulator.entity.GameModeData;
-import org.spongepowered.api.data.manipulator.entity.JoinData;
+import org.spongepowered.api.data.component.base.DisplayNameComponent;
+import org.spongepowered.api.data.component.entity.GameModeComponent;
+import org.spongepowered.api.data.component.entity.JoinComponent;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.network.PlayerConnection;
@@ -293,23 +293,23 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public JoinData getJoinData() {
-        return getData(JoinData.class).get();
+    public JoinComponent getJoinData() {
+        return getData(JoinComponent.class).get();
     }
 
     @Override
-    public DisplayNameData getDisplayNameData() {
-        return getData(DisplayNameData.class).get();
+    public DisplayNameComponent getDisplayNameData() {
+        return getData(DisplayNameComponent.class).get();
     }
 
     @Override
-    public GameModeData getGameModeData() {
-        return getData(GameModeData.class).get();
+    public GameModeComponent getGameModeData() {
+        return getData(GameModeComponent.class).get();
     }
 
     @Override
     public DataContainer toContainer() {
-        return super.toContainer().set(of("JoinData"), getJoinData());
+        return super.toContainer().set(of("JoinComponent"), getJoinData());
     }
 
     @Override

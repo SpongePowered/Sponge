@@ -30,29 +30,30 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.ElderData;
+import org.spongepowered.api.data.component.entity.ElderComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeElderData;
+import org.spongepowered.common.data.component.entity.SpongeElderComponent;
 import org.spongepowered.common.data.util.DataUtil;
 
-public class SpongeElderDataProcessor implements SpongeDataProcessor<ElderData> {
+public class SpongeElderDataProcessor implements SpongeDataProcessor<ElderComponent> {
 
     @Override
-    public Optional<ElderData> getFrom(DataHolder dataHolder) {
+    public Optional<ElderComponent> getFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityGuardian)) {
             return Optional.absent();
         }
-        return ((EntityGuardian) dataHolder).isElder() ? Optional.of(create()) : Optional.<ElderData>absent();
+        return ((EntityGuardian) dataHolder).isElder() ? Optional.of(create()) : Optional.<ElderComponent>absent();
     }
 
     @Override
-    public Optional<ElderData> fillData(DataHolder dataHolder, ElderData manipulator, DataPriority priority) {
+    public Optional<ElderComponent> fillData(DataHolder dataHolder, ElderComponent manipulator, DataPriority priority) {
         return null;
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, ElderData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, ElderComponent manipulator, DataPriority priority) {
         return null;
     }
 
@@ -62,18 +63,18 @@ public class SpongeElderDataProcessor implements SpongeDataProcessor<ElderData> 
     }
 
     @Override
-    public Optional<ElderData> build(DataView container) throws InvalidDataException {
-        final boolean isElder = DataUtil.getData(container, SpongeElderData.ELDER, Boolean.TYPE);
-        return isElder ? Optional.of(create()) : Optional.<ElderData>absent();
+    public Optional<ElderComponent> build(DataView container) throws InvalidDataException {
+        final boolean isElder = DataUtil.getData(container, Tokens.ELDER.getQuery(), Boolean.TYPE);
+        return isElder ? Optional.of(create()) : Optional.<ElderComponent>absent();
     }
 
     @Override
-    public ElderData create() {
-        return new SpongeElderData();
+    public ElderComponent create() {
+        return new SpongeElderComponent();
     }
 
     @Override
-    public Optional<ElderData> createFrom(DataHolder dataHolder) {
+    public Optional<ElderComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityGuardian)) {
             return Optional.absent();
         }

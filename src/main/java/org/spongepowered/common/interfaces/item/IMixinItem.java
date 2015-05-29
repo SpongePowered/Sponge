@@ -25,12 +25,12 @@
 package org.spongepowered.common.interfaces.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 
 import java.util.List;
 
 public interface IMixinItem {
 
-    List<DataManipulator<?>> getManipulatorsFor(ItemStack itemStack);
+    List<Component<?>> getManipulatorsFor(ItemStack itemStack);
 
 }

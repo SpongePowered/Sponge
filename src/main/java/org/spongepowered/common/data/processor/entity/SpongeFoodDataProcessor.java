@@ -35,15 +35,15 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.FoodData;
+import org.spongepowered.api.data.component.entity.FoodComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.entity.SpongeFoodData;
+import org.spongepowered.common.data.component.entity.SpongeFoodComponent;
 
-public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
+public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodComponent> {
 
     @Override
-    public Optional<FoodData> fillData(DataHolder dataHolder, FoodData manipulator, DataPriority priority) {
+    public Optional<FoodComponent> fillData(DataHolder dataHolder, FoodComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof EntityPlayer)) {
             return Optional.absent();
         }
@@ -61,16 +61,16 @@ public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, FoodData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, FoodComponent manipulator, DataPriority priority) {
         if (!(dataHolder instanceof EntityPlayer)) {
             return fail(manipulator);
         } else {
             switch (checkNotNull(priority)) {
                 case DATA_HOLDER:
                     return builder().reject(manipulator).result(DataTransactionResult.Type.SUCCESS).build();
-                case DATA_MANIPULATOR:
+                case COMPONENT:
                     final FoodStats foodStats = ((EntityPlayer) dataHolder).getFoodStats();
-                    final FoodData oldData = createFrom(dataHolder).get();
+                    final FoodComponent oldData = createFrom(dataHolder).get();
                     foodStats.setFoodLevel(((int) Math.floor(manipulator.getFoodLevel())));
                     foodStats.foodExhaustionLevel = ((float) manipulator.getExhaustion());
                     foodStats.setFoodSaturationLevel(((float) manipulator.getSaturation()));
@@ -95,22 +95,22 @@ public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
     }
 
     @Override
-    public Optional<FoodData> build(DataView container) throws InvalidDataException {
+    public Optional<FoodComponent> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public FoodData create() {
-        return new SpongeFoodData();
+    public FoodComponent create() {
+        return new SpongeFoodComponent();
     }
 
     @Override
-    public Optional<FoodData> createFrom(DataHolder dataHolder) {
+    public Optional<FoodComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof EntityPlayer)) {
             return Optional.absent();
         }
         final FoodStats foodStats = ((EntityPlayer) dataHolder).getFoodStats();
-        final FoodData foodData = create();
+        final FoodComponent foodData = create();
         foodData.setExhaustion(foodStats.foodExhaustionLevel);
         foodData.setFoodLevel(foodStats.getFoodLevel());
         foodData.setSaturation(foodStats.getSaturationLevel());
@@ -118,7 +118,7 @@ public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
     }
 
     @Override
-    public Optional<FoodData> getFrom(DataHolder dataHolder) {
+    public Optional<FoodComponent> getFrom(DataHolder dataHolder) {
         return createFrom(dataHolder);
     }
 }

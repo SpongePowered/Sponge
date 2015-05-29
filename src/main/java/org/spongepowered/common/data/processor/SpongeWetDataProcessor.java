@@ -37,17 +37,17 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.WetData;
+import org.spongepowered.api.data.component.base.WetComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.SpongeWetData;
+import org.spongepowered.common.data.component.base.SpongeWetComponent;
 import org.spongepowered.common.interfaces.entity.IMixinWetHolder;
 
-public class SpongeWetDataProcessor implements SpongeDataProcessor<WetData>, SpongeBlockProcessor<WetData> {
+public class SpongeWetDataProcessor implements SpongeDataProcessor<WetComponent>, SpongeBlockProcessor<WetComponent> {
 
     @Override
-    public Optional<WetData> getFrom(DataHolder dataHolder) {
+    public Optional<WetComponent> getFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof IMixinWetHolder)) {
             return Optional.absent();
         }
@@ -55,12 +55,12 @@ public class SpongeWetDataProcessor implements SpongeDataProcessor<WetData>, Spo
     }
 
     @Override
-    public Optional<WetData> fillData(DataHolder dataHolder, WetData manipulator, DataPriority priority) {
+    public Optional<WetComponent> fillData(DataHolder dataHolder, WetComponent manipulator, DataPriority priority) {
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, WetData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, WetComponent manipulator, DataPriority priority) {
         return fail(manipulator);
     }
 
@@ -70,17 +70,17 @@ public class SpongeWetDataProcessor implements SpongeDataProcessor<WetData>, Spo
     }
 
     @Override
-    public Optional<WetData> build(DataView container) throws InvalidDataException {
+    public Optional<WetComponent> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public WetData create() {
-        return new SpongeWetData();
+    public WetComponent create() {
+        return new SpongeWetComponent();
     }
 
     @Override
-    public Optional<WetData> createFrom(DataHolder dataHolder) {
+    public Optional<WetComponent> createFrom(DataHolder dataHolder) {
         if (!(dataHolder instanceof Entity)) {
             return Optional.absent();
         }
@@ -88,16 +88,16 @@ public class SpongeWetDataProcessor implements SpongeDataProcessor<WetData>, Spo
     }
 
     @Override
-    public Optional<WetData> fromBlockPos(World world, BlockPos blockPos) {
+    public Optional<WetComponent> fromBlockPos(World world, BlockPos blockPos) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (!(blockState.getBlock() instanceof IMixinWetHolder)) {
             return Optional.absent();
         }
-        return ((IMixinWetHolder) blockState.getBlock()).isWet() ? Optional.of(create()) : Optional.<WetData>absent();
+        return ((IMixinWetHolder) blockState.getBlock()).isWet() ? Optional.of(create()) : Optional.<WetComponent>absent();
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, WetData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(World world, BlockPos blockPos, WetComponent manipulator, DataPriority priority) {
 
         return fail(manipulator);
     }
@@ -113,7 +113,7 @@ public class SpongeWetDataProcessor implements SpongeDataProcessor<WetData>, Spo
     }
 
     @Override
-    public Optional<WetData> createFrom(IBlockState blockState) {
+    public Optional<WetComponent> createFrom(IBlockState blockState) {
         return Optional.absent();
     }
 }

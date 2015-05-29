@@ -30,9 +30,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.data.Component;
+import org.spongepowered.api.data.ComponentBuilder;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataManipulatorBuilder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
@@ -47,7 +47,7 @@ import java.util.Collection;
 public abstract class MixinDataHolder implements DataHolder {
 
     @Override
-    public <T extends DataManipulator<T>> Optional<T> getData(Class<T> dataClass) {
+    public <T extends Component<T>> Optional<T> getData(Class<T> dataClass) {
         Optional<SpongeDataProcessor<T>> builderOptional = SpongeManipulatorRegistry.getInstance().getUtil(dataClass);
         if (builderOptional.isPresent()) {
             return builderOptional.get().getFrom(this);
@@ -56,8 +56,8 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public <T extends DataManipulator<T>> Optional<T> getOrCreate(Class<T> manipulatorClass) {
-        Optional<DataManipulatorBuilder<T>> builderOptional = SpongeManipulatorRegistry.getInstance().getBuilder(manipulatorClass);
+    public <T extends Component<T>> Optional<T> getOrCreate(Class<T> manipulatorClass) {
+        Optional<ComponentBuilder<T>> builderOptional = SpongeManipulatorRegistry.getInstance().getBuilder(manipulatorClass);
         if (builderOptional.isPresent()) {
             return builderOptional.get().createFrom(this);
         }
@@ -65,7 +65,7 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public <T extends DataManipulator<T>> boolean remove(Class<T> manipulatorClass) {
+    public <T extends Component<T>> boolean remove(Class<T> manipulatorClass) {
         Optional<SpongeDataProcessor<T>> utilOptional = SpongeManipulatorRegistry.getInstance().getUtil(manipulatorClass);
         if (utilOptional.isPresent()) {
             return utilOptional.get().remove(this);
@@ -74,18 +74,18 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public <T extends DataManipulator<T>> boolean isCompatible(Class<T> manipulatorClass) {
+    public <T extends Component<T>> boolean isCompatible(Class<T> manipulatorClass) {
         return false;
     }
 
     @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(T manipulatorData) {
-        return offer(manipulatorData, DataPriority.DATA_MANIPULATOR);
+    public <T extends Component<T>> DataTransactionResult offer(T manipulatorData) {
+        return offer(manipulatorData, DataPriority.COMPONENT);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(T manipulatorData, DataPriority priority) {
+    public <T extends Component<T>> DataTransactionResult offer(T manipulatorData, DataPriority priority) {
         Optional<SpongeDataProcessor<T>> setterOptional = SpongeManipulatorRegistry.getInstance().getUtil((Class<T>) (Class) manipulatorData
                 .getClass());
         if (setterOptional.isPresent()) {
@@ -95,7 +95,7 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators() {
+    public Collection<Component<?>> getComponents() {
         return ImmutableList.of();
     }
 

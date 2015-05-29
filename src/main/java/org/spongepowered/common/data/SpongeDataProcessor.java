@@ -25,21 +25,21 @@
 package org.spongepowered.common.data;
 
 import com.google.common.base.Optional;
+import org.spongepowered.api.data.Component;
+import org.spongepowered.api.data.ComponentBuilder;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataManipulatorBuilder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.service.persistence.DataBuilder;
 
-public interface SpongeDataProcessor<T extends DataManipulator<T>> extends DataBuilder<T>, DataManipulatorBuilder<T> {
+public interface SpongeDataProcessor<T extends Component<T>> extends DataBuilder<T>, ComponentBuilder<T> {
 
     /**
-     * Attempts to get the given {@link DataManipulator} of type {@code T} if
+     * Attempts to get the given {@link Component} of type {@code T} if
      * and only if the manipulator's required data exists from the
      * {@link DataHolder}. This is conceptually different from
-     * {@link DataManipulatorBuilder#createFrom(DataHolder)} since a new instance
-     * isn't returned even if the {@link DataManipulator} is applicable.
+     * {@link ComponentBuilder#createFrom(DataHolder)} since a new instance
+     * isn't returned even if the {@link Component} is applicable.
      *
      * <p>This is a processor method for {@link DataHolder#getData(Class)}.</p>
      *
@@ -49,7 +49,7 @@ public interface SpongeDataProcessor<T extends DataManipulator<T>> extends DataB
     Optional<T> getFrom(DataHolder dataHolder);
 
     /**
-     * Attempts to fill the given {@link DataManipulator}
+     * Attempts to fill the given {@link Component}
      * @param dataHolder
      * @param manipulator
      * @param priority
@@ -58,7 +58,7 @@ public interface SpongeDataProcessor<T extends DataManipulator<T>> extends DataB
     Optional<T> fillData(DataHolder dataHolder, T manipulator, DataPriority priority);
 
     /**
-     * Sets the data from the {@link DataManipulator} with the given {@link DataPriority}.
+     * Sets the data from the {@link Component} with the given {@link DataPriority}.
      *
      * @param dataHolder The data holder to set the data onto
      * @param manipulator The manipulator to set the data from
@@ -68,7 +68,7 @@ public interface SpongeDataProcessor<T extends DataManipulator<T>> extends DataB
     DataTransactionResult setData(DataHolder dataHolder, T manipulator, DataPriority priority);
 
     /**
-     * Attempts to remove the {@link DataManipulator} type from the given {@link DataHolder}.
+     * Attempts to remove the {@link Component} type from the given {@link DataHolder}.
      *
      * <p>If the {@link DataHolder} can not support removing the data outright,
      * {@code false} should be returned.</p>

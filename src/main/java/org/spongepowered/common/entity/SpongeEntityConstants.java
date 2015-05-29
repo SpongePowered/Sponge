@@ -26,7 +26,7 @@ package org.spongepowered.common.entity;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -46,12 +46,12 @@ public class SpongeEntityConstants {
         }
 
         @Override
-        public Optional<? extends Collection<? extends DataManipulator<?>>> getRejectedData() {
+        public Optional<? extends Collection<? extends Component<?>>> getRejectedData() {
             return Optional.absent();
         }
 
         @Override
-        public Optional<? extends Collection<? extends DataManipulator<?>>> getReplacedData() {
+        public Optional<? extends Collection<? extends Component<?>>> getReplacedData() {
             return Optional.absent();
         }
     };

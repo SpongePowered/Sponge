@@ -34,23 +34,23 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.block.PoweredData;
+import org.spongepowered.api.data.component.block.PoweredComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.block.SpongePoweredData;
+import org.spongepowered.common.data.component.block.SpongePoweredComponent;
 import org.spongepowered.common.interfaces.block.IMixinPoweredHolder;
 
-public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>, SpongeBlockProcessor<PoweredData> {
+public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredComponent>, SpongeBlockProcessor<PoweredComponent> {
 
     @Override
-    public Optional<PoweredData> fillData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
+    public Optional<PoweredComponent> fillData(DataHolder dataHolder, PoweredComponent manipulator, DataPriority priority) {
         return null;
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, PoweredComponent manipulator, DataPriority priority) {
         return null;
     }
 
@@ -60,22 +60,22 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     }
 
     @Override
-    public Optional<PoweredData> build(DataView container) throws InvalidDataException {
+    public Optional<PoweredComponent> build(DataView container) throws InvalidDataException {
         return null;
     }
 
     @Override
-    public PoweredData create() {
-        return new SpongePoweredData();
+    public PoweredComponent create() {
+        return new SpongePoweredComponent();
     }
 
     @Override
-    public Optional<PoweredData> createFrom(DataHolder dataHolder) {
+    public Optional<PoweredComponent> createFrom(DataHolder dataHolder) {
         return null;
     }
 
     @Override
-    public Optional<PoweredData> fromBlockPos(World world, BlockPos blockPos) {
+    public Optional<PoweredComponent> fromBlockPos(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
         if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState)) {
             return Optional.of(create());
@@ -84,7 +84,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, PoweredData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(World world, BlockPos blockPos, PoweredComponent manipulator, DataPriority priority) {
         IBlockState blockState = world.getBlockState(blockPos);
         world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, true));
         return DataTransactionBuilder.successNoData();
@@ -97,10 +97,10 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     }
 
     @Override
-    public Optional<PoweredData> createFrom(IBlockState blockState) {
+    public Optional<PoweredComponent> createFrom(IBlockState blockState) {
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {
             return ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState) ? Optional.of(create())
-                    : Optional.<PoweredData>absent();
+                    : Optional.<PoweredComponent>absent();
         }
         return Optional.absent();
     }
@@ -114,7 +114,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     }
 
     @Override
-    public Optional<PoweredData> getFrom(DataHolder dataHolder) {
+    public Optional<PoweredComponent> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

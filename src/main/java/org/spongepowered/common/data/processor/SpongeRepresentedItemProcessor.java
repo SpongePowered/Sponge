@@ -37,31 +37,31 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.RepresentedItemData;
+import org.spongepowered.api.data.component.base.RepresentedItemComponent;
+import org.spongepowered.api.data.token.Tokens;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.SpongeRepresentedItemData;
+import org.spongepowered.common.data.component.base.SpongeRepresentedItemComponent;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
-import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
-public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<RepresentedItemData> {
+public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<RepresentedItemComponent> {
 
     @Override
-    public Optional<RepresentedItemData> fillData(DataHolder dataHolder, RepresentedItemData manipulator, DataPriority priority) {
+    public Optional<RepresentedItemComponent> fillData(DataHolder dataHolder, RepresentedItemComponent manipulator, DataPriority priority) {
         // todo
         return Optional.absent();
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, RepresentedItemData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, RepresentedItemComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof EntityItem) {
             final ItemStack underlying = ((ItemStack) ((EntityItem) dataHolder).getEntityItem());
             final ItemStack clone = new SpongeItemStackBuilder().fromItemStack(underlying).build();
-            final RepresentedItemData old = create();
+            final RepresentedItemComponent old = create();
             old.setValue(clone);
 
             final ItemStack newItem = manipulator.getValue();
@@ -69,7 +69,7 @@ public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<Repre
             return builder().replace(old).result(DataTransactionResult.Type.SUCCESS).build();
         } else if (dataHolder instanceof EntityItemFrame) {
             final ItemStack underlying = ((ItemStack) ((EntityItemFrame) dataHolder).getDisplayedItem().copy());
-            final RepresentedItemData old = create().setValue(underlying);
+            final RepresentedItemComponent old = create().setValue(underlying);
             final ItemStack newItem = manipulator.getValue();
             ((EntityItemFrame) dataHolder).setDisplayedItem(((net.minecraft.item.ItemStack) newItem).copy());
             return successReplaceData(old);
@@ -87,27 +87,27 @@ public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<Repre
     }
 
     @Override
-    public Optional<RepresentedItemData> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, SpongeRepresentedItemData.ITEM);
-        final ItemStack itemStack = container.getSerializable(SpongeRepresentedItemData.ITEM, ItemStack.class, Sponge.getGame().getServiceManager()
+    public Optional<RepresentedItemComponent> build(DataView container) throws InvalidDataException {
+        checkDataExists(container, Tokens.REPRESENTED_ITEM.getQuery());
+        final ItemStack itemStack = container.getSerializable(Tokens.REPRESENTED_ITEM.getQuery(), ItemStack.class, Sponge.getGame().getServiceManager()
                 .provide(SerializationService.class).get()).get();
         return Optional.of(create().setValue(itemStack));
     }
 
     @Override
-    public RepresentedItemData create() {
-        return new SpongeRepresentedItemData();
+    public RepresentedItemComponent create() {
+        return new SpongeRepresentedItemComponent();
     }
 
     @Override
-    public Optional<RepresentedItemData> createFrom(DataHolder dataHolder) {
+    public Optional<RepresentedItemComponent> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityItem) {
             final ItemStack underlying = ((ItemStack) ((EntityItem) dataHolder).getEntityItem());
             if (underlying.getItem() == null) {
                 ((net.minecraft.item.ItemStack) underlying).setItem((Item) ItemTypes.STONE);
             }
             final ItemStack clone = new SpongeItemStackBuilder().fromItemStack(underlying).build();
-            final RepresentedItemData old = create();
+            final RepresentedItemComponent old = create();
             old.setValue(clone);
             return Optional.of(old);
         }
@@ -115,7 +115,7 @@ public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<Repre
     }
 
     @Override
-    public Optional<RepresentedItemData> getFrom(DataHolder dataHolder) {
+    public Optional<RepresentedItemComponent> getFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityItem) {
             return createFrom(dataHolder);
         } else if (dataHolder instanceof EntityItemFrame) {
@@ -123,7 +123,7 @@ public class SpongeRepresentedItemProcessor implements SpongeDataProcessor<Repre
             if (itemStack == null) {
                 return Optional.absent();
             } else {
-                final RepresentedItemData data = create();
+                final RepresentedItemComponent data = create();
                 return Optional.of(data.setValue((ItemStack) itemStack.copy()));
             }
         }

@@ -34,23 +34,23 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.entity.TradeOfferData;
+import org.spongepowered.api.data.component.entity.TradeOfferComponent;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.SpongeTradeOfferData;
+import org.spongepowered.common.data.component.entity.SpongeTradeOfferComponent;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 
-public class SpongeTradeOfferProcessor implements SpongeDataProcessor<TradeOfferData> {
+public class SpongeTradeOfferProcessor implements SpongeDataProcessor<TradeOfferComponent> {
 
     @Override
-    public Optional<TradeOfferData> fillData(DataHolder dataHolder, TradeOfferData manipulator, DataPriority priority) {
+    public Optional<TradeOfferComponent> fillData(DataHolder dataHolder, TradeOfferComponent manipulator, DataPriority priority) {
         return Optional.absent(); // todo
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, TradeOfferData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, TradeOfferComponent manipulator, DataPriority priority) {
         checkNotNull(manipulator);
         checkNotNull(priority);
         if (checkNotNull(dataHolder) instanceof EntityVillager) {
@@ -70,20 +70,20 @@ public class SpongeTradeOfferProcessor implements SpongeDataProcessor<TradeOffer
     }
 
     @Override
-    public Optional<TradeOfferData> build(DataView container) throws InvalidDataException {
+    public Optional<TradeOfferComponent> build(DataView container) throws InvalidDataException {
         return Optional.absent();
     }
 
     @Override
-    public TradeOfferData create() {
-        return new SpongeTradeOfferData();
+    public TradeOfferComponent create() {
+        return new SpongeTradeOfferComponent();
     }
 
     @Override
-    public Optional<TradeOfferData> createFrom(DataHolder dataHolder) {
+    public Optional<TradeOfferComponent> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityVillager) {
             final MerchantRecipeList currentList = ((EntityVillager) dataHolder).getRecipes(null);
-            TradeOfferData data = create();
+            TradeOfferComponent data = create();
             for (Object recipe : currentList) {
                 data.addOffer(new SpongeTradeOfferBuilder().from((TradeOffer) recipe).build());
             }
@@ -93,7 +93,7 @@ public class SpongeTradeOfferProcessor implements SpongeDataProcessor<TradeOffer
     }
 
     @Override
-    public Optional<TradeOfferData> getFrom(DataHolder dataHolder) {
+    public Optional<TradeOfferComponent> getFrom(DataHolder dataHolder) {
 
         return Optional.absent();
     }

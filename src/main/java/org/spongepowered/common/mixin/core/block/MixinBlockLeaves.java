@@ -41,8 +41,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.LayeredData;
-import org.spongepowered.api.data.manipulator.block.TreeData;
+import org.spongepowered.api.data.component.block.TreeComponent;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -56,10 +55,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
+import org.spongepowered.common.data.component.block.SpongeTreeComponent;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 import org.spongepowered.common.util.VecHelper;
-import sun.reflect.generics.tree.Tree;
 
 import java.util.Random;
 
@@ -80,7 +78,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
     }
 
     @Override
-    public TreeData getTreeData(IBlockState blockState) {
+    public TreeComponent getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type = null;
         if(blockState.getBlock() instanceof BlockOldLeaf) {
             type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLeaf.VARIANT);
@@ -111,14 +109,14 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
                 break;
         }
 
-        return new SpongeTreeData().setValue(treeType);
+        return new SpongeTreeComponent().setValue(treeType);
     }
 
     @Override
-    public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos, DataPriority priority) {
-        final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
+    public DataTransactionResult setTreeData(TreeComponent treeData, World world, BlockPos blockPos, DataPriority priority) {
+        final TreeComponent data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
         switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
+            case COMPONENT:
             case POST_MERGE:
                 BlockPlanks.EnumType treeType = null;
 

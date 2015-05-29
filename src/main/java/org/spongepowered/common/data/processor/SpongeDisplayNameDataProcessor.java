@@ -39,32 +39,32 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.DisplayNameData;
+import org.spongepowered.api.data.component.base.DisplayNameComponent;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.SpongeDisplayNameData;
+import org.spongepowered.common.data.component.base.SpongeDisplayNameComponent;
 import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<DisplayNameData> {
+public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<DisplayNameComponent> {
 
     @Override
-    public Optional<DisplayNameData> build(DataView container) throws InvalidDataException {
+    public Optional<DisplayNameComponent> build(DataView container) throws InvalidDataException {
         return null;
     }
 
     @Override
-    public DisplayNameData create() {
-        return new SpongeDisplayNameData();
+    public DisplayNameComponent create() {
+        return new SpongeDisplayNameComponent();
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public Optional<DisplayNameData> createFrom(DataHolder dataHolder) {
+    public Optional<DisplayNameComponent> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
             if (((Entity) dataHolder).hasCustomName()) {
-                final DisplayNameData data = create();
-                data.setDisplayName(SpongeTexts.toText(((Entity) dataHolder).getDisplayName()));
+                final DisplayNameComponent data = create();
+                data.setValue(SpongeTexts.toText(((Entity) dataHolder).getDisplayName()));
                 data.setCustomNameVisible(((Entity) dataHolder).getAlwaysRenderNameTag());
                 return Optional.of(data);
             } else {
@@ -74,17 +74,17 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
             if (((ItemStack) dataHolder).getItem() == Items.written_book) {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
                 final String titleString = mainCompound.getString("title");
-                final DisplayNameData data = create();
-                data.setDisplayName(Texts.fromLegacy(titleString));
+                final DisplayNameComponent data = create();
+                data.setValue(Texts.fromLegacy(titleString));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);
             }
             final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getSubCompound("display", false);
             if (mainCompound != null && mainCompound.hasKey("Name", 8)) {
                 final String displayString = mainCompound.getString("Name");
-                final DisplayNameData data = new SpongeDisplayNameData();
+                final DisplayNameComponent data = new SpongeDisplayNameComponent();
                 System.err.println("The retrieved displayname from an item stack was: " + displayString);
-                data.setDisplayName(Texts.fromLegacy(displayString));
+                data.setValue(Texts.fromLegacy(displayString));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);
             } else {
@@ -92,9 +92,9 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
             }
         } else if (dataHolder instanceof IWorldNameable) {
             if (((IWorldNameable) dataHolder).hasCustomName()) {
-                final DisplayNameData data = new SpongeDisplayNameData();
+                final DisplayNameComponent data = new SpongeDisplayNameComponent();
                 final String customName = ((IWorldNameable) dataHolder).getCommandSenderName();
-                data.setDisplayName(Texts.fromLegacy(customName));
+                data.setValue(Texts.fromLegacy(customName));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);
             }
@@ -115,20 +115,20 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
     }
 
     @Override
-    public Optional<DisplayNameData> fillData(DataHolder dataHolder, DisplayNameData manipulator, DataPriority priority) {
+    public Optional<DisplayNameComponent> fillData(DataHolder dataHolder, DisplayNameComponent manipulator, DataPriority priority) {
         return Optional.absent(); // todo
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, DisplayNameData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, DisplayNameComponent manipulator, DataPriority priority) {
         if (dataHolder instanceof ItemStack) {
             switch (checkNotNull(priority)) {
-                case DATA_MANIPULATOR:
+                case COMPONENT:
                     if (((ItemStack) dataHolder).getItem() == Items.written_book) {
-                        getTagCompound((ItemStack) dataHolder).setString("title", Texts.toLegacy(manipulator.getDisplayName()));
+                        getTagCompound((ItemStack) dataHolder).setString("title", Texts.toLegacy(manipulator.getValue()));
                     } else {
-                        ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getDisplayName()));
+                        ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getValue()));
                     }
                     return successNoData();
                 case DATA_HOLDER:
@@ -139,14 +139,14 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
             }
 
         } else if (dataHolder instanceof Entity) {
-            ((Entity) dataHolder).setCustomNameTag(Texts.toLegacy(manipulator.getDisplayName()));
+            ((Entity) dataHolder).setCustomNameTag(Texts.toLegacy(manipulator.getValue()));
             ((Entity) dataHolder).setAlwaysRenderNameTag(manipulator.isCustomNameVisible());
         }
         return fail(manipulator);
     }
 
     @Override
-    public Optional<DisplayNameData> getFrom(DataHolder dataHolder) {
+    public Optional<DisplayNameComponent> getFrom(DataHolder dataHolder) {
         return Optional.absent();
     }
 }

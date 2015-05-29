@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.living;
 
 import net.minecraft.entity.item.EntityArmorStand;
-import org.spongepowered.api.data.manipulator.entity.BodyPartRotationalData;
+import org.spongepowered.api.data.component.entity.BodyPartRotationalComponent;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,8 +41,8 @@ public abstract class MixinArmorStand extends MixinEntityLivingBase implements A
 
 
     @Override
-    public BodyPartRotationalData getBodyPartRotationalData() {
-        return getData(BodyPartRotationalData.class).get();
+    public BodyPartRotationalComponent getBodyPartRotationalData() {
+        return getData(BodyPartRotationalComponent.class).get();
     }
 
     @Override

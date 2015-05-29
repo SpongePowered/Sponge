@@ -29,16 +29,15 @@ import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.AxisData;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.component.block.AxisComponent;
+import org.spongepowered.api.data.component.block.DirectionalComponent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
+import org.spongepowered.common.data.component.block.SpongeDirectionalComponent;
 import org.spongepowered.common.interfaces.block.IMixinBlockAxisOriented;
 import org.spongepowered.common.interfaces.block.IMixinBlockDirectional;
 import org.spongepowered.common.interfaces.block.IMixinPoweredHolder;
@@ -50,15 +49,15 @@ import java.util.Collection;
 public abstract class MixinBlockLever extends MixinBlock implements IMixinBlockDirectional, IMixinBlockAxisOriented, IMixinPoweredHolder {
 
     @Override
-    public DirectionalData getDirectionalData(IBlockState blockState) {
+    public DirectionalComponent getDirectionalData(IBlockState blockState) {
         final BlockLever.EnumOrientation intDir = (BlockLever.EnumOrientation) (Object) blockState.getValue(BlockLever.FACING);
-        final DirectionalData directionalData = new SpongeDirectionalData();
-        directionalData.setValue(Direction.values()[((intDir.ordinal() - 1) + 8) % 16]);
-        return directionalData;
+        final DirectionalComponent directionalComponent = new SpongeDirectionalComponent();
+        directionalComponent.setValue(Direction.values()[((intDir.ordinal() - 1) + 8) % 16]);
+        return directionalComponent;
     }
 
     @Override
-    public DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority) {
+    public DataTransactionResult setDirectionalData(DirectionalComponent directionalData, World world, BlockPos blockPos, DataPriority priority) {
         return null;
     }
 
@@ -73,12 +72,12 @@ public abstract class MixinBlockLever extends MixinBlock implements IMixinBlockD
     }
 
     @Override
-    public AxisData getAxisData(IBlockState blockState) {
+    public AxisComponent getAxisData(IBlockState blockState) {
         return null;
     }
 
     @Override
-    public DataTransactionResult setAxisData(AxisData axisData, World world, BlockPos blockPos) {
+    public DataTransactionResult setAxisData(AxisComponent axisData, World world, BlockPos blockPos) {
         return null;
     }
 
@@ -96,13 +95,13 @@ public abstract class MixinBlockLever extends MixinBlock implements IMixinBlockD
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
+    public Collection<Component<?>> getManipulators(World world, BlockPos blockPos) {
         return getManipulators(world.getBlockState(blockPos));
     }
 
     @Override
-    public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<DataManipulator<?>>of(getAxisData(blockState), getDirectionalData(blockState));
+    public ImmutableList<Component<?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<Component<?>>of(getAxisData(blockState), getDirectionalData(blockState));
     }
 
     @Override

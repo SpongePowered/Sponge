@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectBuilder;
@@ -49,7 +49,7 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M>> PotionEffectBuilder add(M manipulator) {
+    public <M extends Component<M>> PotionEffectBuilder add(M manipulator) {
         return this; // TODO
     }
 

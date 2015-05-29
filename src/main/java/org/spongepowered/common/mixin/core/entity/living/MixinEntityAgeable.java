@@ -28,7 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.entity.AgeableData;
+import org.spongepowered.api.data.component.entity.AgeableComponent;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class MixinEntityAgeable extends MixinEntityLiving implements Ageable {
 
     @Override
-    public AgeableData getAgeData() {
-        return getData(AgeableData.class).get();
+    public AgeableComponent getAgeData() {
+        return getData(AgeableComponent.class).get();
     }
 
     @Override

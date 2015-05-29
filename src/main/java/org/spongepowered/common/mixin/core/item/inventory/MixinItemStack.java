@@ -26,12 +26,10 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -42,7 +40,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 
 import java.util.Collection;
-import java.util.List;
 
 @SuppressWarnings("serial")
 @NonnullByDefault
@@ -93,14 +90,14 @@ public abstract class MixinItemStack implements ItemStack {
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators() {
+    public Collection<Component<?>> getComponents() {
         return ((IMixinItem) shadow$getItem()).getManipulatorsFor((net.minecraft.item.ItemStack) (Object) this);
     }
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer();
-        for (DataManipulator<?> manipulator : getManipulators()) {
+        for (Component<?> manipulator : getComponents()) {
             container.set(of(manipulator.getClass().getCanonicalName()), manipulator.toContainer());
         }
         return new MemoryDataContainer()

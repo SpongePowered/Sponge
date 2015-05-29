@@ -26,7 +26,6 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;

@@ -49,17 +49,17 @@ public class SpongeImmutableRegistry implements ImmutableDataRegistry {
 
 
     @Override
-    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> void register(Class<T> manipulatorClass, B builder) {
-        if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
-            this.builderMap.put(manipulatorClass, checkNotNull(builder));
+    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> void register(Class<T> componentClass, B builder) {
+        if (!this.builderMap.containsKey(checkNotNull(componentClass))) {
+            this.builderMap.put(componentClass, checkNotNull(builder));
         } else {
-            throw new IllegalStateException("Already registered the DataUtil for " + manipulatorClass.getCanonicalName());
+            throw new IllegalStateException("Already registered the DataUtil for " + componentClass.getCanonicalName());
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> Optional<B> getBuilder(Class<T> manipulatorClass) {
-        return Optional.fromNullable((B) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
+    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> Optional<B> getBuilder(Class<T> componentClass) {
+        return Optional.fromNullable((B) (Object) this.builderMap.get(checkNotNull(componentClass)));
     }
 }

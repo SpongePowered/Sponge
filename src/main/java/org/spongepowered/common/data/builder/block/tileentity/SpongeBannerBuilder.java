@@ -32,11 +32,11 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.component.tileentity.BannerComponent;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
+import org.spongepowered.common.data.component.tileentity.SpongeBannerComponent;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         }
         final SerializationService service = this.game.getServiceManager().provide(SerializationService.class).get();
 
-        final BannerData bannerData = new SpongeBannerData();
+        final BannerComponent bannerData = new SpongeBannerComponent();
 
         String dyeColorId = container.getString(BASE).get();
         Optional<DyeColor> colorOptional = this.game.getRegistry().getType(DyeColor.class, dyeColorId);
@@ -72,8 +72,8 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         bannerData.setBaseColor(colorOptional.get());
 
         // Now we have to get the patterns list
-        final List<BannerData.PatternLayer> patternsList = container.getSerializableList(PATTERNS, BannerData.PatternLayer.class, service).get();
-        for (BannerData.PatternLayer pattern : patternsList) {
+        final List<BannerComponent.PatternLayer> patternsList = container.getSerializableList(PATTERNS, BannerComponent.PatternLayer.class, service).get();
+        for (BannerComponent.PatternLayer pattern : patternsList) {
             bannerData.addPatternLayer(pattern);
         }
         final Banner banner = bannerOptional.get();

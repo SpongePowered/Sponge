@@ -28,13 +28,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.AttachedData;
+import org.spongepowered.api.data.component.block.AttachedComponent;
 
 public interface IMixinBlockAttachable {
 
-    AttachedData getAttachedData(IBlockState blockState);
+    AttachedComponent getAttachedData(IBlockState blockState);
 
-    DataTransactionResult setAttachedData(AttachedData attachedData, World world, BlockPos blockPos);
+    DataTransactionResult setAttachedData(AttachedComponent attachedData, World world, BlockPos blockPos);
 
     void resetAttached(World world, BlockPos blockPos);
 

@@ -28,7 +28,7 @@ import com.google.common.base.Optional;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
@@ -40,7 +40,7 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M>> BlockStateBuilder add(M manipulator) {
+    public <M extends Component<M>> BlockStateBuilder add(M manipulator) {
         return null;
     }
 

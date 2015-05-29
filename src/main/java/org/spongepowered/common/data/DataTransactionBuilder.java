@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Component;
 import org.spongepowered.api.data.DataTransactionResult;
 
 import java.util.Collection;
@@ -38,14 +38,14 @@ import java.util.List;
 
 public final class DataTransactionBuilder {
 
-    private List<DataManipulator<?>> rejected;
-    private List<DataManipulator<?>> replaced;
+    private List<Component<?>> rejected;
+    private List<Component<?>> replaced;
     private DataTransactionResult.Type resultType;
 
     private DataTransactionBuilder() {
     }
 
-    public static DataTransactionResult fail(final DataManipulator<?> manipulator) {
+    public static DataTransactionResult fail(final Component<?> manipulator) {
         return builder().reject(manipulator).result(DataTransactionResult.Type.FAILURE).build();
     }
 
@@ -53,7 +53,7 @@ public final class DataTransactionBuilder {
         return builder().result(DataTransactionResult.Type.SUCCESS).build();
     }
 
-    public static DataTransactionResult successReplaceData(final DataManipulator<?> manipulator) {
+    public static DataTransactionResult successReplaceData(final Component<?> manipulator) {
         return builder().result(DataTransactionResult.Type.SUCCESS).replace(manipulator).build();
     }
 
@@ -67,7 +67,7 @@ public final class DataTransactionBuilder {
     }
 
 
-    public DataTransactionBuilder replace(final DataManipulator<?> manipulator) {
+    public DataTransactionBuilder replace(final Component<?> manipulator) {
         if (this.replaced == null) {
             this.replaced = Lists.newArrayList();
         }
@@ -75,7 +75,7 @@ public final class DataTransactionBuilder {
         return this;
     }
 
-    public DataTransactionBuilder reject(final DataManipulator<?> manipulator) {
+    public DataTransactionBuilder reject(final Component<?> manipulator) {
         if (this.rejected == null) {
             this.rejected = Lists.newArrayList();
         }
@@ -91,8 +91,8 @@ public final class DataTransactionBuilder {
     private class BuilderResult implements DataTransactionResult {
 
         private final Type type;
-        private final List<DataManipulator<?>> rejected;
-        private final List<DataManipulator<?>> replaced;
+        private final List<Component<?>> rejected;
+        private final List<Component<?>> replaced;
 
         BuilderResult(final DataTransactionBuilder builder) {
             this.type = builder.resultType;
@@ -114,12 +114,12 @@ public final class DataTransactionBuilder {
         }
 
         @Override
-        public Optional<? extends Collection<? extends DataManipulator<?>>> getRejectedData() {
+        public Optional<? extends Collection<? extends Component<?>>> getRejectedData() {
             return Optional.fromNullable(this.rejected);
         }
 
         @Override
-        public Optional<? extends Collection<? extends DataManipulator<?>>> getReplacedData() {
+        public Optional<? extends Collection<? extends Component<?>>> getReplacedData() {
             return Optional.fromNullable(this.replaced);
         }
     }
