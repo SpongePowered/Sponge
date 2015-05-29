@@ -63,32 +63,12 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
 
     @Override
     public Map<Integer, List<TradeOfferGenerator>> getTradeOffers(final Career career) {
-        checkNotNull(career, "career");
-        checkArgument(career instanceof SpongeCareer, "Unsupported Career: %s (%s)", career.getClass().getName());
-        final Profession profession = checkNotNull(career.getProfession(), "profession");
-        checkArgument(profession instanceof SpongeProfession, "Unsupported Profession: %s (%s)", profession.getName(), profession.getClass()
-                .getName());
-        final SpongeCareer spongeCareer = (SpongeCareer) career;
-        final SpongeProfession spongeProfession = (SpongeProfession) profession;
-        // The types starting with 1
-        final int careerType = spongeCareer.type;
-        final int professionType = spongeProfession.type;
+        final ITradeList[][] careerTrades = getFor(career);
 
-        final ITradeList[][][][] defaultTrades = EntityVillager.DEFAULT_TRADE_LIST_MAP;
-        if (defaultTrades == null || defaultTrades.length <= professionType) {
-            throw new IllegalStateException("Could not find valid entry in default trade offer generators");
-        }
-        final ITradeList[][][] professionTrades = defaultTrades[professionType];
-        if (professionTrades == null || professionTrades.length <= careerType) {
-            throw new IllegalStateException("Could not find valid entry in profession trade offer generators " + profession.getName());
-        }
-        final ITradeList[][] careerTrades = professionTrades[careerType - 1];
-        if (careerTrades == null) {
-            throw new IllegalStateException("Could not find valid entry in career trade offer generators " + career.getName());
-        }
+        // Convert
         final ImmutableMap.Builder<Integer, List<TradeOfferGenerator>> result = ImmutableMap.builder();
-        for (int level = 1; level < careerTrades.length + 1; level++) {
-            final ITradeList[] levelTrades = careerTrades[level - 1];
+        for (int level = 0; level < careerTrades.length; level++) {
+            final ITradeList[] levelTrades = careerTrades[level];
             if (levelTrades == null || levelTrades.length == 0) {
                 continue;
             }
@@ -96,49 +76,16 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
             for (final Object trade : levelTrades) {
                 offers.add((TradeOfferGenerator) trade);
             }
-            result.put(level, offers.build());
+            result.put(level + 1, offers.build());
         }
         return result.build();
     }
 
     @Override
     public List<TradeOfferGenerator> getTradeOffers(final Career career, final int level) throws IllegalArgumentException {
-        checkNotNull(career, "career");
-        checkArgument(career instanceof SpongeCareer, "Unsupported Career: %s (%s)", career.getClass().getName());
-        final Profession profession = checkNotNull(career.getProfession(), "profession");
-        checkArgument(profession instanceof SpongeProfession, "Unsupported Profession: %s (%s)", profession.getName(), profession.getClass()
-                .getName());
-        final SpongeCareer spongeCareer = (SpongeCareer) career;
-        final SpongeProfession spongeProfession = (SpongeProfession) profession;
-        // The types starting with 1
-        final int careerType = spongeCareer.type;
-        final int professionType = spongeProfession.type;
+        final ITradeList[] levelTrades = getFor(career, level);
 
-        // Validation
-        checkArgument(careerType > 0, "CareerType cannot be zero or negative");
-        checkArgument(professionType > 0, "ProfessionType cannot be zero or negative");
-        checkArgument(level > 0, "Level cannot be zero or negative");
-        checkArgument(level <= 100, "Level cannot be bigger than 100"); // TODO useful check?
-
-        // Get current generators
-        final ITradeList[][][][] defaultTrades = EntityVillager.DEFAULT_TRADE_LIST_MAP;
-        if (defaultTrades == null || defaultTrades.length < professionType) {
-            throw new IllegalStateException("Could not find valid entry in default trade offer generators");
-        }
-        final ITradeList[][][] professionTrades = defaultTrades[professionType];
-        if (professionTrades == null || professionTrades.length < careerType) {
-            throw new IllegalStateException("Could not find valid entry in profession trade offer generators " + profession.getName());
-        }
-        final ITradeList[][] careerTrades = professionTrades[careerType - 1];
-        if (careerTrades == null || careerTrades.length < careerType) {
-            throw new IllegalStateException("Could not find valid entry in career trade offer generators " + career.getName());
-        }
-        final ITradeList[] levelTrades = careerTrades[level - 1];
-        if (levelTrades == null) {
-            throw new IllegalStateException("Could not find valid entry in career level trade offer generators " + career.getName() + " " + level);
-        }
-
-        // Collect
+        // Convert
         final ImmutableList.Builder<TradeOfferGenerator> offers = ImmutableList.builder();
         for (final Object trade : levelTrades) {
             if (trade != null) {
@@ -150,121 +97,46 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
 
     @Override
     public void addTradeOffers(final Career career, final int level, final TradeOfferGenerator... generators) throws IllegalArgumentException {
-        checkNotNull(career, "career");
-        checkArgument(career instanceof SpongeCareer, "Unsupported Career: %s (%s)", career.getClass().getName());
-        final Profession profession = checkNotNull(career.getProfession(), "profession");
-        checkArgument(profession instanceof SpongeProfession, "Unsupported Profession: %s (%s)", profession.getName(), profession.getClass()
-                .getName());
-        final SpongeCareer spongeCareer = (SpongeCareer) career;
-        final SpongeProfession spongeProfession = (SpongeProfession) profession;
-        // The types starting with 1
-        final int careerType = spongeCareer.type;
-        final int professionType = spongeProfession.type;
+        validateLevel(level);
+        checkNotNull(generators, "generators");
 
-        // Validation
-        checkArgument(careerType > 0, "CareerType cannot be zero or negative");
-        checkArgument(professionType > 0, "ProfessionType cannot be zero or negative");
-        checkArgument(level > 0, "Level cannot be zero or negative");
-        checkArgument(level <= 100, "Level cannot be bigger than 100"); // TODO useful check?
-        // Nothing to add?
-        if (checkNotNull(generators, "generators").length == 0) {
-            return;
-        }
+        final ITradeList[][][] professionTrades = getForProfession(career);
+        final ITradeList[][] careerTrades = getFor(career, professionTrades);
 
-        // Get current generators
-        final ITradeList[][][][] defaultTrades = EntityVillager.DEFAULT_TRADE_LIST_MAP;
-        if (defaultTrades == null || defaultTrades.length < professionType) {
-            throw new IllegalStateException("Could not find valid entry in default trade offer generators");
-        }
-        final ITradeList[][][] professionTrades = defaultTrades[professionType];
-        if (professionTrades == null || professionTrades.length < careerType) {
-            throw new IllegalStateException("Could not find valid entry in profession trade offer generators " + profession.getName());
-        }
-        final ITradeList[][] careerTrades = professionTrades[careerType - 1];
-        if (careerTrades == null) {
-            throw new IllegalStateException("Could not find valid entry in career trade offer generators " + career.getName());
-        }
-
+        int careerType = ((SpongeCareer) career).type;
         // Change and set the generators
         professionTrades[careerType - 1] = modify(careerTrades, level, Arrays.asList(generators), false);
     }
 
     @Override
     public void setTradeOffers(final Career career, final int level, final List<TradeOfferGenerator> generators) throws IllegalArgumentException {
-        checkNotNull(career, "career");
-        checkArgument(career instanceof SpongeCareer, "Unsupported Career: %s (%s)", career.getClass().getName());
-        final Profession profession = checkNotNull(career.getProfession(), "profession");
-        checkArgument(profession instanceof SpongeProfession, "Unsupported Profession: %s (%s)", profession.getName(), profession.getClass()
-                .getName());
-        final SpongeCareer spongeCareer = (SpongeCareer) career;
-        final SpongeProfession spongeProfession = (SpongeProfession) profession;
-        // The types starting with 1
-        final int careerType = spongeCareer.type;
-        final int professionType = spongeProfession.type;
-
-        // Validation
-        checkArgument(careerType > 0, "CareerType cannot be zero or negative");
-        checkArgument(professionType > 0, "ProfessionType cannot be zero or negative");
-        checkArgument(level > 0, "Level cannot be zero or negative");
-        checkArgument(level <= 100, "Level cannot be bigger than 100"); // TODO useful check?
+        validateLevel(level);
         checkNotNull(generators, "generators");
 
-        // Get current generators
-        final ITradeList[][][][] defaultTrades = EntityVillager.DEFAULT_TRADE_LIST_MAP;
-        if (defaultTrades == null || defaultTrades.length < professionType) {
-            throw new IllegalStateException("Could not find valid entry in default trade offer generators");
-        }
-        final ITradeList[][][] professionTrades = defaultTrades[professionType];
-        if (professionTrades == null || professionTrades.length < careerType) {
-            throw new IllegalStateException("Could not find valid entry in profession trade offer generators " + profession.getName());
-        }
-        final ITradeList[][] careerTrades = professionTrades[careerType - 1];
-        if (careerTrades == null) {
-            throw new IllegalStateException("Could not find valid entry in trade offer generators");
-        }
+        final ITradeList[][][] professionTrades = getForProfession(career);
+        final ITradeList[][] careerTrades = getFor(career, professionTrades);
 
+        int careerType = ((SpongeCareer) career).type;
         // Change and set the generators
         professionTrades[careerType - 1] = modify(careerTrades, level, generators, true);
     }
 
     @Override
     public void setTradeOffers(final Career career, final Map<Integer, List<TradeOfferGenerator>> generatorMap) throws IllegalArgumentException {
-        checkNotNull(career, "career");
-        checkArgument(career instanceof SpongeCareer, "Unsupported Career: %s (%s)", career.getClass().getName());
-        final Profession profession = checkNotNull(career.getProfession(), "profession");
-        checkArgument(profession instanceof SpongeProfession, "Unsupported Profession: %s (%s)", profession.getName(), profession.getClass()
-                .getName());
-        final SpongeCareer spongeCareer = (SpongeCareer) career;
-        final SpongeProfession spongeProfession = (SpongeProfession) profession;
-        // The types starting with 1
-        final int careerType = spongeCareer.type;
-        final int professionType = spongeProfession.type;
-
-        // Validation
-        checkArgument(careerType > 0, "CareerType cannot be zero or negative");
-        checkArgument(professionType > 0, "ProfessionType cannot be zero or negative");
         checkNotNull(generatorMap, "generator map");
 
-        // Get current generators
-        final ITradeList[][][][] defaultTrades = EntityVillager.DEFAULT_TRADE_LIST_MAP;
-        if (defaultTrades == null || defaultTrades.length < professionType) {
-            throw new IllegalStateException("Could not find valid entry in default trade offer generators");
-        }
-        final ITradeList[][][] professionTrades = defaultTrades[professionType];
-        if (professionTrades == null || professionTrades.length < careerType) {
-            throw new IllegalStateException("Could not find valid entry in profession trade offer generators " + profession.getName());
-        }
+        final ITradeList[][][] professionTrades = getFor(career.getProfession());
+        getFor(career, professionTrades); // Just for validation
 
         // Ignore previous entries
         ITradeList[][] careerTrades = new ITradeList[generatorMap.size()][0];
         // Change the generators
         for (final Entry<Integer, List<TradeOfferGenerator>> entry : generatorMap.entrySet()) {
-            final int level = checkNotNull(entry.getKey(), "level");
-            checkArgument(level > 0, "Level cannot be zero or negative");
-            checkArgument(level <= 100, "Level cannot be bigger than 100"); // TODO useful check?
-            final List<TradeOfferGenerator> generators = checkNotNull(entry.getValue(), "generators");
-            careerTrades = modify(careerTrades, level, generators, true);
+            final int level = validateLevel(checkNotNull(entry.getKey(), "level"));
+            careerTrades = modify(careerTrades, level, checkNotNull(entry.getValue(), "generators"), true);
         }
+
+        final int careerType = ((SpongeCareer) career).type;
         // And set them
         professionTrades[careerType - 1] = careerTrades;
 
@@ -284,6 +156,68 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
         for (final TradeOfferGenerator generator : generators) {
             generator.generate(currentOffers);
         }
+    }
+
+    private static ITradeList[][][] getForProfession(Career career) {
+        validate(career);
+        return getFor(career.getProfession());
+    }
+
+    private static ITradeList[][][] getFor(Profession profession) {
+        final int professionType = validate(profession);
+        final ITradeList[][][][] defaultTrades = checkNotNull(EntityVillager.DEFAULT_TRADE_LIST_MAP, "defaultTradeOfferGenerators");
+        if (defaultTrades.length < professionType || defaultTrades[professionType - 1] == null) {
+            throw new IllegalStateException("Could not find valid entry in default trade offer generators. " +
+                    "Is this (" + profession + ") a valid profession?");
+        }
+        return defaultTrades[professionType - 1];
+    }
+
+    private static int validate(Profession profession) {
+        checkNotNull(profession, "profession");
+        checkArgument(profession instanceof SpongeProfession, "Unsupported Profession: %s (%s)",
+                profession.getName(), profession.getClass().getName());
+        final int professionType = ((SpongeProfession) profession).type;
+        checkArgument(professionType > 0, "ProfessionType cannot be zero or negative");
+        return professionType;
+    }
+
+    private static ITradeList[][] getFor(Career career) {
+        return getFor(career, getFor(career.getProfession()));
+    }
+
+    private static ITradeList[][] getFor(Career career, ITradeList[][][] professionTrades) {
+        final int careerType = validate(career);
+        if (professionTrades.length < careerType || professionTrades[careerType - 1] == null) {
+            throw new IllegalStateException("Could not find valid entry in profession trade offer generators. " +
+                    "Is this (" + career + ") a valid career?");
+        }
+        return professionTrades[careerType - 1];
+    }
+
+    private static int validate(Career career) {
+        checkNotNull(career, "career");
+        checkArgument(career instanceof SpongeCareer, "Unsupported Career: %s (%s)",
+                career.getName(), career.getClass().getName());
+        final int careerType = ((SpongeCareer) career).type;
+        checkArgument(careerType > 0, "CareerType cannot be zero or negative");
+        return careerType;
+    }
+
+    private static ITradeList[] getFor(Career career, int level) {
+        validateLevel(level);
+        final ITradeList[][] careerTrades = getFor(career);
+        if (careerTrades.length < level || careerTrades[level - 1] == null) {
+            throw new IllegalStateException("Could not find valid entry in career trade offer generators. " +
+                    "Is this level (" + level + " @ " + career + ") a valid career level?");
+        }
+        return careerTrades[level - 1];
+    }
+
+    private static int validateLevel(int level) {
+        checkArgument(level > 0, "Level cannot be zero or negative");
+        checkArgument(level <= 100, "Level cannot be bigger than 100"); // TODO useful check?
+        return level;
     }
 
     private static ITradeList[][] modify(ITradeList[][] careerTrades, final int level, final List<TradeOfferGenerator> generators,
@@ -327,12 +261,11 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
         return new TradeOfferGeneratorAsITradeList(new TraceableTradeOfferGenerator(generator));
     }
 
-    private static class TradeOfferGeneratorAsITradeList implements ITradeList, TradeOfferGenerator {
+    static class TradeOfferGeneratorAsITradeList implements ITradeList, TradeOfferGenerator {
 
         private final TradeOfferGenerator generator;
 
         TradeOfferGeneratorAsITradeList(final TradeOfferGenerator generator) {
-            super();
             this.generator = generator;
         }
 
