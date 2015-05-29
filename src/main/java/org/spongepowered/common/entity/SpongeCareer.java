@@ -33,10 +33,12 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 public class SpongeCareer extends SpongeEntityMeta implements Career {
 
     private final Profession profession;
+    private final Translation translation;
 
-    public SpongeCareer(int id, String name, Profession profession) {
+    public SpongeCareer(int id, String name, Profession profession, Translation translation) {
         super(id, name);
         this.profession = profession;
+        this.translation = translation;
     }
 
     @Override
@@ -51,6 +53,7 @@ public class SpongeCareer extends SpongeEntityMeta implements Career {
 
     @Override
     public Translation getTranslation() {
-        return null;
+        return this.translation;
     }
+
 }
