@@ -70,6 +70,7 @@ import java.util.Random;
 @Mixin(BlockLog.class)
 public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTree {
 
+    @Override
     public TreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type = null;
         if(blockState.getBlock() instanceof BlockOldLog) {
@@ -104,6 +105,7 @@ public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTre
         return new SpongeTreeData().setValue(treeType);
     }
 
+    @Override
     public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos, DataPriority priority) {
         final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
         switch (checkNotNull(priority)) {

@@ -79,6 +79,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
         }
     }
 
+    @Override
     public TreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type = null;
         if(blockState.getBlock() instanceof BlockOldLeaf) {
@@ -113,6 +114,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
         return new SpongeTreeData().setValue(treeType);
     }
 
+    @Override
     public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos, DataPriority priority) {
         final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
         switch (checkNotNull(priority)) {
