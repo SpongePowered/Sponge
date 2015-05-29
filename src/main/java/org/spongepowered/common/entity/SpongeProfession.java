@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -44,4 +45,13 @@ public class SpongeProfession extends SpongeEntityMeta implements Profession {
     public Translation getTranslation() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("type", this.type)
+                .add("name", this.name)
+                .toString();
+    }
+
 }

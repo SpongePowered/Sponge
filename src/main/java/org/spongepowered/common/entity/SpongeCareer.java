@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.text.translation.Translation;
@@ -54,6 +55,15 @@ public class SpongeCareer extends SpongeEntityMeta implements Career {
     @Override
     public Translation getTranslation() {
         return this.translation;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("profession", this.profession)
+                .add("type", this.type)
+                .add("name", this.name)
+                .toString();
     }
 
 }
