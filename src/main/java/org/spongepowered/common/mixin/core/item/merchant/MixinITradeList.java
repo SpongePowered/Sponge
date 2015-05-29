@@ -51,9 +51,7 @@ public abstract class MixinITradeList implements TradeOfferGenerator {
             modifyMerchantRecipeList((MerchantRecipeList) tradeOffers, RANDOM);
         } else {
             final MerchantRecipeList list = new MerchantRecipeList();
-            for (final TradeOffer offer : tradeOffers) {
-                list.add(offer);
-            }
+            list.addAll(tradeOffers);
             modifyMerchantRecipeList(list, RANDOM);
             tradeOffers.clear();
             for (final Object offer : list) {
