@@ -159,8 +159,6 @@
         "text.MixinChatComponentStyle",
         "text.MixinChatComponentText",
         "text.MixinChatComponentTranslation",
-        "text.MixinChatStyle",
-        "text.MixinChatStyleRoot",
         "text.MixinClickEvent",
         "text.MixinHoverEvent",
         "world.MixinAnvilSaveHandler",

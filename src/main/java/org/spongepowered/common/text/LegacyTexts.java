@@ -157,12 +157,11 @@ public final class LegacyTexts {
                     }
 
                     current.content(text.substring(from, pos));
+                } else if (current == null) {
+                    current = Texts.builder("");
                 }
 
-                if (current != null) {
-                    reset |= applyStyle(current, format);
-                }
-
+                reset |= applyStyle(current, format);
                 pos = next;
             }
 
@@ -180,7 +179,7 @@ public final class LegacyTexts {
     private static boolean applyStyle(TextBuilder builder, EnumChatFormatting formatting) {
         switch (formatting) {
             case BOLD:
-                builder.style(TextStyles.BOLD).style(TextStyles.BOLD);
+                builder.style(TextStyles.BOLD);
                 break;
             case ITALIC:
                 builder.style(TextStyles.ITALIC);

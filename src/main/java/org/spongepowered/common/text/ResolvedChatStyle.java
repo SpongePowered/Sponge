@@ -22,19 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.text;
+package org.spongepowered.common.text;
 
-import net.minecraft.util.ChatStyle;
-import org.apache.commons.lang3.ArrayUtils;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.text.IMixinChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 
-@Mixin(targets = "net/minecraft/util/ChatStyle$1")
-public abstract class MixinChatStyleRoot extends ChatStyle implements IMixinChatStyle {
+import javax.annotation.Nullable;
 
-    @Override
-    public char[] asFormattingCode() {
-        return ArrayUtils.EMPTY_CHAR_ARRAY;
+public final class ResolvedChatStyle {
+
+    @Nullable
+    public final EnumChatFormatting color;
+    public final boolean bold;
+    public final boolean italic;
+    public final boolean underlined;
+    public final boolean strikethrough;
+    public final boolean obfuscated;
+
+    public ResolvedChatStyle(@Nullable EnumChatFormatting color,
+            boolean bold, boolean italic, boolean underlined, boolean strikethrough, boolean obfuscated) {
+        this.color = color;
+        this.bold = bold;
+        this.italic = italic;
+        this.underlined = underlined;
+        this.strikethrough = strikethrough;
+        this.obfuscated = obfuscated;
     }
 
 }
