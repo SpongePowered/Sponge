@@ -173,6 +173,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public float getTemperature(Vector3i position) {
+        return getTemperature(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public float getTemperature(int x, int y, int z) {
+        BlockPos pos = new BlockPos(x, y, z);
+        return getBiomeGenForCoords(pos).getFloatTemperature(pos);
+    }
+
+    @Override
     public UUID getUniqueId() {
         return ((WorldProperties) this.worldInfo).getUniqueId();
     }

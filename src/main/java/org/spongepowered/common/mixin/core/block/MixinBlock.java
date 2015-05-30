@@ -137,6 +137,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
+    public boolean isReplaceable() {
+        return getMaterial().isReplaceable();
+    }
+
+    @Override
     public Optional<ItemBlock> getHeldItem() {
         return Optional.fromNullable((ItemBlock) Item.getItemFromBlock((Block) (Object) this));
     }
