@@ -243,9 +243,9 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
         } else {
             // Append
             final int oldLength = levelTrades.length;
-            final int newLength = oldLength + generators.size();
-            final ITradeList[] newTrades = Arrays.copyOf(levelTrades, newLength);
-            for (int i = 0; i < generators.size(); i++) {
+            final int newLength = generators.size();
+            final ITradeList[] newTrades = Arrays.copyOf(levelTrades, oldLength+newLength);
+            for (int i = 0; i < newLength; i++) {
                 newTrades[oldLength + i] = wrap(generators.get(i));
             }
             careerTrades[level - 1] = newTrades;
