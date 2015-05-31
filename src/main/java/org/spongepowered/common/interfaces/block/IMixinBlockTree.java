@@ -22,19 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.interfaces.block;
 
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataPriority;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.manipulator.block.TreeData;
 
-/**
- * Interface going with IMixinSubject-shared mixins (what am I even saying?).
- */
-public interface Subjectable {
+public interface IMixinBlockTree extends IMixinBlock {
 
-    void setSubject(Subject subj);
+    TreeData getTreeData(IBlockState blockState);
 
-    String getSubjectCollectionIdentifier();
+    DataTransactionResult setTreeData(TreeData layeredData, World world, BlockPos blockPos, DataPriority priority);
 
-    Tristate permDefault(String permission);
+    BlockState resetTreeData(BlockState blockState);
+
 }

@@ -22,19 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 
-/**
- * Interface going with IMixinSubject-shared mixins (what am I even saying?).
- */
-public interface Subjectable {
+@NonnullByDefault
+public class SpongeTreeType implements TreeType {
 
-    void setSubject(Subject subj);
+    private final byte id;
+    private final String name;
 
-    String getSubjectCollectionIdentifier();
+    public SpongeTreeType(byte id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-    Tristate permDefault(String permission);
+    @Override
+    public String getId() {
+        return this.name; //TODO;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }

@@ -22,19 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.service.pagination;
 
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.service.pagination.PaginationCalculator;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.command.CommandSource;
 
 /**
- * Interface going with IMixinSubject-shared mixins (what am I even saying?).
+ * A pagination calculator that has a fixed length per page.
  */
-public interface Subjectable {
+class FixedLengthPaginationCalculator implements PaginationCalculator<CommandSource> {
+    private final int linesPerPage;
 
-    void setSubject(Subject subj);
+    public FixedLengthPaginationCalculator(int linesPerPage) {
+        this.linesPerPage = linesPerPage;
+    }
 
-    String getSubjectCollectionIdentifier();
+    @Override
+    public int getLinesPerPage(CommandSource source) {
+        return this.linesPerPage;
+    }
 
-    Tristate permDefault(String permission);
+    @Override
+    public int getLines(CommandSource source, Text text) {
+        return 1;
+    }
+
+    @Override
+    public Text center(CommandSource source, Text text, String padding) {
+        return text;
+    }
 }

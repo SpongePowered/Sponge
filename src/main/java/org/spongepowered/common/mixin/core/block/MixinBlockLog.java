@@ -29,8 +29,11 @@ import static org.spongepowered.common.data.DataTransactionBuilder.successNoData
 import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
 
 import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockNewLeaf;
+import net.minecraft.block.BlockNewLog;
 import net.minecraft.block.BlockOldLeaf;
+import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
@@ -64,28 +67,16 @@ import sun.reflect.generics.tree.Tree;
 import java.util.Random;
 
 @NonnullByDefault
-@Mixin(BlockLeaves.class)
-public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlockTree {
-
-    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = "net/minecraft/block/BlockLeaves.destroy (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
-    public void callLeafDecay(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci, byte b0, int i, int j, int k, int l, byte b1, int i1, int j1, int k1) {
-        Location block = new Location((Extent) worldIn, VecHelper.toVector(pos));
-        BlockSnapshot postChange = block.getSnapshot();
-        postChange.setBlockState(BlockTypes.AIR.getDefaultState());
-        final LeafDecayEvent event = SpongeEventFactory.createLeafDecay(Sponge.getGame(), null, block, postChange); //TODO Fix null cause
-        Sponge.getGame().getEventManager().post(event);
-        if(event.isCancelled()) {
-            ci.cancel();
-        }
-    }
+@Mixin(BlockLog.class)
+public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTree {
 
     @Override
     public TreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type = null;
-        if(blockState.getBlock() instanceof BlockOldLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLeaf.VARIANT);
-        } else if(blockState.getBlock() instanceof BlockNewLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockNewLeaf.VARIANT);
+        if(blockState.getBlock() instanceof BlockOldLog) {
+            type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLog.VARIANT);
+        } else if(blockState.getBlock() instanceof BlockNewLog) {
+            type = (BlockPlanks.EnumType) blockState.getValue(BlockNewLog.VARIANT);
         }
 
         TreeType treeType = null;
@@ -122,26 +113,26 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
             case POST_MERGE:
                 BlockPlanks.EnumType treeType = null;
 
-                if(treeData.getValue() == TreeTypes.OAK) {
+                if(data.getValue() == TreeTypes.OAK) {
                     treeType = BlockPlanks.EnumType.OAK;
-                } else if(treeData.getValue() == TreeTypes.SPRUCE) {
+                } else if(data.getValue() == TreeTypes.SPRUCE) {
                     treeType = BlockPlanks.EnumType.SPRUCE;
-                } else if(treeData.getValue() == TreeTypes.BIRCH) {
+                } else if(data.getValue() == TreeTypes.BIRCH) {
                     treeType = BlockPlanks.EnumType.BIRCH;
-                } else if(treeData.getValue() == TreeTypes.JUNGLE) {
+                } else if(data.getValue() == TreeTypes.JUNGLE) {
                     treeType = BlockPlanks.EnumType.JUNGLE;
-                } else if(treeData.getValue() == TreeTypes.ACACIA) {
+                } else if(data.getValue() == TreeTypes.ACACIA) {
                     treeType = BlockPlanks.EnumType.ACACIA;
-                } else if(treeData.getValue() == TreeTypes.DARK_OAK) {
+                } else if(data.getValue() == TreeTypes.DARK_OAK) {
                     treeType = BlockPlanks.EnumType.DARK_OAK;
                 }
 
                 IBlockState blockState = world.getBlockState(blockPos);
 
-                if(blockState.getBlock() instanceof BlockOldLeaf) {
-                    world.setBlockState(blockPos, blockState.withProperty(BlockOldLeaf.VARIANT, checkNotNull(treeType)));
-                } else if(blockState.getBlock() instanceof BlockNewLeaf) {
-                    world.setBlockState(blockPos, blockState.withProperty(BlockOldLeaf.VARIANT, checkNotNull(treeType)));
+                if(blockState.getBlock() instanceof BlockOldLog) {
+                    world.setBlockState(blockPos, blockState.withProperty(BlockOldLog.VARIANT, checkNotNull(treeType)));
+                } else if(blockState.getBlock() instanceof BlockNewLog) {
+                    world.setBlockState(blockPos, blockState.withProperty(BlockNewLog.VARIANT, checkNotNull(treeType)));
                 }
                 return successReplaceData(data);
             default:
@@ -152,9 +143,9 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
     @Override
     public BlockState resetTreeData(BlockState blockState) {
         if(blockState.getType() == BlockTypes.LEAVES) {
-            return ((BlockState) ((IBlockState) blockState).withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK));
+            return ((BlockState) ((IBlockState) blockState).withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.OAK));
         } else if(blockState.getType() == BlockTypes.LEAVES2) {
-            return ((BlockState) ((IBlockState) blockState).withProperty(BlockNewLeaf.VARIANT, BlockPlanks.EnumType.ACACIA));
+            return ((BlockState) ((IBlockState) blockState).withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.ACACIA));
         } else {
             return blockState;
         }

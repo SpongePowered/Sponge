@@ -12,6 +12,7 @@
         "block.MixinBlock",
         "block.MixinBlockCake",
         "block.MixinBlockLeaves",
+        "block.MixinBlockLog",
         "block.MixinBlockSnowLayer",
         "block.MixinBlockSponge",
         "block.MixinBlockState",

@@ -162,9 +162,10 @@ public final class LegacyTexts {
                 if (current != null) {
                     reset |= applyStyle(current, format);
                 }
+
+                pos = next;
             }
 
-            pos = next;
             next = text.lastIndexOf(code, next - 1);
         } while (next != -1);
 

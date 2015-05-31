@@ -37,6 +37,8 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.source.ConsoleSource;
@@ -49,6 +51,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinServer;
 import org.spongepowered.common.interfaces.Subjectable;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
@@ -82,6 +85,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @SideOnly(Side.SERVER)
     public abstract int getPort();
 
+    private MessageSink broadcastSink = SpongeMessageSinkFactory.INSTANCE.toAll();
 
     @Override
     public Optional<World> loadWorld(UUID uuid) {
@@ -118,11 +122,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     }
 
     @Override
-    public void broadcastMessage(Text message) {
-        for (Player player : getOnlinePlayers()) {
-            player.sendMessage(message);
-        }
-        sendMessage(message);
+    public MessageSink getBroadcastSink() {
+        return this.broadcastSink;
     }
 
     @Override

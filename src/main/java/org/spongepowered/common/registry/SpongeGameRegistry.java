@@ -91,6 +91,7 @@ import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.api.data.manipulator.block.PoweredData;
+import org.spongepowered.api.data.manipulator.block.TreeData;
 import org.spongepowered.api.data.manipulator.entity.AgeableData;
 import org.spongepowered.api.data.manipulator.entity.AgentData;
 import org.spongepowered.api.data.manipulator.entity.CareerData;
@@ -153,6 +154,7 @@ import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
@@ -208,6 +210,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.selector.SelectorType;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -256,6 +259,7 @@ import org.spongepowered.common.data.manipulator.SpongeTradeOfferData;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
 import org.spongepowered.common.data.manipulator.block.SpongePoweredData;
+import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
 import org.spongepowered.common.data.manipulator.entity.SpongeAgeableData;
 import org.spongepowered.common.data.manipulator.entity.SpongeAgentData;
 import org.spongepowered.common.data.manipulator.entity.SpongeCareerData;
@@ -271,6 +275,7 @@ import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.block.SpongeLayeredDataProcessor;
+import org.spongepowered.common.data.processor.block.SpongeTreeDataProcessor;
 import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
@@ -294,6 +299,7 @@ import org.spongepowered.common.data.processor.item.SpongeEnchantmentProcessor;
 import org.spongepowered.common.data.processor.item.SpongeLoreProcessor;
 import org.spongepowered.common.data.processor.item.SpongePagesProcessor;
 import org.spongepowered.common.data.processor.tileentity.SpongeSignDataProcessor;
+import org.spongepowered.common.data.type.SpongeTreeType;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
@@ -317,6 +323,7 @@ import org.spongepowered.common.text.SpongeTextFactory;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.text.format.SpongeTextColor;
 import org.spongepowered.common.text.format.SpongeTextStyle;
+import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.weather.SpongeWeather;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -420,6 +427,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
     private final Map<String, SkullType> skullTypeMappings = Maps.newHashMap();
+    private final Map<String, TreeType> treeTypeMappings = Maps.newHashMap();
     private final Map<String, BannerPatternShape> bannerPatternShapeMappings = Maps.newHashMap();
     private final Map<String, BannerPatternShape> idToBannerPatternShapeMappings = Maps.newHashMap();
     private final Map<String, Fish> fishMappings = Maps.newHashMap();
@@ -493,7 +501,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(TextColor.class, textColorMappings)
                     .put(TileEntityType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                    .put(TreeType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(TreeType.class, treeTypeMappings)
                     .put(Visibility.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(WallType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(Weather.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -1107,6 +1115,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setTextFactory() {
         RegistryHelper.setFactory(Texts.class, new SpongeTextFactory());
+        RegistryHelper.setFactory(MessageSinks.class, SpongeMessageSinkFactory.INSTANCE);
     }
 
     private void setSelectors() {
@@ -1545,6 +1554,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(LayeredData.class, SpongeLayeredData.class, layeredDataProcessor);
         dataRegistry.registerBlockProcessorAndImpl(LayeredData.class, SpongeLayeredData.class, layeredDataProcessor);
 
+        SpongeTreeDataProcessor treeDataProcessor = new SpongeTreeDataProcessor();
+        service.registerBuilder(TreeData.class, treeDataProcessor);
+        dataRegistry.register(TreeData.class, treeDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(TreeData.class, SpongeTreeData.class, treeDataProcessor);
+        dataRegistry.registerBlockProcessorAndImpl(TreeData.class, SpongeTreeData.class, treeDataProcessor);
+
         // User
         // TODO someone needs to write a User implementation...
     }
@@ -1570,6 +1585,19 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 SkullType skullType = new SpongeSkullType((byte) SpongeGameRegistry.this.skullTypeMappings.size(), input);
                 SpongeGameRegistry.this.skullTypeMappings.put(input, skullType);
                 return skullType;
+            }
+
+        });
+    }
+
+    private void setTreeTypes() {
+        RegistryHelper.mapFields(TreeTypes.class, new Function<String, TreeType>() {
+
+            @Override
+            public TreeType apply(String input) {
+                TreeType treeType = new SpongeTreeType((byte) SpongeGameRegistry.this.treeTypeMappings.size(), input);
+                SpongeGameRegistry.this.treeTypeMappings.put(input, treeType);
+                return treeType;
             }
 
         });
@@ -1818,6 +1846,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setArts();
         setDyeColors();
         setSkullTypes();
+        setTreeTypes();
         setNotePitches();
         setBannerPatternShapes();
         setEntityInteractionTypes();

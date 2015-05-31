@@ -308,4 +308,15 @@ public abstract class MixinChunk implements Chunk {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.blockMin, this.blockMax);
         }
     }
+
+    @Override
+    public float getTemperature(Vector3i position) {
+        return getTemperature(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public float getTemperature(int x, int y, int z) {
+        BlockPos pos = new BlockPos(x, y, z);
+        return getBiome(pos, this.worldObj.getWorldChunkManager()).getFloatTemperature(pos);
+    }
 }

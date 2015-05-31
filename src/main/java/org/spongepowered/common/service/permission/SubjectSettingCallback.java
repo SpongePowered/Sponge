@@ -22,19 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.service.permission;
 
+import com.google.common.base.Predicate;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.mixin.core.command.MixinSubject;
+
+import javax.annotation.Nullable;
 
 /**
- * Interface going with IMixinSubject-shared mixins (what am I even saying?).
+ * {@link MixinSubject} helper class to apply the appropriate subject to the mixin
  */
-public interface Subjectable {
+public class SubjectSettingCallback implements Predicate<PermissionService> {
+    private final Subjectable ref;
 
-    void setSubject(Subject subj);
+    public SubjectSettingCallback(Subjectable ref) {
+        this.ref = ref;
+    }
 
-    String getSubjectCollectionIdentifier();
+    @Override
+    public boolean apply(@Nullable PermissionService input) {
+        SubjectCollection userSubjects = input.getSubjects(ref.getSubjectCollectionIdentifier());
+        if (userSubjects != null) {
+            ref.setSubject(userSubjects.get(((Subject) ref).getIdentifier()));
+        }
+        return true;
+    }
 
-    Tristate permDefault(String permission);
 }
