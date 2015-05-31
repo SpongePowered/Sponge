@@ -67,7 +67,9 @@ public abstract class MixinSubject implements CommandSource, ICommandSender, Sub
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     public void subjectConstructor(CallbackInfo ci) {
-        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
+        if (Sponge.isInitialized()) {
+            Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
+        }
     }
 
     @Override
@@ -77,6 +79,12 @@ public abstract class MixinSubject implements CommandSource, ICommandSender, Sub
 
     @Nullable
     private Subject internalSubject() {
+        if (this.thisSubject == null) {
+            Optional<PermissionService> serv = Sponge.getGame().getServiceManager().provide(PermissionService.class);
+            if (serv.isPresent()) {
+                new SubjectSettingCallback(this).apply(serv.get());
+            }
+        }
         return this.thisSubject;
     }
 

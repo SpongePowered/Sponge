@@ -75,6 +75,10 @@ public class Sponge {
         return instance;
     }
 
+    public static boolean isInitialized() {
+        return instance != null;
+    }
+
     private final Injector injector;
     private final Game game;
     private final Logger logger;
