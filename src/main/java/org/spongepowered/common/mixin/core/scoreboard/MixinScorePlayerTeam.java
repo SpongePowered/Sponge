@@ -78,7 +78,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
 
     @Override
     public SpongeTeam getSpongeTeam() {
-        return spongeTeam;
+        return this.spongeTeam;
     }
 
     @Override
@@ -86,31 +86,34 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         this.spongeTeam = team;
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "setTeamName", at = @At("HEAD"), cancellable = true)
     public void onSetTeamName(String name, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setDisplayName(Texts.fromLegacy(name));
+            this.spongeTeam.setDisplayName(Texts.legacy().fromUnchecked(name));
             this.spongeTeam.allowRecursion = true;
             ci.cancel();
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "setNamePrefix", at = @At("HEAD"), cancellable = true)
     public void onSetNamePrefix(String prefix, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setPrefix(Texts.fromLegacy(prefix));
+            this.spongeTeam.setPrefix(Texts.legacy().fromUnchecked(prefix));
             this.spongeTeam.allowRecursion = true;
             ci.cancel();
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "setNameSuffix", at = @At("HEAD"), cancellable = true)
     public void onSetNameSuffix(String suffix, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setSuffix(Texts.fromLegacy(suffix));
+            this.spongeTeam.setSuffix(Texts.legacy().fromUnchecked(suffix));
             this.spongeTeam.allowRecursion = true;
             ci.cancel();
         }
@@ -160,7 +163,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     public void onSetChatFormat(EnumChatFormatting formatting, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setColor(((SpongeGameRegistry) Sponge.getGame().getRegistry()).enumChatColor.get(formatting));
+            this.spongeTeam.setColor(SpongeGameRegistry.enumChatColor.get(formatting));
             this.spongeTeam.allowRecursion = true;
             ci.cancel();
         }
@@ -181,6 +184,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     }
 
     private boolean shouldEcho() {
-        return (((IMixinScoreboard) theScoreboard).echoToSponge() || this.spongeTeam.getScoreboards().size() == 1) && this.spongeTeam.allowRecursion;
+        return (((IMixinScoreboard) this.theScoreboard).echoToSponge() || this.spongeTeam.getScoreboards().size() == 1)
+                && this.spongeTeam.allowRecursion;
     }
 }

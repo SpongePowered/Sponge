@@ -81,12 +81,14 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
         this.removeObjectives(player);
     }
 
+    @SuppressWarnings("unchecked")
     void removeTeams(EntityPlayerMP player) {
         for (ScorePlayerTeam team: (Collection<ScorePlayerTeam>) this.getTeams()) {
             player.playerNetServerHandler.sendPacket(new S3EPacketTeams(team, 1));
         }
     }
 
+    @SuppressWarnings("unchecked")
     void removeObjectives(EntityPlayerMP player) {
         for (ScoreObjective objective: (Collection<ScoreObjective>) this.getScoreObjectives()) {
             player.playerNetServerHandler.sendPacket(new S3BPacketScoreboardObjective(objective, 1));
@@ -143,12 +145,16 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96549_e", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0))
+    @SuppressWarnings("rawtypes")
+    @Redirect(method = "func_96549_e", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
+            false))
     public Iterator onGetPlayerIteratorForObjectives(List list) {
         return this.players.iterator();
     }
 
-    @Redirect(method = "func_96546_g", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0))
+    @SuppressWarnings("rawtypes")
+    @Redirect(method = "func_96546_g", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
+            false))
     public Iterator onGetPlayerIterator(List list) {
         return this.players.iterator();
     }

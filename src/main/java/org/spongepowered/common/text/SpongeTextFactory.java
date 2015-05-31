@@ -27,32 +27,29 @@ package org.spongepowered.common.text;
 import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 import static org.spongepowered.common.text.SpongeTexts.getDefaultLocale;
 
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.util.IChatComponent;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextFactory;
+import org.spongepowered.api.text.TextRepresentation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.text.xml.TextXmlRepresentation;
 
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 @NonnullByDefault
 public class SpongeTextFactory implements TextFactory {
-
-    @Override
-    public Text parseJson(String json) throws IllegalArgumentException {
-        try {
-            return ((IMixinChatComponent) IChatComponent.Serializer.jsonToComponent(json)).toText();
-        } catch (JsonSyntaxException e) {
-            throw new IllegalArgumentException("Failed to parse JSON", e);
-        }
-    }
-
-    @Override
-    public Text parseJsonLenient(String json) throws IllegalArgumentException {
-        return parseJson(json); // TODO
-    }
+    private final LoadingCache<Character, LegacyTextRepresentation> legacyCache = CacheBuilder.newBuilder()
+            .maximumSize(53)
+            .build(new CacheLoader<Character, LegacyTextRepresentation>() {
+                @Override
+                public LegacyTextRepresentation load(Character key) throws Exception {
+                    return new LegacyTextRepresentation(key);
+                }
+            });
 
     @Override
     public String toPlain(Text text) {
@@ -65,13 +62,13 @@ public class SpongeTextFactory implements TextFactory {
     }
 
     @Override
-    public String toJson(Text text) {
-        return toJson(text, getDefaultLocale());
+    public TextRepresentation json() {
+        return JsonTextRepresentation.INSTANCE;
     }
 
     @Override
-    public String toJson(Text text, Locale locale) {
-        return ((IMixinText) text).toJson(locale);
+    public TextRepresentation xml() {
+        return TextXmlRepresentation.INSTANCE;
     }
 
     @Override
@@ -80,29 +77,25 @@ public class SpongeTextFactory implements TextFactory {
     }
 
     @Override
-    public Text.Literal parseLegacyMessage(String text, char code) {
-        return LegacyTexts.parse(text, code);
+    public TextRepresentation legacy(char legacyChar) {
+        if (legacyChar == COLOR_CHAR) {
+            return LegacyTextRepresentation.DEFAULT_CHAR_INSTANCE;
+        } else {
+            try {
+                return this.legacyCache.get(legacyChar);
+            } catch (ExecutionException e) {
+                return LegacyTextRepresentation.DEFAULT_CHAR_INSTANCE; // Why would this happen?
+            }
+        }
     }
 
     @Override
     public String stripLegacyCodes(String text, char code) {
-        return LegacyTexts.strip(text, code);
+        return LegacyTextRepresentation.strip(text, code);
     }
 
     @Override
     public String replaceLegacyCodes(String text, char from, char to) {
-        return LegacyTexts.replace(text, from, to);
+        return LegacyTextRepresentation.replace(text, from, to);
     }
-
-    @Override
-    public String toLegacy(Text text, char code) {
-        return toLegacy(text, code, getDefaultLocale());
-    }
-
-    @Override
-    public String toLegacy(Text text, char code, Locale locale) {
-        return ((IMixinText) text).toLegacy(code, locale);
-    }
-
-
 }

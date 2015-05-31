@@ -73,7 +73,7 @@ public class SpongeScoreboard implements Scoreboard {
 
     public SpongeScoreboard() {
         ((IMixinScoreboard) this.playerScoreboard).setSpongeScoreboard(this);
-        this.scoreboards.add(playerScoreboard);
+        this.scoreboards.add(this.playerScoreboard);
     }
 
     @Override
@@ -107,8 +107,7 @@ public class SpongeScoreboard implements Scoreboard {
     public void addObjective(Objective objective) throws IllegalArgumentException {
         if (this.objectives.containsValue(objective)) {
             throw new IllegalArgumentException("The specified objective already exists on this scoreboard!");
-        }
-        else if (this.objectives.containsKey(objective.getName())) {
+        } else if (this.objectives.containsKey(objective.getName())) {
             throw new IllegalArgumentException("An objective with the specified name already exists on this scoreboard!");
         }
         this.objectives.put(objective.getName(), objective);
@@ -133,6 +132,7 @@ public class SpongeScoreboard implements Scoreboard {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<Objective> getObjectives() {
         return new HashSet(this.objectives.values());
     }
@@ -152,6 +152,7 @@ public class SpongeScoreboard implements Scoreboard {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<Score> getScores(Text name) {
         HashSet scores = Sets.newHashSet();
         for (Objective objective: this.objectives.values()) {
@@ -249,6 +250,7 @@ public class SpongeScoreboard implements Scoreboard {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<Team> getTeams() {
         return new HashSet(this.teams.values());
     }
@@ -278,11 +280,11 @@ public class SpongeScoreboard implements Scoreboard {
     private void setObjectives(net.minecraft.scoreboard.Scoreboard scoreboard, Scoreboard spongeScoreboard) {
         for (Objective objective: spongeScoreboard.getObjectives()) {
             ScoreObjective scoreObjective = scoreboard.addScoreObjective(objective.getName(), ((IScoreObjectiveCriteria) objective.getCriterion()));
-            scoreObjective.setDisplayName(Texts.toLegacy(objective.getDisplayName()));
+            scoreObjective.setDisplayName(Texts.legacy().to(objective.getDisplayName()));
             scoreObjective.setRenderType((IScoreObjectiveCriteria.EnumRenderType) (Object) objective.getDisplayMode());
 
             for (Score spongeScore: objective.getScores().values()) {
-                net.minecraft.scoreboard.Score score = scoreboard.getValueFromObjective(Texts.toLegacy(spongeScore.getName()), scoreObjective);
+                net.minecraft.scoreboard.Score score = scoreboard.getValueFromObjective(Texts.legacy().to(spongeScore.getName()), scoreObjective);
                 score.setScorePoints(spongeScore.getScore());
             }
         }
@@ -301,10 +303,10 @@ public class SpongeScoreboard implements Scoreboard {
     private void setTeams(net.minecraft.scoreboard.Scoreboard scoreboard, Scoreboard spongeScoreboard) {
         for (Team spongeTeam: spongeScoreboard.getTeams()) {
             ScorePlayerTeam team = scoreboard.createTeam(spongeTeam.getName());
-            team.setTeamName(Texts.toLegacy(spongeTeam.getDisplayName()));
+            team.setTeamName(Texts.legacy().to(spongeTeam.getDisplayName()));
             team.setChatFormat(((SpongeTextColor) spongeTeam.getColor()).getHandle());
-            team.setNamePrefix(Texts.toLegacy(spongeTeam.getPrefix()));
-            team.setNameSuffix(Texts.toLegacy(spongeTeam.getSuffix()));
+            team.setNamePrefix(Texts.legacy().to(spongeTeam.getPrefix()));
+            team.setNameSuffix(Texts.legacy().to(spongeTeam.getSuffix()));
             team.setAllowFriendlyFire(spongeTeam.allowFriendlyFire());
             team.setSeeFriendlyInvisiblesEnabled(spongeTeam.canSeeFriendlyInvisibles());
             team.func_178772_a(((SpongeVisibility) spongeTeam.getNameTagVisibility()).getHandle());

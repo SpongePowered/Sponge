@@ -34,8 +34,8 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
+import org.spongepowered.common.interfaces.IMixinScoreObjective;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,16 +55,18 @@ public class SpongeObjective implements Objective {
 
     public boolean allowRecursion = true;
 
+    @SuppressWarnings("deprecation")
     public SpongeObjective(String name, Criterion criterion) {
         this.name = name;
-        this.displayName = Texts.fromLegacy(name);
+        this.displayName = Texts.legacy().fromUnchecked(name);
         this.displayMode = ObjectiveDisplayModes.INTEGER;
         this.criterion = criterion;
     }
 
+    @SuppressWarnings("deprecation")
     public static SpongeObjective fromScoreObjective(ScoreObjective scoreObjective) {
         SpongeObjective objective = new SpongeObjective(scoreObjective.getName(), (Criterion) scoreObjective.getCriteria());
-        objective.setDisplayName(Texts.fromLegacy(scoreObjective.getDisplayName()));
+        objective.setDisplayName(Texts.legacy().fromUnchecked(scoreObjective.getDisplayName()));
         objective.setDisplayMode((ObjectiveDisplayMode) (Object) scoreObjective.getRenderType());
         return objective;
     }
@@ -89,7 +91,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayName() {
         this.allowRecursion = false;
         for (ScoreObjective objective: this.objectives.values()) {
-            objective.setDisplayName(Texts.toLegacy(this.displayName));
+            objective.setDisplayName(Texts.legacy().to(this.displayName));
         }
         this.allowRecursion = true;
     }
@@ -119,6 +121,7 @@ public class SpongeObjective implements Objective {
         this.allowRecursion = true;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Map<Text, Score> getScores() {
         return new HashMap(this.scores);
     }
@@ -149,7 +152,7 @@ public class SpongeObjective implements Objective {
 
     @Override
     public void removeScore(Score score) {
-        this.scores.remove(score);
+        this.scores.remove(score.getName());
 
         this.allowRecursion = false;
         ((SpongeScore) score).removeFromObjective(this);
@@ -165,7 +168,7 @@ public class SpongeObjective implements Objective {
 
         this.objectives.put(scoreboard, objective);
 
-        objective.setDisplayName(Texts.toLegacy(this.displayName));
+        objective.setDisplayName(Texts.legacy().to(this.displayName));
         objective.setRenderType((IScoreObjectiveCriteria.EnumRenderType) (Object) this.displayMode);
         this.addScoresToObjective(objective);
 

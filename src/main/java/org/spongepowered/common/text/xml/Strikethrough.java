@@ -22,45 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.item;
+package org.spongepowered.common.text.xml;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.format.TextStyles;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.item.PagedData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.AbstractListData;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
-import java.util.List;
-
-public class SpongePagedData extends AbstractListData<Text, PagedData> implements PagedData {
-
-    public static final DataQuery PAGES = of("Pages");
-
-    public SpongePagedData() {
-        super(PagedData.class);
-    }
+@XmlSeeAlso(Strikethrough.S.class)
+@XmlRootElement
+public class Strikethrough extends Element {
 
     @Override
-    public PagedData copy() {
-        return new SpongePagedData().set(this.elementList);
+    protected void modifyBuilder(TextBuilder builder) {
+        builder.style(TextStyles.STRIKETHROUGH);
     }
 
-    @Override
-    public int compareTo(PagedData o) {
-        return 0;
-    }
+    @XmlRootElement
+    public static class S extends Strikethrough {
 
-    @Override
-    public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.json().to(text));
-        }
-        return new MemoryDataContainer().set(PAGES, lore);
     }
 }

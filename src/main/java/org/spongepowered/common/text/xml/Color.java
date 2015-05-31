@@ -22,45 +22,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.item;
+package org.spongepowered.common.text.xml;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import com.google.common.base.Optional;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.common.Sponge;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.item.PagedData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.AbstractListData;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
-import java.util.List;
+@XmlSeeAlso(Color.C.class)
+@XmlRootElement
+public class Color extends Element {
 
-public class SpongePagedData extends AbstractListData<Text, PagedData> implements PagedData {
+    @XmlAttribute
+    private String name;
 
-    public static final DataQuery PAGES = of("Pages");
+    @XmlAttribute
+    protected String n;
 
-    public SpongePagedData() {
-        super(PagedData.class);
+    public Color() {
     }
 
-    @Override
-    public PagedData copy() {
-        return new SpongePagedData().set(this.elementList);
+    public Color(TextColor color) {
+        this.name = color.getName();
     }
 
-    @Override
-    public int compareTo(PagedData o) {
-        return 0;
-    }
 
     @Override
-    public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.json().to(text));
+    protected void modifyBuilder(TextBuilder builder) {
+        if (this.name == null && this.n != null) {
+            this.name = this.n;
         }
-        return new MemoryDataContainer().set(PAGES, lore);
+
+        if (this.name != null) {
+            Optional<TextColor> color = Sponge.getGame().getRegistry().getType(TextColor.class, this.name.toUpperCase());
+            if (color.isPresent()) {
+                builder.color(color.get());
+            }
+        }
+    }
+
+    @XmlRootElement
+    public static class C extends Color {
+        public C() {
+        }
+
+        public C(TextColor color) {
+            this.n = color.getName();
+        }
+
     }
 }

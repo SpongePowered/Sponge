@@ -63,7 +63,9 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
 
     private boolean echoToSponge = true;
 
+    @SuppressWarnings("rawtypes")
     @Shadow public abstract Collection getTeams();
+    @SuppressWarnings("rawtypes")
     @Shadow public abstract Collection getScoreObjectives();
 
     @Override
@@ -92,12 +94,13 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "removeObjectiveFromEntity", at = @At("HEAD"), cancellable = true)
     public void onRemoveObjectiveFromEntity(String name, ScoreObjective objective, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.scoreboard.allowRecursion = false;
             if (objective == null) {
-                for (Score score: this.scoreboard.getScores(Texts.fromLegacy(name))) {
+                for (Score score: this.scoreboard.getScores(Texts.legacy().fromUnchecked(name))) {
                     for (Objective spongeObjective: score.getObjectives()) {
                         spongeObjective.removeScore(score);
                     }
@@ -105,7 +108,7 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
             } else {
                 SpongeObjective spongeObjective = ((IMixinScoreObjective) objective).getSpongeObjective();
                 if (spongeObjective != null) {
-                    spongeObjective.removeScore(spongeObjective.getScore(Texts.fromLegacy(name)));
+                    spongeObjective.removeScore(spongeObjective.getScore(Texts.legacy().fromUnchecked(name)));
                 }
             }
             this.scoreboard.allowRecursion = true;
@@ -131,7 +134,8 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         if (shouldEcho()) {
             this.scoreboard.allowRecursion = false;
             // The objective is nullable, so no need to check the result of getSpongeObjective
-            System.out.format("Scoreboard: {} Objecite: {} DisplaySlot: ", new Object[] {this.scoreboard, objective,Iterables.get(((SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot) });
+            //System.out.format("Scoreboard: {} Objecite: {} DisplaySlot: ", new Object[] {this.scoreboard, objective,Iterables.get((
+            //        (SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot) });
             this.scoreboard.addObjective(((IMixinScoreObjective) objective).getSpongeObjective(),
                                          Iterables.get(((SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot));
             this.scoreboard.allowRecursion = true;
@@ -199,11 +203,14 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         }
     }
 
-    @Inject(method = "getValueFromObjective", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BY, by = 3, ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    @Inject(method = "getValueFromObjective", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", shift
+            = At.Shift.BY, by = 3, ordinal = 1, remap = false), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void onGetValueFromObjective(String name, ScoreObjective objective, CallbackInfoReturnable<net.minecraft.scoreboard.Score> cir, Object map, net.minecraft.scoreboard.Score score) {
         if (shouldEcho() && score == null) {
             this.scoreboard.allowRecursion = false;
-            SpongeScore spongeScore = (SpongeScore) ((IMixinScoreObjective) objective).getSpongeObjective().getScore(Texts.fromLegacy(name));
+            @SuppressWarnings("deprecation")
+            SpongeScore spongeScore = (SpongeScore) ((IMixinScoreObjective) objective).getSpongeObjective().getScore(Texts.legacy().fromUnchecked(
+                    name));
             this.scoreboard.allowRecursion = true;
             cir.setReturnValue(spongeScore.getScore(objective));
         }

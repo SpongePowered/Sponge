@@ -89,7 +89,8 @@ public abstract class MixinScore implements IMixinScore {
     }
 
     private boolean shouldEcho() {
-        return (((IMixinScoreboard) theScoreboard).echoToSponge() || ((IMixinScoreboard) this.theScoreboard).getSpongeScoreboard().getScoreboards().size() == 1) && this.allowRecursion;
+        return (((IMixinScoreboard) this.theScoreboard).echoToSponge() || ((IMixinScoreboard) this.theScoreboard).getSpongeScoreboard()
+                .getScoreboards().size() == 1) && this.allowRecursion;
     }
 
 }

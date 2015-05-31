@@ -89,9 +89,9 @@ public class SpongeScore implements Score {
         }
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "unchecked"})
     public void addToScoreObjective(ScoreObjective scoreObjective) {
-        String name = Texts.toLegacy(this.name);
+        String name = Texts.legacy().to(this.name);
 
         net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(scoreObjective.theScoreboard, scoreObjective, name);
         ((IMixinScore) score).setSpongeCreated();
@@ -119,15 +119,16 @@ public class SpongeScore implements Score {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void removeFromScoreObjective(ScoreObjective objective) {
-        objective.getScoreboard().removeObjectiveFromEntity(Texts.toLegacy(this.name), objective);
+        objective.getScoreboard().removeObjectiveFromEntity(Texts.legacy().to(this.name), objective);
     }
 
     public net.minecraft.scoreboard.Score getScore(ScoreObjective objective) {
         return this.scores.get(objective);
     }
 
-    public UUID getUUID() {
-        return uuid;
+    public UUID getUuid() {
+        return this.uuid;
     }
 }

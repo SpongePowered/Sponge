@@ -72,7 +72,7 @@ public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
                     final List<Text> lore = Lists.newArrayList();
                     final NBTTagList list = subCompound.getTagList("Lore", 8);
                     for (int i = 0; i < list.tagCount(); i++) {
-                        lore.add(Texts.fromLegacy(list.getStringTagAt(i)));
+                        lore.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
                     }
                     return Optional.of(manipulator.set(lore));
                 }
@@ -86,7 +86,7 @@ public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
                     }
                     final NBTTagList list = subCompound.getTagList("Lore", 8);
                     for (int i = 0; i < list.tagCount(); i++) {
-                        manipulator.add(Texts.fromLegacy(list.getStringTagAt(i)));
+                        manipulator.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
                     }
                     return Optional.of(manipulator);
                 }
@@ -101,7 +101,7 @@ public class SpongeLoreProcessor implements SpongeDataProcessor<LoreData> {
                     final List<Text> lore = Lists.newArrayList();
                     final NBTTagList list = subCompound.getTagList("Lore", 8);
                     for (int i = 0; i < list.tagCount(); i++) {
-                        lore.add(Texts.fromLegacy(list.getStringTagAt(i)));
+                        lore.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
                     }
                     lore.addAll(manipulator.getAll());
                     return Optional.of(manipulator.set(lore));

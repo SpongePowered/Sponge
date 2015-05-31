@@ -22,45 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.item;
+package org.spongepowered.common.text.xml;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.action.TextActions;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.item.PagedData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.AbstractListData;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import java.util.List;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
-public class SpongePagedData extends AbstractListData<Text, PagedData> implements PagedData {
+@XmlRootElement
+public class A extends Element {
 
-    public static final DataQuery PAGES = of("Pages");
+    @XmlAttribute(required = true)
+    private URL href;
 
-    public SpongePagedData() {
-        super(PagedData.class);
+    public A() {
+    }
+
+    public A(URL href) {
+        this.href = href;
     }
 
     @Override
-    public PagedData copy() {
-        return new SpongePagedData().set(this.elementList);
-    }
-
-    @Override
-    public int compareTo(PagedData o) {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.json().to(text));
+    protected void modifyBuilder(TextBuilder builder) {
+        if (this.href == null) {
+            throw new IllegalArgumentException("href is null! Make sure it is a valid URL");
         }
-        return new MemoryDataContainer().set(PAGES, lore);
+        builder.onClick(TextActions.openUrl(this.href));
+    }
+
+    public void setUrl(URL href) {
+        this.href = href;
     }
 }

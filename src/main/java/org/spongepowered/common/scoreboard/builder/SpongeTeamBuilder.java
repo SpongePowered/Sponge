@@ -128,6 +128,7 @@ public class SpongeTeamBuilder implements TeamBuilder {
         checkState(this.name != null, "Name cannot be null!");
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
-        return new SpongeTeam(name, displayName, color, prefix, suffix, allowFriendlyFire, showFriendlyInvisibles, nameTagVisibility, deathMessageVisibility, users);
+        return new SpongeTeam(this.name, this.displayName, this.color, this.prefix, this.suffix, this.allowFriendlyFire, this.showFriendlyInvisibles,
+                this.nameTagVisibility, this.deathMessageVisibility, this.users);
     }
 }

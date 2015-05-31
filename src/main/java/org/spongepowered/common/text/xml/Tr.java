@@ -22,45 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.item;
+package org.spongepowered.common.text.xml;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.item.PagedData;
-import org.spongepowered.api.text.Text;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.AbstractListData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.List;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
-public class SpongePagedData extends AbstractListData<Text, PagedData> implements PagedData {
+@XmlRootElement
+public class Tr extends Element {
 
-    public static final DataQuery PAGES = of("Pages");
+    @XmlAttribute(required = true)
+    private String key;
 
-    public SpongePagedData() {
-        super(PagedData.class);
+    public Tr() {}
+
+    public Tr(String key) {
+        this.key = key;
     }
 
     @Override
-    public PagedData copy() {
-        return new SpongePagedData().set(this.elementList);
+    protected void modifyBuilder(TextBuilder builder) {
+        // TODO: get rid of this
     }
 
     @Override
-    public int compareTo(PagedData o) {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.json().to(text));
+    public TextBuilder toText() throws Exception {
+        ImmutableList.Builder<Object> build = ImmutableList.builder();
+        for (Object child : this.mixedContent) {
+            if (child instanceof String) {
+                build.add(((String) child).replace('\u000B', ' '));
+            } else if (child instanceof Element) {
+                build.add(((Element) child).toText().build());
+            } else {
+                throw new IllegalArgumentException("What is this evenn? " + child);
+            }
         }
-        return new MemoryDataContainer().set(PAGES, lore);
+        TextBuilder builder = Texts.builder(new SpongeTranslation(this.key), build.build());
+        applyTextActions(builder);
+        return builder;
     }
 }

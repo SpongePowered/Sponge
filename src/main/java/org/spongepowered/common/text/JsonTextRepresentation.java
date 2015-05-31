@@ -22,45 +22,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.item;
+package org.spongepowered.common.text;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.item.PagedData;
+import com.google.gson.JsonSyntaxException;
+import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentation;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.AbstractListData;
+import org.spongepowered.api.util.TextMessageException;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinText;
 
-import java.util.List;
+import java.util.Locale;
 
-public class SpongePagedData extends AbstractListData<Text, PagedData> implements PagedData {
+/**
+ * TextSerializer implementation for the json format.
+ */
+public class JsonTextRepresentation implements TextRepresentation {
+    public static final JsonTextRepresentation INSTANCE = new JsonTextRepresentation();
 
-    public static final DataQuery PAGES = of("Pages");
+    private JsonTextRepresentation() {}
 
-    public SpongePagedData() {
-        super(PagedData.class);
+    @Override
+    public String to(Text text) {
+        return to(text, SpongeTexts.getDefaultLocale());
     }
 
     @Override
-    public PagedData copy() {
-        return new SpongePagedData().set(this.elementList);
+    public String to(Text text, Locale locale) {
+        return ((IMixinText) text).toJson(locale);
     }
 
     @Override
-    public int compareTo(PagedData o) {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        List<String> lore = Lists.newArrayList();
-        for (Text text : this.elementList) {
-            lore.add(Texts.json().to(text));
+    public Text from(String input) throws TextMessageException {
+        try {
+            return ((IMixinChatComponent) IChatComponent.Serializer.jsonToComponent(input)).toText();
+        } catch (JsonSyntaxException e) {
+            throw new TextMessageException(t("Failed to parse JSON"), e);
         }
-        return new MemoryDataContainer().set(PAGES, lore);
+    }
+
+    @Override
+    public Text fromUnchecked(String input) {
+        try {
+            return from(input);
+        } catch (TextMessageException e) {
+            return Texts.of(input);
+        }
     }
 }

@@ -69,7 +69,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
 
     @Override
     public SpongeObjective getSpongeObjective() {
-        return spongeObjective;
+        return this.spongeObjective;
     }
 
     @Override
@@ -77,11 +77,12 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
         this.spongeObjective = spongeObjective;
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "setDisplayName", at = @At("HEAD"), cancellable = true)
     public void onSetDisplayName(String name, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeObjective.allowRecursion = false;
-            this.spongeObjective.setDisplayName(Texts.fromLegacy(name));
+            this.spongeObjective.setDisplayName(Texts.legacy().fromUnchecked(name));
             this.spongeObjective.allowRecursion = true;
             ci.cancel();
         }

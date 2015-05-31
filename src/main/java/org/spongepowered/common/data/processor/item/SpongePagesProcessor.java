@@ -72,17 +72,17 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
                         manipulator.remove(i);
                     }
                     for (int i = 0; i < pageList.tagCount(); i++) {
-                        manipulator.add(Texts.parseJson(pageList.getStringTagAt(i)));
+                        manipulator.add(Texts.json().fromUnchecked(pageList.getStringTagAt(i)));
                     }
                     return Optional.of(manipulator);
                 case PRE_MERGE:
                     for (int i = 0; i < pageList.tagCount(); i++) {
-                        manipulator.add(Texts.parseJson(pageList.getStringTagAt(i)));
+                        manipulator.add(Texts.json().fromUnchecked(pageList.getStringTagAt(i)));
                     }
                     return Optional.of(manipulator);
                 case POST_MERGE:
                     for (int i = 0; i < pageList.tagCount(); i++) {
-                        manipulator.add(0, Texts.parseJson(pageList.getStringTagAt(i)));
+                        manipulator.add(0, Texts.json().fromUnchecked(pageList.getStringTagAt(i)));
                     }
                     return Optional.of(manipulator);
                 default:
@@ -139,7 +139,7 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
         final List<String> pages = container.getStringList(PAGES).get();
         final PagedData data = create();
         for (String page : pages) {
-            data.add(Texts.parseJson(page));
+            data.add(Texts.json().fromUnchecked(page));
         }
         return Optional.of(data);
     }
@@ -163,7 +163,7 @@ public class SpongePagesProcessor implements SpongeDataProcessor<PagedData> {
         final NBTTagList pageList = ((ItemStack) dataHolder).getTagCompound().getTagList("pages", 8);
         final PagedData data = create();
         for (int i = 0; i < pageList.tagCount(); i++) {
-            data.add(Texts.parseJson(pageList.getStringTagAt(i)));
+            data.add(Texts.json().fromUnchecked(pageList.getStringTagAt(i)));
         }
         return Optional.of(data);
     }

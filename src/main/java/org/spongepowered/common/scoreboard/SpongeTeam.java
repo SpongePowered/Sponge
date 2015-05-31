@@ -77,9 +77,10 @@ public class SpongeTeam implements Team {
         this.deathMessageVisibility = deathMessageVisibility;
     }
 
+    @SuppressWarnings("deprecation")
     public SpongeTeam(String name) {
         this.name = name;
-        this.displayName = Texts.fromLegacy(name);
+        this.displayName = Texts.legacy().fromUnchecked(name);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class SpongeTeam implements Team {
 
     private void updateColor() {
         this.allowRecursion = false;
-        EnumChatFormatting enumChatFormatting = ((SpongeTextColor) color).getHandle();
+        EnumChatFormatting enumChatFormatting = ((SpongeTextColor) this.color).getHandle();
         for (ScorePlayerTeam team: this.teams.values()) {
             team.setChatFormat(enumChatFormatting);
         }
@@ -115,7 +116,7 @@ public class SpongeTeam implements Team {
     @Override
     @SuppressWarnings("deprecation")
     public void setDisplayName(Text displayName) throws IllegalArgumentException {
-        if (Texts.toLegacy(displayName).length() > 32) {
+        if (Texts.legacy().to(displayName).length() > 32) {
             throw new IllegalArgumentException("Team display name length cannot be greater than 32 characters!");
         }
         this.displayName = displayName;
@@ -125,7 +126,7 @@ public class SpongeTeam implements Team {
     @SuppressWarnings("deprecation")
     private void updateDisplayName() {
         this.allowRecursion = false;
-        String displayName = Texts.toLegacy(this.displayName);
+        String displayName = Texts.legacy().to(this.displayName);
         for (ScorePlayerTeam team: this.teams.values()) {
             team.setTeamName(displayName);
         }
@@ -140,7 +141,7 @@ public class SpongeTeam implements Team {
     @Override
     @SuppressWarnings("deprecation")
     public void setPrefix(Text prefix) throws IllegalArgumentException {
-        if (Texts.toLegacy(prefix).length() > 16) {
+        if (Texts.legacy().to(prefix).length() > 16) {
             throw new IllegalArgumentException("Prefix length cannot be greater than 16 characters!");
         }
         this.prefix = prefix;
@@ -150,7 +151,7 @@ public class SpongeTeam implements Team {
     @SuppressWarnings("deprecation")
     private void updatePrefix() {
         this.allowRecursion = false;
-        String prefix = Texts.toLegacy(this.prefix);
+        String prefix = Texts.legacy().to(this.prefix);
         for (ScorePlayerTeam team: this.teams.values()) {
             team.setNamePrefix(prefix);
         }
@@ -165,7 +166,7 @@ public class SpongeTeam implements Team {
     @Override
     @SuppressWarnings("deprecation")
     public void setSuffix(Text suffix) throws IllegalArgumentException {
-        if (Texts.toLegacy(suffix).length() > 16) {
+        if (Texts.legacy().to(suffix).length() > 16) {
             throw new IllegalArgumentException("Suffix length cannot be greater than 16 characters!");
         }
         this.suffix = suffix;
@@ -175,7 +176,7 @@ public class SpongeTeam implements Team {
     @SuppressWarnings("deprecation")
     private void updateSuffix() {
         this.allowRecursion = false;
-        String suffix = Texts.toLegacy(this.suffix);
+        String suffix = Texts.legacy().to(this.suffix);
         for (ScorePlayerTeam team: this.teams.values()) {
             team.setNameSuffix(suffix);
         }
@@ -261,6 +262,7 @@ public class SpongeTeam implements Team {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<User> getUsers() {
         return new HashSet(this.users);
     }
@@ -307,12 +309,12 @@ public class SpongeTeam implements Team {
 
         this.teams.put(scoreboard, team);
 
-        team.setTeamName(Texts.toLegacy(this.displayName));
+        team.setTeamName(Texts.legacy().to(this.displayName));
         team.setSeeFriendlyInvisiblesEnabled(this.seeFriendlyInvisibles);
         team.setAllowFriendlyFire(this.allowFriendlyFire);
-        team.setChatFormat(((SpongeTextColor) color).getHandle());
-        team.setNamePrefix(Texts.toLegacy(this.prefix));
-        team.setNameSuffix(Texts.toLegacy(this.suffix));
+        team.setChatFormat(((SpongeTextColor) this.color).getHandle());
+        team.setNamePrefix(Texts.legacy().to(this.prefix));
+        team.setNameSuffix(Texts.legacy().to(this.suffix));
         team.func_178772_a(((SpongeVisibility) this.nameTagVisibility).getHandle());
         team.func_178773_b(((SpongeVisibility) this.deathMessageVisibility).getHandle());
 
