@@ -97,7 +97,7 @@ public abstract class MixinSubject implements CommandSource, ICommandSender, Sub
     public SubjectCollection getContainingCollection() {
         Subject subj = internalSubject();
         if (subj == null) {
-            throw new IllegalStateException("No subject present for player " + this);
+            throw new IllegalStateException("No subject present for user " + this);
         } else {
             return subj.getContainingCollection();
         }
@@ -107,7 +107,7 @@ public abstract class MixinSubject implements CommandSource, ICommandSender, Sub
     public SubjectData getSubjectData() {
         Subject subj = internalSubject();
         if (subj == null) {
-            throw new IllegalStateException("No subject present for player " + this);
+            throw new IllegalStateException("No subject present for user " + this);
         } else {
             return subj.getSubjectData();
         }
@@ -117,7 +117,7 @@ public abstract class MixinSubject implements CommandSource, ICommandSender, Sub
     public SubjectData getTransientSubjectData() {
         Subject subj = internalSubject();
         if (subj == null) {
-            throw new IllegalStateException("No subject present for player " + this);
+            throw new IllegalStateException("No subject present for user " + this);
         } else {
             return subj.getTransientSubjectData();
         }

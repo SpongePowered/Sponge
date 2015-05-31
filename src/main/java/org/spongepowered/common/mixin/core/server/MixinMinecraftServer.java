@@ -86,6 +86,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     public abstract int getPort();
 
     private MessageSink broadcastSink = SpongeMessageSinkFactory.INSTANCE.toAll();
+    private MessageSink sourceSink = broadcastSink;
 
     @Override
     public Optional<World> loadWorld(UUID uuid) {
@@ -209,6 +210,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @Override
     public String getName() {
         return "Server";
+    }
+
+    @Override
+    public void setMessageSink(MessageSink sink) {
+        this.sourceSink = sink;
+    }
+
+    @Override
+    public MessageSink getMessageSink() {
+        return this.sourceSink;
     }
 
     @Override

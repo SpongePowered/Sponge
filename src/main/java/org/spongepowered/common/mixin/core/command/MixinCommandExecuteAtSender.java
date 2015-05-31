@@ -31,6 +31,7 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
@@ -119,6 +120,16 @@ public abstract class MixinCommandExecuteAtSender implements CommandSource, ICom
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
         return ((CommandSource) this.field_174802_b).getParents(contexts);
+    }
+
+    @Override
+    public void setMessageSink(MessageSink sink) {
+        ((CommandSource) this.field_174802_b).setMessageSink(sink);
+    }
+
+    @Override
+    public MessageSink getMessageSink() {
+        return ((CommandSource) this.field_174802_b).getMessageSink();
     }
 
     @Override
