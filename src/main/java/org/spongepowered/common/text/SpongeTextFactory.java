@@ -31,9 +31,12 @@ import com.google.gson.JsonSyntaxException;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextFactory;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.text.xml.TextXmlParser;
+import org.spongepowered.common.text.xml.TextXmlPrinter;
 
 import java.util.Locale;
 
@@ -72,6 +75,20 @@ public class SpongeTextFactory implements TextFactory {
     @Override
     public String toJson(Text text, Locale locale) {
         return ((IMixinText) text).toJson(locale);
+    }
+
+    @Override
+    public Text parseXml(String input) {
+        try {
+            return TextXmlParser.parse(input);
+        } catch (Exception e) { // TODO: Exception handling?
+            return Texts.of(input);
+        }
+    }
+
+    @Override
+    public String toXml(Text input, Locale locale) {
+        return TextXmlPrinter.toHtml(input, locale);
     }
 
     @Override
