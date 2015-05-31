@@ -53,6 +53,11 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         reset();
     }
 
+    public SpongeItemStackBuilder(ItemStack baseItem) {
+        this();
+        fromItemStack(baseItem);
+    }
+
     @Override
     public ItemStackBuilder itemType(ItemType itemType) {
         checkNotNull(itemType, "Item type cannot be null");

@@ -170,6 +170,7 @@ import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -562,6 +563,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public ItemStackBuilder getItemBuilder() {
         return new SpongeItemStackBuilder();
+    }
+
+    @Override
+    public ItemStackBuilder getItemBuilder(ItemStack stack) {
+        return new SpongeItemStackBuilder(stack);
     }
 
     @Override
