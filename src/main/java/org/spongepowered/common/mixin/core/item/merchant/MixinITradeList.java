@@ -37,11 +37,11 @@ import java.util.Random;
 
 @NonnullByDefault
 // All implementations of EntityVillager.ITradeList that do not implement TradeOfferGenerator
-@Mixin(targets = {"net.minecraft.entity.passive.EntityVillager$EmeraldForItems",
-        "net.minecraft.entity.passive.EntityVillager$ItemAndEmeraldToItem",
-        "net.minecraft.entity.passive.EntityVillager$ListEnchantedBookForEmeralds",
-        "net.minecraft.entity.passive.EntityVillager$ListEnchantedItemForEmeralds",
-        "net.minecraft.entity.passive.EntityVillager$ListItemForEmeralds"})
+@Mixin({net.minecraft.entity.passive.EntityVillager.EmeraldForItems.class,
+        net.minecraft.entity.passive.EntityVillager.ItemAndEmeraldToItem.class,
+        net.minecraft.entity.passive.EntityVillager.ListEnchantedBookForEmeralds.class,
+        net.minecraft.entity.passive.EntityVillager.ListEnchantedItemForEmeralds.class,
+        net.minecraft.entity.passive.EntityVillager.ListItemForEmeralds.class})
 //@Mixin(ITradeList.class)
 public abstract class MixinITradeList implements ITradeList, TradeOfferGenerator {
 
