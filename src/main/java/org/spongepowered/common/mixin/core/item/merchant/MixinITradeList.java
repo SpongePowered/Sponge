@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.item.merchant;
 
+import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.generator.TradeOfferGenerator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 
 import java.util.List;
@@ -42,13 +42,10 @@ import java.util.Random;
 //        "net.minecraft.entity.passive.EntityVillager.ListEnchantedBookForEmeralds",
 //        "net.minecraft.entity.passive.EntityVillager.ListEnchantedItemForEmeralds",
 //        "net.minecraft.entity.passive.EntityVillager.ListItemForEmeralds"})
-@Mixin(net.minecraft.entity.passive.EntityVillager.ITradeList.class)
-public abstract class MixinITradeList implements TradeOfferGenerator {
+@Mixin(ITradeList.class)
+public abstract class MixinITradeList implements ITradeList, TradeOfferGenerator {
 
     private static final Random RANDOM = new Random();
-
-    @Shadow
-    public abstract void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random);
 
     @SuppressWarnings("unchecked")
     @Override
