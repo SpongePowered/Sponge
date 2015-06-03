@@ -422,6 +422,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<Integer, String> worldFolderDimensionIdMappings = Maps.newHashMap();
     public final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
 
+    //Weather Mapping (needs preview)
+    public static final ImmutableMap<String, Weather> weatherMappings = new ImmutableMap.Builder<String, Weather>()
+            .put("CLEAR", new SpongeWeather("CLEAR"))
+            .put("RAIN", new SpongeWeather("RAIN"))
+            .put("THUNDER_STORM", new SpongeWeather("THUNDER_STORM"))
+            .build();
+
     private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
     private final Map<String, SkullType> skullTypeMappings = Maps.newHashMap();
     private final Map<String, TreeType> treeTypeMappings = Maps.newHashMap();
@@ -501,7 +508,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(TreeType.class, treeTypeMappings)
                     .put(Visibility.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(WallType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                    .put(Weather.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(Weather.class, weatherMappings) //Needs testing.
                     .put(WorldGeneratorModifier.class, this.worldGeneratorRegistry.viewModifiersMap())
                     .build();
     private final Map<Class<?>, Class<?>> builderMap = ImmutableMap.of(); // TODO FIGURE OUT HOW TO DO THIS!!?!
@@ -536,7 +543,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         if (tempMap == null) {
             return com.google.common.base.Optional.absent();
         } else {
-            T type = (T) tempMap.get(id);
+            T type = (T) tempMap.get(id.toUpperCase());
             if (type == null) {
                 return com.google.common.base.Optional.absent();
             } else {
