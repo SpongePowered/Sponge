@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import net.minecraft.block.BlockTallGrass;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -91,6 +92,7 @@ import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.api.data.manipulator.block.PoweredData;
+import org.spongepowered.api.data.manipulator.block.ShrubData;
 import org.spongepowered.api.data.manipulator.block.TreeData;
 import org.spongepowered.api.data.manipulator.entity.AgeableData;
 import org.spongepowered.api.data.manipulator.entity.AgentData;
@@ -146,6 +148,7 @@ import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.SandstoneType;
+import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.data.type.SkullType;
@@ -257,6 +260,7 @@ import org.spongepowered.common.data.manipulator.SpongeTradeOfferData;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
 import org.spongepowered.common.data.manipulator.block.SpongePoweredData;
+import org.spongepowered.common.data.manipulator.block.SpongeShrubData;
 import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
 import org.spongepowered.common.data.manipulator.entity.SpongeAgeableData;
 import org.spongepowered.common.data.manipulator.entity.SpongeAgentData;
@@ -273,6 +277,7 @@ import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.block.SpongeLayeredDataProcessor;
+import org.spongepowered.common.data.processor.block.SpongeShrubProcessor;
 import org.spongepowered.common.data.processor.block.SpongeTreeDataProcessor;
 import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
@@ -432,6 +437,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
     private final Map<String, Art> artMappings = Maps.newHashMap();
     private final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
+    private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
+        .put("DEAD_BUSH", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
+        .put("TALL_GRASS", (ShrubType) (Object) BlockTallGrass.EnumType.GRASS)
+        .put("FERN", (ShrubType) (Object) BlockTallGrass.EnumType.FERN)
+        .build();
 
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
@@ -487,6 +497,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(Rotation.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(SandstoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(SelectorType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(ShrubType.class, this.shrubTypeMappings)
                     .put(SkeletonType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(SkullType.class, this.skullTypeMappings)
                     .put(SlabType.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -498,7 +509,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(TextColor.class, textColorMappings)
                     .put(TileEntityType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                    .put(TreeType.class, treeTypeMappings)
+                    .put(TreeType.class, this.treeTypeMappings)
                     .put(Visibility.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(WallType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(Weather.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -1537,6 +1548,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(TreeData.class, SpongeTreeData.class, treeDataProcessor);
         dataRegistry.registerBlockProcessorAndImpl(TreeData.class, SpongeTreeData.class, treeDataProcessor);
 
+        SpongeShrubProcessor shrubProcessor = new SpongeShrubProcessor();
+        service.registerBuilder(ShrubData.class, shrubProcessor);
+        dataRegistry.register(ShrubData.class, shrubProcessor);
+        dataRegistry.registerDataProcessorAndImpl(ShrubData.class, SpongeShrubData.class, shrubProcessor);
+        dataRegistry.registerBlockProcessorAndImpl(ShrubData.class, SpongeShrubData.class, shrubProcessor);
         // User
         // TODO someone needs to write a User implementation...
     }

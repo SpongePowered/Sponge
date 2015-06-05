@@ -43,6 +43,7 @@
         "data.types.MixinEnumArt",
         "data.types.MixinEnumBannerPattern",
         "data.types.MixinEnumDyeColor",
+        "data.types.MixinEnumShrubType",
         "data.types.MixinFishType",
         "command.MixinCommandBlockLogic",
         "command.MixinCommandExecuteAtSender",
