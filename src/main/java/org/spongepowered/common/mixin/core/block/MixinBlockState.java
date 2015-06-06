@@ -50,8 +50,8 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Shadow
     @SuppressWarnings("rawtypes")
-    private final ImmutableMap properties = null;
-    @Shadow private final Block block = null;
+    private ImmutableMap properties;
+    @Shadow private Block block;
 
     private ImmutableList<DataManipulator<?>> manipulators;
 
