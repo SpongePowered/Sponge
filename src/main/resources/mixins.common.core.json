@@ -37,6 +37,7 @@
         "block.tiles.MixinTileEntitySign",
         "block.tiles.MixinTileEntitySkull",
         "data.MixinDataHolder",
+        "data.holders.MixinBlockButton",
         "data.holders.MixinBlockLever",
         "data.holders.MixinBlockStandingSign",
         "data.holders.MixinBlockWallSign",

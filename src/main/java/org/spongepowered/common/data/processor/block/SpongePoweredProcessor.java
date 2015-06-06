@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.block;
 
+import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+
 import com.google.common.base.Optional;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
@@ -46,12 +48,12 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
 
     @Override
     public Optional<PoweredData> fillData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
-        return null;
+        return Optional.absent();
     }
 
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
-        return null;
+        return fail(manipulator);
     }
 
     @Override
@@ -95,7 +97,10 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public boolean remove(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
-        return world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, false));
+        if (blockState.getBlock() instanceof IMixinPoweredHolder) {
+            return world.setBlockState(blockPos, (IBlockState) ((IMixinPoweredHolder) blockState.getBlock()).resetPoweredData((BlockState) blockState), 3);
+        }
+        return false;
     }
 
     @Override
