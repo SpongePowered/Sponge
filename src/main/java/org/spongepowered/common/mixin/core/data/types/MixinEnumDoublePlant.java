@@ -22,38 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.block;
+package org.spongepowered.common.mixin.core.data.types;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.block.DoublePlantData;
+import net.minecraft.block.BlockDoublePlant;
 import org.spongepowered.api.data.type.DoubleSizePlantType;
-import org.spongepowered.api.data.type.DoubleSizePlantTypes;
-import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public class SpongeDoublePlantType extends AbstractSingleValueData<DoubleSizePlantType, DoublePlantData> implements DoublePlantData {
+@Mixin(BlockDoublePlant.EnumPlantType.class)
+public abstract class MixinEnumDoublePlant implements DoubleSizePlantType {
 
-    public static final DataQuery DOUBLE_SIZE_PLANT_TYPE = of("DoubleSizePlantType");
+    @Shadow private String unlocalizedName;
 
-    public SpongeDoublePlantType() {
-        super(DoublePlantData.class, DoubleSizePlantTypes.GRASS);
+    @Override
+    public String getId() {
+        return this.unlocalizedName;
     }
 
     @Override
-    public DoublePlantData copy() {
-        return new SpongeDoublePlantType().setValue(this.getValue());
-    }
-
-    @Override
-    public int compareTo(DoublePlantData o) {
-        return o.getValue().getId().compareTo(this.getValue().getId());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(DOUBLE_SIZE_PLANT_TYPE, this.getValue().getId());
+    public String getName() {
+        return this.unlocalizedName;
     }
 }

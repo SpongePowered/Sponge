@@ -29,15 +29,15 @@ import static org.spongepowered.common.data.DataTransactionBuilder.errorData;
 import static org.spongepowered.common.data.DataTransactionBuilder.fail;
 import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
 import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
-import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockTallGrass;
+import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemDoublePlant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -46,41 +46,45 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.block.ShrubData;
-import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.manipulator.block.DoublePlantData;
+import org.spongepowered.api.data.type.DoubleSizePlantType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.SpongeBlockProcessor;
 import org.spongepowered.common.data.SpongeDataProcessor;
-import org.spongepowered.common.data.manipulator.block.SpongeShrubData;
-import org.spongepowered.common.mixin.core.data.types.MixinEnumShrubType;
+import org.spongepowered.common.data.manipulator.block.SpongeDoublePlantData;
 
 import java.util.List;
 
-public class SpongeShrubProcessor implements SpongeBlockProcessor<ShrubData>, SpongeDataProcessor<ShrubData> {
+public class SpongeDoublePlantProcessor implements SpongeBlockProcessor<DoublePlantData>, SpongeDataProcessor<DoublePlantData> {
 
     @Override
-    public Optional<ShrubData> getFrom(DataHolder dataHolder) {
-        return createFrom(dataHolder); // since the itemstack can always have it iif and only if the itemstack is of type tall grass
+    public Optional<DoublePlantData> getFrom(DataHolder dataHolder) {
+        if (!(dataHolder instanceof ItemStack) || !(((ItemStack) dataHolder).getItem() instanceof ItemDoublePlant)) {
+            return Optional.absent();
+        }
+        final ItemStack itemStack = ((ItemStack) dataHolder);
+        final BlockDoublePlant.EnumPlantType plantType = BlockDoublePlant.EnumPlantType.byMetadata(itemStack.getMetadata());
+        return Optional.of(create().setValue((DoubleSizePlantType) (Object) plantType));
     }
 
     @Override
-    public Optional<ShrubData> fillData(DataHolder dataHolder, ShrubData manipulator, DataPriority priority) {
-        if (!(dataHolder instanceof ItemStack) || !(((ItemStack) dataHolder).getItem() instanceof ItemBlock)) {
+    public Optional<DoublePlantData> fillData(DataHolder dataHolder, DoublePlantData manipulator, DataPriority priority) {
+        if (!(dataHolder instanceof ItemStack) || !(((ItemStack) dataHolder).getItem() instanceof ItemDoublePlant)) {
             return Optional.absent();
         }
         final Block block = ((ItemBlock) ((ItemStack) dataHolder).getItem()).getBlock();
-        if (block != Blocks.tallgrass) {
+        if (block != Blocks.double_plant) {
             return Optional.absent();
         }
         switch (checkNotNull(priority)) {
             case DATA_HOLDER:
             case PRE_MERGE:
-                final List<ShrubType> shrubTypes = ((List<ShrubType>) Sponge.getSpongeRegistry().getAllOf(ShrubType.class));
-                final int mod = shrubTypes.size() - 1;
+                final List<DoubleSizePlantType> doublePlantTypes = ((List<DoubleSizePlantType>) Sponge.getSpongeRegistry().getAllOf(DoubleSizePlantType.class));
+                final int mod = doublePlantTypes.size() - 1;
                 try {
-                    final ShrubType shrubType = shrubTypes.get(((ItemStack) dataHolder).getItemDamage() % mod);
-                    return Optional.of(manipulator.setValue(shrubType));
+                    final DoubleSizePlantType doublePlantType = doublePlantTypes.get(((ItemStack) dataHolder).getItemDamage() % mod);
+                    return Optional.of(manipulator.setValue(doublePlantType));
                 } catch (Exception e) {
                     e.printStackTrace();
                     return Optional.of(manipulator);
@@ -91,24 +95,24 @@ public class SpongeShrubProcessor implements SpongeBlockProcessor<ShrubData>, Sp
     }
 
     @Override
-    public DataTransactionResult setData(DataHolder dataHolder, ShrubData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(DataHolder dataHolder, DoublePlantData manipulator, DataPriority priority) {
         if (!(dataHolder instanceof ItemStack) || !(((ItemStack) dataHolder).getItem() instanceof ItemBlock)) {
             return fail(manipulator);
         }
         final Block block = ((ItemBlock) ((ItemStack) dataHolder).getItem()).getBlock();
-        if (block != Blocks.tallgrass) {
+        if (block != Blocks.double_plant) {
             return fail(manipulator);
         }
         switch (checkNotNull(priority)) {
             case DATA_MANIPULATOR:
             case POST_MERGE:
-                final List<ShrubType> shrubTypes = ((List<ShrubType>) Sponge.getSpongeRegistry().getAllOf(ShrubType.class));
-                final int mod = shrubTypes.size() - 1;
+                final List<DoubleSizePlantType> doublePlantTypes = ((List<DoubleSizePlantType>) Sponge.getSpongeRegistry().getAllOf(DoubleSizePlantType.class));
+                final int mod = doublePlantTypes.size() - 1;
                 try {
-                    final ShrubData oldData = getFrom(dataHolder).get();
-                    final ShrubType shrubType = shrubTypes.get(((ItemStack) dataHolder).getItemDamage() % mod);
-                    final BlockTallGrass.EnumType shrubEnum = (BlockTallGrass.EnumType) (Object) shrubType;
-                    ((ItemStack) dataHolder).setItemDamage(shrubEnum.getMeta());
+                    final DoublePlantData oldData = getFrom(dataHolder).get();
+                    final DoubleSizePlantType plantType = doublePlantTypes.get(((ItemStack) dataHolder).getItemDamage() % mod);
+                    final BlockDoublePlant.EnumPlantType plantEnum = (BlockDoublePlant.EnumPlantType) (Object) plantType;
+                    ((ItemStack) dataHolder).setItemDamage(plantEnum.getMeta());
                     return successReplaceData(oldData);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -116,8 +120,7 @@ public class SpongeShrubProcessor implements SpongeBlockProcessor<ShrubData>, Sp
                 }
             default:
                 return successNoData();
-        }
-    }
+        }    }
 
     @Override
     public boolean remove(DataHolder dataHolder) {
@@ -125,33 +128,31 @@ public class SpongeShrubProcessor implements SpongeBlockProcessor<ShrubData>, Sp
     }
 
     @Override
-    public Optional<ShrubData> build(DataView container) throws InvalidDataException {
-        final String shrubId = getData(container, SpongeShrubData.SHRUB_TYPE, String.class);
-        final Optional<ShrubType> shrubTypeOptional = Sponge.getSpongeRegistry().getType(ShrubType.class, shrubId);
-        return shrubTypeOptional.isPresent() ? Optional.of(create().setValue(shrubTypeOptional.get())) : Optional.<ShrubData>absent();
+    public Optional<DoublePlantData> build(DataView container) throws InvalidDataException {
+        return Optional.absent();
     }
 
     @Override
-    public ShrubData create() {
-        return new SpongeShrubData();
+    public DoublePlantData create() {
+        return new SpongeDoublePlantData();
     }
 
     @Override
-    public Optional<ShrubData> createFrom(DataHolder dataHolder) {
-        if (!(dataHolder instanceof ItemStack) || !(((ItemStack) dataHolder).getItem() instanceof ItemBlock)) {
+    public Optional<DoublePlantData> createFrom(DataHolder dataHolder) {
+        if (!(dataHolder instanceof ItemStack) || !(((ItemStack) dataHolder).getItem() instanceof ItemDoublePlant)) {
             return Optional.absent();
         }
         final ItemStack itemStack = ((ItemStack) dataHolder);
         final Item item = itemStack.getItem();
-        final Block block = ((ItemBlock) item).getBlock();
-        if (block != Blocks.tallgrass) {
+        final Block block = ((ItemDoublePlant) item).getBlock();
+        if (block != Blocks.double_plant) {
             return Optional.absent();
         }
-        final List<ShrubType> shrubTypes = ((List<ShrubType>) Sponge.getSpongeRegistry().getAllOf(ShrubType.class));
-        final int mod = shrubTypes.size() - 1;
+        final List<DoubleSizePlantType> doublePlantTypes = ((List<DoubleSizePlantType>) Sponge.getSpongeRegistry().getAllOf(DoubleSizePlantType.class));
+        final int mod = doublePlantTypes.size() - 1;
         try {
-            final ShrubType shrubType = shrubTypes.get(itemStack.getItemDamage() % mod);
-            return Optional.of(create().setValue(shrubType));
+            final DoubleSizePlantType doublePlantType = doublePlantTypes.get(itemStack.getItemDamage() % mod);
+            return Optional.of(create().setValue(doublePlantType));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,28 +161,28 @@ public class SpongeShrubProcessor implements SpongeBlockProcessor<ShrubData>, Sp
     }
 
     @Override
-    public Optional<ShrubData> fromBlockPos(World world, BlockPos blockPos) {
+    public Optional<DoublePlantData> fromBlockPos(World world, BlockPos blockPos) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         final Block block = blockState.getBlock();
-        if (block != Blocks.tallgrass) {
+        if (block != Blocks.double_plant) {
             return Optional.absent();
         }
-        final ShrubType grassType = (ShrubType) blockState.getValue(BlockTallGrass.TYPE);
+        final DoubleSizePlantType grassType = (DoubleSizePlantType) blockState.getValue(BlockDoublePlant.VARIANT);
         return Optional.of(create().setValue(grassType));
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, ShrubData manipulator, DataPriority priority) {
+    public DataTransactionResult setData(World world, BlockPos blockPos, DoublePlantData manipulator, DataPriority priority) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
-        if (blockState.getBlock() != Blocks.tallgrass) {
+        if (blockState.getBlock() != Blocks.double_plant) {
             return fail(manipulator);
         }
         switch (checkNotNull(priority)) {
             case DATA_MANIPULATOR:
             case POST_MERGE:
-                final ShrubData oldData = createFrom(blockState).get();
-                final BlockTallGrass.EnumType shrub = (BlockTallGrass.EnumType) (Object) checkNotNull(manipulator).getValue();
-                blockState.withProperty(BlockTallGrass.TYPE, shrub);
+                final DoublePlantData oldData = createFrom(blockState).get();
+                final BlockDoublePlant.EnumPlantType plant = (BlockDoublePlant.EnumPlantType) (Object) checkNotNull(manipulator).getValue();
+                blockState.withProperty(BlockDoublePlant.VARIANT, plant);
                 return successReplaceData(oldData);
             default:
                 return successNoData();
@@ -199,12 +200,12 @@ public class SpongeShrubProcessor implements SpongeBlockProcessor<ShrubData>, Sp
     }
 
     @Override
-    public Optional<ShrubData> createFrom(IBlockState blockState) {
+    public Optional<DoublePlantData> createFrom(IBlockState blockState) {
         final Block block = blockState.getBlock();
-        if (block != Blocks.tallgrass) {
+        if (block != Blocks.double_plant) {
             return Optional.absent();
         }
-        final ShrubType shrubType = (ShrubType) blockState.getValue(BlockTallGrass.TYPE);
-        return Optional.of(create().setValue(shrubType));
+        final DoubleSizePlantType plantType = (DoubleSizePlantType) blockState.getValue(BlockDoublePlant.VARIANT);
+        return Optional.of(create().setValue(plantType));
     }
 }
