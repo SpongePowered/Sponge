@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -90,6 +91,7 @@ import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.data.manipulator.PotionEffectData;
 import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.manipulator.block.DoublePlantData;
 import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.api.data.manipulator.block.PoweredData;
 import org.spongepowered.api.data.manipulator.block.ShrubData;
@@ -122,6 +124,7 @@ import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
+import org.spongepowered.api.data.type.DoubleSizePlantType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.Fish;
@@ -258,6 +261,7 @@ import org.spongepowered.common.data.manipulator.SpongePotionEffectData;
 import org.spongepowered.common.data.manipulator.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.SpongeTradeOfferData;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
+import org.spongepowered.common.data.manipulator.block.SpongeDoublePlantData;
 import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
 import org.spongepowered.common.data.manipulator.block.SpongePoweredData;
 import org.spongepowered.common.data.manipulator.block.SpongeShrubData;
@@ -276,6 +280,7 @@ import org.spongepowered.common.data.manipulator.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
+import org.spongepowered.common.data.processor.block.SpongeDoublePlantProcessor;
 import org.spongepowered.common.data.processor.block.SpongeLayeredDataProcessor;
 import org.spongepowered.common.data.processor.block.SpongeShrubProcessor;
 import org.spongepowered.common.data.processor.block.SpongeTreeDataProcessor;
@@ -442,6 +447,14 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         .put("TALL_GRASS", (ShrubType) (Object) BlockTallGrass.EnumType.GRASS)
         .put("FERN", (ShrubType) (Object) BlockTallGrass.EnumType.FERN)
         .build();
+    private final Map<String, DoubleSizePlantType> doublePlantMappings = new ImmutableMap.Builder<String, DoubleSizePlantType>()
+        .put("SUNFLOWER", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.SUNFLOWER)
+        .put("SYRINGA", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.SYRINGA)
+        .put("GRASS", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.GRASS)
+        .put("FERN", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.FERN)
+        .put("ROSE", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.ROSE)
+        .put("PAEONIA", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.PAEONIA)
+        .build();
 
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
@@ -470,6 +483,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(DimensionType.class, this.dimensionTypeMappings)
                     .put(DirtType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(DisguisedBlockType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(DoubleSizePlantType.class, this.doublePlantMappings)
                     .put(Enchantment.class, this.enchantmentMappings)
                     .put(EquipmentType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(FireworkShape.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -1553,6 +1567,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.register(ShrubData.class, shrubProcessor);
         dataRegistry.registerDataProcessorAndImpl(ShrubData.class, SpongeShrubData.class, shrubProcessor);
         dataRegistry.registerBlockProcessorAndImpl(ShrubData.class, SpongeShrubData.class, shrubProcessor);
+
+        SpongeDoublePlantProcessor doublePlantProcessor = new SpongeDoublePlantProcessor();
+        service.registerBuilder(DoublePlantData.class, doublePlantProcessor);
+        dataRegistry.register(DoublePlantData.class, doublePlantProcessor);
+        dataRegistry.registerDataProcessorAndImpl(DoublePlantData.class, SpongeDoublePlantData.class, doublePlantProcessor);
+        dataRegistry.registerBlockProcessorAndImpl(DoublePlantData.class, SpongeDoublePlantData.class, doublePlantProcessor);
         // User
         // TODO someone needs to write a User implementation...
     }
