@@ -36,6 +36,8 @@ public interface IMixinBlockAttachable {
 
     DataTransactionResult setAttachedData(AttachedData attachedData, World world, BlockPos blockPos);
 
+    IBlockState setAttachedData(IBlockState blockState, AttachedData attachedData);
+
     void resetAttached(World world, BlockPos blockPos);
 
 }

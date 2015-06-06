@@ -67,6 +67,8 @@ public interface IMixinBlockLayerable extends IMixinBlock {
      */
     DataTransactionResult setLayerData(LayeredData layeredData, World world, BlockPos blockPos, DataPriority priority);
 
+    BlockState setLayerData(IBlockState blockState, LayeredData data);
+
     /**
      * Resets the direction on the given {@link BlockState}
      * @param blockState

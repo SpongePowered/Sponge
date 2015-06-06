@@ -39,6 +39,8 @@ public interface SpongeBlockProcessor<T extends DataManipulator<T>> {
 
     DataTransactionResult setData(World world, BlockPos blockPos, T manipulator, DataPriority priority);
 
+    Optional<BlockState> withData(IBlockState blockState, T manipulator);
+
     boolean remove(World world, BlockPos blockPos);
 
     Optional<BlockState> removeFrom(IBlockState blockState);

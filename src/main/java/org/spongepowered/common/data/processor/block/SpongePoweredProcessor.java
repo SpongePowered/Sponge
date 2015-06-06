@@ -95,6 +95,11 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, PoweredData manipulator) {
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {

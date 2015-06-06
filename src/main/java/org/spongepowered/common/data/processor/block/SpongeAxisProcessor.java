@@ -89,6 +89,11 @@ public class SpongeAxisProcessor implements SpongeDataProcessor<AxisData>, Spong
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, AxisData manipulator) {
+        return Optional.absent();
+    }
+
+    @Override
     public Optional<BlockState> removeFrom(IBlockState blockState) {
         return Optional.absent();
     }

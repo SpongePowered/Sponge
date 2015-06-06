@@ -88,6 +88,14 @@ public class SpongeAttachedProcessor implements SpongeDataProcessor<AttachedData
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, AttachedData manipulator) {
+        if (blockState.getBlock() instanceof IMixinBlockAttachable) {
+            return Optional.of((BlockState) ((IMixinBlockAttachable) blockState.getBlock()).setAttachedData(blockState, manipulator));
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         return false;
     }

@@ -190,6 +190,15 @@ public class SpongeDoublePlantProcessor implements SpongeBlockProcessor<DoublePl
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, DoublePlantData manipulator) {
+        if (blockState.getBlock() == Blocks.double_plant) {
+            final BlockDoublePlant.EnumPlantType plant = (BlockDoublePlant.EnumPlantType) (Object) checkNotNull(manipulator).getValue();
+            return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.VARIANT, plant));
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         return false;
     }

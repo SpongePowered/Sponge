@@ -94,6 +94,14 @@ public class SpongeDirectionalProcessor implements SpongeDataProcessor<Direction
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, DirectionalData manipulator) {
+        if (blockState.getBlock() instanceof IMixinBlockDirectional) {
+            return Optional.of(((IMixinBlockDirectional) blockState.getBlock()).setDirectionalData(blockState, manipulator));
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
         if (blockState.getBlock() instanceof IMixinBlockDirectional) {

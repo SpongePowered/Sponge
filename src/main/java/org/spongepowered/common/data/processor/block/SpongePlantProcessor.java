@@ -126,6 +126,17 @@ public class SpongePlantProcessor implements SpongeDataProcessor<FlowerData>, Sp
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, FlowerData manipulator) {
+        if (blockState.getBlock() == Blocks.red_flower) {
+            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) manipulator.getValue();
+            return Optional.of((BlockState) blockState.withProperty(Blocks.red_flower.getTypeProperty(), flowerType));
+        } else if (blockState.getBlock() == Blocks.yellow_flower) {
+            return Optional.of((BlockState) blockState);
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         return false;
     }

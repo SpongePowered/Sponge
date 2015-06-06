@@ -189,6 +189,15 @@ public class SpongeShrubProcessor implements SpongeBlockProcessor<ShrubData>, Sp
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, ShrubData manipulator) {
+        if (blockState.getBlock() != Blocks.tallgrass) {
+            return Optional.absent();
+        }
+        final BlockTallGrass.EnumType shrub = (BlockTallGrass.EnumType) (Object) checkNotNull(manipulator).getValue();
+        return Optional.of((BlockState) blockState.withProperty(BlockTallGrass.TYPE, shrub));
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         return false;
     }

@@ -24,43 +24,66 @@
  */
 package org.spongepowered.common.data;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.mixin.core.block.MixinBlockState;
+
+import java.util.List;
 
 public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
+    private BlockType blockType;
+    private List<DataManipulator<?>> manipulators;
+
     @Override
     public BlockStateBuilder blockType(BlockType blockType) {
-        return null;
+        this.blockType = checkNotNull(blockType);
+        return this;
     }
 
     @Override
     public <M extends DataManipulator<M>> BlockStateBuilder add(M manipulator) {
-        return null;
+        this.manipulators.add(manipulator);
+        return this;
     }
 
     @Override
     public BlockStateBuilder from(BlockState holder) {
-        return null;
+        this.blockType = holder.getType();
+        this.manipulators = Lists.newArrayList();
+        this.manipulators.addAll(holder.getManipulators());
+        return this;
     }
 
     @Override
     public BlockStateBuilder reset() {
-        return null;
+        this.blockType = BlockTypes.STONE;
+        this.manipulators = Lists.newArrayList();
+        return this;
     }
 
     @Override
     public BlockState build() {
-        return null;
+        IBlockState blockState = ((IBlockState) this.blockType.getDefaultState());
+        for (DataManipulator<?> manipulator : this.manipulators) {
+            blockState = (IBlockState) ((BlockState) blockState).withData((DataManipulator) manipulator);
+        }
+        return (BlockState) blockState;
     }
 
     @Override
     public Optional<BlockState> build(DataView container) throws InvalidDataException {
-        return null;
+        return Optional.absent();
     }
 }

@@ -33,6 +33,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.manipulator.block.FlowerData;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.processor.block.SpongePlantProcessor;
 
 import java.util.Collection;
 
@@ -46,6 +48,7 @@ public abstract class MixinBlockFlower extends MixinBlock {
 
     @Override
     public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<DataManipulator<?>>of(((BlockState) blockState).getManipulator(FlowerData.class).get());
+        SpongePlantProcessor processor = (SpongePlantProcessor) Sponge.getSpongeRegistry().getManipulatorRegistry().getBuilder(FlowerData.class).get();
+        return ImmutableList.<DataManipulator<?>>of(processor.createFrom(blockState).get());
     }
 }

@@ -102,6 +102,14 @@ public class SpongeLayeredDataProcessor implements SpongeDataProcessor<LayeredDa
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, LayeredData manipulator) {
+        if (blockState.getBlock() instanceof IMixinBlockLayerable) {
+            return Optional.of(((IMixinBlockLayerable) blockState.getBlock()).setLayerData(blockState, manipulator));
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (blockState.getBlock() instanceof IMixinBlockLayerable) {
