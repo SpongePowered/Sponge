@@ -77,7 +77,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public Optional<PoweredData> fromBlockPos(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState)) {
+        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState.getBlock()).getPoweredData(blockState) != null) {
             return Optional.of(create());
         }
         return Optional.absent();
@@ -86,8 +86,10 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public DataTransactionResult setData(World world, BlockPos blockPos, PoweredData manipulator, DataPriority priority) {
         IBlockState blockState = world.getBlockState(blockPos);
-        world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, true));
-        return DataTransactionBuilder.successNoData();
+        if(blockState.getBlock() instanceof IMixinPoweredHolder) {
+            return ((IMixinPoweredHolder) blockState.getBlock()).setPoweredData(manipulator, world, blockPos, priority);
+        }
+        return DataTransactionBuilder.builder().build();
     }
 
     @Override
@@ -99,8 +101,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public Optional<PoweredData> createFrom(IBlockState blockState) {
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {
-            return ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState) ? Optional.of(create())
-                    : Optional.<PoweredData>absent();
+            return ((IMixinPoweredHolder) blockState.getBlock()).getPoweredData(blockState) != null ? Optional.of(create()) : Optional.<PoweredData>absent();
         }
         return Optional.absent();
     }
@@ -108,7 +109,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public Optional<BlockState> removeFrom(IBlockState blockState) {
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {
-            return Optional.of(((IMixinPoweredHolder) blockState.getBlock()).setUnpowered(blockState));
+            return Optional.of(((IMixinPoweredHolder) blockState.getBlock()).resetPoweredData((BlockState) blockState));
         }
         return Optional.absent();
     }
