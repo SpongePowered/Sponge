@@ -30,7 +30,6 @@ import static org.spongepowered.common.data.DataTransactionBuilder.successReplac
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockButton;
-import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -61,7 +60,7 @@ public abstract class MixinBlockButton extends MixinBlock implements IMixinPower
 
     @Override
     public PoweredData getPoweredData(IBlockState blockState) {
-        final boolean powered = (boolean) blockState.getValue(BlockButton.POWERED);
+        final boolean powered = (Boolean) blockState.getValue(BlockButton.POWERED);
         return powered ? new SpongePoweredData() : null;
     }
 
