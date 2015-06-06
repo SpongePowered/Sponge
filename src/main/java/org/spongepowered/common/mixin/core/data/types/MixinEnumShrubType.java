@@ -26,20 +26,22 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockTallGrass;
 import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockTallGrass.EnumType.class)
+@Implements(@Interface(iface = ShrubType.class, prefix = "shrub$"))
 public abstract class MixinEnumShrubType implements ShrubType {
 
     @Shadow private String name;
 
-    @Override
-    public String getId() {
+    public String shrub$getId() {
         return this.name; // todo maybe prefix with "minecraft"?
     }
-    @Override
-    public String getName() {
+
+    public String shrub$getName() {
         return this.name;
     }
 }

@@ -26,21 +26,22 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockFlower;
 import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockFlower.EnumFlowerType.class)
-public abstract class MixinEnumPlantType implements PlantType {
+@Implements(@Interface(iface = PlantType.class, prefix = "plant$"))
+public abstract class MixinEnumPlantType {
 
     @Shadow private String name;
 
-    @Override
-    public String getId() {
+    public String plant$getId() {
         return this.name;
     }
 
-    @Override
-    public String getName() {
+    public String plant$getName() {
         return this.name;
     }
 }

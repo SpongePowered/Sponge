@@ -22,26 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
-
-import net.minecraft.block.BlockDoublePlant;
-import org.spongepowered.api.data.type.DoubleSizePlantType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-
-@Mixin(BlockDoublePlant.EnumPlantType.class)
-@Implements(@Interface(iface = DoubleSizePlantType.class, prefix = "double$"))
-public abstract class MixinEnumDoublePlant {
-
-    @Shadow private String unlocalizedName;
-
-    public String double$getId() {
-        return this.unlocalizedName;
-    }
-
-    public String double$getName() {
-        return this.unlocalizedName;
-    }
-}
+/**
+ * A majority of these interfaces are to aid in manipulating block states and blocks
+ * for a specific {@link org.spongepowered.api.data.DataManipulator}. The one
+ * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
+ * for the benefit of being able to "reset" the block to a "default state".
+ */
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.data.types;
