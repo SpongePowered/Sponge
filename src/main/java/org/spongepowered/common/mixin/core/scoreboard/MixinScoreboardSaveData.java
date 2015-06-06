@@ -69,7 +69,7 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
         this.scoreMap = new HashMap<UUID, SpongeScore>();
     }
 
-    @Inject(method = "<init>(Ljava/lang/String;)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Ljava/lang/String;)V", at = @At("RETURN"), remap = false)
     public void onInit(String name, CallbackInfo ci) {
         this.scoreMap = Maps.newHashMap();
     }

@@ -123,7 +123,7 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/s erver/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onUpdateObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
