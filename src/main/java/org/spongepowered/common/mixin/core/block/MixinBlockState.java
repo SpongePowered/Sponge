@@ -70,7 +70,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public <M extends DataManipulator<M>> Optional<M> getManipulator(Class<M> manipulatorClass) {
-        for (final DataManipulator<?> manipulator : this.manipulators) {
+        for (final DataManipulator<?> manipulator : this.getManipulators()) {
             if (manipulatorClass.isInstance(manipulator)) {
                 return SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass).get().createFrom(this);
             }
@@ -85,7 +85,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public <M extends DataManipulator<M>> Optional<BlockState> withoutData(Class<M> manipulator) {
-        for (final DataManipulator<?> manipulator1 : this.manipulators) {
+        for (final DataManipulator<?> manipulator1 : this.getManipulators()) {
             if (manipulator.isInstance(manipulator1)) {
                 return SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulator).get().removeFrom(this);
             }

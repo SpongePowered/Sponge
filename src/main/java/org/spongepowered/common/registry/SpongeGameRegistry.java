@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -92,6 +93,7 @@ import org.spongepowered.api.data.manipulator.PotionEffectData;
 import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
 import org.spongepowered.api.data.manipulator.block.DoublePlantData;
+import org.spongepowered.api.data.manipulator.block.FlowerData;
 import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.api.data.manipulator.block.PoweredData;
 import org.spongepowered.api.data.manipulator.block.ShrubData;
@@ -125,6 +127,7 @@ import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.api.data.type.DoubleSizePlantType;
+import org.spongepowered.api.data.type.DoubleSizePlantTypes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.Fish;
@@ -142,6 +145,7 @@ import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.api.data.type.Profession;
@@ -152,6 +156,7 @@ import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.data.type.SkullType;
@@ -262,6 +267,7 @@ import org.spongepowered.common.data.manipulator.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.SpongeTradeOfferData;
 import org.spongepowered.common.data.manipulator.block.SpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.block.SpongeDoublePlantData;
+import org.spongepowered.common.data.manipulator.block.SpongeFlowerData;
 import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
 import org.spongepowered.common.data.manipulator.block.SpongePoweredData;
 import org.spongepowered.common.data.manipulator.block.SpongeShrubData;
@@ -282,6 +288,7 @@ import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.block.SpongeDoublePlantProcessor;
 import org.spongepowered.common.data.processor.block.SpongeLayeredDataProcessor;
+import org.spongepowered.common.data.processor.block.SpongePlantProcessor;
 import org.spongepowered.common.data.processor.block.SpongeShrubProcessor;
 import org.spongepowered.common.data.processor.block.SpongeTreeDataProcessor;
 import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
@@ -455,7 +462,18 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         .put("ROSE", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.ROSE)
         .put("PAEONIA", (DoubleSizePlantType) (Object) BlockDoublePlant.EnumPlantType.PAEONIA)
         .build();
-
+    private final Map<String, PlantType> plantTypeMappings = new ImmutableMap.Builder<String, PlantType>()
+        .put("DANDELION", (PlantType) (Object) BlockFlower.EnumFlowerType.DANDELION)
+        .put("POPPY", (PlantType) (Object) BlockFlower.EnumFlowerType.POPPY)
+        .put("BLUE_ORCHID", (PlantType) (Object) BlockFlower.EnumFlowerType.BLUE_ORCHID)
+        .put("ALLIUM", (PlantType) (Object) BlockFlower.EnumFlowerType.ALLIUM)
+        .put("HOUSTONIA", (PlantType) (Object) BlockFlower.EnumFlowerType.HOUSTONIA)
+        .put("RED_TULIP", (PlantType) (Object) BlockFlower.EnumFlowerType.RED_TULIP)
+        .put("ORANGE_TULIP", (PlantType) (Object) BlockFlower.EnumFlowerType.ORANGE_TULIP)
+        .put("WHITE_TULIP", (PlantType) (Object) BlockFlower.EnumFlowerType.WHITE_TULIP)
+        .put("PINK_TULIP", (PlantType) (Object) BlockFlower.EnumFlowerType.PINK_TULIP)
+        .put("OXEYE_DAISY", (PlantType) (Object) BlockFlower.EnumFlowerType.OXEYE_DAISY)
+        .build();
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
                     .put("ATTACK", new SpongeEntityInteractionType("ATTACK"))
@@ -1573,6 +1591,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.register(DoublePlantData.class, doublePlantProcessor);
         dataRegistry.registerDataProcessorAndImpl(DoublePlantData.class, SpongeDoublePlantData.class, doublePlantProcessor);
         dataRegistry.registerBlockProcessorAndImpl(DoublePlantData.class, SpongeDoublePlantData.class, doublePlantProcessor);
+
+        SpongePlantProcessor plantProcessor = new SpongePlantProcessor();
+        service.registerBuilder(FlowerData.class, plantProcessor);
+        dataRegistry.register(FlowerData.class, plantProcessor);
+        dataRegistry.registerDataProcessorAndImpl(FlowerData.class, SpongeFlowerData.class, plantProcessor);
+        dataRegistry.registerBlockProcessorAndImpl(FlowerData.class, SpongeFlowerData.class, plantProcessor);
         // User
         // TODO someone needs to write a User implementation...
     }
@@ -1792,6 +1816,18 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return newEntityTypeFromName(name, name);
     }
 
+    private void setDoublePlantMappings() {
+        RegistryHelper.mapFields(DoubleSizePlantTypes.class, this.doublePlantMappings);
+    }
+
+    private void setFlowerMappings() {
+        RegistryHelper.mapFields(PlantTypes.class, this.plantTypeMappings);
+    }
+
+    private void setShrubTypeMappings() {
+        RegistryHelper.mapFields(ShrubTypes.class, this.shrubTypeMappings);
+    }
+
     @Override
     public com.google.common.base.Optional<EntityStatistic> getEntityStatistic(StatisticGroup statisticGroup, EntityType entityType) {
         throw new UnsupportedOperationException(); // TODO
@@ -1863,6 +1899,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setNotePitches();
         setBannerPatternShapes();
         setEntityInteractionTypes();
+        setFlowerMappings();
+        setDoublePlantMappings();
+        setShrubTypeMappings();
     }
 
     public void postInit() {

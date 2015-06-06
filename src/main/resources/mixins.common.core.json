@@ -45,6 +45,7 @@
         "data.types.MixinEnumDyeColor",
         "data.types.MixinEnumShrubType",
         "data.types.MixinEnumDoublePlant",
+        "data.types.MixinEnumPlantType",
         "data.types.MixinFishType",
         "command.MixinCommandBlockLogic",
         "command.MixinCommandExecuteAtSender",
