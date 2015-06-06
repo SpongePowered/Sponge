@@ -36,6 +36,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.Packet;
+import net.minecraft.profiler.Profiler;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
@@ -46,6 +48,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -81,6 +84,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
@@ -92,6 +96,7 @@ import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
@@ -121,10 +126,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private ImmutableList<Populator> populators;
     private ImmutableList<GeneratorPopulator> generatorPopulators;
 
+    protected SpongeScoreboard spongeScoreboard = new SpongeScoreboard();
+
     @Shadow public WorldProvider provider;
     @Shadow protected WorldInfo worldInfo;
     @Shadow public Random rand;
     @Shadow public List<net.minecraft.entity.Entity> loadedEntityList;
+    @Shadow public Scoreboard worldScoreboard;
 
     @Shadow(prefix = "shadow$")
     public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
@@ -671,4 +679,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
         }
     }
+
+    @Override
+    public org.spongepowered.api.scoreboard.Scoreboard getScoreboard() {
+        return this.spongeScoreboard;
+    }
+
+    @Override
+    public void setScoreboard(org.spongepowered.api.scoreboard.Scoreboard scoreboard) {
+        this.spongeScoreboard = checkNotNull(((SpongeScoreboard) scoreboard), "Scoreboard cannot be null!");
+        this.worldScoreboard = ((SpongeScoreboard) scoreboard).createScoreboard(scoreboard);
+    }
+
 }

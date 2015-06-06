@@ -31,12 +31,13 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
-import net.minecraft.entity.Entity;
 import com.google.common.base.Preconditions;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.util.FoodStats;
 import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.api.GameProfile;
@@ -58,22 +59,27 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.Subjectable;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
+import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -93,12 +99,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     private MessageSink sink = Sponge.getGame().getServer().getBroadcastSink();
 
+    private org.spongepowered.api.scoreboard.Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
+
+    private net.minecraft.scoreboard.Scoreboard mcScoreboard = this.worldObj.getScoreboard();
+
     @Inject(method = "func_152339_d", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private void onRemoveEntity(Entity entityIn, CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {
             ((EntityHuman) entityIn).onRemovedFrom((EntityPlayerMP) (Object) this);
         }
+    }
+
+    @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria(Lnet/minecraft/scoreboard/IScoreObjectiveCriteria;)Ljava/util/Collection;"))
+    public Collection onGetObjectivesFromCriteria(net.minecraft.scoreboard.Scoreboard this$0, IScoreObjectiveCriteria criteria) {
+        return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
     }
 
     @Override
@@ -330,5 +345,25 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean isViewingInventory() {
         return this.openContainer != null;
+    }
+
+    @Override
+    public void setScoreboard(org.spongepowered.api.scoreboard.Scoreboard scoreboard) {
+        if (scoreboard == null) {
+            scoreboard = ((World) this.worldObj).getScoreboard();
+        }
+        ((IMixinServerScoreboard) this.mcScoreboard).removePlayer((EntityPlayerMP) (Object) this);
+        this.spongeScoreboard = scoreboard;
+        this.mcScoreboard = ((SpongeScoreboard) scoreboard).getPlayerScoreboard();
+        ((IMixinServerScoreboard) this.mcScoreboard).addPlayer((EntityPlayerMP) (Object) this);
+    }
+
+    @Override
+    public net.minecraft.scoreboard.Scoreboard getWorldScoreboard() {
+        return this.mcScoreboard;
+    }
+
+    public org.spongepowered.api.scoreboard.Scoreboard getScoreboard() {
+        return this.spongeScoreboard;
     }
 }

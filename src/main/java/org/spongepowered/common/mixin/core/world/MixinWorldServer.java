@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.util.BlockPos;
+import net.minecraft.village.VillageCollection;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -36,6 +38,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.interfaces.IMixinScoreboardSaveData;
 import org.spongepowered.common.interfaces.IMixinWorld;
 
 @NonnullByDefault
@@ -49,6 +53,12 @@ public abstract class MixinWorldServer extends MixinWorld {
             this.worldInfo.setSpawn(new BlockPos(55, 60, 0));
             ci.cancel();
         }
+    }
+
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
+    public void onInit(CallbackInfoReturnable<World> ci, String s, VillageCollection villagecollection, ScoreboardSaveData scoreboardsavedata) {
+        ((IMixinScoreboardSaveData) scoreboardsavedata).setSpongeScoreboard(this.spongeScoreboard);
+        this.spongeScoreboard.getScoreboards().add(this.worldScoreboard);
     }
 
     @Inject(method = "init", at = @At("RETURN"))

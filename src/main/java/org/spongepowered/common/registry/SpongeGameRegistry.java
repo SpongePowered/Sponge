@@ -48,6 +48,8 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemFishFood;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBanner;
+import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
@@ -194,11 +196,15 @@ import org.spongepowered.api.potion.PotionEffectTypes;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.ScoreboardBuilder;
 import org.spongepowered.api.scoreboard.TeamBuilder;
+import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.ObjectiveBuilder;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.api.statistic.BlockStatistic;
 import org.spongepowered.api.statistic.EntityStatistic;
@@ -332,6 +338,11 @@ import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 import org.spongepowered.common.rotation.SpongeRotation;
+import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
+import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
+import org.spongepowered.common.scoreboard.SpongeVisibility;
+import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
+import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.status.SpongeFavicon;
 import org.spongepowered.common.text.SpongeTextFactory;
 import org.spongepowered.common.text.chat.SpongeChatType;
@@ -371,6 +382,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     public static final Map<String, TextColor> textColorMappings = Maps.newHashMap();
     public static final Map<EnumChatFormatting, SpongeTextColor> enumChatColor = Maps.newEnumMap(EnumChatFormatting.class);
+
+    public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
+    public static final Map<Team.EnumVisible, SpongeVisibility> enumVisible = Maps.newEnumMap(Team.EnumVisible.class);
 
     public static final ImmutableMap<String, TextStyle> textStyleMappings = new ImmutableMap.Builder<String, TextStyle>()
             .put("BOLD", SpongeTextStyle.of(EnumChatFormatting.BOLD))
@@ -418,6 +432,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("HARD", (Difficulty) (Object) EnumDifficulty.HARD)
             .build();
     public final Map<String, SpongeEntityType> entityIdToTypeMappings = Maps.newHashMap();
+    private static final ImmutableMap<String, ObjectiveDisplayMode> objectiveDisplayModeMappings = new ImmutableMap.Builder<String, ObjectiveDisplayMode>()
+            .put("INTEGER", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.INTEGER)
+            .put("HEARTS", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.HEARTS)
+            .build();
+
     public final Map<Class<? extends Entity>, SpongeEntityType> entityClassToTypeMappings = Maps.newHashMap();
     public final Map<String, Enchantment> enchantmentMappings = Maps.newHashMap();
     private final Map<String, Career> careerMappings = Maps.newHashMap();
@@ -438,6 +457,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, WorldProperties> worldPropertiesNameMappings = Maps.newHashMap();
     private final Map<Integer, String> worldFolderDimensionIdMappings = Maps.newHashMap();
     public final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
+    public final Map<String, SpongeDisplaySlot> displaySlotMappings = Maps.newLinkedHashMap();
+    public final Map<String, Criterion> criteriaMap = Maps.newHashMap();
 
     private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
     private final Map<String, SkullType> skullTypeMappings = Maps.newHashMap();
@@ -496,11 +517,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(CoalType.class, this.coaltypeMappings)
                     .put(NotePitch.class, this.notePitchMappings)
                     .put(Comparison.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                    .put(Criterion.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(Criterion.class, this.criteriaMap)
                     .put(Difficulty.class, difficultyMappings)
                     .put(DimensionType.class, this.dimensionTypeMappings)
                     .put(DirtType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(DisguisedBlockType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(DisplaySlot.class, this.displaySlotMappings)
                     .put(DoubleSizePlantType.class, this.doublePlantMappings)
                     .put(Enchantment.class, this.enchantmentMappings)
                     .put(EquipmentType.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -514,7 +536,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(HorseStyle.class, SpongeEntityConstants.HORSE_STYLES)
                     .put(HorseVariant.class, SpongeEntityConstants.HORSE_VARIANTS)
                     .put(ItemType.class, ImmutableMap.<String, CatalogType>of()) // TODO handle special case of items
-                    .put(ObjectiveDisplayMode.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(ObjectiveDisplayMode.class, this.objectiveDisplayModeMappings)
                     .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
                     .put(Operation.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(ParticleType.class, this.particleByName)
@@ -541,8 +563,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(TextColor.class, textColorMappings)
                     .put(TileEntityType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                    .put(TreeType.class, this.treeTypeMappings)
-                    .put(Visibility.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(TreeType.class, treeTypeMappings)
+                    .put(Visibility.class, this.visibilityMappings)
                     .put(WallType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(Weather.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(WorldGeneratorModifier.class, this.worldGeneratorRegistry.viewModifiersMap())
@@ -630,17 +652,17 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public ObjectiveBuilder getObjectiveBuilder() {
-        return null;
+        return new SpongeObjectiveBuilder();
     }
 
     @Override
     public TeamBuilder getTeamBuilder() {
-        return null;
+        return new SpongeTeamBuilder();
     }
 
     @Override
     public ScoreboardBuilder getScoreboardBuilder() {
-        return null;
+        return new SpongeScoreboardBuilder();
     }
 
     @Override
@@ -1438,7 +1460,44 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(Difficulties.class, difficultyMappings);
     }
 
-    @SuppressWarnings("unchecked")
+    private void setDisplaySlots() {
+        this.displaySlotMappings.put("LIST", new SpongeDisplaySlot("LIST", null, 0));
+        this.displaySlotMappings.put("SIDEBAR", new SpongeDisplaySlot("SIDEBAR", null, 1));
+        this.displaySlotMappings.put("BELOW_NAME", new SpongeDisplaySlot("BELOW_NAME", null, 2));
+
+        RegistryHelper.mapFields(DisplaySlots.class, this.displaySlotMappings);
+
+        for (Map.Entry<EnumChatFormatting, SpongeTextColor> entry: this.enumChatColor.entrySet()) {
+            this.displaySlotMappings.put(entry.getValue().getId(), new SpongeDisplaySlot(entry.getValue().getId(), entry.getValue(), entry.getKey().getColorIndex() + 3));
+        }
+    }
+
+    private void addVisibility(String name, Team.EnumVisible handle) {
+        SpongeVisibility visibility = new SpongeVisibility(handle);
+        this.visibilityMappings.put(name, visibility);
+        this.enumVisible.put(handle, visibility);
+    }
+
+    private void setCriteria() {
+        this.criteriaMap.put("DUMMY", (Criterion) IScoreObjectiveCriteria.DUMMY);
+        this.criteriaMap.put("TRIGGER", (Criterion) IScoreObjectiveCriteria.TRIGGER);
+        this.criteriaMap.put("HEALTH", (Criterion) IScoreObjectiveCriteria.health);
+        this.criteriaMap.put("PLAYER_KiLLS", (Criterion) IScoreObjectiveCriteria.playerKillCount);
+        this.criteriaMap.put("TOTAL_KILLS", (Criterion) IScoreObjectiveCriteria.totalKillCount);
+        this.criteriaMap.put("DEATHS", (Criterion) IScoreObjectiveCriteria.deathCount);
+
+        RegistryHelper.mapFields(Criteria.class, this.criteriaMap);
+    }
+
+    private void setVisibilities() {
+        this.addVisibility("ALL", Team.EnumVisible.ALWAYS);
+        this.addVisibility("OWN_TEAM", Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
+        this.addVisibility("OTHER_TEAMS", Team.EnumVisible.HIDE_FOR_OWN_TEAM);
+        this.addVisibility("NONE", Team.EnumVisible.NEVER);
+
+        RegistryHelper.mapFields(Visibilities.class, this.visibilityMappings);
+    }
+
     private void setupSerialization() {
         Game game = Sponge.getGame();
         SerializationService service = game.getServiceManager().provide(SerializationService.class).get();
@@ -1713,6 +1772,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         });
     }
 
+    private void setObjectiveDisplayModes() {
+        RegistryHelper.mapFields(ObjectiveDisplayModes.class, this.objectiveDisplayModeMappings);
+    }
+
     private void setEntityTypes() {
         // internal mapping of our EntityTypes to actual MC names
         this.entityTypeMappings.put("DROPPED_ITEM", newEntityTypeFromName("Item"));
@@ -1805,7 +1868,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(OcelotTypes.class, SpongeEntityConstants.OCELOT_TYPES);
         RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);
     }
-
 
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
         return new SpongeEntityType((Integer) EntityList.stringToIDMapping.get(mcName), spongeName,
@@ -1902,6 +1964,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setFlowerMappings();
         setDoublePlantMappings();
         setShrubTypeMappings();
+        setDisplaySlots();
+        setVisibilities();
+        setCriteria();
+        setObjectiveDisplayModes();
     }
 
     public void postInit() {
