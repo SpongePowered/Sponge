@@ -105,7 +105,7 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
 
         int careerType = ((SpongeCareer) career).type;
         // Change and set the generators
-        professionTrades[careerType - 1] = modify(careerTrades, level, Arrays.asList(generators), false);
+        professionTrades[careerType] = modify(careerTrades, level, Arrays.asList(generators), false);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
 
         int careerType = ((SpongeCareer) career).type;
         // Change and set the generators
-        professionTrades[careerType - 1] = modify(careerTrades, level, generators, true);
+        professionTrades[careerType] = modify(careerTrades, level, generators, true);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
 
         final int careerType = ((SpongeCareer) career).type;
         // And set them
-        professionTrades[careerType - 1] = careerTrades;
+        professionTrades[careerType] = careerTrades;
 
     }
 
@@ -166,11 +166,11 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
     private static ITradeList[][][] getFor(Profession profession) {
         final int professionType = validate(profession);
         final ITradeList[][][][] defaultTrades = checkNotNull(EntityVillager.DEFAULT_TRADE_LIST_MAP, "defaultTradeOfferGenerators");
-        if (defaultTrades.length < professionType || defaultTrades[professionType - 1] == null) {
+        if (defaultTrades.length < professionType || defaultTrades[professionType] == null) {
             throw new IllegalStateException("Could not find valid entry in default trade offer generators. " +
                     "Is this (" + profession + ") a valid profession?");
         }
-        return defaultTrades[professionType - 1];
+        return defaultTrades[professionType];
     }
 
     private static int validate(Profession profession) {
@@ -178,7 +178,7 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
         checkArgument(profession instanceof SpongeProfession, "Unsupported Profession: %s (%s)",
                 profession.getName(), profession.getClass().getName());
         final int professionType = ((SpongeProfession) profession).type;
-        checkArgument(professionType > 0, "ProfessionType cannot be zero or negative");
+        checkArgument(professionType >= 0, "ProfessionType cannot be negative");
         return professionType;
     }
 
@@ -188,19 +188,21 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
 
     private static ITradeList[][] getFor(Career career, ITradeList[][][] professionTrades) {
         final int careerType = validate(career);
-        if (professionTrades.length < careerType || professionTrades[careerType - 1] == null) {
+        if (professionTrades.length < careerType || professionTrades[careerType] == null) {
             throw new IllegalStateException("Could not find valid entry in profession trade offer generators. " +
                     "Is this (" + career + ") a valid career?");
         }
-        return professionTrades[careerType - 1];
+        return professionTrades[careerType];
     }
 
+    // Notice Sponge's Career Ids start with 0, Minecraft's start with 1
+    // So we DON'T have to adjust the array index with -1
     private static int validate(Career career) {
         checkNotNull(career, "career");
         checkArgument(career instanceof SpongeCareer, "Unsupported Career: %s (%s)",
                 career.getName(), career.getClass().getName());
         final int careerType = ((SpongeCareer) career).type;
-        checkArgument(careerType > 0, "CareerType cannot be zero or negative");
+        checkArgument(careerType >= 0, "CareerType cannot be negative");
         return careerType;
     }
 
@@ -244,7 +246,7 @@ public class SpongeVillagerRegistry implements VillagerRegistry {
             // Append
             final int oldLength = levelTrades.length;
             final int newLength = generators.size();
-            final ITradeList[] newTrades = Arrays.copyOf(levelTrades, oldLength+newLength);
+            final ITradeList[] newTrades = Arrays.copyOf(levelTrades, oldLength + newLength);
             for (int i = 0; i < newLength; i++) {
                 newTrades[oldLength + i] = wrap(generators.get(i));
             }
