@@ -90,7 +90,7 @@ public class SpongeSignData extends SpongeAbstractData<SignData> implements Sign
     public DataContainer toContainer() {
         List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
         for (Text line : this.lines) {
-            jsonLines.add(Texts.toJson(line));
+            jsonLines.add(Texts.json().to(line));
         }
         return new MemoryDataContainer().set(LINES, jsonLines);
     }

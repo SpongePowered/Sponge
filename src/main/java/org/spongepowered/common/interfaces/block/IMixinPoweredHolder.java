@@ -28,14 +28,16 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.manipulator.block.PoweredData;
 
 public interface IMixinPoweredHolder extends IMixinBlock {
 
-    boolean isCurrentlyPowered(IBlockState blockState);
+    PoweredData getPoweredData(IBlockState blockState);
 
-    DataTransactionResult setPowered(World world, BlockPos blockPos, boolean powered);
+    DataTransactionResult setPoweredData(PoweredData poweredData, World world, BlockPos blockPos, DataPriority priority);
 
-    BlockState setUnpowered(IBlockState blockState);
+    BlockState resetPoweredData(BlockState blockState);
 
 }

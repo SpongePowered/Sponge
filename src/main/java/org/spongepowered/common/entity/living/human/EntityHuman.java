@@ -207,11 +207,6 @@ public class EntityHuman extends EntityCreature {
     }
 
     @Override
-    public void setAIMoveSpeed(float speedIn) {
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(speedIn);
-    }
-
-    @Override
     protected String getFallSoundString(int damageValue) {
         return damageValue > 4 ? "game.player.hurt.fall.big" : "game.player.hurt.fall.small";
     }

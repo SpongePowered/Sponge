@@ -38,6 +38,8 @@ public interface IMixinBlockDyeable extends IMixinBlock {
 
     DataTransactionResult setDyeableData(DyeableData data, World world, BlockPos blockPos, DataPriority priority);
 
+    BlockState setDyeableData(IBlockState blockState, DyeableData dyeableData);
+
     BlockState resetDyeableData(BlockState blockState);
 
 }

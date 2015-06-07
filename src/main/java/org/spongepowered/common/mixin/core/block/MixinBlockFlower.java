@@ -22,38 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.block;
+package org.spongepowered.common.mixin.core.block;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import com.google.common.collect.ImmutableList;
+import net.minecraft.block.BlockFlower;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.manipulator.block.FlowerData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.processor.block.SpongePlantProcessor;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.block.DoublePlantData;
-import org.spongepowered.api.data.type.DoubleSizePlantType;
-import org.spongepowered.api.data.type.DoubleSizePlantTypes;
-import org.spongepowered.common.data.manipulator.AbstractSingleValueData;
+import java.util.Collection;
 
-public class SpongeDoublePlantType extends AbstractSingleValueData<DoubleSizePlantType, DoublePlantData> implements DoublePlantData {
+@Mixin(BlockFlower.class)
+public abstract class MixinBlockFlower extends MixinBlock {
 
-    public static final DataQuery DOUBLE_SIZE_PLANT_TYPE = of("DoubleSizePlantType");
-
-    public SpongeDoublePlantType() {
-        super(DoublePlantData.class, DoubleSizePlantTypes.GRASS);
+    @Override
+    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
+        return getManipulators(world.getBlockState(blockPos));
     }
 
     @Override
-    public DoublePlantData copy() {
-        return new SpongeDoublePlantType().setValue(this.getValue());
-    }
-
-    @Override
-    public int compareTo(DoublePlantData o) {
-        return o.getValue().getId().compareTo(this.getValue().getId());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(DOUBLE_SIZE_PLANT_TYPE, this.getValue().getId());
+    public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
+        SpongePlantProcessor processor = (SpongePlantProcessor) Sponge.getSpongeRegistry().getManipulatorRegistry().getBuilder(FlowerData.class).get();
+        return ImmutableList.<DataManipulator<?>>of(processor.createFrom(blockState).get());
     }
 }

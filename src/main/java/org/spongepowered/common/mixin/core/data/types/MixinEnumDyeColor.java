@@ -27,30 +27,29 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.awt.Color;
 
-@NonnullByDefault
 @Mixin(net.minecraft.item.EnumDyeColor.class)
-public class MixinEnumDyeColor implements DyeColor {
+@Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
+public abstract class MixinEnumDyeColor {
 
     @Shadow
     private String name;
 
-    @Override
-    public String getName() {
+    public String dye$getName() {
         return this.name;
     }
 
-    @Override
-    public String getId() {
+    public String dye$getId() {
         return this.name;
     }
 
-    @Override
-    public Color getColor() {
+    public Color dye$getColor() {
         return new Color(((EnumDyeColor) (Object) this).getMapColor().colorValue);
     }
 

@@ -68,8 +68,10 @@ public class UserCollection extends SpongeSubjectCollection {
         GameProfile profile = cache.getProfileByUUID(uid); // Get already cached profile by uuid
         if (profile == null) {
             profile = MinecraftServer.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uid, null), false);
-            cache.addEntry(profile); // Cache newly looked up profile
-            cache.save(); // Save
+            if (profile.getName() != null) {
+                cache.addEntry(profile); // Cache newly looked up profile
+                cache.save(); // Save
+            }
         }
         return profile;
     }

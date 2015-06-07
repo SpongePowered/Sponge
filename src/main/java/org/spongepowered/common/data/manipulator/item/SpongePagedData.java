@@ -59,7 +59,7 @@ public class SpongePagedData extends AbstractListData<Text, PagedData> implement
     public DataContainer toContainer() {
         List<String> lore = Lists.newArrayList();
         for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
+            lore.add(Texts.json().to(text));
         }
         return new MemoryDataContainer().set(PAGES, lore);
     }

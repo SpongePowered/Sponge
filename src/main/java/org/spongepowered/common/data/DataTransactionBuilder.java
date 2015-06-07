@@ -57,6 +57,10 @@ public final class DataTransactionBuilder {
         return builder().result(DataTransactionResult.Type.SUCCESS).replace(manipulator).build();
     }
 
+    public static DataTransactionResult errorData(final DataManipulator<?> manipulator) {
+        return builder().result(DataTransactionResult.Type.ERROR).reject(manipulator).build();
+    }
+
     public static DataTransactionBuilder builder() {
         return new DataTransactionBuilder();
     }

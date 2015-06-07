@@ -22,10 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.text;
+package org.spongepowered.common.interfaces;
 
-public interface IMixinChatStyle {
+import org.spongepowered.common.scoreboard.SpongeTeam;
 
-    char[] asFormattingCode();
+public interface IMixinTeam {
 
+    void setSpongeTeam(SpongeTeam team);
+
+    SpongeTeam getSpongeTeam();
 }

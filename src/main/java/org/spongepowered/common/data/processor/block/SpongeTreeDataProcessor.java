@@ -102,6 +102,11 @@ public class SpongeTreeDataProcessor implements SpongeDataProcessor<TreeData>, S
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, TreeData manipulator) {
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         final IBlockState blockState = checkNotNull(world).getBlockState(checkNotNull(blockPos));
         if (blockState.getBlock() instanceof IMixinBlockTree) {

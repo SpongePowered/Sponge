@@ -85,7 +85,7 @@ public class SpongeDyeableDataProcessor implements SpongeDataProcessor<DyeableDa
                     case DATA_HOLDER:
                     case PRE_MERGE:
                         return Optional.of(manipulator.setValue(((IMixinItemDyeable) ((ItemStack) dataHolder).getItem()).getDyeColor(
-                                ((ItemStack) dataHolder))));
+                            ((ItemStack) dataHolder))));
                     default:
                         return Optional.of(manipulator);
                 }
@@ -170,6 +170,14 @@ public class SpongeDyeableDataProcessor implements SpongeDataProcessor<DyeableDa
             return fail(manipulator);
         }
         return ((IMixinBlockDyeable) blockState.getBlock()).setDyeableData(checkNotNull(manipulator), world, blockPos, priority);
+    }
+
+    @Override
+    public Optional<BlockState> withData(IBlockState blockState, DyeableData manipulator) {
+        if (blockState.getBlock() instanceof IMixinBlockDyeable) {
+            return Optional.of(((IMixinBlockDyeable) blockState.getBlock()).setDyeableData(blockState, manipulator));
+        }
+        return Optional.absent();
     }
 
     @Override

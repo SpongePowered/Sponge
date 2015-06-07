@@ -38,6 +38,8 @@ public interface IMixinBlockDirectional extends IMixinBlock {
 
     DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority);
 
+    BlockState setDirectionalData(IBlockState blockState, DirectionalData manipulator);
+
     BlockState resetDirectionData(BlockState blockState);
 
 }

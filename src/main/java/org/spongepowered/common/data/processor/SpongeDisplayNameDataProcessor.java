@@ -42,6 +42,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.SpongeDisplayNameData;
 import org.spongepowered.common.text.SpongeTexts;
@@ -75,7 +76,7 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
                 final String titleString = mainCompound.getString("title");
                 final DisplayNameData data = create();
-                data.setDisplayName(Texts.fromLegacy(titleString));
+                data.setDisplayName(Texts.legacy().fromUnchecked(titleString));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);
             }
@@ -84,7 +85,7 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
                 final String displayString = mainCompound.getString("Name");
                 final DisplayNameData data = new SpongeDisplayNameData();
                 System.err.println("The retrieved displayname from an item stack was: " + displayString);
-                data.setDisplayName(Texts.fromLegacy(displayString));
+                data.setDisplayName(Texts.legacy().fromUnchecked(displayString));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);
             } else {
@@ -94,7 +95,7 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
             if (((IWorldNameable) dataHolder).hasCustomName()) {
                 final DisplayNameData data = new SpongeDisplayNameData();
                 final String customName = ((IWorldNameable) dataHolder).getCommandSenderName();
-                data.setDisplayName(Texts.fromLegacy(customName));
+                data.setDisplayName(Texts.legacy().fromUnchecked(customName));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);
             }
@@ -126,9 +127,9 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
             switch (checkNotNull(priority)) {
                 case DATA_MANIPULATOR:
                     if (((ItemStack) dataHolder).getItem() == Items.written_book) {
-                        getTagCompound((ItemStack) dataHolder).setString("title", Texts.toLegacy(manipulator.getDisplayName()));
+                        getTagCompound((ItemStack) dataHolder).setString("title", Texts.legacy().to(manipulator.getDisplayName()));
                     } else {
-                        ((ItemStack) dataHolder).setStackDisplayName(Texts.toLegacy(manipulator.getDisplayName()));
+                        ((ItemStack) dataHolder).setStackDisplayName(Texts.legacy().to(manipulator.getDisplayName()));
                     }
                     return successNoData();
                 case DATA_HOLDER:
@@ -139,7 +140,7 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
             }
 
         } else if (dataHolder instanceof Entity) {
-            ((Entity) dataHolder).setCustomNameTag(Texts.toLegacy(manipulator.getDisplayName()));
+            ((Entity) dataHolder).setCustomNameTag(Texts.legacy().to(manipulator.getDisplayName()));
             ((Entity) dataHolder).setAlwaysRenderNameTag(manipulator.isCustomNameVisible());
         }
         return fail(manipulator);

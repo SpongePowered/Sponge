@@ -75,6 +75,7 @@ shadowJar {
         include dependency('aopalliance:aopalliance')
 
         include dependency('com.flowpowered:flow-math')
+        include dependency('com.flowpowered:flow-noise')
 
         include dependency('ninja.leaping.configurate:configurate-core')
         include dependency('ninja.leaping.configurate:configurate-hocon')

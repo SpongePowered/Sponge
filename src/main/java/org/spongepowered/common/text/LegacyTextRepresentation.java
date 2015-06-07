@@ -28,23 +28,31 @@ import com.google.common.collect.Lists;
 import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.TextRepresentation;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.api.util.TextMessageException;
+import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-public final class LegacyTexts {
-
-    private LegacyTexts() {
-    }
-
+public class LegacyTextRepresentation implements TextRepresentation {
+    public static final LegacyTextRepresentation DEFAULT_CHAR_INSTANCE = new LegacyTextRepresentation(SpongeTexts.COLOR_CHAR);
     private static final EnumChatFormatting[] formatting = EnumChatFormatting.values();
     private static final String LOOKUP;
+
+    private final char legacyChar;
+
+    public LegacyTextRepresentation(char legacyChar) {
+        this.legacyChar = legacyChar;
+    }
+
 
     static {
         char[] lookup = new char[formatting.length];
@@ -73,6 +81,100 @@ public final class LegacyTexts {
     private static EnumChatFormatting getFormat(char format) {
         int pos = findFormat(format);
         return pos != -1 ? formatting[pos] : null;
+    }
+
+    @Override
+    public String to(Text text) {
+        return to(text, SpongeTexts.getDefaultLocale());
+    }
+
+    @Override
+    public String to(Text text, Locale locale) {
+        return ((IMixinText) text).toLegacy(this.legacyChar, locale);
+    }
+
+    @Override
+    public Text from(String input) throws TextMessageException {
+        return fromUnchecked(input);
+    }
+
+    @Override
+    public Text fromUnchecked(String input) {
+        int next = input.lastIndexOf(this.legacyChar, input.length() - 2);
+        if (next == -1) {
+            return Texts.of(input);
+        }
+
+        List<Text> parts = Lists.newArrayList();
+
+        TextBuilder.Literal current = null;
+        boolean reset = false;
+
+        int pos = input.length();
+        do {
+            EnumChatFormatting format = getFormat(input.charAt(next + 1));
+            if (format != null) {
+                int from = next + 2;
+                if (from != pos) {
+                    if (current != null) {
+                        if (reset) {
+                            parts.add(current.build());
+                            reset = false;
+                            current = Texts.builder("");
+                        } else {
+                            current = Texts.builder("").append(current.build());
+                        }
+                    } else {
+                        current = Texts.builder("");
+                    }
+
+                    current.content(input.substring(from, pos));
+                } else if (current == null) {
+                    current = Texts.builder("");
+                }
+
+                reset |= applyStyle(current, format);
+                pos = next;
+            }
+
+            next = input.lastIndexOf(this.legacyChar, next - 1);
+        } while (next != -1);
+
+        if (current != null) {
+            parts.add(current.build());
+        }
+
+        Collections.reverse(parts);
+        return Texts.builder(pos > 0 ? input.substring(0, pos) : "").append(parts).build();
+    }
+
+    private static boolean applyStyle(TextBuilder builder, EnumChatFormatting formatting) {
+        switch (formatting) {
+            case BOLD:
+                builder.style(TextStyles.BOLD);
+                break;
+            case ITALIC:
+                builder.style(TextStyles.ITALIC);
+                break;
+            case UNDERLINE:
+                builder.style(TextStyles.UNDERLINE);
+                break;
+            case STRIKETHROUGH:
+                builder.style(TextStyles.STRIKETHROUGH);
+                break;
+            case OBFUSCATED:
+                builder.style(TextStyles.OBFUSCATED);
+                break;
+            case RESET:
+                return true;
+            default:
+                if (builder.getColor() == TextColors.NONE) {
+                    builder.color(SpongeTextColor.of(formatting));
+                }
+                return true;
+        }
+
+        return false;
     }
 
     public static String replace(String text, char from, char to) {
@@ -126,84 +228,4 @@ public final class LegacyTexts {
 
         return result.append(text, pos, text.length()).toString();
     }
-
-    public static Text.Literal parse(String text, char code) {
-        int next = text.lastIndexOf(code, text.length() - 2);
-        if (next == -1) {
-            return Texts.of(text);
-        }
-
-        List<Text> parts = Lists.newArrayList();
-
-        TextBuilder.Literal current = null;
-        boolean reset = false;
-
-        int pos = text.length();
-        do {
-            EnumChatFormatting format = getFormat(text.charAt(next + 1));
-            if (format != null) {
-                int from = next + 2;
-                if (from != pos) {
-                    if (current != null) {
-                        if (reset) {
-                            parts.add(current.build());
-                            reset = false;
-                            current = Texts.builder("");
-                        } else {
-                            current = Texts.builder("").append(current.build());
-                        }
-                    } else {
-                        current = Texts.builder("");
-                    }
-
-                    current.content(text.substring(from, pos));
-                }
-
-                if (current != null) {
-                    reset |= applyStyle(current, format);
-                }
-
-                pos = next;
-            }
-
-            next = text.lastIndexOf(code, next - 1);
-        } while (next != -1);
-
-        if (current != null) {
-            parts.add(current.build());
-        }
-
-        Collections.reverse(parts);
-        return Texts.builder(pos > 0 ? text.substring(0, pos) : "").append(parts).build();
-    }
-
-    private static boolean applyStyle(TextBuilder builder, EnumChatFormatting formatting) {
-        switch (formatting) {
-            case BOLD:
-                builder.style(TextStyles.BOLD).style(TextStyles.BOLD);
-                break;
-            case ITALIC:
-                builder.style(TextStyles.ITALIC);
-                break;
-            case UNDERLINE:
-                builder.style(TextStyles.UNDERLINE);
-                break;
-            case STRIKETHROUGH:
-                builder.style(TextStyles.STRIKETHROUGH);
-                break;
-            case OBFUSCATED:
-                builder.style(TextStyles.OBFUSCATED);
-                break;
-            case RESET:
-                return true;
-            default:
-                if (builder.getColor() == TextColors.NONE) {
-                    builder.color(SpongeTextColor.of(formatting));
-                }
-                return true;
-        }
-
-        return false;
-    }
-
 }

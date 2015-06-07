@@ -34,7 +34,7 @@ import org.spongepowered.api.event.server.StatusPingEvent;
 import org.spongepowered.api.status.StatusClient;
 import org.spongepowered.api.status.StatusResponse;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.text.LegacyTexts;
+import org.spongepowered.common.text.LegacyTextRepresentation;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
@@ -106,7 +106,7 @@ public final class SpongeStatusResponse {
     }
 
     public static String getUnformattedMotd(ServerStatusResponse response) {
-        return getFirstLine(LegacyTexts.strip(response.getServerDescription().getUnformattedText(), COLOR_CHAR, true));
+        return getFirstLine(LegacyTextRepresentation.strip(response.getServerDescription().getUnformattedText(), COLOR_CHAR, true));
     }
 
 }

@@ -22,19 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.text;
+package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.util.ChatStyle;
-import org.apache.commons.lang3.ArrayUtils;
+import com.google.common.collect.ImmutableList;
+import net.minecraft.block.BlockTallGrass;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.manipulator.block.ShrubData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.text.IMixinChatStyle;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.processor.block.SpongeShrubProcessor;
 
-@Mixin(targets = "net/minecraft/util/ChatStyle$1")
-public abstract class MixinChatStyleRoot extends ChatStyle implements IMixinChatStyle {
+import java.util.Collection;
+
+@Mixin(BlockTallGrass.class)
+public abstract class MixinBlockTallGrass extends MixinBlock {
 
     @Override
-    public char[] asFormattingCode() {
-        return ArrayUtils.EMPTY_CHAR_ARRAY;
+    public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
+        SpongeShrubProcessor processor = (SpongeShrubProcessor) Sponge.getSpongeRegistry().getManipulatorRegistry().getBuilder(ShrubData.class).get();
+        return ImmutableList.<DataManipulator<?>>of(processor.createFrom(blockState).get());
     }
 
+    @Override
+    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
+        return getManipulators(world.getBlockState(blockPos));
+    }
 }

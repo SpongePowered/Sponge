@@ -51,6 +51,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase {
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract IChatComponent getDisplayName();
     @Shadow public abstract void addExperience(int amount);
+    @Shadow public abstract net.minecraft.scoreboard.Scoreboard getWorldScoreboard();
     @Shadow protected BlockPos spawnChunk;
     @Shadow protected FoodStats foodStats;
 

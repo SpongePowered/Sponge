@@ -86,6 +86,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     public abstract int getPort();
 
     private MessageSink broadcastSink = SpongeMessageSinkFactory.INSTANCE.toAll();
+    private MessageSink sourceSink = broadcastSink;
 
     @Override
     public Optional<World> loadWorld(UUID uuid) {
@@ -149,16 +150,25 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @Override
     @SuppressWarnings("unchecked")
     public Collection<Player> getOnlinePlayers() {
+        if (getConfigurationManager() == null || getConfigurationManager().playerEntityList == null) {
+            return ImmutableList.of();
+        }
         return ImmutableList.copyOf((List<Player>) getConfigurationManager().playerEntityList);
     }
 
     @Override
     public Optional<Player> getPlayer(UUID uniqueId) {
+        if (getConfigurationManager() == null) {
+            return Optional.absent();
+        }
         return Optional.fromNullable((Player) getConfigurationManager().getPlayerByUUID(uniqueId));
     }
 
     @Override
     public Optional<Player> getPlayer(String name) {
+        if (getConfigurationManager() == null) {
+            return Optional.absent();
+        }
         return Optional.fromNullable((Player) getConfigurationManager().getPlayerByUsername(name));
     }
 
@@ -169,6 +179,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
 
     @Override
     public int getMaxPlayers() {
+        if (getConfigurationManager() == null) {
+            return 0;
+        }
         return getConfigurationManager().getMaxPlayers();
     }
 
@@ -209,6 +222,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @Override
     public String getName() {
         return "Server";
+    }
+
+    @Override
+    public void setMessageSink(MessageSink sink) {
+        this.sourceSink = sink;
+    }
+
+    @Override
+    public MessageSink getMessageSink() {
+        return this.sourceSink;
     }
 
     @Override

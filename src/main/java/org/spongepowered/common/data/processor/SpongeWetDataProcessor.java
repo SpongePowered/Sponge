@@ -103,6 +103,11 @@ public class SpongeWetDataProcessor implements SpongeDataProcessor<WetData>, Spo
     }
 
     @Override
+    public Optional<BlockState> withData(IBlockState blockState, WetData manipulator) {
+        return Optional.absent();
+    }
+
+    @Override
     public boolean remove(World world, BlockPos blockPos) {
         return false;
     }

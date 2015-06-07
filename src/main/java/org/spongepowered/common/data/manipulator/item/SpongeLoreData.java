@@ -59,7 +59,7 @@ public class SpongeLoreData extends AbstractListData<Text, LoreData> implements 
     public DataContainer toContainer() {
         List<String> lore = Lists.newArrayList();
         for (Text text : this.elementList) {
-            lore.add(Texts.toJson(text));
+            lore.add(Texts.json().to(text));
         }
         return new MemoryDataContainer().set(LORE, lore);
     }

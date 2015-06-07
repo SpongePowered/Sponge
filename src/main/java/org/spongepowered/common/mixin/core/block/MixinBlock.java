@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.BlockLiquid;
@@ -35,6 +37,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.BlockRandomTickEvent;
 import org.spongepowered.api.item.ItemBlock;
@@ -54,10 +57,11 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Collection;
 import java.util.Random;
 
 @NonnullByDefault
-@Mixin(Block.class)
+@Mixin(value = Block.class, priority = 999)
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow private boolean needsRandomTick;
@@ -151,4 +155,23 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return this.getMaterial() == Material.air;
     }
 
+    @Override
+    public Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos) {
+        return Lists.newArrayList();
+    }
+
+    @Override
+    public ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.of();
+    }
+
+    @Override
+    public void resetBlockState(World world, BlockPos blockPos) {
+        world.setBlockState(blockPos, shadow$getDefaultState());
+    }
+
+    @Override
+    public BlockState getDefaultBlockState() {
+        return getDefaultState();
+    }
 }

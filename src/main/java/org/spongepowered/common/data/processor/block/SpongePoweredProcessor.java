@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.block;
 
+import static org.spongepowered.common.data.DataTransactionBuilder.fail;
+
 import com.google.common.base.Optional;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
@@ -46,12 +48,12 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
 
     @Override
     public Optional<PoweredData> fillData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
-        return null;
+        return Optional.absent();
     }
 
     @Override
     public DataTransactionResult setData(DataHolder dataHolder, PoweredData manipulator, DataPriority priority) {
-        return null;
+        return fail(manipulator);
     }
 
     @Override
@@ -77,7 +79,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public Optional<PoweredData> fromBlockPos(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState)) {
+        if (blockState.getBlock() instanceof IMixinPoweredHolder && ((IMixinPoweredHolder) blockState.getBlock()).getPoweredData(blockState) != null) {
             return Optional.of(create());
         }
         return Optional.absent();
@@ -86,21 +88,30 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public DataTransactionResult setData(World world, BlockPos blockPos, PoweredData manipulator, DataPriority priority) {
         IBlockState blockState = world.getBlockState(blockPos);
-        world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, true));
-        return DataTransactionBuilder.successNoData();
+        if(blockState.getBlock() instanceof IMixinPoweredHolder) {
+            return ((IMixinPoweredHolder) blockState.getBlock()).setPoweredData(manipulator, world, blockPos, priority);
+        }
+        return DataTransactionBuilder.builder().build();
+    }
+
+    @Override
+    public Optional<BlockState> withData(IBlockState blockState, PoweredData manipulator) {
+        return Optional.absent();
     }
 
     @Override
     public boolean remove(World world, BlockPos blockPos) {
         IBlockState blockState = world.getBlockState(blockPos);
-        return world.setBlockState(blockPos, blockState.withProperty(BlockLever.POWERED, false));
+        if (blockState.getBlock() instanceof IMixinPoweredHolder) {
+            return world.setBlockState(blockPos, (IBlockState) ((IMixinPoweredHolder) blockState.getBlock()).resetPoweredData((BlockState) blockState), 3);
+        }
+        return false;
     }
 
     @Override
     public Optional<PoweredData> createFrom(IBlockState blockState) {
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {
-            return ((IMixinPoweredHolder) blockState.getBlock()).isCurrentlyPowered(blockState) ? Optional.of(create())
-                    : Optional.<PoweredData>absent();
+            return ((IMixinPoweredHolder) blockState.getBlock()).getPoweredData(blockState) != null ? Optional.of(create()) : Optional.<PoweredData>absent();
         }
         return Optional.absent();
     }
@@ -108,7 +119,7 @@ public class SpongePoweredProcessor implements SpongeDataProcessor<PoweredData>,
     @Override
     public Optional<BlockState> removeFrom(IBlockState blockState) {
         if (blockState.getBlock() instanceof IMixinPoweredHolder) {
-            return Optional.of(((IMixinPoweredHolder) blockState.getBlock()).setUnpowered(blockState));
+            return Optional.of(((IMixinPoweredHolder) blockState.getBlock()).resetPoweredData((BlockState) blockState));
         }
         return Optional.absent();
     }
