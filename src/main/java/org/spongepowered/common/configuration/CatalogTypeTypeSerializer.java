@@ -40,7 +40,7 @@ public class CatalogTypeTypeSerializer implements TypeSerializer {
 
     @Override
     public boolean isApplicable(TypeToken<?> type) {
-        return type.getRawType().isAssignableFrom(CatalogType.class);
+        return CatalogType.class.isAssignableFrom(type.getRawType());
     }
 
     @Override
