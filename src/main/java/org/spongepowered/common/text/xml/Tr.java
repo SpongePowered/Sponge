@@ -58,7 +58,7 @@ public class Tr extends Element {
             } else if (child instanceof Element) {
                 build.add(((Element) child).toText().build());
             } else {
-                throw new IllegalArgumentException("What is this evenn? " + child);
+                throw new IllegalArgumentException("What is this even? " + child);
             }
         }
         TextBuilder builder = Texts.builder(new SpongeTranslation(this.key), build.build());

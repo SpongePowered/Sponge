@@ -80,7 +80,6 @@ public class TextXmlRepresentation implements TextRepresentation {
             return Texts.toPlain(text, locale);
         }
         return writer.getBuffer().toString();
-        //return TextXmlPrinter.toXml(text, locale);
     }
 
 
