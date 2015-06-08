@@ -38,7 +38,6 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.source.ConsoleSource;
@@ -237,6 +236,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, Sub
     @Override
     public ConsoleSource getConsole() {
         return this;
+    }
+
+    @Override
+    public void shutdown() {
+        initiateShutdown();
     }
 
     @Override
