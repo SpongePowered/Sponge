@@ -39,6 +39,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.util.FoodStats;
+import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
@@ -50,6 +51,7 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.sink.MessageSink;
@@ -70,6 +72,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.Subjectable;
@@ -365,5 +368,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     public org.spongepowered.api.scoreboard.Scoreboard getScoreboard() {
         return this.spongeScoreboard;
+    }
+
+    @Override
+    public void kick() {
+        kick(Texts.of(Sponge.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
+    }
+
+    @Override
+    public void kick(Text message) {
+        final IChatComponent component = SpongeTexts.toComponent(message, getLocale());
+        PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
     }
 }
