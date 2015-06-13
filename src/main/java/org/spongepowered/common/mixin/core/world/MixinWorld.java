@@ -636,13 +636,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public byte getLuminanceFromSky(int x, int y, int z) {
-        return (byte) Math.max(0, getLightFor(EnumSkyBlock.SKY, new BlockPos(x, y, z)) - getSkylightSubtracted());
+    public int getLuminanceFromSky(int x, int y, int z) {
+        return Math.max(0, getLightFor(EnumSkyBlock.SKY, new BlockPos(x, y, z)) - getSkylightSubtracted());
     }
 
     @Override
-    public byte getLuminanceFromGround(int x, int y, int z) {
-        return (byte) getLightFor(EnumSkyBlock.BLOCK, new BlockPos(x, y, z));
+    public int getLuminanceFromGround(int x, int y, int z) {
+        return getLightFor(EnumSkyBlock.BLOCK, new BlockPos(x, y, z));
     }
 
     @Override
