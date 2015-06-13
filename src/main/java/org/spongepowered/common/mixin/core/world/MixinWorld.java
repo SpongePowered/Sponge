@@ -41,6 +41,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -74,6 +75,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -134,8 +136,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow public Scoreboard worldScoreboard;
 
-    @Shadow(prefix = "shadow$")
-    public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
+    @Shadow(prefix = "shadow$") public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
+    @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
 
     @Shadow
     public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
@@ -689,6 +691,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void setScoreboard(org.spongepowered.api.scoreboard.Scoreboard scoreboard) {
         this.spongeScoreboard = checkNotNull(((SpongeScoreboard) scoreboard), "Scoreboard cannot be null!");
         this.worldScoreboard = ((SpongeScoreboard) scoreboard).createScoreboard(scoreboard);
+    }
+
+    @Override
+    public Difficulty getDifficulty() {
+        return (Difficulty) (Object) this.shadow$getDifficulty();
     }
 
 }
