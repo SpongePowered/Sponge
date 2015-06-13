@@ -31,13 +31,11 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.tileentity.BannerData;
-import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,6 +45,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.util.List;
 
@@ -81,10 +80,10 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     private void updatePatterns() {
         this.patternLayers.clear();
         if (this.patterns != null) {
-            GameRegistry registry = Sponge.getGame().getRegistry();
+            SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
-                this.patternLayers.add(new SpongePatternLayer(registry.getType(BannerPatternShape.class, tagCompound.getString("Pattern")).get(),
+                this.patternLayers.add(new SpongePatternLayer(registry.idToBannerPatternShapeMappings.get(tagCompound.getString("Pattern")),
                         registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger("Color")).getName()).get()));
             }
         }
