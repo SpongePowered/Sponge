@@ -56,14 +56,15 @@ public class MixinServerConfigurationManager {
     }
 
     @Inject(method = "recreatePlayerEntity", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onRecreatePlayerEntityReturn(EntityPlayerMP playerIn, int dimension, boolean conqueredEnd, CallbackInfoReturnable<EntityPlayerMP> cir, World world, BlockPos blockpos, boolean flag1, Object object, EntityPlayerMP entityplayermp1, WorldServer worldserver, BlockPos blockpos1 ) {
+    public void onRecreatePlayerEntityReturn(EntityPlayerMP playerIn, int dimension, boolean conqueredEnd, CallbackInfoReturnable<EntityPlayerMP> cir, World world, BlockPos blockpos, boolean flag1, Object object, EntityPlayerMP entityplayermp1, WorldServer worldserver, BlockPos blockpos1) {
         ((Player) entityplayermp1).setScoreboard(this.scoreboard);
         this.scoreboard = null;
     }
 
+    // The 'world' local variable is only present in SpongeForge's @Overwrite
     @Surrogate
-    public void onRecreatePlayerEntityReturn(EntityPlayerMP playerIn, int dimension, boolean conqueredEnd, CallbackInfoReturnable<EntityPlayerMP> cir) {
-        ((Player) this.uuidToPlayerMap.get(playerIn.getUniqueID())).setScoreboard(this.scoreboard);
+    public void onRecreatePlayerEntityReturn(EntityPlayerMP playerIn, int dimension, boolean conqueredEnd, CallbackInfoReturnable<EntityPlayerMP> cir, BlockPos blockpos, boolean flag1, Object object, EntityPlayerMP entityplayermp1, WorldServer worldserver, BlockPos blockpos1 ) {
+        ((Player) entityplayermp1).setScoreboard(this.scoreboard);
         this.scoreboard = null;
     }
 
