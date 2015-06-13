@@ -163,6 +163,26 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
+    public int getLuminance(Vector3i position) {
+        return getLuminance(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public int getLuminance(int x, int y, int z) {
+        return Math.max(getLuminanceFromGround(x, y, z), getLuminanceFromSky(x, y, z));
+    }
+
+    @Override
+    public int getLuminanceFromSky(Vector3i position) {
+        return getLuminanceFromSky(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public int getLuminanceFromGround(Vector3i position) {
+        return getLuminanceFromGround(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
     public boolean isBlockPowered(Vector3i position) {
         return isBlockPowered(position.getX(), position.getY(), position.getZ());
     }

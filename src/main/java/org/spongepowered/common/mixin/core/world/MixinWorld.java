@@ -57,6 +57,7 @@ import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -192,6 +193,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.worldBorder.addListener(new PlayerBorderListener());
         }
     }
+
+    @Shadow
+    public abstract int getSkylightSubtracted();
+
+    @Shadow
+    public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
@@ -685,6 +692,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
         final BlockPos blockPos = new BlockPos(x, y, z);
         return ((IMixinBlock) getBlock(x, y, z).getType()).getManipulators((net.minecraft.world.World) ((Object) this), blockPos);
+    }
+
+    @Override
+    public int getLuminanceFromSky(int x, int y, int z) {
+        return Math.max(0, getLightFor(EnumSkyBlock.SKY, new BlockPos(x, y, z)) - getSkylightSubtracted());
+    }
+
+    @Override
+    public int getLuminanceFromGround(int x, int y, int z) {
+        return getLightFor(EnumSkyBlock.BLOCK, new BlockPos(x, y, z));
     }
 
     @Override
