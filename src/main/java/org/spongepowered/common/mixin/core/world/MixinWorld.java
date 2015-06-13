@@ -41,6 +41,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -170,6 +171,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow
     public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
+
+    @Shadow
+    public abstract int getSkylightSubtracted();
+
+    @Shadow
+    public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
@@ -626,6 +633,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
         final BlockPos blockPos = new BlockPos(x, y, z);
         return ((IMixinBlock) getBlock(x, y, z).getType()).getManipulators((net.minecraft.world.World) ((Object) this), blockPos);
+    }
+
+    @Override
+    public byte getLuminanceFromSky(int x, int y, int z) {
+        return (byte) Math.max(0, getLightFor(EnumSkyBlock.SKY, new BlockPos(x, y, z)) - getSkylightSubtracted());
+    }
+
+    @Override
+    public byte getLuminanceFromGround(int x, int y, int z) {
+        return (byte) getLightFor(EnumSkyBlock.BLOCK, new BlockPos(x, y, z));
     }
 
     @Override
