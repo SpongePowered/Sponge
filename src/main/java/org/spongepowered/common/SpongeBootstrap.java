@@ -111,7 +111,7 @@ public final class SpongeBootstrap {
         ((SpongeGameRegistry) Sponge.getGame().getRegistry()).init();
     }
 
-    public static void postIniitalizeRegistry() {
+    public static void postInitializeRegistry() {
         ((SpongeGameRegistry) Sponge.getGame().getRegistry()).postInit();
     }
 

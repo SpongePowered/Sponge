@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -66,15 +67,29 @@ public abstract class MixinSaveHandler {
     }
 
     @Inject(method = "loadWorldInfo", at = @At(value = "RETURN", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onLoadWorldInfoBeforeReturn0(CallbackInfoReturnable<WorldInfo> cir, File file1, NBTTagCompound nbttagcompound, NBTTagCompound nbttagcompound1, WorldInfo worldInfo) throws IOException {
+    public void onLoadWorldInfoBeforeReturn0(CallbackInfoReturnable<WorldInfo> cir, File file1, NBTTagCompound nbttagcompound,
+            NBTTagCompound nbttagcompound1, WorldInfo worldInfo) throws IOException {
+        loadDimensionAndOtherData((SaveHandler) (Object) this, worldInfo, nbttagcompound);
+        loadSpongeDatData(worldInfo);
+    }
+
+    @Surrogate
+    public void onLoadWorldInfoBeforeReturn0(CallbackInfoReturnable<WorldInfo> cir, File file1, WorldInfo worldInfo, NBTTagCompound nbttagcompound,
+            NBTTagCompound nbttagcompound1) throws IOException {
         loadDimensionAndOtherData((SaveHandler) (Object) this, worldInfo, nbttagcompound);
         loadSpongeDatData(worldInfo);
     }
 
     @Inject(method = "loadWorldInfo", at = @At(value = "RETURN", ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD)
     public void onLoadWorldInfoBeforeReturn1(CallbackInfoReturnable<WorldInfo> cir, File file1, NBTTagCompound nbttagcompound,
-            NBTTagCompound
-            nbttagcompound1, WorldInfo worldInfo) throws IOException {
+            NBTTagCompound nbttagcompound1, WorldInfo worldInfo) throws IOException {
+        loadDimensionAndOtherData((SaveHandler) (Object) this, worldInfo, nbttagcompound);
+        loadSpongeDatData(worldInfo);
+    }
+
+    @Surrogate
+    public void onLoadWorldInfoBeforeReturn1(CallbackInfoReturnable<WorldInfo> cir, File file1, WorldInfo worldInfo, NBTTagCompound nbttagcompound,
+            NBTTagCompound nbttagcompound1) throws IOException {
         loadDimensionAndOtherData((SaveHandler) (Object) this, worldInfo, nbttagcompound);
         loadSpongeDatData(worldInfo);
     }
