@@ -34,13 +34,13 @@ import org.spongepowered.api.util.command.source.CommandBlockSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
 @NonnullByDefault
 @Mixin(value = CommandBlockLogic.class, targets = "net/minecraft/tileentity/TileEntitySign$2")
-public abstract class MixinCommandBlockLogic implements ICommandSender, CommandBlockSource, Subjectable {
+public abstract class MixinCommandBlockLogic implements ICommandSender, CommandBlockSource, IMixinSubject {
 
     @Override
     public String getName() {

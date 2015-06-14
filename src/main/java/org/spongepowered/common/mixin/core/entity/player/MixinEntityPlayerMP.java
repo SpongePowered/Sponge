@@ -75,7 +75,7 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
-import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.text.SpongeTexts;
@@ -90,7 +90,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)
-public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, CommandSource, Subjectable, IMixinEntityPlayerMP {
+public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, CommandSource, IMixinSubject, IMixinEntityPlayerMP {
 
     public int newExperience = 0;
     public int newLevel = 0;
@@ -323,11 +323,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         this.keepsLevel = false;
-    }
-
-    @Override
-    public boolean usesCustomClient() {
-        return false;
     }
 
     @Override

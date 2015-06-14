@@ -65,9 +65,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.Subjectable;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.world.DimensionManager;
@@ -85,7 +85,7 @@ import java.util.UUID;
 
 @NonnullByDefault
 @Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer implements Server, ConsoleSource, Subjectable, IMixinMinecraftServer {
+public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinMinecraftServer {
 
     @Shadow private static Logger logger;
     @Shadow private ServerConfigurationManager serverConfigManager;

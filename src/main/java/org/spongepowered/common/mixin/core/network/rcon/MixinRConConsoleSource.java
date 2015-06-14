@@ -39,11 +39,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinRConConsoleSource;
-import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.text.SpongeTexts;
 
 @Mixin(RConConsoleSource.class)
-public abstract class MixinRConConsoleSource implements ICommandSender, IMixinRConConsoleSource, RconSource, Subjectable {
+public abstract class MixinRConConsoleSource implements ICommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
     @Shadow
     private StringBuffer buffer;
 

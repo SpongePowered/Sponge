@@ -47,8 +47,6 @@ public interface IMixinEntity {
 
     void inactiveTick();
 
-    NBTTagCompound getEntityData();
-
     NBTTagCompound getSpongeData();
 
     /**

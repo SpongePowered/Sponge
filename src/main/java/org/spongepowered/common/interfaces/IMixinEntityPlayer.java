@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.util.BlockPos;
 
-public interface IMixinEntityPlayer extends IMixinEntity {
+public interface IMixinEntityPlayer {
     BlockPos getBedLocation(int dim);
 
     boolean isSpawnForced(int dim);
