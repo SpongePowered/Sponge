@@ -130,8 +130,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
     private static final Vector2i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(1, 1);
     private boolean keepSpawnLoaded;
-    // TODO: what am I?
-    private long weatherStartTime;
     public SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
     private volatile Context worldContext;
     private ImmutableList<Populator> populators;
@@ -396,11 +394,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - this.weatherStartTime;
-    }
-
-    @Override
     public void forecast(Weather weather) {
         this.forecast(weather, (300 + this.rand.nextInt(600)) * 20);
     }
@@ -426,14 +419,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.worldInfo.setRaining(true);
             this.worldInfo.setThundering(true);
         }
-    }
-
-    @Inject(method = "updateWeatherBody()V", remap = false, at = {
-            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThundering(Z)V"),
-            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRaining(Z)V")
-    })
-    private void onUpdateWeatherBody(CallbackInfo ci) {
-        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
     }
 
     @Override

@@ -196,11 +196,11 @@ public class DimensionManager {
             worlds.put(id, world);
             weakWorldMap.put(world, world);
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().put(id, new long[100]);
-            Sponge.getLogger().info("Loading dimension %d (%s) (%s)", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
+            Sponge.getLogger().info("Loading dimension {} ({}) ({})", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
         } else {
             worlds.remove(id);
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().remove(id);
-            Sponge.getLogger().info("Unloading dimension %d", id);
+            Sponge.getLogger().info("Unloading dimension {}", id);
         }
 
         ArrayList<WorldServer> tmp = new ArrayList<WorldServer>();
