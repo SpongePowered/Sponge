@@ -65,7 +65,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     private String[] splitArgs(String arguments) {
-        return arguments.isEmpty() ? new String[0] : arguments.split(" +");
+        // Why split with a limit of -1? Because that's how you make it include trailing spaces. Because that makes sense. Isn't java great?
+        return arguments.isEmpty() ? new String[0] : arguments.split(" ", -1);
     }
 
     @Override
