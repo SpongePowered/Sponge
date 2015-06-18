@@ -43,6 +43,7 @@ import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
@@ -70,6 +71,7 @@ public final class SpongeBootstrap {
         try {
             SimpleCommandService commandService = new SimpleCommandService(Sponge.getGame(), slf4jLogger, new SpongeCommandDisambiguator(Sponge.getGame()));
             Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), CommandService.class, commandService);
+            commandService.register(Sponge.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
         } catch (ProviderExistsException e) {
             Sponge.getLogger().warn("Non-Sponge CommandService already registered: " + e.getLocalizedMessage());
         }
