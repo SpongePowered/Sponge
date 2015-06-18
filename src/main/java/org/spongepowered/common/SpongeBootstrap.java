@@ -34,6 +34,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.command.SimpleCommandService;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.api.service.rcon.RconService;
 import org.spongepowered.api.service.scheduler.AsynchronousScheduler;
@@ -44,6 +45,7 @@ import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
 import org.spongepowered.common.service.scheduler.AsyncScheduler;
@@ -91,6 +93,14 @@ public final class SpongeBootstrap {
             Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SerializationService.class, serializationService);
         } catch (ProviderExistsException e2) {
             Sponge.getLogger().warn("Non-Sponge SerializationService already registered: " + e2.getLocalizedMessage());
+        }
+
+        try {
+            PaginationService paginationService = new SpongePaginationService();
+            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), PaginationService.class, paginationService);
+        } catch (ProviderExistsException e) {
+            Sponge.getLogger().warn("Non-Sponge PaginationService already registered: " + e.getLocalizedMessage());
+
         }
 
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
