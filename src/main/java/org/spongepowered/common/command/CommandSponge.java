@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command;
 
+import static org.spongepowered.api.util.command.args.GenericArguments.choices;
 import static org.spongepowered.api.util.command.args.GenericArguments.dimension;
 import static org.spongepowered.api.util.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.util.command.args.GenericArguments.flags;
@@ -33,20 +34,30 @@ import static org.spongepowered.api.util.command.args.GenericArguments.seq;
 import static org.spongepowered.api.util.command.args.GenericArguments.string;
 import static org.spongepowered.api.util.command.args.GenericArguments.world;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.action.TextAction;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.CommandCallable;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.util.command.args.CommandContext;
+import org.spongepowered.api.util.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.util.command.spec.CommandExecutor;
 import org.spongepowered.api.util.command.spec.CommandSpec;
 import org.spongepowered.api.world.DimensionType;
@@ -63,7 +74,11 @@ import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 public class CommandSponge {
@@ -71,6 +86,7 @@ public class CommandSponge {
     private static final String LONG_INDENT = INDENT + INDENT;
 
     private static final Text NEWLINE_TEXT = Texts.of("\n");
+    private static final Text SEPARATOR_TEXT = Texts.of(", ");
 
     /**
      * Create a new instance of the Sponge command structure.
@@ -83,6 +99,7 @@ public class CommandSponge {
         nonFlagChildren.register(getVersionCommand(), "version");
         nonFlagChildren.register(getAuditCommand(), "audit");
         nonFlagChildren.register(getHeapCommand(), "heap");
+        nonFlagChildren.register(getPluginsCommand(), "plugins");
         flagChildren.register(getChunksCommand(), "chunks");
         flagChildren.register(getConfigCommand(), "config");
         flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
@@ -90,13 +107,14 @@ public class CommandSponge {
         return CommandSpec.builder()
                 .description(Texts.of("Text description"))
                 .extendedDescription(Texts.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
-                        INDENT, Texts.of(TextColors.GREEN, "chunks"), LONG_INDENT, "Prints chunk data for a specific dimension or world(s)\n",
-                        INDENT, Texts.of(TextColors.GREEN, "conf"), LONG_INDENT, "Configure sponge settings\n",
-                        INDENT, Texts.of(TextColors.GREEN, "heap"), LONG_INDENT, "Dump live JVM heap\n",
-                        INDENT, Texts.of(TextColors.GREEN, "reload", LONG_INDENT, "Reloads a global, dimension, or world config\n"),
-                        INDENT, Texts.of(TextColors.GREEN, "save"), LONG_INDENT, "Saves a global, dimension, or world config\n",
-                        INDENT, Texts.of(TextColors.GREEN, "version"), LONG_INDENT, "Prints current Sponge version\n",
-                        INDENT, Texts.of(TextColors.GREEN, "audit"), LONG_INDENT, "Audit mixin classes for implementation"))
+                        INDENT, title("chunks"), LONG_INDENT, "Prints chunk data for a specific dimension or world(s)\n",
+                        INDENT, title("conf"), LONG_INDENT, "Configure sponge settings\n",
+                        INDENT, title("heap"), LONG_INDENT, "Dump live JVM heap\n",
+                        INDENT, title("reload"), LONG_INDENT, "Reloads a global, dimension, or world config\n",
+                        INDENT, title("save"), LONG_INDENT, "Saves a global, dimension, or world config\n",
+                        INDENT, title("version"), LONG_INDENT, "Prints current Sponge version\n",
+                        INDENT, title("audit"), LONG_INDENT, "Audit mixin classes for implementation",
+                        INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins"))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
                         .valueFlag(world(Texts.of("world"), Sponge.getGame()), "-world", "w")
@@ -105,6 +123,7 @@ public class CommandSponge {
                 .executor(nonFlagChildren)
                 .build();
     }
+
 
     // TODO: Have some sort of separator between outputs for each world/dimension/global/whatever (that are exactly one line?)
     private abstract static class ConfigUsingExecutor implements CommandExecutor {
@@ -251,10 +270,10 @@ public class CommandSponge {
                         if (value.isPresent()) { // Set
                             setting.setValue(value.get());
                             return Texts.builder().append(Texts.of(TextColors.GOLD, key), Texts.of(" set to "),
-                                    Texts.of(TextColors.GREEN, setting.getValue())).build();
+                                    title(String.valueOf(setting.getValue()))).build();
                         } else {
                             return Texts.builder().append(Texts.of(TextColors.GOLD, key), Texts.of(" is "),
-                                    Texts.of(TextColors.GREEN, setting.getValue())).build();
+                                    title(String.valueOf(setting.getValue()))).build();
                         }
                     }
                 })
@@ -303,7 +322,7 @@ public class CommandSponge {
                         src.sendMessage(Texts.of("Writing JVM heap data to: ", file));
                         SpongeHooks.dumpHeap(file, true);
                         src.sendMessage(Texts.of("Heap dump complete"));
-                        return CommandResult.builder().successCount(1).build();
+                        return CommandResult.success();
                     }
                 })
                 .build();
@@ -318,9 +337,9 @@ public class CommandSponge {
                 .executor(new CommandExecutor() {
                     @Override
                     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                        src.sendMessage(Texts.of("SpongeMod: ", Texts.of(TextColors.GREEN, Sponge.getGame().getPlatform().getVersion()), "\n",
-                                "SpongeAPI: ", Texts.of(TextColors.GREEN, Sponge.getGame().getPlatform().getApiVersion())));
-                        return CommandResult.builder().successCount(1).build();
+                        src.sendMessage(Texts.of("SpongeMod: ", title(Sponge.getGame().getPlatform().getVersion()), "\n",
+                                "SpongeAPI: ", title(Sponge.getGame().getPlatform().getApiVersion())));
+                        return CommandResult.success();
                     }
                 })
                 .build();
@@ -338,5 +357,76 @@ public class CommandSponge {
                     }
                 })
                 .build();
+    }
+
+    private static class PluginsCommandElement extends PatternMatchingCommandElement {
+
+        protected PluginsCommandElement(@Nullable Text key) {
+            super(key);
+        }
+
+        @Override
+        protected Iterable<String> getChoices(CommandSource source) {
+            return Iterables.transform(Sponge.getGame().getPluginManager().getPlugins(), new Function<PluginContainer, String>() {
+                @Nullable
+                @Override
+                public String apply(@Nullable PluginContainer input) {
+                    return input.getId();
+                }
+            });
+        }
+
+        @Override
+        protected Object getValue(String choice) throws IllegalArgumentException {
+            Optional<PluginContainer> plugin = Sponge.getGame().getPluginManager().getPlugin(choice);
+            if (!plugin.isPresent()) {
+                throw new IllegalArgumentException("Plugin " + choice + " was not valid");
+            }
+            return plugin.get();
+        }
+    }
+
+    private static Text title(String title) {
+        return Texts.of(TextColors.GREEN, title);
+    }
+
+    private static CommandSpec getPluginsCommand() {
+        return CommandSpec.builder()
+                .description(Texts.of("List currently installed plugins"))
+                .permission("sponge.command.plugins")
+                .arguments(optional(new PluginsCommandElement(Texts.of("plugin"))))
+                .executor(new CommandExecutor() {
+                    @Override
+                    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+                        if (args.hasAny("plugin")) {
+                            for (PluginContainer container : args.<PluginContainer>getAll("plugin")) {
+                                TextBuilder build = Texts.builder().append(title(container.getName()),
+                                        Texts.of(" v" + container.getVersion()), NEWLINE_TEXT)
+                                        .append(Texts.of(INDENT, title("ID: "), container.getId(), NEWLINE_TEXT,
+                                                INDENT, title("Main class: "), container.getInstance() == null ? " Virtual mod " :
+                                                        container.getInstance().getClass().getCanonicalName()));
+                                // TODO: Provide more metadata once it is exposed
+                                src.sendMessage(build.build());
+
+                            }
+                        } else {
+                            Collection<PluginContainer> plugins = Sponge.getGame().getPluginManager().getPlugins();
+                            TextBuilder build = Texts.builder(String.format("Plugins (%d): ", plugins.size()));
+                            boolean first = true;
+                            for (PluginContainer next : plugins) {
+                                if (!first) {
+                                    build.append(SEPARATOR_TEXT);
+                                }
+                                first = false;
+                                build.append(Texts.builder(next.getName())
+                                        .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()))
+                                        .onHover(TextActions.showText(Texts.of("Version " + next.getVersion())))
+                                        .color(TextColors.GREEN).build());
+                            }
+                            src.sendMessage(build.build());
+                        }
+                        return CommandResult.success();
+                    }
+                }).build();
     }
 }
