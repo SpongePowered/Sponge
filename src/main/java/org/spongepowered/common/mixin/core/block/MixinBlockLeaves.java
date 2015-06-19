@@ -32,7 +32,6 @@ import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -41,7 +40,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.LayeredData;
 import org.spongepowered.api.data.manipulator.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
@@ -59,7 +57,6 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 import org.spongepowered.common.util.VecHelper;
-import sun.reflect.generics.tree.Tree;
 
 import java.util.Random;
 
@@ -70,7 +67,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = "net/minecraft/block/BlockLeaves.destroy (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeafDecay(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci, byte b0, int i, int j, int k, int l, byte b1, int i1, int j1, int k1) {
         Location block = new Location((Extent) worldIn, VecHelper.toVector(pos));
-        BlockSnapshot postChange = block.getSnapshot();
+        BlockSnapshot postChange = block.getBlockSnapshot();
         postChange.setBlockState(BlockTypes.AIR.getDefaultState());
         final LeafDecayEvent event = SpongeEventFactory.createLeafDecay(Sponge.getGame(), null, block, postChange); //TODO Fix null cause
         Sponge.getGame().getEventManager().post(event);
