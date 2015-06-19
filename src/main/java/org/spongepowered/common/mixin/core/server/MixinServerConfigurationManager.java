@@ -148,6 +148,10 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
             s1 = netManager.getRemoteAddress().toString();
         }
 
+        WorldInfo worldinfo = worldserver.getWorldInfo();
+        BlockPos blockpos = worldserver.getSpawnPoint();
+        this.setPlayerGameTypeBasedOnOther(playerIn, null, worldserver);
+
         // Sponge Start
 
         if (handler == null) {
@@ -158,10 +162,6 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         playerIn.playerNetServerHandler = handler;
 
         // Sponge End
-
-        WorldInfo worldinfo = worldserver.getWorldInfo();
-        BlockPos blockpos = worldserver.getSpawnPoint();
-        this.setPlayerGameTypeBasedOnOther(playerIn, null, worldserver);
 
         // Support vanilla clients logging into custom dimensions
         int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.getDimensionId(), worldserver, playerIn);
