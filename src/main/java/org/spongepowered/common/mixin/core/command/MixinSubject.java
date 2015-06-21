@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
-import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
 import java.util.Collections;
@@ -60,7 +60,7 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(value = {EntityPlayerMP.class, CommandBlockLogic.class, MinecraftServer.class, RConConsoleSource.class},
         targets = "net/minecraft/tileentity/TileEntitySign$2")
-public abstract class MixinSubject implements CommandSource, ICommandSender, Subjectable {
+public abstract class MixinSubject implements CommandSource, ICommandSender, IMixinSubject {
 
     @Nullable
     private Subject thisSubject;

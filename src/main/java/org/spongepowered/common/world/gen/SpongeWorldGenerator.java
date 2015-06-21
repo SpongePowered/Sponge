@@ -36,7 +36,6 @@ import java.util.List;
 
 /**
  * Implementation of {@link WorldGenerator}.
- *
  */
 public final class SpongeWorldGenerator implements WorldGenerator {
 

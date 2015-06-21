@@ -22,26 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderEnd;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 
-@NonnullByDefault
-@Mixin(WorldProviderEnd.class)
-public abstract class MixinWorldProviderEnd extends WorldProvider {
+import java.util.Hashtable;
 
-    @Override
-    public IChunkProvider createChunkGenerator() {
-        if (this.terrainType == WorldType.DEFAULT) {
-            return new ChunkProviderEnd(this.worldObj, this.worldObj.getSeed());
-        } else {
-            return super.createChunkGenerator(); // use custom GeneratorType
-        }
-    }
+public interface IMixinMinecraftServer {
+
+    Hashtable<Integer, long[]> getWorldTickTimes();
+
+    AnvilSaveHandler getHandler(String worldName);
 }

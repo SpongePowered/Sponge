@@ -22,19 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.world.type;
 
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.IChunkProvider;
 
-/**
- * Interface going with IMixinSubject-shared mixins (what am I even saying?).
- */
-public interface Subjectable {
+public class SpongeWorldTypeOverworld extends SpongeWorldType {
 
-    void setSubject(Subject subj);
+    public SpongeWorldTypeOverworld() {
+        super("OVERWORLD");
+    }
 
-    String getSubjectCollectionIdentifier();
-
-    Tristate permDefault(String permission);
+    public IChunkProvider getChunkGenerator(World world, String generatorOptions) {
+        return new net.minecraft.world.gen.ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(),
+                generatorOptions);
+    }
 }

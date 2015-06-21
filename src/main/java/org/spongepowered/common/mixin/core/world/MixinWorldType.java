@@ -25,10 +25,19 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.WorldChunkManagerHell;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderDebug;
+import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import org.spongepowered.api.data.DataContainer;
@@ -36,11 +45,15 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.gen.GeneratorPopulator;
+import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
+import org.spongepowered.common.world.gen.SpongeGeneratorPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 @NonnullByDefault
@@ -49,7 +62,6 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
 
     @Shadow private String worldType;
     @Shadow private int worldTypeId;
-
 
     @Override
     public String getId() {
@@ -108,13 +120,50 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         return this.createGeneratorFromString(world, json);
     }
 
+    @Override
+    public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
+        net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
+        IChunkProvider chunkProvider = this.getChunkGenerator(mcWorld, settings);
+        WorldChunkManager chunkManager = this.getChunkManager(mcWorld);
+
+        return new SpongeWorldGenerator(
+                SpongeBiomeGenerator.of(chunkManager),
+                SpongeGeneratorPopulator.of((WorldServer) world, chunkProvider),
+                ImmutableList.<GeneratorPopulator> of(),
+                ImmutableList.<Populator> of());
+    }
+
+    public WorldChunkManager getChunkManager(net.minecraft.world.World world) {
+        if ((Object) this == WorldType.FLAT) {
+            final FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(world.getWorldInfo().getGeneratorOptions());
+            return new WorldChunkManagerHell(
+                    BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), net.minecraft.world.biome.BiomeGenBase.field_180279_ad), 0.5F);
+        }
+        else if ((Object) this == WorldType.DEBUG_WORLD) {
+            return new WorldChunkManagerHell(net.minecraft.world.biome.BiomeGenBase.plains, 0.0F);
+        }
+        else {
+            return new WorldChunkManager(world);
+        }
+    }
+
+    public IChunkProvider getChunkGenerator(net.minecraft.world.World world, String generatorOptions) {
+        if ((Object) this == WorldType.FLAT) {
+            return new ChunkProviderFlat(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(),
+                    generatorOptions);
+        }
+        if ((Object) this == WorldType.DEBUG_WORLD) {
+            return new ChunkProviderDebug(world);
+        }
+        return new ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + this.getName().hashCode();
-        result = prime * result + worldTypeId;
+        result = prime * result + this.worldTypeId;
         return result;
     }
 
@@ -124,16 +173,9 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
             return false;
         }
 
-        WorldType other = (WorldType) obj;
-        if (!this.getName().equals(other.getWorldTypeName())) {
-            return false;
-        }
+        final WorldType other = (WorldType) obj;
+        return this.getName().equals(other.getWorldTypeName()) && this.worldTypeId == other.getWorldTypeID();
 
-        if (this.worldTypeId != other.getWorldTypeID()) {
-            return false;
-        }
-
-        return true;
     }
 
     @Override

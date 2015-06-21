@@ -230,7 +230,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
     @Override
     public WorldBuilder reset() {
         this.name = "spongeworld";
-        this.seed = (new Random()).nextLong();
+        this.seed = new Random().nextLong();
         this.gameMode = GameModes.SURVIVAL;
         this.generatorType = GeneratorTypes.DEFAULT;
         this.dimensionType = DimensionTypes.OVERWORLD;

@@ -36,12 +36,13 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class MixinEnumDoublePlant {
 
     @Shadow private String unlocalizedName;
+    @Shadow private String name;
 
     public String double$getId() {
         return this.unlocalizedName;
     }
 
     public String double$getName() {
-        return this.unlocalizedName;
+        return this.name;
     }
 }

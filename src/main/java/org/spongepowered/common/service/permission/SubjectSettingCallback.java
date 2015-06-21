@@ -28,7 +28,7 @@ import com.google.common.base.Predicate;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.common.interfaces.Subjectable;
+import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.mixin.core.command.MixinSubject;
 
 import javax.annotation.Nullable;
@@ -37,9 +37,9 @@ import javax.annotation.Nullable;
  * {@link MixinSubject} helper class to apply the appropriate subject to the mixin
  */
 public class SubjectSettingCallback implements Predicate<PermissionService> {
-    private final Subjectable ref;
+    private final IMixinSubject ref;
 
-    public SubjectSettingCallback(Subjectable ref) {
+    public SubjectSettingCallback(IMixinSubject ref) {
         this.ref = ref;
     }
 

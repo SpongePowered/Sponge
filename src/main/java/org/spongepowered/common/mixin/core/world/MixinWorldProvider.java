@@ -33,14 +33,20 @@ import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.world.DimensionManager;
+
+import java.io.File;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
@@ -78,10 +84,8 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         return this.getAverageGroundLevel();
     }
 
-
-
     public boolean canCoordinateBeSpawn(int x, int z) {
-        if (((GeneratorType) this.terrainType).equals(GeneratorTypes.END)) {
+        if (this.terrainType.equals(GeneratorTypes.END)) {
             return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
         }
         else {
@@ -105,16 +109,23 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     }
 
     public boolean getHasNoSky() {
-        if (((GeneratorType) this.terrainType).equals(GeneratorTypes.NETHER)) {
-            return true;
-        } else {
-            return this.hasNoSky;
-        }
+        return this.terrainType.equals(GeneratorTypes.NETHER) || this.hasNoSky;
     }
 
     @Override
     public DimensionType getType() {
         return ((SpongeGameRegistry) Sponge.getGame().getRegistry()).dimensionClassMappings.get(this.getClass());
+    }
+
+    @Override
+    @Nullable
+    public String getSaveFolder() {
+        return (this.dimensionId == 0 ? null : "DIM" + this.dimensionId);
+    }
+
+    @Override
+    public void setDimension(int dim) {
+        this.dimensionId = dim;
     }
 
     @Override
@@ -135,4 +146,31 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         return this.dimContext;
     }
 
+    @Overwrite
+    public static WorldProvider getProviderForDimension(int dimension) {
+        WorldProvider provider = DimensionManager.createProviderFor(dimension);
+        if (((IMixinWorldProvider) provider).getDimensionConfig() == null) {
+            SpongeConfig<SpongeConfig.DimensionConfig> dimConfig = SpongeGameRegistry.dimensionConfigs.get(provider.getClass());
+            if (dimConfig == null) {
+                String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+                dimConfig = new SpongeConfig<SpongeConfig.DimensionConfig>(SpongeConfig.Type.DIMENSION, new File(Sponge.getConfigDirectory()
+                        + File.separator + providerName + File.separator, "dimension.conf"), "sponge");
+                SpongeGameRegistry.dimensionConfigs.put(provider.getClass(), dimConfig);
+            }
+            ((IMixinWorldProvider) provider).setDimensionConfig(SpongeGameRegistry.dimensionConfigs.get(provider.getClass()));
+        }
+
+        Dimension dim = (Dimension) provider;
+        dim.setAllowsPlayerRespawns(DimensionManager.shouldLoadSpawn(dimension));
+        return provider;
+    }
+
+    @Override
+    public int getAverageGroundLevel() {
+        if (this.terrainType.equals(GeneratorTypes.END)) {
+            return 50;
+        } else {
+            return ((IMixinWorldType) this.terrainType).getMinimumSpawnHeight(this.worldObj);
+        }
+    }
 }

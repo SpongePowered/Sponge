@@ -24,13 +24,23 @@
  */
 package org.spongepowered.common.interfaces;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
 import org.spongepowered.common.configuration.SpongeConfig;
 
 public interface IMixinWorldProvider {
+
+    String getSaveFolder();
+
+    void setDimension(int dim);
 
     void setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config);
 
     SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig();
 
     int getAverageGroundLevel();
+
+    BlockPos getRandomizedSpawnPoint();
+
+    int getRespawnDimension(EntityPlayerMP playerIn);
 }

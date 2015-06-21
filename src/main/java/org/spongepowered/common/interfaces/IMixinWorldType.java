@@ -31,9 +31,13 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 public interface IMixinWorldType {
 
-    public static final DataQuery STRING_VALUE = DataQuery.of("customSettings");
+    DataQuery STRING_VALUE = DataQuery.of("customSettings");
 
     SpongeWorldGenerator createGenerator(World world, DataContainer settings);
 
     SpongeWorldGenerator createGeneratorFromString(World world, String settings);
+
+    int getMinimumSpawnHeight(net.minecraft.world.World world);
+
+    int getSpawnFuzz();
 }

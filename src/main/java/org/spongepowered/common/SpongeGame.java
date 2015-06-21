@@ -42,6 +42,8 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.service.scheduler.AsyncScheduler;
 import org.spongepowered.common.service.scheduler.SyncScheduler;
 
+import java.io.File;
+
 import javax.inject.Singleton;
 
 @Singleton
@@ -113,4 +115,5 @@ public abstract class SpongeGame implements Game {
         return (Server) MinecraftServer.getServer();
     }
 
+    public abstract File getSavesDirectory();
 }

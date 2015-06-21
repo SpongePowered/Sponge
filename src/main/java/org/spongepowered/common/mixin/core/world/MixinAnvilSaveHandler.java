@@ -36,7 +36,7 @@ import java.io.File;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.storage.AnvilSaveHandler.class)
-public class MixinAnvilSaveHandler extends SaveHandler {
+public abstract class MixinAnvilSaveHandler extends SaveHandler {
 
     public MixinAnvilSaveHandler(File savesDirectory, String directoryName, boolean playersDirectoryIn) {
         super(savesDirectory, directoryName, playersDirectoryIn);
@@ -45,7 +45,7 @@ public class MixinAnvilSaveHandler extends SaveHandler {
     @Override
     @Overwrite
     public IChunkLoader getChunkLoader(WorldProvider provider) {
-        // To workaround the issue of every world having a seperate savehandler
+        // To workaround the issue of every world having a separate save handler
         // we won't be generating a DIMXX folder for chunk loaders since this name is already generated
         // for the world container with provider.getSaveFolder().
         // This allows users to remove our mod and maintain world compatibility.

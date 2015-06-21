@@ -193,7 +193,8 @@
         "world.biome.MixinBiomeGenBase",
         "world.difficulty.MixinEnumDifficulty",
         "world.extent.MixinExtent",
-        "world.storage.MixinWorldInfo"
+        "world.storage.MixinWorldInfo",
+        "world.storage.MixinSaveHandler"
     ],
     "server": [
         "server.MixinDedicatedServer",

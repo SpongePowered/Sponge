@@ -43,6 +43,7 @@ public class SpongeProfession extends SpongeEntityMeta implements Profession {
 
     @Override
     public Translation getTranslation() {
+        // TODO: Does vanilla have a translation for this?
         return null;
     }
 

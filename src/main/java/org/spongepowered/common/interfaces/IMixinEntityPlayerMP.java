@@ -28,4 +28,6 @@ package org.spongepowered.common.interfaces;
 public interface IMixinEntityPlayerMP {
 
     void reset();
+
+    boolean usesCustomClient();
 }

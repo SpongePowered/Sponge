@@ -26,7 +26,6 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.world.Location;
 
 public interface IMixinEntity {
 
@@ -49,8 +48,6 @@ public interface IMixinEntity {
     void inactiveTick();
 
     NBTTagCompound getSpongeData();
-
-    boolean teleportEntity(Entity entity, Location location, int currentDim, int targetDim, boolean forced);
 
     /**
      * Read extra data (SpongeData) from the entity's NBT tag.
