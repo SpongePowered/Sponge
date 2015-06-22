@@ -50,6 +50,7 @@
         "data.types.MixinEnumDoublePlant",
         "data.types.MixinEnumPlantType",
         "data.types.MixinFishType",
+        "data.types.MixinGameType",
         "command.MixinCommandBlockLogic",
         "command.MixinCommandExecuteAtSender",
         "command.MixinSubject",

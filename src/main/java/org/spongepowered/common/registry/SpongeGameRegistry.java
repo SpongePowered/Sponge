@@ -105,6 +105,7 @@ import org.spongepowered.api.data.manipulator.entity.AgeableData;
 import org.spongepowered.api.data.manipulator.entity.AgentData;
 import org.spongepowered.api.data.manipulator.entity.CareerData;
 import org.spongepowered.api.data.manipulator.entity.FoodData;
+import org.spongepowered.api.data.manipulator.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.api.data.manipulator.entity.InvulnerabilityData;
 import org.spongepowered.api.data.manipulator.entity.SkinData;
@@ -285,6 +286,7 @@ import org.spongepowered.common.data.manipulator.entity.SpongeAgeableData;
 import org.spongepowered.common.data.manipulator.entity.SpongeAgentData;
 import org.spongepowered.common.data.manipulator.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.entity.SpongeFoodData;
+import org.spongepowered.common.data.manipulator.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.entity.SpongeHealthData;
 import org.spongepowered.common.data.manipulator.entity.SpongeInvulnerabilityData;
 import org.spongepowered.common.data.manipulator.entity.SpongeSkinData;
@@ -300,6 +302,7 @@ import org.spongepowered.common.data.processor.block.SpongeLayeredDataProcessor;
 import org.spongepowered.common.data.processor.block.SpongePlantProcessor;
 import org.spongepowered.common.data.processor.block.SpongeShrubProcessor;
 import org.spongepowered.common.data.processor.block.SpongeTreeDataProcessor;
+import org.spongepowered.common.data.processor.entity.SpongeGameModeDataProcessor;
 import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
@@ -334,7 +337,6 @@ import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.entity.player.gamemode.SpongeGameMode;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -425,11 +427,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put(Direction.DOWN, EnumFacing.DOWN)
             .build();
     public static final ImmutableMap<String, GameMode> gameModeMappings = new ImmutableMap.Builder<String, GameMode>()
-            .put("SURVIVAL", new SpongeGameMode("SURVIVAL"))
-            .put("CREATIVE", new SpongeGameMode("CREATIVE"))
-            .put("ADVENTURE", new SpongeGameMode("ADVENTURE"))
-            .put("SPECTATOR", new SpongeGameMode("SPECTATOR"))
-            .put("NOT_SET", new SpongeGameMode("NOT_SET"))
+            .put("SURVIVAL", (GameMode) (Object) WorldSettings.GameType.SURVIVAL)
+            .put("CREATIVE", (GameMode) (Object) WorldSettings.GameType.CREATIVE)
+            .put("ADVENTURE", (GameMode) (Object) WorldSettings.GameType.ADVENTURE)
+            .put("SPECTATOR", (GameMode) (Object) WorldSettings.GameType.SPECTATOR)
+            .put("NOT_SET", (GameMode) (Object) WorldSettings.GameType.NOT_SET)
             .build();
     private static final ImmutableMap<String, Difficulty> difficultyMappings = new ImmutableMap.Builder<String, Difficulty>()
             .put("PEACEFUL", (Difficulty) (Object) EnumDifficulty.PEACEFUL)
@@ -1666,6 +1668,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.register(FlowerData.class, plantProcessor);
         dataRegistry.registerDataProcessorAndImpl(FlowerData.class, SpongeFlowerData.class, plantProcessor);
         dataRegistry.registerBlockProcessorAndImpl(FlowerData.class, SpongeFlowerData.class, plantProcessor);
+
+        SpongeGameModeDataProcessor gameModeProcessor = new SpongeGameModeDataProcessor();
+        service.registerBuilder(GameModeData.class, gameModeProcessor);
+        dataRegistry.register(GameModeData.class, gameModeProcessor);
+        dataRegistry.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, gameModeProcessor);
         // User
         // TODO someone needs to write a User implementation...
     }

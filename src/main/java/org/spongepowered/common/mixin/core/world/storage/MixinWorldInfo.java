@@ -62,7 +62,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.entity.player.gamemode.SpongeGameMode;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
@@ -253,7 +252,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public GameMode getGameMode() {
-        return new SpongeGameMode(this.theGameType.getName());
+        return (GameMode) (Object) this.theGameType;
     }
 
     @Override
