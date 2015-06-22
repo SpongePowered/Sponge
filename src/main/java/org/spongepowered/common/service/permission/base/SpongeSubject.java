@@ -29,21 +29,11 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.service.permission.SpongePermissionService;
 
 import java.util.List;
 import java.util.Set;
 
 public abstract class SpongeSubject implements Subject {
-    private final SpongePermissionService service;
-
-    protected SpongeSubject(SpongePermissionService service) {
-        this.service = service;
-    }
-
-    protected SpongePermissionService getService() {
-        return this.service;
-    }
 
     @Override
     public SubjectData getTransientSubjectData() {

@@ -45,6 +45,7 @@ import java.util.UUID;
  * Holds logic for an active pagination that is occurring.
  */
 abstract class ActivePagination {
+
     private static final Text SLASH_TEXT = Texts.of("/");
     private static final Text DIVIDER_TEXT = Texts.of(" ");
     private final WeakReference<CommandSource> src;
@@ -94,16 +95,19 @@ abstract class ActivePagination {
     }
 
     protected abstract Iterable<Text> getLines(int page) throws CommandException;
+
     protected abstract boolean hasPrevious(int page);
+
     protected abstract boolean hasNext(int page);
+
     protected abstract int getTotalPages();
 
     public void nextPage() throws CommandException {
-        specificPage(++this.currentPage);
+        specificPage(this.currentPage + 1);
     }
 
     public void previousPage() throws CommandException {
-        specificPage(--this.currentPage);
+        specificPage(this.currentPage - 1);
     }
 
     public void currentPage() throws CommandException {
@@ -123,6 +127,8 @@ abstract class ActivePagination {
         if (src == null) {
             throw new CommandException(t("Source for pagination %s is no longer active!", getId()));
         }
+        this.currentPage = page;
+
         List<Text> toSend = new ArrayList<Text>();
         Text title = this.title;
         if (title != null) {

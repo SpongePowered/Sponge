@@ -31,6 +31,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -62,7 +63,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
@@ -80,6 +80,8 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
@@ -95,7 +97,8 @@ import java.util.Map.Entry;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)
-public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, CommandSource, IMixinSubject, IMixinEntityPlayerMP {
+public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
+        IMixinCommandSource {
 
     public int newExperience = 0;
     public int newLevel = 0;
@@ -108,8 +111,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
     @Shadow public MinecraftServer mcServer;
-
-    private MessageSink sink = Sponge.getGame().getServer().getBroadcastSink();
 
     private org.spongepowered.api.scoreboard.Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
 
@@ -160,16 +161,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void sendMessage(Text... messages) {
-        sendMessage(ChatTypes.CHAT, messages);
-    }
-
-    @Override
-    public void sendMessage(Iterable<Text> messages) {
-        sendMessage(ChatTypes.CHAT, messages);
-    }
-
-    @Override
     public void sendMessage(ChatType type, Text... messages) {
         for (Text text : messages) {
             if (type == ChatTypes.ACTION_BAR) {
@@ -198,17 +189,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
                     ((SpongeChatType) type).getByteId()));
         }
-    }
-
-    @Override
-    public void setMessageSink(MessageSink sink) {
-        checkNotNull(sink, "sink");
-        this.sink = sink;
-    }
-
-    @Override
-    public MessageSink getMessageSink() {
-        return this.sink;
     }
 
     @Override
@@ -413,7 +393,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final IChatComponent component = SpongeTexts.toComponent(message, getLocale());
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
     }
-
+    
     @Override
     public void playSound(SoundType sound, Vector3d position, double volume) {
         this.playSound(sound, position, volume, 1);
@@ -430,4 +410,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 (float) Math.max(minVolume, volume), (float) pitch));
     }
 
+    @Override
+    public CommandSource asCommandSource() {
+        return this;
+    }
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return (ICommandSender) this;
+    }
 }

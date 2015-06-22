@@ -34,6 +34,8 @@ import net.minecraft.util.Vec3i;
 
 public final class VecHelper {
 
+    public static final Vec3 VEC3_ORIGIN = new Vec3(0, 0, 0);
+
     // === Flow Vector3d --> BlockPos ===
 
     public static BlockPos toBlockPos(Vector3d vector) {

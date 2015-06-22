@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common;
 
+import org.spongepowered.common.command.SpongeHelpCommand;
+
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -76,7 +78,9 @@ public final class SpongeBootstrap {
                 new SpongeCommandDisambiguator(Sponge.getGame()));
         if (registerService(CommandService.class, commandService)) {
             commandService.register(Sponge.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
+            commandService.register(Sponge.getPlugin(), SpongeHelpCommand.create(), "help");
         }
+
         registerService(SqlService.class, new SqlServiceImpl());
         if (!registerService(SchedulerService.class, SpongeScheduler.getInstance())) {
             throw new ExceptionInInitializerError("Cannot continue with a Non-Sponge Scheduler!");

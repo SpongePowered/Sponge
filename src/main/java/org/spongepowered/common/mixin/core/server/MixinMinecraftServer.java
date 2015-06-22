@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -52,6 +53,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -64,11 +66,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -85,7 +88,8 @@ import java.util.UUID;
 
 @NonnullByDefault
 @Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinMinecraftServer {
+public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
+        IMixinMinecraftServer {
 
     @Shadow private static Logger logger;
     @Shadow private ServerConfigurationManager serverConfigManager;
@@ -119,9 +123,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow
     @SideOnly(Side.SERVER)
     public abstract int getPort();
-
-    private final MessageSink broadcastSink = SpongeMessageSinkFactory.INSTANCE.toAll();
-    private MessageSink sourceSink = this.broadcastSink;
 
     @Override
     public Optional<World> loadWorld(UUID uuid) {
@@ -159,7 +160,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public MessageSink getBroadcastSink() {
-        return this.broadcastSink;
+        return SpongeMessageSinkFactory.TO_ALL;
     }
 
     @Override
@@ -226,20 +227,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public void sendMessage(Text... messages) {
-        for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
-    public void sendMessage(Iterable<Text> messages) {
-        for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
     public String getIdentifier() {
         return getName();
     }
@@ -255,22 +242,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public String getName() {
-        return "Server";
-    }
-
-    @Override
-    public void setMessageSink(MessageSink sink) {
-        this.sourceSink = sink;
-    }
-
-    @Override
-    public MessageSink getMessageSink() {
-        return this.sourceSink;
-    }
-
-    @Override
     public ConsoleSource getConsole() {
+        return this;
+    }
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return (MinecraftServer) (Object) this;
+    }
+
+    @Override
+    public CommandSource asCommandSource() {
         return this;
     }
 

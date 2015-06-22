@@ -24,52 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
+import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.source.CommandBlockSource;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.VecHelper;
 
 @NonnullByDefault
-@Mixin(value = CommandBlockLogic.class, targets = "net/minecraft/tileentity/TileEntitySign$2")
-public abstract class MixinCommandBlockLogic implements ICommandSender, CommandBlockSource, IMixinSubject {
-
-    @Override
-    public String getName() {
-        return getCommandSenderName();
-    }
-
-    @Override
-    public void sendMessage(Text... messages) {
-        for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
-    public void sendMessage(Iterable<Text> messages) {
-        for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
-    public Location getLocation() {
-        return new Location((Extent) getEntityWorld(), VecHelper.toVector(getPositionVector()));
-    }
-
-    @Override
-    public org.spongepowered.api.world.World getWorld() {
-        return (org.spongepowered.api.world.World) getEntityWorld();
-    }
+@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+public abstract class MixinCommandBlockSource implements IMixinCommandSource, CommandBlockSource, IMixinSubject {
 
     @Override
     public String getIdentifier() {
