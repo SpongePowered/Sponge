@@ -64,6 +64,8 @@
         "entity.MixinEntityXPOrb",
         "entity.MixinEntityFallingBlock",
         "entity.ai.MixinEntityAIMate",
+        "entity.explosive.MixinExplosive",
+        "entity.explosive.MixinFusedExplosive",
         "entity.explosive.MixinEntityTNTPrimed",
         "entity.hanging.MixinEntityHanging",
         "entity.hanging.MixinEntityPainting",
