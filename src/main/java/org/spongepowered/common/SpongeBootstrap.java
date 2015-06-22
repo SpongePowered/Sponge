@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common;
 
+import org.spongepowered.common.command.SpongeHelpCommand;
+
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -75,6 +77,7 @@ public final class SpongeBootstrap {
         } catch (ProviderExistsException e) {
             Sponge.getLogger().warn("Non-Sponge CommandService already registered: " + e.getLocalizedMessage());
         }
+        Sponge.getGame().getCommandDispatcher().register(Sponge.getPlugin(), new SpongeHelpCommand(), "help");
 
         try {
             Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SqlService.class, new SqlServiceImpl());

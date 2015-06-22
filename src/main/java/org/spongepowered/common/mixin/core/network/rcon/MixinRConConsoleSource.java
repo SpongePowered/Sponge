@@ -30,20 +30,22 @@ import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.RconSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinRConConsoleSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.text.SpongeTexts;
 
 @Mixin(RConConsoleSource.class)
-public abstract class MixinRConConsoleSource implements ICommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
+public abstract class MixinRConConsoleSource implements ICommandSender, IMixinCommandSource, IMixinCommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
+
     @Shadow
     private StringBuffer buffer;
 
@@ -69,20 +71,6 @@ public abstract class MixinRConConsoleSource implements ICommandSender, IMixinRC
         return this.clientThread.loggedIn;
     }
 
-    @Override
-    public void sendMessage(Iterable<Text> messages) {
-        for (Text message : messages) { // TODO: Locale?
-            this.addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
-    public void sendMessage(Text... messages) {
-        for (Text message : messages) {
-            this.addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
     /**
      * Add newlines between output lines for a command
      * @param component
@@ -90,11 +78,6 @@ public abstract class MixinRConConsoleSource implements ICommandSender, IMixinRC
     @Inject(method = "addChatMessage", at = @At("RETURN"))
     public void addNewlines(IChatComponent component, CallbackInfo ci) {
         this.buffer.append('\n');
-    }
-
-    @Override
-    public String getName() {
-        return getCommandSenderName();
     }
 
     @Override
@@ -110,5 +93,15 @@ public abstract class MixinRConConsoleSource implements ICommandSender, IMixinRC
     @Override
     public Tristate permDefault(String permission) {
         return Tristate.TRUE;
+    }
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return this;
+    }
+
+    @Override
+    public CommandSource asCommandSource() {
+        return this;
     }
 }

@@ -22,48 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
+package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.EntityMinecartCommandBlock;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
 
 @NonnullByDefault
-@Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
-
-    @Shadow private CommandBlockLogic commandBlockLogic;
+@Mixin(targets = IMixinCommandSender.COMMAND_MINECART_SENDER)
+public abstract class MixinMinecartCommandBlockSender implements IMixinCommandSender, ICommandSender {
 
     @Override
-    public ICommandSender asICommandSender() {
-        return commandBlockLogic;
+    public CommandSource asCommandSource() {
+        return (CommandSource) getCommandSenderEntity();
     }
-
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
-    }
-
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
-    }
-
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
-        }
-        this.commandBlockLogic.setName(name);
-    }
-
 }

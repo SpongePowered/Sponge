@@ -50,8 +50,7 @@ public class Sponge {
     private static final File gameDir = SpongeLaunch.getGameDirectory();
     private static final File configDir = SpongeLaunch.getConfigDirectory();
     private static final File pluginsDir = SpongeLaunch.getPluginsDirectory();
-    @Nullable
-    private static Sponge instance;
+    @Nullable private static Sponge instance;
     @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
     private final Injector injector;
     private final Game game;

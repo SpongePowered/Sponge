@@ -31,7 +31,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -54,7 +54,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
@@ -73,6 +72,8 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
@@ -90,7 +91,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)
-public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, CommandSource, IMixinSubject, IMixinEntityPlayerMP {
+public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender, IMixinCommandSource {
 
     public int newExperience = 0;
     public int newLevel = 0;
@@ -100,7 +101,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
-    private MessageSink sink = Sponge.getGame().getServer().getBroadcastSink();
 
     private org.spongepowered.api.scoreboard.Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
 
@@ -125,15 +125,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public String getName() {
-        return getGameProfile().getName();
-    }
-
-    @Override
     public boolean isOnline() {
-        // TODO This should actually check if the player is online.
         // A plugin may hold a reference to a player who has since disconnected
-        return true;
+        return Sponge.getGame().getServer().getPlayer(getUniqueID()).isPresent();
     }
 
     @Override
@@ -148,16 +142,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Locale getLocale() {
         return LocaleUtils.toLocale(this.translator);
-    }
-
-    @Override
-    public void sendMessage(Text... messages) {
-        sendMessage(ChatTypes.CHAT, messages);
-    }
-
-    @Override
-    public void sendMessage(Iterable<Text> messages) {
-        sendMessage(ChatTypes.CHAT, messages);
     }
 
     @Override
@@ -182,17 +166,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
                     ((SpongeChatType) type).getByteId()));
         }
-    }
-
-    @Override
-    public void setMessageSink(MessageSink sink) {
-        Preconditions.checkNotNull(sink, "sink");
-        this.sink = sink;
-    }
-
-    @Override
-    public MessageSink getMessageSink() {
-        return this.sink;
     }
 
     @Override
@@ -380,5 +353,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void kick(Text message) {
         final IChatComponent component = SpongeTexts.toComponent(message, getLocale());
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
+    }
+    
+    @Override
+    public CommandSource asCommandSource() {
+        return this;
+    }
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return (ICommandSender) this;
     }
 }

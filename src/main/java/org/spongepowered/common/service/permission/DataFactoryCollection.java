@@ -83,7 +83,6 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         private final MemorySubjectData data;
 
         protected DataFactorySubject(String identifier, MemorySubjectData data) {
-            super(DataFactoryCollection.this.service);
             this.identifier = identifier;
             this.data = data;
         }

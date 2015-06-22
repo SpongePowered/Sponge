@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import net.minecraft.command.CommandHelp;
+import org.spongepowered.common.command.WrapperCommandSource;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.command.CommandHandler;
@@ -36,8 +38,6 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandResult;
@@ -54,9 +54,7 @@ import java.util.List;
 @NonnullByDefault
 @Mixin(ServerCommandManager.class)
 public abstract class MixinServerCommandManager extends CommandHandler implements IMixinServerCommandManager {
-    private static final String
-                TRANSLATION_COMMAND_NOT_FOUND = "commands.generic.notFound";
-
+    
     private List<MinecraftCommandWrapper> lowPriorityCommands = Lists.newArrayList();
     private List<MinecraftCommandWrapper> earlyRegisterCommands = Lists.newArrayList();
 
@@ -79,22 +77,14 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
             command = command.substring(1);
         }
 
-        CommandSource source = ((CommandSource) sender);
-        Game game = Sponge.getGame();
-        Optional<CommandResult> resultOpt;
-        if ((resultOpt = game.getCommandDispatcher().process(source, command)).isPresent()) {
-            CommandResult result = resultOpt.get();
-            updateStat(sender, CommandResultStats.Type.AFFECTED_BLOCKS, result.getAffectedBlocks());
-            updateStat(sender, CommandResultStats.Type.AFFECTED_ENTITIES, result.getAffectedEntities());
-            updateStat(sender, CommandResultStats.Type.AFFECTED_ITEMS, result.getAffectedItems());
-            updateStat(sender, CommandResultStats.Type.QUERY_RESULT, result.getQueryResult());
-            updateStat(sender, CommandResultStats.Type.SUCCESS_COUNT, result.getSuccessCount());
-            return resultOpt.get().getSuccessCount().or(1);
-        } else {
-            source.sendMessage(Texts.builder(game.getRegistry().getTranslationById(TRANSLATION_COMMAND_NOT_FOUND).get())
-                    .color(TextColors.RED).build());
-            return 0;
-        }
+        CommandSource source = WrapperCommandSource.of(sender);
+        CommandResult result = Sponge.getGame().getCommandDispatcher().process(source, command);
+        updateStat(sender, CommandResultStats.Type.AFFECTED_BLOCKS, result.getAffectedBlocks());
+        updateStat(sender, CommandResultStats.Type.AFFECTED_ENTITIES, result.getAffectedEntities());
+        updateStat(sender, CommandResultStats.Type.AFFECTED_ITEMS, result.getAffectedItems());
+        updateStat(sender, CommandResultStats.Type.QUERY_RESULT, result.getQueryResult());
+        updateStat(sender, CommandResultStats.Type.SUCCESS_COUNT, result.getSuccessCount());
+        return result.getSuccessCount().or(0);
 
         //return super.executeCommand(sender, command); // Try Vanilla instead
     }

@@ -22,48 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
+package org.spongepowered.common.mixin.core.command;
 
+import net.minecraft.command.CommandHandler;
+import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.EntityMinecartCommandBlock;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.event.HoverEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.common.command.WrapperCommandSource;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-@NonnullByDefault
-@Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
+@Mixin(CommandHandler.class)
+public abstract class MixinCommandHandler {
 
-    @Shadow private CommandBlockLogic commandBlockLogic;
-
-    @Override
-    public ICommandSender asICommandSender() {
-        return commandBlockLogic;
-    }
-
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
-    }
-
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
-    }
-
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
+    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "addChatComponent(Lnet/minecraft/util/IChatComponent)V;"))
+    public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, Throwable error, ChatComponentTranslation comp) {
+        if (WrapperCommandSource.of(sender).hasPermission("sponge.debug.hover-stacktrace")) {
+            final StringWriter writer = new StringWriter();
+            error.printStackTrace(new PrintWriter(writer));
+            comp.getChatStyle().chatHoverEvent =
+                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(writer.toString().replaceAll("\t", "    ")));
         }
-        this.commandBlockLogic.setName(name);
     }
-
 }

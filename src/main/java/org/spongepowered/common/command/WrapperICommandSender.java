@@ -33,15 +33,19 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.source.EntitySource;
+import org.spongepowered.api.util.command.source.LocatedSource;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.VecHelper;
 
 /**
  * Wrapper around a CommandSource that is not part of the base game to allow it to access MC commands.
  */
 public class WrapperICommandSender implements ICommandSender {
-    private final CommandSource source;
+    final CommandSource source;
 
-    public WrapperICommandSender(CommandSource source) {
+    private WrapperICommandSender(CommandSource source) {
         this.source = source;
     }
 
@@ -67,21 +71,36 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public BlockPos getPosition() {
+        if (source instanceof LocatedSource) {
+            return VecHelper.toBlockPos(((LocatedSource) source).getLocation().getBlockPosition());
+        }
         return BlockPos.ORIGIN;
     }
 
     @Override
     public Vec3 getPositionVector() {
+        if (source instanceof LocatedSource) {
+            return VecHelper.toVector(((LocatedSource) source).getLocation().getPosition());
+        }
         return new Vec3(0, 0, 0);
     }
 
     @Override
     public World getEntityWorld() {
+        if (source instanceof LocatedSource) {
+            return (World) ((LocatedSource) source).getWorld();
+        }
         return null;
     }
 
     @Override
     public Entity getCommandSenderEntity() {
+        if (source instanceof Entity) {
+            return (Entity) source;
+        }
+        if (source instanceof EntitySource) {
+            return (Entity) ((EntitySource) source).getEntity();
+        }
         return null;
     }
 
@@ -93,5 +112,15 @@ public class WrapperICommandSender implements ICommandSender {
     @Override
     public void setCommandStat(CommandResultStats.Type type, int amount) {
 
+    }
+
+    public static ICommandSender of(CommandSource source) {
+        if (source instanceof IMixinCommandSource) {
+            return ((IMixinCommandSource) source).asICommandSender();
+        }
+        if (source instanceof WrapperCommandSource) {
+            return ((WrapperCommandSource) source).sender;
+        }
+        return new WrapperICommandSender(source);
     }
 }

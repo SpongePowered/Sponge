@@ -102,36 +102,14 @@ public class SpongePaginationService implements PaginationService {
         if (this.commandRegistered.compareAndSet(false, true)) {
             Sponge.getGame().getCommandDispatcher().register(Sponge.getPlugin(), CommandSpec.builder()
                     .description(t("Helper command for paginations occurring"))
-                    .arguments(new ActivePaginationCommandElement(t("pagination-id")))
-                    .child(CommandSpec.builder()
-                            .description(t("Go to the next page"))
-                            .executor(new CommandExecutor() {
-                                @Override
-                                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                                    args.<ActivePagination>getOne("pagination-id").get().nextPage();
-                                    return CommandResult.success();
-                                }
-                            }).build(), "next", "n")
-                    .child(CommandSpec.builder()
-                            .description(t("Go to the previous page"))
-                            .executor(new CommandExecutor() {
-                                @Override
-                                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                                    args.<ActivePagination>getOne("pagination-id").get().previousPage();
-                                    return CommandResult.success();
-                                }
-                            }).build(), "previous", "prev", "p")
-                    .child(CommandSpec.builder()
-                            .description(t("Go to a specific page"))
-                            .arguments(integer(t("page")))
-                            .executor(new CommandExecutor() {
-                                @Override
-                                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                                    args.<ActivePagination>getOne("pagination-id").get().specificPage(args.<Integer>getOne("page").get());
-                                    return CommandResult.success();
-                                }
-                            }).build(), "page")
-                    .build(), "pagination", "page");
+                    .arguments(new ActivePaginationCommandElement(t("pagination-id")), integer(t("page")))
+                    .executor(new CommandExecutor() {
+                        @Override
+                        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+                            args.<ActivePagination>getOne("pagination-id").get().sendPage(args.<Integer>getOne("page").get());
+                            return CommandResult.success();
+                        }
+                    }).build(), "pagination", "page");
         }
 
     }

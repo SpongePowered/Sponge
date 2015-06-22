@@ -24,65 +24,55 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
-import org.spongepowered.api.service.permission.PermissionService;
+import com.google.common.base.Preconditions;
+import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.rcon.RConConsoleSource;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.source.CommandBlockSource;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 
-@NonnullByDefault
-@Mixin(value = CommandBlockLogic.class, targets = "net/minecraft/tileentity/TileEntitySign$2")
-public abstract class MixinCommandBlockLogic implements ICommandSender, CommandBlockSource, IMixinSubject {
+@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
+        targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+public abstract class MixinCommandSource implements IMixinCommandSource, CommandSource {
+
+    private MessageSink sink = SpongeMessageSinkFactory.TO_ALL;
 
     @Override
     public String getName() {
-        return getCommandSenderName();
+        return this.asICommandSender().getCommandSenderName();
     }
 
     @Override
     public void sendMessage(Text... messages) {
         for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
+            this.asICommandSender().addChatMessage(SpongeTexts.toComponent(message));
         }
     }
 
     @Override
     public void sendMessage(Iterable<Text> messages) {
         for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
+            this.asICommandSender().addChatMessage(SpongeTexts.toComponent(message));
         }
     }
 
     @Override
-    public Location getLocation() {
-        return new Location((Extent) getEntityWorld(), VecHelper.toVector(getPositionVector()));
+    public MessageSink getMessageSink() {
+        return this.sink;
     }
 
     @Override
-    public org.spongepowered.api.world.World getWorld() {
-        return (org.spongepowered.api.world.World) getEntityWorld();
+    public void setMessageSink(MessageSink sink) {
+        Preconditions.checkNotNull(sink, "sink");
+        this.sink = sink;
     }
 
-    @Override
-    public String getIdentifier() {
-        return getName();
-    }
-
-    @Override
-    public String getSubjectCollectionIdentifier() {
-        return PermissionService.SUBJECTS_COMMAND_BLOCK;
-    }
-
-    @Override
-    public Tristate permDefault(String permission) {
-        return Tristate.TRUE;
-    }
 }

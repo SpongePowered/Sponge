@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import static org.spongepowered.api.util.command.CommandMessageFormatting.error;
+import org.spongepowered.api.util.command.source.ProxySource;
 
+import static org.spongepowered.api.util.command.CommandMessageFormatting.error;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -34,11 +35,9 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.service.pagination.PaginationBuilder;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandSource;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -49,6 +48,7 @@ class SpongePaginationBuilder implements PaginationBuilder {
     private Text title;
     private Text header;
     private Text footer;
+    private int page = 1;
     private String paginationSpacer = "=";
 
     public SpongePaginationBuilder(SpongePaginationService service) {
@@ -86,6 +86,12 @@ class SpongePaginationBuilder implements PaginationBuilder {
     }
 
     @Override
+    public PaginationBuilder page(int page) {
+        this.page = page;
+        return this;
+    }
+
+    @Override
     public PaginationBuilder paddingString(String padding) {
         this.paginationSpacer = padding;
         return this;
@@ -97,8 +103,12 @@ class SpongePaginationBuilder implements PaginationBuilder {
         Preconditions.checkNotNull(source, "source");
         this.service.registerCommandOnce();
 
+        CommandSource realSource = source;
+        while (realSource instanceof ProxySource) {
+            realSource = ((ProxySource)realSource).getCause();
+        }
         @SuppressWarnings("unchecked")
-        PaginationCalculator<CommandSource> calculator = (PaginationCalculator) this.service.calculators.get(source.getClass());
+        PaginationCalculator<CommandSource> calculator = (PaginationCalculator) this.service.calculators.get(realSource.getClass());
         if (calculator == null) {
             calculator = this.service.getUnpaginatedCalculator(); // TODO: or like 50 lines?
         }
@@ -117,16 +127,9 @@ class SpongePaginationBuilder implements PaginationBuilder {
             title = calculator.center(source, title, this.paginationSpacer);
         }
 
-        ActivePagination pagination;
-        if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
-            pagination = new ListPagination(source, calculator, ImmutableList.copyOf(counts), title, this.header, this.footer, this.paginationSpacer);
-        } else {
-            pagination = new IterablePagination(source, calculator, counts, title, this.header, this.footer, this.paginationSpacer);
-        }
-
-        this.service.getPaginationState(source, true).put(pagination);
+        ActivePagination pagination = new ActivePagination(source, calculator, counts, title, this.header, this.footer, this.paginationSpacer);        this.service.getPaginationState(source, true).put(pagination);
         try {
-            pagination.nextPage();
+            pagination.sendPage(this.page);
         } catch (CommandException e) {
             source.sendMessage(error(e.getText()));
         }

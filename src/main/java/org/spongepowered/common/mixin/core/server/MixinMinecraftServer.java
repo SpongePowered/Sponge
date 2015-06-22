@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -52,6 +53,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -64,11 +66,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -85,32 +88,68 @@ import java.util.UUID;
 
 @NonnullByDefault
 @Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinMinecraftServer {
+public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
+        IMixinMinecraftServer {
 
     @Shadow private static Logger logger;
     @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow private int tickCounter;
-    @Shadow public abstract EnumDifficulty getDifficulty();
-    @Shadow public abstract ServerConfigurationManager getConfigurationManager();
-    @Shadow public abstract void addChatMessage(IChatComponent message);
-    @Shadow public abstract boolean isServerInOnlineMode();
-    @Shadow public abstract void initiateShutdown();
-    @Shadow public abstract boolean isServerRunning();
-    @Shadow protected abstract void setUserMessage(String message);
-    @Shadow protected abstract void outputPercentRemaining(String message, int percent);
-    @Shadow protected abstract void clearCurrentTask();
+
+    @Shadow
+    public abstract EnumDifficulty getDifficulty();
+
+    @Shadow
+    public abstract ServerConfigurationManager getConfigurationManager();
+
+    @Shadow
+    public abstract void addChatMessage(IChatComponent message);
+
+    @Shadow
+    public abstract boolean isServerInOnlineMode();
+
+    @Shadow
+    public abstract void initiateShutdown();
+
+    @Shadow
+    public abstract boolean isServerRunning();
+
+    @Shadow
+    protected abstract void setUserMessage(String message);
+
+    @Shadow
+    protected abstract void outputPercentRemaining(String message, int percent);
+
+    @Shadow
+    protected abstract void clearCurrentTask();
+
     @Shadow public WorldServer[] worldServers;
     @Shadow public Profiler theProfiler;
     @Shadow private boolean enableBonusChest;
     @Shadow private boolean worldIsBeingDeleted;
-    @Shadow public abstract boolean canStructuresSpawn();
-    @Shadow public abstract boolean isHardcore();
-    @Shadow public abstract boolean isSinglePlayer();
-    @Shadow public abstract String getFolderName();
-    @Shadow public abstract WorldSettings.GameType getGameType();
-    @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
-    @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
-    @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
+
+    @Shadow
+    public abstract boolean canStructuresSpawn();
+
+    @Shadow
+    public abstract boolean isHardcore();
+
+    @Shadow
+    public abstract boolean isSinglePlayer();
+
+    @Shadow
+    public abstract String getFolderName();
+
+    @Shadow
+    public abstract WorldSettings.GameType getGameType();
+
+    @Shadow
+    public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
+
+    @Shadow
+    protected abstract void convertMapIfNeeded(String worldNameIn);
+
+    @Shadow
+    protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
 
     @Shadow
     @SideOnly(Side.SERVER)
@@ -119,9 +158,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow
     @SideOnly(Side.SERVER)
     public abstract int getPort();
-
-    private final MessageSink broadcastSink = SpongeMessageSinkFactory.INSTANCE.toAll();
-    private MessageSink sourceSink = this.broadcastSink;
 
     @Override
     public Optional<World> loadWorld(UUID uuid) {
@@ -159,7 +195,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public MessageSink getBroadcastSink() {
-        return this.broadcastSink;
+        return SpongeMessageSinkFactory.TO_ALL;
     }
 
     @Override
@@ -226,20 +262,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public void sendMessage(Text... messages) {
-        for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
-    public void sendMessage(Iterable<Text> messages) {
-        for (Text message : messages) {
-            addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
     public String getIdentifier() {
         return getName();
     }
@@ -255,22 +277,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public String getName() {
-        return "Server";
-    }
-
-    @Override
-    public void setMessageSink(MessageSink sink) {
-        this.sourceSink = sink;
-    }
-
-    @Override
-    public MessageSink getMessageSink() {
-        return this.sourceSink;
-    }
-
-    @Override
     public ConsoleSource getConsole() {
+        return this;
+    }
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return (MinecraftServer) (Object) this;
+    }
+
+    @Override
+    public CommandSource asCommandSource() {
         return this;
     }
 
@@ -281,8 +298,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public void shutdown(Text kickMessage) {
-        for (Player player : getOnlinePlayers()) {
-            player.kick(kickMessage);
+        for (Player spongePlayer : getOnlinePlayers()) {
+            spongePlayer.kick(kickMessage);
         }
 
         initiateShutdown();
@@ -315,13 +332,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
 
             WorldInfo worldInfo;
-            WorldSettings newWorldSettings ;
+            WorldSettings newWorldSettings;
             AnvilSaveHandler worldsavehandler;
 
             if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
                 worldsavehandler =
                         new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory() :
-                                new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
+                            new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
             } else {
                 worldsavehandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
             }
@@ -370,7 +387,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     world));
         }
 
-        this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
+        this.serverConfigManager.setPlayerManager(new WorldServer[] {DimensionManager.getWorldFromDimId(0)});
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.initialWorldChunkLoad();
     }
@@ -420,7 +437,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         File file = new File(getFolderName(), worldName);
 
-        if ((file.exists()) && (!file.isDirectory())) {
+        if (file.exists() && !file.isDirectory()) {
             throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
         }
 
@@ -440,9 +457,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 worldInfo = (WorldInfo) Sponge.getSpongeRegistry().getWorldProperties(((WorldProperties) worldInfo).getUniqueId()).get();
             }
             dim = ((IMixinWorldInfo) worldInfo).getDimensionId();
-            if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+            if (!DimensionManager.isDimensionRegistered(dim)) { // handle
+                                                                // reloads
+                                                                // properly
                 DimensionManager
-                        .registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+                .registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
             }
             if (Sponge.getSpongeRegistry().getWorldFolder(dim) == null) {
                 Sponge.getSpongeRegistry().registerWorldDimensionId(dim, worldName);
@@ -453,7 +472,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         WorldSettings settings = new WorldSettings(worldInfo);
 
-        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads
+                                                            // properly
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
 
@@ -520,7 +540,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
         Sponge.getSpongeRegistry().registerWorldUniqueId(uuid, worldName);
 
-        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads
+                                                            // properly
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());

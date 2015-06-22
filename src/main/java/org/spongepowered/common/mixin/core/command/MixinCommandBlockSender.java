@@ -22,48 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
+package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.EntityMinecartCommandBlock;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
+import net.minecraft.tileentity.TileEntityCommandBlock;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.source.CommandBlockSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.spongepowered.common.interfaces.IMixinSubject;
 
 @NonnullByDefault
-@Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
-
-    @Shadow private CommandBlockLogic commandBlockLogic;
+@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+public abstract class MixinCommandBlockSender implements IMixinCommandSource, CommandBlockSource, IMixinSubject {
 
     @Override
-    public ICommandSender asICommandSender() {
-        return commandBlockLogic;
+    public String getIdentifier() {
+        return getName();
     }
 
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
+    @Override
+    public String getSubjectCollectionIdentifier() {
+        return PermissionService.SUBJECTS_COMMAND_BLOCK;
     }
 
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
+    @Override
+    public Tristate permDefault(String permission) {
+        return Tristate.TRUE;
     }
-
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
-        }
-        this.commandBlockLogic.setName(name);
-    }
-
 }

@@ -30,6 +30,7 @@ import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -39,42 +40,36 @@ import org.spongepowered.api.util.command.CommandSource;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Holds logic for an active pagination that is occurring.
  */
-abstract class ActivePagination {
+class ActivePagination {
+
     private static final Text SLASH_TEXT = Texts.of("/");
     private static final Text DIVIDER_TEXT = Texts.of(" ");
+    private static final Text NEXT_PAGE_TEXT = Texts.builder(">>").color(TextColors.BLUE).style(TextStyles.UNDERLINE).build();
+    private static final Text PREVIOUS_PAGE_TEXT = Texts.builder("<<").color(TextColors.BLUE).style(TextStyles.UNDERLINE).build();
     private final WeakReference<CommandSource> src;
     private final UUID id = UUID.randomUUID();
-    private final Text nextPageText;
-    private final Text prevPageText;
     private final Text title;
     private final Text header;
     private final Text footer;
-    private int currentPage;
     private final int maxContentLinesPerPage;
     protected final PaginationCalculator<CommandSource> calc;
     private final String padding;
+    private final List<List<Text>> pages;
 
-    public ActivePagination(CommandSource src, PaginationCalculator<CommandSource> calc, Text title,
-            Text header, Text footer, String padding) {
+    public ActivePagination(CommandSource src, PaginationCalculator<CommandSource> calc, Iterable<Map.Entry<Text, Integer>> lines,
+            Text title, Text header, Text footer, String padding) {
         this.src = new WeakReference<CommandSource>(src);
         this.calc = calc;
         this.title = title;
         this.header = header;
         this.footer = footer;
         this.padding = padding;
-        this.nextPageText = t("»").builder()
-                .color(TextColors.BLUE)
-                .style(TextStyles.UNDERLINE)
-                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " next")).build();
-        this.prevPageText = t("«").builder()
-                .color(TextColors.BLUE)
-                .style(TextStyles.UNDERLINE)
-                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " prev")).build();
         int maxContentLinesPerPage = calc.getLinesPerPage(src) - 1;
         if (title != null) {
             maxContentLinesPerPage -= calc.getLines(src, title);
@@ -87,38 +82,64 @@ abstract class ActivePagination {
         }
         this.maxContentLinesPerPage = maxContentLinesPerPage;
 
+        List<List<Text>> pages = new ArrayList<List<Text>>();
+        List<Text> currentPage = new ArrayList<Text>();
+        int currentPageLines = 0;
+
+        for (Map.Entry<Text, Integer> ent : lines) {
+            if (getMaxContentLinesPerPage() > 0 && ent.getValue() + currentPageLines > getMaxContentLinesPerPage() && currentPageLines != 0) {
+                while (currentPageLines < getMaxContentLinesPerPage()) {
+                    currentPage.add(Texts.of());
+                    currentPageLines++;
+                }
+                currentPageLines = 0;
+                pages.add(currentPage);
+                currentPage = new ArrayList<Text>();
+            }
+            currentPageLines += ent.getValue();
+            currentPage.add(ent.getKey());
+        }
+        if (currentPageLines > 0) {
+            while (currentPageLines < getMaxContentLinesPerPage()) {
+                currentPage.add(Texts.of());
+                currentPageLines++;
+            }
+            pages.add(currentPage);
+        }
+        this.pages = pages;
+
     }
 
     public UUID getId() {
         return this.id;
     }
 
-    protected abstract Iterable<Text> getLines(int page) throws CommandException;
-    protected abstract boolean hasPrevious(int page);
-    protected abstract boolean hasNext(int page);
-    protected abstract int getTotalPages();
-
-    public void nextPage() throws CommandException {
-        specificPage(++this.currentPage);
+    protected List<Text> getLines(int page) throws CommandException {
+        if (page < 1) {
+            throw new CommandException(t("Page %s does not exist!", page));
+        } else if (page > this.pages.size()) {
+            throw new CommandException(t("Page %s is too high", page));
+        }
+        return this.pages.get(page - 1);
     }
 
-    public void previousPage() throws CommandException {
-        specificPage(--this.currentPage);
+    protected boolean hasPrevious(int page) {
+        return page > 1;
     }
 
-    public void currentPage() throws CommandException {
-        specificPage(this.currentPage);
+    protected boolean hasNext(int page) {
+        return page < this.pages.size();
     }
 
-    protected int getCurrentPage() {
-        return this.currentPage;
+    protected int getTotalPages() {
+        return this.pages.size();
     }
 
     protected int getMaxContentLinesPerPage() {
         return this.maxContentLinesPerPage;
     }
 
-    public void specificPage(int page) throws CommandException {
+    public void sendPage(int page) throws CommandException {
         CommandSource src = this.src.get();
         if (src == null) {
             throw new CommandException(t("Source for pagination %s is no longer active!", getId()));
@@ -153,7 +174,8 @@ abstract class ActivePagination {
 
         TextBuilder ret = Texts.builder();
         if (hasPrevious) {
-            ret.append(this.prevPageText).append(DIVIDER_TEXT);
+            ClickAction<?> backAction = TextActions.runCommand("/pagination " + this.getId().toString() + " " + (currentPage - 1));
+            ret.append(PREVIOUS_PAGE_TEXT.builder().onClick(backAction).build()).append(DIVIDER_TEXT);
         }
         boolean needsDiv = false;
         int totalPages = getTotalPages();
@@ -165,7 +187,8 @@ abstract class ActivePagination {
             if (needsDiv) {
                 ret.append(DIVIDER_TEXT);
             }
-            ret.append(this.nextPageText);
+            ClickAction<?> backAction = TextActions.runCommand("/pagination " + this.getId().toString() + " " + (currentPage + 1));
+            ret.append(NEXT_PAGE_TEXT.builder().onClick(backAction).build());
         }
         if (this.title != null) {
             ret.color(this.title.getColor());

@@ -22,48 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
+package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+
 import net.minecraft.entity.EntityMinecartCommandBlock;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntityCommandBlock;
+import org.spongepowered.api.util.command.source.LocatedSource;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.common.util.VecHelper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-@NonnullByDefault
-@Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
-
-    @Shadow private CommandBlockLogic commandBlockLogic;
+@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class},
+        targets = {IMixinCommandSender.SIGN_CLICK_SENDER, IMixinCommandSender.EXECUTE_COMMAND_SENDER})
+public abstract class MixinLocatedSource implements LocatedSource, IMixinCommandSource {
 
     @Override
-    public ICommandSender asICommandSender() {
-        return commandBlockLogic;
+    public Location getLocation() {
+        return new Location((World) asICommandSender().getEntityWorld(), VecHelper.toVector(asICommandSender().getPositionVector()));
     }
 
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
-    }
-
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
-    }
-
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
-        }
-        this.commandBlockLogic.setName(name);
+    @Override
+    public World getWorld() {
+        return (World) asICommandSender().getEntityWorld();
     }
 
 }
