@@ -62,7 +62,6 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow public WorldType terrainType;
     @Shadow protected boolean hasNoSky;
     @Shadow public abstract String getDimensionName();
-    @Shadow public abstract boolean canRespawnHere();
 
     @Override
     public String getName() {
@@ -161,7 +160,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         }
 
         Dimension dim = (Dimension) provider;
-        dim.setAllowsPlayerRespawns(DimensionManager.shouldLoadSpawn(dimension));
+        dim.setAllowsPlayerRespawns(provider.canRespawnHere());
         return provider;
     }
 

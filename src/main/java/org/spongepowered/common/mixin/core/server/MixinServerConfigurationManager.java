@@ -68,6 +68,7 @@ import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
 import org.spongepowered.api.event.entity.player.PlayerRespawnEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -242,23 +243,27 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         }
     }
 
-    @SuppressWarnings({"unused", "unchecked"})
+    @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd) {
         this.scoreboard = ((Player) playerIn).getScoreboard();
 
         // Phase 1 - check if the player is allowed to respawn in same dimension
-        net.minecraft.world.World world = this.mcServer.worldServerForDimension(targetDimension);
-        World fromWorld = (World) playerIn.worldObj;
-
-        if (!world.provider.canRespawnHere()) {
-            targetDimension = ((IMixinWorldProvider) world.provider).getRespawnDimension(playerIn);
+        Dimension prevDimension = (Dimension) this.mcServer.worldServerForDimension(playerIn.dimension).provider;
+        if (prevDimension.allowsPlayerRespawns()) {
+            targetDimension = playerIn.dimension;
+        } else {
+            WorldServer requestedWorld = this.mcServer.worldServerForDimension(targetDimension);
+            if (requestedWorld == null) {
+                targetDimension = 0;
+            } else if (!requestedWorld.provider.canRespawnHere()) {
+                targetDimension = ((IMixinWorldProvider) requestedWorld.provider).getRespawnDimension(playerIn);
+            }
         }
 
         // Phase 2 - handle return from End
         if (conqueredEnd) {
             WorldServer exitWorld = this.mcServer.worldServerForDimension(targetDimension);
-            Location enter = ((Player) playerIn).getLocation();
             Optional<Location> exit = Optional.absent();
             // use bed if available, otherwise default spawn
             if (((Player) playerIn).getData(RespawnLocationData.class).isPresent()) {
@@ -272,6 +277,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
 
         // Phase 3 - remove current player from current dimension
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
+        playerIn.getServerForPlayer().getEntityTracker().untrackEntity(playerIn);
         playerIn.getServerForPlayer().getPlayerManager().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.worldServerForDimension(playerIn.dimension).removePlayerEntityDangerously(playerIn);
@@ -280,8 +286,10 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         BlockPos bedSpawnChunkCoords = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
         boolean spawnForced = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimension);
         playerIn.dimension = targetDimension;
+        WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
         // make sure to update reference for bed spawn logic
-        playerIn.setWorld(this.mcServer.worldServerForDimension(playerIn.dimension));
+        playerIn.setWorld(worldserver);
+        playerIn.theItemInWorldManager.setWorld(worldserver);
         playerIn.playerConqueredTheEnd = false;
         BlockPos bedSpawnLocation;
         boolean isBedSpawn = false;
@@ -311,9 +319,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
 
         if (location == null) {
             // use the world spawnpoint as default location
-            location =
-                    new Location(toWorld, new Vector3d(toWorld.getProperties().getSpawnPosition().getX(), toWorld.getProperties().getSpawnPosition()
-                            .getY(), toWorld.getProperties().getSpawnPosition().getZ()));
+            location = new Location(toWorld, toWorld.getProperties().getSpawnPosition());
         }
 
         if (!conqueredEnd) { // don't reset player if returning from end
@@ -337,8 +343,8 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         playerIn.playerNetServerHandler.sendPacket(new S07PacketRespawn(dimension, targetWorld.getDifficulty(), targetWorld
                 .getWorldInfo().getTerrainType(), playerIn.theItemInWorldManager.getGameType()));
         playerIn.setWorld(targetWorld); // in case plugin changed it
+        playerIn.theItemInWorldManager.setWorld(targetWorld);
         playerIn.isDead = false;
-        BlockPos blockpos1 = targetWorld.getSpawnPoint();
         playerIn.playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 playerIn.rotationYaw, playerIn.rotationPitch);
 
