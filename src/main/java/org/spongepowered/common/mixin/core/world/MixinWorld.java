@@ -185,8 +185,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
             this.worldConfig =
                     new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD, new File(Sponge.getConfigDirectory() + File.separator +
-                            providerName + File.separator + (providerIn.getDimensionId() == 0 ? "DIM0" : Sponge.getSpongeRegistry().getWorldFolder
-                            (providerIn.getDimensionId())), "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
+                            "worlds" + File.separator + providerName + File.separator + (providerIn.getDimensionId() == 0 ? "DIM0" : Sponge
+                            .getSpongeRegistry().getWorldFolder(providerIn.getDimensionId())), "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
 
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
