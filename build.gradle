@@ -38,12 +38,12 @@ dependencies {
         exclude module: 'guava'
     }
 
-    compile 'com.zaxxer:HikariCP-java6:2.3.7'
+    compile 'com.zaxxer:HikariCP-java6:2.3.8'
 
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
-    runtime 'org.mariadb.jdbc:mariadb-java-client:1.1.8'
+    runtime 'org.mariadb.jdbc:mariadb-java-client:1.1.9'
     runtime 'com.h2database:h2:1.4.187'
-    runtime 'org.xerial:sqlite-jdbc:3.8.9.1'
+    runtime 'org.xerial:sqlite-jdbc:3.8.10.1'
 }
 
 // Add Javadocs for example sources
