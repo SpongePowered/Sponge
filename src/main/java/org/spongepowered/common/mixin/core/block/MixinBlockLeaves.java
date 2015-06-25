@@ -64,7 +64,7 @@ import java.util.Random;
 @Mixin(BlockLeaves.class)
 public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlockTree {
 
-    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = "net/minecraft/block/BlockLeaves.destroy (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockLeaves;destroy(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeafDecay(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci, byte b0, int i, int j, int k, int l, byte b1, int i1, int j1, int k1) {
         Location block = new Location((Extent) worldIn, VecHelper.toVector(pos));
         BlockSnapshot postChange = block.getBlockSnapshot();
