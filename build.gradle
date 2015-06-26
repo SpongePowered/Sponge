@@ -17,7 +17,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.minecrell:VanillaGradle:1.0.1-SNAPSHOT'
+        classpath 'net.minecrell:VanillaGradle:2.0-SNAPSHOT'
         classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
             exclude module: 'guava'
         }
