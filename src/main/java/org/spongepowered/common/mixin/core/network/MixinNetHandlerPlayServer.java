@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
 import net.minecraft.command.server.CommandBlockLogic;
@@ -36,6 +37,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
@@ -54,9 +56,11 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.player.PlayerMoveEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -237,6 +241,33 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             + "(Ljava/lang/String;)Ljava/lang/String;", remap = false))
     public String dontNormalizeStringBecauseSomeMojangDevSucks(String input) {
         return input;
+    }
+
+    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
+    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+        if (packetIn.isMoving() || packetIn.getRotating()) {
+            Player player = (Player) playerEntity;
+            Vector3d fromrot = player.getRotation();
+            Location from = player.getLocation();
+            Vector3d torot = new Vector3d(packetIn.getYaw(), packetIn.getPitch(), 0);
+            Location to = new Location(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
+
+            double delta = Math.pow(from.getX() - to.getX(), 2) + Math.pow(from.getX() - to.getY(), 2) + Math.pow(from.getX() - to.getZ(), 2);
+            float deltaAngle = Math.abs((float) (fromrot.getX() - torot.getX()) + Math.abs((float) (fromrot.getY() - torot.getY())));
+
+            if ((delta > 1f / 256 || deltaAngle > 10f) && !playerEntity.isDead) {
+                PlayerMoveEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, from, to, torot);
+                Sponge.getGame().getEventManager().post(event);
+                if (event.isCancelled()) {
+                    player.setLocationAndRotation(from, fromrot);
+                    ci.cancel();
+                }
+                if (!event.getNewLocation().equals(to)) {
+                    player.setLocationAndRotation(event.getNewLocation(), event.getRotation());
+                    ci.cancel();
+                }
+            }
+        }
     }
 
 }
