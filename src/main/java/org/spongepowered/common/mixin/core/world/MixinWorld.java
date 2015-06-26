@@ -617,13 +617,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return this.generatorPopulators;
     }
 
-
-    @Override
-    public void setWorldInfo(WorldInfo worldInfo) {
-        this.worldInfo = worldInfo;
-    }
-
-
     @Override
     public WorldProperties getProperties() {
         return (WorldProperties) this.worldInfo;

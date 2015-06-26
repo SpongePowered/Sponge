@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.block.BlockState;
@@ -136,7 +137,10 @@ public abstract class AbstractChunkBuffer implements MutableBlockBuffer {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "(min = " + this.getBlockMin() + ", max = " + this.getBlockMax() + ")";
+        return Objects.toStringHelper(this)
+                .add("min", this.getBlockMin())
+                .add("max", this.getBlockMax())
+                .toString();
     }
 
 }

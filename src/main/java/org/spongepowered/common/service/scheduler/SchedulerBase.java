@@ -67,7 +67,6 @@ abstract class SchedulerBase {
      * next call to {@link #runTick}.
      *
      * @param task The task to add
-     * @return An optional of the same task, absent if it could not be added
      */
     protected void addTask(ScheduledTask task) {
         task.setTimestamp(this.getTimestamp(task));

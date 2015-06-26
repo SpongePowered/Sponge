@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.service.scheduler;
 
-/**
- * Internal implementation of the {@link SynchronousScheduler} interface.
- */
 public class SyncScheduler extends SchedulerBase {
 
     // The number of ticks elapsed since this scheduler began.

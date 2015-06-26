@@ -76,7 +76,6 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -91,7 +90,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(ServerConfigurationManager.class)
-public abstract class MixinServerConfigurationManager implements IMixinServerConfigurationManager {
+public abstract class MixinServerConfigurationManager {
 
     @Shadow private static Logger logger;
     @Shadow private MinecraftServer mcServer;
