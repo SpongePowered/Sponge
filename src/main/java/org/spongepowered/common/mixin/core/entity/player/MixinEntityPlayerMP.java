@@ -37,7 +37,10 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.LocaleUtils;
@@ -47,6 +50,7 @@ import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.data.manipulator.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.entity.JoinData;
 import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -60,7 +64,6 @@ import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -80,13 +83,10 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-
-import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)
@@ -100,6 +100,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
+    @Shadow public MinecraftServer mcServer;
+
     private MessageSink sink = Sponge.getGame().getServer().getBroadcastSink();
 
     private org.spongepowered.api.scoreboard.Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
@@ -114,6 +116,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria(Lnet/minecraft/scoreboard/IScoreObjectiveCriteria;)Ljava/util/Collection;"))
     public Collection onGetObjectivesFromCriteria(net.minecraft.scoreboard.Scoreboard this$0, IScoreObjectiveCriteria criteria) {
         return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
@@ -131,18 +134,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public boolean isOnline() {
-        // TODO This should actually check if the player is online.
-        // A plugin may hold a reference to a player who has since disconnected
-        return true;
+        return this.mcServer.getConfigurationManager().getPlayerByUUID(this.getUniqueId()) != null;
     }
 
     @Override
     public Optional<Player> getPlayer() {
-        return Optional.of((Player) this);
-    }
-
-    public Text getDisplayNameApi() {
-        return SpongeTexts.toText(getDisplayName());
+        return this.isOnline() ? Optional.<Player>of(this) : Optional.<Player>absent();
     }
 
     @Override
@@ -169,6 +166,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
             this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
                     ((SpongeChatType) type).getByteId()));
+        }
+    }
+
+    @Override
+    public void sendMessage(ChatType type, String... messages) {
+        for (String text : messages) {
+            this.playerNetServerHandler.sendPacket(new S02PacketChat(new ChatComponentText(text), ((SpongeChatType) type).getByteId()));
         }
     }
 
@@ -239,10 +243,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public PlayerConnection getConnection() {
         return (PlayerConnection) this.playerNetServerHandler;
-    }
-
-    public void setBedLocation(@Nullable Location location) {
-        this.spawnChunk = location != null ? VecHelper.toBlockPos(location.getPosition()) : null;
     }
 
     // this needs to be overridden from EntityPlayer so we can force a resend of the experience level
@@ -381,4 +381,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final IChatComponent component = SpongeTexts.toComponent(message, getLocale());
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
     }
+
+    @Override
+    public void playSound(SoundType sound, Vector3d position, double volume) {
+        this.playSound(sound, position, volume, 1);
+    }
+
+    @Override
+    public void playSound(SoundType sound, Vector3d position, double volume, double pitch) {
+        this.playSound(sound, position, volume, pitch, 0);
+    }
+
+    @Override
+    public void playSound(SoundType sound, Vector3d position, double volume, double pitch, double minVolume) {
+        this.playerNetServerHandler.sendPacket(new S29PacketSoundEffect(sound.getName(), position.getX(), position.getY(), position.getZ(),
+                (float) Math.max(minVolume, volume), (float) pitch));
+    }
+
 }

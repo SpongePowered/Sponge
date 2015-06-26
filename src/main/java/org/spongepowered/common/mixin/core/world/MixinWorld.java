@@ -33,6 +33,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityHanging;
@@ -82,9 +83,13 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.service.permission.context.Context;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
@@ -806,6 +811,53 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Difficulty getDifficulty() {
         return (Difficulty) (Object) this.shadow$getDifficulty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Player> getPlayers() {
+        return (List<Player>) ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, Predicates.alwaysTrue());
+    }
+
+    @Override
+    public void sendMessage(ChatType type, String... message) {
+        for (Player player : getPlayers()) {
+            player.sendMessage(type, message);
+        }
+    }
+
+    @Override
+    public void sendMessage(ChatType type, Text... messages) {
+        for (Player player : getPlayers()) {
+            player.sendMessage(type, messages);
+        }
+    }
+
+    @Override
+    public void sendMessage(ChatType type, Iterable<Text> messages) {
+        for (Player player : getPlayers()) {
+            player.sendMessage(type, messages);
+        }
+    }
+
+    @Override
+    public void sendTitle(Title title) {
+        for (Player player : getPlayers()) {
+            player.sendTitle(title);
+        }
+    }
+
+    @Override
+    public void resetTitle() {
+        for (Player player : getPlayers()) {
+            player.resetTitle();
+        }
+    }
+
+    @Override
+    public void clearTitle() {
+        for (Player player : getPlayers()) {
+            player.clearTitle();
+        }
     }
 
 }

@@ -394,7 +394,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
     public static final Map<Team.EnumVisible, SpongeVisibility> enumVisible = Maps.newEnumMap(Team.EnumVisible.class);
 
-    public static final ImmutableMap<String, TextStyle> textStyleMappings = new ImmutableMap.Builder<String, TextStyle>()
+    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
             .put("BOLD", SpongeTextStyle.of(EnumChatFormatting.BOLD))
             .put("ITALIC", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
             .put("UNDERLINE", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
@@ -573,6 +573,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(StatisticGroup.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(TextColor.class, textColorMappings)
+                    .put(TextStyle.Base.class, this.textStyleMappings)
                     .put(TileEntityType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(TreeType.class, this.treeTypeMappings)
                     .put(Visibility.class, this.visibilityMappings)
