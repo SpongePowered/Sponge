@@ -31,7 +31,7 @@ import net.minecraft.village.VillageCollection;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
-import org.spongepowered.api.entity.living.Human;
+import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -93,7 +93,7 @@ public abstract class MixinWorldServer extends MixinWorld {
             int sleepingPlayers = 0;
             for (EntityPlayer entityPlayer : this.playerEntities) {
                 if (entityPlayer.isSpectator()
-                        || (entityPlayer instanceof Human && ((Human)entityPlayer).isSleepingIgnored())) {
+                        || (entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored())) {
                     ignoredPlayers++;
                 } else if (entityPlayer.isPlayerSleeping()) {
                     sleepingPlayers++;
@@ -108,7 +108,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     public boolean areAllPlayersAsleep() {
         if ((this.allPlayersSleeping) && (!this.isRemote)) {
             for (EntityPlayer entityPlayer : this.playerEntities) {
-                boolean ignore = entityPlayer instanceof Human && ((Human)entityPlayer).isSleepingIgnored();
+                boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
                 if (!ignore && (entityPlayer.isSpectator() || !entityPlayer.isPlayerFullyAsleep())) {
                     return false;
                 }
