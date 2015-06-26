@@ -110,7 +110,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         if ((this.allPlayersSleeping) && (!this.isRemote)) {
             for (EntityPlayer entityPlayer : this.playerEntities) {
                 boolean ignore = entityPlayer instanceof Human && ((Human)entityPlayer).isSleepingIgnored();
-                if (ignore || (entityPlayer.isSpectator() || !entityPlayer.isPlayerFullyAsleep())) {
+                if (!ignore && (entityPlayer.isSpectator() || !entityPlayer.isPlayerFullyAsleep())) {
                     return false;
                 }
             }
