@@ -24,16 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.util.BlockPos;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Surrogate;
@@ -43,9 +47,14 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.interfaces.IMixinScoreboardSaveData;
 import org.spongepowered.common.interfaces.IMixinWorld;
 
+import java.util.Iterator;
+import java.util.List;
+
 @NonnullByDefault
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer extends MixinWorld {
+
+    @Shadow private boolean allPlayersSleeping;
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
@@ -74,5 +83,39 @@ public abstract class MixinWorldServer extends MixinWorld {
         // (the "init" method, not the "<init>" constructor)
         IMixinWorld world = (IMixinWorld) ci.getReturnValue();
         world.updateWorldGenerator();
+    }
+
+    @Overwrite
+    public void updateAllPlayersSleepingFlag() {
+        this.allPlayersSleeping = false;
+        if (!this.playerEntities.isEmpty())
+        {
+            int ignoredPlayers = 0;
+            int sleepingPlayers = 0;
+            for (EntityPlayer entityPlayer : this.playerEntities) {
+                if (entityPlayer.isSpectator()
+                        || (entityPlayer instanceof Human && ((Human)entityPlayer).isSleepingIgnored())) {
+                    ignoredPlayers++;
+                } else if (entityPlayer.isPlayerSleeping()) {
+                    sleepingPlayers++;
+                }
+            }
+            this.allPlayersSleeping = ((sleepingPlayers > 0)
+                    && (sleepingPlayers >= this.playerEntities.size() - ignoredPlayers));
+        }
+    }
+
+    @Overwrite
+    public boolean areAllPlayersAsleep() {
+        if ((this.allPlayersSleeping) && (!this.isRemote)) {
+            for (EntityPlayer entityPlayer : this.playerEntities) {
+                boolean ignore = entityPlayer instanceof Human && ((Human)entityPlayer).isSleepingIgnored();
+                if (ignore || (entityPlayer.isSpectator() || !entityPlayer.isPlayerFullyAsleep())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }

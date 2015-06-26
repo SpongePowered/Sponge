@@ -106,6 +106,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     private net.minecraft.scoreboard.Scoreboard mcScoreboard = this.worldObj.getScoreboard();
 
+    private boolean sleepingIgnored;
+
     @Inject(method = "func_152339_d", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private void onRemoveEntity(Entity entityIn, CallbackInfo ci) {
@@ -380,5 +382,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void kick(Text message) {
         final IChatComponent component = SpongeTexts.toComponent(message, getLocale());
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
+    }
+
+    @Override
+    public boolean isSleepingIgnored() {
+        return this.sleepingIgnored;
+    }
+
+    @Override
+    public void setSleepingIgnored(boolean sleepingIgnored) {
+        this.sleepingIgnored = sleepingIgnored;
     }
 }
