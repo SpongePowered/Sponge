@@ -88,8 +88,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Overwrite
     public void updateAllPlayersSleepingFlag() {
         this.allPlayersSleeping = false;
-        if (!this.playerEntities.isEmpty())
-        {
+        if (!this.playerEntities.isEmpty()) {
             int ignoredPlayers = 0;
             int sleepingPlayers = 0;
             for (EntityPlayer entityPlayer : this.playerEntities) {
