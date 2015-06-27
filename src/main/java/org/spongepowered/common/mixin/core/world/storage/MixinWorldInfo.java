@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
@@ -31,6 +32,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
@@ -318,13 +320,19 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Optional<String> getGameRule(String gameRule) {
-        return Optional.fromNullable(this.theGameRules.getGameRuleStringValue(gameRule));
+        if (this.theGameRules.hasRule(gameRule)) {
+            return Optional.of(this.theGameRules.getGameRuleStringValue(gameRule));
+        }
+        return Optional.absent();
     }
 
     @Override
     public Map<String, String> getGameRules() {
-        // TODO World changes
-        return null;
+        ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
+        for (String rule : this.theGameRules.getRules()) {
+            ruleMap.put(rule, this.theGameRules.getGameRuleStringValue(rule));
+        }
+        return ruleMap.build();
     }
 
     @Override

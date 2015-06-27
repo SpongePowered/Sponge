@@ -34,6 +34,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityHanging;
@@ -59,6 +60,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -90,6 +92,7 @@ import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
@@ -124,9 +127,11 @@ import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.gen.CustomChunkProviderGenerate;
 import org.spongepowered.common.world.gen.CustomWorldChunkManager;
@@ -139,6 +144,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -165,6 +171,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public Random rand;
     @Shadow public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow public Scoreboard worldScoreboard;
+    @Shadow public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
+    @Shadow private net.minecraft.world.border.WorldBorder worldBorder;
 
     @Shadow(prefix = "shadow$") public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
@@ -181,17 +189,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
     @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
-    @Shadow private net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow public abstract int getRedstonePower(BlockPos pos, EnumFacing facing);
+    @Shadow public abstract int getStrongPower(BlockPos pos, EnumFacing direction);
+    @Shadow public abstract int isBlockIndirectlyGettingPowered(BlockPos pos);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
         if (!client) {
             String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
-            this.worldConfig =
-                    new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD, new File(Sponge.getConfigDirectory() + File.separator +
-                            "worlds" + File.separator + providerName + File.separator + (providerIn.getDimensionId() == 0 ? "DIM0" : Sponge
-                            .getSpongeRegistry().getWorldFolder(providerIn.getDimensionId())), "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
+            this.worldConfig = new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD,
+                    new File(Sponge.getConfigDirectory() + File.separator + "worlds" + File.separator + providerName + File.separator
+                            + (providerIn.getDimensionId() == 0 ? "DIM0" :
+                                    Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
+                            , "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
 
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
@@ -210,7 +221,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void onGetCollidingBoundingBoxes(net.minecraft.entity.Entity entity, net.minecraft.util.AxisAlignedBB axis,
             CallbackInfoReturnable<List> cir) {
         if (!entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
-            cir.setReturnValue(new ArrayList());// Removing misbehaved living entities
+            // Removing misbehaved living entities
+            cir.setReturnValue(new ArrayList());
         }
     }
 
@@ -396,6 +408,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer) {
+        // TODO once entity containers are implemented
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<Entity> createEntity(DataContainer entityContainer, Vector3d position) {
         // TODO once entity containers are implemented
         return Optional.absent();
     }
@@ -851,6 +869,94 @@ public abstract class MixinWorld implements World, IMixinWorld {
         for (Player player : getPlayers()) {
             player.clearTitle();
         }
+    }
+
+    @Override
+    public boolean isBlockIndirectlyPowered(int x, int y, int z) {
+        return this.isBlockIndirectlyGettingPowered(new BlockPos(x, y, z)) > 0;
+    }
+
+    @Override
+    public boolean isBlockFacePowered(int x, int y, int z, Direction direction) {
+        checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
+        BlockPos pos = new BlockPos(x, y, z);
+        EnumFacing facing = SpongeGameRegistry.directionMap.get(direction);
+        return this.getStrongPower(pos.offset(facing), facing) > 0;
+    }
+
+    @Override
+    public boolean isBlockFaceIndirectlyPowered(int x, int y, int z, Direction direction) {
+        checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
+        BlockPos pos = new BlockPos(x, y, z);
+        EnumFacing facing = SpongeGameRegistry.directionMap.get(direction);
+        return this.getRedstonePower(pos.offset(facing), facing) > 0;
+    }
+
+    @Override
+    public Collection<Direction> getPoweredBlockFaces(int x, int y, int z) {
+        // Similar to World.getStrongPower(BlockPos)
+        BlockPos pos = new BlockPos(x, y, z);
+        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (this.getStrongPower(pos.offset(facing), facing) > 0) {
+                faces.add(SpongeGameRegistry.directionMap.inverse().get(facing));
+            }
+        }
+        return faces.build();
+    }
+
+    @Override
+    public Collection<Direction> getIndirectlyPoweredBlockFaces(int x, int y, int z) {
+        // Similar to World.isBlockIndirectlyGettingPowered
+        BlockPos pos = new BlockPos(x, y, z);
+        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (this.getRedstonePower(pos.offset(facing), facing) > 0) {
+                faces.add(SpongeGameRegistry.directionMap.inverse().get(facing));
+            }
+        }
+        return faces.build();
+    }
+
+    @Override
+    public boolean isBlockPassable(int x, int y, int z) {
+        BlockPos pos = new BlockPos(x, y, z);
+        return this.getBlockState(pos).getBlock().isPassable((IBlockAccess) this, pos);
+    }
+
+    @Override
+    public boolean isBlockFlammable(int x, int y, int z, Direction faceDirection) {
+        checkArgument(faceDirection.isCardinal() || faceDirection.isUpright(), "Direction must be a valid block face");
+        BlockPos pos = new BlockPos(x, y, z);
+        return ((IMixinBlock) this.getBlockState(pos).getBlock()).isFlammable((IBlockAccess) this, pos,
+                SpongeGameRegistry.directionMap.get(faceDirection));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<TileEntity> getTileEntities() {
+        return ImmutableList.copyOf((List<TileEntity>) (Object) this.loadedTileEntityList);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
+        return ImmutableList.copyOf(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return DimensionManager.getWorldFromDimId(this.provider.getDimensionId()) != null;
+    }
+
+    @Override
+    public Optional<String> getGameRule(String gameRule) {
+        return this.getProperties().getGameRule(gameRule);
+    }
+
+    @Override
+    public Map<String, String> getGameRules() {
+        return this.getProperties().getGameRules();
     }
 
 }

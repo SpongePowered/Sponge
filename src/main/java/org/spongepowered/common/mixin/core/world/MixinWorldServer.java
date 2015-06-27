@@ -24,28 +24,41 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.util.BlockPos;
 import net.minecraft.village.VillageCollection;
+import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinScoreboardSaveData;
 import org.spongepowered.common.interfaces.IMixinWorld;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 @NonnullByDefault
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer extends MixinWorld {
+
+    @Shadow private Set<NextTickListEntry> pendingTickListEntriesHashSet;
+    @Shadow private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
@@ -56,7 +69,9 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "init", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V", shift = At.Shift.BEFORE),
+            locals = LocalCapture.CAPTURE_FAILHARD)
     public void onInit(CallbackInfoReturnable<World> cir, String s, VillageCollection villagecollection, ScoreboardSaveData scoreboardsavedata) {
         ((IMixinScoreboardSaveData) scoreboardsavedata).setSpongeScoreboard(this.spongeScoreboard);
         this.spongeScoreboard.getScoreboards().add(this.worldScoreboard);
@@ -75,4 +90,49 @@ public abstract class MixinWorldServer extends MixinWorld {
         IMixinWorld world = (IMixinWorld) ci.getReturnValue();
         world.updateWorldGenerator();
     }
+
+    @Override
+    public Collection<ScheduledBlockUpdate> getScheduledUpdates(int x, int y, int z) {
+        BlockPos position = new BlockPos(x, y, z);
+        ImmutableList.Builder<ScheduledBlockUpdate> builder = ImmutableList.builder();
+        for (NextTickListEntry sbu : this.pendingTickListEntriesTreeSet) {
+            if (sbu.position.equals(position)) {
+                builder.add((ScheduledBlockUpdate) sbu);
+            }
+        }
+        return builder.build();
+    }
+
+    private NextTickListEntry tmpScheduledObj;
+
+    @Redirect(method = "updateBlockTick(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
+    private void onUpdateScheduledBlock(NextTickListEntry sbu, int priority) {
+        this.onCreateScheduledBlockUpdate(sbu, priority);
+    }
+
+    @Redirect(method = "scheduleBlockUpdate(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
+    private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
+        sbu.setPriority(priority);
+        ((IMixinBlockUpdate) sbu).setWorld((WorldServer) (Object) this);
+        this.tmpScheduledObj = sbu;
+    }
+
+    @Override
+    public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
+        BlockPos pos = new BlockPos(x, y, z);
+        ((WorldServer) (Object) this).scheduleBlockUpdate(pos, getBlockState(pos).getBlock(), ticks, priority);
+        ScheduledBlockUpdate sbu = (ScheduledBlockUpdate) this.tmpScheduledObj;
+        this.tmpScheduledObj = null;
+        return sbu;
+    }
+
+    @Override
+    public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
+        // Note: Ignores position argument
+        this.pendingTickListEntriesHashSet.remove(update);
+        this.pendingTickListEntriesTreeSet.remove(update);
+    }
+
 }
