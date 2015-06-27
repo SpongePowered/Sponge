@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -85,36 +86,30 @@ public abstract class MixinWorldServer extends MixinWorld {
         world.updateWorldGenerator();
     }
 
-    @Overwrite
-    public void updateAllPlayersSleepingFlag() {
-        this.allPlayersSleeping = false;
-        if (!this.playerEntities.isEmpty()) {
-            int ignoredPlayers = 0;
-            int sleepingPlayers = 0;
-            for (EntityPlayer entityPlayer : this.playerEntities) {
-                if (entityPlayer.isSpectator()
-                        || (entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored())) {
-                    ignoredPlayers++;
-                } else if (entityPlayer.isPlayerSleeping()) {
-                    sleepingPlayers++;
-                }
-            }
-            this.allPlayersSleeping = ((sleepingPlayers > 0)
-                    && (sleepingPlayers >= this.playerEntities.size() - ignoredPlayers));
-        }
+    @Redirect(method = "updateAllPlayersSleepingFlag()V", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/entity/player/EntityPlayer;isSpectator()Z"))
+    public boolean isSpectatorOrIgnored(EntityPlayer entityPlayer) {
+        // spectators are excluded from the sleep tally in vanilla
+        // this redirect expands that check to include sleep-ignored players as well
+        boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
+        return ignore || entityPlayer.isPlayerFullyAsleep();
     }
 
-    @Overwrite
-    public boolean areAllPlayersAsleep() {
-        if ((this.allPlayersSleeping) && (!this.isRemote)) {
-            for (EntityPlayer entityPlayer : this.playerEntities) {
-                boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
-                if (!ignore && (entityPlayer.isSpectator() || !entityPlayer.isPlayerFullyAsleep())) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
+    @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"))
+    public boolean isPlayerFullyAsleep(EntityPlayer entityPlayer) {
+        // if isPlayerFullyAsleep() returns false areAllPlayerAsleep() breaks its loop and returns false
+        // this redirect forces it to return true if the player is sleep-ignored even if they're not sleeping
+        boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
+        return ignore || entityPlayer.isPlayerFullyAsleep();
+    }
+
+    @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/entity/player/EntityPlayer;isSpectator()Z"))
+    public boolean isSpectatorAndNotIgnored(EntityPlayer entityPlayer) {
+        // if a player is marked as a spectator areAllPlayersAsleep() breaks its loop and returns false
+        // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator
+        boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
+        return !ignore && entityPlayer.isPlayerFullyAsleep();
     }
 }
