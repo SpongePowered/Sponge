@@ -53,7 +53,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract IChatComponent getDisplayName();
     @Shadow public abstract void addExperience(int amount);
     @Shadow public abstract net.minecraft.scoreboard.Scoreboard getWorldScoreboard();
-    @Shadow protected BlockPos spawnChunk;
+    @Shadow private BlockPos spawnChunk;
     @Shadow protected FoodStats foodStats;
 
     public double getExhaustion() {

@@ -84,7 +84,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
 
-    @Shadow public long randomSeed;
+    @Shadow private long randomSeed;
     @Shadow private net.minecraft.world.WorldType terrainType;
     @Shadow private String generatorOptions;
     @Shadow private int spawnX;
