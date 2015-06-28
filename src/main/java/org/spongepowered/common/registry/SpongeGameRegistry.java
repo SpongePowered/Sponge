@@ -506,6 +506,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private final Map<String, GeneratorType> generatorTypeMappings = Maps.newHashMap();
 
+    protected final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
+
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
                     .put("ATTACK", new SpongeEntityInteractionType("ATTACK"))
@@ -518,7 +520,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(Art.class, this.artMappings)
                     .put(Attribute.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(BiomeType.class, this.biomeTypeMappings)
-                    .put(BlockType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(BlockType.class, this.blockTypeMappings)
                     .put(Career.class, this.careerMappings)
                     .put(ChatType.class, chatTypeMappings)
                     .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
