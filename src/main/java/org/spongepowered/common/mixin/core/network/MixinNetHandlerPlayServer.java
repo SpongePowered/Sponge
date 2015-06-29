@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
 import net.minecraft.command.server.CommandBlockLogic;
@@ -55,9 +56,11 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.player.PlayerMoveEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -73,12 +76,13 @@ import java.net.InetSocketAddress;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
-
     @Shadow private static Logger logger;
+
     @Shadow public NetworkManager netManager;
+
     @Shadow public EntityPlayerMP playerEntity;
+
     @Shadow private MinecraftServer serverController;
-    @Shadow private boolean hasMoved;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);
 
@@ -239,9 +243,40 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return input;
     }
 
-    @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isSinglePlayer()Z"))
-    public boolean checkMovement(MinecraftServer serverIn) {
-        return (this.hasMoved && serverIn.isSinglePlayer());
+    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
+    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+        if (packetIn.isMoving() || packetIn.getRotating()) {
+            Player player = (Player) playerEntity;
+            Vector3d fromrot = player.getRotation();
+            Location from = player.getLocation();
+            Vector3d torot = new Vector3d(packetIn.getYaw(), packetIn.getPitch(), 0);
+            Location to = new Location(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
+
+            double deltaSquared = to.getPosition().distanceSquared(from.getPosition());
+            float deltaAngle = Math.abs((float) (fromrot.getX() - torot.getX()) + Math.abs((float) (fromrot.getY() - torot.getY())));
+
+            // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
+            boolean rotationOnly = !packetIn.isMoving() && packetIn.getRotating();
+            if (rotationOnly) {
+                // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
+                to = from;
+            }
+
+            // These magic numbers are sad but help prevent excessive lag from this event.
+            // eventually it would be nice to not have them
+            if ((deltaSquared > (1f / 16) * (1f / 16) || deltaAngle > 10f || rotationOnly) && !playerEntity.isDead) {
+                PlayerMoveEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, from, to, torot);
+                Sponge.getGame().getEventManager().post(event);
+                if (event.isCancelled()) {
+                    player.setLocationAndRotation(from, fromrot);
+                    ci.cancel();
+                }
+                if (!event.getNewLocation().equals(to)) {
+                    player.setLocationAndRotation(event.getNewLocation(), event.getRotation());
+                    ci.cancel();
+                }
+            }
+        }
     }
 
 }
