@@ -57,7 +57,6 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
         this.sender = sender;
         this.data = new MemorySubjectData(Sponge.getGame().getServiceManager().provide(PermissionService.class).get());
 
-        long start = System.nanoTime();
         // ICommandSenders have a *very* basic understanding of permissions, so
         // get what we can.
         this.data.setPermission(SubjectData.GLOBAL_CONTEXT, "minecraft.selector",
@@ -71,7 +70,6 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
                         Tristate.fromBoolean(wrapper.command.canCommandSenderUseCommand(sender)));
             }
         }
-        System.out.println((System.nanoTime() - start) / 0.000001 + " nanoseconds");
     }
 
     @Override

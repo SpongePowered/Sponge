@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import net.minecraft.command.CommandHelp;
 import org.spongepowered.common.command.WrapperCommandSource;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -54,7 +53,7 @@ import java.util.List;
 @NonnullByDefault
 @Mixin(ServerCommandManager.class)
 public abstract class MixinServerCommandManager extends CommandHandler implements IMixinServerCommandManager {
-    
+
     private List<MinecraftCommandWrapper> lowPriorityCommands = Lists.newArrayList();
     private List<MinecraftCommandWrapper> earlyRegisterCommands = Lists.newArrayList();
 

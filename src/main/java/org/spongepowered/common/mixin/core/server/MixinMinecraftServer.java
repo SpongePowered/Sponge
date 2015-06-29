@@ -94,62 +94,27 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private static Logger logger;
     @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow private int tickCounter;
-
-    @Shadow
-    public abstract EnumDifficulty getDifficulty();
-
-    @Shadow
-    public abstract ServerConfigurationManager getConfigurationManager();
-
-    @Shadow
-    public abstract void addChatMessage(IChatComponent message);
-
-    @Shadow
-    public abstract boolean isServerInOnlineMode();
-
-    @Shadow
-    public abstract void initiateShutdown();
-
-    @Shadow
-    public abstract boolean isServerRunning();
-
-    @Shadow
-    protected abstract void setUserMessage(String message);
-
-    @Shadow
-    protected abstract void outputPercentRemaining(String message, int percent);
-
-    @Shadow
-    protected abstract void clearCurrentTask();
-
+    @Shadow public abstract EnumDifficulty getDifficulty();
+    @Shadow public abstract ServerConfigurationManager getConfigurationManager();
+    @Shadow public abstract void addChatMessage(IChatComponent message);
+    @Shadow public abstract boolean isServerInOnlineMode();
+    @Shadow public abstract void initiateShutdown();
+    @Shadow public abstract boolean isServerRunning();
+    @Shadow protected abstract void setUserMessage(String message);
+    @Shadow protected abstract void outputPercentRemaining(String message, int percent);
+    @Shadow protected abstract void clearCurrentTask();
     @Shadow public WorldServer[] worldServers;
     @Shadow public Profiler theProfiler;
     @Shadow private boolean enableBonusChest;
     @Shadow private boolean worldIsBeingDeleted;
-
-    @Shadow
-    public abstract boolean canStructuresSpawn();
-
-    @Shadow
-    public abstract boolean isHardcore();
-
-    @Shadow
-    public abstract boolean isSinglePlayer();
-
-    @Shadow
-    public abstract String getFolderName();
-
-    @Shadow
-    public abstract WorldSettings.GameType getGameType();
-
-    @Shadow
-    public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
-
-    @Shadow
-    protected abstract void convertMapIfNeeded(String worldNameIn);
-
-    @Shadow
-    protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
+    @Shadow public abstract boolean canStructuresSpawn();
+    @Shadow public abstract boolean isHardcore();
+    @Shadow public abstract boolean isSinglePlayer();
+    @Shadow public abstract String getFolderName();
+    @Shadow public abstract WorldSettings.GameType getGameType();
+    @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
+    @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
+    @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
 
     @Shadow
     @SideOnly(Side.SERVER)
@@ -298,8 +263,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public void shutdown(Text kickMessage) {
-        for (Player spongePlayer : getOnlinePlayers()) {
-            spongePlayer.kick(kickMessage);
+        for (Player player : getOnlinePlayers()) {
+            player.kick(kickMessage);
         }
 
         initiateShutdown();
@@ -332,13 +297,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
 
             WorldInfo worldInfo;
-            WorldSettings newWorldSettings;
+            WorldSettings newWorldSettings ;
             AnvilSaveHandler worldsavehandler;
 
             if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
                 worldsavehandler =
                         new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory() :
-                            new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
+                                new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
             } else {
                 worldsavehandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
             }
@@ -387,7 +352,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     world));
         }
 
-        this.serverConfigManager.setPlayerManager(new WorldServer[] {DimensionManager.getWorldFromDimId(0)});
+        this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.initialWorldChunkLoad();
     }
@@ -437,7 +402,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         File file = new File(getFolderName(), worldName);
 
-        if (file.exists() && !file.isDirectory()) {
+        if ((file.exists()) && (!file.isDirectory())) {
             throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
         }
 
@@ -457,11 +422,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 worldInfo = (WorldInfo) Sponge.getSpongeRegistry().getWorldProperties(((WorldProperties) worldInfo).getUniqueId()).get();
             }
             dim = ((IMixinWorldInfo) worldInfo).getDimensionId();
-            if (!DimensionManager.isDimensionRegistered(dim)) { // handle
-                                                                // reloads
-                                                                // properly
+            if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
                 DimensionManager
-                .registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+                        .registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
             }
             if (Sponge.getSpongeRegistry().getWorldFolder(dim) == null) {
                 Sponge.getSpongeRegistry().registerWorldDimensionId(dim, worldName);
@@ -472,8 +435,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         WorldSettings settings = new WorldSettings(worldInfo);
 
-        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads
-                                                            // properly
+        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
 
@@ -540,8 +502,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
         Sponge.getSpongeRegistry().registerWorldUniqueId(uuid, worldName);
 
-        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads
-                                                            // properly
+        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
