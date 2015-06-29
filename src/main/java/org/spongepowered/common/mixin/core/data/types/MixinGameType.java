@@ -30,30 +30,23 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(WorldSettings.GameType.class)
 @Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
-public class MixinGameType {
-    @Shadow
-    String name;
+public abstract class MixinGameType {
+    @Shadow String name;
 
     public String gamemode$getId() {
-        return this.name.toUpperCase();
+        return this.name;
     }
 
     public String gamemode$getName() {
-        return this.name.toUpperCase();
+        return this.name;
     }
 
     public Translation gamemode$getTranslation() {
         return new SpongeTranslation("gameMode." + this.name.toLowerCase());
-    }
-
-    @Overwrite
-    public String getName() {
-        return this.name;
     }
 }

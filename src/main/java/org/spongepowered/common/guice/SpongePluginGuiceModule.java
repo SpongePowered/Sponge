@@ -26,6 +26,7 @@ package org.spongepowered.common.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
+import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -46,9 +47,11 @@ import javax.inject.Inject;
 public class SpongePluginGuiceModule extends AbstractModule {
 
     private final SpongePluginContainer container;
+    private final Class<?> pluginClass;
 
-    public SpongePluginGuiceModule(SpongePluginContainer container) {
+    public SpongePluginGuiceModule(SpongePluginContainer container, Class<?> pluginClass) {
         this.container = container;
+        this.pluginClass = pluginClass;
     }
 
     @Override
@@ -57,6 +60,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
         DefaultConfig sharedConfigFile = new ConfigFileAnnotation(true);
         DefaultConfig privateConfigFile = new ConfigFileAnnotation(false);
 
+        bind(this.pluginClass).in(Scopes.SINGLETON);
         bind(PluginContainer.class).toInstance(this.container);
         bind(Logger.class).toInstance(this.container.getLogger());
 

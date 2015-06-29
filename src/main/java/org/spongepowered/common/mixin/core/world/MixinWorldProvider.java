@@ -62,7 +62,6 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow public WorldType terrainType;
     @Shadow protected boolean hasNoSky;
     @Shadow public abstract String getDimensionName();
-    @Shadow public abstract boolean canRespawnHere();
 
     @Override
     public String getName() {
@@ -154,14 +153,14 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
             if (dimConfig == null) {
                 String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
                 dimConfig = new SpongeConfig<SpongeConfig.DimensionConfig>(SpongeConfig.Type.DIMENSION, new File(Sponge.getConfigDirectory()
-                        + File.separator + providerName + File.separator, "dimension.conf"), "sponge");
+                        + File.separator + "worlds" + File.separator + providerName + File.separator, "dimension.conf"), "sponge");
                 SpongeGameRegistry.dimensionConfigs.put(provider.getClass(), dimConfig);
             }
             ((IMixinWorldProvider) provider).setDimensionConfig(SpongeGameRegistry.dimensionConfigs.get(provider.getClass()));
         }
 
         Dimension dim = (Dimension) provider;
-        dim.setAllowsPlayerRespawns(DimensionManager.shouldLoadSpawn(dimension));
+        dim.setAllowsPlayerRespawns(provider.canRespawnHere());
         return provider;
     }
 

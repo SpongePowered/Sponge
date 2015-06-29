@@ -42,8 +42,6 @@ public abstract class MixinEntityTracker {
 
     @Inject(method = "trackEntity", at = @At("HEAD"), cancellable = true)
     public void onTrackEntity(Entity entityIn, CallbackInfo ci) {
-        // TODO This is done in forge already (EntityRegistry), move to
-        // SpongeVanilla only?
         if (entityIn instanceof EntityHuman) {
             this.trackEntity(entityIn, 512, 2);
             ci.cancel();

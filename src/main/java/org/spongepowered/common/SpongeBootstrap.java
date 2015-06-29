@@ -39,8 +39,7 @@ import org.spongepowered.api.service.command.SimpleCommandService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.api.service.rcon.RconService;
-import org.spongepowered.api.service.scheduler.AsynchronousScheduler;
-import org.spongepowered.api.service.scheduler.SynchronousScheduler;
+import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
@@ -51,8 +50,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
-import org.spongepowered.common.service.scheduler.AsyncScheduler;
-import org.spongepowered.common.service.scheduler.SyncScheduler;
+import org.spongepowered.common.service.scheduler.SpongeScheduler;
 import org.spongepowered.common.service.sql.SqlServiceImpl;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -86,8 +84,7 @@ public final class SpongeBootstrap {
         }
 
         try {
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SynchronousScheduler.class, SyncScheduler.getInstance());
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), AsynchronousScheduler.class, AsyncScheduler.getInstance());
+            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SchedulerService.class, SpongeScheduler.getInstance());
         } catch (ProviderExistsException e) {
             Sponge.getLogger().error("Non-Sponge scheduler has been registered. Cannot continue!");
             throw new ExceptionInInitializerError(e);

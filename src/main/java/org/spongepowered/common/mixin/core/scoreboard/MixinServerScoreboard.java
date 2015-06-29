@@ -30,7 +30,6 @@ import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
 import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -71,7 +70,6 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
 
     @Override
     public void removePlayer(EntityPlayerMP player) {
-        System.out.println("REMOING PLAYER");
         this.players.remove(player);
         this.removeScoreboard(player);
     }

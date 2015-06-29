@@ -36,6 +36,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
@@ -72,13 +73,12 @@ import java.net.InetSocketAddress;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
+
     @Shadow private static Logger logger;
-
     @Shadow public NetworkManager netManager;
-
     @Shadow public EntityPlayerMP playerEntity;
-
     @Shadow private MinecraftServer serverController;
+    @Shadow private boolean hasMoved;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);
 
@@ -237,6 +237,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             + "(Ljava/lang/String;)Ljava/lang/String;", remap = false))
     public String dontNormalizeStringBecauseSomeMojangDevSucks(String input) {
         return input;
+    }
+
+    @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isSinglePlayer()Z"))
+    public boolean checkMovement(MinecraftServer serverIn) {
+        return (this.hasMoved && serverIn.isSinglePlayer());
     }
 
 }

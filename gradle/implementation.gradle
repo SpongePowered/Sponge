@@ -79,6 +79,10 @@ shadowJar {
 
         include dependency('ninja.leaping.configurate:configurate-core')
         include dependency('ninja.leaping.configurate:configurate-hocon')
+        include dependency('ninja.leaping.configurate:configurate-gson')
+        include dependency('ninja.leaping.configurate:configurate-yaml')
+
+        include dependency('org.yaml:snakeyaml')
 
         include dependency('com.zaxxer:HikariCP-java6')
         include dependency('org.javassist:javassist')

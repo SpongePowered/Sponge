@@ -394,7 +394,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
     public static final Map<Team.EnumVisible, SpongeVisibility> enumVisible = Maps.newEnumMap(Team.EnumVisible.class);
 
-    public static final ImmutableMap<String, TextStyle> textStyleMappings = new ImmutableMap.Builder<String, TextStyle>()
+    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
             .put("BOLD", SpongeTextStyle.of(EnumChatFormatting.BOLD))
             .put("ITALIC", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
             .put("UNDERLINE", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
@@ -506,6 +506,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private final Map<String, GeneratorType> generatorTypeMappings = Maps.newHashMap();
 
+    protected final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
+
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
                     .put("ATTACK", new SpongeEntityInteractionType("ATTACK"))
@@ -518,7 +520,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(Art.class, this.artMappings)
                     .put(Attribute.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(BiomeType.class, this.biomeTypeMappings)
-                    .put(BlockType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(BlockType.class, this.blockTypeMappings)
                     .put(Career.class, this.careerMappings)
                     .put(ChatType.class, chatTypeMappings)
                     .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
@@ -573,6 +575,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(StatisticGroup.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(TextColor.class, textColorMappings)
+                    .put(TextStyle.Base.class, this.textStyleMappings)
                     .put(TileEntityType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(TreeType.class, this.treeTypeMappings)
                     .put(Visibility.class, this.visibilityMappings)
@@ -1860,7 +1863,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.entityTypeMappings.put("WEATHER", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class));
         this.entityTypeMappings.put("PLAYER", new SpongeEntityType(-5, "Player", EntityPlayerMP.class));
         this.entityTypeMappings.put("COMPLEX_PART", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class));
-        this.entityTypeMappings.put("HUMAN", new SpongeEntityType(-7, "Human", EntityHuman.class));
+        this.entityTypeMappings.put("HUMAN", registerCustomEntity(EntityHuman.class, "Human", -7));
 
         RegistryHelper.mapFields(EntityTypes.class, new Function<String, EntityType>() {
 
@@ -1886,6 +1889,24 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);
     }
 
+    @SuppressWarnings("unchecked")
+    private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
+        return new SpongeEntityType((Integer) EntityList.stringToIDMapping.get(mcName), spongeName,
+                (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName));
+    }
+
+    private SpongeEntityType newEntityTypeFromName(String name) {
+        return newEntityTypeFromName(name, name);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId) {
+        String entityFullName = String.format("%s.%s", Sponge.ECOSYSTEM_NAME, entityName);
+        EntityList.classToStringMapping.put(entityClass, entityFullName);
+        EntityList.stringToClassMapping.put(entityFullName, entityClass);
+        return new SpongeEntityType(entityId, entityName, Sponge.ECOSYSTEM_NAME, entityClass);
+    }
+
     public void setGeneratorTypes() {
         this.generatorTypeMappings.put("DEFAULT", (GeneratorType) WorldType.DEFAULT);
         this.generatorTypeMappings.put("FLAT", (GeneratorType) WorldType.FLAT);
@@ -1894,15 +1915,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.generatorTypeMappings.put("END", (GeneratorType) new SpongeWorldTypeEnd());
         this.generatorTypeMappings.put("OVERWORLD", (GeneratorType) new SpongeWorldTypeOverworld());
         RegistryHelper.mapFields(GeneratorTypes.class, this.generatorTypeMappings);
-    }
-
-    private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        return new SpongeEntityType((Integer) EntityList.stringToIDMapping.get(mcName), spongeName,
-                (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName));
-    }
-
-    private SpongeEntityType newEntityTypeFromName(String name) {
-        return newEntityTypeFromName(name, name);
     }
 
     private void setDoublePlantMappings() {

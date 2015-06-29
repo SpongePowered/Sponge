@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
@@ -66,8 +65,8 @@ import org.spongepowered.api.data.manipulator.entity.RespawnLocationData;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
 import org.spongepowered.api.event.entity.player.PlayerRespawnEvent;
-import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -77,9 +76,9 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 
@@ -91,7 +90,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(ServerConfigurationManager.class)
-public abstract class MixinServerConfigurationManager implements IMixinServerConfigurationManager {
+public abstract class MixinServerConfigurationManager {
 
     @Shadow private static Logger logger;
     @Shadow private MinecraftServer mcServer;
@@ -107,8 +106,6 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
 
-    private Scoreboard scoreboard;
-
     /**
      * Bridge methods to proxy modified method in Vanilla, nothing in Forge
      */
@@ -123,7 +120,6 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         initializeConnectionToPlayer(netManager, playerIn, null);
     }
 
-    @SuppressWarnings("rawtypes")
     public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
         GameProfile gameprofile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
@@ -242,92 +238,68 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         }
     }
 
-    @SuppressWarnings({"unused", "unchecked"})
+    // A temporary variable to transfer the 'isBedSpawn' variable between
+    // getPlayerRespawnLocation and recreatePlayerEntity
+    private boolean tempIsBedSpawn = false;
+
+    @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd) {
-        this.scoreboard = ((Player) playerIn).getScoreboard();
 
-        // Phase 1 - check if the player is allowed to respawn in same dimension
-        net.minecraft.world.World world = this.mcServer.worldServerForDimension(targetDimension);
-        World fromWorld = (World) playerIn.worldObj;
+        // ### PHASE 1 ### Get the location to spawn
 
-        if (!world.provider.canRespawnHere()) {
-            targetDimension = ((IMixinWorldProvider) world.provider).getRespawnDimension(playerIn);
+        // Vanilla will always use overworld, set to the world the player was in
+        // UNLESS comming back from the end.
+        if (!conqueredEnd && targetDimension == 0) {
+            targetDimension = playerIn.dimension;
         }
+        Location location = this.getPlayerRespawnLocation(playerIn, targetDimension);
 
-        // Phase 2 - handle return from End
-        if (conqueredEnd) {
-            WorldServer exitWorld = this.mcServer.worldServerForDimension(targetDimension);
-            Location enter = ((Player) playerIn).getLocation();
-            Optional<Location> exit = Optional.absent();
-            // use bed if available, otherwise default spawn
-            if (((Player) playerIn).getData(RespawnLocationData.class).isPresent()) {
-                exit = Optional.of(((Player) playerIn).getData(RespawnLocationData.class).get().getRespawnLocation());
-            }
-            if (!exit.isPresent() || ((net.minecraft.world.World) exit.get().getExtent()).provider.getDimensionId() != 0) {
-                Vector3i pos = ((World) exitWorld).getProperties().getSpawnPosition();
-                exit = Optional.of(new Location((World) exitWorld, new Vector3d(pos.getX(), pos.getY(), pos.getZ())));
-            }
+        // Keep players out of blocks
+        Vector3d tempPos = ((Player) playerIn).getLocation().getPosition();
+        playerIn.setPosition(location.getX(), location.getY(), location.getZ());
+        while (!((WorldServer) location.getExtent()).getCollidingBoundingBoxes(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
+            playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
+            location = location.add(0, 1, 0);
         }
+        playerIn.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
 
-        // Phase 3 - remove current player from current dimension
+
+        // ### PHASE 2 ### Remove player from current dimension
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
+        playerIn.getServerForPlayer().getEntityTracker().untrackEntity(playerIn);
         playerIn.getServerForPlayer().getPlayerManager().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.worldServerForDimension(playerIn.dimension).removePlayerEntityDangerously(playerIn);
 
-        // Phase 4 - handle bed spawn
-        BlockPos bedSpawnChunkCoords = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
-        boolean spawnForced = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimension);
-        playerIn.dimension = targetDimension;
-        // make sure to update reference for bed spawn logic
-        playerIn.setWorld(this.mcServer.worldServerForDimension(playerIn.dimension));
+        // ### PHASE 3 ### Reset player (if applicable)
         playerIn.playerConqueredTheEnd = false;
-        BlockPos bedSpawnLocation;
-        boolean isBedSpawn = false;
-        World toWorld = ((World) playerIn.worldObj);
-        Location location = null;
-
-        if (bedSpawnChunkCoords != null) { // if player has a bed
-            bedSpawnLocation =
-                    EntityPlayer.getBedSpawnLocation(this.mcServer.worldServerForDimension(playerIn.dimension), bedSpawnChunkCoords, spawnForced);
-
-            if (bedSpawnLocation != null) {
-                isBedSpawn = true;
-                playerIn.setLocationAndAngles(bedSpawnLocation.getX() + 0.5F,
-                        bedSpawnLocation.getY() + 0.1F, bedSpawnLocation.getZ() + 0.5F, 0.0F, 0.0F);
-                playerIn.setSpawnPoint(bedSpawnChunkCoords, spawnForced);
-                location =
-                        new Location(toWorld, new Vector3d(bedSpawnChunkCoords.getX() + 0.5, bedSpawnChunkCoords.getY(),
-                                bedSpawnChunkCoords.getZ() + 0.5));
-            } else { // bed was not found (broken)
-                playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0));
-                // use the spawnpoint as location
-                location =
-                        new Location(toWorld, new Vector3d(toWorld.getProperties().getSpawnPosition().getX(), toWorld.getProperties()
-                                .getSpawnPosition().getY(), toWorld.getProperties().getSpawnPosition().getZ()));
-            }
-        }
-
-        if (location == null) {
-            // use the world spawnpoint as default location
-            location =
-                    new Location(toWorld, new Vector3d(toWorld.getProperties().getSpawnPosition().getX(), toWorld.getProperties().getSpawnPosition()
-                            .getY(), toWorld.getProperties().getSpawnPosition().getZ()));
-        }
-
         if (!conqueredEnd) { // don't reset player if returning from end
             ((IMixinEntityPlayerMP) playerIn).reset();
         }
+        playerIn.setSneaking(false);
 
-        final PlayerRespawnEvent event = SpongeImplEventFactory.createPlayerRespawn(Sponge.getGame(), (Player) playerIn, isBedSpawn, location);
+        // ### PHASE 4 ### Fire event and set new location on the player
+        final PlayerRespawnEvent event =
+                SpongeImplEventFactory.createPlayerRespawn(Sponge.getGame(), (Player) playerIn, this.tempIsBedSpawn, location);
+        this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);
         location = event.getNewRespawnLocation();
 
+        if (!(location.getExtent() instanceof WorldServer)) {
+            Sponge.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
+            location = event.getRespawnLocation();
+        }
         final WorldServer targetWorld = (WorldServer) location.getExtent();
+
+        playerIn.dimension = targetWorld.provider.getDimensionId();
+        playerIn.setWorld(targetWorld);
+        playerIn.theItemInWorldManager.setWorld(targetWorld);
+
         targetWorld.theChunkProviderServer.loadChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
-        // Phase 5 - Respawn player in new world
+        // ### PHASE 5 ### Respawn player in new world
+
         // Support vanilla clients logging into custom dimensions
         int dimension = DimensionManager.getClientDimensionToSend(targetWorld.provider.getDimensionId(), targetWorld, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
@@ -336,18 +308,10 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
 
         playerIn.playerNetServerHandler.sendPacket(new S07PacketRespawn(dimension, targetWorld.getDifficulty(), targetWorld
                 .getWorldInfo().getTerrainType(), playerIn.theItemInWorldManager.getGameType()));
-        playerIn.setWorld(targetWorld); // in case plugin changed it
         playerIn.isDead = false;
-        BlockPos blockpos1 = targetWorld.getSpawnPoint();
         playerIn.playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 playerIn.rotationYaw, playerIn.rotationPitch);
 
-        // Keep players out of blocks
-        while (!targetWorld.getCollidingBoundingBoxes(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
-            playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
-        }
-
-        playerIn.setSneaking(false);
         final BlockPos spawnLocation = targetWorld.getSpawnPoint();
         playerIn.playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(spawnLocation));
         playerIn.playerNetServerHandler.sendPacket(new S1FPacketSetExperience(playerIn.experience, playerIn.experienceTotal,
@@ -359,10 +323,55 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         playerIn.addSelfToInternalCraftingInventory();
         playerIn.setHealth(playerIn.getHealth());
 
-        ((Player) playerIn).setScoreboard(this.scoreboard);
-        ((Player) this.uuidToPlayerMap.get(playerIn.getUniqueID())).setScoreboard(this.scoreboard);
-
         return playerIn;
+    }
+
+    // Internal. Note: Has side-effects
+    private Location getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
+        this.tempIsBedSpawn = false;
+        WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
+        if (targetWorld == null) { // Target world doesn't exist? Use global
+            return ((World) this.mcServer.getEntityWorld()).getSpawnLocation();
+        }
+        Dimension targetDim = (Dimension) targetWorld.provider;
+        // Cannot respawn in requested world, use the fallback dimension for
+        // that world. (Usually overworld unless a mod says otherwise).
+        if (!targetDim.allowsPlayerRespawns()) {
+            targetDimension = ((IMixinWorldProvider) targetDim).getRespawnDimension(playerIn);
+            targetWorld = this.mcServer.worldServerForDimension(targetDimension);
+            targetDim = (Dimension) targetWorld.provider;
+        }
+        // Use data attached to the player if possible
+        Optional<RespawnLocationData> optRespawn = ((Player) playerIn).getData(RespawnLocationData.class);
+        if (optRespawn.isPresent()) {
+            // API TODO: Make this support multiple world spawn points
+            // TODO Make RespawnLocationData 'shadow' the bed location from below
+            return optRespawn.get().getRespawnLocation();
+        }
+        Vector3d spawnPos = null;
+        BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
+        if (bedLoc != null) { // Player has a bed
+            boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimension);
+            BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(this.mcServer.worldServerForDimension(targetDimension), bedLoc, forceBedSpawn);
+            if (bedSpawnLoc != null) { // The bed exists and is not obstructed
+                this.tempIsBedSpawn = true;
+                playerIn.setLocationAndAngles(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D, 0.0F, 0.0F);
+                spawnPos = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
+            } else { // Bed invalid
+                playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0.0F));
+                // Vanilla behaviour - Delete the known bed location if invalid
+                bedLoc = null; // null = remove location
+            }
+            // Set the new bed location for the new dimension
+            int prevDim = playerIn.dimension; // Temporarily for setSpawnPoint
+            playerIn.dimension = targetDimension;
+            playerIn.setSpawnPoint(bedLoc, forceBedSpawn);
+            playerIn.dimension = prevDim;
+        }
+        if (spawnPos == null) {
+            spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
+        }
+        return new Location((World) targetWorld, spawnPos);
     }
 
     @Overwrite

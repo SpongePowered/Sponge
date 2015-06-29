@@ -52,14 +52,14 @@ public abstract class MixinSaveHandler {
     @Shadow private File worldDirectory;
     @Shadow private long initializationTime;
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE",target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)"
-            + "V", ordinal = 0))
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
+            , ordinal = 0))
     public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE",target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)"
-            + "V", ordinal = 1))
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
+            , ordinal = 1))
     public String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }

@@ -46,10 +46,10 @@ public class SpongeTeleportHelper implements TeleportHelper {
         // Check around the player first in a configurable radius:
         final Optional<Location> safe = checkAboveAndBelowLocation(location, height, width);
         if (safe.isPresent()) {
-            return Optional.of(new Location(safe.get().getExtent(), safe.get().getPosition().add(0.5, 0, 0.5)));
-        } else {
-            return Optional.absent();
+            // Add 0.5 to X and Z of block position so always in centre of block
+            return Optional.of(new Location(safe.get().getExtent(), safe.get().getBlockPosition().toDouble().add(0.5, 0, 0.5)));
         }
+        return safe;
     }
 
     private Optional<Location> checkAboveAndBelowLocation(Location location, final int height, final int width) {
@@ -64,13 +64,13 @@ public class SpongeTeleportHelper implements TeleportHelper {
         // We've already checked zero right above this.
         for (int currentLevel = 1; currentLevel <= height; currentLevel++) {
             // Check above
-            safe = checkAroundLocation(new Location(location.getExtent(), location.getPosition().add(0, currentLevel, 0)), width);
+            safe = checkAroundLocation(location.add(0, currentLevel, 0), width);
             if (safe.isPresent()) {
                 return safe;
             }
 
             // Check below
-            safe = checkAroundLocation(new Location(location.getExtent(), location.getPosition().sub(0, currentLevel, 0)), width);
+            safe = checkAroundLocation(location.add(0, -currentLevel, 0), width);
             if (safe.isPresent()) {
                 return safe;
             }
@@ -88,7 +88,8 @@ public class SpongeTeleportHelper implements TeleportHelper {
         for (int currentRadius = 0; currentRadius <= radius; currentRadius++) {
             Optional<Vector3i> safePosition = checkAroundSpecificDiameter(location, currentRadius);
             if (safePosition.isPresent()) {
-                // If a safe area was found: Return the checkLoc, it is the safe location.
+                // If a safe area was found: Return the checkLoc, it is the safe
+                // location.
                 return Optional.of(new Location(location.getExtent(), safePosition.get()));
             }
         }
@@ -148,8 +149,8 @@ public class SpongeTeleportHelper implements TeleportHelper {
     }
 
     public boolean isSafeLocation(World world, Vector3i blockPos) {
-        final Vector3i up = new Vector3i(blockPos.add(Vector3i.UP));
-        final Vector3i down = new Vector3i(blockPos.sub(Vector3i.UP));
+        final Vector3i up = blockPos.add(Vector3i.UP);
+        final Vector3i down = blockPos.sub(Vector3i.UP);
 
         return !(!isBlockSafe(world, blockPos, false) || !isBlockSafe(world, up, false) || !isBlockSafe(world, down, true));
 
@@ -166,9 +167,8 @@ public class SpongeTeleportHelper implements TeleportHelper {
             return false;
         }
 
-
         if (floorBlock) {
-            //Floor is air so we'll fall, need to make sure we fall safely.
+            // Floor is air so we'll fall, need to make sure we fall safely.
             if (block == BlockTypes.AIR) {
                 final BlockType typeBelowPos = world.getBlockType(blockPos.sub(0, 1, 0));
                 final BlockType typeBelowPos2 = world.getBlockType(blockPos.sub(0, 2, 0));
@@ -183,15 +183,16 @@ public class SpongeTeleportHelper implements TeleportHelper {
                     return false;
                 }
 
-                // We'll fall through an air block to another, need to make sure its safe
+                // We'll fall through an air block to another, need to make sure
+                // its safe
                 return isSafeFloorMaterial(((Block) typeBelowPos2).getMaterial());
             }
 
-            //We have a non-air floor, need to ensure its safe
+            // We have a non-air floor, need to ensure its safe
             return isSafeFloorMaterial(((Block) block).getMaterial());
         }
 
-        //We need to make sure the block at our torso or head is safe
+        // We need to make sure the block at our torso or head is safe
         return isSafeBodyMaterial(((Block) block).getMaterial());
     }
 
@@ -200,8 +201,8 @@ public class SpongeTeleportHelper implements TeleportHelper {
     }
 
     private boolean isSafeBodyMaterial(Material material) {
-        return (material == Material.air || material == Material.grass || material == Material.plants ||
-        material == Material.water || material == Material.redstoneLight || material == Material.circuits ||
-        material == Material.snow || material == Material.portal || material == Material.web || material == Material.vine);
+        return (material == Material.air || material == Material.grass || material == Material.plants
+                || material == Material.water || material == Material.redstoneLight || material == Material.circuits
+                || material == Material.snow || material == Material.portal || material == Material.web || material == Material.vine);
     }
 }
