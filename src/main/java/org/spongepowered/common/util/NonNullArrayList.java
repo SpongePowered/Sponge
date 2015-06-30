@@ -32,6 +32,8 @@ import java.util.Iterator;
 
 public class NonNullArrayList<E> extends ArrayList<E> {
 
+    private static final long serialVersionUID = 6567438878579505932L;
+
     @Override
     public boolean add(E element) {
         return super.add(checkNotNull(element, "Element cannot be null"));

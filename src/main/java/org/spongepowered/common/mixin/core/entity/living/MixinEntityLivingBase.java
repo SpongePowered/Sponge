@@ -40,8 +40,8 @@ import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.entity.DamageableData;
-import org.spongepowered.api.data.manipulator.entity.HealthData;
+import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.potion.PotionEffect;
@@ -61,6 +61,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(EntityLivingBase.class)
 public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
@@ -273,12 +274,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public DamageableData getMortalData() {
-        return getData(DamageableData.class).get(); // possibly perform a failsafe?
+        return get(DamageableData.class).get(); // possibly perform a failsafe?
     }
 
     @Override
     public HealthData getHealthData() {
-        return getData(HealthData.class).get(); // possibly perform a failsafe?
+        return get(HealthData.class).get(); // possibly perform a failsafe?
     }
 
     @Override

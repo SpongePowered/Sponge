@@ -32,11 +32,12 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
+import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 
 import java.util.List;
 
@@ -62,20 +63,22 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         }
         final SerializationService service = this.game.getServiceManager().provide(SerializationService.class).get();
 
-        final BannerData bannerData = new SpongeBannerData();
+        final BannerData bannerData = null;
 
         String dyeColorId = container.getString(BASE).get();
         Optional<DyeColor> colorOptional = this.game.getRegistry().getType(DyeColor.class, dyeColorId);
         if (!colorOptional.isPresent()) {
             throw new InvalidDataException("The provided container has an invalid dye color entry!");
         }
-        bannerData.setBaseColor(colorOptional.get());
+        bannerData.baseColor().set(colorOptional.get());
 
         // Now we have to get the patterns list
-        final List<BannerData.PatternLayer> patternsList = container.getSerializableList(PATTERNS, BannerData.PatternLayer.class, service).get();
-        for (BannerData.PatternLayer pattern : patternsList) {
-            bannerData.addPatternLayer(pattern);
+        final List<PatternLayer> patternsList = container.getSerializableList(PATTERNS, PatternLayer.class, service).get();
+        final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
+        for (PatternLayer pattern : patternsList) {
+            patternLayers.add(pattern);
         }
+        bannerData.set(patternLayers);
         final Banner banner = bannerOptional.get();
         banner.offer(bannerData);
         ((TileEntityBanner) banner).validate();

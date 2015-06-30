@@ -28,7 +28,7 @@ import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.item.EntityMinecartTNT;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.monster.EntityCreeper;
-import org.spongepowered.api.data.manipulator.entity.FuseData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -38,6 +38,6 @@ public abstract class MixinFusedExplosive extends MixinEntity implements FusedEx
 
     @Override
     public FuseData getFuseData() {
-        return getData(FuseData.class).get();
+        return get(FuseData.class).get();
     }
 }

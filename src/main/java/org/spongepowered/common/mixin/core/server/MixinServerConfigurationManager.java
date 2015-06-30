@@ -61,7 +61,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.data.manipulator.entity.RespawnLocationData;
+import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
 import org.spongepowered.api.event.entity.player.PlayerRespawnEvent;
@@ -342,11 +342,11 @@ public abstract class MixinServerConfigurationManager {
             targetDim = (Dimension) targetWorld.provider;
         }
         // Use data attached to the player if possible
-        Optional<RespawnLocationData> optRespawn = ((Player) playerIn).getData(RespawnLocationData.class);
+        Optional<RespawnLocationData> optRespawn = ((Player) playerIn).get(RespawnLocationData.class);
         if (optRespawn.isPresent()) {
             // API TODO: Make this support multiple world spawn points
             // TODO Make RespawnLocationData 'shadow' the bed location from below
-            return optRespawn.get().getRespawnLocation();
+            return null;
         }
         Vector3d spawnPos = null;
         BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);

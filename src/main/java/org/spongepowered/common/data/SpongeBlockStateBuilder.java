@@ -28,23 +28,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.mixin.core.block.MixinBlockState;
 
 import java.util.List;
 
 public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
     private BlockType blockType;
-    private List<DataManipulator<?>> manipulators;
+    private List<ImmutableDataManipulator<?, ?>> manipulators;
 
     @Override
     public BlockStateBuilder blockType(BlockType blockType) {
@@ -53,7 +52,13 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M>> BlockStateBuilder add(M manipulator) {
+    public <M extends DataManipulator<M, ?>> BlockStateBuilder add(M manipulator) {
+        this.manipulators.add(manipulator.asImmutable());
+        return this;
+    }
+
+    @Override
+    public <I extends ImmutableDataManipulator<I, ?>> BlockStateBuilder add(I manipulator) {
         this.manipulators.add(manipulator);
         return this;
     }
@@ -76,8 +81,8 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     @Override
     public BlockState build() {
         IBlockState blockState = ((IBlockState) this.blockType.getDefaultState());
-        for (DataManipulator<?> manipulator : this.manipulators) {
-            blockState = (IBlockState) ((BlockState) blockState).withData((DataManipulator) manipulator);
+        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+            blockState = (IBlockState) ((BlockState) blockState).with( manipulator);
         }
         return (BlockState) blockState;
     }

@@ -29,8 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectBuilder;
 import org.spongepowered.api.potion.PotionEffectType;
@@ -49,8 +50,13 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M>> PotionEffectBuilder add(M manipulator) {
+    public <M extends DataManipulator<M, ?>> PotionEffectBuilder add(M manipulator) {
         return this; // TODO
+    }
+
+    @Override
+    public <I extends ImmutableDataManipulator<I, ?>> PotionEffectBuilder add(I manipulator) {
+        return null;
     }
 
     @Override
