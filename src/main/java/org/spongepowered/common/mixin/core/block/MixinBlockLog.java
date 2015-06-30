@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
-import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
+import static org.spongepowered.api.data.DataTransactionBuilder.successNoData;
 
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockNewLog;
@@ -37,14 +36,12 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.TreeData;
+import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 
 @NonnullByDefault
@@ -83,42 +80,12 @@ public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTre
                 break;
         }
 
-        return new SpongeTreeData().setValue(treeType);
+        return null;
     }
 
-    @Override
-    public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos, DataPriority priority) {
+    public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos) {
         final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
-        switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
-            case POST_MERGE:
-                BlockPlanks.EnumType treeType = null;
-
-                if(data.getValue() == TreeTypes.OAK) {
-                    treeType = BlockPlanks.EnumType.OAK;
-                } else if(data.getValue() == TreeTypes.SPRUCE) {
-                    treeType = BlockPlanks.EnumType.SPRUCE;
-                } else if(data.getValue() == TreeTypes.BIRCH) {
-                    treeType = BlockPlanks.EnumType.BIRCH;
-                } else if(data.getValue() == TreeTypes.JUNGLE) {
-                    treeType = BlockPlanks.EnumType.JUNGLE;
-                } else if(data.getValue() == TreeTypes.ACACIA) {
-                    treeType = BlockPlanks.EnumType.ACACIA;
-                } else if(data.getValue() == TreeTypes.DARK_OAK) {
-                    treeType = BlockPlanks.EnumType.DARK_OAK;
-                }
-
-                IBlockState blockState = world.getBlockState(blockPos);
-
-                if(blockState.getBlock() instanceof BlockOldLog) {
-                    world.setBlockState(blockPos, blockState.withProperty(BlockOldLog.VARIANT, checkNotNull(treeType)));
-                } else if(blockState.getBlock() instanceof BlockNewLog) {
-                    world.setBlockState(blockPos, blockState.withProperty(BlockNewLog.VARIANT, checkNotNull(treeType)));
-                }
-                return successReplaceData(data);
-            default:
-                return successNoData();
-        }
+        return successNoData();
     }
 
     @Override

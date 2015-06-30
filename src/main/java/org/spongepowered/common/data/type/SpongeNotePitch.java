@@ -51,4 +51,9 @@ public class SpongeNotePitch implements NotePitch {
     public byte getByteId() {
         return this.id;
     }
+
+    @Override
+    public NotePitch cycleNext() {
+        return null;
+    }
 }

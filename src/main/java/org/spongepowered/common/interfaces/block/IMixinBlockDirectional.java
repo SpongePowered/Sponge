@@ -28,15 +28,21 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.DirectionalData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
+import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.util.Direction;
 
 public interface IMixinBlockDirectional extends IMixinBlock {
 
-    DirectionalData getDirectionalData(IBlockState blockState);
+    ImmutableDirectionalData getDirectionalData(IBlockState blockState);
 
-    DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos, DataPriority priority);
+    Value<Direction> getDirectionFor(IBlockState blockState);
+
+    boolean validateDirection(Direction direction);
+
+    DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos);
 
     BlockState setDirectionalData(IBlockState blockState, DirectionalData manipulator);
 

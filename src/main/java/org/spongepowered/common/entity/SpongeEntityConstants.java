@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
@@ -35,26 +32,9 @@ import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.SkeletonType;
 
-import java.util.Collection;
 import java.util.Map;
 
 public class SpongeEntityConstants {
-    public static final DataTransactionResult NO_CHANGE = new DataTransactionResult() {
-        @Override
-        public Type getType() {
-            return Type.SUCCESS;
-        }
-
-        @Override
-        public Optional<? extends Collection<? extends DataManipulator<?>>> getRejectedData() {
-            return Optional.absent();
-        }
-
-        @Override
-        public Optional<? extends Collection<? extends DataManipulator<?>>> getReplacedData() {
-            return Optional.absent();
-        }
-    };
 
     public static final Map<String, SkeletonType> SKELETON_TYPES = Maps.newHashMap();
     public static final Map<Integer, SkeletonType> SKELETON_IDMAP = Maps.newHashMap();

@@ -261,7 +261,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
 
         public Predicate<InetAddress> getIpSet(String name) {
-            return ipSets.containsKey(name) ? Predicates.and(ipSets.get(name)) : null;
+            return ipSets.containsKey(name) ? Predicates.<InetAddress>and(ipSets.get(name)) : null;
         }
     }
 

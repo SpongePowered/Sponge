@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
 
 import net.minecraft.entity.ai.EntityMinecartMobSpawner;
-import org.spongepowered.api.data.manipulator.MobSpawnerData;
+import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartMobSpawner;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +36,6 @@ public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart 
 
     @Override
     public MobSpawnerData getSpawnerData() {
-        return getData(MobSpawnerData.class).get();
+        return get(MobSpawnerData.class).get();
     }
 }
