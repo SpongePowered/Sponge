@@ -228,10 +228,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return (PlayerConnection) this.playerNetServerHandler;
     }
 
-    public void setBedLocation(@Nullable Location location) {
-        this.spawnChunk = location != null ? VecHelper.toBlockPos(location.getPosition()) : null;
-    }
-
     // this needs to be overridden from EntityPlayer so we can force a resend of the experience level
     @Override
     public void setLevel(int level) {
