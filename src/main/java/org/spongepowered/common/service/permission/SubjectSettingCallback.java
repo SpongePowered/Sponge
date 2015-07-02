@@ -34,7 +34,7 @@ import org.spongepowered.common.mixin.core.command.MixinSubject;
 import javax.annotation.Nullable;
 
 /**
- * {@link MixinSubject} helper class to apply the appropriate subject to the mixin
+ * {@link MixinSubject} helper class to apply the appropriate subject to the mixin.
  */
 public class SubjectSettingCallback implements Predicate<PermissionService> {
     private final IMixinSubject ref;
@@ -45,9 +45,12 @@ public class SubjectSettingCallback implements Predicate<PermissionService> {
 
     @Override
     public boolean apply(@Nullable PermissionService input) {
-        SubjectCollection userSubjects = input.getSubjects(ref.getSubjectCollectionIdentifier());
+        if (input == null) {
+            return false;
+        }
+        SubjectCollection userSubjects = input.getSubjects(this.ref.getSubjectCollectionIdentifier());
         if (userSubjects != null) {
-            ref.setSubject(userSubjects.get(((Subject) ref).getIdentifier()));
+            this.ref.setSubject(userSubjects.get(((Subject) this.ref).getIdentifier()));
         }
         return true;
     }
