@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
 import net.minecraft.command.server.CommandBlockLogic;
@@ -55,9 +56,12 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.player.PlayerMoveEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -66,21 +70,29 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.interfaces.IMixinEntity;
+import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
+import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
-
     @Shadow private static Logger logger;
+
     @Shadow public NetworkManager netManager;
+
     @Shadow public EntityPlayerMP playerEntity;
+
     @Shadow private MinecraftServer serverController;
-    @Shadow private boolean hasMoved;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);
+
+    private boolean justTeleported = false;
+
+    private Location lastMoveLocation = null;
 
     @Override
     public Player getPlayer() {
@@ -239,9 +251,68 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return input;
     }
 
-    @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isSinglePlayer()Z"))
-    public boolean checkMovement(MinecraftServer serverIn) {
-        return (this.hasMoved && serverIn.isSinglePlayer());
+    @Inject(method = "setPlayerLocation(DDDFFLjava/util/Set;)V", at = @At(value = "RETURN"))
+    public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, Set relativeSet, CallbackInfo ci) {
+        justTeleported = true;
+    }
+
+    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
+    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+        if (packetIn.isMoving() || packetIn.getRotating() && !playerEntity.isDead) {
+            Player player = (Player) playerEntity;
+            Vector3d fromrot = player.getRotation();
+
+            // If Sponge used the player's current location, the delta might never be triggered which could be exploited
+            Location from = player.getLocation();
+            if (lastMoveLocation != null) {
+                 from = lastMoveLocation;
+            }
+
+            Vector3d torot = new Vector3d(packetIn.getYaw(), packetIn.getPitch(), 0);
+            Location to = new Location(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
+
+            // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
+            boolean rotationOnly = !packetIn.isMoving() && packetIn.getRotating();
+            if (rotationOnly) {
+                // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
+                // In this case it's only a rotation update, which isn't related to the to location
+                from = player.getLocation();
+                to = from;
+            }
+
+            // Minecraft does the same with rotation when it's only a positional update
+            boolean positionOnly = packetIn.isMoving() && !packetIn.getRotating();
+            if (positionOnly) {
+                // Correct the new rotation to match the old rotation
+                torot = fromrot;
+            }
+
+            double deltaSquared = to.getPosition().distanceSquared(from.getPosition());
+            double deltaAngleSquared = fromrot.distanceSquared(torot);
+
+            // These magic numbers are sad but help prevent excessive lag from this event.
+            // eventually it would be nice to not have them
+            if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
+                PlayerMoveEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, from, to, torot);
+                Sponge.getGame().getEventManager().post(event);
+                if (event.isCancelled()) {
+                    player.setLocationAndRotation(from, fromrot);
+                    lastMoveLocation = from;
+                    ci.cancel();
+                } else if (!event.getNewLocation().equals(to)) {
+                    player.setLocationAndRotation(event.getNewLocation(), event.getRotation());
+                    lastMoveLocation = event.getNewLocation();
+                    ci.cancel();
+                } else if (!from.equals(player.getLocation()) && justTeleported) {
+                    lastMoveLocation = player.getLocation();
+                    // Prevent teleports during the move event from causing odd behaviors
+                    justTeleported = false;
+                    ci.cancel();
+                } else {
+                    lastMoveLocation = event.getNewLocation();
+                }
+            }
+        }
     }
 
 }
