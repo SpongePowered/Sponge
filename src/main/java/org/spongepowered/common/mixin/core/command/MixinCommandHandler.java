@@ -41,7 +41,7 @@ import java.io.StringWriter;
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler {
 
-    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "addChatComponent(Lnet/minecraft/util/IChatComponent)V;"))
+    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatComponent(Lnet/minecraft/util/IChatComponent)V;"))
     public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, Throwable error, ChatComponentTranslation comp) {
         if (WrapperCommandSource.of(sender).hasPermission("sponge.debug.hover-stacktrace")) {
             final StringWriter writer = new StringWriter();
