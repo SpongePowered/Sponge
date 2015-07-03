@@ -38,6 +38,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandSource;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -127,9 +128,16 @@ class SpongePaginationBuilder implements PaginationBuilder {
             title = calculator.center(source, title, this.paginationSpacer);
         }
 
-        ActivePagination pagination = new ActivePagination(source, calculator, counts, title, this.header, this.footer, this.paginationSpacer);        this.service.getPaginationState(source, true).put(pagination);
+        ActivePagination pagination;
+        if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
+            pagination = new ListPagination(source, calculator, ImmutableList.copyOf(counts), title, this.header, this.footer, this.paginationSpacer);
+        } else {
+            pagination = new IterablePagination(source, calculator, counts, title, this.header, this.footer, this.paginationSpacer);
+        }
+
+        this.service.getPaginationState(source, true).put(pagination);
         try {
-            pagination.sendPage(this.page);
+            pagination.specificPage(this.page);
         } catch (CommandException e) {
             source.sendMessage(error(e.getText()));
         }
