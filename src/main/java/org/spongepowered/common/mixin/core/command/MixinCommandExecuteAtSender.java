@@ -55,7 +55,6 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Shadow(aliases = "val$entity") private net.minecraft.entity.Entity field_174804_a;
     @Shadow(aliases = "val$sender") private ICommandSender field_174802_b;
-    private MessageSink sink = Sponge.getGame().getServer().getBroadcastSink();
 
     @Override
     public void sendMessage(Text... messages) {
@@ -134,12 +133,12 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public void setMessageSink(MessageSink sink) {
-        this.sink = Preconditions.checkNotNull(sink);
+        getCause().setMessageSink(sink);
     }
 
     @Override
     public MessageSink getMessageSink() {
-        return this.sink;
+        return getCause().getMessageSink();
     }
 
     @Override
