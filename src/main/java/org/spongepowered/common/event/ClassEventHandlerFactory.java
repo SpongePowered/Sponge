@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ClassEventHandlerFactory implements AnnotatedEventHandler.Factory {
 
     private final AtomicInteger id = new AtomicInteger();
-    private final LocalClassLoader classLoader = new LocalClassLoader(getClass().getClassLoader());
     private final LoadingCache<Method, Class<? extends AnnotatedEventHandler>> cache = CacheBuilder.newBuilder()
             .concurrencyLevel(1)
             .weakValues()
@@ -84,7 +83,8 @@ public final class ClassEventHandlerFactory implements AnnotatedEventHandler.Fac
         String name = this.targetPackage
                 + eventClass.getSimpleName() + "Handler_" +  handle.getSimpleName() + '_' + method.getName()
                 + this.id.incrementAndGet();
-        return this.classLoader.defineClass(name, generateClass(name, handle, method, eventClass));
+        LocalClassLoader classLoader = new LocalClassLoader(method.getDeclaringClass().getClassLoader());
+        return classLoader.defineClass(name, generateClass(name, handle, method, eventClass));
     }
 
     private static final String BASE_HANDLER = Type.getInternalName(AnnotatedEventHandler.class);
