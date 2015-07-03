@@ -119,7 +119,7 @@ public class SpongeEventManager implements EventManager {
         synchronized (this.lock) {
             boolean changed = false;
 
-            for (RegisteredHandler handler : handlers) {
+            for (RegisteredHandler<?> handler : handlers) {
                 if (this.handlersByEvent.put(handler.getEventClass(), handler)) {
                     changed = true;
                 }
@@ -241,7 +241,7 @@ public class SpongeEventManager implements EventManager {
         return this.handlersCache.getUnchecked(checkNotNull(event, "event").getClass());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected static boolean post(Event event, List<RegisteredHandler<?>> handlers) {
         for (RegisteredHandler handler : handlers) {
             try {
