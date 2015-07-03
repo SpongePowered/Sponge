@@ -92,7 +92,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         this.canPickUpLoot = canPickupItems;
     }
 
-    @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "net/minecraft/entity/EntityLiving.setLeashedToEntity (Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         final EntityLeashEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Player)playerIn);
         Sponge.getGame().getEventManager().post(event);
@@ -101,7 +101,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "net/minecraft/entity/EntityLiving.isLeashed : Z", opcode = Opcodes.PUTFIELD), cancellable = true)
+    @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         final EntityUnleashEvent event = SpongeEventFactory.createEntityUnleash(Sponge.getGame(), this, (Entity)getLeashedToEntity());
         Sponge.getGame().getEventManager().post(event);

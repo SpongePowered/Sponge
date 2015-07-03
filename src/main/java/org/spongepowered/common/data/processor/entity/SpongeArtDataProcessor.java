@@ -43,7 +43,6 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.entity.SpongeArtData;
-import org.spongepowered.common.mixin.core.entity.hanging.art.MixinEnumArt;
 
 public class SpongeArtDataProcessor implements SpongeDataProcessor<ArtData>  {
 

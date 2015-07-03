@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
@@ -31,6 +32,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
@@ -62,7 +64,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.entity.player.gamemode.SpongeGameMode;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
@@ -85,7 +86,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
 
-    @Shadow public long randomSeed;
+    @Shadow private long randomSeed;
     @Shadow private net.minecraft.world.WorldType terrainType;
     @Shadow private String generatorOptions;
     @Shadow private int spawnX;
@@ -253,7 +254,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public GameMode getGameMode() {
-        return new SpongeGameMode(this.theGameType.getName());
+        return (GameMode) (Object) this.theGameType;
     }
 
     @Override
@@ -319,13 +320,19 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Optional<String> getGameRule(String gameRule) {
-        return Optional.fromNullable(this.theGameRules.getGameRuleStringValue(gameRule));
+        if (this.theGameRules.hasRule(gameRule)) {
+            return Optional.of(this.theGameRules.getGameRuleStringValue(gameRule));
+        }
+        return Optional.absent();
     }
 
     @Override
     public Map<String, String> getGameRules() {
-        // TODO World changes
-        return null;
+        ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
+        for (String rule : this.theGameRules.getRules()) {
+            ruleMap.put(rule, this.theGameRules.getGameRuleStringValue(rule));
+        }
+        return ruleMap.build();
     }
 
     @Override

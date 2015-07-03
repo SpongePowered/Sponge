@@ -24,181 +24,139 @@
  */
 package org.spongepowered.common.service.scheduler;
 
-import com.google.common.base.Optional;
+import com.google.common.base.Objects;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.Task;
 
 import java.util.UUID;
 
 /**
- * <p>
- * ScheduledTask is an internal representation of a Task created by the Plugin
- * through one of the Scheduler interfaces.
- * </p>
+ * An internal representation of a {@link Task} created by a plugin.
  */
 public class ScheduledTask implements Task {
 
-    protected long offset;
-    protected long period;
-    protected PluginContainer owner;
-    protected Runnable runnableBody;
-    protected long timestamp;
-    protected ScheduledTaskState state;
-    protected UUID id;
-    protected String name;
-    protected TaskSynchroncity syncType;
+    final long offset;
+    final long period;
+    final boolean delayIsTicks;
+    final boolean intervalIsTicks;
+    private final PluginContainer owner;
+    private final Runnable runnableBody;
+    private long timestamp;
+    private ScheduledTaskState state;
+    private final UUID id;
+    private final String name;
+    private final TaskSynchronicity syncType;
+    private final String stringRepresentation;
 
     // Internal Task state. Not for user-service use.
     public enum ScheduledTaskState {
+        /**
+         * Never ran before, waiting for the offset to pass.
+         */
         WAITING,
+        /**
+         * Has ran, and will continue to unless removed from the task map.
+         */
         RUNNING,
+        /**
+         * Task cancelled, scheduled to be removed from the task map.
+         */
         CANCELED,
     }
 
-    // No c'tor without arguments.  This prevents internal Sponge code from accidentally trying to
-    // instantiate a ScheduledTask incorrectly.
-    @SuppressWarnings("unused")
-    private ScheduledTask() {
-    }
-
-    // This c'tor is OK for internal Sponge use. APIs do not expose the c'tor.
-    protected ScheduledTask(long x, long t, TaskSynchroncity syncType) {
+    ScheduledTask(TaskSynchronicity syncType, Runnable task, String taskName, long delay, boolean delayIsTicks, long interval,
+            boolean intervalIsTicks, PluginContainer pluginContainer) {
         // All tasks begin waiting.
-        this.state = ScheduledTaskState.WAITING;
-
-        // Values assigned to offset and period are always interpreted by the internal
-        // Sponge implementation as in milliseconds for scaleDecriptors that are not Tick based.
-        this.offset = x;
-        this.period = t;
-        this.owner = null;
-        this.runnableBody = null;
+        this.setState(ScheduledTaskState.WAITING);
+        this.offset = delay;
+        this.delayIsTicks = delayIsTicks;
+        this.period = interval;
+        this.intervalIsTicks = intervalIsTicks;
+        this.owner = pluginContainer;
+        this.runnableBody = task;
         this.id = UUID.randomUUID();
+        this.name = taskName;
         this.syncType = syncType;
-    }
 
-    // Builder method
-    protected ScheduledTask setState(ScheduledTaskState state) {
-        this.state = state;
-        return this;
-    }
-
-    // Builder method
-    protected ScheduledTask setOffset(long x) {
-        this.offset = x;
-        return this;
-    }
-
-    // Builder method
-    protected ScheduledTask setPeriod(long t) {
-        this.period = t;
-        return this;
-    }
-
-    // Builder method
-    protected ScheduledTask setTimestamp(long ts) {
-        this.timestamp = ts;
-        return this;
-    }
-
-    // Builder method
-    protected ScheduledTask setPluginContainer(PluginContainer owner) {
-        this.owner = owner;
-        return this;
-    }
-
-    // Builder method
-    protected ScheduledTask setRunnableBody(Runnable body) {
-        this.runnableBody = body;
-        return this;
+        this.stringRepresentation = Objects.toStringHelper(this)
+                .add("name", this.name)
+                .add("delay", this.offset)
+                .add("interval", this.period)
+                .add("owner", this.owner)
+                .add("id", this.id)
+                .add("isAsync", this.isAsynchronous())
+                .toString();
     }
 
     @Override
     public PluginContainer getOwner() {
-
         return this.owner;
     }
 
     @Override
-    public Optional<Long> getDelay() {
-        Optional<Long> result = Optional.absent();
-        if (this.offset > 0) {
-            result = Optional.of(this.offset);
-
-        }
-        return result;
+    public long getDelay() {
+        return this.offset;
     }
 
     @Override
-    public Optional<Long> getInterval() {
-        Optional<Long> result = Optional.absent();
-
-        if (this.period > 0) {
-            result = Optional.of(this.period);
-        }
-        return result;
+    public long getInterval() {
+        return this.period;
     }
 
     @Override
     public boolean cancel() {
-
-        boolean bResult = false;
-
-        // When a task is canceled, it is removed from the map
-        // Even if the task is a repeating task, by removing it from the map of tasks
-        // known in the Scheduler, the task will not repeat.
-        //
-        // A successful cancel() occurs when the opportunity is present where
-        // the task can be canceled.  If it is, then the result is true.
-        // If the task is already canceled, or already running, the task cannot
-        // be canceled.
-
-        if (this.state == ScheduledTask.ScheduledTaskState.WAITING) {
-            bResult = true;
+        boolean success = false;
+        if (this.getState() != ScheduledTask.ScheduledTaskState.RUNNING) {
+            success = true;
         }
-
-        this.state = ScheduledTask.ScheduledTaskState.CANCELED;
-
-        return bResult;
+        this.setState(ScheduledTask.ScheduledTaskState.CANCELED);
+        return success;
     }
 
     @Override
-    public Optional<Runnable> getRunnable() {
-        Optional<Runnable> result = Optional.absent();
-        if (this.runnableBody != null) {
-            result = Optional.of(this.runnableBody);
-        }
-        return result;
+    public Runnable getRunnable() {
+        return this.runnableBody;
     }
 
     @Override
     public UUID getUniqueId() {
-
         return this.id;
     }
 
     @Override
-    public Optional<String> getName() {
-        Optional<String> result = Optional.absent();
-        if (this.name != null) {
-            result = Optional.of(this.name);
-        }
-        return result;
-    }
-
-    @Override
-    public boolean isSynchronous() {
-        return this.syncType == TaskSynchroncity.SYNCHRONOUS;
-    }
-
-    @Override
-    public String setName(String name) {
-
-        this.name = name;
+    public String getName() {
         return this.name;
     }
 
-    public enum TaskSynchroncity {
+    @Override
+    public boolean isAsynchronous() {
+        return this.syncType == TaskSynchronicity.ASYNCHRONOUS;
+    }
+
+    long getTimestamp() {
+        return this.timestamp;
+    }
+
+    void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    ScheduledTaskState getState() {
+        return this.state;
+    }
+
+    void setState(ScheduledTaskState state) {
+        this.state = state;
+    }
+
+    @Override
+    public String toString() {
+        return this.stringRepresentation;
+    }
+
+    public enum TaskSynchronicity {
         SYNCHRONOUS,
         ASYNCHRONOUS
     }
+
 }

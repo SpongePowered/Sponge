@@ -42,7 +42,7 @@ import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 
 @NonnullByDefault
 @Mixin(ItemFishingRod.class)
-public abstract class MixinItemFishingRod extends Item implements IMixinEntityFishHook {
+public abstract class MixinItemFishingRod extends Item {
 
     @Override
     @Overwrite

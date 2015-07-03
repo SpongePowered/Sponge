@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.util.gen.BiomeBuffer;
 import org.spongepowered.common.util.VecHelper;
@@ -81,6 +82,9 @@ public abstract class AbstractBiomeArea implements BiomeBuffer {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "(min = " + this.getBiomeMin() + ", max = " + this.getBiomeMax() + ")";
+        return Objects.toStringHelper(this)
+                .add("min", this.getBiomeMin())
+                .add("max", this.getBiomeMax())
+                .toString();
     }
 }

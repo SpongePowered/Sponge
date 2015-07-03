@@ -22,32 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.player.gamemode;
+package org.spongepowered.common.mixin.core.data.types;
 
+import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeGameMode implements GameMode {
+@Mixin(WorldSettings.GameType.class)
+@Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
+public abstract class MixinGameType {
+    @Shadow String name;
 
-    private String name;
-
-    public SpongeGameMode(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.name.toUpperCase());
-    }
-
-    @Override
-    public String getId() {
+    public String gamemode$getId() {
         return this.name;
     }
 
-    @Override
-    public String getName() {
+    public String gamemode$getName() {
         return this.name;
+    }
+
+    public Translation gamemode$getTranslation() {
+        return new SpongeTranslation("gameMode." + this.name.toLowerCase());
     }
 }

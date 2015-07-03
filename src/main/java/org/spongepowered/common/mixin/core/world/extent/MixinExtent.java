@@ -32,13 +32,16 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
@@ -74,7 +77,8 @@ public abstract class MixinExtent implements Extent {
     @Override
     public <T extends DataManipulator<T>> boolean isCompatible(int x, int y, int z, Class<T> manipulatorClass) {
         Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        return blockUtilOptional.isPresent(); // TODO for now, this is what we have to deal with...
+        // TODO for now, this is what we have to deal with...
+        return blockUtilOptional.isPresent();
     }
 
     @Override
@@ -153,13 +157,43 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public Location getFullBlock(Vector3i position) {
-        return getFullBlock(position.getX(), position.getY(), position.getZ());
+    public Location getLocation(int x, int y, int z) {
+        return getLocation(new Vector3i(x, y, z));
     }
 
     @Override
-    public Location getFullBlock(int x, int y, int z) {
-        return new Location(this, new Vector3d(x, y, z));
+    public Location getLocation(Vector3i position) {
+        return new Location(this, position);
+    }
+
+    @Override
+    public Location getLocation(double x, double y, double z) {
+        return getLocation(new Vector3d(x, y, z));
+    }
+
+    @Override
+    public Location getLocation(Vector3d position) {
+        return new Location(this, position);
+    }
+
+    @Override
+    public int getLuminance(Vector3i position) {
+        return getLuminance(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public int getLuminance(int x, int y, int z) {
+        return Math.max(getLuminanceFromGround(x, y, z), getLuminanceFromSky(x, y, z));
+    }
+
+    @Override
+    public int getLuminanceFromSky(Vector3i position) {
+        return getLuminanceFromSky(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public int getLuminanceFromGround(Vector3i position) {
+        return getLuminanceFromGround(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
@@ -186,4 +220,85 @@ public abstract class MixinExtent implements Extent {
     public boolean containsBlock(Vector3i position) {
         return containsBlock(position.getX(), position.getY(), position.getZ());
     }
+
+    @Override
+    public void interactBlock(Vector3i position) {
+        interactBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public void interactBlockWith(Vector3i position, ItemStack itemStack) {
+        interactBlockWith(position.getX(), position.getY(), position.getZ(), itemStack);
+    }
+
+    @Override
+    public boolean digBlock(Vector3i position) {
+        return digBlock(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public boolean digBlockWith(Vector3i position, ItemStack itemStack) {
+        return digBlockWith(position.getX(), position.getY(), position.getZ(), itemStack);
+    }
+
+    @Override
+    public int getBlockDigTime(Vector3i position) {
+        return getBlockDigTime(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public int getBlockDigTimeWith(Vector3i position, ItemStack itemStack) {
+        return getBlockDigTimeWith(position.getX(), position.getY(), position.getZ(), itemStack);
+    }
+
+    @Override
+    public boolean isBlockFlammable(Vector3i position, Direction faceDirection) {
+        return isBlockFlammable(position.getX(), position.getY(), position.getZ(), faceDirection);
+    }
+
+    @Override
+    public boolean isBlockIndirectlyPowered(Vector3i position) {
+        return isBlockIndirectlyPowered(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public boolean isBlockFacePowered(Vector3i position, Direction direction) {
+        return isBlockFacePowered(position.getX(), position.getY(), position.getZ(), direction);
+    }
+
+    @Override
+    public boolean isBlockFaceIndirectlyPowered(Vector3i position, Direction direction) {
+        return isBlockFaceIndirectlyPowered(position.getX(), position.getY(), position.getZ(), direction);
+    }
+
+    @Override
+    public Collection<Direction> getPoweredBlockFaces(Vector3i position) {
+        return getPoweredBlockFaces(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public Collection<Direction> getIndirectlyPoweredBlockFaces(Vector3i position) {
+        return getIndirectlyPoweredBlockFaces(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public boolean isBlockPassable(Vector3i position) {
+        return this.isBlockPassable(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public Collection<ScheduledBlockUpdate> getScheduledUpdates(Vector3i position) {
+        return getScheduledUpdates(position.getX(), position.getY(), position.getZ());
+    }
+
+    @Override
+    public ScheduledBlockUpdate addScheduledUpdate(Vector3i position, int priority, int ticks) {
+        return addScheduledUpdate(position.getX(), position.getY(), position.getZ(), priority, ticks);
+    }
+
+    @Override
+    public void removeScheduledUpdate(Vector3i position, ScheduledBlockUpdate update) {
+        removeScheduledUpdate(position.getX(), position.getY(), position.getZ(), update);
+    }
+
 }

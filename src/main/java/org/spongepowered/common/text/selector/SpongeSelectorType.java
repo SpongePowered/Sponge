@@ -22,43 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.hanging.art;
+package org.spongepowered.common.text.selector;
 
-import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.item.EntityPainting.EnumArt.class)
-public class MixinEnumArt implements Art {
+public class SpongeSelectorType implements SelectorType {
 
-    @Shadow
-    public String title;
+    private final String id;
 
-    @Shadow
-    public int sizeX;
-
-    @Shadow
-    public int sizeY;
-
-    @Override
-    public int getHeight() {
-        return this.sizeY;
-    }
-
-    @Override
-    public int getWidth() {
-        return this.sizeX;
+    public SpongeSelectorType(String id) {
+        this.id = id;
     }
 
     @Override
     public String getId() {
-        return this.title; // todo maybe prefix with 'minecraft:'
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return this.title;
+        return getId();
     }
+
 }

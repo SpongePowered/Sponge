@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.interfaces;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
 
-public interface IMixinEnchantment {
+public interface IMixinBlockUpdate {
 
-    boolean canBeAppliedToStack(ItemStack itemStack);
+    void setWorld(World world);
 }

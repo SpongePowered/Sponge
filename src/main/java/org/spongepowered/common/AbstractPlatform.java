@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.collect.Maps;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractPlatform implements Platform {
@@ -36,10 +38,28 @@ public abstract class AbstractPlatform implements Platform {
     private final String apiVersion;
     private final String version;
 
+    protected final Map<String, Object> platformMap = new HashMap<String, Object>() {
+
+        private static final long serialVersionUID = 4481663796339419546L;
+
+        @Override
+        public Object put(String key, Object value) {
+            checkArgument(!this.containsKey(key), "Cannot set the value of the existing key " + key);
+            return super.put(key, value);
+        }
+    };
+
     public AbstractPlatform(MinecraftVersion minecraftVersion, String apiVersion, String version) {
         this.minecraftVersion = minecraftVersion;
         this.apiVersion = apiVersion;
         this.version = version;
+
+        this.platformMap.put("Name", this.getName());
+        this.platformMap.put("Type", this.getType());
+        this.platformMap.put("ExecutionType", this.getExecutionType());
+        this.platformMap.put("ApiVersion", this.getApiVersion());
+        this.platformMap.put("ImplementationVersion", this.getVersion());
+        this.platformMap.put("MinecraftVersion", this.getMinecraftVersion());
     }
 
     @Override
@@ -63,15 +83,8 @@ public abstract class AbstractPlatform implements Platform {
     }
 
     @Override
-    public Map<String, Object> asMap() {
-        final Map<String, Object> map = Maps.newHashMap();
-        map.put("Name", this.getName());
-        map.put("Type", this.getType());
-        map.put("ExecutionType", this.getExecutionType());
-        map.put("ApiVersion", this.getApiVersion());
-        map.put("ImplementationVersion", this.getVersion());
-        map.put("MinecraftVersion", this.getMinecraftVersion());
-        return map;
+    public final Map<String, Object> asMap() {
+        return this.platformMap;
     }
 
 }

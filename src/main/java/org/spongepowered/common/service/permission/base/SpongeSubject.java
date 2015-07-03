@@ -69,7 +69,7 @@ public abstract class SpongeSubject implements Subject {
     }
 
     protected Tristate getDataPermissionValue(MemorySubjectData subject, String permission) {
-        Tristate res = getSubjectData().getNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
+        Tristate res = subject.getNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
 
         if (res == Tristate.UNDEFINED) {
             for (Subject parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
