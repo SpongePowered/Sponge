@@ -72,11 +72,11 @@ public final class SpongeBootstrap {
             SimpleCommandService commandService = new SimpleCommandService(Sponge.getGame(), slf4jLogger, new SpongeCommandDisambiguator(Sponge.getGame()));
             Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), CommandService.class, commandService);
             commandService.register(Sponge.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
+            commandService.register(Sponge.getPlugin(), SpongeHelpCommand.create(), "help");
         } catch (ProviderExistsException e) {
             Sponge.getLogger().warn("Non-Sponge CommandService already registered: " + e.getLocalizedMessage());
         }
-        Sponge.getGame().getCommandDispatcher().register(Sponge.getPlugin(), new SpongeHelpCommand(), "help");
-
+        
         try {
             Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SqlService.class, new SqlServiceImpl());
         } catch (ProviderExistsException e) {
