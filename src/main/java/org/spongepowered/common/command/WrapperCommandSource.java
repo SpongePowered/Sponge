@@ -132,7 +132,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
         if (sender.getCommandSenderEntity() != null) {
             return new WithEntity(sender);
         }
-        if (!new Vec3(0, 0, 0).equals(sender.getPositionVector())) {
+        if (!VecHelper.VEC3_ORIGIN.equals(sender.getPositionVector())) {
             return new Located(sender);
         }
         return new WrapperCommandSource(sender);
