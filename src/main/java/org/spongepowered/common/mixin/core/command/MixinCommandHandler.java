@@ -27,27 +27,20 @@ package org.spongepowered.common.mixin.core.command;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.event.HoverEvent;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.common.command.WrapperCommandSource;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.command.MinecraftCommandWrapper;
 
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler {
 
-    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatComponent(Lnet/minecraft/util/IChatComponent)V;"))
-    public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, Throwable error, ChatComponentTranslation comp) {
-        if (WrapperCommandSource.of(sender).hasPermission("sponge.debug.hover-stacktrace")) {
-            final StringWriter writer = new StringWriter();
-            error.printStackTrace(new PrintWriter(writer));
-            comp.getChatStyle().chatHoverEvent =
-                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(writer.toString().replaceAll("\t", "    ")));
-        }
+    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatComponent(Lnet/minecraft/util/IChatComponent)V;", ordinal = 2), cancellable = true)
+    public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> cir,
+                    Throwable error, ChatComponentTranslation comp) {
+        MinecraftCommandWrapper.setError(error);
+        cir.setReturnValue(false);
     }
 }

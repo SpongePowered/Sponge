@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.command;
 
+import com.google.common.base.Throwables;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
@@ -61,6 +63,9 @@ public class MinecraftCommandWrapper implements CommandCallable {
                 TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;
     protected final ICommand command;
+    private static final ThreadLocal<Throwable> commandErrors = new ThreadLocal<Throwable>();
+    // This differs from null in that null means "not active".
+    private static final Exception noError = new Exception();
 
     public MinecraftCommandWrapper(final PluginContainer owner, final ICommand command) {
         this.owner = owner;
@@ -100,13 +105,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
             for (Entity entity : list) {
                 splitArgs[usernameIndex] = entity.getUniqueID().toString();
 
-                if (handler.tryExecute(mcSender, splitArgs, this.command, arguments)) {
+                if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                     ++successCount;
                 }
             }
             splitArgs[usernameIndex] = previousNameVal;
         } else {
-            if (handler.tryExecute(mcSender, splitArgs, this.command, arguments)) {
+            if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                 ++successCount;
             }
         }
@@ -115,6 +120,20 @@ public class MinecraftCommandWrapper implements CommandCallable {
                 .affectedEntities(affectedEntities)
                 .successCount(successCount)
                 .build();
+    }
+    
+    private boolean tryExecute(CommandHandler handler, ICommandSender mcSender, String[] splitArgs, String arguments) {
+        commandErrors.set(noError);
+        try {
+            boolean success = handler.tryExecute(mcSender, splitArgs, this.command, arguments);
+            Throwable error = commandErrors.get();
+            if (error != noError) {
+                throw Throwables.propagate(error);
+            }
+            return success;
+        } finally {
+            commandErrors.set(null);
+        }
     }
 
     protected boolean throwEvent(ICommandSender sender, String[] args) throws InvocationCommandException {
@@ -184,5 +203,11 @@ public class MinecraftCommandWrapper implements CommandCallable {
     @SuppressWarnings("unchecked")
     public List<String> getNames() {
         return ImmutableList.<String>builder().add(this.command.getCommandName()).addAll(this.command.getCommandAliases()).build();
+    }
+    
+    public static void setError(Throwable error) {
+        if (commandErrors.get() == noError) {
+            commandErrors.set(error);
+        }
     }
 }
