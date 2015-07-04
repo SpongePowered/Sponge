@@ -32,7 +32,7 @@
  * <dt>{@link org.spongepowered.api.util.command.source.LocatedSource}</dt>
  * <dd>{@link MixinLocatedSource}
  * <dt>{@link org.spongepowered.api.util.command.source.CommandBlockSource}</dt>
- * <dd>{@link MixinCommandBlockSender}
+ * <dd>{@link MixinCommandBlockSource}
  * <dt>{@link org.spongepowered.api.util.command.RconSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.MixinRConConsoleSource}
  * <dt>{@link org.spongepowered.api.util.command.SignSource}</dt>

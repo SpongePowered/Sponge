@@ -37,7 +37,7 @@ import org.spongepowered.common.interfaces.IMixinSubject;
 
 @NonnullByDefault
 @Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinCommandBlockSender implements IMixinCommandSource, CommandBlockSource, IMixinSubject {
+public abstract class MixinCommandBlockSource implements IMixinCommandSource, CommandBlockSource, IMixinSubject {
 
     @Override
     public String getIdentifier() {

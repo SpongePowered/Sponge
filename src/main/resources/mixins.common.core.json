@@ -52,7 +52,7 @@
         "data.types.MixinFishType",
         "data.types.MixinGameType",
         "command.MixinBlockCommandBlockSender",
-        "command.MixinCommandBlockSender",
+        "command.MixinCommandBlockSource",
         "command.MixinCommandExecuteAtSender",
         "command.MixinCommandHandler",
         "command.MixinCommandSource",
