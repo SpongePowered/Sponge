@@ -33,16 +33,17 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.EntitySource;
 import org.spongepowered.api.util.command.source.LocatedSource;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
 /**
- * Wrapper around a CommandSource that is not part of the base game to allow it to access MC commands.
+ * Wrapper around a CommandSource that is not part of the base game to allow it
+ * to access MC commands.
  */
 public class WrapperICommandSender implements ICommandSender {
+
     final CommandSource source;
 
     private WrapperICommandSender(CommandSource source) {
@@ -97,9 +98,6 @@ public class WrapperICommandSender implements ICommandSender {
     public Entity getCommandSenderEntity() {
         if (source instanceof Entity) {
             return (Entity) source;
-        }
-        if (source instanceof EntitySource) {
-            return (Entity) ((EntitySource) source).getEntity();
         }
         return null;
     }

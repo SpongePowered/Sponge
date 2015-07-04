@@ -106,7 +106,7 @@ class SpongePaginationBuilder implements PaginationBuilder {
 
         CommandSource realSource = source;
         while (realSource instanceof ProxySource) {
-            realSource = ((ProxySource)realSource).getCause();
+            realSource = ((ProxySource)realSource).getInitiator();
         }
         @SuppressWarnings("unchecked")
         PaginationCalculator<CommandSource> calculator = (PaginationCalculator) this.service.calculators.get(realSource.getClass());

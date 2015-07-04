@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -73,6 +74,11 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
     public void setMessageSink(MessageSink sink) {
         Preconditions.checkNotNull(sink, "sink");
         this.sink = sink;
+    }
+
+    @Override
+    public Optional<CommandSource> getCommandSource() {
+        return Optional.<CommandSource>of(this);
     }
 
 }

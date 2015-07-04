@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Preconditions;
-
-import org.spongepowered.common.Sponge;
 import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.entity.Entity;
@@ -58,12 +55,12 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public void sendMessage(Text... messages) {
-        getCause().sendMessage(messages);
+        getInitiator().sendMessage(messages);
     }
 
     @Override
     public void sendMessage(Iterable<Text> messages) {
-        getCause().sendMessage(messages);
+        getInitiator().sendMessage(messages);
     }
 
     @Override
@@ -73,7 +70,7 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public String getIdentifier() {
-        return getCause().getIdentifier();
+        return getInitiator().getIdentifier();
     }
 
     @Override
@@ -83,77 +80,82 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public SubjectCollection getContainingCollection() {
-        return getCause().getContainingCollection();
+        return getInitiator().getContainingCollection();
     }
 
     @Override
     public SubjectData getSubjectData() {
-        return getCause().getSubjectData();
+        return getInitiator().getSubjectData();
     }
 
     @Override
     public SubjectData getTransientSubjectData() {
-        return getCause().getTransientSubjectData();
+        return getInitiator().getTransientSubjectData();
     }
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
-        return getCause().hasPermission(contexts, permission);
+        return getInitiator().hasPermission(contexts, permission);
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        return getCause().hasPermission(permission);
+        return getInitiator().hasPermission(permission);
     }
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        return getCause().getPermissionValue(contexts, permission);
+        return getInitiator().getPermissionValue(contexts, permission);
     }
 
     @Override
     public boolean isChildOf(Subject parent) {
-        return getCause().isChildOf(parent);
+        return getInitiator().isChildOf(parent);
     }
 
     @Override
     public boolean isChildOf(Set<Context> contexts, Subject parent) {
-        return getCause().isChildOf(contexts, parent);
+        return getInitiator().isChildOf(contexts, parent);
     }
 
     @Override
     public List<Subject> getParents() {
-        return getCause().getParents();
+        return getInitiator().getParents();
     }
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
-        return getCause().getParents(contexts);
+        return getInitiator().getParents(contexts);
     }
 
     @Override
     public void setMessageSink(MessageSink sink) {
-        getCause().setMessageSink(sink);
+        getInitiator().setMessageSink(sink);
     }
 
     @Override
     public MessageSink getMessageSink() {
-        return getCause().getMessageSink();
+        return getInitiator().getMessageSink();
     }
 
     @Override
     public Set<Context> getActiveContexts() {
-        return getCause().getActiveContexts();
+        return getInitiator().getActiveContexts();
+    }
+
+    @Override
+    public CommandSource getInitiator() {
+        return WrapperCommandSource.of(this.field_174802_b);
+    }
+
+    @Override
+    public Subject getProvider() {
+        return getInitiator();
     }
 
     @Override
     public Entity getEntity() {
         return (Entity) field_174804_a;
-    }
-
-    @Override
-    public CommandSource getCause() {
-        return WrapperCommandSource.of(this.field_174802_b);
     }
 
     @Override

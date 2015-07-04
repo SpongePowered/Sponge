@@ -26,8 +26,6 @@ package org.spongepowered.common.command;
 
 import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.Vec3;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -37,7 +35,6 @@ import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.EntitySource;
 import org.spongepowered.api.util.command.source.LocatedSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -129,10 +126,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
         if (sender instanceof WrapperICommandSender) {
             return ((WrapperICommandSender) sender).source;
         }
-        if (sender.getCommandSenderEntity() != null) {
-            return new WithEntity(sender);
-        }
-        if (!VecHelper.VEC3_ORIGIN.equals(sender.getPositionVector())) {
+        if (sender.getCommandSenderEntity() != null || !VecHelper.VEC3_ORIGIN.equals(sender.getPositionVector())) {
             return new Located(sender);
         }
         return new WrapperCommandSource(sender);
@@ -154,18 +148,6 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
             return (World) this.sender.getEntityWorld();
         }
 
-    }
-
-    public static class WithEntity extends Located implements EntitySource {
-
-        WithEntity(ICommandSender sender) {
-            super(sender);
-        }
-
-        @Override
-        public Entity getEntity() {
-            return (Entity) this.sender.getCommandSenderEntity();
-        }
     }
 
 }

@@ -32,17 +32,21 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.tileentity.SignData;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.tileentity.SpongeSignDataProcessor;
+import org.spongepowered.common.interfaces.IMixinSubject;
 
 import java.util.List;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntitySign.class)
-public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign {
+public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
 
     @Shadow public IChatComponent[] signText;
 
@@ -65,5 +69,25 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
     @Override
     public Optional<SignData> getData() {
         return new SpongeSignDataProcessor().createFrom(this);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "Sign";
+    }
+
+    @Override
+    public String getSubjectCollectionIdentifier() {
+        return PermissionService.SUBJECTS_COMMAND_BLOCK;
+    }
+
+    @Override
+    public Tristate permDefault(String permission) {
+        return Tristate.TRUE;
+    }
+
+    @Override
+    public Optional<CommandSource> getCommandSource() {
+        return Optional.absent();
     }
 }

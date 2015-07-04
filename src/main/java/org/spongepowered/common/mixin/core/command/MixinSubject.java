@@ -32,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntityCommandBlock;
+import net.minecraft.tileentity.TileEntitySign;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -60,9 +61,9 @@ import javax.annotation.Nullable;
  * installed permissions service for a subject.
  */
 @NonnullByDefault
-@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
-        targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinSubject implements CommandSource, IMixinCommandSource, IMixinSubject {
+@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, TileEntitySign.class, EntityMinecartCommandBlock.class, MinecraftServer.class,
+        RConConsoleSource.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+public abstract class MixinSubject implements Subject, IMixinSubject {
 
     @Nullable private Subject thisSubject;
 
@@ -87,11 +88,6 @@ public abstract class MixinSubject implements CommandSource, IMixinCommandSource
             }
         }
         return this.thisSubject;
-    }
-
-    @Override
-    public Optional<CommandSource> getCommandSource() {
-        return Optional.<CommandSource>of(this);
     }
 
     @Override
