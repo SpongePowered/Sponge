@@ -190,6 +190,7 @@
         "text.MixinHoverEvent",
         "world.MixinAnvilSaveHandler",
         "world.MixinChunk",
+        "world.MixinNextTickListEntry",
         "world.MixinWorld",
         "world.MixinWorldBorder",
         "world.MixinWorldProvider",

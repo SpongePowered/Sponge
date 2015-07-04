@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.permission;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
@@ -32,6 +33,7 @@ import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.UserListOpsEntry;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
 import java.util.UUID;
@@ -97,14 +99,18 @@ public class UserCollection extends SpongeSubjectCollection {
     @Override
     @SuppressWarnings("unchecked")
     public Iterable<Subject> getAllSubjects() {
-        return Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(), new Function<Object, Subject>() {
-            @Nullable
-            @Override
-            public Subject apply(Object input) {
-                GameProfile profile = ((GameProfile) ((UserListOpsEntry) input).value);
-                return get(profile);
-            }
-        });
+        return (Iterable) Sponge.getGame().getServer().getOnlinePlayers();
+        /*return ImmutableSet.copyOf(Iterables.concat(
+                Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(),
+                        new Function<Object, Subject>() {
+                        @Nullable
+                        @Override
+                        public Subject apply(Object input) {
+                            GameProfile profile = ((GameProfile) ((UserListOpsEntry) input).value);
+                            return get(profile);
+                        }
+                        // WARNING: This gives dupes
+                    }), Sponge.getGame().getServer().getOnlinePlayers()));*/
     }
 
     public SpongePermissionService getService() {
