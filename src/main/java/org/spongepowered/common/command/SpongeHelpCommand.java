@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.command;
 
+import com.google.common.collect.ImmutableList;
+
 import static org.spongepowered.api.util.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.util.command.args.GenericArguments.integer;
 import static org.spongepowered.api.util.command.args.GenericArguments.optional;
@@ -32,7 +34,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 import org.spongepowered.api.service.pagination.PaginationBuilder;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
@@ -106,13 +107,13 @@ public class SpongeHelpCommand {
                                         return input.getCallable().testPermission(src);
                                     }
                                 }));
-                        builder.contents(Iterables.transform(commands, new Function<CommandMapping, Text>() {
+                        builder.contents(ImmutableList.copyOf(Collections2.transform(commands, new Function<CommandMapping, Text>() {
 
                             @Override
                             public Text apply(CommandMapping input) {
                                 return getDescription(src, input);
                             }
-                        }));
+                        })));
 
                         builder.sendTo(src);
                         return CommandResult.success();
