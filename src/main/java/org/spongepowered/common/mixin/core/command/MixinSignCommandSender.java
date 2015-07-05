@@ -56,7 +56,7 @@ public abstract class MixinSignCommandSender implements ICommandSender, IMixinCo
     }
 
     @Override
-    public Sign getProvider() {
+    public Sign getSubject() {
         return (Sign) field_174797_a;
     }
 

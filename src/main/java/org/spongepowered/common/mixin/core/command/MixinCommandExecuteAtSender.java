@@ -149,7 +149,7 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
     }
 
     @Override
-    public Subject getProvider() {
+    public Subject getSubject() {
         return getInitiator();
     }
 
