@@ -152,11 +152,11 @@ public class SpongeObjective implements Objective {
 
     @Override
     public void removeScore(Score score) {
-        this.scores.remove(score.getName());
-
         this.allowRecursion = false;
         ((SpongeScore) score).removeFromObjective(this);
         this.allowRecursion = true;
+
+        this.scores.remove(score.getName());
     }
 
     @SuppressWarnings("deprecation")
