@@ -42,6 +42,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
@@ -64,10 +65,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
-import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.*;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.world.DimensionManager;
@@ -75,6 +73,7 @@ import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -528,6 +527,33 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         Sponge.getGame().getEventManager().post(SpongeEventFactory.createWorldCreate(Sponge.getGame(), (WorldProperties)
                 worldInfo, settings));
         return Optional.of((WorldProperties) worldInfo);
+    }
+
+    @Override
+    public Optional<World> copyWorld(World originalWorld, String copyName) {
+        try {
+            FileUtils.copyDirectory(getWorldDir(originalWorld.getName()), getWorldDir(copyName));
+            AnvilSaveHandler savehandler = getHandler(copyName);
+            int newDimId = DimensionManager.getNextFreeDimId();
+            IMixinWorldInfo mixinWorldInfo = (IMixinWorldInfo) savehandler.loadWorldInfo();
+            mixinWorldInfo.setDimensionId(newDimId);
+            mixinWorldInfo.setWorldName(copyName);
+            mixinWorldInfo.setUUID(UUID.randomUUID());
+            savehandler.saveWorldInfo((WorldInfo) mixinWorldInfo);
+            savehandler.flush();
+            return loadWorld(copyName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.absent();
+    }
+
+    private File getWorldDir(String worldName) {
+        if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
+            return new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName(), worldName);
+        } else {
+            return new File(getFolderName(), worldName);
+        }
     }
 
     @Override
