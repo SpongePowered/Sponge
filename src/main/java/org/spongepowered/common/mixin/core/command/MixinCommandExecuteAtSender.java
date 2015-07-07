@@ -149,11 +149,6 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
     }
 
     @Override
-    public Subject getSubject() {
-        return getInitiator();
-    }
-
-    @Override
     public Entity getEntity() {
         return (Entity) field_174804_a;
     }

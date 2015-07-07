@@ -35,7 +35,6 @@ import org.spongepowered.api.data.manipulator.tileentity.SignData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
@@ -72,11 +71,6 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
     }
 
     @Override
-    public String getIdentifier() {
-        return "Sign";
-    }
-
-    @Override
     public String getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_COMMAND_BLOCK;
     }
@@ -84,10 +78,5 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
     @Override
     public Tristate permDefault(String permission) {
         return Tristate.TRUE;
-    }
-
-    @Override
-    public Optional<CommandSource> getCommandSource() {
-        return Optional.absent();
     }
 }
