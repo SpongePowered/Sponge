@@ -121,7 +121,7 @@ public class SpongeScore implements Score {
 
     @SuppressWarnings("deprecation")
     public void removeFromScoreObjective(ScoreObjective objective) {
-        objective.getScoreboard().removeObjectiveFromEntity(Texts.legacy().to(this.name), objective);
+        objective.theScoreboard.removeObjectiveFromEntity(Texts.legacy().to(this.name), objective);
     }
 
     public net.minecraft.scoreboard.Score getScore(ScoreObjective objective) {

@@ -42,6 +42,7 @@ import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
@@ -57,9 +58,9 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.player.PlayerMoveEvent;
+import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,8 +71,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.interfaces.IMixinEntity;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -80,6 +80,7 @@ import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
+
     @Shadow private static Logger logger;
 
     @Shadow public NetworkManager netManager;
@@ -253,19 +254,19 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Inject(method = "setPlayerLocation(DDDFFLjava/util/Set;)V", at = @At(value = "RETURN"))
     public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, Set relativeSet, CallbackInfo ci) {
-        justTeleported = true;
+        this.justTeleported = true;
     }
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
     public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
-        if (packetIn.isMoving() || packetIn.getRotating() && !playerEntity.isDead) {
-            Player player = (Player) playerEntity;
+        if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
+            Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
             Location from = player.getLocation();
-            if (lastMoveLocation != null) {
-                 from = lastMoveLocation;
+            if (this.lastMoveLocation != null) {
+                 from = this.lastMoveLocation;
             }
 
             Vector3d torot = new Vector3d(packetIn.getYaw(), packetIn.getPitch(), 0);
@@ -297,22 +298,54 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setLocationAndRotation(from, fromrot);
-                    lastMoveLocation = from;
+                    this.lastMoveLocation = from;
                     ci.cancel();
                 } else if (!event.getNewLocation().equals(to)) {
                     player.setLocationAndRotation(event.getNewLocation(), event.getRotation());
-                    lastMoveLocation = event.getNewLocation();
+                    this.lastMoveLocation = event.getNewLocation();
                     ci.cancel();
-                } else if (!from.equals(player.getLocation()) && justTeleported) {
-                    lastMoveLocation = player.getLocation();
+                } else if (!from.equals(player.getLocation()) && this.justTeleported) {
+                    this.lastMoveLocation = player.getLocation();
                     // Prevent teleports during the move event from causing odd behaviors
-                    justTeleported = false;
+                    this.justTeleported = false;
                     ci.cancel();
                 } else {
-                    lastMoveLocation = event.getNewLocation();
+                    this.lastMoveLocation = event.getNewLocation();
                 }
             }
         }
+    }
+
+    private ChatComponentTranslation tmpQuitMessage;
+
+    /**
+     * @author Simon816
+     *
+     * Store the quit message and ServerConfigurationManager instance for use in
+     * {@link #onDisconnectPlayer}.
+     */
+    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendChatMsg(Lnet/minecraft/util/IChatComponent;)V"))
+    public void onSendChatMsgCall(ServerConfigurationManager thisCtx, IChatComponent chatcomponenttranslation) {
+        this.tmpQuitMessage = (ChatComponentTranslation) chatcomponenttranslation;
+    }
+
+    /**
+     * @author Simon816
+     *
+     * Fire the PlayerQuitEvent before playerLoggedOut is called in order for
+     * event handlers to change the quit message captured from
+     * {@link #onSendChatMsgCall}.
+     */
+    @Inject(method = "onDisconnect", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V"))
+    public void onDisconnectPlayer(IChatComponent reason, CallbackInfo ci) {
+        PlayerQuitEvent event =
+                SpongeImplEventFactory.createPlayerQuit(Sponge.getGame(), (Player) this.playerEntity, SpongeTexts.toText(this.tmpQuitMessage),
+                        ((Player) this.playerEntity).getMessageSink());
+        this.tmpQuitMessage = null;
+        Sponge.getGame().getEventManager().post(event);
+        event.getSink().sendMessage(event.getNewMessage());
     }
 
 }
