@@ -61,6 +61,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -70,6 +71,7 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -189,9 +191,12 @@ public abstract class MixinServerConfigurationManager {
         handler.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
         this.updateTimeAndWeatherForPlayer(playerIn, worldserver);
 
-        if (this.mcServer.getResourcePackUrl().length() > 0) {
-            playerIn.loadResourcePack(this.mcServer.getResourcePackUrl(), this.mcServer.getResourcePackHash());
+        // Sponge Start - Use the server's ResourcePack object
+        Optional<ResourcePack> pack = ((Server)this.mcServer).getDefaultResourcePack();
+        if (pack.isPresent()) {
+            ((Player)playerIn).sendResourcePack(pack.get());
         }
+        // Sponge End
 
         playerIn.addSelfToInternalCraftingInventory();
 

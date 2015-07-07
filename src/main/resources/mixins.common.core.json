@@ -175,6 +175,7 @@
         "item.merchant.MixinMerchantRecipe",
         "network.MixinNetHandlerPlayServer",
         "network.packet.MixinS3BPacketScoreboardObjective",
+        "network.packet.MixinS48PacketResourcePackSend",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "scoreboard.MixinCriterion",

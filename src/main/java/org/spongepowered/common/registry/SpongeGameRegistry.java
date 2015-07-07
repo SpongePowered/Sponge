@@ -241,6 +241,7 @@ import org.spongepowered.api.potion.PotionEffectBuilder;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.potion.PotionEffectTypes;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.resourcepack.ResourcePacks;
 import org.spongepowered.api.scoreboard.ScoreboardBuilder;
 import org.spongepowered.api.scoreboard.TeamBuilder;
 import org.spongepowered.api.scoreboard.Visibilities;
@@ -454,6 +455,7 @@ import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.potion.SpongePotionBuilder;
+import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.common.rotation.SpongeRotation;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeVisibility;
@@ -1331,6 +1333,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 return weather;
             }
         });
+    }
+    
+    private void setResourcePackFactory() {
+        RegistryHelper.setFactory(ResourcePacks.class, new SpongeResourcePackFactory());
     }
 
     private void setTextActionFactory() {
@@ -2346,6 +2352,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setTextColors();
         setRotations();
         setWeathers();
+        setResourcePackFactory();
         setTextActionFactory();
         setTextFactory();
         setSelectors();
