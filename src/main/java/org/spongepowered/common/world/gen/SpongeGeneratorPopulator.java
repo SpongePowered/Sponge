@@ -32,8 +32,8 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.util.gen.BiomeBuffer;
-import org.spongepowered.api.util.gen.MutableBlockBuffer;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 
 /**
@@ -45,8 +45,8 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
     private final World world;
 
     /**
-     * Gets the {@link GeneratorPopulator} from the given {@link IChunkProvider}
-     * . If the chunk provider wraps a {@link GeneratorPopulator}, that
+     * Gets the {@link GeneratorPopulator} from the given {@link IChunkProvider}.
+     * If the chunk provider wraps a {@link GeneratorPopulator}, that
      * populator is returned, otherwise the chunk provider is wrapped.
      *
      * @param world The world the chunk generator is bound to.
@@ -66,16 +66,25 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, MutableBlockBuffer buffer, BiomeBuffer biomes) {
+    public void populate(org.spongepowered.api.world.World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+
+        Vector3i min = buffer.getBlockMin();
+        Vector3i max = buffer.getBlockMax();
 
         // Empty the buffer
-        buffer.fill(BlockTypes.AIR.getDefaultState());
+        @SuppressWarnings("ConstantConditions")
+        final BlockState air = BlockTypes.AIR.getDefaultState();
+        for (int zz = min.getZ(); zz <= max.getZ(); zz++) {
+            for (int yy = min.getY(); yy <= max.getY(); yy++) {
+                for (int xx = min.getX(); xx <= max.getX(); xx++) {
+                    buffer.setBlock(xx, yy, zz, air);
+                }
+            }
+        }
 
         // The block buffer can be of any size. We generate all chunks that
         // have at least part of the chunk in the given area, and copy the
         // needed blocks into the buffer
-        Vector3i min = buffer.getBlockMin();
-        Vector3i max = buffer.getBlockMax();
         int minChunkX = (int) Math.floor(min.getX() / 16.0);
         int minChunkZ = (int) Math.floor(min.getZ() / 16.0);
         int maxChunkX = (int) Math.floor(max.getX() / 16.0);
@@ -88,7 +97,7 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
         }
     }
 
-    private void placeChunkInBuffer(Chunk chunk, MutableBlockBuffer buffer, int chunkX, int chunkZ) {
+    private void placeChunkInBuffer(Chunk chunk, MutableBlockVolume buffer, int chunkX, int chunkZ) {
 
         // Calculate bounds
         int xOffset = chunkX * 16;
@@ -116,7 +125,7 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
                 for (int yInChunk = yInChunkStart; yInChunk <= yInChunkEnd; yInChunk++) {
                     for (int zInChunk = zInChunkStart; zInChunk <= zInChunkEnd; zInChunk++) {
                         buffer.setBlock(xOffset + xInChunk, yOffset + yInChunk, zOffset + zInChunk,
-                                (BlockState) miniChunk.get(xInChunk, yInChunk, zInChunk));
+                            (BlockState) miniChunk.get(xInChunk, yInChunk, zInChunk));
                     }
                 }
             }
@@ -135,7 +144,7 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
     IChunkProvider getHandle(World targetWorld) {
         if (!this.world.equals(targetWorld)) {
             throw new IllegalArgumentException("Cannot reassign internal generator from world "
-                    + getWorldName(this.world) + " to world " + getWorldName(targetWorld));
+                + getWorldName(this.world) + " to world " + getWorldName(targetWorld));
         }
         return this.chunkGenerator;
     }

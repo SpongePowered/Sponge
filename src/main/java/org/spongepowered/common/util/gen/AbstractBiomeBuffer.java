@@ -27,20 +27,20 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import org.spongepowered.api.util.gen.BiomeBuffer;
+import org.spongepowered.api.world.extent.BiomeArea;
 import org.spongepowered.common.util.VecHelper;
 
 /**
  * Base class for biome areas. This class provides methods for retrieving the
  * size and for range checking.
  */
-public abstract class AbstractBiomeArea implements BiomeBuffer {
+public abstract class AbstractBiomeBuffer implements BiomeArea {
 
     protected Vector2i start;
     protected Vector2i size;
     protected Vector2i end;
 
-    protected AbstractBiomeArea(Vector2i start, Vector2i size) {
+    protected AbstractBiomeBuffer(Vector2i start, Vector2i size) {
         this.start = Preconditions.checkNotNull(start, "start");
         this.size = Preconditions.checkNotNull(size, "size");
 
@@ -72,10 +72,12 @@ public abstract class AbstractBiomeArea implements BiomeBuffer {
         return this.size;
     }
 
+    @Override
     public boolean containsBiome(Vector2i position) {
         return containsBiome(position.getX(), position.getY());
     }
 
+    @Override
     public boolean containsBiome(int x, int z) {
         return VecHelper.inBounds(x, z, this.start, this.end);
     }

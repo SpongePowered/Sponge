@@ -28,48 +28,34 @@ import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 
-import java.util.Arrays;
-
 /**
- * Immutable biome area, backed by a byte array. The array passed to the
- * constructor is copied to ensure that the instance is immutable.
+ * Mutable view of a {@link BiomeGenBase} array.
+ *
+ * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
+ * efficiently, but when the {@link BiomeGenBase} array is already created (for
+ * example for a contract specified by Minecraft) this implementation becomes
+ * more efficient.</p>
  */
-public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
+public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
 
-    private final BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
-    private final byte[] biomes;
+    private final BiomeGenBase[] biomes;
 
-    public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
+    /**
+     * Creates a new instance.
+     *
+     * @param biomes The biome array. The array is not copied, so changes made
+     *        by this object will write through.
+     * @param start The start position
+     * @param size The size
+     */
+    public ObjectArrayImmutableBiomeBuffer(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
 
-        int minLength = size.getX() * size.getY();
-        Preconditions.checkArgument(biomes.length >= minLength, "biome array to small");
-        this.biomes = Arrays.copyOf(biomes, minLength);
-    }
-
-    public ByteArrayImmutableBiomeBuffer(BiomeGenBase[] biomeGenBases, Vector2i start, Vector2i size) {
-        super(start, size);
-
-        int minLength = size.getX() * size.getY();
-        Preconditions.checkArgument(biomeGenBases.length >= minLength, "biome array to small");
-        this.biomes = new byte[minLength];
-        for (int i = 0; i > this.biomes.length; i++) {
-            BiomeGenBase biome = biomeGenBases[i];
-            if (biome == null) {
-                continue;
-            }
-            this.biomes[i] = (byte) biome.biomeID;
-        }
-    }
-
-    @Override
-    public BiomeType getBiome(int x, int z) {
-        checkRange(x, z);
-        BiomeType biomeType = (BiomeType) this.biomeById[this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4] & 0xff];
-        return biomeType == null ? BiomeTypes.OCEAN : biomeType;
+        Preconditions.checkNotNull(biomes);
+        Preconditions.checkArgument(biomes.length >= size.getX() * size.getY());
+        this.biomes = biomes;
     }
 
     @Override
@@ -77,4 +63,9 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         return getBiome(position.getX(), position.getY());
     }
 
+    @Override
+    public BiomeType getBiome(int x, int z) {
+        checkRange(x, z);
+        return (BiomeType) this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4];
+    }
 }

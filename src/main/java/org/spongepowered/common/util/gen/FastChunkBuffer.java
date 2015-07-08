@@ -24,15 +24,11 @@
  */
 package org.spongepowered.common.util.gen;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.util.gen.ImmutableBlockBuffer;
-
-import java.util.Arrays;
 
 /**
  * Buffer backed by a single chunk.
@@ -41,6 +37,7 @@ import java.util.Arrays;
  * chunk after you are done.</p>
  *
  */
+@SuppressWarnings("ConstantConditions")
 public final class FastChunkBuffer extends AbstractChunkBuffer {
 
     private final Chunk chunk;
@@ -81,32 +78,4 @@ public final class FastChunkBuffer extends AbstractChunkBuffer {
         boolean storeSkyLight = !this.chunk.getWorld().provider.getHasNoSky();
         return new ExtendedBlockStorage(ySectionId << 4, storeSkyLight);
     }
-
-    @Override
-    public void fill(BlockState block) {
-        if (block.getType() == BlockTypes.AIR) {
-            // Clear chunk by clearing chunk sections
-            Arrays.fill(this.sectionArray, null);
-            return;
-        }
-
-        // Fill chunk
-        @SuppressWarnings("deprecation")
-        char blockStateId = (char) Block.BLOCK_STATE_IDS.get(block);
-        for (int ySectionId = 0; ySectionId < this.sectionArray.length; ySectionId++) {
-            ExtendedBlockStorage section = this.sectionArray[ySectionId];
-            if (section == null) {
-                this.sectionArray[ySectionId] = section = createChunkSection(ySectionId);
-            }
-            char[] data = section.getData();
-            Arrays.fill(data, blockStateId);
-        }
-    }
-
-    @Override
-    public ImmutableBlockBuffer getImmutableClone() {
-        // TODO implement
-        throw new UnsupportedOperationException("Not yet supported");
-    }
-
 }

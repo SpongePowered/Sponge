@@ -27,22 +27,22 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.util.gen.ImmutableBiomeBuffer;
-import org.spongepowered.api.util.gen.MutableBiomeBuffer;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
 
 import java.util.Arrays;
 
 /**
  * Mutable biome area backed by a byte array. Reusable.
- * <p/>
+
  * <p>Using {@link #detach()} the underlying byte array can be accessed.
  * Both the sizeX and sizeZ will be set to 0 by that method, preventing
  * further access to the byte array. The byte array can then
  * be reused by calling {@link #reuse(Vector2i)}.</p>
  */
-public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeArea implements MutableBiomeBuffer {
+public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
 
     private boolean detached;
     private final byte[] biomes;
@@ -70,13 +70,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeArea impleme
         this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4] = (byte) ((BiomeGenBase) biome).biomeID;
     }
 
-    @Override
-    public void fill(BiomeType biome) {
-        Arrays.fill(this.biomes, (byte) ((BiomeGenBase) biome).biomeID);
-    }
-
-    @Override
-    public ImmutableBiomeBuffer getImmutableClone() {
+    public ImmutableBiomeArea getImmutableClone() {
         checkOpen();
         return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }

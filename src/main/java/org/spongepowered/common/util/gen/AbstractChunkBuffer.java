@@ -30,7 +30,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.util.gen.MutableBlockBuffer;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -38,7 +38,7 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
  * Base class for block buffers that are exactly one chunk in size.
  *
  */
-public abstract class AbstractChunkBuffer implements MutableBlockBuffer {
+public abstract class AbstractChunkBuffer implements MutableBlockVolume {
 
     private final int chunkX;
     private final int chunkZ;
@@ -117,22 +117,6 @@ public abstract class AbstractChunkBuffer implements MutableBlockBuffer {
     @Override
     public void setBlockType(int x, int y, int z, BlockType type) {
         setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
-    public void setHorizontalLayer(int startY, int height, BlockState block) {
-        int startX = this.chunkX << 4;
-        int startZ = this.chunkZ << 4;
-
-        int endY = startY + height;
-
-        for (int xInChunk = 0; xInChunk < 16; xInChunk++) {
-            for (int zInChunk = 0; zInChunk < 16; zInChunk++) {
-                for (int yInChunk = startY; yInChunk < endY; yInChunk++) {
-                    this.setBlock(xInChunk | startX, yInChunk, zInChunk | startZ, block);
-                }
-            }
-        }
     }
 
     @Override

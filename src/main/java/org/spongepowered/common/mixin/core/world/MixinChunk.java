@@ -47,9 +47,9 @@ import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.gen.BiomeBuffer;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,7 +63,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.FastChunkBuffer;
-import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
+import org.spongepowered.common.util.gen.ObjectArrayImmutableBiomeBuffer;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Collection;
@@ -125,7 +125,7 @@ public abstract class MixinChunk implements Chunk {
         if (!populators.isEmpty()) {
             FastChunkBuffer buffer = new FastChunkBuffer((net.minecraft.world.chunk.Chunk) (Object) this);
             BiomeGenBase[] biomeArray = world.getWorldChunkManager().getBiomeGenAt(null, chunkX * 16, chunkZ * 16, 16, 16, true);
-            BiomeBuffer biomes = new ObjectArrayMutableBiomeBuffer(biomeArray, new Vector2i(chunkX * 16, chunkZ * 16), new Vector2i(16, 16));
+            ImmutableBiomeArea biomes = new ObjectArrayImmutableBiomeBuffer(biomeArray, new Vector2i(chunkX * 16, chunkZ * 16), new Vector2i(16, 16));
 
             for (GeneratorPopulator populator : populators) {
                 populator.populate((org.spongepowered.api.world.World) world, buffer, biomes);
