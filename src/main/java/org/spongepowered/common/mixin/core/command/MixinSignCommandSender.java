@@ -25,15 +25,20 @@
 package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.tileentity.TileEntitySign;
+import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.SignSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 
 @Mixin(targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinSignCommandSender implements ICommandSender, IMixinCommandSender, SignSource, IMixinCommandSource {
+
+    @Shadow private TileEntitySign field_174797_a;
 
     @Override
     public ICommandSender asICommandSender() {
@@ -54,5 +59,11 @@ public abstract class MixinSignCommandSender implements ICommandSender, IMixinCo
     public Player getEntity() {
         return (Player) getCommandSenderEntity();
     }
+    
+    @Override
+    public Sign getSign() {
+        return (Sign) field_174797_a;
+    }
+
 
 }
