@@ -52,7 +52,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
     private static final Vector2i CACHED_AREA_SIZE = new Vector2i(40, 40);
 
     private final ByteArrayMutableBiomeBuffer areaForGeneration = new ByteArrayMutableBiomeBuffer(Vector2i.ZERO, CACHED_AREA_SIZE);
-    final BiomeGenerator biomeGenerator;
+    private final BiomeGenerator biomeGenerator;
 
     /**
      * Gets a world chunk manager based on the given biome generator.
@@ -76,6 +76,10 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
             throw new AssertionError(getClass() + " can only wrap custom biome generators, "
                 + SpongeBiomeGenerator.class + " is not a custom biome generator");
         }
+    }
+
+    public BiomeGenerator getBiomeGenerator() {
+        return biomeGenerator;
     }
 
     /**

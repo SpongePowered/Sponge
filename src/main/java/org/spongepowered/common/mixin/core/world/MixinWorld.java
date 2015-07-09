@@ -762,18 +762,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void setWorldGenerator(WorldGenerator generator) {
+        // Replace populators with possibly modified list
+        this.populators = ImmutableList.copyOf(generator.getPopulators());
+        this.generatorPopulators = ImmutableList.copyOf(generator.getGeneratorPopulators());
+
         // Replace biome generator with possible modified one
         BiomeGenerator biomeGenerator = generator.getBiomeGenerator();
         WorldServer thisWorld = (WorldServer) (Object) this;
         thisWorld.provider.worldChunkMgr = CustomWorldChunkManager.of(biomeGenerator);
 
         // Replace generator populator with possibly modified one
-        GeneratorPopulator generatorPopulator = generator.getBaseGeneratorPopulator();
-        replaceChunkGenerator(CustomChunkProviderGenerate.of(thisWorld, generatorPopulator, biomeGenerator));
-
-        // Replace populators with possibly modified list
-        this.populators = ImmutableList.copyOf(generator.getPopulators());
-        this.generatorPopulators = ImmutableList.copyOf(generator.getGeneratorPopulators());
+        ((ChunkProviderServer) this.getChunkProvider()).serverChunkGenerator =
+            CustomChunkProviderGenerate.of(thisWorld, biomeGenerator, generator.getBaseGeneratorPopulator(), this.generatorPopulators);
     }
 
     @Override
@@ -789,11 +789,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 SpongeGeneratorPopulator.of(world, serverChunkProvider.serverChunkGenerator),
                 this.generatorPopulators,
                 this.populators);
-    }
-
-    private void replaceChunkGenerator(IChunkProvider provider) {
-        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
-        chunkProviderServer.serverChunkGenerator = provider;
     }
 
     private void checkBiomeBounds(int x, int z) {

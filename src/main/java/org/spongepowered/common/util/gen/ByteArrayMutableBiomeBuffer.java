@@ -38,9 +38,7 @@ import java.util.Arrays;
  * Mutable biome area backed by a byte array. Reusable.
 
  * <p>Using {@link #detach()} the underlying byte array can be accessed.
- * Both the sizeX and sizeZ will be set to 0 by that method, preventing
- * further access to the byte array. The byte array can then
- * be reused by calling {@link #reuse(Vector2i)}.</p>
+ * The byte array can then be reused by calling {@link #reuse(Vector2i)}.</p>
  */
 public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
 

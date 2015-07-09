@@ -45,7 +45,7 @@ public final class SpongeBiomeGenerator implements BiomeGenerator {
 
     public static BiomeGenerator of(WorldChunkManager worldChunkManager) {
         if (worldChunkManager instanceof CustomWorldChunkManager) {
-            return ((CustomWorldChunkManager) worldChunkManager).biomeGenerator;
+            return ((CustomWorldChunkManager) worldChunkManager).getBiomeGenerator();
         }
         return new SpongeBiomeGenerator(worldChunkManager);
     }

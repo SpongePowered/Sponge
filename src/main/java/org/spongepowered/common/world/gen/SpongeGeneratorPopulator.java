@@ -31,7 +31,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
@@ -55,7 +54,7 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
      */
     public static GeneratorPopulator of(World world, IChunkProvider chunkGenerator) {
         if (chunkGenerator instanceof CustomChunkProviderGenerate) {
-            return ((CustomChunkProviderGenerate) chunkGenerator).generatorPopulator;
+            return ((CustomChunkProviderGenerate) chunkGenerator).getBaseGenerator();
         }
         return new SpongeGeneratorPopulator(world, chunkGenerator);
     }
@@ -70,17 +69,6 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
 
         Vector3i min = buffer.getBlockMin();
         Vector3i max = buffer.getBlockMax();
-
-        // Empty the buffer
-        @SuppressWarnings("ConstantConditions")
-        final BlockState air = BlockTypes.AIR.getDefaultState();
-        for (int zz = min.getZ(); zz <= max.getZ(); zz++) {
-            for (int yy = min.getY(); yy <= max.getY(); yy++) {
-                for (int xx = min.getX(); xx <= max.getX(); xx++) {
-                    buffer.setBlock(xx, yy, zz, air);
-                }
-            }
-        }
 
         // The block buffer can be of any size. We generate all chunks that
         // have at least part of the chunk in the given area, and copy the

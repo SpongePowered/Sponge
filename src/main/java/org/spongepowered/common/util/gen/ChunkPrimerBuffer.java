@@ -45,7 +45,7 @@ public final class ChunkPrimerBuffer extends AbstractChunkBuffer {
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkRange(x, y, z);
-        return (BlockState) this.chunkPrimer.getBlockState(x, y, z);
+        return (BlockState) this.chunkPrimer.getBlockState(x & 0xf, y, z & 0xf);
     }
 
     @Override
