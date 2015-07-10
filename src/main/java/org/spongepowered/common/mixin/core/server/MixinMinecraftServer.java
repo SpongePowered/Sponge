@@ -341,7 +341,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
                     ((WorldProperties) worldInfo).setLoadOnStartup(true);
                     ((WorldProperties) worldInfo).setEnabled(true);
-                    ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
+                    if (dim != 0) {
+                        ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
+                    }
                     Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
                 }
             } else {
