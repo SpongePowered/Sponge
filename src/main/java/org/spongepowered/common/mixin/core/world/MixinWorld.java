@@ -208,6 +208,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             this.worldBorder.addListener(new PlayerBorderListener());
         }
+        this.keepSpawnLoaded = ((WorldProperties) info).doesKeepSpawnLoaded();
     }
 
     @Shadow
