@@ -28,8 +28,8 @@ import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
-import org.spongepowered.api.util.gen.MutableBiomeBuffer;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 
 /**
@@ -45,7 +45,7 @@ public final class SpongeBiomeGenerator implements BiomeGenerator {
 
     public static BiomeGenerator of(WorldChunkManager worldChunkManager) {
         if (worldChunkManager instanceof CustomWorldChunkManager) {
-            return ((CustomWorldChunkManager) worldChunkManager).biomeGenerator;
+            return ((CustomWorldChunkManager) worldChunkManager).getBiomeGenerator();
         }
         return new SpongeBiomeGenerator(worldChunkManager);
     }
@@ -55,7 +55,7 @@ public final class SpongeBiomeGenerator implements BiomeGenerator {
     }
 
     @Override
-    public void generateBiomes(MutableBiomeBuffer buffer) {
+    public void generateBiomes(MutableBiomeArea buffer) {
         Vector2i min = buffer.getBiomeMin();
         Vector2i size = buffer.getBiomeSize();
         int xStart = min.getX();

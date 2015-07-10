@@ -28,6 +28,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
+import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
 import org.spongepowered.api.event.entity.player.PlayerRespawnEvent;
 import org.spongepowered.api.event.world.WorldLoadEvent;
 import org.spongepowered.api.text.Text;
@@ -35,10 +36,11 @@ import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.Location;
 
 /**
- * Utility that fires events that normally Forge fires at (in spots). Typically our penultimate goal
- * is to not remove spots where events occur but sometimes it happens (in @Overwrites typically). Normally events that are
- * in Forge are called themselves in SpongeVanilla but when it can't really occur, we fix this issue with Sponge by overwriting
- * this class
+ * Utility that fires events that normally Forge fires at (in spots). Typically
+ * our penultimate goal is to not remove spots where events occur but sometimes
+ * it happens (in @Overwrites typically). Normally events that are in Forge are
+ * called themselves in SpongeVanilla but when it can't really occur, we fix
+ * this issue with Sponge by overwriting this class
  */
 public class SpongeImplEventFactory {
 
@@ -53,5 +55,9 @@ public class SpongeImplEventFactory {
     public static PlayerRespawnEvent createPlayerRespawn(Game game, Player player, boolean bedSpawn, Location respawnLocation) {
         return SpongeEventFactory.createPlayerRespawn(game, player, bedSpawn, respawnLocation);
     }
-}
 
+    public static PlayerQuitEvent createPlayerQuit(Game game, Player player, Text message, MessageSink sink) {
+        return SpongeEventFactory.createPlayerQuit(game, player, message, sink);
+    }
+
+}

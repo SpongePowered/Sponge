@@ -187,8 +187,19 @@ public class DimensionManager {
         return worlds.get(id);
     }
 
-    public static void unloadWorldFromDimId(int id) {
+    public static boolean unloadWorldFromDimId(int id) {
+        WorldServer world = worlds.get(id);
+        if (world == null) {
+            return true;
+        }
+        if (!world.playerEntities.isEmpty()) {
+            return false;
+        }
+        if (((org.spongepowered.api.world.World) world).doesKeepSpawnLoaded()) {
+            return false;
+        }
         unloadQueue.add(id);
+        return true;
     }
 
     public static void setWorld(int id, WorldServer world) {

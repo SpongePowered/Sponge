@@ -61,7 +61,7 @@ public class Tr extends Element {
                 throw new IllegalArgumentException("What is this even? " + child);
             }
         }
-        TextBuilder builder = Texts.builder(new SpongeTranslation(this.key), build.build());
+        TextBuilder builder = Texts.builder(new SpongeTranslation(this.key), build.build().toArray());
         applyTextActions(builder);
         return builder;
     }

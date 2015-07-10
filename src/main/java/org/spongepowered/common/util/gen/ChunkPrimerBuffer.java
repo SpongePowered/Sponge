@@ -24,17 +24,13 @@
  */
 package org.spongepowered.common.util.gen;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.util.gen.ImmutableBlockBuffer;
-import org.spongepowered.api.util.gen.MutableBlockBuffer;
-
-import java.util.Arrays;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
 
 /**
- * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockBuffer}.
+ * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
  *
  */
 public final class ChunkPrimerBuffer extends AbstractChunkBuffer {
@@ -47,17 +43,9 @@ public final class ChunkPrimerBuffer extends AbstractChunkBuffer {
     }
 
     @Override
-    public void fill(BlockState block) {
-        @SuppressWarnings("deprecation")
-        short stateId = (short) Block.BLOCK_STATE_IDS.get(block);
-
-        Arrays.fill(this.chunkPrimer.data, stateId);
-    }
-
-    @Override
     public BlockState getBlock(int x, int y, int z) {
         checkRange(x, y, z);
-        return (BlockState) this.chunkPrimer.getBlockState(x, y, z);
+        return (BlockState) this.chunkPrimer.getBlockState(x & 0xf, y, z & 0xf);
     }
 
     @Override
@@ -65,12 +53,4 @@ public final class ChunkPrimerBuffer extends AbstractChunkBuffer {
         checkRange(x, y, z);
         this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
     }
-
-    @Override
-    public ImmutableBlockBuffer getImmutableClone() {
-        // TODO implement
-        throw new UnsupportedOperationException("Not yet supported");
-    }
-
-
 }
