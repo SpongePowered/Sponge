@@ -323,7 +323,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
                     ((WorldProperties) worldInfo).setLoadOnStartup(true);
                     ((WorldProperties) worldInfo).setEnabled(true);
-                    ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
+                    if (dim != 0) {
+                        ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
+                    }
                     Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
                 }
             } else {
@@ -516,8 +518,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public boolean unloadWorld(World world) {
         int dim = ((net.minecraft.world.World) world).provider.getDimensionId();
         if (DimensionManager.getWorldFromDimId(dim) != null) {
-            DimensionManager.unloadWorldFromDimId(((net.minecraft.world.World) world).provider.getDimensionId());
-            return true;
+            return DimensionManager.unloadWorldFromDimId(dim);
         }
         return false;
     }

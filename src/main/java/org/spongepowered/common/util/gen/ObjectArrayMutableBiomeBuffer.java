@@ -27,11 +27,8 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.util.gen.ImmutableBiomeBuffer;
-import org.spongepowered.api.util.gen.MutableBiomeBuffer;
 import org.spongepowered.api.world.biome.BiomeType;
-
-import java.util.Arrays;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
 
 /**
  * Mutable view of a {@link BiomeGenBase} array.
@@ -41,7 +38,7 @@ import java.util.Arrays;
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeArea implements MutableBiomeBuffer {
+public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
 
     private final BiomeGenBase[] biomes;
 
@@ -83,15 +80,4 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeArea imple
         checkRange(x, z);
         this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4] = (BiomeGenBase) biome;
     }
-
-    @Override
-    public void fill(BiomeType biome) {
-        Arrays.fill(this.biomes, biome);
-    }
-
-    @Override
-    public ImmutableBiomeBuffer getImmutableClone() {
-        return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
-    }
-
 }

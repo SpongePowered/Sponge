@@ -37,6 +37,8 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderGenerate;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
@@ -53,8 +55,9 @@ public final class CustomChunkProviderGenerate implements IChunkProvider {
 
     private static final Vector2i CHUNK_AREA = new Vector2i(16, 16);
 
-    final GeneratorPopulator generatorPopulator;
-    final BiomeGenerator biomeGenerator;
+    private final BiomeGenerator biomeGenerator;
+    private final GeneratorPopulator baseGenerator;
+    private final List<GeneratorPopulator> generatorPopulators;
     private final World world;
     private final ByteArrayMutableBiomeBuffer cachedBiomes;
 
@@ -63,29 +66,37 @@ public final class CustomChunkProviderGenerate implements IChunkProvider {
      * generator.
      *
      * @param world The world to bind the chunk provider to.
-     * @param generatorPopulator The generator populator.
      * @param biomeGenerator Biome generator used to generate chunks.
+     * @param baseGenerator The base generator
+     * @param generatorPopulators The generator populators
      * @return The chunk generator.
      * @throws IllegalArgumentException If the generator populator cannot be
      *         bound to the given world.
      */
-    public static IChunkProvider of(World world, GeneratorPopulator generatorPopulator, BiomeGenerator biomeGenerator) {
-        if (generatorPopulator instanceof SpongeGeneratorPopulator) {
+    public static IChunkProvider of(World world, BiomeGenerator biomeGenerator, GeneratorPopulator baseGenerator,
+        List<GeneratorPopulator> generatorPopulators) {
+        if (baseGenerator instanceof SpongeGeneratorPopulator) {
             // Unwrap instead of wrap
-            return ((SpongeGeneratorPopulator) generatorPopulator).getHandle(world);
+            return ((SpongeGeneratorPopulator) baseGenerator).getHandle(world);
         }
         // Wrap a custom GeneratorPopulator implementation
-        return new CustomChunkProviderGenerate(world, generatorPopulator, biomeGenerator);
+        return new CustomChunkProviderGenerate(world, biomeGenerator, baseGenerator, generatorPopulators);
     }
 
-    private CustomChunkProviderGenerate(World world, GeneratorPopulator generatorPopulator, BiomeGenerator biomeGenerator) {
+    private CustomChunkProviderGenerate(World world, BiomeGenerator biomeGenerator, GeneratorPopulator baseGenerator,
+        List<GeneratorPopulator> generatorPopulators) {
         this.world = Preconditions.checkNotNull(world);
-        this.generatorPopulator = Preconditions.checkNotNull(generatorPopulator);
+        this.baseGenerator = Preconditions.checkNotNull(baseGenerator);
         this.biomeGenerator = Preconditions.checkNotNull(biomeGenerator);
+        this.generatorPopulators = Preconditions.checkNotNull(generatorPopulators);
 
         // Make initially empty biome cache
         this.cachedBiomes = new ByteArrayMutableBiomeBuffer(Vector2i.ZERO, CHUNK_AREA);
         this.cachedBiomes.detach();
+    }
+
+    public GeneratorPopulator getBaseGenerator() {
+        return baseGenerator;
     }
 
     @Override
@@ -131,10 +142,16 @@ public final class CustomChunkProviderGenerate implements IChunkProvider {
         this.cachedBiomes.reuse(new Vector2i(chunkX << 4, chunkZ << 4));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);
 
-        // Generate blocks
+        // Generate base terrain
         ChunkPrimer chunkprimer = new ChunkPrimer();
-        ChunkPrimerBuffer buffer = new ChunkPrimerBuffer(chunkprimer, chunkX, chunkZ);
-        this.generatorPopulator.populate((org.spongepowered.api.world.World) this.world, buffer, this.cachedBiomes.getImmutableClone());
+        MutableBlockVolume blockBuffer = new ChunkPrimerBuffer(chunkprimer, chunkX, chunkZ);
+        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableClone();
+        this.baseGenerator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
+
+        // Apply the generator populators to complete the blockBuffer
+        for (GeneratorPopulator populator : generatorPopulators) {
+            populator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
+        }
 
         // Assemble chunk
         Chunk chunk = new Chunk(this.world, chunkprimer, chunkX, chunkZ);
