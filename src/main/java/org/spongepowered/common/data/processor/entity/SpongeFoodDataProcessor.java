@@ -73,7 +73,7 @@ public class SpongeFoodDataProcessor implements SpongeDataProcessor<FoodData> {
                     final FoodData oldData = createFrom(dataHolder).get();
                     foodStats.setFoodLevel(((int) Math.floor(manipulator.getFoodLevel())));
                     foodStats.foodExhaustionLevel = ((float) manipulator.getExhaustion());
-                    foodStats.setFoodSaturationLevel(((float) manipulator.getSaturation()));
+                    foodStats.foodSaturationLevel = (float) manipulator.getSaturation();
                     return builder().replace(oldData).result(DataTransactionResult.Type.SUCCESS).build();
                 default:
                     return fail(manipulator);
