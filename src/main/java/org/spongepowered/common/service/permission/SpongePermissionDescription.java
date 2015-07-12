@@ -32,22 +32,34 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.Tristate;
 
-import javax.annotation.Nullable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
- * Basic implementation of {@link PermissionDescription}.
+ * Basic implementation of {@link PermissionDescription}. Can only be used in
+ * conjunction with {@link SpongePermissionService}.
  */
 class SpongePermissionDescription implements PermissionDescription {
 
+    private final PermissionService permissionService;
     private final String id;
     private final Text description;
     private final Optional<String> suggestedRank;
     private final PluginContainer owner;
 
-    public SpongePermissionDescription(String id, Text description, Optional<String> suggestedRank, PluginContainer owner) {
+    public SpongePermissionDescription(PermissionService permissionService, String id, Text description, Optional<String> suggestedRank,
+            PluginContainer owner) {
         super();
+        this.permissionService = checkNotNull(permissionService, "permissionService");
         this.id = checkNotNull(id, "id");
         this.description = checkNotNull(description, "description");
         this.suggestedRank = checkNotNull(suggestedRank, "suggestedRank");
@@ -65,8 +77,9 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public Optional<String> getSuggestedRank() {
-        return this.suggestedRank;
+    public Set<Subject> getAssignedSubjects(String identifier) {
+        SubjectCollection subjects = this.permissionService.getSubjects(identifier);
+        return subjects.getAllWithPermission(this.id).keySet();
     }
 
     @Override
@@ -121,6 +134,7 @@ class SpongePermissionDescription implements PermissionDescription {
         private String id;
         private Text description;
         private Optional<String> suggestedRank = Optional.absent();
+        private final Map<String, Tristate> roleAssignments = new LinkedHashMap<String, Tristate>();
 
         public Builder(SpongePermissionService permissionService, PluginContainer owner) {
             super();
@@ -141,8 +155,8 @@ class SpongePermissionDescription implements PermissionDescription {
         }
 
         @Override
-        public Builder suggestedRank(@Nullable String rank) {
-            this.suggestedRank = Optional.fromNullable(rank);
+        public Builder assign(String role, boolean value) {
+            this.roleAssignments.put(role, Tristate.fromBoolean(value));
             return this;
         }
 
@@ -150,8 +164,16 @@ class SpongePermissionDescription implements PermissionDescription {
         public SpongePermissionDescription register() throws IllegalStateException {
             checkState(this.id != null, "No id set");
             checkState(this.description != null, "No description set");
-            SpongePermissionDescription description = new SpongePermissionDescription(this.id, this.description, this.suggestedRank, this.owner);
+            SpongePermissionDescription description =
+                    new SpongePermissionDescription(this.permissionService, this.id, this.description, this.suggestedRank, this.owner);
             this.permissionService.addDescription(description);
+
+            // Set role-templates
+            SubjectCollection subjects = this.permissionService.getSubjects(PermissionService.SUBJECTS_ROLE_TEMPLATE);
+            for (Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
+                Subject subject = subjects.get(assignment.getKey());
+                subject.getTransientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, this.id, assignment.getValue());
+            }
             return description;
         }
 
@@ -160,6 +182,7 @@ class SpongePermissionDescription implements PermissionDescription {
             this.id = null;
             this.description = null;
             this.suggestedRank = Optional.absent();
+            this.roleAssignments.clear();
             return this;
         }
 
