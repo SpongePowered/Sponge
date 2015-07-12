@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import org.spongepowered.common.interfaces.IMixinCommandSender;
-
 import com.google.common.base.Optional;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntityCommandBlock;
+import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -45,6 +44,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
@@ -60,13 +61,13 @@ import javax.annotation.Nullable;
  * installed permissions service for a subject.
  */
 @NonnullByDefault
-@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
-        targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
+        SpongeUser.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinSubject implements CommandSource, IMixinCommandSource, IMixinSubject {
 
     @Nullable private Subject thisSubject;
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
+    @Inject(method = "<init>", at = @At("RETURN") , remap = false)
     public void subjectConstructor(CallbackInfo ci) {
         if (Sponge.isInitialized()) {
             Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
@@ -91,6 +92,9 @@ public abstract class MixinSubject implements CommandSource, IMixinCommandSource
 
     @Override
     public Optional<CommandSource> getCommandSource() {
+        if (this instanceof User && !((User) this).isOnline()) {
+            return Optional.absent();
+        }
         return Optional.<CommandSource>of(this);
     }
 

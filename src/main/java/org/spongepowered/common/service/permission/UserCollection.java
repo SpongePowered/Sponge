@@ -24,27 +24,20 @@
  */
 package org.spongepowered.common.service.permission;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.server.management.UserListOpsEntry;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
+import org.spongepowered.common.service.profile.SpongeProfileResolver;
 
 import java.util.UUID;
-
-import javax.annotation.Nullable;
-
 
 /**
  * User collection keeping track of opped users.
  */
 public class UserCollection extends SpongeSubjectCollection {
+
     private final SpongePermissionService service;
 
     public UserCollection(SpongePermissionService service) {
@@ -66,16 +59,7 @@ public class UserCollection extends SpongeSubjectCollection {
     }
 
     private GameProfile uuidToGameProfile(UUID uid) {
-        PlayerProfileCache cache = MinecraftServer.getServer().getPlayerProfileCache();
-        GameProfile profile = cache.getProfileByUUID(uid); // Get already cached profile by uuid
-        if (profile == null) {
-            profile = MinecraftServer.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uid, null), false);
-            if (profile.getName() != null) {
-                cache.addEntry(profile); // Cache newly looked up profile
-                cache.save(); // Save
-            }
-        }
-        return profile;
+        return (GameProfile) SpongeProfileResolver.getProfile(uid, true);
     }
 
     @Override

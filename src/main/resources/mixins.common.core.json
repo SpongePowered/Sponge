@@ -121,6 +121,7 @@
         "entity.living.villager.MixinEntityVillager",
         "entity.player.MixinEntityPlayer",
         "entity.player.MixinEntityPlayerMP",
+        "entity.player.MixinSpongeUser",
         "entity.projectile.MixinEntityArrow",
         "entity.projectile.MixinEntityEgg",
         "entity.projectile.MixinEntityEnderEye",

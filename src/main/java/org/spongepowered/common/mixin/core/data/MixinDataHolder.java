@@ -40,10 +40,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.DataTransactionBuilder;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
+import org.spongepowered.common.entity.player.SpongeUser;
 
 import java.util.Collection;
 
-@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, PotionEffect.class}, priority = 999)
+@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, PotionEffect.class, SpongeUser.class}, priority = 999)
 public abstract class MixinDataHolder implements DataHolder {
 
     @Override
