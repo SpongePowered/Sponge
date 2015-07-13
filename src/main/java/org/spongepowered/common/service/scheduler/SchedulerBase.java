@@ -154,7 +154,8 @@ abstract class SchedulerBase {
         // If the task has a period of 0 (zero) this task will not repeat, and
         // is removed after we start it.
         if (threshold <= (now - task.getTimestamp())) {
-            task.setTimestamp(now);
+            task.setState(ScheduledTask.ScheduledTaskState.SWITCHING);
+            task.setTimestamp(this.getTimestamp(task));
             startTask(task);
             // If task is one time shot, remove it from the map.
             if (task.period == 0L) {
