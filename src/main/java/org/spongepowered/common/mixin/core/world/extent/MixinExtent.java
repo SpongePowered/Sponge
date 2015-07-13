@@ -222,13 +222,13 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public void interactBlock(Vector3i position) {
-        interactBlock(position.getX(), position.getY(), position.getZ());
+    public void interactBlock(Vector3i position, Direction side) {
+        interactBlock(position.getX(), position.getY(), position.getZ(), side);
     }
 
     @Override
-    public void interactBlockWith(Vector3i position, ItemStack itemStack) {
-        interactBlockWith(position.getX(), position.getY(), position.getZ(), itemStack);
+    public void interactBlockWith(Vector3i position, ItemStack itemStack, Direction side) {
+        interactBlockWith(position.getX(), position.getY(), position.getZ(), itemStack, side);
     }
 
     @Override

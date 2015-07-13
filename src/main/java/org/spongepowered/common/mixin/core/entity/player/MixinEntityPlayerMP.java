@@ -31,7 +31,6 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -203,7 +202,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void setMessageSink(MessageSink sink) {
-        Preconditions.checkNotNull(sink, "sink");
+        checkNotNull(sink, "sink");
         this.sink = sink;
     }
 

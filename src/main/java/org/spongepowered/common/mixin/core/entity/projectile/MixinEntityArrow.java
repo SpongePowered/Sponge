@@ -29,7 +29,6 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -63,7 +62,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
         } else if (this.shootingEntity instanceof ProjectileSource) {
             return (ProjectileSource) this.shootingEntity;
         }
-        return new UnknownProjectileSource();
+        return ProjectileSource.UNKNOWN;
     }
 
     @Override

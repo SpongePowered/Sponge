@@ -26,12 +26,10 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -42,7 +40,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 
 import java.util.Collection;
-import java.util.List;
 
 @SuppressWarnings("serial")
 @NonnullByDefault

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.scoreboard.builder;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.TeamBuilder;
@@ -37,9 +40,6 @@ import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 public class SpongeTeamBuilder implements TeamBuilder {
 

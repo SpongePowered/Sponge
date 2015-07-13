@@ -35,7 +35,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.BlockProjectileSource;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.UUID;
@@ -69,7 +68,7 @@ public class ProjectileSourceSerializer {
                 return (ProjectileSource) tileEntity;
             }
         }
-        return new UnknownProjectileSource();
+        return ProjectileSource.UNKNOWN;
     }
 
     public static void writeSourceToNbt(NBTTagCompound compound, ProjectileSource projectileSource, net.minecraft.entity.Entity potentialEntity) {

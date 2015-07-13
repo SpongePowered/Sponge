@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +43,7 @@ public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEn
     @Shadow private double targetZ;
     @Shadow private boolean shatterOrDrop;
 
-    private ProjectileSource projectileSource = new UnknownProjectileSource();
+    private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
     public Vector3d getTargetedLocation() {
         return new Vector3d(this.targetX, this.targetY, this.targetZ);

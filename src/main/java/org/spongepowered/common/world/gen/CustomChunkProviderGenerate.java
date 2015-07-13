@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.gen;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.base.Preconditions;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.BlockPos;
@@ -85,10 +86,10 @@ public final class CustomChunkProviderGenerate implements IChunkProvider {
 
     private CustomChunkProviderGenerate(World world, BiomeGenerator biomeGenerator, GeneratorPopulator baseGenerator,
         List<GeneratorPopulator> generatorPopulators) {
-        this.world = Preconditions.checkNotNull(world);
-        this.baseGenerator = Preconditions.checkNotNull(baseGenerator);
-        this.biomeGenerator = Preconditions.checkNotNull(biomeGenerator);
-        this.generatorPopulators = Preconditions.checkNotNull(generatorPopulators);
+        this.world = checkNotNull(world, "world");
+        this.baseGenerator = checkNotNull(baseGenerator, "baseGenerator");
+        this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
+        this.generatorPopulators = checkNotNull(generatorPopulators, "generatorPopulators");
 
         // Make initially empty biome cache
         this.cachedBiomes = new ByteArrayMutableBiomeBuffer(Vector2i.ZERO, CHUNK_AREA);
@@ -96,7 +97,7 @@ public final class CustomChunkProviderGenerate implements IChunkProvider {
     }
 
     public GeneratorPopulator getBaseGenerator() {
-        return baseGenerator;
+        return this.baseGenerator;
     }
 
     @Override
@@ -149,7 +150,7 @@ public final class CustomChunkProviderGenerate implements IChunkProvider {
         this.baseGenerator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
 
         // Apply the generator populators to complete the blockBuffer
-        for (GeneratorPopulator populator : generatorPopulators) {
+        for (GeneratorPopulator populator : this.generatorPopulators) {
             populator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
         }
 

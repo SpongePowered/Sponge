@@ -87,7 +87,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -358,7 +358,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } else if (entityClass.isAssignableFrom(EntityEnderPearl.class)) {
             EntityArmorStand tempEntity = new EntityArmorStand(world, x, y, z);
             entity = (Entity) new EntityEnderPearl(world, tempEntity);
-            ((EnderPearl) entity).setShooter(new UnknownProjectileSource());
+            ((EnderPearl) entity).setShooter(ProjectileSource.UNKNOWN);
         }
 
         // Some entities need to have non-null fields (and the easiest way to

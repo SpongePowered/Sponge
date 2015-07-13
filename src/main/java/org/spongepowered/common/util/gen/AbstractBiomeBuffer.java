@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.util.gen;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.world.extent.BiomeArea;
 import org.spongepowered.common.util.VecHelper;
 
@@ -41,11 +43,11 @@ public abstract class AbstractBiomeBuffer implements BiomeArea {
     protected Vector2i end;
 
     protected AbstractBiomeBuffer(Vector2i start, Vector2i size) {
-        this.start = Preconditions.checkNotNull(start, "start");
-        this.size = Preconditions.checkNotNull(size, "size");
+        this.start = checkNotNull(start, "start");
+        this.size = checkNotNull(size, "size");
 
-        Preconditions.checkArgument(size.getX() > 0);
-        Preconditions.checkArgument(size.getY() > 0);
+        checkArgument(size.getX() > 0);
+        checkArgument(size.getY() > 0);
 
         this.end = this.start.add(this.size).sub(Vector2i.ONE);
     }

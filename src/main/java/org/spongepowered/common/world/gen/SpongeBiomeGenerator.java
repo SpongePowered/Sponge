@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.gen;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -51,7 +52,7 @@ public final class SpongeBiomeGenerator implements BiomeGenerator {
     }
 
     private SpongeBiomeGenerator(WorldChunkManager worldChunkManager) {
-        this.worldChunkManager = Preconditions.checkNotNull(worldChunkManager);
+        this.worldChunkManager = checkNotNull(worldChunkManager, "worldChunkManager");
     }
 
     @Override

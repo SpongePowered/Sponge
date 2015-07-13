@@ -34,8 +34,8 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
+import org.spongepowered.common.interfaces.IMixinScoreboard;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -121,6 +121,7 @@ public class SpongeObjective implements Objective {
         this.allowRecursion = true;
     }
 
+    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Map<Text, Score> getScores() {
         return new HashMap(this.scores);
