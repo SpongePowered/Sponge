@@ -66,7 +66,6 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
      * UserList.hasEntries() is named incorrectly in MCP, it should be isEmpty
      * The logic at time of writing is if OPList is empty, disable spawn protection. This has been replaced with if(false) disable spawn protection
      */
-
     @Redirect(method = "isBlockProtected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/UserListOps;hasEntries()Z"))
     public boolean ignoreEmptyOPList(UserListOps server){
         return false;
