@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-public class SpongeVillagerRegistry implements VillagerRegistry {
+public final class SpongeVillagerRegistry implements VillagerRegistry {
 
     private static final SpongeVillagerRegistry instance = new SpongeVillagerRegistry();
     private static final ITradeList[] EMPTY_TRADES = new ITradeList[0];
