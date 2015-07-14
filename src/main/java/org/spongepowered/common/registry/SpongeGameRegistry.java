@@ -674,11 +674,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public ItemStackBuilder getItemBuilder(ItemStack stack) {
-        return new SpongeItemStackBuilder(stack);
-    }
-
-    @Override
     public TradeOfferBuilder getTradeOfferBuilder() {
         return new SpongeTradeOfferBuilder();
     }
