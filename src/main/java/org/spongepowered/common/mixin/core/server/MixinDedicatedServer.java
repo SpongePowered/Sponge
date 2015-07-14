@@ -26,9 +26,12 @@ package org.spongepowered.common.mixin.core.server;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.management.UserListOps;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.io.File;
 import java.net.Proxy;
@@ -53,6 +56,20 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     public void setGuiEnabled() {
         //MinecraftServerGui.createServerGui(this);
         this.guiIsEnabled = false;
+    }
+
+    /**
+     * @author ryantheleach
+     *
+     * Purpose: This disables the new check in minecraft 1.8 that checks the OP list to check if there is no operators
+     * Reasoning: There has been complaints about 1.8 breaking spawn protection see: https://github.com/SpongePowered/SpongeCommon/issues/15
+     * UserList.hasEntries() is named incorrectly in MCP, it should be isEmpty
+     * The logic at time of writing is if OPList is empty, disable spawn protection. This has been replaced with if(false) disable spawn protection
+     */
+
+    @Redirect(method = "isBlockProtected", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/UserListOps;hasEntries()Z"))
+    public boolean ignoreEmptyOPList(UserListOps server){
+        return false;
     }
 
 }
