@@ -73,7 +73,6 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ItemStackBuilder itemData(final DataManipulator<?> itemData) throws IllegalArgumentException {
         checkNotNull(itemData, "Must have a non-null item data!");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
@@ -97,6 +96,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         this.type = itemStack.getItem();
         this.quantity = itemStack.getQuantity();
         this.maxQuantity = itemStack.getMaxStackQuantity();
+        this.itemDataSet.addAll(itemStack.getManipulators());
         return this;
     }
 
@@ -109,6 +109,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         return this;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public ItemStack build() throws IllegalStateException {
         checkState(this.type != null, "Item type has not been set");

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.util.gen;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
@@ -53,8 +55,8 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     public ObjectArrayMutableBiomeBuffer(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
 
-        Preconditions.checkNotNull(biomes);
-        Preconditions.checkArgument(biomes.length >= size.getX() * size.getY());
+        checkNotNull(biomes);
+        checkArgument(biomes.length >= size.getX() * size.getY());
         this.biomes = biomes;
     }
 
@@ -76,7 +78,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
 
     @Override
     public void setBiome(int x, int z, BiomeType biome) {
-        Preconditions.checkNotNull(biome, "biome");
+        checkNotNull(biome, "biome");
         checkRange(x, z);
         this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4] = (BiomeGenBase) biome;
     }

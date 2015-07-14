@@ -30,6 +30,7 @@ import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -45,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
@@ -58,7 +60,7 @@ import javax.annotation.Nullable;
  * Mixin to provide a common implementation of subject that refers to the installed permissions service for a subject.
  */
 @NonnullByDefault
-@Mixin(value = {EntityPlayerMP.class, CommandBlockLogic.class, MinecraftServer.class, RConConsoleSource.class},
+@Mixin(value = {EntityPlayerMP.class, CommandBlockLogic.class, MinecraftServer.class, RConConsoleSource.class, SpongeUser.class},
         targets = "net/minecraft/tileentity/TileEntitySign$2")
 public abstract class MixinSubject implements CommandSource, ICommandSender, IMixinSubject {
 
@@ -90,6 +92,9 @@ public abstract class MixinSubject implements CommandSource, ICommandSender, IMi
 
     @Override
     public Optional<CommandSource> getCommandSource() {
+        if (this instanceof User && !((User) this).isOnline()) {
+            return Optional.absent();
+        }
         return Optional.<CommandSource>of(this);
     }
 

@@ -24,10 +24,14 @@
  */
 package org.spongepowered.common.interfaces;
 
+import org.spongepowered.api.entity.player.User;
 
 public interface IMixinEntityPlayerMP {
 
     void reset();
 
     boolean usesCustomClient();
+
+    User getUserObject();
+
 }

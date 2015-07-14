@@ -36,9 +36,11 @@ import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.command.SimpleCommandService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.rcon.RconService;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.sql.SqlService;
+import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
@@ -47,9 +49,11 @@ import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
+import org.spongepowered.common.service.profile.SpongeProfileResolver;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 import org.spongepowered.common.service.sql.SqlServiceImpl;
+import org.spongepowered.common.service.user.SpongeUserStorage;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 
@@ -66,49 +70,31 @@ public final class SpongeBootstrap {
     private static final org.slf4j.Logger slf4jLogger = new SLF4JLogger((AbstractLogger) Sponge.getLogger(), Sponge.getLogger().getName());
 
     public static void initializeServices() {
-        try {
-            SimpleCommandService commandService = new SimpleCommandService(Sponge.getGame(), slf4jLogger, new SpongeCommandDisambiguator(Sponge.getGame()));
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), CommandService.class, commandService);
+        SimpleCommandService commandService = new SimpleCommandService(Sponge.getGame(), slf4jLogger,
+                new SpongeCommandDisambiguator(Sponge.getGame()));
+        if (registerService(CommandService.class, commandService)) {
             commandService.register(Sponge.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
-        } catch (ProviderExistsException e) {
-            Sponge.getLogger().warn("Non-Sponge CommandService already registered: " + e.getLocalizedMessage());
         }
-
-        try {
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SqlService.class, new SqlServiceImpl());
-        } catch (ProviderExistsException e) {
-            Sponge.getLogger().warn("Non-Sponge SqlService already registered: " + e.getLocalizedMessage());
+        registerService(SqlService.class, new SqlServiceImpl());
+        if (!registerService(SchedulerService.class, SpongeScheduler.getInstance())) {
+            throw new ExceptionInInitializerError("Cannot continue with a Non-Sponge Scheduler!");
         }
-
-        try {
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SchedulerService.class, SpongeScheduler.getInstance());
-        } catch (ProviderExistsException e) {
-            Sponge.getLogger().error("Non-Sponge scheduler has been registered. Cannot continue!");
-            throw new ExceptionInInitializerError(e);
-        }
-
-        try {
-            SerializationService serializationService = new SpongeSerializationService();
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), SerializationService.class, serializationService);
-        } catch (ProviderExistsException e2) {
-            Sponge.getLogger().warn("Non-Sponge SerializationService already registered: " + e2.getLocalizedMessage());
-        }
-
-        try {
-            PaginationService paginationService = new SpongePaginationService();
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), PaginationService.class, paginationService);
-        } catch (ProviderExistsException e) {
-            Sponge.getLogger().warn("Non-Sponge PaginationService already registered: " + e.getLocalizedMessage());
-
-        }
-
+        registerService(SerializationService.class, new SpongeSerializationService());
+        registerService(PaginationService.class, new SpongePaginationService());
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            try {
-                Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), RconService.class, new MinecraftRconService((DedicatedServer)
-                        MinecraftServer.getServer()));
-            } catch (ProviderExistsException e) {
-                Sponge.getLogger().warn("Non-Sponge Rcon service already registered: " + e.getLocalizedMessage());
-            }
+            registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));
+        }
+        registerService(UserStorage.class, new SpongeUserStorage());
+        registerService(GameProfileResolver.class, new SpongeProfileResolver());
+    }
+
+    private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {
+        try {
+            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), serviceClass, serviceImpl);
+            return true;
+        } catch (ProviderExistsException e) {
+            Sponge.getLogger().warn("Non-Sponge {} already registered: {}", serviceClass.getSimpleName(), e.getLocalizedMessage());
+            return false;
         }
     }
 

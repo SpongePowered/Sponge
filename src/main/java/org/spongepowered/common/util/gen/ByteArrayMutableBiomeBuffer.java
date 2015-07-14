@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.util.gen;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
@@ -47,7 +49,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     private final BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
 
     private void checkOpen() {
-        Preconditions.checkState(!this.detached, "trying to use buffer after it's closed");
+        checkState(!this.detached, "trying to use buffer after it's closed");
     }
 
     public ByteArrayMutableBiomeBuffer(Vector2i start, Vector2i size) {
@@ -103,9 +105,9 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
      * @param start New start position.
      */
     public void reuse(Vector2i start) {
-        Preconditions.checkState(this.detached, "Cannot reuse while still in use");
+        checkState(this.detached, "Cannot reuse while still in use");
 
-        this.start = Preconditions.checkNotNull(start, "start");
+        this.start = checkNotNull(start, "start");
         this.end = this.start.add(this.size).sub(Vector2i.ONE);
         Arrays.fill(this.biomes, (byte) 0);
 

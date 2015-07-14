@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.world.storage;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.storage.ChunkLayout;
 
@@ -69,7 +71,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public boolean isValidChunk(Vector3i coords) {
-        Preconditions.checkNotNull(coords);
+        checkNotNull(coords, "coords");
         return isValidChunk(coords.getX(), coords.getY(), coords.getZ());
     }
 
@@ -103,7 +105,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public Optional<Vector3i> toChunk(Vector3i worldCoords) {
-        Preconditions.checkNotNull(worldCoords);
+        checkNotNull(worldCoords, "worldCoords");
         return toChunk(worldCoords.getX(), worldCoords.getY(), worldCoords.getZ());
     }
 
@@ -115,7 +117,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public Optional<Vector3i> toWorld(Vector3i chunkCoords) {
-        Preconditions.checkNotNull(chunkCoords);
+        checkNotNull(chunkCoords, "chunkCoords");
         return toWorld(chunkCoords.getX(), chunkCoords.getY(), chunkCoords.getZ());
     }
 
@@ -126,8 +128,8 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public Optional<Vector3i> addToChunk(Vector3i chunkCoords, Vector3i chunkOffset) {
-        Preconditions.checkNotNull(chunkCoords);
-        Preconditions.checkNotNull(chunkOffset);
+        checkNotNull(chunkCoords, "chunkCoords");
+        checkNotNull(chunkOffset, "chunkOffset");
         return addToChunk(chunkCoords.getX(), chunkCoords.getY(), chunkCoords.getZ(), chunkOffset.getX(), chunkOffset.getY(), chunkOffset.getZ());
     }
 
@@ -154,7 +156,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public Optional<Vector3i> moveToChunk(Vector3i chunkCoords, Direction direction, int steps) {
-        Preconditions.checkArgument(!direction.isSecondaryOrdinal(), "Secondary cardinal directions can't be used here");
+        checkArgument(!direction.isSecondaryOrdinal(), "Secondary cardinal directions can't be used here");
         return addToChunk(chunkCoords, direction.toVector3d().ceil().toInt().mul(steps));
     }
 

@@ -25,15 +25,13 @@
 package org.spongepowered.common.mixin.plugin;
 
 import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.MixinEnvironment.Side;
-
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.MixinEnvironment.Side;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import java.util.List;
 import java.util.Set;
-
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 
 
 public class CorePlugin implements IMixinConfigPlugin {

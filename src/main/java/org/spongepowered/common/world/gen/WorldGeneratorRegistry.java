@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.world.gen;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -64,15 +66,15 @@ public final class WorldGeneratorRegistry {
     }
 
     public void registerModifier(WorldGeneratorModifier modifier) {
+        checkNotNull(modifier, "modifier");
         String id = modifier.getId();
         checkId(id, "World generator ID");
-        Preconditions.checkNotNull(modifier, "modifier");
 
         this.modifiers.put(id, modifier);
     }
 
     private void checkId(String id, String subject) {
-        Preconditions.checkArgument(id.indexOf(' ') == -1, subject + " " + id + " may not contain a space");
+        checkArgument(id.indexOf(' ') == -1, subject + " " + id + " may not contain a space");
     }
 
     /**
@@ -87,9 +89,9 @@ public final class WorldGeneratorRegistry {
     public ImmutableCollection<String> toIds(Collection<WorldGeneratorModifier> modifiers) {
         ImmutableList.Builder<String> ids = ImmutableList.builder();
         for (WorldGeneratorModifier modifier : modifiers) {
-            Preconditions.checkNotNull(modifier, "modifier (in collection)");
+            checkNotNull(modifier, "modifier (in collection)");
             String id = modifier.getId();
-            Preconditions.checkArgument(this.modifiers.containsKey(id),
+            checkArgument(this.modifiers.containsKey(id),
                     "unregistered modifier in collection");
             ids.add(id);
         }

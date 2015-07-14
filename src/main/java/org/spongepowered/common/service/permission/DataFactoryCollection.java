@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.service.permission;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -56,7 +57,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
 
     @Override
     public Subject get(String identifier) {
-        Preconditions.checkNotNull(identifier, "identifier");
+        checkNotNull(identifier, "identifier");
         SpongeSubject ret = this.subjects.get(identifier);
         if (ret == null) {
             SpongeSubject newRet = this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory.apply(identifier)));

@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,7 +40,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Shadow private int lifetime;
     @Shadow private int fireworkAge;
 
-    private ProjectileSource projectileSource = new UnknownProjectileSource();
+    private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
     public int getFuseDuration() {
         return this.lifetime - this.fireworkAge;

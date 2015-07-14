@@ -37,7 +37,6 @@ import net.minecraft.util.MathHelper;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.player.fishing.PlayerHookedEntityEvent;
 import org.spongepowered.api.event.entity.player.fishing.PlayerRetractFishingLineEvent;
@@ -77,7 +76,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         } else if (this.angler != null && this.angler instanceof ProjectileSource) {
             return (ProjectileSource) this.angler;
         }
-        return new UnknownProjectileSource();
+        return ProjectileSource.UNKNOWN;
     }
 
     @Override

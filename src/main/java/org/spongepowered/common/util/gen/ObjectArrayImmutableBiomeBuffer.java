@@ -23,9 +23,10 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.common.util.gen;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
@@ -53,8 +54,8 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     public ObjectArrayImmutableBiomeBuffer(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
 
-        Preconditions.checkNotNull(biomes);
-        Preconditions.checkArgument(biomes.length >= size.getX() * size.getY());
+        checkNotNull(biomes);
+        checkArgument(biomes.length >= size.getX() * size.getY());
         this.biomes = biomes;
     }
 
