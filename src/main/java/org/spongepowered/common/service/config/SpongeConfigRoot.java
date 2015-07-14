@@ -22,33 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.configuration;
+package org.spongepowered.common.service.config;
 
-import com.google.common.base.Optional;
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.InvalidTypeException;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.common.Sponge;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.spongepowered.api.service.config.ConfigRoot;
+
+import java.io.File;
 
 /**
- * A {@link TypeSerializer} implementation that allows CatalogType values to be used in object-mapped classes.
+ * Root for sponge configurations.
  */
-public class CatalogTypeTypeSerializer implements TypeSerializer<CatalogType> {
+public class SpongeConfigRoot implements ConfigRoot {
+    private final String pluginName;
+    private final File baseDir;
 
-    @Override
-    public CatalogType deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        Optional<? extends CatalogType> ret = Sponge.getSpongeRegistry().getType(type.getRawType().asSubclass(CatalogType.class), value.getString());
-        if (!ret.isPresent()) {
-            throw new ObjectMappingException("Input '" + value.getValue() + "' was not a valid value for type " + type);
-        }
-        return ret.get();
+    public SpongeConfigRoot(String pluginName, File baseDir) {
+        this.pluginName = pluginName;
+        this.baseDir = baseDir;
     }
 
     @Override
-    public void serialize(TypeToken<?> type, CatalogType obj, ConfigurationNode value) throws ObjectMappingException {
-        value.setValue(obj.getId());
+    public File getConfigFile() {
+        return new File(this.baseDir, this.pluginName + ".conf");
+    }
+
+    @Override
+    public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
+        return HoconConfigurationLoader.builder()
+                .setFile(getConfigFile())
+                .build();
+    }
+
+    @Override
+    public File getDirectory() {
+        return this.baseDir;
     }
 }

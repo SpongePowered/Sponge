@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockTallGrass;
@@ -391,7 +392,7 @@ import java.util.UUID;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
     static {
-        TypeSerializers.registerSerializer(new CatalogTypeTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
 
     private final Map<String, BiomeType> biomeTypeMappings = Maps.newHashMap();
