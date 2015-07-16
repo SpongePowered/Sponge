@@ -232,6 +232,7 @@ import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.gen.PopulatorFactory;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -312,6 +313,7 @@ import org.spongepowered.common.weather.SpongeWeather;
 import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldBuilder;
+import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
 import org.spongepowered.common.world.type.SpongeWorldTypeNether;
@@ -1868,6 +1870,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public Transform createTransform(Extent extent) {
         return new SpongeTransform(extent, Vector3d.ZERO);
+    }
+
+    @Override
+    public ExtentBufferFactory getExtentBufferFactory() {
+        return SpongeExtentBufferFactory.INSTANCE;
     }
 
     public void preInit() {

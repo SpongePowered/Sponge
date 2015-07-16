@@ -34,15 +34,33 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.DiscreteTransform2;
+import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBlockVolume;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.api.world.extent.StorageType;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
+import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
+import org.spongepowered.common.util.gen.ShortArrayImmutableBlockBuffer;
+import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
+import org.spongepowered.common.world.extent.ExtentBufferUtil;
+import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
+import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
+import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
+import org.spongepowered.common.world.extent.MutableBlockViewTransform;
+import org.spongepowered.common.world.extent.UnmodifiableBiomeAreaWrapper;
+import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 
 import java.util.Collection;
 
@@ -182,6 +200,104 @@ public abstract class MixinExtent implements Extent {
     @Override
     public void removeScheduledUpdate(Vector3i position, ScheduledBlockUpdate update) {
         removeScheduledUpdate(position.getX(), position.getY(), position.getZ(), update);
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
+        if (!containsBiome(newMin.getX(), newMin.getY())) {
+            throw new PositionOutOfBoundsException(newMin, getBiomeMin(), getBiomeMax());
+        }
+        if (!containsBiome(newMax.getX(), newMax.getY())) {
+            throw new PositionOutOfBoundsException(newMax, getBiomeMin(), getBiomeMax());
+        }
+        return new MutableBiomeViewDownsize(this, newMin, newMax);
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+        return new MutableBiomeViewTransform(this, transform);
+    }
+
+    @Override
+    public MutableBiomeArea getRelativeBiomeView() {
+        return getBiomeView(DiscreteTransform2.fromTranslation(getBiomeMin().negate()));
+    }
+
+    @Override
+    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
+        return new UnmodifiableBiomeAreaWrapper(this);
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeCopy() {
+        return getBiomeCopy(StorageType.STANDARD);
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeCopy(StorageType type) {
+        switch (type) {
+            case STANDARD:
+                return new ByteArrayMutableBiomeBuffer(ExtentBufferUtil.copyToArray(this, getBiomeMin(), getBiomeMax(), getBiomeSize()),
+                    getBiomeMin(), getBiomeSize());
+            case THREAD_SAFE:
+            default:
+                throw new UnsupportedOperationException(type.name());
+        }
+    }
+
+    @Override
+    public ImmutableBiomeArea getImmutableBiomeCopy() {
+        return ByteArrayImmutableBiomeBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, getBiomeMin(), getBiomeMax(), getBiomeSize()),
+            getBiomeMin(), getBiomeSize());
+    }
+
+    @Override
+    public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
+        if (!containsBlock(newMin.getX(), newMin.getY(), newMin.getZ())) {
+            throw new PositionOutOfBoundsException(newMin, getBlockMin(), getBlockMax());
+        }
+        if (!containsBlock(newMax.getX(), newMax.getY(), newMax.getZ())) {
+            throw new PositionOutOfBoundsException(newMax, getBlockMin(), getBlockMax());
+        }
+        return new MutableBlockViewDownsize(this, newMin, newMax);
+    }
+
+    @Override
+    public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
+        return new MutableBlockViewTransform(this, transform);
+    }
+
+    @Override
+    public MutableBlockVolume getRelativeBlockView() {
+        return getBlockView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
+    }
+
+    @Override
+    public UnmodifiableBlockVolume getUnmodifiableBlockView() {
+        return new UnmodifiableBlockVolumeWrapper(this);
+    }
+
+    @Override
+    public MutableBlockVolume getBlockCopy() {
+        return getBlockCopy(StorageType.STANDARD);
+    }
+
+    @Override
+    public MutableBlockVolume getBlockCopy(StorageType type) {
+        switch (type) {
+            case STANDARD:
+                return new ShortArrayMutableBlockBuffer(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
+                    getBlockMin(), getBlockSize());
+            case THREAD_SAFE:
+            default:
+                throw new UnsupportedOperationException(type.name());
+        }
+    }
+
+    @Override
+    public ImmutableBlockVolume getImmutableBlockCopy() {
+        return ShortArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
+            getBlockMin(), getBlockSize());
     }
 
 }

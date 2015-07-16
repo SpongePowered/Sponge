@@ -22,56 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util.gen;
-
-import static com.google.common.base.Preconditions.checkArgument;
+package org.spongepowered.common.world.extent;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
-import org.spongepowered.common.world.extent.MutableBlockViewTransform;
-import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-/**
- * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
- *
- */
-@NonnullByDefault
-public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
+public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableBlockVolume> implements MutableBlockVolume {
 
-    private final ChunkPrimer chunkPrimer;
-
-    public ChunkPrimerBuffer(ChunkPrimer chunkPrimer, int chunkX, int chunkZ) {
-        super(getBlockStart(chunkX, chunkZ), SpongeChunkLayout.CHUNK_SIZE);
-        this.chunkPrimer = chunkPrimer;
-    }
-
-    private static Vector3i getBlockStart(int chunkX, int chunkZ) {
-        final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
-        checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
-        return worldCoords.get();
-    }
-
-    @Override
-    public BlockState getBlock(int x, int y, int z) {
-        checkRange(x, y, z);
-        return (BlockState) this.chunkPrimer.getBlockState(x & 0xf, y, z & 0xf);
-    }
-
-    @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        setBlock(position.getX(), position.getY(), position.getZ(), block);
+    public MutableBlockViewDownsize(MutableBlockVolume volume, Vector3i min, Vector3i max) {
+        super(volume, min, max);
     }
 
     @Override
@@ -85,16 +48,21 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
+    public void setBlock(Vector3i position, BlockState block) {
+        setBlock(position.getX(), position.getY(), position.getZ(), block);
+    }
+
+    @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         checkRange(x, y, z);
-        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
+        this.volume.setBlock(x, y, z, block);
     }
 
     @Override
     public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
         checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
         checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
-        return new MutableBlockViewDownsize(this, newMin, newMax);
+        return new MutableBlockViewDownsize(this.volume, newMin, newMax);
     }
 
     @Override
@@ -104,27 +72,11 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
 
     @Override
     public MutableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.start.negate()));
+        return getBlockView(DiscreteTransform3.fromTranslation(this.min.negate()));
     }
 
     @Override
     public UnmodifiableBlockVolume getUnmodifiableBlockView() {
         return new UnmodifiableBlockVolumeWrapper(this);
-    }
-
-    @Override
-    public MutableBlockVolume getBlockCopy(StorageType type) {
-        switch (type) {
-            case STANDARD:
-                return new ShortArrayMutableBlockBuffer(this.chunkPrimer.data.clone(), this.start, this.size);
-            case THREAD_SAFE:
-            default:
-                throw new UnsupportedOperationException(type.name());
-        }
-    }
-
-    @Override
-    public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new ShortArrayImmutableBlockBuffer(this.chunkPrimer.data, this.start, this.size);
     }
 }
