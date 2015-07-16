@@ -23,13 +23,18 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.common.util.gen;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.world.biome.BiomeGenBase;
+import org.spongepowered.api.util.DiscreteTransform2;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.StorageType;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
+import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 
 /**
  * Mutable view of a {@link BiomeGenBase} array.
@@ -39,6 +44,7 @@ import org.spongepowered.api.world.extent.ImmutableBiomeArea;
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
+@NonnullByDefault
 public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
 
     private final BiomeGenBase[] biomes;
@@ -53,10 +59,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      */
     public ObjectArrayImmutableBiomeBuffer(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
-
-        checkNotNull(biomes);
-        checkArgument(biomes.length >= size.getX() * size.getY());
-        this.biomes = biomes;
+        this.biomes = biomes.clone();
     }
 
     @Override
@@ -67,6 +70,44 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     @Override
     public BiomeType getBiome(int x, int z) {
         checkRange(x, z);
-        return (BiomeType) this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4];
+        return (BiomeType) this.biomes[getIndex(x, z)];
+    }
+
+    @Override
+    public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
+        checkRange(newMin.getX(), newMin.getY());
+        checkRange(newMax.getX(), newMax.getY());
+        return new ImmutableBiomeViewDownsize(this, newMin, newMax);
+    }
+
+    @Override
+    public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+        return new ImmutableBiomeViewTransform(this, transform);
+    }
+
+    @Override
+    public ImmutableBiomeArea getRelativeBiomeView() {
+        return getBiomeView(DiscreteTransform2.fromTranslation(this.start.negate()));
+    }
+
+    @Override
+    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
+        return this;
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeCopy(StorageType type) {
+        switch (type) {
+            case STANDARD:
+                return new ObjectArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
+            case THREAD_SAFE:
+            default:
+                throw new UnsupportedOperationException(type.name());
+        }
+    }
+
+    @Override
+    public ImmutableBiomeArea getImmutableBiomeCopy() {
+        return this;
     }
 }
