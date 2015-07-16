@@ -788,8 +788,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return new SpongeWorldGenerator(
                 SpongeBiomeGenerator.of(getWorldChunkManager()),
                 SpongeGeneratorPopulator.of(world, serverChunkProvider.serverChunkGenerator),
-                this.generatorPopulators,
-                this.populators);
+                getGeneratorPopulators(),
+                getPopulators());
     }
 
     private void checkBiomeBounds(int x, int z) {
