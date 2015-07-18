@@ -565,7 +565,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
                     .put(Operation.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(ParticleType.class, this.particleByName)
-                    .put(PlantType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(PlantType.class, this.plantTypeMappings)
                     .put(PotionEffectType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(PortionType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(PrismarineType.class, ImmutableMap.<String, CatalogType>of()) // TODO
