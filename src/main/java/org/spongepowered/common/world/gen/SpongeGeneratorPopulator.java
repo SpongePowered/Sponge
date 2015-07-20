@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.gen;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Preconditions;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -60,8 +61,8 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
     }
 
     private SpongeGeneratorPopulator(World world, IChunkProvider chunkGenerator) {
-        this.world = Preconditions.checkNotNull(world);
-        this.chunkGenerator = Preconditions.checkNotNull(chunkGenerator);
+        this.world = checkNotNull(world, "world");
+        this.chunkGenerator = checkNotNull(chunkGenerator, "chunkGenerator");
     }
 
     @Override

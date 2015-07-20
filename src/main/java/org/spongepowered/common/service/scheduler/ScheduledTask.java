@@ -55,6 +55,10 @@ public class ScheduledTask implements Task {
          */
         WAITING,
         /**
+         * In the process of switching to the running state.
+         */
+        SWITCHING,
+        /**
          * Has ran, and will continue to unless removed from the task map.
          */
         RUNNING,

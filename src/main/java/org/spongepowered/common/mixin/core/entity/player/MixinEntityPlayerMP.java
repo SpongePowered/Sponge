@@ -68,7 +68,6 @@ import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -90,14 +89,11 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
-
-import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)

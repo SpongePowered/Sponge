@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.scoreboard.builder;
 
-import net.minecraft.scoreboard.IScoreObjectiveCriteria;
-import net.minecraft.scoreboard.ScoreObjective;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -33,12 +34,7 @@ import org.spongepowered.api.scoreboard.objective.ObjectiveBuilder;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.scoreboard.SpongeObjective;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,8 +88,8 @@ public class SpongeObjectiveBuilder implements ObjectiveBuilder {
     @Override
     public Objective build() throws IllegalStateException {
         checkState(this.name != null, "Name cannot be null");
-        checkState(displayName != null, "DisplayName cannot be null");
-        checkState(criterion != null, "Criterion cannot be null");
+        checkState(this.displayName != null, "DisplayName cannot be null");
+        checkState(this.criterion != null, "Criterion cannot be null");
 
         SpongeObjective objective = new SpongeObjective(this.name, this.criterion);
         objective.setDisplayName(this.displayName);

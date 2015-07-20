@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.scoreboard.builder;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.ScoreboardBuilder;
 import org.spongepowered.api.scoreboard.Team;

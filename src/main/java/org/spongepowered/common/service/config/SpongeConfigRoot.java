@@ -22,52 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin;
+package org.spongepowered.common.service.config;
 
-import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.MixinEnvironment.Side;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.spongepowered.api.service.config.ConfigRoot;
 
-import java.util.List;
-import java.util.Set;
+import java.io.File;
 
+/**
+ * Root for sponge configurations.
+ */
+public class SpongeConfigRoot implements ConfigRoot {
+    private final String pluginName;
+    private final File baseDir;
 
-public class CorePlugin implements IMixinConfigPlugin {
-
-    @Override
-    public void onLoad(String mixinPackage) {
+    public SpongeConfigRoot(String pluginName, File baseDir) {
+        this.pluginName = pluginName;
+        this.baseDir = baseDir;
     }
 
     @Override
-    public String getRefMapperConfig() {
-        return null;
+    public File getConfigFile() {
+        return new File(this.baseDir, this.pluginName + ".conf");
     }
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if ("net.minecraft.network.rcon.RConConsoleSource".equals(targetClassName)) {
-            return MixinEnvironment.getCurrentEnvironment().getSide() != Side.CLIENT;
-        }
-        return true;
+    public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
+        return HoconConfigurationLoader.builder()
+                .setFile(getConfigFile())
+                .build();
     }
 
     @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
+    public File getDirectory() {
+        return this.baseDir;
     }
-
-    @Override
-    public List<String> getMixins() {
-        return null;
-    }
-
-    @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
-
-    @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
-
 }

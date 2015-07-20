@@ -24,40 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
-import org.spongepowered.api.scoreboard.Score;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
-import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.ChunkManager;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
-import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scoreboard.SpongeObjective;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @NonnullByDefault
 @Mixin(ScoreObjective.class)

@@ -23,11 +23,11 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.common.util.gen;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -51,7 +51,7 @@ public abstract class AbstractChunkBuffer implements MutableBlockVolume {
         this.chunkZ = chunkZ;
 
         final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
-        Preconditions.checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
+        checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
         this.minBlock = worldCoords.get();
         this.maxBlock = this.minBlock.add(SpongeChunkLayout.CHUNK_SIZE).sub(Vector3i.ONE);
     }

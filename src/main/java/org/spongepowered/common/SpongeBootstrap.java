@@ -34,6 +34,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.command.SimpleCommandService;
+import org.spongepowered.api.service.config.ConfigService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.api.service.profile.GameProfileResolver;
@@ -48,6 +49,7 @@ import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
 import org.spongepowered.common.service.profile.SpongeProfileResolver;
@@ -64,7 +66,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Used to setup the ecosystem
+ * Used to setup the ecosystem.
  */
 @NonnullByDefault
 public final class SpongeBootstrap {
@@ -88,6 +90,7 @@ public final class SpongeBootstrap {
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));
         }
+        registerService(ConfigService.class, new SpongeConfigService(Sponge.getGame().getPluginManager()));
         registerService(UserStorage.class, new SpongeUserStorage());
         registerService(GameProfileResolver.class, new SpongeProfileResolver());
     }

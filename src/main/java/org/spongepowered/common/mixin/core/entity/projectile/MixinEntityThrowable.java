@@ -29,7 +29,6 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,7 +57,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
             return (ProjectileSource) this.getThrower();
         }
 
-        return new UnknownProjectileSource();
+        return ProjectileSource.UNKNOWN;
     }
 
     @Override

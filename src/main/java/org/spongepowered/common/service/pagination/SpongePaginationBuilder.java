@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import org.spongepowered.api.util.command.source.ProxySource;
-
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.util.command.CommandMessageFormatting.error;
+
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -37,6 +36,7 @@ import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.source.ProxySource;
 
 import java.util.List;
 import java.util.Map;
@@ -100,8 +100,8 @@ class SpongePaginationBuilder implements PaginationBuilder {
 
     @Override
     public void sendTo(final CommandSource source) {
-        Preconditions.checkNotNull(this.contents, "contents");
-        Preconditions.checkNotNull(source, "source");
+        checkNotNull(this.contents, "contents");
+        checkNotNull(source, "source");
         this.service.registerCommandOnce();
 
         CommandSource realSource = source;

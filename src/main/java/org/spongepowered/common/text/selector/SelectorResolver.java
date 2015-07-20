@@ -77,6 +77,7 @@ public class SelectorResolver {
     private static final Function<CommandSource, String> GET_NAME =
         new Function<CommandSource, String>() {
 
+            @Override
             public String apply(CommandSource input) {
                 return input.getName();
             }

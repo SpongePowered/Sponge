@@ -53,6 +53,7 @@ class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
      *  <li>when parsing XmlMixed content, JAXB does not suppress the whitespace</li>
      * </ol>
      **/
+    @Override
     public void characters(
             char[] ch, int start, int length
     ) throws SAXException {
@@ -67,42 +68,52 @@ class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
     }
 
     /* what follows is just blind delegation monkey code */
+    @Override
     public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
         this.uh.characters(ch, start, length);
     }
 
+    @Override
     public void endDocument() throws SAXException {
         this.uh.endDocument();
     }
 
+    @Override
     public void endElement(String uri, String localName, String name) throws SAXException {
         this.uh.endElement(uri, localName, name);
     }
 
+    @Override
     public void endPrefixMapping(String prefix) throws SAXException {
         this.uh.endPrefixMapping(prefix);
     }
 
+    @Override
     public void processingInstruction(String target, String data) throws SAXException {
         this.uh.processingInstruction(target, data);
     }
 
+    @Override
     public void setDocumentLocator(Locator locator) {
         this.uh.setDocumentLocator(locator);
     }
 
+    @Override
     public void skippedEntity(String name) throws SAXException {
         this.uh.skippedEntity(name);
     }
 
+    @Override
     public void startDocument() throws SAXException {
         this.uh.startDocument();
     }
 
+    @Override
     public void startElement(String uri, String localName, String name, Attributes atts) throws SAXException {
         this.uh.startElement(uri, localName, name, atts);
     }
 
+    @Override
     public void startPrefixMapping(String prefix, String uri) throws SAXException {
         this.uh.startPrefixMapping(prefix, uri);
     }

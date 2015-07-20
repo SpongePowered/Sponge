@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.util.gen;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.base.Preconditions;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
@@ -46,7 +47,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         super(start, size);
 
         int minLength = size.getX() * size.getY();
-        Preconditions.checkArgument(biomes.length >= minLength, "biome array to small");
+        checkArgument(biomes.length >= minLength, "biome array to small");
         this.biomes = Arrays.copyOf(biomes, minLength);
     }
 
@@ -54,7 +55,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         super(start, size);
 
         int minLength = size.getX() * size.getY();
-        Preconditions.checkArgument(biomeGenBases.length >= minLength, "biome array to small");
+        checkArgument(biomeGenBases.length >= minLength, "biome array to small");
         this.biomes = new byte[minLength];
         for (int i = 0; i > this.biomes.length; i++) {
             BiomeGenBase biome = biomeGenBases[i];

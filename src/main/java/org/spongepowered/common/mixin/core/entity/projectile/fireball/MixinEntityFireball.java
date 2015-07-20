@@ -30,7 +30,6 @@ import net.minecraft.util.MovingObjectPosition;
 import org.spongepowered.api.data.manipulator.entity.DamagingData;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.projectile.source.UnknownProjectileSource;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,7 +51,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
             if (this.shootingEntity != null) {
                 this.projectileSource = (ProjectileSource) this.shootingEntity;
             } else {
-                this.projectileSource = new UnknownProjectileSource();
+                this.projectileSource = ProjectileSource.UNKNOWN;
             }
         }
         return this.projectileSource;

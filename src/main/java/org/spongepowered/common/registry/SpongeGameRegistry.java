@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockTallGrass;
@@ -304,16 +305,6 @@ import org.spongepowered.common.data.manipulator.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
-import org.spongepowered.common.data.processor.block.SpongeDoublePlantProcessor;
-import org.spongepowered.common.data.processor.block.SpongeLayeredDataProcessor;
-import org.spongepowered.common.data.processor.block.SpongePlantProcessor;
-import org.spongepowered.common.data.processor.block.SpongeShrubProcessor;
-import org.spongepowered.common.data.processor.block.SpongeTreeDataProcessor;
-import org.spongepowered.common.data.processor.entity.SpongeGameModeDataProcessor;
-import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
-import org.spongepowered.common.data.type.SpongeCookedFish;
-import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.processor.SpongeBannerDataProcessor;
 import org.spongepowered.common.data.processor.SpongeBeaconDataProcessor;
 import org.spongepowered.common.data.processor.SpongeDisplayNameDataProcessor;
@@ -330,6 +321,7 @@ import org.spongepowered.common.data.processor.entity.SpongeAgeableDataProcessor
 import org.spongepowered.common.data.processor.entity.SpongeAgentDataProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeCareerDataProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeFoodDataProcessor;
+import org.spongepowered.common.data.processor.entity.SpongeGameModeDataProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeHealthProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeInvulnerabilityProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeSkinDataProcessor;
@@ -400,7 +392,7 @@ import java.util.UUID;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
     static {
-        TypeSerializers.registerSerializer(new CatalogTypeTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
 
     private final Map<String, BiomeType> biomeTypeMappings = Maps.newHashMap();
@@ -573,7 +565,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
                     .put(Operation.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(ParticleType.class, this.particleByName)
-                    .put(PlantType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                    .put(PlantType.class, this.plantTypeMappings)
                     .put(PotionEffectType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(PortionType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(PrismarineType.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -1555,15 +1547,15 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
         RegistryHelper.mapFields(DisplaySlots.class, this.displaySlotMappings);
 
-        for (Map.Entry<EnumChatFormatting, SpongeTextColor> entry: this.enumChatColor.entrySet()) {
+        for (Map.Entry<EnumChatFormatting, SpongeTextColor> entry: SpongeGameRegistry.enumChatColor.entrySet()) {
             this.displaySlotMappings.put(entry.getValue().getId(), new SpongeDisplaySlot(entry.getValue().getId(), entry.getValue(), entry.getKey().getColorIndex() + 3));
         }
     }
 
     private void addVisibility(String name, Team.EnumVisible handle) {
         SpongeVisibility visibility = new SpongeVisibility(handle);
-        this.visibilityMappings.put(name, visibility);
-        this.enumVisible.put(handle, visibility);
+        SpongeGameRegistry.visibilityMappings.put(name, visibility);
+        SpongeGameRegistry.enumVisible.put(handle, visibility);
     }
 
     private void setCriteria() {
@@ -1583,7 +1575,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.addVisibility("OTHER_TEAMS", Team.EnumVisible.HIDE_FOR_OWN_TEAM);
         this.addVisibility("NONE", Team.EnumVisible.NEVER);
 
-        RegistryHelper.mapFields(Visibilities.class, this.visibilityMappings);
+        RegistryHelper.mapFields(Visibilities.class, SpongeGameRegistry.visibilityMappings);
     }
 
     private void setupSerialization() {
@@ -1866,7 +1858,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     private void setObjectiveDisplayModes() {
-        RegistryHelper.mapFields(ObjectiveDisplayModes.class, this.objectiveDisplayModeMappings);
+        RegistryHelper.mapFields(ObjectiveDisplayModes.class, SpongeGameRegistry.objectiveDisplayModeMappings);
     }
 
     private void setEntityTypes() {

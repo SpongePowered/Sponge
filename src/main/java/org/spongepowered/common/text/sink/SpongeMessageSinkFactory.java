@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.common.text.sink;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -41,8 +41,6 @@ import org.spongepowered.api.text.sink.MessageSinkFactory;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.common.Sponge;
 
-import java.lang.SuppressWarnings;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -89,7 +87,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
 
     @Override
     public MessageSink toPermission(String permission) {
-        Preconditions.checkNotNull(permission, "permission");
+        checkNotNull(permission, "permission");
         return new PermissionSink(permission);
     }
 

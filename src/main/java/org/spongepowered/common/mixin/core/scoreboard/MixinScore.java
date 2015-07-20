@@ -26,12 +26,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.Scoreboard;
-import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,11 +35,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.scoreboard.SpongeScore;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @NonnullByDefault
 @Mixin(Score.class)

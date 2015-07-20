@@ -42,7 +42,6 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.data.SpongeDataProcessor;
 import org.spongepowered.common.data.manipulator.SpongeDisplayNameData;
 import org.spongepowered.common.text.SpongeTexts;
@@ -84,7 +83,6 @@ public class SpongeDisplayNameDataProcessor implements SpongeDataProcessor<Displ
             if (mainCompound != null && mainCompound.hasKey("Name", 8)) {
                 final String displayString = mainCompound.getString("Name");
                 final DisplayNameData data = new SpongeDisplayNameData();
-                System.err.println("The retrieved displayname from an item stack was: " + displayString);
                 data.setDisplayName(Texts.legacy().fromUnchecked(displayString));
                 data.setCustomNameVisible(true);
                 return Optional.of(data);

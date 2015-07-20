@@ -24,38 +24,21 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.base.Optional;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.EnumChatFormatting;
-import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.entity.player.User;
-import org.spongepowered.api.scoreboard.Team;
-import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.ChunkManager;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scoreboard.SpongeTeam;
-import org.spongepowered.common.scoreboard.SpongeVisibility;
-import org.spongepowered.common.text.format.SpongeTextColor;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @NonnullByDefault

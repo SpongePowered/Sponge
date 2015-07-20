@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.gen;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.base.Preconditions;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
@@ -70,7 +71,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
     }
 
     private CustomWorldChunkManager(BiomeGenerator biomeGenerator) {
-        this.biomeGenerator = Preconditions.checkNotNull(biomeGenerator);
+        this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
 
         if (this.biomeGenerator instanceof SpongeBiomeGenerator) {
             throw new AssertionError(getClass() + " can only wrap custom biome generators, "
@@ -79,7 +80,7 @@ public final class CustomWorldChunkManager extends WorldChunkManager {
     }
 
     public BiomeGenerator getBiomeGenerator() {
-        return biomeGenerator;
+        return this.biomeGenerator;
     }
 
     /**
