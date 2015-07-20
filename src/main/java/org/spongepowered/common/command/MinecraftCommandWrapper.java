@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.command;
 
+import com.google.common.base.Throwables;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
@@ -33,9 +35,11 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerSelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.command.CommandCallable;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandPermissionException;
@@ -43,8 +47,13 @@ import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.InvocationCommandException;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
@@ -54,14 +63,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
                 TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;
     protected final ICommand command;
+    private static final ThreadLocal<Throwable> commandErrors = new ThreadLocal<Throwable>();
+    // This differs from null in that null means "not active".
+    private static final Exception noError = new Exception();
 
     public MinecraftCommandWrapper(final PluginContainer owner, final ICommand command) {
         this.owner = owner;
         this.command = command;
-    }
-
-    private static ICommandSender sourceToSender(CommandSource source) {
-        return source instanceof ICommandSender ? (ICommandSender) source : new WrapperICommandSender(source);
     }
 
     private String[] splitArgs(String arguments) {
@@ -70,7 +78,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     @Override
-    public Optional<CommandResult> process(CommandSource source, String arguments) throws CommandException {
+    public CommandResult process(CommandSource source, String arguments) throws CommandException {
 
         if (!testPermission(source)) {
             throw new CommandPermissionException(Texts.of(Sponge.getGame().getRegistry()
@@ -78,14 +86,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
         }
 
         CommandHandler handler = (CommandHandler) MinecraftServer.getServer().getCommandManager();
-        final ICommandSender mcSender = sourceToSender(source);
+        final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
         int successCount = 0;
 
-
         if (!throwEvent(mcSender, splitArgs)) {
-            return Optional.of(CommandResult.empty());
+            return CommandResult.empty();
         }
         // Below this is copied from CommandHandler.execute. This might need to be updated between versions.
         int affectedEntities = 1;
@@ -98,21 +105,35 @@ public class MinecraftCommandWrapper implements CommandCallable {
             for (Entity entity : list) {
                 splitArgs[usernameIndex] = entity.getUniqueID().toString();
 
-                if (handler.tryExecute(mcSender, splitArgs, this.command, arguments)) {
+                if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                     ++successCount;
                 }
             }
             splitArgs[usernameIndex] = previousNameVal;
         } else {
-            if (handler.tryExecute(mcSender, splitArgs, this.command, arguments)) {
+            if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                 ++successCount;
             }
         }
 
-        return Optional.of(CommandResult.builder()
+        return CommandResult.builder()
                 .affectedEntities(affectedEntities)
                 .successCount(successCount)
-                .build());
+                .build();
+    }
+    
+    private boolean tryExecute(CommandHandler handler, ICommandSender mcSender, String[] splitArgs, String arguments) {
+        commandErrors.set(noError);
+        try {
+            boolean success = handler.tryExecute(mcSender, splitArgs, this.command, arguments);
+            Throwable error = commandErrors.get();
+            if (error != noError) {
+                throw Throwables.propagate(error);
+            }
+            return success;
+        } finally {
+            commandErrors.set(null);
+        }
     }
 
     protected boolean throwEvent(ICommandSender sender, String[] args) throws InvocationCommandException {
@@ -133,45 +154,60 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public boolean testPermission(CommandSource source) {
-        if (source instanceof ICommandSender) {
-            return this.command.canCommandSenderUseCommand((ICommandSender) source);
-        } else {
-            return source.hasPermission(getCommandPermission());
-        }
+        return this.command.canCommandSenderUseCommand(WrapperICommandSender.of(source));
     }
 
     @Override
     public Optional<Text> getShortDescription(CommandSource source) {
-        return Optional.absent();
+        return getHelp(source);
     }
 
     @Override
     public Optional<Text> getHelp(CommandSource source) {
-        return Optional.absent();
+        String translation = command.getCommandUsage(WrapperICommandSender.of(source));
+        if (translation == null) {
+            return Optional.absent();
+        }
+        return Optional.of((Text) Texts.of(new SpongeTranslation(translation)));
     }
 
     @Override
     public Text getUsage(CommandSource source) {
-        final ICommandSender mcSender =
-                source instanceof ICommandSender ? (ICommandSender) source : new WrapperICommandSender(source);
+        final ICommandSender mcSender = WrapperICommandSender.of(source);
         String usage = this.command.getCommandUsage(mcSender);
-        if (usage.startsWith("/") && usage.contains(" ")) {
-            usage = usage.substring(usage.indexOf(" "));
+        Translation translation = Sponge.getGame().getRegistry().getTranslationById(usage).get();
+        if (source instanceof Player) {
+            usage = translation.get(((Player) source).getLocale());
+        } else {
+            usage = translation.get(Locale.getDefault());
         }
-        return Texts.of(Sponge.getGame().getRegistry().getTranslationById(usage).get());
+        
+        List<String> parts = new ArrayList<String>(Arrays.asList(usage.split(" ")));
+        parts.removeAll(Collections.singleton("/" + command.getCommandName()));
+        StringBuilder out = new StringBuilder();
+        for (String s : parts) {
+            out.append(s);
+            out.append(" ");
+        }
+        return Texts.of(out.toString().trim());
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<String> getSuggestions(CommandSource source, String arguments) throws CommandException {
         if (arguments.length() == 0 || !testPermission(source)) {
             return ImmutableList.of();
         }
-        return this.command.addTabCompletionOptions((ICommandSender) source, splitArgs(arguments), null);
+        return this.command.addTabCompletionOptions(WrapperICommandSender.of(source), splitArgs(arguments), null);
     }
 
     @SuppressWarnings("unchecked")
     public List<String> getNames() {
         return ImmutableList.<String>builder().add(this.command.getCommandName()).addAll(this.command.getCommandAliases()).build();
+    }
+    
+    public static void setError(Throwable error) {
+        if (commandErrors.get() == noError) {
+            commandErrors.set(error);
+        }
     }
 }

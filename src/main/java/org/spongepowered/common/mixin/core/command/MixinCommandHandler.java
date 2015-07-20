@@ -22,48 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
+package org.spongepowered.common.mixin.core.command;
 
+import net.minecraft.command.CommandHandler;
+import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.EntityMinecartCommandBlock;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.util.ChatComponentTranslation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.command.MinecraftCommandWrapper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+@Mixin(CommandHandler.class)
+public abstract class MixinCommandHandler {
 
-@NonnullByDefault
-@Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
-
-    @Shadow private CommandBlockLogic commandBlockLogic;
-
-    @Override
-    public ICommandSender asICommandSender() {
-        return commandBlockLogic;
+    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatComponent(Lnet/minecraft/util/IChatComponent)V;", ordinal = 2), cancellable = true)
+    public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> cir,
+                    Throwable error, ChatComponentTranslation comp) {
+        MinecraftCommandWrapper.setError(error);
+        cir.setReturnValue(false);
     }
-
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
-    }
-
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
-    }
-
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
-        }
-        this.commandBlockLogic.setName(name);
-    }
-
 }

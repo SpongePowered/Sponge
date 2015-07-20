@@ -22,48 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
+package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.EntityMinecartCommandBlock;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.tileentity.TileEntityCommandBlock;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+@Mixin(targets = IMixinCommandSender.COMMAND_BLOCK_SENDER)
+public abstract class MixinBlockCommandBlockSender implements IMixinCommandSender {
 
-@NonnullByDefault
-@Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
-
-    @Shadow private CommandBlockLogic commandBlockLogic;
+    @Shadow(aliases = "this$0") private TileEntityCommandBlock field_145767_a;
 
     @Override
-    public ICommandSender asICommandSender() {
-        return commandBlockLogic;
+    public CommandSource asCommandSource() {
+        return (CommandSource) field_145767_a;
     }
-
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
-    }
-
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
-    }
-
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
-        }
-        this.commandBlockLogic.setName(name);
-    }
-
 }

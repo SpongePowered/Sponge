@@ -47,6 +47,7 @@ import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
+import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
@@ -69,6 +70,7 @@ import java.util.UUID;
  */
 @NonnullByDefault
 public final class SpongeBootstrap {
+
     private static final org.slf4j.Logger slf4jLogger = new SLF4JLogger((AbstractLogger) Sponge.getLogger(), Sponge.getLogger().getName());
 
     public static void initializeServices() {
@@ -76,7 +78,9 @@ public final class SpongeBootstrap {
                 new SpongeCommandDisambiguator(Sponge.getGame()));
         if (registerService(CommandService.class, commandService)) {
             commandService.register(Sponge.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
+            commandService.register(Sponge.getPlugin(), SpongeHelpCommand.create(), "help");
         }
+
         registerService(SqlService.class, new SqlServiceImpl());
         if (!registerService(SchedulerService.class, SpongeScheduler.getInstance())) {
             throw new ExceptionInInitializerError("Cannot continue with a Non-Sponge Scheduler!");

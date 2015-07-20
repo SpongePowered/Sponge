@@ -91,7 +91,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         return new PermissionSink(permission);
     }
 
-    private static class AllSink extends MessageSink {
+    public static final MessageSink TO_ALL = new MessageSink() {
         @Override
         public Iterable<CommandSource> getRecipients() {
             // TODO: Non-player subjects?
@@ -100,11 +100,11 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
             ret.add((CommandSource) MinecraftServer.getServer());
             return ret;
         }
-    }
+    };
 
     @Override
     public MessageSink toAll() {
-        return new AllSink();
+        return TO_ALL;
     }
 
     private static class CombinedSink extends MessageSink {

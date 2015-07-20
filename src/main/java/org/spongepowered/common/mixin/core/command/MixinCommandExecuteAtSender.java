@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.command;
 
 import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -35,106 +36,131 @@ import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.source.ProxySource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.command.WrapperCommandSource;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 
 import java.util.List;
 import java.util.Set;
 
-@Mixin(targets = "net/minecraft/command/CommandExecuteAt$1")
+@Mixin(targets = IMixinCommandSender.EXECUTE_COMMAND_SENDER)
 @NonnullByDefault
-public abstract class MixinCommandExecuteAtSender implements CommandSource, ICommandSender {
-    @Shadow(aliases = "val$sender")
-    private ICommandSender field_174802_b;
+public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixinCommandSource, IMixinCommandSender {
+
+    @Shadow(aliases = "val$entity") private net.minecraft.entity.Entity field_174804_a;
+    @Shadow(aliases = "val$sender") private ICommandSender field_174802_b;
 
     @Override
     public void sendMessage(Text... messages) {
-        ((CommandSource) this.field_174802_b).sendMessage(messages);
+        getInitiator().sendMessage(messages);
     }
 
     @Override
     public void sendMessage(Iterable<Text> messages) {
-        ((CommandSource) this.field_174802_b).sendMessage(messages);
+        getInitiator().sendMessage(messages);
     }
 
     @Override
     public String getName() {
-        return ((CommandSource) this.field_174802_b).getIdentifier();
+        return this.field_174804_a.getCommandSenderName();
     }
 
     @Override
     public String getIdentifier() {
-        return ((CommandSource) this.field_174802_b).getIdentifier();
+        return getInitiator().getIdentifier();
     }
 
     @Override
     public Optional<CommandSource> getCommandSource() {
-        return ((CommandSource) this.field_174802_b).getCommandSource();
+        return Optional.of((CommandSource) this);
     }
 
     @Override
     public SubjectCollection getContainingCollection() {
-        return ((CommandSource) this.field_174802_b).getContainingCollection();
+        return getInitiator().getContainingCollection();
     }
 
     @Override
     public SubjectData getSubjectData() {
-        return ((CommandSource) this.field_174802_b).getSubjectData();
+        return getInitiator().getSubjectData();
     }
 
     @Override
     public SubjectData getTransientSubjectData() {
-        return ((CommandSource) this.field_174802_b).getTransientSubjectData();
+        return getInitiator().getTransientSubjectData();
     }
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
-        return ((CommandSource) this.field_174802_b).hasPermission(contexts, permission);
+        return getInitiator().hasPermission(contexts, permission);
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        return ((CommandSource) this.field_174802_b).hasPermission(permission);
+        return getInitiator().hasPermission(permission);
     }
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        return ((CommandSource) this.field_174802_b).getPermissionValue(contexts, permission);
+        return getInitiator().getPermissionValue(contexts, permission);
     }
 
     @Override
     public boolean isChildOf(Subject parent) {
-        return ((CommandSource) this.field_174802_b).isChildOf(parent);
+        return getInitiator().isChildOf(parent);
     }
 
     @Override
     public boolean isChildOf(Set<Context> contexts, Subject parent) {
-        return ((CommandSource) this.field_174802_b).isChildOf(contexts, parent);
+        return getInitiator().isChildOf(contexts, parent);
     }
 
     @Override
     public List<Subject> getParents() {
-        return ((CommandSource) this.field_174802_b).getParents();
+        return getInitiator().getParents();
     }
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
-        return ((CommandSource) this.field_174802_b).getParents(contexts);
+        return getInitiator().getParents(contexts);
     }
 
     @Override
     public void setMessageSink(MessageSink sink) {
-        ((CommandSource) this.field_174802_b).setMessageSink(sink);
+        getInitiator().setMessageSink(sink);
     }
 
     @Override
     public MessageSink getMessageSink() {
-        return ((CommandSource) this.field_174802_b).getMessageSink();
+        return getInitiator().getMessageSink();
     }
 
     @Override
     public Set<Context> getActiveContexts() {
-        return ((CommandSource) this.field_174802_b).getActiveContexts();
+        return getInitiator().getActiveContexts();
+    }
+
+    @Override
+    public CommandSource getInitiator() {
+        return WrapperCommandSource.of(this.field_174802_b);
+    }
+
+    @Override
+    public Entity getEntity() {
+        return (Entity) field_174804_a;
+    }
+
+    @Override
+    public CommandSource asCommandSource() {
+        return this;
+    }
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return (ICommandSender) this;
     }
 
 }

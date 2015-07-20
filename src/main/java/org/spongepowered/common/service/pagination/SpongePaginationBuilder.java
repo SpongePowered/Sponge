@@ -36,6 +36,7 @@ import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.source.ProxySource;
 
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ class SpongePaginationBuilder implements PaginationBuilder {
     private Text title;
     private Text header;
     private Text footer;
+    private int page = 1;
     private String paginationSpacer = "=";
 
     public SpongePaginationBuilder(SpongePaginationService service) {
@@ -85,6 +87,12 @@ class SpongePaginationBuilder implements PaginationBuilder {
     }
 
     @Override
+    public PaginationBuilder page(int page) {
+        this.page = page;
+        return this;
+    }
+
+    @Override
     public PaginationBuilder paddingString(String padding) {
         this.paginationSpacer = padding;
         return this;
@@ -96,8 +104,12 @@ class SpongePaginationBuilder implements PaginationBuilder {
         checkNotNull(source, "source");
         this.service.registerCommandOnce();
 
+        CommandSource realSource = source;
+        while (realSource instanceof ProxySource) {
+            realSource = ((ProxySource)realSource).getInitiator();
+        }
         @SuppressWarnings("unchecked")
-        PaginationCalculator<CommandSource> calculator = (PaginationCalculator) this.service.calculators.get(source.getClass());
+        PaginationCalculator<CommandSource> calculator = (PaginationCalculator) this.service.calculators.get(realSource.getClass());
         if (calculator == null) {
             calculator = this.service.getUnpaginatedCalculator(); // TODO: or like 50 lines?
         }
@@ -125,7 +137,7 @@ class SpongePaginationBuilder implements PaginationBuilder {
 
         this.service.getPaginationState(source, true).put(pagination);
         try {
-            pagination.nextPage();
+            pagination.specificPage(this.page);
         } catch (CommandException e) {
             source.sendMessage(error(e.getText()));
         }

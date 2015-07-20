@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.command;
 
 import com.google.common.base.Optional;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
+import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -38,15 +38,15 @@ import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
@@ -57,17 +57,17 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
- * Mixin to provide a common implementation of subject that refers to the installed permissions service for a subject.
+ * Mixin to provide a common implementation of subject that refers to the
+ * installed permissions service for a subject.
  */
 @NonnullByDefault
-@Mixin(value = {EntityPlayerMP.class, CommandBlockLogic.class, MinecraftServer.class, RConConsoleSource.class, SpongeUser.class},
-        targets = "net/minecraft/tileentity/TileEntitySign$2")
-public abstract class MixinSubject implements CommandSource, ICommandSender, IMixinSubject {
+@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
+        SpongeUser.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+public abstract class MixinSubject implements CommandSource, IMixinCommandSource, IMixinSubject {
 
-    @Nullable
-    private Subject thisSubject;
+    @Nullable private Subject thisSubject;
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
+    @Inject(method = "<init>", at = @At("RETURN") , remap = false)
     public void subjectConstructor(CallbackInfo ci) {
         if (Sponge.isInitialized()) {
             Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
@@ -183,15 +183,5 @@ public abstract class MixinSubject implements CommandSource, ICommandSender, IMi
     public Set<Context> getActiveContexts() {
         Subject subj = internalSubject();
         return subj == null ? Collections.<Context>emptySet() : subj.getActiveContexts();
-    }
-
-    @Override
-    public boolean canCommandSenderUseCommand(int permissionLevel, String commandName) {
-        for (CommandMapping mapping : Sponge.getGame().getCommandDispatcher().getAll(commandName)) {
-            if (mapping.getCallable() instanceof MinecraftCommandWrapper) { // best we can do :/
-                return hasPermission(((MinecraftCommandWrapper) mapping.getCallable()).getCommandPermission());
-            }
-        }
-        return this.permDefault(commandName).asBoolean();
     }
 }

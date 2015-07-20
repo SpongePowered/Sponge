@@ -22,48 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
+package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.EntityMinecartCommandBlock;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.tileentity.TileEntitySign;
+import org.spongepowered.api.block.tileentity.Sign;
+import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.source.SignSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+@Mixin(targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+public abstract class MixinSignCommandSender implements ICommandSender, IMixinCommandSender, SignSource, IMixinCommandSource {
 
-@NonnullByDefault
-@Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
-
-    @Shadow private CommandBlockLogic commandBlockLogic;
+    @Shadow private TileEntitySign field_174797_a;
 
     @Override
     public ICommandSender asICommandSender() {
-        return commandBlockLogic;
+        return this;
     }
 
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
+    @Override
+    public CommandSource asCommandSource() {
+        return this;
+    }
+    
+    @Override
+    public Player getInitiator() {
+        return getEntity();
     }
 
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
+    @Override
+    public Player getEntity() {
+        return (Player) getCommandSenderEntity();
+    }
+    
+    @Override
+    public Sign getSign() {
+        return (Sign) field_174797_a;
     }
 
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
-        }
-        this.commandBlockLogic.setName(name);
-    }
 
 }
