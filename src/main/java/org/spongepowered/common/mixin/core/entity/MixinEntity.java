@@ -375,11 +375,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         // TODO - add flag for entities loaded/unloaded into world
         return !isRemoved();
     }
-    
-    @Override
-    public boolean isSneaking() {
-    	 return this.getFlag(1);
-    }
 
     @Override
     public void remove() {
@@ -404,11 +399,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setTeleportVehicle(net.minecraft.entity.Entity vehicle) {
         this.teleportVehicle = vehicle;
-    }
-    
-    @Override
-    public void setSneaking(boolean sneaking) {
-    	this.setFlag(1, sneaking);
     }
 
     @Override
