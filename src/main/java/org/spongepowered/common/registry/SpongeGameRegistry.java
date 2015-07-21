@@ -112,6 +112,7 @@ import org.spongepowered.api.data.manipulator.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.entity.HealthData;
 import org.spongepowered.api.data.manipulator.entity.InvulnerabilityData;
 import org.spongepowered.api.data.manipulator.entity.SkinData;
+import org.spongepowered.api.data.manipulator.entity.SneakingData;
 import org.spongepowered.api.data.manipulator.entity.TradeOfferData;
 import org.spongepowered.api.data.manipulator.item.AuthorData;
 import org.spongepowered.api.data.manipulator.item.EnchantmentData;
@@ -298,6 +299,7 @@ import org.spongepowered.common.data.manipulator.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.entity.SpongeHealthData;
 import org.spongepowered.common.data.manipulator.entity.SpongeInvulnerabilityData;
 import org.spongepowered.common.data.manipulator.entity.SpongeSkinData;
+import org.spongepowered.common.data.manipulator.entity.SpongeSneakingData;
 import org.spongepowered.common.data.manipulator.item.SpongeAuthorData;
 import org.spongepowered.common.data.manipulator.item.SpongeEnchantmentItemData;
 import org.spongepowered.common.data.manipulator.item.SpongeLoreData;
@@ -325,6 +327,7 @@ import org.spongepowered.common.data.processor.entity.SpongeGameModeDataProcesso
 import org.spongepowered.common.data.processor.entity.SpongeHealthProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeInvulnerabilityProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeSkinDataProcessor;
+import org.spongepowered.common.data.processor.entity.SpongeSneakingDataProcessor;
 import org.spongepowered.common.data.processor.entity.SpongeTradeOfferProcessor;
 import org.spongepowered.common.data.processor.item.SpongeAuthorProcessor;
 import org.spongepowered.common.data.processor.item.SpongeEnchantmentProcessor;
@@ -1736,6 +1739,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.register(FlowerData.class, plantProcessor);
         dataRegistry.registerDataProcessorAndImpl(FlowerData.class, SpongeFlowerData.class, plantProcessor);
         dataRegistry.registerBlockProcessorAndImpl(FlowerData.class, SpongeFlowerData.class, plantProcessor);
+
+        
+        SpongeSneakingDataProcessor sneakingDataProcessor = new SpongeSneakingDataProcessor();
+        service.registerBuilder(SneakingData.class, sneakingDataProcessor);
+        dataRegistry.register(SneakingData.class, sneakingDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(SneakingData.class, SpongeSneakingData.class, sneakingDataProcessor);
 
         SpongeGameModeDataProcessor gameModeProcessor = new SpongeGameModeDataProcessor();
         service.registerBuilder(GameModeData.class, gameModeProcessor);
