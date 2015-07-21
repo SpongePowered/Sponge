@@ -99,11 +99,6 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public SchedulerService getScheduler() {
-        return SpongeScheduler.getInstance();
-    }
-
-    @Override
     public Server getServer() {
         return (Server) MinecraftServer.getServer();
     }
