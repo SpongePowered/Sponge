@@ -95,6 +95,7 @@ import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.DataManipulatorRegistry;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DisplayNameData;
+import org.spongepowered.api.data.manipulator.DyeableData;
 import org.spongepowered.api.data.manipulator.PotionEffectData;
 import org.spongepowered.api.data.manipulator.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.block.DirectionalData;
@@ -280,6 +281,7 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeNoteBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
 import org.spongepowered.common.data.manipulator.SpongeDisplayNameData;
+import org.spongepowered.common.data.manipulator.SpongeDyeableData;
 import org.spongepowered.common.data.manipulator.SpongePotionEffectData;
 import org.spongepowered.common.data.manipulator.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.SpongeTradeOfferData;
@@ -308,6 +310,7 @@ import org.spongepowered.common.data.manipulator.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.SpongeBannerDataProcessor;
 import org.spongepowered.common.data.processor.SpongeBeaconDataProcessor;
 import org.spongepowered.common.data.processor.SpongeDisplayNameDataProcessor;
+import org.spongepowered.common.data.processor.SpongeDyeableDataProcessor;
 import org.spongepowered.common.data.processor.SpongePotionDataProcessor;
 import org.spongepowered.common.data.processor.SpongeRepresentedItemProcessor;
 import org.spongepowered.common.data.processor.block.SpongeDirectionalProcessor;
@@ -1631,6 +1634,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(EnchantmentData.class, enchantmentProcessor);
         dataRegistry.register(EnchantmentData.class, enchantmentProcessor);
         dataRegistry.registerDataProcessorAndImpl(EnchantmentData.class, SpongeEnchantmentItemData.class, enchantmentProcessor);
+
+        SpongeDyeableDataProcessor dyeableDataProcessor = new SpongeDyeableDataProcessor();
+        service.registerBuilder(DyeableData.class, dyeableDataProcessor);
+        dataRegistry.register(DyeableData.class, dyeableDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, dyeableDataProcessor);
 
         SpongeDisplayNameDataProcessor displayNameDataBuilder = new SpongeDisplayNameDataProcessor();
         service.registerBuilder(DisplayNameData.class, displayNameDataBuilder);
