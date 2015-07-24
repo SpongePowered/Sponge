@@ -50,6 +50,7 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -91,6 +92,7 @@ import java.util.UUID;
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
+    @Shadow private String motd;
     @Shadow private static Logger logger;
     @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow private int tickCounter;
@@ -210,7 +212,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Text getMotd() {
-        throw new UnsupportedOperationException();
+        return Texts.legacy().fromUnchecked(this.motd);
     }
 
     @Override
