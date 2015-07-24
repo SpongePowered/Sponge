@@ -121,7 +121,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                 .successCount(successCount)
                 .build();
     }
-    
+
     private boolean tryExecute(CommandHandler handler, ICommandSender mcSender, String[] splitArgs, String arguments) {
         commandErrors.set(noError);
         try {
@@ -181,7 +181,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         } else {
             usage = translation.get(Locale.getDefault());
         }
-        
+
         List<String> parts = new ArrayList<String>(Arrays.asList(usage.split(" ")));
         parts.removeAll(Collections.singleton("/" + command.getCommandName()));
         StringBuilder out = new StringBuilder();
@@ -197,14 +197,19 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (arguments.length() == 0 || !testPermission(source)) {
             return ImmutableList.of();
         }
-        return this.command.addTabCompletionOptions(WrapperICommandSender.of(source), splitArgs(arguments), null);
+        @SuppressWarnings("unchecked")
+        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), splitArgs(arguments), null);
+        if (suggestions == null) {
+            return ImmutableList.of();
+        }
+        return suggestions;
     }
 
     @SuppressWarnings("unchecked")
     public List<String> getNames() {
         return ImmutableList.<String>builder().add(this.command.getCommandName()).addAll(this.command.getCommandAliases()).build();
     }
-    
+
     public static void setError(Throwable error) {
         if (commandErrors.get() == noError) {
             commandErrors.set(error);
