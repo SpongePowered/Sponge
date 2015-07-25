@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common;
 
+import com.google.common.base.Predicate;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.common.command.SpongeHelpCommand;
 
 import net.minecraft.nbt.CompressedStreamTools;
@@ -93,6 +95,13 @@ public final class SpongeBootstrap {
         registerService(ConfigService.class, new SpongeConfigService(Sponge.getGame().getPluginManager()));
         registerService(UserStorage.class, new SpongeUserStorage());
         registerService(GameProfileResolver.class, new SpongeProfileResolver());
+        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new Predicate<PermissionService>() {
+            @Override
+            public boolean apply(PermissionService input) {
+                Sponge.getGame().getServer().getConsole().getContainingCollection();
+                return true;
+            }
+        });
     }
 
     private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {
