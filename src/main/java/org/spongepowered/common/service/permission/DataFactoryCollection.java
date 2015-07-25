@@ -60,10 +60,8 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         checkNotNull(identifier, "identifier");
         SpongeSubject ret = this.subjects.get(identifier);
         if (ret == null) {
-            SpongeSubject newRet = this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory.apply(identifier)));
-            if (newRet != null) {
-                ret = newRet;
-            }
+            ret = new DataFactorySubject(identifier, this.dataFactory.apply(identifier));
+            this.subjects.put(identifier, ret);
         }
         return ret;
     }
