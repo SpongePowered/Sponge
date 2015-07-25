@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -60,6 +61,11 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     @Override
     public Optional<Player> getPlayer() {
         return Optional.fromNullable((Player) MinecraftServer.getServer().getConfigurationManager().getPlayerByUUID(this.profile.getId()));
+    }
+    
+    @Override
+    public Optional<CommandSource> getCommandSource() {
+        return Optional.absent();
     }
 
     @Override
