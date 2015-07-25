@@ -136,11 +136,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public String getName() {
-        return this.user.getName();
-    }
-
-    @Override
     public boolean isOnline() {
         return this.user.isOnline();
     }
@@ -393,7 +388,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final IChatComponent component = SpongeTexts.toComponent(message, getLocale());
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
     }
-    
+
     @Override
     public void playSound(SoundType sound, Vector3d position, double volume) {
         this.playSound(sound, position, volume, 1);
