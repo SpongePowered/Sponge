@@ -228,7 +228,7 @@ public abstract class Element {
 
         if (text.getHoverAction().isPresent()) {
             HoverEvent nmsEvent = SpongeHoverAction.getHandle(text.getHoverAction().get(), locale);
-            currentElement.onHover = nmsEvent.getAction().getCanonicalName() + "('" + nmsEvent.getValue() + "')";
+            currentElement.onHover = nmsEvent.getAction().getCanonicalName() + "('" + TextXmlRepresentation.INSTANCE.to(SpongeTexts.toText(nmsEvent.getValue()), locale) + "')";
         }
 
         if (text.getShiftClickAction().isPresent()) {
@@ -246,7 +246,14 @@ public abstract class Element {
             if (transl instanceof SpongeTranslation) {
                 currentElement = update(fixedRoot, currentElement, new Tr(transl.getId()));
             } else {
-                currentElement.mixedContent.add(transl.get(locale));
+                currentElement = update(fixedRoot, currentElement, new Tr(transl.get(locale)));
+            }
+            for (Object o : ((Text.Translatable) text).getArguments()) {
+                if (o instanceof Text) {
+                    currentElement.mixedContent.add(Element.fromText(((Text) o), locale));
+                } else {
+                    currentElement.mixedContent.add(String.valueOf(o));
+                }
             }
         } else {
             throw new IllegalArgumentException("Text was of type " + text.getClass() + ", which is unsupported by the XML format");
