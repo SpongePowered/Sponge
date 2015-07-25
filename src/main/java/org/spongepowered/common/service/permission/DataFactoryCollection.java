@@ -58,14 +58,10 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
     @Override
     public Subject get(String identifier) {
         checkNotNull(identifier, "identifier");
-        SpongeSubject ret = this.subjects.get(identifier);
-        if (ret == null) {
-            SpongeSubject newRet = this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory.apply(identifier)));
-            if (newRet != null) {
-                ret = newRet;
-            }
+        if (!this.subjects.containsKey(identifier)) {
+            this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory.apply(identifier)));
         }
-        return ret;
+        return this.subjects.get(identifier);
     }
 
     @Override
