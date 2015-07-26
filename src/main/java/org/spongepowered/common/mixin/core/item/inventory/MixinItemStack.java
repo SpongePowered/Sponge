@@ -26,14 +26,20 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.base.Optional;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulator.DisplayNameData;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -105,4 +111,18 @@ public abstract class MixinItemStack implements ItemStack {
                 .set(of("Quantity"), this.getQuantity())
                 .set(of("Data"), container);
     }
+
+    @Override
+    public Text toText() {
+        TextBuilder builder;
+        Optional<DisplayNameData> optName = getData(DisplayNameData.class);
+        if (optName.isPresent()) {
+            builder = optName.get().getDisplayName().builder();
+        } else {
+            builder = Texts.builder(getItem().getTranslation());
+        }
+        builder.onHover(TextActions.showItem(this));
+        return builder.build();
+    }
+
 }
