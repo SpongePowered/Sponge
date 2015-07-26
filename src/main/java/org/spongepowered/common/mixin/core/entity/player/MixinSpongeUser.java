@@ -62,6 +62,11 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     public Optional<Player> getPlayer() {
         return Optional.fromNullable((Player) MinecraftServer.getServer().getConfigurationManager().getPlayerByUUID(this.profile.getId()));
     }
+    
+    @Override
+    public Optional<CommandSource> getCommandSource() {
+        return Optional.absent();
+    }
 
     @Override
     @SuppressWarnings("unchecked")
