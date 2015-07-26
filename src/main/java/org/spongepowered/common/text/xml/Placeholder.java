@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.text.xml;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Tr extends Element {
+public class Placeholder extends Span {
 
     @XmlAttribute(required = true)
     private String key;
 
-    public Tr() {}
+    public Placeholder() {
+    }
 
-    public Tr(String key) {
+    public Placeholder(String key) {
         this.key = key;
     }
 
@@ -51,11 +50,10 @@ public class Tr extends Element {
 
     @Override
     public TextBuilder toText() throws Exception {
-        ImmutableList.Builder<Object> build = ImmutableList.builder();
-        for (Object child : this.mixedContent) {
-            build.add(builderFromObject(child).build());
+        TextBuilder.Placeholder builder = Texts.placeholderBuilder(this.key);
+        if (!this.mixedContent.isEmpty()) {
+            builder.fallback(super.toText().build());
         }
-        TextBuilder builder = Texts.builder(new SpongeTranslation(this.key), build.build().toArray());
         applyTextActions(builder);
         return builder;
     }

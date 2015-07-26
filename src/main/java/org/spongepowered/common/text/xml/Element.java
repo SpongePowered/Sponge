@@ -61,6 +61,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
         Color.class,
         I.class,
         Obfuscated.class,
+        Placeholder.class,
         Strikethrough.class,
         Span.class,
         Tr.class,
@@ -142,38 +143,21 @@ public abstract class Element {
 
     }
 
-    private TextBuilder builderFromString(String input) {
-        return Texts.builder(input.replace('\u000B', ' '));
-    }
-
     public TextBuilder toText() throws Exception {
         TextBuilder builder;
         if (this.mixedContent.size() == 0) {
             builder = Texts.builder();
         } else if (this.mixedContent.size() == 1) { // then we are a thin wrapper around the child
-            Object child = this.mixedContent.get(0);
-            if (child instanceof String) {
-                builder = builderFromString(String.valueOf(child));
-            } else if (child instanceof Element) {
-                builder = ((Element) child).toText();
-            } else {
-                throw new IllegalArgumentException("What is this even? " + child);
-            }
+            builder = builderFromObject(this.mixedContent.get(0));
         } else {
             if (this.mixedContent.get(0) instanceof String) {
-                builder = builderFromString((String) this.mixedContent.get(0));
+                builder = builderFromObject(this.mixedContent.get(0));
                 this.mixedContent.remove(0);
             } else {
                 builder = Texts.builder();
             }
             for (Object child : this.mixedContent) {
-                if (child instanceof String) {
-                    builder.append(builderFromString((String) child).build());
-                } else if (child instanceof Element) {
-                    builder.append(((Element) child).toText().build());
-                } else {
-                    throw new IllegalArgumentException("What is this even? " + child);
-                }
+                builder.append(builderFromObject(child).build());
             }
         }
 
@@ -181,6 +165,16 @@ public abstract class Element {
         applyTextActions(builder);
 
         return builder;
+    }
+
+    protected TextBuilder builderFromObject(Object o) throws Exception {
+        if (o instanceof String) {
+            return Texts.builder(String.valueOf(o).replace('\u000B', ' '));
+        } else if (o instanceof Element) {
+            return ((Element) o).toText();
+        } else {
+            throw new IllegalArgumentException("What is this even? " + o);
+        }
     }
 
     public static Element fromText(Text text, Locale locale) {
@@ -239,7 +233,14 @@ public abstract class Element {
             currentElement.onShiftClick = "insert_text('" + action.getResult() + ')';
         }
 
-        if (text instanceof Text.Literal) {
+        if (text instanceof Text.Placeholder) {
+            Text.Placeholder textPlaceholder = (Text.Placeholder) text;
+            Placeholder placeholder = new Placeholder(textPlaceholder.getKey());
+            if (textPlaceholder.getFallback().isPresent()) {
+                placeholder.mixedContent.add(Element.fromText(textPlaceholder.getFallback().get(), locale));
+            }
+            update(fixedRoot, currentElement, placeholder);
+        } else if (text instanceof Text.Literal) {
             currentElement.mixedContent.add(((Text.Literal) text).getContent());
         } else if (text instanceof Text.Translatable) {
             Translation transl = ((Text.Translatable) text).getTranslation();

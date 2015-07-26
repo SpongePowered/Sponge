@@ -22,41 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.xml;
 
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+package org.spongepowered.common.mixin.api.text;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.google.common.base.Optional;
+import net.minecraft.util.ChatComponentStyle;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.text.ChatComponentPlaceholder;
 
-@XmlRootElement
-public class Tr extends Element {
+import java.util.Locale;
 
-    @XmlAttribute(required = true)
-    private String key;
+@Mixin(value = Text.Placeholder.class, remap = false)
+public class MixinTextPlaceholder extends MixinText {
 
-    public Tr() {}
-
-    public Tr(String key) {
-        this.key = key;
-    }
+    @Shadow protected String key;
+    @Shadow private Optional<Text> fallback;
 
     @Override
-    protected void modifyBuilder(TextBuilder builder) {
-        // TODO: get rid of this
-    }
-
-    @Override
-    public TextBuilder toText() throws Exception {
-        ImmutableList.Builder<Object> build = ImmutableList.builder();
-        for (Object child : this.mixedContent) {
-            build.add(builderFromObject(child).build());
+    protected ChatComponentStyle createComponent(Locale locale) {
+        if (fallback.isPresent()) {
+            return new ChatComponentPlaceholder(this.key, ((IMixinText) fallback.get()).toComponent(locale));
+        } else {
+            return new ChatComponentPlaceholder(this.key);
         }
-        TextBuilder builder = Texts.builder(new SpongeTranslation(this.key), build.build().toArray());
-        applyTextActions(builder);
-        return builder;
     }
+
 }

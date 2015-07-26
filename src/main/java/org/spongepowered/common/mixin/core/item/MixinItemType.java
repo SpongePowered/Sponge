@@ -64,7 +64,7 @@ public abstract class MixinItemType implements ItemType {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getUnlocalizedName());
+        return new SpongeTranslation(getUnlocalizedName() + ".name");
     }
 
     @Override
