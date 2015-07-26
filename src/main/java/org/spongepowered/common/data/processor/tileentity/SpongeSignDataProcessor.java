@@ -96,6 +96,8 @@ public class SpongeSignDataProcessor implements SpongeDataProcessor<SignData> {
                 for (int i = 0; i < 4; i++) {
                     ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(manipulator.getLine(i));
                 }
+                ((TileEntitySign) dataHolder).markDirty();
+                ((TileEntitySign) dataHolder).getWorld().markBlockForUpdate(((TileEntitySign) dataHolder).getPos());
                 builder.result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
             }
