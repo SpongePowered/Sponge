@@ -36,6 +36,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.command.source.ProxySourceTarget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.command.WrapperCommandSource;
@@ -151,6 +152,11 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
     @Override
     public CommandSource getOriginalSource() {
         return WrapperCommandSource.of(this.sender);
+    }
+    
+    @Override
+    public ProxySourceTarget getTarget() {
+        return (ProxySourceTarget) this.entity;
     }
 
     @Override
