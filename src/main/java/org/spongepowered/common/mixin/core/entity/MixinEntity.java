@@ -252,8 +252,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return true;
     }
 
-
-
     @Override
     public void setLocationAndRotation(Location location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         setLocationAndRotation(location, rotation, relativePositions, false);
@@ -286,15 +284,15 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
 
                 if (relativePositions.contains(RelativePositions.PITCH)) {
-                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.Y_ROT);
-                }
-
-                if (relativePositions.contains(RelativePositions.YAW)) {
                     relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.X_ROT);
                 }
 
+                if (relativePositions.contains(RelativePositions.YAW)) {
+                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.Y_ROT);
+                }
+
                 ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                        .getY(), location.getPosition().getZ(), (float) rotation.getX(), (float) rotation.getY(), relativeFlags);
+                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
                 Location resultant = getLocation();
                 Vector3d resultantRotation = getRotation();
@@ -328,8 +326,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return relocated;
     }
 
-
-
     @Override
     public boolean transferToWorld(String worldName, Vector3d position) {
         Optional<WorldProperties> props = Sponge.getSpongeRegistry().getWorldProperties(worldName);
@@ -352,12 +348,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Vector3d getRotation() {
-        return new Vector3d(this.rotationYaw, this.rotationPitch, 0);
+        return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
     }
 
     @Override
     public void setRotation(Vector3d rotation) {
-        shadow$setRotation((float) rotation.getX(), (float) rotation.getY());
+        shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
     }
 
     @Override
