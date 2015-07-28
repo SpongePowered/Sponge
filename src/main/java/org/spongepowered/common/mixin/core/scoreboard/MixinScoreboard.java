@@ -30,10 +30,14 @@ import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.service.profile.GameProfileResolver;
+import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -172,15 +176,10 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         if (shouldEcho()) {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
-                Optional<Player> spongePlayer = Sponge.getGame().getServer().getPlayer(player);
-                if (spongePlayer.isPresent()) {
-                    this.scoreboard.allowRecursion = false;
-                    spongeTeam.addUser(spongePlayer.get());
-                    this.scoreboard.allowRecursion = true;
-                    ci.setReturnValue(true);
-                } else {
-                    // Well, we tried ¯\_(ツ)_/¯
-                }
+                this.scoreboard.allowRecursion = false;
+                spongeTeam.addUser(this.getUser(player));
+                this.scoreboard.allowRecursion = true;
+                ci.setReturnValue(true);
             }
         }
     }
@@ -191,14 +190,10 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
                 Optional<Player> spongePlayer = Sponge.getGame().getServer().getPlayer(name);
-                if (spongePlayer.isPresent()) {
                     this.scoreboard.allowRecursion = false;
-                    spongeTeam.removeUser(spongePlayer.get());
+                    spongeTeam.removeUser(this.getUser(name));
                     this.scoreboard.allowRecursion = true;
                     ci.cancel();
-                } else {
-                    // Well, we tried ¯\_(ツ)_/¯
-                }
             }
         }
     }
@@ -213,6 +208,20 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
                     name));
             this.scoreboard.allowRecursion = true;
             cir.setReturnValue(spongeScore.getScore(objective));
+        }
+    }
+
+    private User getUser(String name) {
+        try {
+            UserStorage storage = Sponge.getGame().getServiceManager().provideUnchecked(UserStorage.class);
+            Optional<User> optUser = storage.get(name);
+            if (!optUser.isPresent()) {
+                GameProfile profile = Sponge.getGame().getServiceManager().provideUnchecked(GameProfileResolver.class).get(name).get();
+                return storage.getOrCreate(profile);
+            }
+            return optUser.get();
+        } catch (Exception e) {
+            throw new RuntimeException("An error ocured while attempting to lookup a user for a scoreboard!", e);
         }
     }
 
