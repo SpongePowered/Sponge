@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.util.gen;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
@@ -41,32 +38,21 @@ import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-/**
- * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
- *
- */
 @NonnullByDefault
-public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
+public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
-    private final ChunkPrimer chunkPrimer;
+    @SuppressWarnings("ConstantConditions")
+    private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
+    private final short[] blocks;
 
-    public ChunkPrimerBuffer(ChunkPrimer chunkPrimer, int chunkX, int chunkZ) {
-        super(getBlockStart(chunkX, chunkZ), SpongeChunkLayout.CHUNK_SIZE);
-        this.chunkPrimer = chunkPrimer;
+    public ShortArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
+        this(new short[size.getX() * size.getY() * size.getZ()], start, size);
     }
 
-    private static Vector3i getBlockStart(int chunkX, int chunkZ) {
-        final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
-        checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
-        return worldCoords.get();
-    }
-
-    @Override
-    public BlockState getBlock(int x, int y, int z) {
-        checkRange(x, y, z);
-        return (BlockState) this.chunkPrimer.getBlockState(x & 0xf, y, z & 0xf);
+    public ShortArrayMutableBlockBuffer(short[] blocks, Vector3i start, Vector3i size) {
+        super(start, size);
+        this.blocks = blocks;
     }
 
     @Override
@@ -87,7 +73,14 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         checkRange(x, y, z);
-        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
+        this.blocks[getIndex(x, y, z)] = (short) Block.BLOCK_STATE_IDS.get(block);
+    }
+
+    @Override
+    public BlockState getBlock(int x, int y, int z) {
+        checkRange(x, y, z);
+        BlockState block = (BlockState) Block.BLOCK_STATE_IDS.getByValue(this.blocks[getIndex(x, y, z)]);
+        return block == null ? AIR : block;
     }
 
     @Override
@@ -116,7 +109,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ShortArrayMutableBlockBuffer(this.chunkPrimer.data.clone(), this.start, this.size);
+                return new ShortArrayMutableBlockBuffer(this.blocks.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -125,6 +118,6 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
 
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new ShortArrayImmutableBlockBuffer(this.chunkPrimer.data, this.start, this.size);
+        return new ShortArrayImmutableBlockBuffer(this.blocks, this.start, this.size);
     }
 }

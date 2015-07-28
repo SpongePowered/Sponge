@@ -23,60 +23,63 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.common.util.gen;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.util.PositionOutOfBoundsException;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 /**
- * Base class for block buffers that are exactly one chunk in size.
+ * Base class for block buffers.
  *
  */
-public abstract class AbstractChunkBuffer implements MutableBlockVolume {
+@NonnullByDefault
+public abstract class AbstractBlockBuffer implements BlockVolume {
 
-    private final int chunkX;
-    private final int chunkZ;
+    protected final Vector3i start;
+    protected final Vector3i size;
+    protected final Vector3i end;
+    private final int yLine;
+    private final int yzSlice;
 
-    private final Vector3i maxBlock;
-    private final Vector3i minBlock;
+    protected AbstractBlockBuffer(Vector3i start, Vector3i size) {
+        this.start = start;
+        this.size = size;
+        this.end = this.start.add(this.size).sub(Vector3i.ONE);
 
-    protected AbstractChunkBuffer(int chunkX, int chunkZ) {
-        this.chunkX = chunkX;
-        this.chunkZ = chunkZ;
-
-        final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
-        checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
-        this.minBlock = worldCoords.get();
-        this.maxBlock = this.minBlock.add(SpongeChunkLayout.CHUNK_SIZE).sub(Vector3i.ONE);
+        this.yLine = size.getY();
+        this.yzSlice = this.yLine * size.getZ();
     }
 
     protected void checkRange(int x, int y, int z) {
-        if ((x >> 4) != this.chunkX || (z >> 4) != this.chunkZ || (y >> 8) != 0) {
-            throw new IndexOutOfBoundsException("Outside chunk: " + new Vector3i(x, y, z)
-                    + " is outside chunk (" + this.chunkX + "," + this.chunkZ
-                    + "), containing blocks " + this.minBlock + " to " + this.maxBlock);
+        if (!VecHelper.inBounds(x, y, z, this.start, this.end)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.start, this.end);
         }
+    }
+
+    protected int getIndex(int x, int y, int z) {
+        return (x - this.start.getX()) * this.yzSlice + (z - this.start.getZ()) * this.yLine + (y - this.start.getY());
     }
 
     @Override
     public Vector3i getBlockMax() {
-        return this.maxBlock;
+        return this.end;
     }
 
     @Override
     public Vector3i getBlockMin() {
-        return this.minBlock;
+        return this.start;
     }
 
     @Override
     public Vector3i getBlockSize() {
-        return SpongeChunkLayout.CHUNK_SIZE;
+        return this.size;
     }
 
     @Override
@@ -86,7 +89,7 @@ public abstract class AbstractChunkBuffer implements MutableBlockVolume {
 
     @Override
     public boolean containsBlock(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, this.minBlock, this.maxBlock);
+        return VecHelper.inBounds(x, y, z, this.start, this.end);
     }
 
     @Override
@@ -95,18 +98,8 @@ public abstract class AbstractChunkBuffer implements MutableBlockVolume {
     }
 
     @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        setBlock(position.getX(), position.getY(), position.getZ(), block);
-    }
-
-    @Override
     public BlockType getBlockType(Vector3i position) {
         return getBlockType(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public void setBlockType(Vector3i position, BlockType type) {
-        setBlockType(position.getX(), position.getY(), position.getZ(), type);
     }
 
     @Override
@@ -115,16 +108,16 @@ public abstract class AbstractChunkBuffer implements MutableBlockVolume {
     }
 
     @Override
-    public void setBlockType(int x, int y, int z, BlockType type) {
-        setBlock(x, y, z, type.getDefaultState());
+    public MutableBlockVolume getBlockCopy() {
+        return getBlockCopy(StorageType.STANDARD);
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("min", this.getBlockMin())
-                .add("max", this.getBlockMax())
-                .toString();
+            .add("min", this.getBlockMin())
+            .add("max", this.getBlockMax())
+            .toString();
     }
 
 }
