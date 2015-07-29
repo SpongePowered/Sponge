@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListOps;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -64,12 +65,14 @@ public class SpongePermissionService implements PermissionService {
         }
     };
 
+    private final Game game;
     private final Map<String, PermissionDescription> descriptionMap = new LinkedHashMap<String, PermissionDescription>();
     private Collection<PermissionDescription> descriptions;
     private final ConcurrentMap<String, SubjectCollection> subjects = new ConcurrentHashMap<String, SubjectCollection>();
     private final MemorySubjectData defaultData;
 
-    public SpongePermissionService() {
+    public SpongePermissionService(Game game) {
+        this.game = game;
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
@@ -158,8 +161,14 @@ public class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public Optional<Builder> newDescriptionBuilder(PluginContainer plugin) {
-        return Optional.of((Builder) new SpongePermissionDescription.Builder(this, checkNotNull(plugin, "plugin")));
+    public Optional<Builder> newDescriptionBuilder(Object instance) {
+        Optional<PluginContainer> container = this.game.getPluginManager().fromInstance(checkNotNull(instance, "instance"));
+        if (!container.isPresent()) {
+            throw new IllegalArgumentException("The provided plugin object does not have an associated plugin container "
+                    + "(in other words, is 'plugin' actually your plugin object?)");
+        }
+
+        return Optional.<Builder>of(new SpongePermissionDescription.Builder(this, container.get()));
     }
 
     public void addDescription(PermissionDescription permissionDescription) {
