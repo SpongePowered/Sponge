@@ -61,6 +61,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
         Color.class,
         I.class,
         Obfuscated.class,
+        Placeholder.class,
         Strikethrough.class,
         Span.class,
         Tr.class,
