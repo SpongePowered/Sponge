@@ -33,11 +33,13 @@ import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
@@ -72,6 +74,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
+import org.spongepowered.common.interfaces.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -80,6 +83,10 @@ import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
+
+    Long lastPacket;
+    // Store the last block right-clicked
+    private Item lastItem;
 
     @Shadow private static Logger logger;
 
@@ -252,6 +259,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return input;
     }
 
+    @SuppressWarnings("rawtypes")
     @Inject(method = "setPlayerLocation(DDDFFLjava/util/Set;)V", at = @At(value = "RETURN"))
     public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, Set relativeSet, CallbackInfo ci) {
         this.justTeleported = true;
@@ -313,6 +321,26 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                     this.lastMoveLocation = event.getNewLocation();
                 }
             }
+        }
+    }
+
+    @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)
+    public void injectBlockPlacement(C08PacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
+        // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
+        // aimed at a block. We shouldn't need to get the second packet if the data is handled
+        // but we cannot know what the client will do, so we might still get it
+        //
+        // If the time between packets is small enough, and the 'signature' similar, we discard the
+        // second one. This sadly has to remain until Mojang makes their packets saner. :(
+        //  -- Grum
+        if (packetIn.getPlacedBlockDirection() == 255) {
+            if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
+                this.lastPacket = null;
+                ci.cancel();
+            }
+        } else {
+            this.lastItem = packetIn.getStack() == null ? null : packetIn.getStack().getItem();
+            this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
         }
     }
 
