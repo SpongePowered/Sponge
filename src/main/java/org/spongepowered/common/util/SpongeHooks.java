@@ -42,6 +42,7 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.configuration.SpongeConfig.WorldConfig;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 
@@ -284,7 +285,7 @@ public class SpongeHooks {
     }
 
     public static SpongeConfig<?> getActiveConfig(World world) {
-        SpongeConfig<?> config = ((IMixinWorld) world).getWorldConfig();
+        SpongeConfig<WorldConfig> config = ((IMixinWorld) world).getWorldConfig();
         if (config.getConfig().isConfigEnabled()) {
             return config;
         } else if (((IMixinWorldProvider) world.provider).getDimensionConfig() != null && ((IMixinWorldProvider) world.provider)

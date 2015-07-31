@@ -256,26 +256,47 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     public static class DimensionConfig extends ConfigBase {
 
+        @Setting(
+                value = CONFIG_ENABLED,
+                comment = "Enabling config will override override Global.")
+        protected boolean configEnabled = true;
+
         public DimensionConfig() {
             this.configEnabled = false;
+        }
+
+        public boolean isConfigEnabled() {
+            return this.configEnabled;
+        }
+
+        public void setConfigEnabled(boolean configEnabled) {
+            this.configEnabled = configEnabled;
         }
     }
 
     public static class WorldConfig extends ConfigBase {
 
+        @Setting(
+                value = CONFIG_ENABLED,
+                comment = "Enabling config will override Dimension and Global.")
+        protected boolean configEnabled = true;
+
         public WorldConfig() {
             this.configEnabled = false;
+        }
+
+        public boolean isConfigEnabled() {
+            return this.configEnabled;
+        }
+
+        public void setConfigEnabled(boolean configEnabled) {
+            this.configEnabled = configEnabled;
         }
     }
 
     @SuppressWarnings("UnusedDeclaration")
     public static class ConfigBase {
 
-        @Setting(
-                value = CONFIG_ENABLED,
-                comment = "Controls whether or not this config is enabled.\n"
-                        + "Note: If enabled, World configs override Dimension and Global, Dimension configs override Global.")
-        protected boolean configEnabled = true;
         @Setting
         private DebugCategory debug = new DebugCategory();
         @Setting
@@ -288,14 +309,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private LoggingCategory logging = new LoggingCategory();
         @Setting
         private WorldCategory world = new WorldCategory();
-
-        public boolean isConfigEnabled() {
-            return this.configEnabled;
-        }
-
-        public void setConfigEnabled(boolean configEnabled) {
-            this.configEnabled = configEnabled;
-        }
 
         public DebugCategory getDebug() {
             return this.debug;
