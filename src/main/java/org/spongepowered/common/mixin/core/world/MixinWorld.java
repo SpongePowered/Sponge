@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.builder;
-
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -198,11 +197,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
             CallbackInfo ci) {
         if (!client) {
             String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
-            this.worldConfig = new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD,
-                    new File(Sponge.getConfigDirectory() + File.separator + "worlds" + File.separator + providerName + File.separator
-                            + (providerIn.getDimensionId() == 0 ? "DIM0" :
-                                    Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
-                            , "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
+            this.worldConfig =
+                    new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD,
+                            new File(Sponge.getModConfigDirectory() + File.separator + "worlds" + File.separator
+                                    + providerName + File.separator
+                                    + (providerIn.getDimensionId() == 0 ? "DIM0" :
+                                            Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
+                                    , "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
 
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
@@ -619,7 +620,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.setWorldGenerator(newGenerator);
     }
 
-
     @Override
     public ImmutableList<Populator> getPopulators() {
         if (this.populators == null) {
@@ -673,7 +673,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.absent();
     }
 
-
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
         Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
@@ -693,8 +693,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return blockUtilOptional.isPresent() && blockUtilOptional.get().remove((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z));
     }
 
-
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
         Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
@@ -774,7 +773,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         // Replace generator populator with possibly modified one
         ((ChunkProviderServer) this.getChunkProvider()).serverChunkGenerator =
-            CustomChunkProviderGenerate.of(thisWorld, biomeGenerator, generator.getBaseGeneratorPopulator(), this.generatorPopulators);
+                CustomChunkProviderGenerate.of(thisWorld, biomeGenerator, generator.getBaseGeneratorPopulator(), this.generatorPopulators);
     }
 
     @Override
@@ -822,7 +821,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @SuppressWarnings("unchecked")
     private List<Player> getPlayers() {
-        return (List<Player>) ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, Predicates.alwaysTrue());
+        return ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, Predicates.alwaysTrue());
     }
 
     @Override
