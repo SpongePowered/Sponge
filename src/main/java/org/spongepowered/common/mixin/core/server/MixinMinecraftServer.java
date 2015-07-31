@@ -306,10 +306,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 worldsavehandler =
                         new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory() :
                                 new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
+                if (dim == 0) {
+                    worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldFolder).get();
+                } else {
+                    worldInfo = worldsavehandler.loadWorldInfo();
+                }
             } else {
                 worldsavehandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
+                worldInfo = worldsavehandler.loadWorldInfo();
             }
-            worldInfo = worldsavehandler.loadWorldInfo();
 
             if (worldInfo == null) {
                 newWorldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
