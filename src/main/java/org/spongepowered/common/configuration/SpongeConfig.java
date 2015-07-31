@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.configuration;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
@@ -32,13 +38,19 @@ import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
+import org.spongepowered.common.util.IpSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("unused")
 public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
@@ -142,7 +154,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
 
             reload();
-            this.loader.save(this.root);
+            save();
         } catch (Throwable t) {
             LogManager.getLogger().error(ExceptionUtils.getStackTrace(t));
         }
@@ -166,6 +178,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public void reload() {
         try {
             this.root = this.loader.load(ConfigurationOptions.defaults()
+                    .setSerializers(
+                            TypeSerializers.getDefaultSerializers().newChild().registerType(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer()))
                     .setHeader(HEADER));
             this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
         } catch (IOException e) {
@@ -210,6 +224,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = "modules")
         private ModuleCategory mixins = new ModuleCategory();
 
+        @Setting("ip-sets")
+        private Map<String, List<IpSet>> ipSets = new HashMap<String, List<IpSet>>();
+
         public SqlCategory getSql() {
             return this.sql;
         }
@@ -220,6 +237,20 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public ModuleCategory getModules() {
             return this.mixins;
+        }
+
+        public Map<String, Predicate<InetAddress>> getIpSets() {
+            return ImmutableMap.copyOf(Maps.transformValues(ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
+                @Nullable
+                @Override
+                public Predicate<InetAddress> apply(List<IpSet> input) {
+                    return Predicates.and(input);
+                }
+            }));
+        }
+
+        public Predicate<InetAddress> getIpSet(String name) {
+            return ipSets.containsKey(name) ? Predicates.and(ipSets.get(name)) : null;
         }
     }
 
