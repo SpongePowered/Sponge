@@ -26,10 +26,11 @@ package org.spongepowered.common.interfaces.text;
 
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 
 import java.util.Iterator;
 
-public interface IMixinChatComponent extends IChatComponent {
+public interface IMixinChatComponent extends IChatComponent, TextRepresentable {
 
     Iterator<IChatComponent> childrenIterator();
 
@@ -41,6 +42,7 @@ public interface IMixinChatComponent extends IChatComponent {
 
     String toLegacy(char code);
 
+    @Override
     Text toText();
 
 }
