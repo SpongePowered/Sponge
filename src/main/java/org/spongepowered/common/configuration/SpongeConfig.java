@@ -258,7 +258,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         @Setting(
                 value = CONFIG_ENABLED,
-                comment = "Enabling config will override override Global.")
+                comment = "Enabling config will override Global.")
         protected boolean configEnabled = true;
 
         public DimensionConfig() {
