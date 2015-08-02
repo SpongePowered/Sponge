@@ -127,6 +127,10 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     // and a fish being caught. There's no good way to do this with an injection.
     @Overwrite
     public int handleHookRetraction() {
+        if (this.worldObj.isRemote) {
+            return 0;
+        }
+
         ItemStack itemStack = null;
         int exp = 0;
         if (this.ticksCatchable > 0) {
