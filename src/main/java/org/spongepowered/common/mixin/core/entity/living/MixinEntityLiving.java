@@ -94,19 +94,24 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
-        final EntityLeashEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Player)playerIn);
-        Sponge.getGame().getEventManager().post(event);
-        if(event.isCancelled()) {
-            ci.cancel();
+        if (!playerIn.worldObj.isRemote) {
+            final EntityLeashEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Player)playerIn);
+            Sponge.getGame().getEventManager().post(event);
+            if(event.isCancelled()) {
+                ci.cancel();
+            }
         }
     }
 
     @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
-        final EntityUnleashEvent event = SpongeEventFactory.createEntityUnleash(Sponge.getGame(), this, (Entity)getLeashedToEntity());
-        Sponge.getGame().getEventManager().post(event);
-        if(event.isCancelled()) {
-            ci.cancel();
+        net.minecraft.entity.Entity entity = getLeashedToEntity();
+        if (!entity.worldObj.isRemote) {
+            final EntityUnleashEvent event = SpongeEventFactory.createEntityUnleash(Sponge.getGame(), this, (Entity)entity);
+            Sponge.getGame().getEventManager().post(event);
+            if(event.isCancelled()) {
+                ci.cancel();
+            }
         }
     }
 
