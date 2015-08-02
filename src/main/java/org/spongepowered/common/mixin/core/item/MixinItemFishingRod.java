@@ -54,10 +54,12 @@ public abstract class MixinItemFishingRod extends Item {
             player.fishEntity.handleHookRetraction();
         } else {
             EntityFishHook fishHook = new EntityFishHook(world, player);
-            if (!Sponge.getGame().getEventManager()
+            if (world.isRemote || !Sponge.getGame().getEventManager()
                     .post(SpongeEventFactory.createPlayerCastFishingLineEvent(Sponge.getGame(), (Player) player, (FishHook) fishHook))) {
                 world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
-                world.spawnEntityInWorld(fishHook);
+                if (!world.isRemote) {
+                    world.spawnEntityInWorld(fishHook);
+                }
 
                 player.swingItem();
                 player.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);

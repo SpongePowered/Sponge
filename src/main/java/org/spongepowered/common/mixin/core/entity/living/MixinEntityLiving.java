@@ -34,7 +34,6 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.EntityLeashEvent;
 import org.spongepowered.api.event.entity.EntityUnleashEvent;
@@ -94,7 +93,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
-        final EntityLeashEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Player)playerIn);
+        final EntityLeashEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Entity)playerIn);
         Sponge.getGame().getEventManager().post(event);
         if(event.isCancelled()) {
             ci.cancel();
