@@ -255,7 +255,7 @@ public class CommandSponge {
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         final Optional<String> key = args.getOne("key");
                         final Optional<String> value = args.getOne("value");
-                        if (config.getSetting(key.get()).isVirtual()) {
+                        if (config.getSetting(key.get()) == null) {
                             throw new CommandException(Texts.of("Key ", Texts.builder(key.get()).color(TextColors.GREEN).build(), " is not "
                                     + "valid"));
                         }
