@@ -43,9 +43,17 @@ import java.util.UUID;
 public abstract class MixinMinecraft {
 
     @Inject(method = "launchIntegratedServer", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/integrated/IntegratedServer;startServerThread()V",
+            shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
+    public void onlaunchIntegratedServerBeforeStart(String folderName, String worldName, WorldSettings worldSettingsIn, CallbackInfo ci,
+            ISaveHandler isavehandler, WorldInfo worldInfo) {
+        Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+    }
+
+    @Inject(method = "launchIntegratedServer", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/storage/ISaveHandler;saveWorldInfo(Lnet/minecraft/world/storage/WorldInfo;)V",
             shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onlaunchIntegratedServerAfterTagSet(String folderName, String worldName, WorldSettings worldSettingsIn, CallbackInfo ci,
+    public void onlaunchIntegratedServerAfterSaveWorldInfo(String folderName, String worldName, WorldSettings worldSettingsIn, CallbackInfo ci,
             ISaveHandler isavehandler, WorldInfo worldInfo) {
         // initialize overworld properties
         UUID uuid = UUID.randomUUID();
@@ -53,6 +61,5 @@ public abstract class MixinMinecraft {
         ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
         ((WorldProperties) worldInfo).setLoadOnStartup(true);
         ((WorldProperties) worldInfo).setEnabled(true);
-        Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
     }
 }
