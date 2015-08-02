@@ -38,7 +38,6 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.player.fishing.PlayerHookedEntityEvent;
 import org.spongepowered.api.event.entity.player.fishing.PlayerRetractFishingLineEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -103,14 +102,15 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Redirect(method = "onUpdate()V", at =
             @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
         )
-    public boolean onAttackEntityFrom(Entity this$0, DamageSource damageSource, float damage) {
-        PlayerHookedEntityEvent event = SpongeEventFactory.createPlayerHookedEntityEvent(Sponge.getGame(), (Player) this.angler, this,
-                (org.spongepowered.api.entity.Entity) this$0);
-        if (!Sponge.getGame().getEventManager().post(event)) {
+    public boolean onAttackEntityFrom(Entity entity, DamageSource damageSource, float damage) {
+        if (entity.worldObj.isRemote
+                || !Sponge.getGame().getEventManager()
+                        .post(SpongeEventFactory.createPlayerHookedEntityEvent(Sponge.getGame(), (Player) this.angler, this,
+                                (org.spongepowered.api.entity.Entity) entity))) {
             if (this.getShooter() instanceof Entity) {
                 damageSource = DamageHandler.damage(this, (Entity) this.getShooter());
             }
-            return this$0.attackEntityFrom(damageSource, (float) this.getDamage());
+            return entity.attackEntityFrom(damageSource, (float) this.getDamage());
         }
         return false;
     }
