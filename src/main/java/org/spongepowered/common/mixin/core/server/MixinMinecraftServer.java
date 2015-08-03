@@ -33,6 +33,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.crash.CrashReport;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -160,6 +161,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
+    @Shadow public abstract CrashReport addServerInfoToCrashReport(CrashReport report);
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -1070,4 +1072,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         StaticMixinHelper.lastAnimationPacketTick = 0;
     }
+
+    @Override
+    public void fillCrashReport(org.spongepowered.api.service.crash.CrashReport report) {
+        this.addServerInfoToCrashReport((CrashReport) report);
+    }
+
 }

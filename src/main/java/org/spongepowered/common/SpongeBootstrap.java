@@ -29,6 +29,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.api.service.crash.CrashReportService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.rcon.RconService;
@@ -39,6 +40,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.command.SpongeCommand;
 import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.service.ban.SpongeBanService;
+import org.spongepowered.common.service.crash.SpongeCrashReportService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
 import org.spongepowered.common.service.sql.SqlServiceImpl;
@@ -61,6 +63,7 @@ public final class SpongeBootstrap {
         registerService(UserStorageService.class, new SpongeUserStorageService());
         registerService(BanService.class, new SpongeBanService());
         registerService(WhitelistService.class, new SpongeWhitelistService());
+        registerService(CrashReportService.class, new SpongeCrashReportService());
         SpongeInternalListeners.getInstance().registerServiceCallback(PermissionService.class, input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
     }
 

@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -86,6 +87,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.crash.CrashReport;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
@@ -219,6 +221,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract CrashReportCategory addWorldInfoToCrashReport(net.minecraft.crash.CrashReport report);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -1034,4 +1037,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void setActiveConfig(SpongeConfig<?> config) {
         this.activeConfig = config;
     }
+
+    @Override
+    public void fillCrashReport(CrashReport report) {
+        this.addWorldInfoToCrashReport((net.minecraft.crash.CrashReport) report);
+    }
+
 }

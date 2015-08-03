@@ -156,6 +156,8 @@
         "command.MixinPlayerSelector",
         "command.MixinPlayerSelectorScore",
         "command.server.MixinCommandSummon",
+        "crash.MixinCrashReport",
+        "crash.MixinCrashReportCategory",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAgeable",
