@@ -215,7 +215,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     public static class GlobalConfig extends ConfigBase {
 
-        @Setting
+        @Setting(comment = "Configuration options related to the Sql service, including connection aliases etc")
         private SqlCategory sql = new SqlCategory();
 
         @Setting
@@ -337,7 +337,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     @ConfigSerializable
     public static class SqlCategory extends Category {
-        @Setting
+        @Setting(comment = "Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
         private Map<String, String> aliases = new HashMap<String, String>();
 
         public Map<String, String> getAliases() {
