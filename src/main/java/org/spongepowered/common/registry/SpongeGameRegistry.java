@@ -183,6 +183,7 @@ import org.spongepowered.api.entity.EntityInteractionType;
 import org.spongepowered.api.entity.EntityInteractionTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.entity.player.gamemode.GameModes;
 import org.spongepowered.api.item.Enchantment;
@@ -250,6 +251,7 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.gen.PopulatorFactory;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -344,6 +346,7 @@ import org.spongepowered.common.entity.SpongeEntityInteractionType;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
@@ -2037,6 +2040,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public PopulatorFactory getPopulatorFactory() {
         throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public Transform createTransform(Extent extent) {
+        return new SpongeTransform(extent, Vector3d.ZERO);
     }
 
     public void preInit() {
