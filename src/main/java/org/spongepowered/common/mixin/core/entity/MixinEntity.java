@@ -40,6 +40,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.interfaces.IMixinEntity;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.registry.SpongeGameRegistry;
@@ -324,6 +326,28 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         return relocated;
+    }
+
+    @Override
+    public Vector3d getScale() {
+        return Vector3d.ONE;
+    }
+
+    @Override
+    public void setScale(Vector3d scale) {
+        // do nothing, Minecraft doesn't properly support this yet
+    }
+
+    @Override
+    public Transform getTransform() {
+        return new SpongeTransform(getWorld(), new Vector3d(this.posX, this.posY, this.posZ), getRotation(), getScale());
+    }
+
+    @Override
+    public void setTransform(Transform transform) {
+        setLocation(transform.getLocation());
+        setRotation(transform.getRotation());
+        setScale(transform.getScale());
     }
 
     @Override
