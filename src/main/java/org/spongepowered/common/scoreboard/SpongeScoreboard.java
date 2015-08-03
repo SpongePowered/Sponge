@@ -207,10 +207,17 @@ public class SpongeScoreboard implements Scoreboard {
     public void removeTeam(Team team) {
         this.removeTeamInternal(team);
         this.teams.remove(team.getName());
+
+        Set<User> keysToRemove = Sets.newHashSet();
+
         for (Map.Entry<User, Team> userTeam: this.userTeams.entrySet()) {
             if (team.equals(userTeam.getValue())) {
-                this.userTeams.remove(userTeam.getKey());
+                keysToRemove.add(userTeam.getKey());
             }
+        }
+
+        for (User user: keysToRemove) {
+            this.userTeams.remove(user);
         }
     }
 
