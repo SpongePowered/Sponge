@@ -160,7 +160,6 @@
         "item.inventory.MixinItemStack",
         "item.merchant.MixinMerchantRecipe",
         "network.MixinNetHandlerPlayServer",
-        "network.packet.MixinC08PacketPlayerBlockPlacement",
         "network.packet.MixinS3BPacketScoreboardObjective",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
