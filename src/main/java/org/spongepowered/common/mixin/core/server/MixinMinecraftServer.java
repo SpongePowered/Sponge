@@ -140,6 +140,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void clearCurrentTask();
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
+    @Shadow public abstract boolean getAllowNether();
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -300,8 +301,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.convertMapIfNeeded(overworldFolder);
         this.setUserMessage("menu.loadingLevel");
 
-        List<Integer> idList = new LinkedList<>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
-        idList.remove(Integer.valueOf(0));
+        List<Integer> idList = new LinkedList<>();
+        if (getAllowNether()) {
+            idList.addAll(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
+            idList.remove(Integer.valueOf(0));
+        }
         idList.add(0, 0); // load overworld first
         for (int dim : idList) {
             WorldProvider provider = WorldProvider.getProviderForDimension(dim);
@@ -471,6 +475,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (optExisting.isPresent()) {
             return optExisting;
         }
+        
+        if (!getAllowNether() && !worldName.equals(getFolderName())) {
+            SpongeImpl.getLogger().error("Unable to load world " + worldName + ". Multiworld is disabled via allow-nether.");
+            return Optional.empty();
+        }
 
         File file = new File(getFolderName(), worldName);
 
@@ -540,6 +549,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         final Optional<World> optExisting = getWorld(worldName);
         if (optExisting.isPresent()) {
             return Optional.of(optExisting.get().getProperties());
+        }
+        
+        if (!getAllowNether()) {
+            SpongeImpl.getLogger().error("Unable to create world " + worldName + ". Multiworld is disabled via allow-nether.");
+            return Optional.empty();
         }
 
         int dim;
