@@ -45,7 +45,11 @@ public class SpongeConfigRoot implements ConfigRoot {
 
     @Override
     public File getConfigFile() {
-        return new File(this.baseDir, this.pluginName + ".conf");
+        File configFile = new File(this.baseDir, this.pluginName + ".conf");
+        if (configFile.getParentFile().isDirectory()) {
+            configFile.getParentFile().mkdirs();
+        }
+        return configFile;
     }
 
     @Override
