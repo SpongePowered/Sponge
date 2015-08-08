@@ -380,7 +380,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public void setRotation(Vector3d rotation) {
-        shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
+        if (((Entity) this) instanceof EntityPlayerMP) {
+            // Force an update, this also set the rotation in this entity
+            ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
+                getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(RelativePositions.class));
+        } else {
+            // Let the entity tracker do its job, this just updates the variables
+            shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
+        }
     }
 
     @Override
