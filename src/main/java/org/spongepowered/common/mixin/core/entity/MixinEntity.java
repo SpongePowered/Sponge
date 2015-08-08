@@ -146,9 +146,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return (World) this.worldObj;
     }
 
+    public Vector3d getPosition() {
+        return new Vector3d(this.posX, this.posY, this.posZ);
+    }
+
     @Override
     public Location getLocation() {
-        return new Location((Extent) this.worldObj, new Vector3d(this.posX, this.posY, this.posZ));
+        return new Location((Extent) this.worldObj, getPosition());
     }
 
     @Override
@@ -226,8 +230,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
-                        .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
-                                thisEntity.rotationYaw, thisEntity.rotationPitch);
+                    .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
+                        thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
@@ -264,13 +268,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
-            //This is just a normal teleport that happens to set both.
+            // This is just a normal teleport that happens to set both.
             relocated = setLocation(location, forced);
             setRotation(rotation);
         } else {
-            Entity spongeEntity = this;
-            if (spongeEntity instanceof EntityPlayerMP) {
-                //Players use different logic, as they support real relative movement.
+            if (((Entity) this) instanceof EntityPlayerMP) {
+                // Players use different logic, as they support real relative movement.
                 EnumSet relativeFlags = EnumSet.noneOf(S08PacketPlayerPosLook.EnumFlags.class);
 
                 if (relativePositions.contains(RelativePositions.X)) {
@@ -294,33 +297,33 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
 
                 ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
+                    .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
-                Location resultant = getLocation();
+                Location resultantLocation = getLocation();
                 Vector3d resultantRotation = getRotation();
 
                 if (relativePositions.contains(RelativePositions.X)) {
-                    resultant.add(location.getPosition().getX(), 0, 0);
+                    resultantLocation = resultantLocation.add(location.getPosition().getX(), 0, 0);
                 }
 
                 if (relativePositions.contains(RelativePositions.Y)) {
-                    resultant.add(0, location.getPosition().getY(), 0);
+                    resultantLocation = resultantLocation.add(0, location.getPosition().getY(), 0);
                 }
 
                 if (relativePositions.contains(RelativePositions.Z)) {
-                    resultant.add(0, 0, location.getPosition().getZ());
+                    resultantLocation = resultantLocation.add(0, 0, location.getPosition().getZ());
                 }
 
                 if (relativePositions.contains(RelativePositions.PITCH)) {
-                    resultantRotation.add(rotation.getX(), 0, 0);
+                    resultantRotation = resultantRotation.add(rotation.getX(), 0, 0);
                 }
 
                 if (relativePositions.contains(RelativePositions.YAW)) {
-                    resultantRotation.add(0, rotation.getY(), 0);
+                    resultantRotation = resultantRotation.add(0, rotation.getY(), 0);
                 }
 
-                //From here just a normal teleport is needed.
-                relocated = setLocation(resultant, forced);
+                // From here just a normal teleport is needed.
+                relocated = setLocation(resultantLocation, forced);
                 setRotation(resultantRotation);
             }
         }
@@ -340,7 +343,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Transform getTransform() {
-        return new SpongeTransform(getWorld(), new Vector3d(this.posX, this.posY, this.posZ), getRotation(), getScale());
+        return new SpongeTransform(getWorld(), getPosition(), getRotation(), getScale());
     }
 
     @Override
@@ -515,18 +518,18 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 // Send bogus dimension change for same worlds on Vanilla client
                 if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
                     entityplayermp1.playerNetServerHandler.sendPacket(
-                            new S07PacketRespawn(((clientDimension + 2) % 3) - 1, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                                    entityplayermp1.theItemInWorldManager.getGameType()));
+                        new S07PacketRespawn(((clientDimension + 2) % 3) - 1, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                            entityplayermp1.theItemInWorldManager.getGameType()));
                 }
             }
 
             entityplayermp1.playerNetServerHandler.sendPacket(
-                    new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.theItemInWorldManager.getGameType()));
+                new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                    entityplayermp1.theItemInWorldManager.getGameType()));
             entity.setWorld(toWorld);
             entity.isDead = false;
             entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
-                    entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
+                entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
             entityplayermp1.setSneaking(false);
             mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
             toWorld.getPlayerManager().addPlayer(entityplayermp1);
