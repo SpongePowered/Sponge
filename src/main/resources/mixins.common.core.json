@@ -193,6 +193,7 @@
         "text.MixinHoverEvent",
         "world.MixinAnvilSaveHandler",
         "world.MixinChunk",
+        "world.MixinExplosion",
         "world.MixinNextTickListEntry",
         "world.MixinWorld",
         "world.MixinWorldBorder",

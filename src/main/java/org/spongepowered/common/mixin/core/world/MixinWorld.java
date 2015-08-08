@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.DataTransactionBuilder.builder;
+
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -96,6 +97,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
+import org.spongepowered.api.world.Explosion;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
@@ -191,6 +193,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract int getRedstonePower(BlockPos pos, EnumFacing facing);
     @Shadow public abstract int getStrongPower(BlockPos pos, EnumFacing direction);
     @Shadow public abstract int isBlockIndirectlyGettingPowered(BlockPos pos);
+    @Shadow public abstract net.minecraft.world.Explosion newExplosion(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
@@ -952,6 +955,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Map<String, String> getGameRules() {
         return this.getProperties().getGameRules();
+    }
+
+    @Override
+    public void triggerExplosion(Explosion explosion) {
+        checkNotNull(explosion, "explosion");
+        checkNotNull(explosion.getOrigin(), "origin");
+
+        newExplosion((net.minecraft.entity.Entity) explosion.getSourceEntity().orNull(), explosion
+                .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
+                explosion.shouldBreakBlocks());
     }
 
 }

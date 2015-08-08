@@ -244,6 +244,7 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.ExplosionBuilder;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.WorldBuilder;
@@ -371,6 +372,7 @@ import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.weather.SpongeWeather;
 import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldBuilder;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
@@ -738,6 +740,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public WorldBuilder getWorldBuilder() {
         return new SpongeWorldBuilder();
+    }
+
+    @Override
+    public ExplosionBuilder getExplosionBuilder() {
+        return new SpongeExplosionBuilder();
     }
 
     @Override
