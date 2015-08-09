@@ -60,6 +60,7 @@ import org.spongepowered.common.service.rcon.MinecraftRconService;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 import org.spongepowered.common.service.sql.SqlServiceImpl;
 import org.spongepowered.common.service.user.SpongeUserStorage;
+import org.spongepowered.common.text.action.SpongeCallbackHolder;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 
@@ -81,6 +82,7 @@ public final class SpongeBootstrap {
         if (registerService(CommandService.class, commandService)) {
             commandService.register(Sponge.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
             commandService.register(Sponge.getPlugin(), SpongeHelpCommand.create(), "help");
+            commandService.register(Sponge.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
         }
 
         registerService(SqlService.class, new SqlServiceImpl());

@@ -22,34 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.server.network;
 
-import com.mojang.authlib.properties.Property;
-import org.spongepowered.api.MinecraftVersion;
+import net.minecraft.server.network.NetHandlerLoginServer;
+import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.UUID;
+@Mixin(targets = "net/minecraft/server/network/NetHandlerLoginServer$2")
+public class MixinNetHandlerLoginServerAnonThread extends Thread {
 
-public interface IMixinNetworkManager {
+    @Shadow(aliases = "this$0")
+    private NetHandlerLoginServer field_180221_a;
 
-    InetSocketAddress getAddress();
+    private IMixinNetHandlerLoginServer outerRef = (IMixinNetHandlerLoginServer) this.field_180221_a;
 
-    InetSocketAddress getVirtualHost();
+    @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
+            remap = false, cancellable = true)
+    public void fireAuthEvent(CallbackInfo ci) {
+        if (this.outerRef.fireAuthEvent()) {
+            ci.cancel();
+        }
+    }
 
-    void setVirtualHost(String host, int port);
-
-    MinecraftVersion getVersion();
-
-    void setVersion(int version);
-
-    void setRemoteAddress(SocketAddress socketAddress);
-
-    UUID getSpoofedUUID();
-
-    void setSpoofedUUID(UUID uuid);
-
-    Property[] getSpoofedProfile();
-
-    void setSpoofedProfile(Property[] profile);
 }

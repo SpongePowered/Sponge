@@ -31,6 +31,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.Rotations;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3i;
+import net.minecraft.world.ChunkCoordIntPair;
 
 public final class VecHelper {
 
@@ -76,6 +77,18 @@ public final class VecHelper {
 
     public static Vec3i toVector(Vector3i vector) {
         return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    // === MC ChunkCoordIntPair ---> Flow Vector3i ===
+
+    public static Vector3i toVector(ChunkCoordIntPair chunk) {
+        return new Vector3i(chunk.chunkXPos, 0, chunk.chunkZPos);
+    }
+
+    // === Flow Vector3i --> MC ChunkCoordIntPair ===
+
+    public static ChunkCoordIntPair toChunkCoordIntPair(Vector3i vector) {
+        return new ChunkCoordIntPair(vector.getX(), vector.getZ());
     }
 
     // === MC Vec3 --> flow Vector3d ==

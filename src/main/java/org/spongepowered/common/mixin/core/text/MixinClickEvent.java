@@ -26,15 +26,20 @@ package org.spongepowered.common.mixin.core.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Optional;
 import net.minecraft.event.ClickEvent;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.util.Consumer;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinClickEvent;
+import org.spongepowered.common.text.action.SpongeCallbackHolder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 @Mixin(ClickEvent.class)
 public abstract class MixinClickEvent implements IMixinClickEvent {
@@ -43,7 +48,7 @@ public abstract class MixinClickEvent implements IMixinClickEvent {
     @Shadow private String value;
 
     private ClickAction<?> handle;
-    private boolean initialized;
+    private volatile boolean initialized;
 
     @Override
     public ClickAction<?> getHandle() {
@@ -58,6 +63,17 @@ public abstract class MixinClickEvent implements IMixinClickEvent {
                         }
                         break;
                     case RUN_COMMAND:
+                        if (this.value.startsWith(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED)) {
+                            try {
+                                UUID callbackId = UUID.fromString(this.value.substring(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED.length() + 1));
+                                Optional<Consumer<CommandSource>> callback = SpongeCallbackHolder.getInstance().getCallbackForUUID(callbackId);
+                                if (callback.isPresent()) {
+                                    setHandle(TextActions.executeCallback(callback.get()));
+                                    break;
+                                }
+                            } catch (IllegalArgumentException ex) {
+                            }
+                        }
                         setHandle(TextActions.runCommand(this.value));
                         break;
                     case SUGGEST_COMMAND:

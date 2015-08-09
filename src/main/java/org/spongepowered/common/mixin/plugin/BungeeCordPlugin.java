@@ -22,45 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.service.config;
+package org.spongepowered.common.mixin.plugin;
 
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.service.config.ConfigRoot;
+import org.spongepowered.asm.lib.tree.ClassNode;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.common.Sponge;
 
-import java.io.File;
+import java.util.List;
+import java.util.Set;
 
-/**
- * Root for sponge configurations.
- */
-public class SpongeConfigRoot implements ConfigRoot {
-    private final String pluginName;
-    private final File baseDir;
+public class BungeeCordPlugin implements IMixinConfigPlugin {
 
-    public SpongeConfigRoot(String pluginName, File baseDir) {
-        this.pluginName = pluginName;
-        this.baseDir = baseDir;
+    @Override
+    public void onLoad(String mixinPackage) {
     }
 
     @Override
-    public File getConfigFile() {
-        File configFile = new File(this.baseDir, this.pluginName + ".conf");
-        if (configFile.getParentFile().isDirectory()) {
-            configFile.getParentFile().mkdirs();
+    public String getRefMapperConfig() {
+        return null;
+    }
+
+    @Override
+    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (!Sponge.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
+                && mixinClassName.contains("mixin.bungee")) {
+            return false;
         }
-        return configFile;
+        return true;
     }
 
     @Override
-    public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
-        return HoconConfigurationLoader.builder()
-                .setFile(getConfigFile())
-                .build();
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
     }
 
     @Override
-    public File getDirectory() {
-        return this.baseDir;
+    public List<String> getMixins() {
+        return null;
     }
+
+    @Override
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    }
+
+    @Override
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    }
+
 }

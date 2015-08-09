@@ -24,32 +24,10 @@
  */
 package org.spongepowered.common.interfaces;
 
-import com.mojang.authlib.properties.Property;
-import org.spongepowered.api.MinecraftVersion;
+public interface IMixinNetHandlerLoginServer {
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.UUID;
+    boolean fireAuthEvent();
 
-public interface IMixinNetworkManager {
+    void initUUID();
 
-    InetSocketAddress getAddress();
-
-    InetSocketAddress getVirtualHost();
-
-    void setVirtualHost(String host, int port);
-
-    MinecraftVersion getVersion();
-
-    void setVersion(int version);
-
-    void setRemoteAddress(SocketAddress socketAddress);
-
-    UUID getSpoofedUUID();
-
-    void setSpoofedUUID(UUID uuid);
-
-    Property[] getSpoofedProfile();
-
-    void setSpoofedProfile(Property[] profile);
 }

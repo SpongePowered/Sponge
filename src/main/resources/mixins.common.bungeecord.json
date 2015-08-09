@@ -1,0 +1,15 @@
+{
+    "package": "org.spongepowered.common.mixin.bungee",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.BungeeCordPlugin",
+    "mixins": [
+    ],
+    "server": [
+        "network.MixinNetHandlerHandshakeTCP",
+        "network.MixinNetHandlerLoginServer",
+        "network.MixinNetworkManager",
+        "network.packet.MixinC00Handshake"
+    ],
+    "client": [
+    ]
+}

@@ -183,6 +183,7 @@ import org.spongepowered.api.entity.EntityInteractionType;
 import org.spongepowered.api.entity.EntityInteractionTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.entity.player.gamemode.GameModes;
 import org.spongepowered.api.item.Enchantment;
@@ -243,6 +244,7 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.ExplosionBuilder;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.WorldBuilder;
@@ -250,6 +252,7 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.gen.PopulatorFactory;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -344,6 +347,7 @@ import org.spongepowered.common.entity.SpongeEntityInteractionType;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
@@ -368,6 +372,7 @@ import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.weather.SpongeWeather;
 import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldBuilder;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
@@ -628,7 +633,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         if (tempMap == null) {
             return com.google.common.base.Optional.absent();
         } else {
-            T type = (T) tempMap.get(id);
+            T type = (T) tempMap.get(id.toUpperCase());
             if (type == null) {
                 return com.google.common.base.Optional.absent();
             } else {
@@ -735,6 +740,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public WorldBuilder getWorldBuilder() {
         return new SpongeWorldBuilder();
+    }
+
+    @Override
+    public ExplosionBuilder getExplosionBuilder() {
+        return new SpongeExplosionBuilder();
     }
 
     @Override
@@ -2037,6 +2047,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public PopulatorFactory getPopulatorFactory() {
         throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public Transform createTransform(Extent extent) {
+        return new SpongeTransform(extent, Vector3d.ZERO);
     }
 
     public void preInit() {

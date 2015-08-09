@@ -40,6 +40,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.interfaces.IMixinEntity;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.registry.SpongeGameRegistry;
@@ -144,9 +146,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return (World) this.worldObj;
     }
 
+    public Vector3d getPosition() {
+        return new Vector3d(this.posX, this.posY, this.posZ);
+    }
+
     @Override
     public Location getLocation() {
-        return new Location((Extent) this.worldObj, new Vector3d(this.posX, this.posY, this.posZ));
+        return new Location((Extent) this.worldObj, getPosition());
     }
 
     @Override
@@ -224,8 +230,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
-                        .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
-                                thisEntity.rotationYaw, thisEntity.rotationPitch);
+                    .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
+                        thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
@@ -252,8 +258,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return true;
     }
 
-
-
     @Override
     public void setLocationAndRotation(Location location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         setLocationAndRotation(location, rotation, relativePositions, false);
@@ -264,13 +268,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
-            //This is just a normal teleport that happens to set both.
+            // This is just a normal teleport that happens to set both.
             relocated = setLocation(location, forced);
             setRotation(rotation);
         } else {
-            Entity spongeEntity = this;
-            if (spongeEntity instanceof EntityPlayerMP) {
-                //Players use different logic, as they support real relative movement.
+            if (((Entity) this) instanceof EntityPlayerMP) {
+                // Players use different logic, as they support real relative movement.
                 EnumSet relativeFlags = EnumSet.noneOf(S08PacketPlayerPosLook.EnumFlags.class);
 
                 if (relativePositions.contains(RelativePositions.X)) {
@@ -286,41 +289,41 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
 
                 if (relativePositions.contains(RelativePositions.PITCH)) {
-                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.Y_ROT);
-                }
-
-                if (relativePositions.contains(RelativePositions.YAW)) {
                     relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.X_ROT);
                 }
 
+                if (relativePositions.contains(RelativePositions.YAW)) {
+                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.Y_ROT);
+                }
+
                 ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                        .getY(), location.getPosition().getZ(), (float) rotation.getX(), (float) rotation.getY(), relativeFlags);
+                    .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
-                Location resultant = getLocation();
+                Location resultantLocation = getLocation();
                 Vector3d resultantRotation = getRotation();
 
                 if (relativePositions.contains(RelativePositions.X)) {
-                    resultant.add(location.getPosition().getX(), 0, 0);
+                    resultantLocation = resultantLocation.add(location.getPosition().getX(), 0, 0);
                 }
 
                 if (relativePositions.contains(RelativePositions.Y)) {
-                    resultant.add(0, location.getPosition().getY(), 0);
+                    resultantLocation = resultantLocation.add(0, location.getPosition().getY(), 0);
                 }
 
                 if (relativePositions.contains(RelativePositions.Z)) {
-                    resultant.add(0, 0, location.getPosition().getZ());
+                    resultantLocation = resultantLocation.add(0, 0, location.getPosition().getZ());
                 }
 
                 if (relativePositions.contains(RelativePositions.PITCH)) {
-                    resultantRotation.add(rotation.getX(), 0, 0);
+                    resultantRotation = resultantRotation.add(rotation.getX(), 0, 0);
                 }
 
                 if (relativePositions.contains(RelativePositions.YAW)) {
-                    resultantRotation.add(0, rotation.getY(), 0);
+                    resultantRotation = resultantRotation.add(0, rotation.getY(), 0);
                 }
 
-                //From here just a normal teleport is needed.
-                relocated = setLocation(resultant, forced);
+                // From here just a normal teleport is needed.
+                relocated = setLocation(resultantLocation, forced);
                 setRotation(resultantRotation);
             }
         }
@@ -328,7 +331,27 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return relocated;
     }
 
+    @Override
+    public Vector3d getScale() {
+        return Vector3d.ONE;
+    }
 
+    @Override
+    public void setScale(Vector3d scale) {
+        // do nothing, Minecraft doesn't properly support this yet
+    }
+
+    @Override
+    public Transform getTransform() {
+        return new SpongeTransform(getWorld(), getPosition(), getRotation(), getScale());
+    }
+
+    @Override
+    public void setTransform(Transform transform) {
+        setLocation(transform.getLocation());
+        setRotation(transform.getRotation());
+        setScale(transform.getScale());
+    }
 
     @Override
     public boolean transferToWorld(String worldName, Vector3d position) {
@@ -352,12 +375,19 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Vector3d getRotation() {
-        return new Vector3d(this.rotationYaw, this.rotationPitch, 0);
+        return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
     }
 
     @Override
     public void setRotation(Vector3d rotation) {
-        shadow$setRotation((float) rotation.getX(), (float) rotation.getY());
+        if (((Entity) this) instanceof EntityPlayerMP) {
+            // Force an update, this also set the rotation in this entity
+            ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
+                getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(RelativePositions.class));
+        } else {
+            // Let the entity tracker do its job, this just updates the variables
+            shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
+        }
     }
 
     @Override
@@ -495,18 +525,18 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 // Send bogus dimension change for same worlds on Vanilla client
                 if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
                     entityplayermp1.playerNetServerHandler.sendPacket(
-                            new S07PacketRespawn(((clientDimension + 2) % 3) - 1, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                                    entityplayermp1.theItemInWorldManager.getGameType()));
+                        new S07PacketRespawn(((clientDimension + 2) % 3) - 1, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                            entityplayermp1.theItemInWorldManager.getGameType()));
                 }
             }
 
             entityplayermp1.playerNetServerHandler.sendPacket(
-                    new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.theItemInWorldManager.getGameType()));
+                new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                    entityplayermp1.theItemInWorldManager.getGameType()));
             entity.setWorld(toWorld);
             entity.isDead = false;
             entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
-                    entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
+                entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
             entityplayermp1.setSneaking(false);
             mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
             toWorld.getPlayerManager().addPlayer(entityplayermp1);

@@ -177,6 +177,8 @@
         "server.MixinNetworkManager",
         "server.MixinServerCommandManager",
         "server.MixinServerConfigurationManager",
+        "server.network.MixinNetHandlerLoginServer",
+        "server.network.MixinNetHandlerLoginServerAnonThread",
         "status.MixinMinecraftProtocolVersionIdentifier",
         "status.MixinNetHandlerStatusServer",
         "status.MixinPingResponseHandler",
@@ -192,6 +194,7 @@
         "text.MixinHoverEvent",
         "world.MixinAnvilSaveHandler",
         "world.MixinChunk",
+        "world.MixinExplosion",
         "world.MixinNextTickListEntry",
         "world.MixinWorld",
         "world.MixinWorldBorder",
@@ -214,6 +217,7 @@
         "network.rcon.MixinRConThreadClient"
     ],
     "client": [
+        "client.MixinMinecraft",
         "client.server.MixinIntegratedServer"
     ]
 }
