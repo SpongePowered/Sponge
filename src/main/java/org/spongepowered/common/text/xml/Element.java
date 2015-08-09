@@ -240,7 +240,15 @@ public abstract class Element {
             currentElement.onShiftClick = "insert_text('" + action.getResult() + ')';
         }
 
-        if (text instanceof Text.Literal) {
+        if (text instanceof Text.Placeholder) {
+            Text.Placeholder textPlaceholder = (Text.Placeholder) text;
+            Placeholder placeholder = new Placeholder(textPlaceholder.getKey());
+            String content = textPlaceholder.getContent();
+            if (content != null) {
+                placeholder.mixedContent.add(content);
+            }
+            update(fixedRoot, currentElement, placeholder);
+        } else if (text instanceof Text.Literal) {
             currentElement.mixedContent.add(((Text.Literal) text).getContent());
         } else if (text instanceof Text.Translatable) {
             Translation transl = ((Text.Translatable) text).getTranslation();

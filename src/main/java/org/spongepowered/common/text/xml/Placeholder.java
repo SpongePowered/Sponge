@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Placeholder extends Element {
+public class Placeholder extends Span {
 
     @XmlAttribute(required = true)
     private String key;
