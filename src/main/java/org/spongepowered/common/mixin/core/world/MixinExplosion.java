@@ -43,7 +43,7 @@ import java.util.List;
 public abstract class MixinExplosion implements Explosion {
 
     public Vector3d origin;
-    public Vec3 position; // Added due to our AT's breaking Forge patch
+    public Vec3 position; // Added for Forge
 
     @Shadow public boolean isFlaming;
     @Shadow public boolean isSmoking;
@@ -53,7 +53,8 @@ public abstract class MixinExplosion implements Explosion {
     @Shadow public double explosionZ;
     @Shadow public net.minecraft.entity.Entity exploder;
     @Shadow public float explosionSize;
-    @SuppressWarnings("rawtypes") @Shadow public List affectedBlockPositions;
+    @SuppressWarnings("rawtypes") 
+    @Shadow public List affectedBlockPositions;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstructed(net.minecraft.world.World world, net.minecraft.entity.Entity entity, double originX, double originY,
