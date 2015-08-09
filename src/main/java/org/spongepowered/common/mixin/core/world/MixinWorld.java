@@ -128,8 +128,12 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.SpongeEventFactoryUtils;
+import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -137,6 +141,8 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
+import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
@@ -189,6 +195,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -236,7 +243,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final Vector2i BIOME_MIN = BLOCK_MIN.toVector2(true);
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
     private static final Vector2i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(1, 1);
-    private long weatherStartTime;
     public boolean processingCaptureCause = false;
     public boolean captureEntitySpawns = true;
     public boolean captureBlockDecay = false;
@@ -262,8 +268,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
     @Nullable private volatile Context worldContext;
-
     private SpongeChunkProvider spongegen;
+    private Weather prevWeather;
+    private long weatherStartTime;
 
     // @formatter:off
     @Shadow public Profiler theProfiler;
@@ -323,6 +330,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.captureBlockLists.put(CaptureType.DECAY, this.capturedSpongeBlockDecays);
         this.captureBlockLists.put(CaptureType.MODIFY, this.capturedSpongeBlockModifications);
         this.captureBlockLists.put(CaptureType.PLACE, this.capturedSpongeBlockPlaces);
+        this.prevWeather = getWeather();
+        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
     }
 
     /**
@@ -424,11 +433,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 this.updateComparatorOutputLevel(pos, new_.getBlock());
             }
         }
-    }
-
-    @Override
-    public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - this.weatherStartTime;
     }
 
     @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V") )
@@ -538,6 +542,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (entityIn instanceof EntityPlayer) {
             flag = true;
+        } else if (entityIn instanceof EntityLightningBolt) {
+            ((IMixinEntityLightningBolt) entityIn).setCause(cause);
         }
 
         if (!flag && !this.isChunkLoaded(i, j, true)) {
@@ -657,7 +663,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (!((Cancellable) event).isCancelled()) {
                     if (entityIn instanceof EntityWeatherEffect) {
-                        return addWeatherEffect(entityIn);
+                        return addWeatherEffect(entityIn, cause);
                     }
 
                     this.getChunkFromChunkCoords(i, j).addEntity(entityIn);
@@ -1092,7 +1098,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 }
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity;
                 if (nmsEntity instanceof EntityWeatherEffect) {
-                    addWeatherEffect(nmsEntity);
+                    addWeatherEffect(nmsEntity, cause);
                 } else {
                     int x = MathHelper.floor_double(nmsEntity.posX / 16.0D);
                     int z = MathHelper.floor_double(nmsEntity.posZ / 16.0D);
@@ -1155,6 +1161,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
         }
+    }
+
+    private boolean addWeatherEffect(net.minecraft.entity.Entity entity, Cause cause) {
+        if (entity instanceof EntityLightningBolt) {
+            LightningEvent.Pre event = SpongeEventFactory.createLightningEventPre(((IMixinEntityLightningBolt) entity).getCause());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                return addWeatherEffect(entity);
+            }
+        } else {
+            return addWeatherEffect(entity);
+        }
+        return false;
     }
 
     /**
@@ -1689,8 +1708,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public long getRunningDuration() {
+        return this.worldInfo.getWorldTotalTime() - this.weatherStartTime;
+    }
+
+    @Override
     public void forecast(Weather weather) {
-        this.forecast(weather, (300 + this.rand.nextInt(600)) * 20);
+        if (weather.equals(Weathers.CLEAR)) {
+            this.forecast(weather, (300 + this.rand.nextInt(600)) * 20);
+        } else {
+            this.forecast(weather, 0);
+        }
     }
 
     @Override
@@ -1713,6 +1741,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.worldInfo.setThunderTime((int) duration);
             this.worldInfo.setRaining(true);
             this.worldInfo.setThundering(true);
+        }
+    }
+
+    @Inject(method = "updateWeather", at = @At(value = "RETURN"))
+    public void onUpdateWeatherReturn(CallbackInfo ci) {
+        Weather weather = getWeather();
+        int duration = (int) getRemainingDuration();
+        if (this.prevWeather != weather && duration > 0) {
+            ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(Cause.of(NamedCause.source(this)), duration, duration,
+                    weather, weather, this.prevWeather, this);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                this.forecast(this.prevWeather);
+            } else {
+                this.forecast(event.getWeather(), event.getDuration());
+                this.prevWeather = event.getWeather();
+                this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+            }
         }
     }
 
