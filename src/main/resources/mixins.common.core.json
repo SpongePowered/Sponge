@@ -184,6 +184,7 @@
         "status.MixinServerStatusResponse",
         "text.MixinChatComponentScore",
         "text.MixinChatComponentSelector",
+        "text.MixinChatComponentSerializer",
         "text.MixinChatComponentStyle",
         "text.MixinChatComponentText",
         "text.MixinChatComponentTranslation",
