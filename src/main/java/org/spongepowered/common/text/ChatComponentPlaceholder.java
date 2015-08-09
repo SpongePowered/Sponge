@@ -60,6 +60,18 @@ public class ChatComponentPlaceholder extends ChatComponentText {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (!(obj instanceof ChatComponentPlaceholder)) {
+            return false;
+        } else {
+            ChatComponentPlaceholder other = (ChatComponentPlaceholder) obj;
+            return placeholderKey.equals(other.placeholderKey) && super.equals(obj);
+        }
+    }
+
+    @Override
     public String toString() {
         return "PlaceholderComponent{component=\'" + this.placeholderKey +
                 "\', text=\'" + getChatComponentText_TextValue() +
