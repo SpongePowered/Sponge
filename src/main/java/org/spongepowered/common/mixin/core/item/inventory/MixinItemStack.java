@@ -40,10 +40,12 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.item.IMixinItem;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 
@@ -113,13 +115,18 @@ public abstract class MixinItemStack implements ItemStack {
     }
 
     @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(shadow$getItem().getUnlocalizedName((net.minecraft.item.ItemStack) (Object) this) + ".name");
+    }
+
+    @Override
     public Text toText() {
         TextBuilder builder;
         Optional<DisplayNameData> optName = getData(DisplayNameData.class);
         if (optName.isPresent()) {
             builder = optName.get().getDisplayName().builder();
         } else {
-            builder = Texts.builder(getItem().getTranslation());
+            builder = Texts.builder(getTranslation());
         }
         builder.onHover(TextActions.showItem(this));
         return builder.build();
