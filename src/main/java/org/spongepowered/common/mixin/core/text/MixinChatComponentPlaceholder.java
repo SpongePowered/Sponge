@@ -24,20 +24,21 @@
  */
 package org.spongepowered.common.mixin.core.text;
 
-import net.minecraft.util.ChatComponentText;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChatComponentText.class)
-public abstract class MixinChatComponentText extends MixinChatComponentStyle {
+import org.spongepowered.common.text.ChatComponentPlaceholder;
+import org.spongepowered.asm.mixin.Mixin;
 
-    @Shadow protected String text;
+@Mixin(ChatComponentPlaceholder.class)
+public abstract class MixinChatComponentPlaceholder extends MixinChatComponentText {
+
+    @Shadow protected String placeholderKey;
 
     @Override
     protected TextBuilder createBuilder() {
-        return Texts.builder(this.text);
+        return Texts.placeholderBuilder(placeholderKey).content(text);
     }
 
 }
