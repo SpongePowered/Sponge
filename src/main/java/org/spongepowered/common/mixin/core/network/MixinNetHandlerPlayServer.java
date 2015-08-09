@@ -37,6 +37,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
@@ -53,6 +54,8 @@ import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.tileentity.SignData;
+import org.spongepowered.api.entity.EntityInteractionType;
+import org.spongepowered.api.entity.EntityInteractionTypes;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
@@ -346,6 +349,33 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         this.tmpQuitMessage = null;
         Sponge.getGame().getEventManager().post(event);
         event.getSink().sendMessage(event.getNewMessage());
+    }
+    
+    @Inject(method = "processUseEntity", at = @At(value = "INVOKE", target =
+             "net/minecraft/network/play/client/C02PacketUseEntity.getAction()Lnet/minecraft/network/play/client/C02PacketUseEntity$Action;",
+             ordinal = 0), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
+    public void processUseEntity(C02PacketUseEntity packetIn, CallbackInfo info, WorldServer worldserver, Entity entity, boolean flag, double d0) {
+        EntityInteractionType type = null;
+        Vector3d location = null;
+        switch (packetIn.getAction()) {
+            case ATTACK:
+                type = EntityInteractionTypes.ATTACK;
+                break;
+            case INTERACT_AT:
+                location = new Vector3d(packetIn.getHitVec().xCoord, packetIn.getHitVec().yCoord, packetIn.getHitVec().zCoord);
+            case INTERACT:
+                type = EntityInteractionTypes.USE;
+                break;
+        }
+
+        if (type == null){
+        	return;
+        }
+
+        if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPlayerInteractEntity(Sponge.getGame(), this.getPlayer(), 
+                (org.spongepowered.api.entity.Entity) entity, type, location))) {
+            info.cancel();
+        }
     }
 
 }
