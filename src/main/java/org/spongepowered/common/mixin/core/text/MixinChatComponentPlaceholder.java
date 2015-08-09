@@ -34,11 +34,11 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(value = ChatComponentPlaceholder.class, remap = false)
 public abstract class MixinChatComponentPlaceholder extends MixinChatComponentText {
 
-    @Shadow(remap = false) protected String placeholderKey;
+    @Shadow(remap = false) private String placeholderKey;
 
     @Override
     protected TextBuilder createBuilder() {
-        return Texts.placeholderBuilder(placeholderKey).content(text);
+        return Texts.placeholderBuilder(placeholderKey).content(getUnformattedText());
     }
 
 }
