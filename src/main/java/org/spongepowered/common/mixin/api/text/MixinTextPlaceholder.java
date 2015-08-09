@@ -36,7 +36,6 @@ import java.util.Locale;
 @Mixin(value = Text.Placeholder.class, remap = false)
 public class MixinTextPlaceholder extends MixinTextLiteral {
 
-    @Shadow protected String content;
     @Shadow protected String key;
 
     @Override
