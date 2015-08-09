@@ -22,34 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.bungee.network;
 
-import com.mojang.authlib.properties.Property;
-import org.spongepowered.api.MinecraftVersion;
+import io.netty.channel.SimpleChannelInboundHandler;
+import net.minecraft.network.NetworkManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.UUID;
 
-public interface IMixinNetworkManager {
+@SuppressWarnings("rawtypes")
+@Mixin(NetworkManager.class)
+public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements IMixinNetworkManager {
 
-    InetSocketAddress getAddress();
+    @Shadow private SocketAddress socketAddress;
 
-    InetSocketAddress getVirtualHost();
+    private UUID spoofedUUID;
+    private com.mojang.authlib.properties.Property[] spoofedProfile;
 
-    void setVirtualHost(String host, int port);
+    @Override
+    public void setRemoteAddress(SocketAddress socketAddress) {
+        this.socketAddress = socketAddress;
+    }
 
-    MinecraftVersion getVersion();
+    @Override
+    public UUID getSpoofedUUID() {
+        return this.spoofedUUID;
+    }
 
-    void setVersion(int version);
+    @Override
+    public void setSpoofedUUID(UUID uuid) {
+        this.spoofedUUID = uuid;
+    }
 
-    void setRemoteAddress(SocketAddress socketAddress);
+    @Override
+    public com.mojang.authlib.properties.Property[] getSpoofedProfile() {
+        return this.spoofedProfile;
+    }
 
-    UUID getSpoofedUUID();
-
-    void setSpoofedUUID(UUID uuid);
-
-    Property[] getSpoofedProfile();
-
-    void setSpoofedProfile(Property[] profile);
+    @Override
+    public void setSpoofedProfile(com.mojang.authlib.properties.Property[] profile) {
+        this.spoofedProfile = profile;
+    }
 }

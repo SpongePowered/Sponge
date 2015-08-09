@@ -88,6 +88,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String ENTITY_ACTIVATION_RANGE_MISC = "misc-activation-range";
     public static final String ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY = "human-player-list-remove-delay";
 
+    // BUNGEECORD
+    public static final String BUNGEECORD_IP_FORWARDING = "ip-forwarding";
+
     // GENERAL
     public static final String GENERAL_DISABLE_WARNINGS = "disable-warnings";
     public static final String GENERAL_CHUNK_LOAD_OVERRIDE = "chunk-load-override";
@@ -104,6 +107,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
+    public static final String MODULE_BUNGEECORD = "bungeecord";
 
     // WORLD
     public static final String WORLD_INFINITE_WATER_SOURCE = "infinite-water-source";
@@ -128,7 +132,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @SuppressWarnings("unused")
     private File file;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public SpongeConfig(Type type, File file, String modId) {
 
         this.type = type;
@@ -227,6 +231,13 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("ip-sets")
         private Map<String, List<IpSet>> ipSets = new HashMap<String, List<IpSet>>();
 
+        @Setting(value = MODULE_BUNGEECORD)
+        private BungeeCordCategory bungeeCord = new BungeeCordCategory();
+
+        public BungeeCordCategory getBungeeCord() {
+            return this.bungeeCord;
+        }
+
         public SqlCategory getSql() {
             return this.sql;
         }
@@ -294,7 +305,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
     }
 
-    @SuppressWarnings("UnusedDeclaration")
     public static class ConfigBase {
 
         @Setting
@@ -355,7 +365,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
     }
 
-    @SuppressWarnings("UnusedDeclaration")
     @ConfigSerializable
     public static class DebugCategory extends Category {
 
@@ -492,6 +501,18 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setHumanPlayerListRemoveDelay(int delay) {
             this.humanPlayerListRemoveDelay = Math.max(0, Math.min(delay, 100));
+        }
+    }
+
+    @ConfigSerializable
+    public static class BungeeCordCategory extends Category {
+
+        @Setting(value = BUNGEECORD_IP_FORWARDING,
+                comment = "If enabled, allows BungeeCord to forward IP address, UUID, and Game Profile to this server")
+        private boolean ipForwarding = false;
+
+        public boolean getIpForwarding() {
+            return this.ipForwarding;
         }
     }
 
@@ -638,15 +659,26 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class ModuleCategory extends Category {
 
+        @Setting(value = MODULE_BUNGEECORD)
+        private boolean pluginBungeeCord = false;
+
         @Setting(value = MODULE_ENTITY_ACTIVATION_RANGE)
         private boolean pluginEntityActivation = true;
+
+        public boolean usePluginBungeeCord() {
+            return this.pluginBungeeCord;
+        }
+
+        public void setPluginBungeeCord(boolean state) {
+            this.pluginEntityActivation = state;
+        }
 
         public boolean usePluginEntityActivation() {
             return this.pluginEntityActivation;
         }
 
-        public void setPluginEntityActivation(boolean pluginEntityActivation) {
-            this.pluginEntityActivation = pluginEntityActivation;
+        public void setPluginEntityActivation(boolean state) {
+            this.pluginEntityActivation = state;
         }
     }
 

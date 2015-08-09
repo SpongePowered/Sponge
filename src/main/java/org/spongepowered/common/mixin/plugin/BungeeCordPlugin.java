@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.plugin;
 
 import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.MixinEnvironment.Side;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.common.Sponge;
@@ -34,7 +32,7 @@ import org.spongepowered.common.Sponge;
 import java.util.List;
 import java.util.Set;
 
-public class CorePlugin implements IMixinConfigPlugin {
+public class BungeeCordPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -47,10 +45,8 @@ public class CorePlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if ("net.minecraft.network.rcon.RConConsoleSource".equals(targetClassName)) {
-            return MixinEnvironment.getCurrentEnvironment().getSide() != Side.CLIENT;
-        } else if (Sponge.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
-                && mixinClassName.equals("org.spongepowered.common.mixin.core.server.network.MixinNetHandlerLoginServer")) {
+        if (!Sponge.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
+                && mixinClassName.contains("mixin.bungee")) {
             return false;
         }
         return true;
