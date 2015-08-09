@@ -184,6 +184,7 @@
         "status.MixinPingResponseHandler",
         "status.MixinPlayerCountData",
         "status.MixinServerStatusResponse",
+        "text.MixinChatComponentPlaceholder",
         "text.MixinChatComponentScore",
         "text.MixinChatComponentSelector",
         "text.MixinChatComponentSerializer",
