@@ -25,6 +25,10 @@
 
 package org.spongepowered.common.text;
 
+import net.minecraft.util.IChatComponent;
+
+import java.util.List;
+
 import net.minecraft.util.ChatComponentText;
 
 public class ChatComponentPlaceholder extends ChatComponentText {
@@ -42,6 +46,17 @@ public class ChatComponentPlaceholder extends ChatComponentText {
 
     public String getPlaceholderKey() {
         return this.placeholderKey;
+    }
+
+    public ChatComponentPlaceholder createCopy() {
+        ChatComponentPlaceholder copy = new ChatComponentPlaceholder(placeholderKey, super.getChatComponentText_TextValue());
+        copy.setChatStyle(this.getChatStyle().createShallowCopy());
+        @SuppressWarnings("unchecked")
+        List<IChatComponent> siblings = this.getSiblings();
+        for (IChatComponent sibling : siblings) {
+            copy.appendSibling(sibling.createCopy());
+        }
+        return copy;
     }
 
 }
