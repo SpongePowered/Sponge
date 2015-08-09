@@ -35,9 +35,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -46,80 +43,11 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.SpongeBlockProcessor;
-import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 import java.util.Collection;
 
 @Mixin({World.class, Chunk.class})
 public abstract class MixinExtent implements Extent {
-
-    @Override
-    public <T extends DataManipulator<T>> Optional<T> getData(Vector3i position, Class<T> dataClass) {
-        return getData(position.getX(), position.getY(), position.getZ(), dataClass);
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> Optional<T> getOrCreate(Vector3i position, Class<T> manipulatorClass) {
-        return getOrCreate(position.getX(), position.getY(), position.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> boolean remove(Vector3i position, Class<T> manipulatorClass) {
-        return remove(position.getX(), position.getY(), position.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> boolean isCompatible(Vector3i position, Class<T> manipulatorClass) {
-        return isCompatible(position.getX(), position.getY(), position.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> boolean isCompatible(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        // TODO for now, this is what we have to deal with...
-        return blockUtilOptional.isPresent();
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(Vector3i position, T manipulatorData) {
-        return offer(position.getX(), position.getY(), position.getZ(), manipulatorData);
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData) {
-        return offer(x, y, z, manipulatorData, DataPriority.DATA_MANIPULATOR);
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(Vector3i position, T manipulatorData, DataPriority priority) {
-        return offer(position.getX(), position.getY(), position.getZ(), manipulatorData, priority);
-    }
-
-    @Override
-    public Collection<DataManipulator<?>> getManipulators(Vector3i position) {
-        return getManipulators(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Vector3i position, Class<T> propertyClass) {
-        return getProperty(position.getX(), position.getY(), position.getZ(), propertyClass);
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getProperties(Vector3i position) {
-        return getProperties(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public boolean validateRawData(Vector3i position, DataContainer container) {
-        return validateRawData(position.getX(), position.getY(), position.getZ(), container);
-    }
-
-    @Override
-    public void setRawData(Vector3i position, DataContainer container) throws InvalidDataException {
-        setRawData(position.getX(), position.getY(), position.getZ(), container);
-    }
 
     @Override
     public BiomeType getBiome(Vector2i position) {
@@ -177,31 +105,6 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public int getLuminance(Vector3i position) {
-        return getLuminance(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public int getLuminance(int x, int y, int z) {
-        return Math.max(getLuminanceFromGround(x, y, z), getLuminanceFromSky(x, y, z));
-    }
-
-    @Override
-    public int getLuminanceFromSky(Vector3i position) {
-        return getLuminanceFromSky(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public int getLuminanceFromGround(Vector3i position) {
-        return getLuminanceFromGround(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public boolean isBlockPowered(Vector3i position) {
-        return isBlockPowered(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public Optional<TileEntity> getTileEntity(Vector3i position) {
         return getTileEntity(position.getX(), position.getY(), position.getZ());
     }
@@ -242,23 +145,8 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public int getBlockDigTime(Vector3i position) {
-        return getBlockDigTime(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public int getBlockDigTimeWith(Vector3i position, ItemStack itemStack) {
-        return getBlockDigTimeWith(position.getX(), position.getY(), position.getZ(), itemStack);
-    }
-
-    @Override
     public boolean isBlockFlammable(Vector3i position, Direction faceDirection) {
         return isBlockFlammable(position.getX(), position.getY(), position.getZ(), faceDirection);
-    }
-
-    @Override
-    public boolean isBlockIndirectlyPowered(Vector3i position) {
-        return isBlockIndirectlyPowered(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
@@ -279,11 +167,6 @@ public abstract class MixinExtent implements Extent {
     @Override
     public Collection<Direction> getIndirectlyPoweredBlockFaces(Vector3i position) {
         return getIndirectlyPoweredBlockFaces(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public boolean isBlockPassable(Vector3i position) {
-        return this.isBlockPassable(position.getX(), position.getY(), position.getZ());
     }
 
     @Override

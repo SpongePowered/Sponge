@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
-import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
+import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
 
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockNewLeaf;
@@ -38,9 +37,8 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.TreeData;
+import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -53,7 +51,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.manipulator.block.SpongeTreeData;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 import org.spongepowered.common.util.VecHelper;
 
@@ -108,42 +105,12 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
                 break;
         }
 
-        return new SpongeTreeData().setValue(treeType);
+        return null; // todo
     }
 
-    @Override
-    public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos, DataPriority priority) {
+    public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos) {
         final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
-        switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
-            case POST_MERGE:
-                BlockPlanks.EnumType treeType = null;
-
-                if (treeData.getValue() == TreeTypes.OAK) {
-                    treeType = BlockPlanks.EnumType.OAK;
-                } else if (treeData.getValue() == TreeTypes.SPRUCE) {
-                    treeType = BlockPlanks.EnumType.SPRUCE;
-                } else if (treeData.getValue() == TreeTypes.BIRCH) {
-                    treeType = BlockPlanks.EnumType.BIRCH;
-                } else if (treeData.getValue() == TreeTypes.JUNGLE) {
-                    treeType = BlockPlanks.EnumType.JUNGLE;
-                } else if (treeData.getValue() == TreeTypes.ACACIA) {
-                    treeType = BlockPlanks.EnumType.ACACIA;
-                } else if (treeData.getValue() == TreeTypes.DARK_OAK) {
-                    treeType = BlockPlanks.EnumType.DARK_OAK;
-                }
-
-                IBlockState blockState = world.getBlockState(blockPos);
-
-                if (blockState.getBlock() instanceof BlockOldLeaf) {
-                    world.setBlockState(blockPos, blockState.withProperty(BlockOldLeaf.VARIANT, checkNotNull(treeType)));
-                } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-                    world.setBlockState(blockPos, blockState.withProperty(BlockOldLeaf.VARIANT, checkNotNull(treeType)));
-                }
-                return successReplaceData(data);
-            default:
-                return successNoData();
-        }
+        return failResult(treeData.type().asImmutable());
     }
 
     @Override

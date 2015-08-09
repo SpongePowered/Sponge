@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
 public class DataUtil {
@@ -38,6 +40,19 @@ public class DataUtil {
         } else {
             return dataView;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) {
+        checkDataExists(dataView, checkNotNull(key).getQuery());
+        final Object object = dataView.get(key.getQuery()).get();
+        return (T) object;
+    }
+
+    public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) {
+        checkDataExists(dataView, checkNotNull(key).getQuery());
+        final Object object = dataView.get(key.getQuery()).get();
+        return (T) object;
     }
 
     @SuppressWarnings("unchecked")

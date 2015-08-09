@@ -28,11 +28,11 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 
-public class SpongePatternLayer implements BannerData.PatternLayer {
+public class SpongePatternLayer implements PatternLayer {
 
     private final BannerPatternShape id;
     private final DyeColor color;
@@ -43,7 +43,7 @@ public class SpongePatternLayer implements BannerData.PatternLayer {
     }
 
     @Override
-    public BannerPatternShape getId() {
+    public BannerPatternShape getShape() {
         return this.id;
     }
 

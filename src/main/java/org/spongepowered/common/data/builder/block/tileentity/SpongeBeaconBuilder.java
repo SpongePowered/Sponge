@@ -33,10 +33,10 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.tileentity.BeaconData;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.manipulator.tileentity.SpongeBeaconData;
 
 public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
 
@@ -57,9 +57,9 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
         if (!container.contains(PRIMARY) || !container.contains(SECONDARY)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
-        final BeaconData beaconData = new SpongeBeaconData();
-        beaconData.setPrimaryEffect((PotionEffectType) Potion.potionTypes[container.getInt(PRIMARY).get()]);
-        beaconData.setSecondaryEffect((PotionEffectType) Potion.potionTypes[container.getInt(SECONDARY).get()]);
+        final BeaconData beaconData = null;
+        beaconData.set(Keys.BEACON_PRIMARY_EFFECT, (PotionEffectType) Potion.potionTypes[container.getInt(PRIMARY).get()]);
+        beaconData.set(Keys.BEACON_SECONDARY_EFFECT, (PotionEffectType) Potion.potionTypes[container.getInt(SECONDARY).get()]);
 
         final Beacon beacon = beaconOptional.get();
         beacon.offer(beaconData);

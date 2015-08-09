@@ -25,7 +25,7 @@
 package org.spongepowered.common.interfaces.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.manipulator.DyeableData;
+import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 
 public interface IMixinItemDyeable extends IMixinItem {

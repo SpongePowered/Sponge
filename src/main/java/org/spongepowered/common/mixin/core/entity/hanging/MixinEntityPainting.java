@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.hanging;
 
-import org.spongepowered.api.data.manipulator.entity.ArtData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
 import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +35,6 @@ public abstract class MixinEntityPainting extends MixinEntityHanging implements 
 
     @Override
     public ArtData getArtData() {
-        return getData(ArtData.class).get();
+        return get(ArtData.class).get();
     }
 }
