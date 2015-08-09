@@ -27,7 +27,6 @@ package org.spongepowered.common.text;
 
 import net.minecraft.util.ChatComponentText;
 
-// TODO: Move this somewhere else
 public class ChatComponentPlaceholder extends ChatComponentText {
 
     private final String placeholderKey;
