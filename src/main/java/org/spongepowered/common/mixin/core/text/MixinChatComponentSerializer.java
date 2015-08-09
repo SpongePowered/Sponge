@@ -25,48 +25,109 @@
 
 package org.spongepowered.common.mixin.core.text;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IChatComponent.Serializer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
 import java.lang.reflect.Type;
+import java.util.List;
 
 @Mixin(Serializer.class)
-public class MixinChatComponentSerializer {
+public abstract class MixinChatComponentSerializer {
 
-    @Redirect(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/util/IChatComponent;",
-            at = @At(value = "NEW", target = "class=net.minecraft.util.ChatComponentText.ChatComponentText", ordinal=0))
-    public ChatComponentText deserializePlaceholder(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) {
-        return new ChatComponentText("TEST");
+    @Shadow
+    public abstract IChatComponent deserialize(JsonElement jsonElement, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_);
+
+    @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/util/IChatComponent;",
+            at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonElement;getAsJsonObject()Lcom/google/gson/JsonObject;", ordinal = 0, shift = Shift.BY, by = 3, remap = false),
+            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    public void deserializePlaceholder(JsonElement jsonElement, Type type, JsonDeserializationContext context,
+            CallbackInfoReturnable<IChatComponent> cir, JsonObject jsonObject) {
+        if (jsonObject.has("placeholderKey")) {
+            final String placeholderKey = jsonObject.get("placeholderKey").getAsString();
+            final IChatComponent deserialized;
+            if (jsonObject.has("text")) {
+                deserialized = new ChatComponentPlaceholder(placeholderKey, jsonObject.get("text").getAsString());
+            } else {
+                deserialized = new ChatComponentPlaceholder(placeholderKey);
+            }
+
+            // Default stuff - START
+            if (jsonObject.has("extra")) {
+                JsonArray extraElements = jsonObject.getAsJsonArray("extra");
+
+                if (extraElements.size() == 0) {
+                    throw new JsonParseException("Unexpected empty array of components");
+                }
+
+                for (JsonElement extraElement : extraElements) {
+                    deserialized.appendSibling(this.deserialize(extraElement, type, context));
+                }
+            }
+
+            deserialized.setChatStyle(context.<ChatStyle>deserialize(jsonElement, ChatStyle.class));
+            // Default stuff - END
+
+            cir.setReturnValue(deserialized);
+        }
     }
 
-    @Redirect(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/util/IChatComponent;",
-            at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal=0))
-    public boolean deserializeTextOrPlaceholder(JsonObject jsonobject, String key) {
-        return jsonobject.has("text") || jsonobject.has("placeholderKey");
+    @Shadow
+    abstract void serializeChatStyle(ChatStyle style, JsonObject object, JsonSerializationContext ctx);
+
+    @Shadow
+    public abstract JsonElement serialize(IChatComponent chatComponent, Type type, JsonSerializationContext context);
+
+    @Inject(method = "serialize(Lnet/minecraft/util/IChatComponent;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;",
+            at = @At(value = "HEAD"),
+            cancellable = true)
+    public void serializePlaceholder(IChatComponent chatComponent, Type type, JsonSerializationContext context,
+            CallbackInfoReturnable<JsonElement> cir) {
+        if (chatComponent instanceof ChatComponentPlaceholder) {
+            final ChatComponentPlaceholder placeholder = (ChatComponentPlaceholder) chatComponent;
+            final JsonObject serialized = new JsonObject();
+            serialized.addProperty("placeholderKey", placeholder.getPlaceholderKey());
+
+            final String text = placeholder.getChatComponentText_TextValue();
+            if (text != null) {
+                serialized.addProperty("text", text);
+            }
+
+            // Default stuff - START
+            if (!chatComponent.getChatStyle().isEmpty()) {
+                this.serializeChatStyle(chatComponent.getChatStyle(), serialized, context);
+            }
+
+            @SuppressWarnings("unchecked")
+            List<IChatComponent> siblings = chatComponent.getSiblings();
+            if (!siblings.isEmpty()) {
+                JsonArray extraElements = new JsonArray();
+
+                for (IChatComponent sibling : siblings) {
+                    extraElements.add(this.serialize(sibling, sibling.getClass(), context));
+                }
+
+                serialized.add("extra", extraElements);
+            }
+            // Default stuff - END
+
+            cir.setReturnValue(serialized);
+        }
     }
-
-//    @Inject(method = "serialize(Lnet/minecraft/util/IChatComponent;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;",
-//            at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;addProperty(Ljava/lang/String;Ljava/lang/String;)V", ordinal=0, shift = Shift.AFTER),
-//            locals=LocalCapture.CAPTURE_FAILHARD)
-//    public void serializePlaceholder(IChatComponent p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_,
-//            CallbackInfoReturnable<IChatComponent> cir, JsonObject jsonobject) {
-//        if (p_serialize_1_ instanceof ChatComponentPlaceholder)
-//        {
-//            jsonobject.addProperty("placeholderKey", ((ChatComponentPlaceholder) p_serialize_1_).getPlaceholderKey());
-//        }
-//    }
-
-//    @Redirect(method = "serialize(Lnet/minecraft/util/IChatComponent;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;",
-//            at = @At(value = "INVOKE", target = "Ljava/util/Collection;isEmpty()Z"))
-//    public boolean serializePlaceholderInstead(IChatComponent p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_,
-//                    JsonObject jsonobject) {
-//        return p_serialize_1_.getChatStyle().isEmpty() && !(p_serialize_1_ instanceof ChatComponentPlaceholder);
-//    }
 
     // TODO: Move this somewhere else
     public static class ChatComponentPlaceholder extends ChatComponentText {
