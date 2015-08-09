@@ -4,6 +4,7 @@
     "mixins": [
         "text.MixinText",
         "text.MixinTextLiteral",
+		"text.MixinTextPlaceholder",
         "text.MixinTextScore",
         "text.MixinTextSelector",
         "text.MixinTextTranslatable",

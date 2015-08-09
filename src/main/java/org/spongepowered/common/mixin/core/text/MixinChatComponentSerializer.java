@@ -31,7 +31,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IChatComponent.Serializer;
@@ -42,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.text.ChatComponentPlaceholder;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -127,26 +127,6 @@ public abstract class MixinChatComponentSerializer {
 
             cir.setReturnValue(serialized);
         }
-    }
-
-    // TODO: Move this somewhere else
-    public static class ChatComponentPlaceholder extends ChatComponentText {
-
-        private final String placeholderKey;
-
-        public ChatComponentPlaceholder(String placeholderKey) {
-            this(placeholderKey, "{" + placeholderKey + "}");
-        }
-
-        public ChatComponentPlaceholder(String placeholderKey, String msg) {
-            super(msg);
-            this.placeholderKey = placeholderKey;
-        }
-
-        public String getPlaceholderKey() {
-            return this.placeholderKey;
-        }
-
     }
 
 }
