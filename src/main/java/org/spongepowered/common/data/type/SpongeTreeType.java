@@ -47,4 +47,8 @@ public class SpongeTreeType implements TreeType {
     public String getName() {
         return this.name;
     }
+    
+    public byte getByteId() {
+    	return this.id;
+    }
 }

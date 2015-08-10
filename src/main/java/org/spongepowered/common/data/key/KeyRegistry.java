@@ -42,7 +42,7 @@ import org.spongepowered.common.registry.RegistryHelper;
 import java.awt.Color;
 import java.util.Map;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public class KeyRegistry {
 
     private static final Map<String, Key<?>> keyMap = new MapMaker().concurrencyLevel(4).makeMap();

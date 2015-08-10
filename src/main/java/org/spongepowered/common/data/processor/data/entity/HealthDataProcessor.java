@@ -29,9 +29,11 @@ import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
+
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -56,7 +58,8 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
         return dataHolder instanceof EntityLivingBase;
     }
 
-    @Override
+    @SuppressWarnings("unused")
+	@Override
     public Optional<HealthData> from(DataHolder dataHolder) {
         if (dataHolder instanceof EntityLivingBase) {
             final SpongeHealthData healthData = new SpongeHealthData();

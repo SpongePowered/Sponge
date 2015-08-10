@@ -72,7 +72,6 @@ public class SpongeDataRegistry implements DataManipulatorRegistry {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>> getBuilder(Class<T>
             manipulatorClass) {
@@ -107,7 +106,6 @@ public class SpongeDataRegistry implements DataManipulatorRegistry {
         this.immutableProcessorMap.put(implImClass, processor);
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getUtil(Class<T>
             manipulatorClass) {
         return Optional.fromNullable((DataProcessor<T, I>) (Object) this.processorMap.get(checkNotNull(manipulatorClass)));

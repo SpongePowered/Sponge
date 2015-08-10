@@ -26,12 +26,23 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataTransactionBuilder;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.SpongeDataRegistry;
 
+import com.google.common.base.Optional;
+
+@SuppressWarnings("unchecked")
 public class DataUtil {
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
@@ -42,14 +53,13 @@ public class DataUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object = dataView.get(key.getQuery()).get();
         return (T) object;
     }
 
-    public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) {
+	public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object = dataView.get(key.getQuery()).get();
         if (clazz.isInstance(object)) {
@@ -59,7 +69,6 @@ public class DataUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T getData(final DataView dataVew, final DataQuery query, Class<T> data) throws InvalidDataException {
         checkDataExists(dataVew, query);
         final Object object = dataVew.get(query).get();
@@ -68,5 +77,21 @@ public class DataUtil {
         } else {
             throw new InvalidDataException("Data does not match!");
         }
+    }
+    
+    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> DataTransactionResult offerWildcard(DataManipulator<?, ?> manipulator, DataHolder dataHolder) {
+    	final Optional<DataProcessor<T, I>> optional = SpongeDataRegistry.getInstance().getProcessor((Class<T>) manipulator.getClass());
+    	if (optional.isPresent()) {
+    		return optional.get().set(dataHolder, (T) manipulator);
+    	}
+    	return DataTransactionBuilder.failResult(manipulator.getValues());
+    }
+    
+    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> DataTransactionResult offerWildcard(DataManipulator<?, ?> manipulator, DataHolder dataHolder, MergeFunction function) {
+    	final Optional<DataProcessor<T, I>> optional = SpongeDataRegistry.getInstance().getProcessor((Class<T>) manipulator.getClass());
+    	if (optional.isPresent()) {
+    		return optional.get().set(dataHolder, (T) manipulator, checkNotNull(function));
+    	}
+    	return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 }
