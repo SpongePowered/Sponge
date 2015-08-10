@@ -92,7 +92,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.Explosion;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
@@ -872,7 +872,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(explosion, "explosion");
         checkNotNull(explosion.getOrigin(), "origin");
 
-        newExplosion((net.minecraft.entity.Entity) explosion.getSourceEntity().orNull(), explosion
+        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orNull(), explosion
                 .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks());
     }

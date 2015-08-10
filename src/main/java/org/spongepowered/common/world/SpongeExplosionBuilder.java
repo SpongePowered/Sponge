@@ -27,16 +27,15 @@ package org.spongepowered.common.world;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.world.Explosion;
-import org.spongepowered.api.world.ExplosionBuilder;
+import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.World;
 
 public class SpongeExplosionBuilder implements ExplosionBuilder {
 
     private World world;
-    private Entity sourceEntity;
+    private Explosive sourceExplosive;
     private float radius;
     private Vector3d origin;
     private boolean canCauseFire;
@@ -53,8 +52,8 @@ public class SpongeExplosionBuilder implements ExplosionBuilder {
     }
 
     @Override
-    public ExplosionBuilder sourceEntity(Entity source) {
-        this.sourceEntity = source;
+    public ExplosionBuilder sourceExplosive(Explosive source) {
+        this.sourceExplosive = source;
         return this;
     }
 
@@ -83,24 +82,29 @@ public class SpongeExplosionBuilder implements ExplosionBuilder {
     }
 
     @Override
-    public Optional<Explosion> build() throws IllegalStateException {
-        if (this.world == null || this.origin == null) {
-            return Optional.absent();
-        }
-
-        return Optional.of((Explosion) new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
-                (net.minecraft.entity.Entity) this.sourceEntity, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
-                this.canCauseFire, this.shouldBreakBlocks));
-    }
-
-    @Override
     public ExplosionBuilder reset() {
         this.world = null;
-        this.sourceEntity = null;
+        this.sourceExplosive = null;
         this.radius = 0;
         this.origin = null;
         this.canCauseFire = false;
         this.shouldBreakBlocks = false;
         return this;
+    }
+
+    @Override
+    public Explosion build() throws IllegalStateException {
+        // TODO Check coordinates and if world is loaded here.
+        if (this.world == null) {
+            throw new IllegalArgumentException("Attempted to create an Explosion but world is null!");
+        }
+
+        if (this.origin == null) {
+            throw new IllegalArgumentException("Attempted to create an Explosion but the origin is null!");
+        }
+
+        return (Explosion) new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
+                (net.minecraft.entity.Entity) this.sourceExplosive, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
+                this.canCauseFire, this.shouldBreakBlocks);
     }
 }

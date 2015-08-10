@@ -225,7 +225,7 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.ExplosionBuilder;
+import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.WorldBuilder;
@@ -604,98 +604,98 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public <T> com.google.common.base.Optional<T> getBuilderOf(Class<T> builderClass) {
+    public <T> com.google.common.base.Optional<T> createBuilderOfType(Class<T> builderClass) {
         return null;
     }
 
 
     @Override
-    public ItemStackBuilder getItemBuilder() {
+    public ItemStackBuilder createItemBuilder() {
         return new SpongeItemStackBuilder();
     }
 
     @Override
-    public TradeOfferBuilder getTradeOfferBuilder() {
+    public TradeOfferBuilder createTradeOfferBuilder() {
         return new SpongeTradeOfferBuilder();
     }
 
     @Override
-    public FireworkEffectBuilder getFireworkEffectBuilder() {
+    public FireworkEffectBuilder createFireworkEffectBuilder() {
         return new SpongeFireworkBuilder();
     }
 
     @Override
-    public PotionEffectBuilder getPotionEffectBuilder() {
+    public PotionEffectBuilder createPotionEffectBuilder() {
         return new SpongePotionBuilder();
     }
 
     @Override
-    public ObjectiveBuilder getObjectiveBuilder() {
+    public ObjectiveBuilder createObjectiveBuilder() {
         return new SpongeObjectiveBuilder();
     }
 
     @Override
-    public TeamBuilder getTeamBuilder() {
+    public TeamBuilder createTeamBuilder() {
         return new SpongeTeamBuilder();
     }
 
     @Override
-    public ScoreboardBuilder getScoreboardBuilder() {
+    public ScoreboardBuilder createScoreboardBuilder() {
         return new SpongeScoreboardBuilder();
     }
 
     @Override
-    public StatisticBuilder getStatisticBuilder() {
+    public StatisticBuilder createStatisticBuilder() {
         return null;
     }
 
     @Override
-    public StatisticBuilder.EntityStatisticBuilder getEntityStatisticBuilder() {
+    public StatisticBuilder.EntityStatisticBuilder createEntityStatisticBuilder() {
         return null;
     }
 
     @Override
-    public StatisticBuilder.BlockStatisticBuilder getBlockStatisticBuilder() {
+    public StatisticBuilder.BlockStatisticBuilder createBlockStatisticBuilder() {
         return null;
     }
 
     @Override
-    public StatisticBuilder.ItemStatisticBuilder getItemStatisticBuilder() {
+    public StatisticBuilder.ItemStatisticBuilder createItemStatisticBuilder() {
         return null;
     }
 
     @Override
-    public StatisticBuilder.TeamStatisticBuilder getTeamStatisticBuilder() {
+    public StatisticBuilder.TeamStatisticBuilder createTeamStatisticBuilder() {
         return null;
     }
 
     @Override
-    public AchievementBuilder getAchievementBuilder() {
+    public AchievementBuilder createAchievementBuilder() {
         return null;
     }
 
     @Override
-    public AttributeModifierBuilder getAttributeModifierBuilder() {
+    public AttributeModifierBuilder createAttributeModifierBuilder() {
         return null;
     }
 
     @Override
-    public AttributeBuilder getAttributeBuilder() {
+    public AttributeBuilder createAttributeBuilder() {
         return null; // TODO
     }
 
     @Override
-    public WorldBuilder getWorldBuilder() {
+    public WorldBuilder createWorldBuilder() {
         return new SpongeWorldBuilder();
     }
 
     @Override
-    public ExplosionBuilder getExplosionBuilder() {
+    public ExplosionBuilder createExplosionBuilder() {
         return new SpongeExplosionBuilder();
     }
 
     @Override
-    public ParticleEffectBuilder getParticleEffectBuilder(ParticleType particle) {
+    public ParticleEffectBuilder createParticleEffectBuilder(ParticleType particle) {
         checkNotNull(particle);
 
         if (particle instanceof SpongeParticleType.Colorable) {

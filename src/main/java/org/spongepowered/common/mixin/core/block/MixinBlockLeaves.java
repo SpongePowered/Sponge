@@ -51,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 import org.spongepowered.common.util.VecHelper;
 
@@ -63,10 +64,10 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
     @Inject(method = "updateTick", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockLeaves;destroy(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), cancellable = true)
     public void callLeafDecay(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        Location block = new Location((Extent) worldIn, VecHelper.toVector(pos));
-        BlockSnapshot postChange = block.getBlockSnapshot();
+        Location location = new Location((Extent) worldIn, VecHelper.toVector(pos));
+        BlockSnapshot postChange = location.getBlockSnapshot();
         postChange.setBlockState(BlockTypes.AIR.getDefaultState());
-        final LeafDecayEvent event = SpongeEventFactory.createLeafDecay(Sponge.getGame(), null, block, postChange); //TODO Fix null cause
+        final LeafDecayEvent event = SpongeEventFactory.createLeafDecay(Sponge.getGame(), null, location, postChange); //TODO Fix null cause
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             ci.cancel();
@@ -84,10 +85,8 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
 
         TreeType treeType = null;
 
+        // TODO Sponge defaults to TreeTypes.OAK if type isn't found.
         switch (type) {
-            case OAK:
-                treeType = TreeTypes.OAK;
-                break;
             case SPRUCE:
                 treeType = TreeTypes.SPRUCE;
                 break;
@@ -103,9 +102,11 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
             case DARK_OAK:
                 treeType = TreeTypes.DARK_OAK;
                 break;
+            default:
+                treeType = TreeTypes.OAK;
         }
 
-        return null; // todo
+        return new SpongeTreeData(treeType);
     }
 
     public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos) {
