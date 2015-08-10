@@ -32,15 +32,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler {
 
     @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"
-            + "(Lnet/minecraft/util/IChatComponent;)V", ordinal = 2), cancellable = true)
+            + "(Lnet/minecraft/util/IChatComponent;)V", ordinal = 2), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> cir,
-                    Throwable error, ChatComponentTranslation comp) {
+                    ChatComponentTranslation comp, Throwable error) {
         MinecraftCommandWrapper.setError(error);
         cir.setReturnValue(false);
     }
