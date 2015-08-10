@@ -30,9 +30,10 @@ import com.google.common.base.Optional;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.manipulator.DisplayNameData;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -44,10 +45,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-
-import java.util.Collection;
 
 @SuppressWarnings("serial")
 @NonnullByDefault
@@ -124,9 +122,14 @@ public abstract class MixinItemStack implements ItemStack {
     @Override
     public Text toText() {
         TextBuilder builder;
-        Optional<DisplayNameData> optName = getData(DisplayNameData.class);
+        Optional<DisplayNameData> optName = get(DisplayNameData.class);
         if (optName.isPresent()) {
-            builder = optName.get().getDisplayName().builder();
+            Value<Text> displayName = optName.get().displayName();
+            if (displayName.exists()) {
+                builder = displayName.get().builder();
+            } else {
+                builder = Texts.builder(getTranslation());
+            }
         } else {
             builder = Texts.builder(getTranslation());
         }
