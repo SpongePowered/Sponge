@@ -32,8 +32,9 @@ import static org.spongepowered.common.item.ItemsHelper.validateData;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import net.minecraft.item.Item;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
@@ -43,8 +44,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 public class SpongeItemStackBuilder implements ItemStackBuilder {
-    @Nullable
-    private Set<DataManipulator<?>> itemDataSet;
+    private Set<DataManipulator<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
     private int maxQuantity;
@@ -67,8 +67,14 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         return this;
     }
 
+
     @Override
-    public ItemStackBuilder itemData(final DataManipulator<?> itemData) throws IllegalArgumentException {
+    public ItemStackBuilder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override
+    public ItemStackBuilder itemData(final DataManipulator<?, ?> itemData) throws IllegalArgumentException {
         checkNotNull(itemData, "Must have a non-null item data!");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
         // Validation is required, we can't let devs set block data on a non-block item!
@@ -87,11 +93,14 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     @Override
     public ItemStackBuilder fromItemStack(ItemStack itemStack) {
         checkNotNull(itemStack, "Item stack cannot be null");
+        if (this.itemDataSet == null) {
+            this.itemDataSet = Sets.newHashSet();
+        }
         // Assumes the item stack's values don't need to be validated
         this.type = itemStack.getItem();
         this.quantity = itemStack.getQuantity();
         this.maxQuantity = itemStack.getMaxStackQuantity();
-        this.itemDataSet.addAll(itemStack.getManipulators());
+        this.itemDataSet.addAll(itemStack.getContainers());
         return this;
     }
 
@@ -127,8 +136,8 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, damage);
 
         if (this.itemDataSet != null) {
-            for (DataManipulator<?> data : this.itemDataSet) {
-                stack.offer((DataManipulator) data);
+            for (DataManipulator<?, ?> data : this.itemDataSet) {
+                stack.offer(data);
             }
         }
         return stack;

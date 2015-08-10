@@ -210,6 +210,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.fromNullable((Player) getConfigurationManager().getPlayerByUsername(name));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Text getMotd() {
         return Texts.legacy().fromUnchecked(this.motd);

@@ -25,14 +25,15 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockDoublePlant;
-import org.spongepowered.api.data.type.DoubleSizePlantType;
+import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockDoublePlant.EnumPlantType.class)
-@Implements(@Interface(iface = DoubleSizePlantType.class, prefix = "double$"))
+@Implements(@Interface(iface = DoublePlantType.class, prefix = "double$"))
 public abstract class MixinEnumDoublePlant {
 
     @Shadow private String unlocalizedName;
@@ -42,6 +43,7 @@ public abstract class MixinEnumDoublePlant {
         return this.unlocalizedName;
     }
 
+    @Intrinsic
     public String double$getName() {
         return this.name;
     }

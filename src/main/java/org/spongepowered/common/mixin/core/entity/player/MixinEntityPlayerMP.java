@@ -47,12 +47,12 @@ import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.manipulator.DisplayNameData;
-import org.spongepowered.api.data.manipulator.entity.AchievementData;
-import org.spongepowered.api.data.manipulator.entity.BanData;
-import org.spongepowered.api.data.manipulator.entity.GameModeData;
-import org.spongepowered.api.data.manipulator.entity.JoinData;
-import org.spongepowered.api.data.manipulator.entity.StatisticData;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.entity.AchievementData;
+import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
+import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
+import org.spongepowered.api.data.manipulator.mutable.entity.StatisticData;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.player.Player;
@@ -314,17 +314,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public JoinData getJoinData() {
-        return getData(JoinData.class).get();
+        return get(JoinData.class).get();
     }
 
     @Override
     public DisplayNameData getDisplayNameData() {
-        return getData(DisplayNameData.class).get();
+        return get(DisplayNameData.class).get();
     }
 
     @Override
     public GameModeData getGameModeData() {
-        return getData(GameModeData.class).get();
+        return get(GameModeData.class).get();
     }
 
     @Override

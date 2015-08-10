@@ -24,20 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.DataTransactionBuilder.successNoData;
-import static org.spongepowered.common.data.DataTransactionBuilder.successReplaceData;
-
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.block.LayeredData;
+import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.block.SpongeLayeredData;
 import org.spongepowered.common.interfaces.block.IMixinBlockLayerable;
 
 @Mixin(BlockSnow.class)
@@ -48,22 +39,12 @@ public abstract class MixinBlockSnowLayer extends MixinBlock implements IMixinBl
     @Override
     public LayeredData getLayerData(IBlockState blockState) {
         final int layer = (Integer) blockState.getValue(BlockSnow.LAYERS);
-        return new SpongeLayeredData(7).setValue(layer - LAYER_OFFSET);
+        return null;
     }
 
     @Override
-    public DataTransactionResult setLayerData(LayeredData layeredData, World world, BlockPos blockPos, DataPriority priority) {
-        final LayeredData data = getLayerData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
-        switch (checkNotNull(priority)) {
-            case DATA_MANIPULATOR:
-            case POST_MERGE:
-                final IBlockState blockState = world.getBlockState(blockPos).withProperty(BlockSnow.LAYERS,
-                        checkNotNull(layeredData).getValue() + LAYER_OFFSET);
-                world.setBlockState(blockPos, blockState);
-                return successReplaceData(data);
-            default:
-                return successNoData();
-        }
+    public BlockState setLayerData(IBlockState blockState, LayeredData data) {
+        return null;
     }
 
     @Override

@@ -58,7 +58,7 @@ public class SpongeScheduler implements SchedulerService {
     }
 
     @Override
-    public TaskBuilder getTaskBuilder() {
+    public TaskBuilder createTaskBuilder() {
         return new SpongeTaskBuilder();
     }
 

@@ -35,7 +35,7 @@ import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.tileentity.BannerData;
+import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -57,7 +57,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     @Shadow private NBTTagList patterns;
 
-    private List<BannerData.PatternLayer> patternLayers = Lists.newArrayList();
+    private List<PatternLayer> patternLayers = Lists.newArrayList();
 
     @Inject(method = "setItemValues(Lnet/minecraft/item/ItemStack;)V", at = @At("RETURN"))
     private void onSetItemValues(ItemStack stack, CallbackInfo ci) {

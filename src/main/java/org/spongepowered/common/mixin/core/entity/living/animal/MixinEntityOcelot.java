@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityOcelot;
-import org.spongepowered.api.data.manipulator.entity.OcelotData;
+import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +36,6 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
 
     @Override
     public OcelotData getOcelotData() {
-        return getData(OcelotData.class).get();
+        return get(OcelotData.class).get();
     }
 }

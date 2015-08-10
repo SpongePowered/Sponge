@@ -49,7 +49,7 @@ public class ProjectileSourceSerializer {
             return new NBTTagString(((Entity) projectileSource).getUniqueId().toString());
         }
         if (projectileSource instanceof BlockProjectileSource) {
-            return new NBTTagLong(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getBlock().getPosition()).toLong());
+            return new NBTTagLong(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation().getBlockPosition()).toLong());
         }
         return null;
     }

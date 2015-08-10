@@ -28,15 +28,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataPriority;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.DyeableData;
+import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 
 public interface IMixinBlockDyeable extends IMixinBlock {
 
     DyeableData getDyeableData(IBlockState blockState);
 
-    DataTransactionResult setDyeableData(DyeableData data, World world, BlockPos blockPos, DataPriority priority);
+    DataTransactionResult setDyeableData(DyeableData data, World world, BlockPos blockPos);
 
     BlockState setDyeableData(IBlockState blockState, DyeableData dyeableData);
 

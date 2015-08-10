@@ -34,9 +34,9 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.spongepowered.api.data.manipulator.DisplayNameData;
-import org.spongepowered.api.data.manipulator.entity.ExperienceHolderData;
-import org.spongepowered.api.data.manipulator.entity.GameModeData;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -239,7 +239,7 @@ public class SelectorResolver {
 
                 @Override
                 public boolean apply(Entity input) {
-                    Optional<GameModeData> mode = input.getData(GameModeData.class);
+                    Optional<GameModeData> mode = input.get(GameModeData.class);
                     return mode.isPresent() && mode.get() == actualMode;
                 }
 
@@ -257,8 +257,8 @@ public class SelectorResolver {
 
                 @Override
                 public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.getData(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().getLevel() >= actualMin;
+                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                    return xp.isPresent() && xp.get().level().get() >= actualMin;
                 }
 
             });
@@ -269,8 +269,8 @@ public class SelectorResolver {
 
                 @Override
                 public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.getData(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().getLevel() <= actualMax;
+                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                    return xp.isPresent() && xp.get().level().get() <= actualMax;
                 }
 
             });
@@ -287,8 +287,8 @@ public class SelectorResolver {
 
                 @Override
                 public boolean apply(Entity input) {
-                    Optional<DisplayNameData> dispName = input.getData(DisplayNameData.class);
-                    return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().getDisplayName())));
+                    Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
+                    return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
                 }
 
             });

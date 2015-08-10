@@ -37,6 +37,7 @@ import net.minecraft.util.IChatComponent;
 /**
  * Function to kick a player.
  */
+@SuppressWarnings("rawtypes")
 public class PlayerKickHelper {
     private PlayerKickHelper() {
     }

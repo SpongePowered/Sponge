@@ -53,7 +53,7 @@ public class SpongeImplEventFactory {
     }
 
     public static PlayerRespawnEvent createPlayerRespawn(Game game, Player player, boolean bedSpawn, Location respawnLocation) {
-        return SpongeEventFactory.createPlayerRespawn(game, player, bedSpawn, respawnLocation);
+        return SpongeEventFactory.createPlayerRespawn(game, player, respawnLocation, bedSpawn);
     }
 
     public static PlayerQuitEvent createPlayerQuit(Game game, Player player, Text message, MessageSink sink) {

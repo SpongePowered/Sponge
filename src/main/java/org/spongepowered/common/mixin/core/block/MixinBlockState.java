@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
@@ -35,14 +33,11 @@ import net.minecraft.block.state.BlockStateBase;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.SpongeBlockProcessor;
-import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 
 @NonnullByDefault
@@ -54,7 +49,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     private ImmutableMap properties;
     @Shadow private Block block;
 
-    private ImmutableList<DataManipulator<?>> manipulators;
+    private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
 
     @Override
     public BlockType getType() {
@@ -62,39 +57,13 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     }
 
     @Override
-    public ImmutableCollection<DataManipulator<?>> getManipulators() {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators() {
         if (this.manipulators == null) {
             this.manipulators = ((IMixinBlock) this.block).getManipulators(this);
         }
         return this.manipulators;
     }
 
-    @Override
-    public <M extends DataManipulator<M>> Optional<M> getManipulator(Class<M> manipulatorClass) {
-        for (final DataManipulator<?> manipulator : this.getManipulators()) {
-            if (manipulatorClass.isInstance(manipulator)) {
-                return SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass).get().createFrom(this);
-            }
-        }
-        return Optional.absent();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <M extends DataManipulator<M>> Optional<BlockState> withData(M manipulator) {
-        SpongeBlockProcessor<M> processor = ((SpongeManipulatorRegistry) Sponge.getSpongeRegistry().getManipulatorRegistry()).getBlockUtil((Class<M>) (Class) manipulator.getClass()).get();
-        return processor.withData(this, manipulator);
-    }
-
-    @Override
-    public <M extends DataManipulator<M>> Optional<BlockState> withoutData(Class<M> manipulator) {
-        for (final DataManipulator<?> manipulator1 : this.getManipulators()) {
-            if (manipulator.isInstance(manipulator1)) {
-                return SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulator).get().removeFrom(this);
-            }
-        }
-        return Optional.absent();
-    }
 
     @Override
     public DataContainer toContainer() {

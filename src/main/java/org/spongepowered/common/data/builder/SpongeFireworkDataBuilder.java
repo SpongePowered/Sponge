@@ -73,7 +73,7 @@ public class SpongeFireworkDataBuilder implements DataBuilder<FireworkEffect> {
         }
         boolean trails = container.getBoolean(TRAILS).get();
         boolean flickers = container.getBoolean(FLICKERS).get();
-        FireworkEffectBuilder builder = Sponge.getGame().getRegistry().getBuilderOf(FireworkEffectBuilder.class).get();
+        FireworkEffectBuilder builder = Sponge.getGame().getRegistry().createBuilderOfType(FireworkEffectBuilder.class).get();
         return Optional.of(builder.colors(colors)
                                    .fades(fades)
                                    .flicker(flickers)

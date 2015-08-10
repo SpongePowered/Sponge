@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
@@ -77,10 +76,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataManipulatorBuilder;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
@@ -97,7 +92,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.Explosion;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
@@ -120,8 +115,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
-import org.spongepowered.common.data.SpongeBlockProcessor;
-import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.IMixinWorld;
@@ -232,17 +225,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public float getTemperature(Vector3i position) {
-        return getTemperature(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public float getTemperature(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        return getBiomeGenForCoords(pos).getFloatTemperature(pos);
-    }
-
-    @Override
     public UUID getUniqueId() {
         return ((WorldProperties) this.worldInfo).getUniqueId();
     }
@@ -317,11 +299,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void setBiome(int x, int z, BiomeType biome) {
         checkBiomeBounds(x, z);
         ((Chunk) getChunkFromChunkCoords(x >> 4, z >> 4)).setBiome(x, z, biome);
-    }
-
-    @Override
-    public boolean isBlockPowered(int x, int y, int z) {
-        return isBlockPowered(new BlockPos(x, y, z));
     }
 
     @SuppressWarnings("unchecked")
@@ -668,62 +645,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
-        }
-        return Optional.absent();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        if (blockUtilOptional.isPresent()) {
-            Optional<T> data = blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
-            if (!data.isPresent() && blockUtilOptional.get() instanceof DataManipulatorBuilder) {
-                data = Optional.<T>fromNullable(((DataManipulatorBuilder<T>) blockUtilOptional.get()).create());
-            }
-            return data;
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        return blockUtilOptional.isPresent() && blockUtilOptional.get().remove((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z));
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
-                .getClass());
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().setData((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z), manipulatorData, priority);
-        }
-        return builder().result(DataTransactionResult.Type.FAILURE).build();
-    }
-
-    @Override
-    public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
-        final BlockPos blockPos = new BlockPos(x, y, z);
-        return ((IMixinBlock) getBlock(x, y, z).getType()).getManipulators((net.minecraft.world.World) ((Object) this), blockPos);
-    }
-
-    @Override
-    public int getLuminanceFromSky(int x, int y, int z) {
-        return Math.max(0, getLightFor(EnumSkyBlock.SKY, new BlockPos(x, y, z)) - getSkylightSubtracted());
-    }
-
-    @Override
-    public int getLuminanceFromGround(int x, int y, int z) {
-        return getLightFor(EnumSkyBlock.BLOCK, new BlockPos(x, y, z));
-    }
-
-    @Override
     public Vector2i getBiomeMin() {
         return BIOME_MIN;
     }
@@ -870,11 +791,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean isBlockIndirectlyPowered(int x, int y, int z) {
-        return this.isBlockIndirectlyGettingPowered(new BlockPos(x, y, z)) > 0;
-    }
-
-    @Override
     public boolean isBlockFacePowered(int x, int y, int z, Direction direction) {
         checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
         BlockPos pos = new BlockPos(x, y, z);
@@ -917,12 +833,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean isBlockPassable(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        return this.getBlockState(pos).getBlock().isPassable((IBlockAccess) this, pos);
-    }
-
-    @Override
     public boolean isBlockFlammable(int x, int y, int z, Direction faceDirection) {
         checkArgument(faceDirection.isCardinal() || faceDirection.isUpright(), "Direction must be a valid block face");
         BlockPos pos = new BlockPos(x, y, z);
@@ -962,7 +872,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(explosion, "explosion");
         checkNotNull(explosion.getOrigin(), "origin");
 
-        newExplosion((net.minecraft.entity.Entity) explosion.getSourceEntity().orNull(), explosion
+        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orNull(), explosion
                 .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks());
     }
