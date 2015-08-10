@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.bungee.network;
 
+import com.mojang.authlib.properties.Property;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +41,7 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     @Shadow private SocketAddress socketAddress;
 
     private UUID spoofedUUID;
-    private com.mojang.authlib.properties.Property[] spoofedProfile;
+    private Property[] spoofedProfile;
 
     @Override
     public void setRemoteAddress(SocketAddress socketAddress) {
@@ -58,12 +59,12 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     }
 
     @Override
-    public com.mojang.authlib.properties.Property[] getSpoofedProfile() {
+    public Property[] getSpoofedProfile() {
         return this.spoofedProfile;
     }
 
     @Override
-    public void setSpoofedProfile(com.mojang.authlib.properties.Property[] profile) {
+    public void setSpoofedProfile(Property[] profile) {
         this.spoofedProfile = profile;
     }
 }

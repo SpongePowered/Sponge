@@ -28,6 +28,4 @@ public interface IMixinNetHandlerLoginServer {
 
     boolean fireAuthEvent();
 
-    void initUUID();
-
 }

@@ -251,7 +251,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
 
         public Map<String, Predicate<InetAddress>> getIpSets() {
-            return ImmutableMap.copyOf(Maps.transformValues(ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
+            return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
                 @Nullable
                 @Override
                 public Predicate<InetAddress> apply(List<IpSet> input) {
@@ -261,7 +261,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
 
         public Predicate<InetAddress> getIpSet(String name) {
-            return ipSets.containsKey(name) ? Predicates.<InetAddress>and(ipSets.get(name)) : null;
+            return this.ipSets.containsKey(name) ? Predicates.<InetAddress>and(this.ipSets.get(name)) : null;
         }
     }
 
@@ -670,7 +670,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
 
         public void setPluginBungeeCord(boolean state) {
-            this.pluginEntityActivation = state;
+            this.pluginBungeeCord = state;
         }
 
         public boolean usePluginEntityActivation() {
