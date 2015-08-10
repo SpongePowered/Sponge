@@ -88,6 +88,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
@@ -99,6 +100,7 @@ import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
@@ -875,6 +877,23 @@ public abstract class MixinWorld implements World, IMixinWorld {
         newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orNull(), explosion
                 .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks());
+    }
+
+    @Override
+    public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
+        checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
+        return null;
+    }
+
+    @Override
+    public Extent getExtentView(DiscreteTransform3 transform) {
+        return null;
+    }
+
+    @Override
+    public Extent getRelativeExtentView() {
+        return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
     }
 
 }

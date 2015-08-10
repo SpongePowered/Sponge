@@ -115,4 +115,8 @@ public final class VecHelper {
     public static boolean inBounds(int x, int y, int z, Vector3i min, Vector3i max) {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
+
+    public static boolean inBounds(double x, double y, double z, Vector3i min, Vector3i max) {
+        return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
+    }
 }

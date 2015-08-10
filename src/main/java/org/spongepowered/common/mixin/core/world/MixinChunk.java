@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -40,20 +38,17 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.BlockDataProcessor;
-import org.spongepowered.common.data.SpongeDataRegistry;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -221,6 +216,23 @@ public abstract class MixinChunk implements Chunk {
         if (!containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.blockMin, this.blockMax);
         }
+    }
+
+    @Override
+    public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
+        checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
+        return null;
+    }
+
+    @Override
+    public Extent getExtentView(DiscreteTransform3 transform) {
+        return null;
+    }
+
+    @Override
+    public Extent getRelativeExtentView() {
+        return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
     }
 
 }
