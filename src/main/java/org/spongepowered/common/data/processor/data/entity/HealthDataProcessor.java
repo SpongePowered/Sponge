@@ -59,7 +59,7 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
     }
 
     @SuppressWarnings("unused")
-	@Override
+    @Override
     public Optional<HealthData> from(DataHolder dataHolder) {
         if (dataHolder instanceof EntityLivingBase) {
             final SpongeHealthData healthData = new SpongeHealthData();

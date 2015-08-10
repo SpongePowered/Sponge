@@ -122,7 +122,7 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     }
 
     @SuppressWarnings("rawtypes")
-	@Override
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

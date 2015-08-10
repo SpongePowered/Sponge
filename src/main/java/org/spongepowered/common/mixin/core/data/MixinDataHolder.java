@@ -28,11 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -120,12 +118,14 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer) {
-        return DataUtil.offerWildcard(valueContainer, this);
+        // This has to use offerWildCard because of eclipse and OpenJDK6
+        return DataUtil.offerPlain((DataManipulator<?, ?>) (Object) valueContainer, this);
     }
 
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        return DataUtil.offerWildcard(valueContainer, this, function);
+        // This has to use offerWildCard because of eclipse and OpenJDK6
+        return DataUtil.offerPlain((DataManipulator<?, ?>) (Object) valueContainer, this, function);
     }
 
     @Override
@@ -219,7 +219,9 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = SpongeDataRegistry.getInstance().getBaseValueProcessor(checkNotNull(key));
+        final Optional<ValueProcessor<E, ? extends BaseValue<E>>>
+            optional =
+            SpongeDataRegistry.getInstance().getBaseValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
             return optional.get().getValueFromContainer(this);
         }

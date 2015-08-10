@@ -111,7 +111,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Value<Entity> or(Entity defaultValue) {
-		final Key<Value<Entity>> key = new SpongeKey<Entity, Value<Entity>>(Entity.class,(Class<Value<Entity>>) (Class) Value.class, this.getKey().getQuery());
+        final Key<Value<Entity>> key = new SpongeKey<Entity, Value<Entity>>(Entity.class,(Class<Value<Entity>>) (Class) Value.class, this.getKey().getQuery());
         return exists() ? new SpongeValue<Entity>(key, this.weakReference.get()) : new SpongeValue<Entity>(key, checkNotNull(defaultValue));
     }
 }

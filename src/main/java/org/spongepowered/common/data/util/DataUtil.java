@@ -59,7 +59,7 @@ public class DataUtil {
         return (T) object;
     }
 
-	public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) {
+    public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object = dataView.get(key.getQuery()).get();
         if (clazz.isInstance(object)) {
@@ -78,20 +78,44 @@ public class DataUtil {
             throw new InvalidDataException("Data does not match!");
         }
     }
-    
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> DataTransactionResult offerWildcard(DataManipulator<?, ?> manipulator, DataHolder dataHolder) {
-    	final Optional<DataProcessor<T, I>> optional = SpongeDataRegistry.getInstance().getProcessor((Class<T>) manipulator.getClass());
-    	if (optional.isPresent()) {
-    		return optional.get().set(dataHolder, (T) manipulator);
-    	}
-    	return DataTransactionBuilder.failResult(manipulator.getValues());
+
+    // These two methods are provided because Eclipse can't handle the generic capture bounds in MixinDataHolder#offer(DataManipulator<?, ?>) and MixinDataHolder#offer(DataManipulator<?, ?>, MergeFunction)
+
+    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> DataTransactionResult offerWildcard(
+        DataManipulator<?, ?> manipulator, DataHolder dataHolder) {
+        final Optional<DataProcessor<T, I>> optional = SpongeDataRegistry.getInstance().getProcessor((Class<T>) manipulator.getClass());
+        if (optional.isPresent()) {
+            return optional.get().set(dataHolder, (T) manipulator);
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
-    
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> DataTransactionResult offerWildcard(DataManipulator<?, ?> manipulator, DataHolder dataHolder, MergeFunction function) {
-    	final Optional<DataProcessor<T, I>> optional = SpongeDataRegistry.getInstance().getProcessor((Class<T>) manipulator.getClass());
-    	if (optional.isPresent()) {
-    		return optional.get().set(dataHolder, (T) manipulator, checkNotNull(function));
-    	}
-    	return DataTransactionBuilder.failResult(manipulator.getValues());
+
+    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> DataTransactionResult offerWildcard(
+        DataManipulator<?, ?> manipulator, DataHolder dataHolder, MergeFunction function) {
+        final Optional<DataProcessor<T, I>> optional = SpongeDataRegistry.getInstance().getProcessor((Class<T>) manipulator.getClass());
+        if (optional.isPresent()) {
+            return optional.get().set(dataHolder, (T) manipulator, checkNotNull(function));
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
+    }
+
+    // These two methods below are because OpenJDK6 Can't handle the two methods above when being passed DataManipulator<?, ?>
+
+    @SuppressWarnings("rawtypes")
+    public static DataTransactionResult offerPlain(DataManipulator manipulator, DataHolder dataHolder) {
+        final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(manipulator.getClass());
+        if (optional.isPresent()) {
+            return optional.get().set(dataHolder, manipulator);
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static DataTransactionResult offerPlain(DataManipulator manipulator, DataHolder dataHolder, MergeFunction function) {
+        final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(manipulator.getClass());
+        if (optional.isPresent()) {
+            return optional.get().set(dataHolder, manipulator, checkNotNull(function));
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 }
