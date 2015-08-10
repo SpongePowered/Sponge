@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.world.DimensionManager;
 
@@ -47,7 +48,7 @@ import java.io.IOException;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.storage.SaveHandler.class)
-public abstract class MixinSaveHandler {
+public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Shadow private File worldDirectory;
     @Shadow private long initializationTime;
@@ -86,7 +87,8 @@ public abstract class MixinSaveHandler {
         saveSpongeDatData(worldInformation);
     }
 
-    private void loadSpongeDatData(WorldInfo info) throws IOException {
+    @Override
+    public void loadSpongeDatData(WorldInfo info) throws IOException {
         final File spongeFile = new File(this.worldDirectory, "level_sponge.dat");
         final File spongeOldFile = new File(this.worldDirectory, "level_sponge.dat_old");
 
