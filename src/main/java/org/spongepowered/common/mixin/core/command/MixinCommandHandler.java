@@ -37,7 +37,8 @@ import org.spongepowered.common.command.MinecraftCommandWrapper;
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler {
 
-    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatComponent(Lnet/minecraft/util/IChatComponent)V;", ordinal = 2), cancellable = true)
+    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"
+            + "(Lnet/minecraft/util/IChatComponent;)V", ordinal = 2), cancellable = true)
     public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> cir,
                     Throwable error, ChatComponentTranslation comp) {
         MinecraftCommandWrapper.setError(error);
