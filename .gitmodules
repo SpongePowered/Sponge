@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 [submodule "SpongeCommon"]
 	path = SpongeCommon
 	url = https://github.com/SpongePowered/SpongeCommon.git
+=======
+[submodule "SpongeAPI"]
+	path = SpongeAPI
+	url = https://github.com/SpongePowered/SpongeAPI.git
+>>>>>>> branch 'master' of https://github.com/pagoru/SpongeCommon.git

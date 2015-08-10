@@ -65,7 +65,11 @@ Thumbs.db
 .checkstyle
 .factorypath
 run
+<<<<<<< HEAD
 ./eclipse
+=======
+eclipse
+>>>>>>> branch 'master' of https://github.com/pagoru/SpongeCommon.git
 nbproject
 atlassian-ide-plugin.xml
 build.xml

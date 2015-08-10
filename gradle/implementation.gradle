@@ -1,0 +1,159 @@
+ext.common = project(':SpongeCommon')
+
+ext {
+    buildNumber = System.getenv().BUILD_NUMBER != null ? System.getenv().BUILD_NUMBER : '0'
+    ciSystem = System.getenv().ciSystem != null ? System.getenv().ciSystem : 'unknown'
+    commit = System.getenv().commit != null ? System.getenv().commit : 'unknown'
+
+    apiVersion = '2.1DEV'
+}
+
+if (project.ext.has('forgeBuild')) {
+    version = "1.8-$forgeBuild-$apiVersion-$buildNumber"
+} else {
+    version = "1.8-$apiVersion-$buildNumber"
+}
+
+apply from: common.file('gradle/minecraft.gradle')
+
+// Apply shadow plugin
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+    compile common
+}
+
+// Eclipse is too stupid to order the classpath correctly unfortunately...
+// Put Common last
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                def lib = classpath.entries.find { it.path == '/SpongeCommon' }
+                def others = classpath.entries.findAll { it != lib }
+                classpath.entries = others + lib
+            }
+        }
+    }
+}
+
+jar {
+    classifier = 'release'
+
+    manifest {
+        attributes(
+                'Implementation-Version': "$version+$ciSystem-b${buildNumber}.git-$commit"
+        )
+    }
+}
+
+evaluationDependsOn common.path
+
+shadowJar {
+    dependsOn common.tasks.reobf
+
+    classifier = ''
+
+    exclude 'GradleStart**'
+    exclude 'net/minecraftforge/**'
+
+    from project.mixinRefMap
+
+    dependencies {
+        // Common
+        include project(common.path)
+        include dependency('org.spongepowered:mixin')
+
+        // SpongeAPI
+        include project(api.path)
+
+        include dependency('org.slf4j:slf4j-api')
+        include dependency('org.apache.logging.log4j:log4j-slf4j-impl')
+
+        include dependency('com.google.inject:guice')
+        include dependency('javax.inject:javax.inject')
+        include dependency('aopalliance:aopalliance')
+
+        include dependency('com.flowpowered:flow-math')
+        include dependency('com.flowpowered:flow-noise')
+
+        include dependency('ninja.leaping.configurate:configurate-core')
+        include dependency('ninja.leaping.configurate:configurate-hocon')
+        include dependency('ninja.leaping.configurate:configurate-gson')
+        include dependency('ninja.leaping.configurate:configurate-yaml')
+
+        include dependency('org.yaml:snakeyaml')
+
+        include dependency('com.zaxxer:HikariCP-java6')
+        include dependency('org.javassist:javassist')
+
+        include dependency('org.mariadb.jdbc:mariadb-java-client')
+        include dependency('com.h2database:h2')
+        include dependency('org.xerial:sqlite-jdbc')
+    }
+
+    mergeServiceFiles()
+    exclude 'LICENSE', 'NOTICE'
+}
+
+// Run shadowJar on build
+assemble.dependsOn shadowJar
+
+reobf {
+    reobf(shadowJar) { spec ->
+        spec.classpath = configurations.compile
+    }
+}
+
+// Add Common access transformer
+common.sourceSets.main.resources.files.each {
+    if (it.name.endsWith('_at.cfg')) {
+        logger.lifecycle("Found AccessTransformer in dependency resources: $it.name")
+        tasks.deobfBinJar.addTransformer(it)
+        tasks.deobfuscateJar.addTransformer(it)
+    }
+}
+
+// Deployment stuff
+task deobfJar(type: Jar, dependsOn: [classes, api.tasks.classes, common.tasks.classes]) {
+    from api.sourceSets.main.output
+    from common.sourceSets.main.output
+    from sourceSets.main.output
+}
+
+sourceJar {
+    from api.sourceSets.main.allSource
+    from common.sourceSets.main.allSource
+}
+
+javadocJar {
+    dependsOn api.tasks.javadoc
+    dependsOn common.tasks.javadoc
+    from api.tasks.javadoc.destinationDir
+    from common.tasks.javadoc.destinationDir
+}
+
+task sdkZip(type: Zip) {
+    from fileTree("sdk");
+    rename ".*\\.gitignore", ".gitignore"
+    def apiVersion = "";
+    if (project.ext.has('forgeVersion'))
+        apiVersion = project.minecraft.version + "-" + project.ext.forgeVersion
+    eachFile { file ->
+        if (file.getName() == "build.gradle")
+        {
+           file.expand([
+                "mcVersion": project.minecraft.version,
+                "apiVersion": apiVersion,
+                "mappings": project.minecraft.mappings,
+                "version": project.version
+           ])
+        }
+    }
+    onlyIf { project.file("sdk").exists() }
+}
+
+artifacts {
+    archives deobfJar
+    archives sdkZip
+}

@@ -7,10 +7,13 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
+<<<<<<< HEAD
 git:
   submodules: false
 before_install: git submodule update --init --recursive
 
+=======
+>>>>>>> branch 'master' of https://github.com/pagoru/SpongeCommon.git
 env: GRADLE_OPTS="-Xms1g -Xmx3g"
 install: ./gradlew setupCIWorkspace
 script: ./gradlew build
