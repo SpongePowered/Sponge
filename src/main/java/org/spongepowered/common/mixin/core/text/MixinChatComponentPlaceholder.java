@@ -22,27 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.text;
+package org.spongepowered.common.mixin.core.text;
 
-import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.ChatComponentPlaceholder;
 
-import java.util.Iterator;
+@Mixin(value = ChatComponentPlaceholder.class, remap = false)
+public abstract class MixinChatComponentPlaceholder extends MixinChatComponentText {
 
-public interface IMixinChatComponent extends IChatComponent, TextRepresentable {
-
-    Iterator<IChatComponent> childrenIterator();
-
-    Iterable<IChatComponent> withChildren();
-
-    String toPlain();
-
-    String getLegacyFormatting();
-
-    String toLegacy(char code);
+    @Shadow(remap = false) private String placeholderKey;
 
     @Override
-    Text toText();
+    protected TextBuilder createBuilder() {
+        return Texts.placeholderBuilder(this.placeholderKey).content(getUnformattedText());
+    }
 
 }

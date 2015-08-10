@@ -22,27 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.text;
+package org.spongepowered.common.text.xml;
 
-import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.Texts;
 
-import java.util.Iterator;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
-public interface IMixinChatComponent extends IChatComponent, TextRepresentable {
+@XmlRootElement
+public class Placeholder extends Span {
 
-    Iterator<IChatComponent> childrenIterator();
+    @XmlAttribute(required = true)
+    private String key;
 
-    Iterable<IChatComponent> withChildren();
+    public Placeholder() {
+    }
 
-    String toPlain();
-
-    String getLegacyFormatting();
-
-    String toLegacy(char code);
+    public Placeholder(String key) {
+        this.key = key;
+    }
 
     @Override
-    Text toText();
+    protected void modifyBuilder(TextBuilder builder) {
+        // TODO: get rid of this
+    }
 
+    @Override
+    public TextBuilder toText() throws Exception {
+        TextBuilder.Placeholder builder = Texts.placeholderBuilder(this.key);
+        if (!this.mixedContent.isEmpty()) {
+            builder.content(this.mixedContent.get(0).toString());
+        }
+        applyTextActions(builder);
+        return builder;
+    }
 }

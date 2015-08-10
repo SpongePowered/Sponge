@@ -22,27 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.text;
 
-import net.minecraft.util.IChatComponent;
+package org.spongepowered.common.mixin.api.text;
+
+import net.minecraft.util.ChatComponentStyle;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.ChatComponentPlaceholder;
 
-import java.util.Iterator;
+import java.util.Locale;
 
-public interface IMixinChatComponent extends IChatComponent, TextRepresentable {
+@Mixin(value = Text.Placeholder.class, remap = false)
+public class MixinTextPlaceholder extends MixinTextLiteral {
 
-    Iterator<IChatComponent> childrenIterator();
-
-    Iterable<IChatComponent> withChildren();
-
-    String toPlain();
-
-    String getLegacyFormatting();
-
-    String toLegacy(char code);
+    @Shadow protected String key;
 
     @Override
-    Text toText();
+    protected ChatComponentStyle createComponent(Locale locale) {
+        if (content == null) {
+            return new ChatComponentPlaceholder(this.key);
+        } else {
+            return new ChatComponentPlaceholder(this.key, content);
+        }
+    }
 
 }
