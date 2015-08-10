@@ -108,5 +108,6 @@ public abstract class SpongeGame implements Game {
         return (Server) MinecraftServer.getServer();
     }
 
+    @Override
     public abstract File getSavesDirectory();
 }
