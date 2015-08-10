@@ -25,6 +25,7 @@
 package org.spongepowered.common.world;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.entity.explosive.Explosive;
@@ -95,13 +96,8 @@ public class SpongeExplosionBuilder implements ExplosionBuilder {
     @Override
     public Explosion build() throws IllegalStateException {
         // TODO Check coordinates and if world is loaded here.
-        if (this.world == null) {
-            throw new IllegalArgumentException("Attempted to create an Explosion but world is null!");
-        }
-
-        if (this.origin == null) {
-            throw new IllegalArgumentException("Attempted to create an Explosion but the origin is null!");
-        }
+        checkState(this.world != null, "World is null!");
+        checkState(this.origin != null, "Origin is null!");
 
         return (Explosion) new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
                 (net.minecraft.entity.Entity) this.sourceExplosive, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
