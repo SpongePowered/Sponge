@@ -53,7 +53,7 @@ import org.spongepowered.common.entity.player.SpongeUser;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
-@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, PotionEffect.class, SpongeUser.class}, priority = 999)
+@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 999)
 public abstract class MixinDataHolder implements DataHolder {
 
     @Override

@@ -53,7 +53,7 @@ public class HealthValueProcessor implements ValueProcessor<Double, MutableBound
     @Override
     public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof EntityLivingBase) {
-            return Optional.of((double) ((EntityLivingBase) container).getMaxHealth());
+            return Optional.of((double) ((EntityLivingBase) container).getHealth());
         }
         return Optional.absent();
     }

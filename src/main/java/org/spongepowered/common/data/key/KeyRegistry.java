@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.key;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
@@ -30,6 +30,7 @@ import com.google.common.collect.MapMaker;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -53,6 +54,7 @@ public class KeyRegistry {
         keyMap.put("MAX_HEALTH", makeKey(Double.class, MutableBoundedValue.class, of("MaxHealth")));
         keyMap.put("SHOWS_DISPLAY_NAME", makeKey(Boolean.class, Value.class, of("ShowDisplayName")));
         keyMap.put("DISPLAY_NAME", makeKey(Text.class, Value.class, of("DisplayName")));
+        keyMap.put("CAREER", makeKey(Career.class, Value.class, of("Career")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

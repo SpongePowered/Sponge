@@ -52,7 +52,11 @@ public class DataUtil {
     public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object = dataView.get(key.getQuery()).get();
-        return (T) object;
+        if (clazz.isInstance(object)) {
+            return (T) object;
+        } else {
+            throw new InvalidDataException("Could not cast to the correct class type!");
+        }
     }
 
     @SuppressWarnings("unchecked")
