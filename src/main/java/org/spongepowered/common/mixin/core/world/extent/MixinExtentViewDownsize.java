@@ -66,7 +66,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
 
-@Mixin(ExtentViewDownsize.class)
+//@Mixin(ExtentViewDownsize.class)
 public abstract class MixinExtentViewDownsize extends MixinExtent implements Extent {
 
     @Shadow(remap = false) private Extent extent;
