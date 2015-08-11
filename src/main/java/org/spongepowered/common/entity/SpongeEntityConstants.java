@@ -91,29 +91,29 @@ public class SpongeEntityConstants {
     public static final SpongeHorseVariant SKELETON_HORSE = new SpongeHorseVariant(4, "SKELETON_HORSE");
 
     static {
-        SKELETON_TYPES.put("NORMAL", NORMAL_SKELETON);
-        SKELETON_TYPES.put("WITHER", WITHER_SKELETON);
+        SKELETON_TYPES.put("normal", NORMAL_SKELETON);
+        SKELETON_TYPES.put("wither", WITHER_SKELETON);
 
         SKELETON_IDMAP.put(0, NORMAL_SKELETON);
         SKELETON_IDMAP.put(1, WITHER_SKELETON);
 
-        OCELOT_TYPES.put("WILD_OCELOT", WILD_OCELOT);
-        OCELOT_TYPES.put("BLACK_CAT", BLACK_CAT);
-        OCELOT_TYPES.put("RED_CAT", RED_CAT);
-        OCELOT_TYPES.put("SIAMESE_CAT", SIAMESE_CAT);
+        OCELOT_TYPES.put("wild_ocelot", WILD_OCELOT);
+        OCELOT_TYPES.put("black_cat", BLACK_CAT);
+        OCELOT_TYPES.put("red_cat", RED_CAT);
+        OCELOT_TYPES.put("siamese_cat", SIAMESE_CAT);
 
         OCELOT_IDMAP.put(0, WILD_OCELOT);
         OCELOT_IDMAP.put(1, BLACK_CAT);
         OCELOT_IDMAP.put(2, RED_CAT);
         OCELOT_IDMAP.put(3, SIAMESE_CAT);
 
-        RABBIT_TYPES.put("BROWN", BROWN_RABBIT);
-        RABBIT_TYPES.put("WHITE", WHITE_RABBIT);
-        RABBIT_TYPES.put("BLACK", BLACK_RABBIT);
-        RABBIT_TYPES.put("BLACK_AND_WHITE", BLACK_AND_WHITE_RABBIT);
-        RABBIT_TYPES.put("GOLD", GOLD_RABBIT);
-        RABBIT_TYPES.put("SALT_AND_PEPPER", SALT_AND_PEPPER_RABBIT);
-        RABBIT_TYPES.put("KILLER", KILLER_RABBIT);
+        RABBIT_TYPES.put("brown", BROWN_RABBIT);
+        RABBIT_TYPES.put("white", WHITE_RABBIT);
+        RABBIT_TYPES.put("black", BLACK_RABBIT);
+        RABBIT_TYPES.put("black_and_white", BLACK_AND_WHITE_RABBIT);
+        RABBIT_TYPES.put("gold", GOLD_RABBIT);
+        RABBIT_TYPES.put("salt_and_pepper", SALT_AND_PEPPER_RABBIT);
+        RABBIT_TYPES.put("killer", KILLER_RABBIT);
 
         RABBIT_IDMAP.put(0, BROWN_RABBIT);
         RABBIT_IDMAP.put(1, WHITE_RABBIT);
@@ -123,12 +123,12 @@ public class SpongeEntityConstants {
         RABBIT_IDMAP.put(5, SALT_AND_PEPPER_RABBIT);
         RABBIT_IDMAP.put(99, KILLER_RABBIT);
 
-        HORSE_COLORS.put("CREAMY", CREAMY);
-        HORSE_COLORS.put("CHESTNUT", CHESTNUT);
-        HORSE_COLORS.put("BROWN", BROWN);
-        HORSE_COLORS.put("BLACK", BLACK);
-        HORSE_COLORS.put("GRAY", GRAY);
-        HORSE_COLORS.put("DARK_BROWN", DARK_BROWN);
+        HORSE_COLORS.put("creamy", CREAMY);
+        HORSE_COLORS.put("chestnut", CHESTNUT);
+        HORSE_COLORS.put("brown", BROWN);
+        HORSE_COLORS.put("black", BLACK);
+        HORSE_COLORS.put("gray", GRAY);
+        HORSE_COLORS.put("dark_brown", DARK_BROWN);
 
         HORSE_COLOR_IDMAP.put(0, CREAMY);
         HORSE_COLOR_IDMAP.put(1, CHESTNUT);
