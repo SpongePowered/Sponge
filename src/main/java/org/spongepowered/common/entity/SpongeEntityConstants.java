@@ -137,11 +137,11 @@ public class SpongeEntityConstants {
         HORSE_COLOR_IDMAP.put(4, GRAY);
         HORSE_COLOR_IDMAP.put(5, DARK_BROWN);
 
-        HORSE_STYLES.put("NONE", NONE);
-        HORSE_STYLES.put("WHITE", WHITE);
-        HORSE_STYLES.put("WHITEFIELD", WHITEFIELD);
-        HORSE_STYLES.put("WHITE_DOTS", WHITE_DOTS);
-        HORSE_STYLES.put("BLACK_DOTS", BLACK_DOTS);
+        HORSE_STYLES.put("none", NONE);
+        HORSE_STYLES.put("white", WHITE);
+        HORSE_STYLES.put("whitefield", WHITEFIELD);
+        HORSE_STYLES.put("white_dots", WHITE_DOTS);
+        HORSE_STYLES.put("black_dots", BLACK_DOTS);
 
         HORSE_STYLE_IDMAP.put(0, NONE);
         HORSE_STYLE_IDMAP.put(1, WHITE);
@@ -149,11 +149,11 @@ public class SpongeEntityConstants {
         HORSE_STYLE_IDMAP.put(3, WHITE_DOTS);
         HORSE_STYLE_IDMAP.put(4, BLACK_DOTS);
 
-        HORSE_VARIANTS.put("HORSE", HORSE);
-        HORSE_VARIANTS.put("DONKEY", DONKEY);
-        HORSE_VARIANTS.put("MULE", MULE);
-        HORSE_VARIANTS.put("UNDEAD_HORSE", UNDEAD_HORSE);
-        HORSE_VARIANTS.put("SKELETON_HORSE", SKELETON_HORSE);
+        HORSE_VARIANTS.put("horse", HORSE);
+        HORSE_VARIANTS.put("donkey", DONKEY);
+        HORSE_VARIANTS.put("mule", MULE);
+        HORSE_VARIANTS.put("undead_horse", UNDEAD_HORSE);
+        HORSE_VARIANTS.put("skeleton_horse", SKELETON_HORSE);
 
         HORSE_VARIANT_IDMAP.put(0, HORSE);
         HORSE_VARIANT_IDMAP.put(1, DONKEY);
