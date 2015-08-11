@@ -48,13 +48,13 @@ public class KeyRegistry {
     private static final Map<String, Key<?>> keyMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     public static void registerKeys() {
-        keyMap.put("AXIS", makeKey(Axis.class, Value.class, of("Axis")));
-        keyMap.put("COLOR", makeKey(Color.class, Value.class, of("Color")));
-        keyMap.put("HEALTH", makeKey(Double.class, MutableBoundedValue.class, of("Health")));
-        keyMap.put("MAX_HEALTH", makeKey(Double.class, MutableBoundedValue.class, of("MaxHealth")));
-        keyMap.put("SHOWS_DISPLAY_NAME", makeKey(Boolean.class, Value.class, of("ShowDisplayName")));
-        keyMap.put("DISPLAY_NAME", makeKey(Text.class, Value.class, of("DisplayName")));
-        keyMap.put("CAREER", makeKey(Career.class, Value.class, of("Career")));
+        keyMap.put("axis", makeKey(Axis.class, Value.class, of("Axis")));
+        keyMap.put("color", makeKey(Color.class, Value.class, of("Color")));
+        keyMap.put("health", makeKey(Double.class, MutableBoundedValue.class, of("Health")));
+        keyMap.put("max_health", makeKey(Double.class, MutableBoundedValue.class, of("MaxHealth")));
+        keyMap.put("shows_display_name", makeKey(Boolean.class, Value.class, of("ShowDisplayName")));
+        keyMap.put("display_name", makeKey(Text.class, Value.class, of("DisplayName")));
+        keyMap.put("career", makeKey(Career.class, Value.class, of("Career")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
