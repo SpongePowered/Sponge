@@ -207,6 +207,7 @@
         "world.biome.MixinBiomeGenBase",
         "world.difficulty.MixinEnumDifficulty",
         "world.extent.MixinExtent",
+        "world.extent.MixinExtentViewDownsize",
         "world.storage.MixinWorldInfo",
         "world.storage.MixinSaveHandler"
     ],
