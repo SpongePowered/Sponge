@@ -68,7 +68,6 @@ import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ShortArrayImmutableBlockBuffer;
 import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
 import org.spongepowered.common.world.extent.ExtentBufferUtil;
-import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
@@ -78,7 +77,7 @@ import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 
 import java.util.Collection;
 
-@Mixin({World.class, Chunk.class, ExtentViewDownsize.class})
+@Mixin({World.class, Chunk.class})
 public abstract class MixinExtent implements Extent {
 
     @Override

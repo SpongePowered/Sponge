@@ -130,6 +130,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
+import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.gen.CustomChunkProviderGenerate;
 import org.spongepowered.common.world.gen.CustomWorldChunkManager;
 import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
@@ -885,7 +886,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
         checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
         checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
-        return null;
+        return ExtentViewDownsize.newInstance(this, newMin, newMax);
     }
 
     @Override
