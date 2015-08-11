@@ -35,6 +35,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -306,14 +307,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Entity> getEntities() {
-        return (Collection<Entity>) (Object) this.loadedEntityList;
+        return Lists.newArrayList((Collection<Entity>) (Object) this.loadedEntityList);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
-                (Predicate<net.minecraft.entity.Entity>) (Object) filter);
+        // This already returns a new copy
+        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class, (Predicate<net.minecraft.entity.Entity>) (Object)
+            filter);
     }
 
     @Override
@@ -845,13 +847,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities() {
-        return ImmutableList.copyOf((List<TileEntity>) (Object) this.loadedTileEntityList);
+        return Lists.newArrayList((List<TileEntity>) (Object) this.loadedTileEntityList);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
-        return ImmutableList.copyOf(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
+        return Lists.newArrayList(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
     }
 
     @Override
