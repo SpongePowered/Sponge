@@ -582,6 +582,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         } else {
             T type = (T) tempMap.get(id.toUpperCase());
             if (type == null) {
+                type = (T) tempMap.get(id.toLowerCase());
+            }
+            if (type == null) {
                 return com.google.common.base.Optional.absent();
             } else {
                 return com.google.common.base.Optional.of(type);
