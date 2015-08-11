@@ -69,13 +69,13 @@ import java.util.UUID;
 //@Mixin(ExtentViewDownsize.class)
 public abstract class MixinExtentViewDownsize extends MixinExtent implements Extent {
 
-    @Shadow(remap = false) private Extent extent;
-    @Shadow(remap = false) private Vector3i blockMin;
-    @Shadow(remap = false) private Vector3i blockMax;
-    @Shadow(remap = false) private Vector3i blockSize;
-    @Shadow(remap = false) private Vector2i biomeMin;
-    @Shadow(remap = false) private Vector2i biomeMax;
-    @Shadow(remap = false) private Vector2i biomeSize;
+    /*@Shadow(remap = false)*/ private Extent extent;
+    /*@Shadow(remap = false)*/ private Vector3i blockMin;
+    /*@Shadow(remap = false)*/ private Vector3i blockMax;
+    /*@Shadow(remap = false)*/ private Vector3i blockSize;
+    /*@Shadow(remap = false)*/ private Vector2i biomeMin;
+    /*@Shadow(remap = false)*/ private Vector2i biomeMax;
+    /*@Shadow(remap = false)*/ private Vector2i biomeSize;
 
     @Override
     public UUID getUniqueId() {
