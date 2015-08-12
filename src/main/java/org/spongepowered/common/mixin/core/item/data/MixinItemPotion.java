@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.item.data;
 
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.manipulator.PotionEffectData;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;
@@ -36,8 +36,8 @@ import java.util.List;
 public abstract class MixinItemPotion extends MixinItem {
 
     @Override
-    public List<DataManipulator<?>> getManipulatorsFor(ItemStack itemStack) {
-        final List<DataManipulator<?>> manipulators = super.getManipulatorsFor(itemStack);
+    public List<DataManipulator<?, ?>> getManipulatorsFor(ItemStack itemStack) {
+        final List<DataManipulator<?, ?>> manipulators = super.getManipulatorsFor(itemStack);
         manipulators.add(getData(itemStack, PotionEffectData.class));
         return manipulators;
     }

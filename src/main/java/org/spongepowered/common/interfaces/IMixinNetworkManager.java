@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.interfaces;
 
+import com.mojang.authlib.properties.Property;
 import org.spongepowered.api.MinecraftVersion;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.UUID;
 
 public interface IMixinNetworkManager {
 
@@ -39,4 +42,14 @@ public interface IMixinNetworkManager {
     MinecraftVersion getVersion();
 
     void setVersion(int version);
+
+    void setRemoteAddress(SocketAddress socketAddress);
+
+    UUID getSpoofedUUID();
+
+    void setSpoofedUUID(UUID uuid);
+
+    Property[] getSpoofedProfile();
+
+    void setSpoofedProfile(Property[] profile);
 }

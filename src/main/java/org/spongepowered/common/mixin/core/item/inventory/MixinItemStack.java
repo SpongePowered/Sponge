@@ -29,7 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -52,6 +52,8 @@ public abstract class MixinItemStack implements ItemStack {
     @Shadow public abstract void setItemDamage(int meta);
     @Shadow public abstract int getMaxStackSize();
     @Shadow public abstract NBTTagCompound getTagCompound();
+    @Shadow(prefix = "shadow$")
+    public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow(prefix = "shadow$")
     public abstract Item shadow$getItem();
 
@@ -90,14 +92,14 @@ public abstract class MixinItemStack implements ItemStack {
     }
 
     @Override
-    public Collection<DataManipulator<?>> getManipulators() {
-        return ((IMixinItem) shadow$getItem()).getManipulatorsFor((net.minecraft.item.ItemStack) (Object) this);
+    public ItemStack copy() {
+        return (ItemStack) shadow$copy();
     }
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer();
-        for (DataManipulator<?> manipulator : getManipulators()) {
+        for (DataManipulator<?, ?> manipulator : getContainers()) {
             container.set(of(manipulator.getClass().getCanonicalName()), manipulator.toContainer());
         }
         return new MemoryDataContainer()

@@ -24,11 +24,19 @@
  */
 package org.spongepowered.common.service.permission;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListOps;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.MemorySubjectData;
+import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.service.permission.PermissionDescription.Builder;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -38,6 +46,8 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.service.permission.base.FixedParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.GlobalMemorySubjectData;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -55,10 +65,14 @@ public class SpongePermissionService implements PermissionService {
         }
     };
 
+    private final Game game;
+    private final Map<String, PermissionDescription> descriptionMap = new LinkedHashMap<String, PermissionDescription>();
+    private Collection<PermissionDescription> descriptions;
     private final ConcurrentMap<String, SubjectCollection> subjects = new ConcurrentHashMap<String, SubjectCollection>();
     private final MemorySubjectData defaultData;
 
-    public SpongePermissionService() {
+    public SpongePermissionService(Game game) {
+        this.game = game;
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
@@ -145,4 +159,38 @@ public class SpongePermissionService implements PermissionService {
     public Map<String, SubjectCollection> getKnownSubjects() {
         return ImmutableMap.copyOf(this.subjects);
     }
+
+    @Override
+    public Optional<Builder> newDescriptionBuilder(Object instance) {
+        Optional<PluginContainer> container = this.game.getPluginManager().fromInstance(checkNotNull(instance, "instance"));
+        if (!container.isPresent()) {
+            throw new IllegalArgumentException("The provided plugin object does not have an associated plugin container "
+                    + "(in other words, is 'plugin' actually your plugin object?)");
+        }
+
+        return Optional.<Builder>of(new SpongePermissionDescription.Builder(this, container.get()));
+    }
+
+    public void addDescription(PermissionDescription permissionDescription) {
+        checkNotNull(permissionDescription, "permissionDescription");
+        checkNotNull(permissionDescription.getId(), "permissionId");
+        this.descriptionMap.put(permissionDescription.getId().toLowerCase(), permissionDescription);
+        this.descriptions = null;
+    }
+
+    @Override
+    public Optional<PermissionDescription> getDescription(String permissionId) {
+        return Optional.fromNullable(this.descriptionMap.get(checkNotNull(permissionId, "permissionId").toLowerCase()));
+    }
+
+    @Override
+    public Collection<PermissionDescription> getDescriptions() {
+        Collection<PermissionDescription> descriptions = this.descriptions;
+        if (descriptions == null) {
+            descriptions = ImmutableList.copyOf(this.descriptionMap.values());
+            this.descriptions = descriptions;
+        }
+        return descriptions;
+    }
+
 }

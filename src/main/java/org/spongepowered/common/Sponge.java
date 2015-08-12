@@ -50,6 +50,7 @@ public class Sponge {
     private static final File gameDir = SpongeLaunch.getGameDirectory();
     private static final File configDir = SpongeLaunch.getConfigDirectory();
     private static final File pluginsDir = SpongeLaunch.getPluginsDirectory();
+    private static final File modConfigDir = new File(SpongeLaunch.getConfigDirectory() + File.separator + "sponge");
     @Nullable
     private static Sponge instance;
     @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
@@ -118,9 +119,13 @@ public class Sponge {
         return pluginsDir;
     }
 
+    public static File getModConfigDirectory() {
+        return modConfigDir;
+    }
+
     public static SpongeConfig<SpongeConfig.GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
-            globalConfig = new SpongeConfig<SpongeConfig.GlobalConfig>(GLOBAL, new File(new File(configDir, "sponge"), "global.conf"), "sponge");
+            globalConfig = new SpongeConfig<SpongeConfig.GlobalConfig>(GLOBAL, new File(modConfigDir, "global.conf"), "sponge");
         }
 
         return globalConfig;

@@ -27,19 +27,24 @@ package org.spongepowered.common.service.persistence;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.data.DataSerializable;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.configuration.DataSerializableTypeSerializer;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 public class SpongeSerializationService implements SerializationService {
     static {
-        TypeSerializers.registerSerializer(new DataSerializableTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(DataSerializable.class), new DataSerializableTypeSerializer());
     }
 
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
@@ -66,6 +71,16 @@ public class SpongeSerializationService implements SerializationService {
         checkNotNull(clazz);
         if (this.builders.containsKey(clazz)) {
             return Optional.of((DataBuilder<T>) this.builders.get(clazz));
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    @Override
+    public <T extends DataSerializable> Optional<T> deserialize(Class<T> clazz, final DataView dataView) {
+        final Optional<DataBuilder<T>> optional = getBuilder(clazz);
+        if (optional.isPresent()) {
+            return optional.get().build(dataView);
         } else {
             return Optional.absent();
         }

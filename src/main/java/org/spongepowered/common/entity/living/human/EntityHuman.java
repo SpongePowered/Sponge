@@ -25,6 +25,8 @@
 
 package org.spongepowered.common.entity.living.human;
 
+import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
+
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -50,11 +52,12 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
+import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.entity.SkinData;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.entity.ArmorEquipable;
-import org.spongepowered.common.data.DataTransactionBuilder;
-import org.spongepowered.common.data.manipulator.entity.SpongeSkinData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IMixinEntity;
 
 import java.util.ArrayList;
@@ -290,13 +293,13 @@ public class EntityHuman extends EntityCreature {
     public DataTransactionResult setSkinData(SkinData skin) {
         if (!MinecraftServer.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
-            return DataTransactionBuilder.fail(skin);
+            return failResult(skin.skin().asImmutable());
         }
-        if (skin.getValue().equals(this.skinUuid)) {
+        if (skin.skin().get().equals(this.skinUuid)) {
             return DataTransactionBuilder.successNoData();
         }
-        if (!updateFakeProfileWithSkin(skin.getValue())) {
-            return DataTransactionBuilder.fail(skin);
+        if (!updateFakeProfileWithSkin(skin.skin().get())) {
+            return failResult(skin.skin().asImmutable());
         }
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
@@ -306,13 +309,13 @@ public class EntityHuman extends EntityCreature {
 
     public Optional<SkinData> getSkinData() {
         if (this.skinUuid != null) {
-            return Optional.<SkinData>of(new SpongeSkinData(this.skinUuid));
+            return Optional.absent(); //Optional.<SkinData>of(new SpongeSkinData(this.skinUuid));
         }
         return Optional.absent();
     }
 
     public SkinData createSkinData() {
-        return this.getSkinData().or(new SpongeSkinData(this.entityUniqueID));
+        return this.getSkinData().orNull(); //.or(new SpongeSkinData(this.entityUniqueID));
     }
 
     public boolean removeSkin() {
@@ -331,7 +334,7 @@ public class EntityHuman extends EntityCreature {
         if (this.skinUuid == null) {
             return Optional.absent();
         }
-        return Optional.of(manipulator.setValue(this.skinUuid));
+        return Optional.of(manipulator.set(new SpongeValue<UUID>(Keys.SKIN, this.skinUuid)));
     }
 
     private boolean isAliveAndInWorld() {

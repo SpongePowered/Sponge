@@ -146,7 +146,7 @@ public final class CustomChunkProviderGenerate implements IChunkProvider {
         // Generate base terrain
         ChunkPrimer chunkprimer = new ChunkPrimer();
         MutableBlockVolume blockBuffer = new ChunkPrimerBuffer(chunkprimer, chunkX, chunkZ);
-        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableClone();
+        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
         this.baseGenerator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
 
         // Apply the generator populators to complete the blockBuffer

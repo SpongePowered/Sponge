@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandBlockLogic;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -34,12 +35,18 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntityCommandBlock.class)
-public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implements CommandBlock {
+public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implements CommandBlock, IMixinCommandSource {
 
     @Shadow public abstract CommandBlockLogic getCommandBlockLogic();
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return getCommandBlockLogic();
+    }
 
     @Override
     public void execute() {

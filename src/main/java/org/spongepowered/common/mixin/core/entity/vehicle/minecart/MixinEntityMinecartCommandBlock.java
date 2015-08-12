@@ -24,21 +24,28 @@
  */
 package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
 
+import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock {
+public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
 
     @Shadow private CommandBlockLogic commandBlockLogic;
+
+    @Override
+    public ICommandSender asICommandSender() {
+        return commandBlockLogic;
+    }
 
     public String getCommand() {
         return this.commandBlockLogic.getCommandSenderName();

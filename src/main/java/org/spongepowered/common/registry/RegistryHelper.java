@@ -40,10 +40,10 @@ public class RegistryHelper {
                 continue;
             }
             try {
-                if (!mapping.containsKey(f.getName())) {
+                if (!mapping.containsKey(f.getName().toLowerCase())) {
                     continue;
                 }
-                f.set(null, mapping.get(f.getName()));
+                f.set(null, mapping.get(f.getName().toLowerCase()));
             } catch (Exception e) {
                 e.printStackTrace();
                 mappingSuccess = false;

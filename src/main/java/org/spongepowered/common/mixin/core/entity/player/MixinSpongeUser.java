@@ -29,14 +29,15 @@ import com.google.common.base.Optional;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.entity.AchievementData;
-import org.spongepowered.api.data.manipulator.entity.BanData;
-import org.spongepowered.api.data.manipulator.entity.StatisticData;
+import org.spongepowered.api.data.manipulator.mutable.entity.AchievementData;
+import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
+import org.spongepowered.api.data.manipulator.mutable.entity.StatisticData;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -60,6 +61,12 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     @Override
     public Optional<Player> getPlayer() {
         return Optional.fromNullable((Player) MinecraftServer.getServer().getConfigurationManager().getPlayerByUUID(this.profile.getId()));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<CommandSource> getCommandSource() {
+        return (Optional) getPlayer();
     }
 
     @Override

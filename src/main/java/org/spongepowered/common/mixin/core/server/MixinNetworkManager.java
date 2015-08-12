@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.local.LocalAddress;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,8 +34,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 
 @SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
@@ -41,6 +45,9 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
 
     @Shadow
     public abstract SocketAddress getRemoteAddress();
+
+    @Shadow
+    private Channel channel;
 
     private InetSocketAddress virtualHost;
     private MinecraftVersion version;
@@ -52,12 +59,17 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return this.virtualHost;
+        return this.virtualHost == null ? (InetSocketAddress) channel.localAddress() : this.virtualHost;
     }
 
     @Override
     public void setVirtualHost(String host, int port) {
-        this.virtualHost = InetSocketAddress.createUnresolved(host, port);
+        try {
+            this.virtualHost = new InetSocketAddress(InetAddress.getByAddress(host, ((InetSocketAddress) channel.localAddress()).getAddress()
+                    .getAddress()), port);
+        } catch (UnknownHostException e) {
+            this.virtualHost = InetSocketAddress.createUnresolved(host, port);
+        }
     }
 
     @Override

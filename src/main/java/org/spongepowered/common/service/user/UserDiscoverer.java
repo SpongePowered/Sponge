@@ -31,6 +31,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.server.management.UserListWhitelist;
@@ -151,10 +152,14 @@ class UserDiscoverer {
     }
 
     private static User getOnlinePlayer(UUID uniqueId) {
+        ServerConfigurationManager confMgr = MinecraftServer.getServer().getConfigurationManager();
+        if (confMgr == null) { // Server not started yet
+            return null;
+        }
         // Although the player itself could be returned here (as Player extends
         // User), a plugin is more likely to cache the User object and we don't
         // want the player entity to be cached.
-        IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) MinecraftServer.getServer().getConfigurationManager().getPlayerByUUID(uniqueId);
+        IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) confMgr.getPlayerByUUID(uniqueId);
         if (player != null) {
             return player.getUserObject();
         }

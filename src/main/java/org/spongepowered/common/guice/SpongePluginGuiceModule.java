@@ -29,13 +29,13 @@ import com.google.inject.Provider;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.config.ConfigDir;
 import org.spongepowered.api.service.config.DefaultConfig;
 import org.spongepowered.common.plugin.SpongePluginContainer;
+import org.spongepowered.common.service.config.SpongeConfigService;
 
 import java.io.File;
 
@@ -80,34 +80,30 @@ public class SpongePluginGuiceModule extends AbstractModule {
     private static class PrivateConfigDirProvider implements Provider<File> {
 
         private final PluginContainer container;
-        private final File configDir;
 
         @Inject
-        private PrivateConfigDirProvider(PluginContainer container, @ConfigDir(sharedRoot = true) File configDir) {
+        private PrivateConfigDirProvider(PluginContainer container) {
             this.container = container;
-            this.configDir = configDir;
         }
 
         @Override
         public File get() {
-            return new File(this.configDir, this.container.getId());
+            return SpongeConfigService.getPrivateRoot(this.container).getDirectory();
         }
     }
 
     private static class PrivateConfigFileProvider implements Provider<File> {
 
         private final PluginContainer container;
-        private final File configDir;
 
         @Inject
-        private PrivateConfigFileProvider(PluginContainer container, @ConfigDir(sharedRoot = false) File configDir) {
+        private PrivateConfigFileProvider(PluginContainer container) {
             this.container = container;
-            this.configDir = configDir;
         }
 
         @Override
         public File get() {
-            return new File(this.configDir, this.container.getId() + ".conf");
+            return SpongeConfigService.getPrivateRoot(this.container).getConfigFile();
         }
 
     }
@@ -115,49 +111,47 @@ public class SpongePluginGuiceModule extends AbstractModule {
     private static class SharedConfigFileProvider implements Provider<File> {
 
         private final PluginContainer container;
-        private final File configDir;
 
         @Inject
-        private SharedConfigFileProvider(PluginContainer container, @ConfigDir(sharedRoot = true) File configDir) {
+        private SharedConfigFileProvider(PluginContainer container) {
             this.container = container;
-            this.configDir = configDir;
         }
 
         @Override
         public File get() {
-            return new File(this.configDir, this.container.getId() + ".conf");
+            return SpongeConfigService.getSharedRoot(this.container).getConfigFile();
         }
 
     }
 
     private static class SharedHoconConfigProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
 
-        private final File configFile;
+        private final PluginContainer container;
 
         @Inject
-        private SharedHoconConfigProvider(@DefaultConfig(sharedRoot = true) File configFile) {
-            this.configFile = configFile;
+        private SharedHoconConfigProvider(PluginContainer container) {
+            this.container = container;
         }
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return HoconConfigurationLoader.builder().setFile(this.configFile).build();
+            return SpongeConfigService.getSharedRoot(this.container).getConfig();
         }
 
     }
 
     private static class PrivateHoconConfigProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
 
-        private final File configFile;
+        private final PluginContainer container;
 
         @Inject
-        private PrivateHoconConfigProvider(@DefaultConfig(sharedRoot = false) File configFile) {
-            this.configFile = configFile;
+        private PrivateHoconConfigProvider(PluginContainer container) {
+            this.container = container;
         }
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return HoconConfigurationLoader.builder().setFile(this.configFile).build();
+            return SpongeConfigService.getPrivateRoot(this.container).getConfig();
         }
 
     }

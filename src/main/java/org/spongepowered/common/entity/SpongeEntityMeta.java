@@ -79,4 +79,9 @@ public class SpongeEntityMeta implements CatalogType {
                 .add("name", this.name)
                 .toString();
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.type, this.name);
+    }
 }

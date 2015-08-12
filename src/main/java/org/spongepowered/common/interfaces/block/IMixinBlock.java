@@ -32,20 +32,39 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator;
-
-import java.util.Collection;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.BlockDataProcessor;
 
 /**
- * The root interface that every {@link Block} is being mixed into, this allows
- * for a simple method call for a desired {@link DataManipulator} to be
- * retrieved from a {@link IBlockState}.
+ * A quasi interface to mix into every possible {@link Block} such that their
+ * acceptable {@link BlockState}s can be created, manipulated, and applied
+ * with the safety of using these instance checks of the {@link IMixinBlock}.
+ * The advantage of this is that a simple cast from {@link Block} to a
+ * particular {@link IMixinBlock} to take advantage of particular {@link Value}
+ * types, such as {@link IMixinBlockDirectional}, are really simple to perform.
+ *
+ * <p>It is important to note that when using this level of implementation,
+ * it is already guaranteed that a particular {@link IMixinBlock} is capable
+ * of a particular type thanks to {@link Mixin}s. All that is needed to handle
+ * a particular type of {@link Value} or {@link ImmutableDataManipulator} is a
+ * simple cast. This is particularly useful for {@link BlockDataProcessor}s as
+ * they already know the type they need to focus on.</p>
  */
 public interface IMixinBlock {
 
-    Collection<DataManipulator<?>> getManipulators(World world, BlockPos blockPos);
+    /**
+     * Gets all the applicable {@link ImmutableDataManipulator}s possible for
+     * the {@link Block} type at he provided {@link BlockPos} and {@link World}.
+     *
+     * @param world
+     * @param blockPos
+     * @return
+     */
+    ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos);
 
-    ImmutableList<DataManipulator<?>> getManipulators(IBlockState blockState);
+    ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState);
 
     void resetBlockState(World world, BlockPos blockPos);
 

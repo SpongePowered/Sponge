@@ -36,19 +36,11 @@ import org.spongepowered.common.Sponge;
 /**
  * A {@link TypeSerializer} implementation that allows CatalogType values to be used in object-mapped classes.
  */
-public class CatalogTypeTypeSerializer implements TypeSerializer {
+public class CatalogTypeTypeSerializer implements TypeSerializer<CatalogType> {
 
     @Override
-    public boolean isApplicable(TypeToken<?> type) {
-        return CatalogType.class.isAssignableFrom(type.getRawType());
-    }
-
-    @Override
-    public Object deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        if (!isApplicable(type)) {
-            throw new InvalidTypeException(type);
-        }
-        Optional<?> ret = Sponge.getSpongeRegistry().getType(type.getRawType().asSubclass(CatalogType.class), value.getString());
+    public CatalogType deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
+        Optional<? extends CatalogType> ret = Sponge.getSpongeRegistry().getType(type.getRawType().asSubclass(CatalogType.class), value.getString());
         if (!ret.isPresent()) {
             throw new ObjectMappingException("Input '" + value.getValue() + "' was not a valid value for type " + type);
         }
@@ -56,11 +48,7 @@ public class CatalogTypeTypeSerializer implements TypeSerializer {
     }
 
     @Override
-    public void serialize(TypeToken<?> type, Object obj, ConfigurationNode value) throws ObjectMappingException {
-        if (!isApplicable(type)) {
-            throw new InvalidTypeException(type);
-        }
-        value.setValue(((CatalogType) obj).getId());
-
+    public void serialize(TypeToken<?> type, CatalogType obj, ConfigurationNode value) throws ObjectMappingException {
+        value.setValue(obj.getId());
     }
 }

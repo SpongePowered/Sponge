@@ -51,8 +51,15 @@
         "data.types.MixinEnumPlantType",
         "data.types.MixinFishType",
         "data.types.MixinGameType",
-        "command.MixinCommandBlockLogic",
+        "command.MixinBlockCommandBlockSender",
+        "command.MixinCommandBlockSource",
         "command.MixinCommandExecuteAtSender",
+        "command.MixinCommandHandler",
+        "command.MixinCommandSource",
+        "command.MixinICommandSender",
+        "command.MixinLocatedSource",
+        "command.MixinMinecartCommandBlockSender",
+        "command.MixinSignCommandSender",
         "command.MixinSubject",
         "command.MixinPlayerSelector",
         "entity.MixinArmorEquipable",
@@ -171,6 +178,8 @@
         "server.MixinNetworkManager",
         "server.MixinServerCommandManager",
         "server.MixinServerConfigurationManager",
+        "server.network.MixinNetHandlerLoginServer",
+        "server.network.MixinNetHandlerLoginServerAnonThread",
         "status.MixinMinecraftProtocolVersionIdentifier",
         "status.MixinNetHandlerStatusServer",
         "status.MixinPingResponseHandler",
@@ -185,6 +194,7 @@
         "text.MixinHoverEvent",
         "world.MixinAnvilSaveHandler",
         "world.MixinChunk",
+        "world.MixinExplosion",
         "world.MixinNextTickListEntry",
         "world.MixinWorld",
         "world.MixinWorldBorder",
@@ -198,6 +208,7 @@
         "world.biome.MixinBiomeGenBase",
         "world.difficulty.MixinEnumDifficulty",
         "world.extent.MixinExtent",
+        "world.extent.MixinExtentViewDownsize",
         "world.storage.MixinWorldInfo",
         "world.storage.MixinSaveHandler"
     ],
@@ -207,6 +218,7 @@
         "network.rcon.MixinRConThreadClient"
     ],
     "client": [
+        "client.MixinMinecraft",
         "client.server.MixinIntegratedServer"
     ]
 }

@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import static org.spongepowered.common.data.DataTransactionBuilder.builder;
-
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -41,26 +38,21 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.SpongeBlockProcessor;
-import org.spongepowered.common.data.SpongeManipulatorRegistry;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
-
-import java.util.Collection;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
@@ -80,20 +72,12 @@ public abstract class MixinChunk implements Chunk {
     @Shadow private boolean isChunkLoaded;
     @Shadow private boolean isTerrainPopulated;
 
-    @Shadow
-    public abstract IBlockState getBlockState(BlockPos pos);
-
+    @Shadow public abstract IBlockState getBlockState(BlockPos pos);
+    @Shadow public abstract BiomeGenBase getBiome(BlockPos pos, WorldChunkManager chunkManager);
+    @Shadow public abstract byte[] getBiomeArray();
+    @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow(prefix = "shadow$")
     public abstract Block shadow$getBlock(int x, int y, int z);
-
-    @Shadow
-    public abstract BiomeGenBase getBiome(BlockPos pos, WorldChunkManager chunkManager);
-
-    @Shadow
-    public abstract byte[] getBiomeArray();
-
-    @Shadow
-    public abstract void setBiomeArray(byte[] biomeArray);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -146,52 +130,6 @@ public abstract class MixinChunk implements Chunk {
     @Override
     public org.spongepowered.api.world.World getWorld() {
         return (org.spongepowered.api.world.World) this.worldObj;
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().fromBlockPos(this.worldObj, new BlockPos(x, y, z));
-        }
-        return Optional.absent();
-    }
-
-
-    @Override
-    public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().fromBlockPos(this.worldObj, new BlockPos(x, y, z));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().remove(this.worldObj, new BlockPos(x, y, z));
-        }
-        return false;
-    }
-
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
-                .getClass());
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().setData(this.worldObj, new BlockPos(x, y, z), manipulatorData, priority);
-        }
-        return builder().result(DataTransactionResult.Type.FAILURE).build();
-    }
-
-    @Override
-    public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
-        final BlockPos blockPos = new BlockPos(x, y, z);
-        return ((IMixinBlock) getBlock(x, y, z)).getManipulators(this.worldObj, blockPos);
     }
 
     @Override
@@ -282,13 +220,20 @@ public abstract class MixinChunk implements Chunk {
     }
 
     @Override
-    public float getTemperature(Vector3i position) {
-        return getTemperature(position.getX(), position.getY(), position.getZ());
+    public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
+        checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
+        return ExtentViewDownsize.newInstance(this, newMin, newMax);
     }
 
     @Override
-    public float getTemperature(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        return getBiome(pos, this.worldObj.getWorldChunkManager()).getFloatTemperature(pos);
+    public Extent getExtentView(DiscreteTransform3 transform) {
+        return null;
     }
+
+    @Override
+    public Extent getRelativeExtentView() {
+        return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
+    }
+
 }

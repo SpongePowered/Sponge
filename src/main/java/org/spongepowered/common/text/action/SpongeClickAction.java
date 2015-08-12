@@ -27,6 +27,8 @@ package org.spongepowered.common.text.action;
 import net.minecraft.event.ClickEvent;
 import org.spongepowered.api.text.action.ClickAction;
 
+import java.util.UUID;
+
 public final class SpongeClickAction {
 
     private SpongeClickAction() {}
@@ -34,7 +36,8 @@ public final class SpongeClickAction {
     private static ClickEvent.Action getType(ClickAction<?> action) {
         if (action instanceof ClickAction.OpenUrl) {
             return ClickEvent.Action.OPEN_URL;
-        } else if (action instanceof ClickAction.RunCommand) {
+        } else if (action instanceof ClickAction.RunCommand
+                || action instanceof ClickAction.ExecuteCallback) {
             return ClickEvent.Action.RUN_COMMAND;
         } else if (action instanceof ClickAction.SuggestCommand) {
             return ClickEvent.Action.SUGGEST_COMMAND;
@@ -46,7 +49,15 @@ public final class SpongeClickAction {
     }
 
     public static ClickEvent getHandle(ClickAction<?> action) {
-        return new ClickEvent(getType(action), action.getResult().toString());
+        final String result;
+        if (action instanceof ClickAction.ExecuteCallback) {
+            UUID callbackId = SpongeCallbackHolder.getInstance().getOrCreateIdForCallback(((ClickAction.ExecuteCallback) action).getResult());
+            result = SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED + " " + callbackId;
+        } else {
+            result = action.getResult().toString();
+        }
+
+        return new ClickEvent(getType(action), result);
     }
 
 }

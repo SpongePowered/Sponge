@@ -52,7 +52,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
-import org.spongepowered.api.data.manipulator.tileentity.SignData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
@@ -147,12 +147,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         final SignData changedSignData = existingSignData.get().copy();
 
         for (int i = 0; i < packetIn.getLines().length; i++) {
-            changedSignData.setLine(i, SpongeTexts.toText(packetIn.getLines()[i]));
+            changedSignData.lines().set(i, SpongeTexts.toText(packetIn.getLines()[i]));
         }
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
         final SignChangeEvent event = SpongeEventFactory.createSignChange(Sponge.getGame(), new Cause(null, this.playerEntity, null), (Sign)
-                tileentitysign, changedSignData, changedSignData);
+                tileentitysign, changedSignData.asImmutable(), changedSignData);
         if (!Sponge.getGame().getEventManager().post(event)) {
             ((Sign) tileentitysign).offer(event.getNewData());
         } else {
@@ -269,7 +269,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                  from = this.lastMoveLocation;
             }
 
-            Vector3d torot = new Vector3d(packetIn.getYaw(), packetIn.getPitch(), 0);
+            Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
             Location to = new Location(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected

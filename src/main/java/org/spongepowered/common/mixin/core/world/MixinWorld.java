@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.DataTransactionBuilder.builder;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
@@ -36,6 +35,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -77,10 +77,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataManipulatorBuilder;
-import org.spongepowered.api.data.DataPriority;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
@@ -93,16 +89,19 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
@@ -119,8 +118,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
-import org.spongepowered.common.data.SpongeBlockProcessor;
-import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.IMixinWorld;
@@ -133,6 +130,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
+import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.gen.CustomChunkProviderGenerate;
 import org.spongepowered.common.world.gen.CustomWorldChunkManager;
 import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
@@ -192,17 +190,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract int getRedstonePower(BlockPos pos, EnumFacing facing);
     @Shadow public abstract int getStrongPower(BlockPos pos, EnumFacing direction);
     @Shadow public abstract int isBlockIndirectlyGettingPowered(BlockPos pos);
+    @Shadow public abstract net.minecraft.world.Explosion newExplosion(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
         if (!client) {
             String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
-            this.worldConfig = new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD,
-                    new File(Sponge.getConfigDirectory() + File.separator + "worlds" + File.separator + providerName + File.separator
-                            + (providerIn.getDimensionId() == 0 ? "DIM0" :
-                                    Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
-                            , "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
+            this.worldConfig =
+                    new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD,
+                            new File(Sponge.getModConfigDirectory() + File.separator + "worlds" + File.separator
+                                    + providerName + File.separator
+                                    + (providerIn.getDimensionId() == 0 ? "DIM0" :
+                                            Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
+                                    , "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
 
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
@@ -225,17 +226,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList());
         }
-    }
-
-    @Override
-    public float getTemperature(Vector3i position) {
-        return getTemperature(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public float getTemperature(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        return getBiomeGenForCoords(pos).getFloatTemperature(pos);
     }
 
     @Override
@@ -315,22 +305,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ((Chunk) getChunkFromChunkCoords(x >> 4, z >> 4)).setBiome(x, z, biome);
     }
 
-    @Override
-    public boolean isBlockPowered(int x, int y, int z) {
-        return isBlockPowered(new BlockPos(x, y, z));
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Entity> getEntities() {
-        return (Collection<Entity>) (Object) this.loadedEntityList;
+        return Lists.newArrayList((Collection<Entity>) (Object) this.loadedEntityList);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
-                (Predicate<net.minecraft.entity.Entity>) (Object) filter);
+        // This already returns a new copy
+        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class, (Predicate<net.minecraft.entity.Entity>) (Object)
+            filter);
     }
 
     @Override
@@ -619,7 +605,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.setWorldGenerator(newGenerator);
     }
 
-
     @Override
     public ImmutableList<Populator> getPopulators() {
         if (this.populators == null) {
@@ -662,63 +647,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } else {
             return Optional.of((TileEntity) tileEntity);
         }
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> Optional<T> getData(int x, int y, int z, Class<T> dataClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(dataClass);
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
-        }
-        return Optional.absent();
-    }
-
-
-    @Override
-    public <T extends DataManipulator<T>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        if (blockUtilOptional.isPresent()) {
-            Optional<T> data = blockUtilOptional.get().fromBlockPos((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
-            if (!data.isPresent() && blockUtilOptional.get() instanceof DataManipulatorBuilder) {
-                data = Optional.<T>fromNullable(((DataManipulatorBuilder<T>) blockUtilOptional.get()).create());
-            }
-            return data;
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public <T extends DataManipulator<T>> boolean remove(int x, int y, int z, Class<T> manipulatorClass) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil(manipulatorClass);
-        return blockUtilOptional.isPresent() && blockUtilOptional.get().remove((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z));
-    }
-
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends DataManipulator<T>> DataTransactionResult offer(int x, int y, int z, T manipulatorData, DataPriority priority) {
-        Optional<SpongeBlockProcessor<T>> blockUtilOptional = SpongeManipulatorRegistry.getInstance().getBlockUtil((Class<T>) (Class) manipulatorData
-                .getClass());
-        if (blockUtilOptional.isPresent()) {
-            return blockUtilOptional.get().setData((net.minecraft.world.World) ((Object) this), new BlockPos(x, y, z), manipulatorData, priority);
-        }
-        return builder().result(DataTransactionResult.Type.FAILURE).build();
-    }
-
-    @Override
-    public Collection<DataManipulator<?>> getManipulators(int x, int y, int z) {
-        final BlockPos blockPos = new BlockPos(x, y, z);
-        return ((IMixinBlock) getBlock(x, y, z).getType()).getManipulators((net.minecraft.world.World) ((Object) this), blockPos);
-    }
-
-    @Override
-    public int getLuminanceFromSky(int x, int y, int z) {
-        return Math.max(0, getLightFor(EnumSkyBlock.SKY, new BlockPos(x, y, z)) - getSkylightSubtracted());
-    }
-
-    @Override
-    public int getLuminanceFromGround(int x, int y, int z) {
-        return getLightFor(EnumSkyBlock.BLOCK, new BlockPos(x, y, z));
     }
 
     @Override
@@ -774,7 +702,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         // Replace generator populator with possibly modified one
         ((ChunkProviderServer) this.getChunkProvider()).serverChunkGenerator =
-            CustomChunkProviderGenerate.of(thisWorld, biomeGenerator, generator.getBaseGeneratorPopulator(), this.generatorPopulators);
+                CustomChunkProviderGenerate.of(thisWorld, biomeGenerator, generator.getBaseGeneratorPopulator(), this.generatorPopulators);
     }
 
     @Override
@@ -788,8 +716,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return new SpongeWorldGenerator(
                 SpongeBiomeGenerator.of(getWorldChunkManager()),
                 SpongeGeneratorPopulator.of(world, serverChunkProvider.serverChunkGenerator),
-                this.generatorPopulators,
-                this.populators);
+                getGeneratorPopulators(),
+                getPopulators());
     }
 
     private void checkBiomeBounds(int x, int z) {
@@ -822,7 +750,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @SuppressWarnings("unchecked")
     private List<Player> getPlayers() {
-        return (List<Player>) ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, Predicates.alwaysTrue());
+        return ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, Predicates.alwaysTrue());
     }
 
     @Override
@@ -868,11 +796,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean isBlockIndirectlyPowered(int x, int y, int z) {
-        return this.isBlockIndirectlyGettingPowered(new BlockPos(x, y, z)) > 0;
-    }
-
-    @Override
     public boolean isBlockFacePowered(int x, int y, int z, Direction direction) {
         checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
         BlockPos pos = new BlockPos(x, y, z);
@@ -915,12 +838,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean isBlockPassable(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        return this.getBlockState(pos).getBlock().isPassable((IBlockAccess) this, pos);
-    }
-
-    @Override
     public boolean isBlockFlammable(int x, int y, int z, Direction faceDirection) {
         checkArgument(faceDirection.isCardinal() || faceDirection.isUpright(), "Direction must be a valid block face");
         BlockPos pos = new BlockPos(x, y, z);
@@ -931,13 +848,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities() {
-        return ImmutableList.copyOf((List<TileEntity>) (Object) this.loadedTileEntityList);
+        return Lists.newArrayList((List<TileEntity>) (Object) this.loadedTileEntityList);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
-        return ImmutableList.copyOf(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
+        return Lists.newArrayList(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
     }
 
     @Override
@@ -953,6 +870,33 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Map<String, String> getGameRules() {
         return this.getProperties().getGameRules();
+    }
+
+    @Override
+    public void triggerExplosion(Explosion explosion) {
+        checkNotNull(explosion, "explosion");
+        checkNotNull(explosion.getOrigin(), "origin");
+
+        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orNull(), explosion
+                .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
+                explosion.shouldBreakBlocks());
+    }
+
+    @Override
+    public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
+        checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
+        return ExtentViewDownsize.newInstance(this, newMin, newMax);
+    }
+
+    @Override
+    public Extent getExtentView(DiscreteTransform3 transform) {
+        return null;
+    }
+
+    @Override
+    public Extent getRelativeExtentView() {
+        return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
     }
 
 }

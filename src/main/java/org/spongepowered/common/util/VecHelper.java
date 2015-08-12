@@ -31,8 +31,11 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.Rotations;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3i;
+import net.minecraft.world.ChunkCoordIntPair;
 
 public final class VecHelper {
+
+    public static final Vec3 VEC3_ORIGIN = new Vec3(0, 0, 0);
 
     // === Flow Vector3d --> BlockPos ===
 
@@ -76,6 +79,18 @@ public final class VecHelper {
         return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
+    // === MC ChunkCoordIntPair ---> Flow Vector3i ===
+
+    public static Vector3i toVector(ChunkCoordIntPair chunk) {
+        return new Vector3i(chunk.chunkXPos, 0, chunk.chunkZPos);
+    }
+
+    // === Flow Vector3i --> MC ChunkCoordIntPair ===
+
+    public static ChunkCoordIntPair toChunkCoordIntPair(Vector3i vector) {
+        return new ChunkCoordIntPair(vector.getX(), vector.getZ());
+    }
+
     // === MC Vec3 --> flow Vector3d ==
 
     public static Vector3d toVector(Vec3 vector) {
@@ -98,6 +113,10 @@ public final class VecHelper {
     }
 
     public static boolean inBounds(int x, int y, int z, Vector3i min, Vector3i max) {
+        return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
+    }
+
+    public static boolean inBounds(double x, double y, double z, Vector3i min, Vector3i max) {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 }

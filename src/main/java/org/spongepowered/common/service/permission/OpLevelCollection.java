@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class OpLevelCollection extends SpongeSubjectCollection {
+
     private final Map<String, OpLevelSubject> levels;
 
     public OpLevelCollection(SpongePermissionService service) {
@@ -76,13 +77,16 @@ public class OpLevelCollection extends SpongeSubjectCollection {
     }
 
     public static class OpLevelSubject extends SpongeSubject {
+
+        private final SpongePermissionService service;
         private final int level;
         private final MemorySubjectData data;
 
         public OpLevelSubject(final SpongePermissionService service, final int level) {
-            super(service);
+            this.service = service;
             this.level = level;
             this.data = new GlobalMemorySubjectData(service) {
+
                 @Override
                 public List<Subject> getParents(Set<Context> contexts) {
                     if (!GLOBAL_CONTEXT.equals(contexts)) {
@@ -113,7 +117,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
 
         @Override
         public SubjectCollection getContainingCollection() {
-            return getService().getGroupSubjects();
+            return this.service.getGroupSubjects();
         }
 
         @Override

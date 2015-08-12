@@ -24,20 +24,24 @@
  */
 package org.spongepowered.common.util.gen;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.world.biome.BiomeGenBase;
+import org.spongepowered.api.util.DiscreteTransform2;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-
-import java.util.Arrays;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.StorageType;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
+import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 
 /**
  * Immutable biome area, backed by a byte array. The array passed to the
  * constructor is copied to ensure that the instance is immutable.
  */
+@NonnullByDefault
 public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
 
     private final BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
@@ -45,31 +49,19 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
 
     public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
-
-        int minLength = size.getX() * size.getY();
-        checkArgument(biomes.length >= minLength, "biome array to small");
-        this.biomes = Arrays.copyOf(biomes, minLength);
+        this.biomes = biomes.clone();
     }
 
-    public ByteArrayImmutableBiomeBuffer(BiomeGenBase[] biomeGenBases, Vector2i start, Vector2i size) {
+    private ByteArrayImmutableBiomeBuffer(Vector2i start, Vector2i size, byte[] biomes) {
         super(start, size);
-
-        int minLength = size.getX() * size.getY();
-        checkArgument(biomeGenBases.length >= minLength, "biome array to small");
-        this.biomes = new byte[minLength];
-        for (int i = 0; i > this.biomes.length; i++) {
-            BiomeGenBase biome = biomeGenBases[i];
-            if (biome == null) {
-                continue;
-            }
-            this.biomes[i] = (byte) biome.biomeID;
-        }
+        this.biomes = biomes;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public BiomeType getBiome(int x, int z) {
         checkRange(x, z);
-        BiomeType biomeType = (BiomeType) this.biomeById[this.biomes[(x - this.start.getX()) | (z - this.start.getY()) << 4] & 0xff];
+        BiomeType biomeType = (BiomeType) this.biomeById[this.biomes[getIndex(x, z)] & 0xff];
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 
@@ -78,4 +70,54 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         return getBiome(position.getX(), position.getY());
     }
 
+    @Override
+    public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
+        checkRange(newMin.getX(), newMin.getY());
+        checkRange(newMax.getX(), newMax.getY());
+        return new ImmutableBiomeViewDownsize(this, newMin, newMax);
+    }
+
+    @Override
+    public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+        return new ImmutableBiomeViewTransform(this, transform);
+    }
+
+    @Override
+    public ImmutableBiomeArea getRelativeBiomeView() {
+        return getBiomeView(DiscreteTransform2.fromTranslation(this.start.negate()));
+    }
+
+    @Override
+    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
+        return this;
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeCopy(StorageType type) {
+        switch (type) {
+            case STANDARD:
+                return new ByteArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
+            case THREAD_SAFE:
+            default:
+                throw new UnsupportedOperationException(type.name());
+        }
+    }
+
+    @Override
+    public ImmutableBiomeArea getImmutableBiomeCopy() {
+        return this;
+    }
+
+    /**
+     * This method doesn't clone the array passed into it. INTERNAL USE ONLY.
+     * Make sure your code doesn't leak the reference if you're using it.
+     *
+     * @param biomes The biomes to store
+     * @param start The start of the area
+     * @param size The size of the area
+     * @return A new buffer using the same array reference
+     */
+    public static ImmutableBiomeArea newWithoutArrayClone(byte[] biomes, Vector2i start, Vector2i size) {
+        return new ByteArrayImmutableBiomeBuffer(start, size, biomes);
+    }
 }

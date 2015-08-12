@@ -26,7 +26,6 @@ package org.spongepowered.common.text.xml;
 
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
@@ -46,6 +45,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,50 +184,51 @@ public abstract class Element {
     }
 
     public static Element fromText(Text text, Locale locale) {
-        Element rootElement = null;
+        final AtomicReference<Element> fixedRoot = new AtomicReference<Element>();
+        Element currentElement = null;
         if (text.getColor() != TextColors.NONE) {
-            rootElement = update(rootElement, new Color.C(text.getColor()));
+            currentElement = update(fixedRoot, currentElement, new Color.C(text.getColor()));
         }
 
         if (text.getStyle().contains(TextStyles.BOLD)) {
-            rootElement = update(rootElement, new B());
+            currentElement = update(fixedRoot, currentElement, new B());
         }
 
         if (text.getStyle().contains(TextStyles.ITALIC)) {
-            rootElement = update(rootElement, new I());
+            currentElement = update(fixedRoot, currentElement, new I());
         }
 
         if (text.getStyle().contains(TextStyles.OBFUSCATED)) {
-            rootElement = update(rootElement, new Obfuscated.O());
+            currentElement = update(fixedRoot, currentElement, new Obfuscated.O());
         }
 
         if (text.getStyle().contains(TextStyles.STRIKETHROUGH)) {
-            rootElement = update(rootElement, new Strikethrough.S());
+            currentElement = update(fixedRoot, currentElement, new Strikethrough.S());
         }
 
         if (text.getStyle().contains(TextStyles.UNDERLINE)) {
-            rootElement = update(rootElement, new U());
+            currentElement = update(fixedRoot, currentElement, new U());
         }
 
         if (text.getClickAction().isPresent()) {
             if (text.getClickAction().get() instanceof ClickAction.OpenUrl) {
-                rootElement = update(rootElement, new A(((ClickAction.OpenUrl) text.getClickAction().get()).getResult()));
+                currentElement = update(fixedRoot, currentElement, new A(((ClickAction.OpenUrl) text.getClickAction().get()).getResult()));
             } else {
-                if (rootElement == null) {
-                    rootElement = new Span();
+                if (currentElement == null) {
+                    fixedRoot.set(currentElement = new Span());
                 }
                 ClickEvent nmsEvent = SpongeClickAction.getHandle(text.getClickAction().get());
-                rootElement.onClick = nmsEvent.getAction().getCanonicalName() + "('" + nmsEvent.getValue() + "')";
+                currentElement.onClick = nmsEvent.getAction().getCanonicalName() + "('" + nmsEvent.getValue() + "')";
             }
         } else {
-            if (rootElement == null) {
-                rootElement = new Span();
+            if (currentElement == null) {
+                fixedRoot.set(currentElement = new Span());
             }
         }
 
         if (text.getHoverAction().isPresent()) {
             HoverEvent nmsEvent = SpongeHoverAction.getHandle(text.getHoverAction().get(), locale);
-            rootElement.onHover = nmsEvent.getAction().getCanonicalName() + "('" + nmsEvent.getValue() + "')";
+            currentElement.onHover = nmsEvent.getAction().getCanonicalName() + "('" + TextXmlRepresentation.INSTANCE.to(SpongeTexts.toText(nmsEvent.getValue()), locale) + "')";
         }
 
         if (text.getShiftClickAction().isPresent()) {
@@ -235,31 +236,39 @@ public abstract class Element {
             if (!(action instanceof ShiftClickAction.InsertText)) {
                 throw new IllegalArgumentException("Shift-click action is not an insertion. Currently not supported!");
             }
-            rootElement.onShiftClick = "insert_text('" + action.getResult() + ')';
+            currentElement.onShiftClick = "insert_text('" + action.getResult() + ')';
         }
 
         if (text instanceof Text.Literal) {
-            rootElement.mixedContent.add(((Text.Literal) text).getContent());
+            currentElement.mixedContent.add(((Text.Literal) text).getContent());
         } else if (text instanceof Text.Translatable) {
             Translation transl = ((Text.Translatable) text).getTranslation();
             if (transl instanceof SpongeTranslation) {
-                rootElement = update(rootElement, new Tr(transl.getId()));
+                currentElement = update(fixedRoot, currentElement, new Tr(transl.getId()));
             } else {
-                rootElement.mixedContent.add(transl.get(locale));
+                currentElement = update(fixedRoot, currentElement, new Tr(transl.get(locale)));
+            }
+            for (Object o : ((Text.Translatable) text).getArguments()) {
+                if (o instanceof Text) {
+                    currentElement.mixedContent.add(Element.fromText(((Text) o), locale));
+                } else {
+                    currentElement.mixedContent.add(String.valueOf(o));
+                }
             }
         } else {
             throw new IllegalArgumentException("Text was of type " + text.getClass() + ", which is unsupported by the XML format");
         }
 
         for (Text child : text.getChildren()) {
-            rootElement.mixedContent.add(Element.fromText(child, locale));
+            currentElement.mixedContent.add(Element.fromText(child, locale));
         }
 
-        return rootElement;
+        return fixedRoot.get();
     }
 
-    private static Element update(@Nullable Element parent, Element child) {
+    private static Element update(AtomicReference<Element> fixedRoot, @Nullable Element parent, Element child) {
         if (parent == null) {
+            fixedRoot.set(child);
             return child;
         } else {
             parent.mixedContent.add(child);

@@ -70,7 +70,7 @@ public final class WorldGeneratorRegistry {
         String id = modifier.getId();
         checkId(id, "World generator ID");
 
-        this.modifiers.put(id, modifier);
+        this.modifiers.put(id.toLowerCase(), modifier);
     }
 
     private void checkId(String id, String subject) {

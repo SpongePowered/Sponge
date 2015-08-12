@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.service.pagination;
 
+import org.spongepowered.api.util.command.source.ProxySource;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.util.command.CommandMessageFormatting.error;
 
+import static org.spongepowered.api.util.command.CommandMessageFormatting.error;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -96,8 +98,12 @@ class SpongePaginationBuilder implements PaginationBuilder {
         checkNotNull(source, "source");
         this.service.registerCommandOnce();
 
+        CommandSource realSource = source;
+        while (realSource instanceof ProxySource) {
+            realSource = ((ProxySource)realSource).getOriginalSource();
+        }
         @SuppressWarnings("unchecked")
-        PaginationCalculator<CommandSource> calculator = (PaginationCalculator) this.service.calculators.get(source.getClass());
+        PaginationCalculator<CommandSource> calculator = (PaginationCalculator) this.service.calculators.get(realSource.getClass());
         if (calculator == null) {
             calculator = this.service.getUnpaginatedCalculator(); // TODO: or like 50 lines?
         }

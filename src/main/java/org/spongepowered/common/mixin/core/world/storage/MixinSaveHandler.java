@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.world.DimensionManager;
 
@@ -47,19 +48,19 @@ import java.io.IOException;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.storage.SaveHandler.class)
-public abstract class MixinSaveHandler {
+public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Shadow private File worldDirectory;
     @Shadow private long initializationTime;
 
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 0))
+            , ordinal = 0, remap = false))
     public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 1))
+            , ordinal = 1, remap = false))
     public String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
@@ -86,7 +87,8 @@ public abstract class MixinSaveHandler {
         saveSpongeDatData(worldInformation);
     }
 
-    private void loadSpongeDatData(WorldInfo info) throws IOException {
+    @Override
+    public void loadSpongeDatData(WorldInfo info) throws IOException {
         final File spongeFile = new File(this.worldDirectory, "level_sponge.dat");
         final File spongeOldFile = new File(this.worldDirectory, "level_sponge.dat_old");
 

@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.configuration;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
@@ -32,13 +38,19 @@ import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
+import org.spongepowered.common.util.IpSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("unused")
 public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
@@ -76,6 +88,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String ENTITY_ACTIVATION_RANGE_MISC = "misc-activation-range";
     public static final String ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY = "human-player-list-remove-delay";
 
+    // BUNGEECORD
+    public static final String BUNGEECORD_IP_FORWARDING = "ip-forwarding";
+
     // GENERAL
     public static final String GENERAL_DISABLE_WARNINGS = "disable-warnings";
     public static final String GENERAL_CHUNK_LOAD_OVERRIDE = "chunk-load-override";
@@ -92,6 +107,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
+    public static final String MODULE_BUNGEECORD = "bungeecord";
 
     // WORLD
     public static final String WORLD_INFINITE_WATER_SOURCE = "infinite-water-source";
@@ -116,7 +132,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @SuppressWarnings("unused")
     private File file;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public SpongeConfig(Type type, File file, String modId) {
 
         this.type = type;
@@ -142,7 +158,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
 
             reload();
-            this.loader.save(this.root);
+            save();
         } catch (Throwable t) {
             LogManager.getLogger().error(ExceptionUtils.getStackTrace(t));
         }
@@ -166,6 +182,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public void reload() {
         try {
             this.root = this.loader.load(ConfigurationOptions.defaults()
+                    .setSerializers(
+                            TypeSerializers.getDefaultSerializers().newChild().registerType(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer()))
                     .setHeader(HEADER));
             this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
         } catch (IOException e) {
@@ -201,7 +219,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     public static class GlobalConfig extends ConfigBase {
 
-        @Setting
+        @Setting(comment = "Configuration options related to the Sql service, including connection aliases etc")
         private SqlCategory sql = new SqlCategory();
 
         @Setting
@@ -209,6 +227,16 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         @Setting(value = "modules")
         private ModuleCategory mixins = new ModuleCategory();
+
+        @Setting("ip-sets")
+        private Map<String, List<IpSet>> ipSets = new HashMap<String, List<IpSet>>();
+
+        @Setting(value = MODULE_BUNGEECORD)
+        private BungeeCordCategory bungeeCord = new BungeeCordCategory();
+
+        public BungeeCordCategory getBungeeCord() {
+            return this.bungeeCord;
+        }
 
         public SqlCategory getSql() {
             return this.sql;
@@ -221,30 +249,64 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public ModuleCategory getModules() {
             return this.mixins;
         }
+
+        public Map<String, Predicate<InetAddress>> getIpSets() {
+            return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
+                @Nullable
+                @Override
+                public Predicate<InetAddress> apply(List<IpSet> input) {
+                    return Predicates.and(input);
+                }
+            }));
+        }
+
+        public Predicate<InetAddress> getIpSet(String name) {
+            return this.ipSets.containsKey(name) ? Predicates.<InetAddress>and(this.ipSets.get(name)) : null;
+        }
     }
 
     public static class DimensionConfig extends ConfigBase {
 
+        @Setting(
+                value = CONFIG_ENABLED,
+                comment = "Enabling config will override Global.")
+        protected boolean configEnabled = true;
+
         public DimensionConfig() {
             this.configEnabled = false;
+        }
+
+        public boolean isConfigEnabled() {
+            return this.configEnabled;
+        }
+
+        public void setConfigEnabled(boolean configEnabled) {
+            this.configEnabled = configEnabled;
         }
     }
 
     public static class WorldConfig extends ConfigBase {
 
+        @Setting(
+                value = CONFIG_ENABLED,
+                comment = "Enabling config will override Dimension and Global.")
+        protected boolean configEnabled = true;
+
         public WorldConfig() {
             this.configEnabled = false;
         }
+
+        public boolean isConfigEnabled() {
+            return this.configEnabled;
+        }
+
+        public void setConfigEnabled(boolean configEnabled) {
+            this.configEnabled = configEnabled;
+        }
     }
 
-    @SuppressWarnings("UnusedDeclaration")
     public static class ConfigBase {
 
-        @Setting(
-                value = CONFIG_ENABLED,
-                comment = "Controls whether or not this config is enabled.\n"
-                        + "Note: If enabled, World configs override Dimension and Global, Dimension configs override Global.")
-        protected boolean configEnabled = true;
         @Setting
         private DebugCategory debug = new DebugCategory();
         @Setting
@@ -257,14 +319,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private LoggingCategory logging = new LoggingCategory();
         @Setting
         private WorldCategory world = new WorldCategory();
-
-        public boolean isConfigEnabled() {
-            return this.configEnabled;
-        }
-
-        public void setConfigEnabled(boolean configEnabled) {
-            this.configEnabled = configEnabled;
-        }
 
         public DebugCategory getDebug() {
             return this.debug;
@@ -293,7 +347,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     @ConfigSerializable
     public static class SqlCategory extends Category {
-        @Setting
+        @Setting(comment = "Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
         private Map<String, String> aliases = new HashMap<String, String>();
 
         public Map<String, String> getAliases() {
@@ -311,7 +365,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
     }
 
-    @SuppressWarnings("UnusedDeclaration")
     @ConfigSerializable
     public static class DebugCategory extends Category {
 
@@ -448,6 +501,18 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setHumanPlayerListRemoveDelay(int delay) {
             this.humanPlayerListRemoveDelay = Math.max(0, Math.min(delay, 100));
+        }
+    }
+
+    @ConfigSerializable
+    public static class BungeeCordCategory extends Category {
+
+        @Setting(value = BUNGEECORD_IP_FORWARDING,
+                comment = "If enabled, allows BungeeCord to forward IP address, UUID, and Game Profile to this server")
+        private boolean ipForwarding = false;
+
+        public boolean getIpForwarding() {
+            return this.ipForwarding;
         }
     }
 
@@ -594,15 +659,26 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class ModuleCategory extends Category {
 
+        @Setting(value = MODULE_BUNGEECORD)
+        private boolean pluginBungeeCord = false;
+
         @Setting(value = MODULE_ENTITY_ACTIVATION_RANGE)
         private boolean pluginEntityActivation = true;
+
+        public boolean usePluginBungeeCord() {
+            return this.pluginBungeeCord;
+        }
+
+        public void setPluginBungeeCord(boolean state) {
+            this.pluginBungeeCord = state;
+        }
 
         public boolean usePluginEntityActivation() {
             return this.pluginEntityActivation;
         }
 
-        public void setPluginEntityActivation(boolean pluginEntityActivation) {
-            this.pluginEntityActivation = pluginEntityActivation;
+        public void setPluginEntityActivation(boolean state) {
+            this.pluginEntityActivation = state;
         }
     }
 
