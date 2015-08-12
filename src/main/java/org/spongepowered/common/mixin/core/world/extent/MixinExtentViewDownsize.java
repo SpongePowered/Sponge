@@ -468,16 +468,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getTileEntities(Predicates.and(new Predicate<TileEntity>() {
-
-            @Override
-            public boolean apply(TileEntity input) {
-                final Location block = input.getLocation();
-                return VecHelper
-                    .inBounds(block.getX(), block.getY(), block.getZ(), MixinExtentViewDownsize.this.blockMin, MixinExtentViewDownsize.this.blockMax);
-            }
-
-        }, filter));
+        return this.extent.getTileEntities(Predicates.and(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
@@ -515,16 +506,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getEntities(Predicates.and(new Predicate<Entity>() {
-
-            @Override
-            public boolean apply(Entity input) {
-                final Location block = input.getLocation();
-                return VecHelper
-                    .inBounds(block.getX(), block.getY(), block.getZ(), MixinExtentViewDownsize.this.blockMin, MixinExtentViewDownsize.this.blockMax);
-            }
-
-        }, filter));
+        return this.extent.getEntities(Predicates.and(new EntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
@@ -563,4 +545,39 @@ public abstract class MixinExtentViewDownsize implements Extent {
         return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
     }
 
+    private static class EntityInBounds implements Predicate<Entity> {
+
+        private final Vector3i min;
+        private final Vector3i max;
+
+        private EntityInBounds(Vector3i min, Vector3i max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public boolean apply(Entity input) {
+            final Location block = input.getLocation();
+            return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
+        }
+
+    }
+
+    private static class TileEntityInBounds implements Predicate<TileEntity> {
+
+        private final Vector3i min;
+        private final Vector3i max;
+
+        private TileEntityInBounds(Vector3i min, Vector3i max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public boolean apply(TileEntity input) {
+            final Location block = input.getLocation();
+            return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
+        }
+
+    }
 }
