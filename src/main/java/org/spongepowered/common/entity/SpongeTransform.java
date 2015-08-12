@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.imaginary.Quaterniond;
 import com.flowpowered.math.matrix.Matrix4d;
 import com.flowpowered.math.vector.Vector3d;
@@ -51,10 +53,10 @@ public class SpongeTransform implements Transform {
     }
 
     public SpongeTransform(Extent extent, Vector3d position, Vector3d rotation, Vector3d scale) {
-        this.extent = extent;
-        this.position = position;
-        this.rotation = rotation;
-        this.scale = scale;
+        this.extent = checkNotNull(extent, "extent");
+        this.position = checkNotNull(position, "position");
+        this.rotation = checkNotNull(rotation, "rotation");
+        this.scale = checkNotNull(scale, "scale");
     }
 
     @Override
@@ -67,6 +69,7 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Transform setLocation(Location location) {
+        checkNotNull(location, "location");
         setExtent(location.getExtent());
         setPosition(location.getPosition());
         return this;
@@ -79,6 +82,7 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Transform setExtent(Extent extent) {
+        checkNotNull(extent, "extent");
         this.extent = extent;
         this.location = null;
         return this;
@@ -91,6 +95,7 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Transform setPosition(Vector3d position) {
+        checkNotNull(position, "position");
         this.position = position;
         this.location = null;
         return this;
@@ -103,6 +108,7 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Transform setRotation(Vector3d rotation) {
+        checkNotNull(rotation, "rotation");
         this.rotation = rotation;
         this.rotationQuaternion = null;
         return this;
@@ -118,6 +124,7 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Transform setRotation(Quaterniond rotation) {
+        checkNotNull(rotation, "rotation");
         final Vector3d axesAngles = rotation.getAxesAngleDeg();
         this.rotation = new Vector3d(axesAngles.getX(), -axesAngles.getY(), axesAngles.getZ());
         this.rotationQuaternion = rotation;
@@ -146,12 +153,14 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Transform setScale(Vector3d scale) {
+        checkNotNull(scale, "scale");
         this.scale = scale;
         return this;
     }
 
     @Override
     public Transform add(Transform other) {
+        checkNotNull(other, "other");
         addTranslation(other.getPosition());
         addRotation(other.getRotationAsQuaternion());
         addScale(other.getScale());
@@ -160,23 +169,27 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Transform addTranslation(Vector3d translation) {
+        checkNotNull(translation, "translation");
         setPosition(getPosition().add(translation));
         return this;
     }
 
     @Override
     public Transform addRotation(Vector3d rotation) {
+        checkNotNull(rotation, "rotation");
         return addRotation(Quaterniond.fromAxesAnglesDeg(rotation.getX(), -rotation.getY(), rotation.getZ()));
     }
 
     @Override
     public Transform addRotation(Quaterniond rotation) {
+        checkNotNull(rotation, "rotation");
         setRotation(rotation.mul(getRotationAsQuaternion()));
         return this;
     }
 
     @Override
     public Transform addScale(Vector3d scale) {
+        checkNotNull(scale, "scale");
         setScale(getScale().mul(scale));
         return this;
     }
