@@ -48,6 +48,7 @@ import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.translator.DataTranslator;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -159,84 +160,95 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         checkNotNull(view);
         checkNotNull(key);
         checkArgument(!key.isEmpty());
-        checkArgument(type > 0);
-        if (type == 1) {
-            view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getByte());
-        } else if (type == 2) {
-            view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getShort());
-        } else if (type == 3) {
-            view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getInt());
-        } else if (type == 4) {
-            view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getLong());
-        } else if (type == 5) {
-            view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getFloat());
-        } else if (type == 6) {
-            view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getDouble());
-        } else if (type == 7) {
-            view.set(of('.', key), ((NBTTagByteArray) base).getByteArray());
-        } else if (type == 8) {
-            view.set(of('.', key), ((NBTTagString) base).getString());
-        } else if (type == 9) {
-            NBTTagList list = (NBTTagList) base;
-            byte listType = (byte) list.getTagType();
-            int count = list.tagCount();
-            List objectList = Lists.newArrayListWithCapacity(count);
-            for (int i = 0; i < count; i++) {
-                objectList.add(fromTagBase(list.get(i), listType));
-            }
-            view.set(of('.', key), objectList);
-        } else if (type == 10) {
-            DataView internalView = view.createView(of('.', key));
-            NBTTagCompound compound = (NBTTagCompound) base;
-            for (String internalKey : (Set<String>) compound.getKeySet()) {
-                NBTBase internalBase = compound.getTag(internalKey);
-                byte internalType = internalBase.getId();
-                // Basically.... more recursion.
-                // Reasoning: This avoids creating a new DataContainer which would
-                // then be copied in to the owning DataView anyways. We can internally
-                // set the actual data directly to the child view instead.
-                setInternal(internalBase, internalType, internalView, internalKey);
-            }
-        } else if (type == 11) {
-            view.set(of('.', key), ((NBTTagIntArray) base).getIntArray());
+        checkArgument(type > NbtDataUtil.TAG_END && type <= NbtDataUtil.TAG_INT_ARRAY);
+        switch (type) {
+            case NbtDataUtil.TAG_BYTE:
+                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getByte());
+                break;
+            case NbtDataUtil.TAG_SHORT:
+                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getShort());
+                break;
+            case NbtDataUtil.TAG_INT:
+                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getInt());
+                break;
+            case NbtDataUtil.TAG_LONG:
+                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getLong());
+                break;
+            case NbtDataUtil.TAG_FLOAT:
+                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getFloat());
+                break;
+            case NbtDataUtil.TAG_DOUBLE:
+                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getDouble());
+                break;
+            case NbtDataUtil.TAG_BYTE_ARRAY:
+                view.set(of('.', key), ((NBTTagByteArray) base).getByteArray());
+                break;
+            case NbtDataUtil.TAG_STRING:
+                view.set(of('.', key), ((NBTTagString) base).getString());
+                break;
+            case NbtDataUtil.TAG_LIST:
+                NBTTagList list = (NBTTagList) base;
+                byte listType = (byte) list.getTagType();
+                int count = list.tagCount();
+                List objectList = Lists.newArrayListWithCapacity(count);
+                for (int i = 0; i < count; i++) {
+                    objectList.add(fromTagBase(list.get(i), listType));
+                }
+                view.set(of('.', key), objectList);
+                break;
+            case NbtDataUtil.TAG_COMPOUND:
+                DataView internalView = view.createView(of('.', key));
+                NBTTagCompound compound = (NBTTagCompound) base;
+                for (String internalKey : (Set<String>) compound.getKeySet()) {
+                    NBTBase internalBase = compound.getTag(internalKey);
+                    byte internalType = internalBase.getId();
+                    // Basically.... more recursion.
+                    // Reasoning: This avoids creating a new DataContainer which would
+                    // then be copied in to the owning DataView anyways. We can internally
+                    // set the actual data directly to the child view instead.
+                    setInternal(internalBase, internalType, internalView, internalKey);
+                }
+                break;
+            case NbtDataUtil.TAG_INT_ARRAY:
+                view.set(of('.', key), ((NBTTagIntArray) base).getIntArray());
+                break;
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Object fromTagBase(NBTBase base, byte type) {
-        if (type == 0) {
-            return null;
-        } else if (type == 1) {
-            return ((NBTBase.NBTPrimitive) base).getByte();
-        } else if (type == 2) {
-            return ((NBTBase.NBTPrimitive) base).getShort();
-        } else if (type == 3) {
-            return ((NBTBase.NBTPrimitive) base).getInt();
-        } else if (type == 4) {
-            return ((NBTBase.NBTPrimitive) base).getLong();
-        } else if (type == 5) {
-            return ((NBTBase.NBTPrimitive) base).getFloat();
-        } else if (type == 6) {
-            return ((NBTBase.NBTPrimitive) base).getDouble();
-        } else if (type == 7) {
-            return ((NBTTagByteArray) base).getByteArray();
-        } else if (type == 8) {
-            return ((NBTTagString) base).getString();
-        } else if (type == 9) {
-            NBTTagList list = (NBTTagList) base;
-            byte listType = (byte) list.getTagType();
-            int count = list.tagCount();
-            List objectList = Lists.newArrayListWithCapacity(count);
-            for (int i = 0; i < list.tagCount(); i++) {
-                objectList.add(fromTagBase(list.get(i), listType));
-            }
-            return objectList;
-        } else if (type == 10) {
-            return getViewFromCompound((NBTTagCompound) base);
-        } else if (type == 11) {
-            return ((NBTTagIntArray) base).getIntArray();
-        } else {
-            return null;
+        switch (type) {
+            case NbtDataUtil.TAG_BYTE:
+                return ((NBTBase.NBTPrimitive) base).getByte();
+            case NbtDataUtil.TAG_SHORT:
+                return (((NBTBase.NBTPrimitive) base)).getShort();
+            case NbtDataUtil.TAG_INT:
+                return ((NBTBase.NBTPrimitive) base).getInt();
+            case NbtDataUtil.TAG_LONG:
+                return ((NBTBase.NBTPrimitive) base).getLong();
+            case NbtDataUtil.TAG_FLOAT:
+                return ((NBTBase.NBTPrimitive) base).getFloat();
+            case NbtDataUtil.TAG_DOUBLE:
+                return ((NBTBase.NBTPrimitive) base).getDouble();
+            case NbtDataUtil.TAG_BYTE_ARRAY:
+                return ((NBTTagByteArray) base).getByteArray();
+            case NbtDataUtil.TAG_STRING:
+                return ((NBTTagString) base).getString();
+            case NbtDataUtil.TAG_LIST:
+                NBTTagList list = (NBTTagList) base;
+                byte listType = (byte) list.getTagType();
+                int count = list.tagCount();
+                List objectList = Lists.newArrayListWithCapacity(count);
+                for (int i = 0; i < list.tagCount(); i++) {
+                    objectList.add(fromTagBase(list.get(i), listType));
+                }
+                return objectList;
+            case NbtDataUtil.TAG_COMPOUND:
+                return getViewFromCompound((NBTTagCompound) base);
+            case NbtDataUtil.TAG_INT_ARRAY:
+                return ((NBTTagIntArray) base).getIntArray();
+            default :
+                return null;
         }
     }
 

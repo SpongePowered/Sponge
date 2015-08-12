@@ -93,21 +93,6 @@ public class CareerDataProcessor implements DataProcessor<CareerData, ImmutableC
     }
 
     @Override
-    public Optional<ImmutableCareerData> fillImmutable(DataHolder dataHolder, ImmutableCareerData immutable) {
-        return null;
-    }
-
-    @Override
-    public Optional<ImmutableCareerData> fillImmutable(DataHolder dataHolder, ImmutableCareerData immutable, MergeFunction overlap) {
-        return null;
-    }
-
-    @Override
-    public Optional<ImmutableCareerData> fillImmutable(DataContainer container, ImmutableCareerData immutableManipulator) {
-        return null;
-    }
-
-    @Override
     public DataTransactionResult set(DataHolder dataHolder, CareerData manipulator) {
         if (dataHolder instanceof IMixinVillager) {
             final Career oldCareer = ((IMixinVillager) dataHolder).getCareer();
@@ -115,7 +100,7 @@ public class CareerDataProcessor implements DataProcessor<CareerData, ImmutableC
             try {
                 ((IMixinVillager) dataHolder).setCareer(manipulator.career().get());
                 return DataTransactionBuilder.builder()
-                    .replace(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, oldCareer, oldCareer))
+                    .replace(ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, Keys.CAREER, oldCareer, oldCareer))
                     .success(newCareer)
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();
@@ -135,7 +120,7 @@ public class CareerDataProcessor implements DataProcessor<CareerData, ImmutableC
             try {
                 ((IMixinVillager) dataHolder).setCareer(newCareer.get());
                 return DataTransactionBuilder.builder()
-                    .replace(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, oldCareer, oldCareer))
+                    .replace(ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, Keys.CAREER, oldCareer, oldCareer))
                     .success(newCareer)
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();

@@ -144,6 +144,31 @@ public final class ImmutableDataCachingUtil {
         }
     }
 
+    public static <E, V extends ImmutableValue<?>> ImmutableValue<?> getWildValue(final Class<V> valueClass, final Key<? extends BaseValue<E>> usedKey, final E arg, final E defaultArg) {
+        final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
+        try {
+            return ImmutableDataCachingUtil.valueCache.get(key,
+                new Callable<ImmutableValue<?>>() {
+                    @Override
+                    public ImmutableValue<?> call() throws Exception {
+                        try {
+                            return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
+                        } catch (InvocationTargetException e) {
+                            System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
+                            e.printStackTrace();
+                        } catch (InstantiationException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                        throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
+                    }
+                });
+        } catch (ExecutionException e) {
+            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);
+        }
+    }
+
     private static String getKey(final Class<?> immutableClass, final Object... args) {
         final StringBuilder builder = new StringBuilder(immutableClass.getCanonicalName() + ":");
         for (Object object : args) {

@@ -132,39 +132,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         this.keyFieldGetterMap.put(checkNotNull(key), checkNotNull(function));
     }
 
-    // The following use traditional processors to handle information
-    // Mostly because they involve immutability
-
-    @Override
-    public Optional<I> fill(DataHolder dataHolder) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        if (!processor.isPresent()) {
-            return Optional.absent();
-        }
-        return processor.get().fillImmutable(dataHolder, (I) (Object) this);
-    }
-
-    @Override
-    public Optional<I> fill(DataHolder dataHolder, MergeFunction overlap) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        if (!processor.isPresent()) {
-            return Optional.absent();
-        }
-        return processor.get().fillImmutable(dataHolder, (I) (Object) this, overlap);
-    }
-
-    @Override
-    public Optional<I> from(DataContainer container) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        if (!processor.isPresent()) {
-            return Optional.absent();
-        }
-        return processor.get().fillImmutable(container, (I) (Object) this);
-    }
-
     @Override
     public <E> Optional<I> with(Key<? extends BaseValue<E>> key, E value) {
         // Basic stuff, getting the processor....

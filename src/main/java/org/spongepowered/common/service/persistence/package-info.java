@@ -22,29 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
-
-import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-
-public interface BlockDataProcessor<T extends ImmutableDataManipulator<T, ?>> {
-
-    Optional<T> fromBlockPos(World world, BlockPos blockPos);
-
-    DataTransactionResult setData(World world, BlockPos blockPos, T manipulator);
-
-    Optional<BlockState> withData(IBlockState blockState, T manipulator);
-
-    boolean remove(World world, BlockPos blockPos);
-
-    Optional<BlockState> removeFrom(IBlockState blockState);
-
-    Optional<T> createFrom(IBlockState blockState);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.service.persistence;

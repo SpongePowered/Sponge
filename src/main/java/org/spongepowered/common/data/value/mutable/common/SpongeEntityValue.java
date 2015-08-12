@@ -31,12 +31,12 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.KeyFactory;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.data.key.SpongeKey;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -111,7 +111,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Value<Entity> or(Entity defaultValue) {
-        final Key<Value<Entity>> key = new SpongeKey<Entity, Value<Entity>>(Entity.class,(Class<Value<Entity>>) (Class) Value.class, this.getKey().getQuery());
+        final Key<Value<Entity>> key = KeyFactory.makeSingleKey(Entity.class, (Class<Value<Entity>>) (Class) Value.class, this.getKey().getQuery());
         return exists() ? new SpongeValue<Entity>(key, this.weakReference.get()) : new SpongeValue<Entity>(key, checkNotNull(defaultValue));
     }
 }

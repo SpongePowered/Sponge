@@ -33,6 +33,10 @@ public interface BlockValueProcessor<E, V extends BaseValue<E>> {
 
     V getApiValueForBlockState(IBlockState blockState);
 
+    IBlockState offerValue(V baseValue);
+
+
+
 
 
 }

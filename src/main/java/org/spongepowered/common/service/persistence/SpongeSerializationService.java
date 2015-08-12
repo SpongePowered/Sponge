@@ -27,7 +27,6 @@ package org.spongepowered.common.service.persistence;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
@@ -39,8 +38,6 @@ import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.configuration.DataSerializableTypeSerializer;
 
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 public class SpongeSerializationService implements SerializationService {
     static {
