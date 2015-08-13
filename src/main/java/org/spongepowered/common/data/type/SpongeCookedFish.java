@@ -40,7 +40,7 @@ public class SpongeCookedFish implements CookedFish {
 
     @Override
     public String getId() {
-        return "cooked" + this.id;
+        return "cooked." + this.id;
     }
 
     @Override
