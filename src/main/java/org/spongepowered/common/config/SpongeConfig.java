@@ -841,6 +841,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = WORLD_FLOWING_LAVA_DECAY, comment = "Lava behaves like vanilla water when source block is removed")
         private boolean flowingLavaDecay = false;
 
+        @Setting(value = "spawn-protection-radius", comment = "Radius in blocks around spawn to protect from being built in. -1 means user server "
+                + "default")
+        private int spawnProtectionRadius = -1;
+
         @Setting(value = WORLD_ENABLED, comment = "Enable if this world should be registered.")
         protected boolean worldEnabled = true;
 
@@ -910,6 +914,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setGenerateSpawnOnLoad(boolean allow) {
             this.generateSpawnOnLoad = allow;
+        }
+
+        public int getSpawnProtectionRadius() {
+            return spawnProtectionRadius;
+        }
+
+        public void setSpawnProtectionRadius(int spawnProtectionRadius) {
+            this.spawnProtectionRadius = spawnProtectionRadius;
         }
     }
 
