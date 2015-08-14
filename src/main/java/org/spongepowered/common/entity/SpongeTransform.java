@@ -125,7 +125,7 @@ public class SpongeTransform implements Transform {
     @Override
     public Transform setRotation(Quaterniond rotation) {
         checkNotNull(rotation, "rotation");
-        final Vector3d axesAngles = rotation.getAxesAngleDeg();
+        final Vector3d axesAngles = rotation.getAxesAnglesDeg();
         this.rotation = new Vector3d(axesAngles.getX(), -axesAngles.getY(), axesAngles.getZ());
         this.rotationQuaternion = rotation;
         return this;

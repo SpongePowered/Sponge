@@ -79,7 +79,7 @@ public class SpongeTransformTest {
         final Vector3d rotation2 = new Vector3d(45, 135, 225);
         final Quaterniond rotationQuat2 = Quaterniond.fromAxesAnglesDeg(rotation2.getX(), -rotation2.getY(), rotation2.getZ());
         final Quaterniond rotationQuat1Plus2 = rotationQuat2.mul(rotationQuat1);
-        final Vector3d axesAnglesDeg = rotationQuat1Plus2.getAxesAngleDeg();
+        final Vector3d axesAnglesDeg = rotationQuat1Plus2.getAxesAnglesDeg();
         final Vector3d rotation1Plus2 = new Vector3d(axesAnglesDeg.getX(), -axesAnglesDeg.getY(), axesAnglesDeg.getZ());
 
         final Transform transform = new SpongeTransform(this.mockExtent1, Vector3d.ZERO, rotation1, Vector3d.ONE);

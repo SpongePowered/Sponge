@@ -26,6 +26,7 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -74,10 +75,10 @@ public final class SpongeGeneratorPopulator implements GeneratorPopulator {
         // The block buffer can be of any size. We generate all chunks that
         // have at least part of the chunk in the given area, and copy the
         // needed blocks into the buffer
-        int minChunkX = (int) Math.floor(min.getX() / 16.0);
-        int minChunkZ = (int) Math.floor(min.getZ() / 16.0);
-        int maxChunkX = (int) Math.floor(max.getX() / 16.0);
-        int maxChunkZ = (int) Math.floor(max.getZ() / 16.0);
+        int minChunkX = GenericMath.floor(min.getX() / 16.0);
+        int minChunkZ = GenericMath.floor(min.getZ() / 16.0);
+        int maxChunkX = GenericMath.floor(max.getX() / 16.0);
+        int maxChunkZ = GenericMath.floor(max.getZ() / 16.0);
         for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
             for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
                 final Chunk generated = this.chunkGenerator.provideChunk(chunkX, chunkZ);
