@@ -1923,6 +1923,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
+    public Transform createTransform() {
+        return new SpongeTransform();
+    }
+
+    @Override
     public Transform createTransform(Extent extent) {
         return new SpongeTransform(extent, Vector3d.ZERO);
     }

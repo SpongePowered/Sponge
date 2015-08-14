@@ -123,6 +123,29 @@ public class SpongeTransformTest {
 
     @Test
     public void testValid() {
+        final SpongeTransform transform = new SpongeTransform();
+        Assert.assertFalse(transform.isValid());
+        transform.setExtent(this.mockExtent1);
+        Assert.assertFalse(transform.isValid());
+        transform.invalidate();
+        Assert.assertFalse(transform.isValid());
+        transform.setExtent(this.mockExtent2);
+        Assert.assertTrue(transform.isValid());
+        transform.invalidate();
+        Assert.assertFalse(transform.isValid());
+
+        try {
+            transform.getExtent();
+            Assert.fail();
+        } catch (IllegalStateException ignored) {
+        }
+
+        try {
+            transform.getLocation();
+            Assert.fail();
+        } catch (IllegalStateException ignored) {
+        }
+
         Assert.assertFalse(new SpongeTransform(this.mockExtent1, Vector3d.ZERO).isValid());
         Assert.assertTrue(new SpongeTransform(this.mockExtent2, Vector3d.ZERO).isValid());
     }

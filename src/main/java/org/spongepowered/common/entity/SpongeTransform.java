@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.imaginary.Quaterniond;
 import com.flowpowered.math.matrix.Matrix4d;
@@ -39,21 +40,23 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 public class SpongeTransform implements Transform {
 
-    private Extent extent;
+    @Nullable private Extent extent;
     private Vector3d position;
     private Vector3d rotation;
     private Vector3d scale;
-    @Nullable
-    private Location location = null;
-    @Nullable
-    private Quaterniond rotationQuaternion = null;
+    @Nullable private Location location = null;
+    @Nullable private Quaterniond rotationQuaternion = null;
 
-    public SpongeTransform(Extent extent, Vector3d position) {
+    public SpongeTransform() {
+        this(null, Vector3d.ZERO, Vector3d.ZERO, Vector3d.ONE);
+    }
+
+    public SpongeTransform(@Nullable Extent extent, Vector3d position) {
         this(extent, position, Vector3d.ZERO, Vector3d.ONE);
     }
 
-    public SpongeTransform(Extent extent, Vector3d position, Vector3d rotation, Vector3d scale) {
-        this.extent = checkNotNull(extent, "extent");
+    public SpongeTransform(@Nullable Extent extent, Vector3d position, Vector3d rotation, Vector3d scale) {
+        this.extent = extent;
         this.position = checkNotNull(position, "position");
         this.rotation = checkNotNull(rotation, "rotation");
         this.scale = checkNotNull(scale, "scale");
@@ -61,6 +64,7 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Location getLocation() {
+        checkState(extent != null, "Transform has no extent");
         if (this.location == null) {
             this.location = new Location(this.extent, this.position);
         }
@@ -77,6 +81,7 @@ public class SpongeTransform implements Transform {
 
     @Override
     public Extent getExtent() {
+        checkState(extent != null, "Transform has no extent");
         return this.extent;
     }
 
@@ -201,7 +206,12 @@ public class SpongeTransform implements Transform {
 
     @Override
     public boolean isValid() {
-        return getExtent().isLoaded();
+        return this.extent != null && this.extent.isLoaded();
+    }
+
+    @Override
+    public void invalidate() {
+        this.extent = null;
     }
 
     @Override
