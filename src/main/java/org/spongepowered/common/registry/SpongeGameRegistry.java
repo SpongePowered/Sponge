@@ -96,10 +96,12 @@ import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -269,19 +271,23 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeNoteBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
+import org.spongepowered.common.data.processor.data.SkullDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
+import org.spongepowered.common.data.processor.value.SkullValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
@@ -440,7 +446,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, SelectorType> selectorMappings = Maps.newHashMap();
 
     private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
-    private final Map<String, SkullType> skullTypeMappings = Maps.newHashMap();
+    public final Map<String, SkullType> skullTypeMappings = Maps.newLinkedHashMap();
     private final Map<String, TreeType> treeTypeMappings = Maps.newHashMap();
     private final Map<String, BannerPatternShape> bannerPatternShapeMappings = Maps.newHashMap();
     public final Map<String, BannerPatternShape> idToBannerPatternShapeMappings = Maps.newHashMap();
@@ -1594,6 +1600,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class,
                                                   ImmutableSignData.class, ImmutableSpongeSignData.class, signDataProcessor);
 
+        final SkullDataProcessor skullDataProcessor = new SkullDataProcessor();
+        service.registerBuilder(SkullData.class, skullDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
+                                                  ImmutableSpongeSkullData.class, skullDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1601,8 +1612,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.SHOWS_DISPLAY_NAME, new DisplayNameVisibleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.CAREER, new CareerValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
-
-
+        dataRegistry.registerValueProcessor(Keys.SKULL_TYPE, new SkullValueProcessor());
     }
 
     private void setNotePitches() {
