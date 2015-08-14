@@ -40,11 +40,15 @@ import javax.annotation.Nullable;
 public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements OptionalValue<E> {
 
     public SpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key) {
-        super(key, Optional.<E>absent());
+        this(key, Optional.<E>absent());
     }
 
     public SpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> actualValue) {
-        super(key, Optional.<E>absent(), actualValue);
+        this(key, Optional.<E>absent(), actualValue);
+    }
+
+    public SpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue) {
+        super(key, defaultValue, actualValue);
     }
 
     @Override

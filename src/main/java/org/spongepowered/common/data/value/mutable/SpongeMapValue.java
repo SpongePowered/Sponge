@@ -48,7 +48,11 @@ public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapV
     }
 
     public SpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> actualValue) {
-        super(key, ImmutableMap.<K, V>of(), Maps.newHashMap(checkNotNull(actualValue)));
+        this(key, ImmutableMap.<K, V>of(), actualValue);
+    }
+
+    public SpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultMap, Map<K, V> actualMap) {
+        super(key, ImmutableMap.copyOf(defaultMap), Maps.newHashMap(actualMap));
     }
 
     @Override

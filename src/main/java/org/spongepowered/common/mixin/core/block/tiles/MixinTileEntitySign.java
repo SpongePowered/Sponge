@@ -31,6 +31,7 @@ import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -60,13 +61,13 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
         for (IChatComponent line : this.signText) {
             lines.add(IChatComponent.Serializer.componentToJson(line));
         }
-        container.set(SpongeSignData.LINES, lines);
+        container.set(Keys.SIGN_LINES.getQuery(), lines);
         return container;
     }
 
     @Override
     public Optional<SignData> getData() {
-        return Optional.absent();
+        return get(SignData.class);
     }
 
     @Override

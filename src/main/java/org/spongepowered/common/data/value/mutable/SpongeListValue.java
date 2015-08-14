@@ -45,8 +45,12 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
         super(key, Lists.<E>newArrayList());
     }
 
+    public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> defaultList, List<E> actualList) {
+        super(key, Lists.newArrayList(defaultList), Lists.newArrayList(actualList));
+    }
+
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> actualValue) {
-        super(key, Lists.<E>newArrayList(), actualValue);
+        this(key, Lists.<E>newArrayList(), actualValue);
     }
 
     @Override

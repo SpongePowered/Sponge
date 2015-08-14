@@ -157,34 +157,6 @@ public class DisplayNameDataProcessor implements DataProcessor<DisplayNameData, 
     }
 
     @Override
-    public Optional<ImmutableDisplayNameData> fillImmutable(DataHolder dataHolder, ImmutableDisplayNameData immutable) {
-        final Optional<DisplayNameData> optional = from(dataHolder);
-        if (optional.isPresent()) {
-            return Optional.of(optional.get().asImmutable());
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<ImmutableDisplayNameData> fillImmutable(DataHolder dataHolder, ImmutableDisplayNameData immutable, MergeFunction overlap) {
-        if (supports(dataHolder)) {
-            final DisplayNameData data = from(dataHolder).orNull();
-            final DisplayNameData newData = checkNotNull(overlap.merge(checkNotNull(immutable.asMutable()), data));
-            return Optional.of(newData.asImmutable());
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<ImmutableDisplayNameData> fillImmutable(DataContainer container, ImmutableDisplayNameData immutableManipulator) {
-        final String json = DataUtil.getData(container, Keys.DISPLAY_NAME, String.class);
-        final Text displayName = Texts.json().fromUnchecked(json);
-        final boolean shows = DataUtil.getData(container, Keys.SHOWS_DISPLAY_NAME);
-        final ImmutableDisplayNameData data = new ImmutableSpongeDisplayNameData(displayName, shows);
-        return Optional.of(data);
-    }
-
-    @Override
     public DataTransactionResult set(DataHolder dataHolder, DisplayNameData manipulator) {
 
         return DataTransactionBuilder.failResult(manipulator.getValues());

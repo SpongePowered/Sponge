@@ -54,6 +54,7 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class SignLinesValueProcessor implements ValueProcessor<List<Text>, ListValue<Text>> {
 
     @Override
@@ -67,7 +68,7 @@ public class SignLinesValueProcessor implements ValueProcessor<List<Text>, ListV
             final IChatComponent[] rawLines = ((TileEntitySign) container).signText;
             final List<Text> signLines = Lists.newArrayListWithCapacity(4);
             for (int i = 0; i < rawLines.length; i++) {
-                signLines.set(i, SpongeTexts.toText(rawLines[i]));
+                signLines.add(i, SpongeTexts.toText(rawLines[i]));
             }
             return Optional.of(signLines);
         } else if (container instanceof ItemStack) {

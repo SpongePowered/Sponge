@@ -104,31 +104,6 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
     }
 
     @Override
-    public Optional<ImmutableHealthData> fillImmutable(DataHolder dataHolder, ImmutableHealthData immutable) {
-        if (dataHolder instanceof EntityLivingBase) {
-            return Optional.<ImmutableHealthData>of(new ImmutableSpongeHealthData(((EntityLivingBase) dataHolder).getHealth(),
-                                                                                  ((EntityLivingBase) dataHolder).getMaxHealth()));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<ImmutableHealthData> fillImmutable(DataHolder dataHolder, ImmutableHealthData immutable, MergeFunction overlap) {
-        if (dataHolder instanceof EntityLivingBase) {
-            final ImmutableHealthData containersHealth = from(dataHolder).get().asImmutable();
-            return Optional.of(checkNotNull(overlap).merge(immutable, containersHealth));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<ImmutableHealthData> fillImmutable(DataContainer container, ImmutableHealthData immutableManipulator) {
-        final double maxHealth = getData(container, Keys.MAX_HEALTH);
-        final double health = getData(container, Keys.HEALTH);
-        return Optional.<ImmutableHealthData>of(new ImmutableSpongeHealthData(health, maxHealth));
-    }
-
-    @Override
     public DataTransactionResult set(DataHolder dataHolder, HealthData manipulator) {
         if (dataHolder instanceof EntityLivingBase) {
             DataTransactionBuilder builder = DataTransactionBuilder.builder();

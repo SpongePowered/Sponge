@@ -69,9 +69,9 @@ public class SignDataProcessor implements DataProcessor<SignData, ImmutableSignD
         if (dataHolder instanceof TileEntitySign) {
             final SignData signData = new SpongeSignData();
             final IChatComponent[] rawLines = ((TileEntitySign) dataHolder).signText;
-            final List<Text> signLines = Lists.newArrayListWithCapacity(4);
+            final List<Text> signLines = Lists.newArrayListWithExpectedSize(4);
             for (int i = 0; i < rawLines.length; i++) {
-                signLines.set(i, SpongeTexts.toText(rawLines[i]));
+                signLines.add(i, SpongeTexts.toText(rawLines[i]));
             }
             return Optional.of(signData.set(Keys.SIGN_LINES, signLines));
         } else if (dataHolder instanceof ItemStack) {
@@ -104,7 +104,7 @@ public class SignDataProcessor implements DataProcessor<SignData, ImmutableSignD
             final IChatComponent[] rawLines = ((TileEntitySign) dataHolder).signText;
             final List<Text> signLines = Lists.newArrayListWithCapacity(4);
             for (int i = 0; i < rawLines.length; i++) {
-                signLines.set(i, SpongeTexts.toText(rawLines[i]));
+                signLines.add(i, SpongeTexts.toText(rawLines[i]));
             }
             return Optional.of(manipulator.set(Keys.SIGN_LINES, signLines));
         } else if (dataHolder instanceof ItemStack) {
@@ -138,7 +138,7 @@ public class SignDataProcessor implements DataProcessor<SignData, ImmutableSignD
             final IChatComponent[] rawLines = ((TileEntitySign) dataHolder).signText;
             final List<Text> signLines = Lists.newArrayListWithCapacity(4);
             for (int i = 0; i < rawLines.length; i++) {
-                signLines.set(i, SpongeTexts.toText(rawLines[i]));
+                signLines.add(i, SpongeTexts.toText(rawLines[i]));
             }
             signData.set(Keys.SIGN_LINES, signLines);
             return Optional.of(overlap.merge(manipulator, signData));

@@ -39,6 +39,7 @@ public abstract class AbstractBaseValue<E> implements BaseValue<E> {
     public AbstractBaseValue(Key<? extends BaseValue<E>> key, E defaultValue) {
         this.key = checkNotNull(key);
         this.defaultValue = checkNotNull(defaultValue);
+        this.actualValue = defaultValue;
     }
 
     public AbstractBaseValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {

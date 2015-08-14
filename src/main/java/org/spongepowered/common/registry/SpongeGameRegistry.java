@@ -158,6 +158,7 @@ import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.type.WallType;
+import org.spongepowered.api.data.value.ValueBuilder;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
@@ -289,6 +290,7 @@ import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.type.SpongeTreeType;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
@@ -699,6 +701,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public ExplosionBuilder createExplosionBuilder() {
         return new SpongeExplosionBuilder();
+    }
+
+    @Override
+    public ValueBuilder createValueBuilder() {
+        return new SpongeValueBuilder();
     }
 
     @Override
