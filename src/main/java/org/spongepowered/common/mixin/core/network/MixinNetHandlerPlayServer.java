@@ -53,6 +53,7 @@ import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
+import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
@@ -61,6 +62,7 @@ import org.spongepowered.api.event.entity.player.PlayerMoveEvent;
 import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
@@ -145,10 +147,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             throw new RuntimeException("Critical error! Sign data not present on sign!");
         }
         final SignData changedSignData = existingSignData.get().copy();
-
+        final ListValue<Text> lines = changedSignData.lines();
         for (int i = 0; i < packetIn.getLines().length; i++) {
-            changedSignData.lines().set(i, SpongeTexts.toText(packetIn.getLines()[i]));
+            lines.set(i, SpongeTexts.toText(packetIn.getLines()[i]));
         }
+        changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
         final SignChangeEvent event = SpongeEventFactory.createSignChange(Sponge.getGame(), new Cause(null, this.playerEntity, null), (Sign)
