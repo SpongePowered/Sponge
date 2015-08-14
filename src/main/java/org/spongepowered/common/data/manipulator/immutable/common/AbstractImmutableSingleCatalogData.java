@@ -33,6 +33,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableVariantData;
 import org.spongepowered.api.data.manipulator.mutable.VariantData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
@@ -49,6 +50,11 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
     @Override
     public int compareTo(I o) {
         return o.get(this.usedKey).get().getId().compareToIgnoreCase(this.getValue().getId());
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, this.usedKey, this.value, this.value);
     }
 
     @Override

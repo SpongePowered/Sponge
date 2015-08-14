@@ -28,12 +28,12 @@ import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.SkullType;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
@@ -58,6 +58,7 @@ public class KeyRegistry {
         keyMap.put("career", makeSingleKey(Career.class, Value.class, of("Career")));
         keyMap.put("sign_lines", makeListKey(Text.class, of("SignLines")));
         keyMap.put("skull_type", makeSingleKey(SkullType.class, Value.class, of("SkullType")));
+        keyMap.put("velocity", makeSingleKey(Vector3d.class, Value.class, of("Velocity")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

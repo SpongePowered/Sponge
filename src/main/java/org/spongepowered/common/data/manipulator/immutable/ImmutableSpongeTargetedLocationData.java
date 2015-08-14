@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
+import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocationData;
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
@@ -38,6 +39,11 @@ public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingle
 
     public ImmutableSpongeTargetedLocationData(Location value) {
         super(ImmutableTargetedLocationData.class, value, Keys.TARGETED_LOCATION);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return new ImmutableSpongeValue<Location>(Keys.TARGETED_LOCATION, new Location(this.value.getExtent(), new Vector3d()), this.value);
     }
 
     @Override

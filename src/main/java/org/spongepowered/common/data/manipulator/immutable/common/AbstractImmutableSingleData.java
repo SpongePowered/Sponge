@@ -34,6 +34,8 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.util.GetterFunction;
 
 public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
         extends AbstractImmutableData<I, M> {
@@ -45,7 +47,21 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
         super(immutableClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey);
+        registerFieldGetter(this.usedKey, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getValue();
+            }
+        });
+        registerKeyValue(this.usedKey, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return getValueGetter();
+            }
+        });
     }
+
+    protected abstract ImmutableValue<?> getValueGetter();
 
     public T getValue() {
         return value;
