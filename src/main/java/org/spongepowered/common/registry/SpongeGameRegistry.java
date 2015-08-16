@@ -98,12 +98,14 @@ import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableEyeLocationData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -232,7 +234,6 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.WorldBuilder;
@@ -240,6 +241,7 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -251,7 +253,6 @@ import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
 import org.spongepowered.common.configuration.SpongeConfig;
-import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
@@ -272,21 +273,25 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeMobSpawnerBu
 import org.spongepowered.common.data.builder.block.tileentity.SpongeNoteBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
+import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
 import org.spongepowered.common.data.processor.data.SkullDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.EyeLocationDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
@@ -294,6 +299,8 @@ import org.spongepowered.common.data.processor.value.DisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
 import org.spongepowered.common.data.processor.value.SkullValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.EyeHeightValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.EyeLocationValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
@@ -1589,7 +1596,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         final HealthDataProcessor healthProcessor = new HealthDataProcessor();
         service.registerBuilder(HealthData.class, healthProcessor);
         dataRegistry.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
-                                                  ImmutableSpongeHealthData.class, healthProcessor);
+            ImmutableSpongeHealthData.class, healthProcessor);
 
         final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
         service.registerBuilder(DisplayNameData.class, displayNameDataProcessor);
@@ -1616,6 +1623,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
                                                   ImmutableSpongeVelocityData.class, velocityDataProcessor);
 
+        final EyeLocationDataProcessor eyeLocationDataProcessor = new EyeLocationDataProcessor();
+        service.registerBuilder(EyeLocationData.class, eyeLocationDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(EyeLocationData.class, SpongeEyeLocationData.class, ImmutableEyeLocationData.class,
+            ImmutableSpongeEyeLocationData.class, eyeLocationDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1625,6 +1637,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SKULL_TYPE, new SkullValueProcessor());
         dataRegistry.registerValueProcessor(Keys.VELOCITY, new VelocityValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.EYE_HEIGHT, new EyeHeightValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.EYE_LOCATION, new EyeLocationValueProcessor());
 
     }
 

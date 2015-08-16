@@ -32,12 +32,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -53,7 +50,7 @@ import javax.annotation.Nullable;
 
 /**
  * So, considering this is the root of the immutable variants of
- * {@link DataManipulator}, otherwise known as {@link                                     ImmutableDataManipulator}s.
+ * {@link DataManipulator}, otherwise known as {@link ImmutableDataManipulator}s.
  * The advantage of these types of {@link DataManipulator}s is that they can not be
  * mutated once created. In other words, it's safe to pass around these immutable
  * variants across threads without worry of the underlying values being changed.

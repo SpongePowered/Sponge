@@ -54,6 +54,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.interfaces.IMixinEntity;
@@ -79,6 +80,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
     private float origHeight;
+    @Nullable private Double modifiedEyeHeight = null;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -140,6 +142,17 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
+    @Inject(method = "getEyeHeight()F", at = @At("HEAD"), cancellable = true)
+    public void onGetEyeHeight(CallbackInfoReturnable<Float> ci) {
+        if (this.modifiedEyeHeight != null) {
+            ci.setReturnValue(this.modifiedEyeHeight.floatValue());
+        }
+    }
+
+    @Override
+    public void setEyeHeight(Double value) {
+        this.modifiedEyeHeight = value;
+    }
 
     @Override
     public World getWorld() {

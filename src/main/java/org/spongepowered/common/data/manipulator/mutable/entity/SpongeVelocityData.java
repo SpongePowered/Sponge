@@ -45,7 +45,7 @@ public class SpongeVelocityData extends AbstractSingleData<Vector3d, VelocityDat
     public static final DataQuery VELOCITY_Z = of("Z");
 
     public SpongeVelocityData() {
-        this(new Vector3d());
+        this(Vector3d.ZERO);
     }
 
     public SpongeVelocityData(Vector3d velocity) {

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -36,36 +34,18 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.IMixinEntity;
 
-public class VelocityValueProcessor implements ValueProcessor<Vector3d, Value<Vector3d>> {
+@SuppressWarnings("ConstantConditions")
+public class EyeLocationValueProcessor implements ValueProcessor<Vector3d, Value<Vector3d>> {
 
     @Override
     public Key<? extends BaseValue<Vector3d>> getKey() {
-        return Keys.VELOCITY;
-    }
-
-    @Override
-    public Optional<Vector3d> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            return Optional.of(new Vector3d(((Entity) container).motionX, ((Entity) container).motionY, ((Entity) container).motionZ));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<Value<Vector3d>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            final double x = ((Entity) container).motionX;
-            final double y = ((Entity) container).motionY;
-            final double z = ((Entity) container).motionZ;
-            return Optional.<Value<Vector3d>>of(new SpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, new Vector3d(x, y, z)));
-        }
-        return Optional.absent();
+        return Keys.EYE_LOCATION;
     }
 
     @Override
@@ -74,49 +54,61 @@ public class VelocityValueProcessor implements ValueProcessor<Vector3d, Value<Ve
     }
 
     @Override
+    public Optional<Vector3d> getValueFromContainer(ValueContainer<?> container) {
+        if (supports(container)) {
+            final Entity entity = (Entity) container;
+            return Optional.of(new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ));
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<Value<Vector3d>> getApiValueFromContainer(ValueContainer<?> container) {
+        if (supports(container)) {
+            final Entity entity = (Entity) container;
+            return Optional.<Value<Vector3d>>of(new SpongeValue<Vector3d>(Keys.EYE_LOCATION, new Vector3d(entity.posX, entity.posY, entity.posZ),
+                new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ)));
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public DataTransactionResult transform(ValueContainer<?> container, Function<Vector3d, Vector3d> function) {
-        if (container instanceof Entity) {
-            final Vector3d old = getValueFromContainer(container).get();
-            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, old);
-            final Vector3d newVec = checkNotNull(checkNotNull(function, "function").apply(old), "The function returned a null value!");
-            final ImmutableValue<Vector3d> newVal = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, newVec);
-            try {
-                ((Entity) container).motionX = newVec.getX();
-                ((Entity) container).motionY = newVec.getY();
-                ((Entity) container).motionZ = newVec.getZ();
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newVal);
-            }
-            return DataTransactionBuilder.successReplaceResult(newVal, oldValue);
+        if (supports(container)) {
+            final Entity entity = (Entity) container;
+            final Vector3d oldValue = new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+            final Vector3d newValue = function.apply(oldValue);
+            ((IMixinEntity) entity).setEyeHeight(newValue.getY() - oldValue.getY());
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, newValue),
+                new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, oldValue));
         }
         return DataTransactionBuilder.failNoData();
     }
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((Vector3d) value.get()));
+        final Object object = value.get();
+        if (object instanceof Vector3d) {
+            return offerToStore(container, (Vector3d) object);
+        }
+        return DataTransactionBuilder.failNoData();
     }
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Vector3d value) {
-        final ImmutableValue<Vector3d> newValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, value);
-        if (container instanceof Entity) {
-            final Vector3d old = getValueFromContainer(container).get();
-            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, old);
-            try {
-                ((Entity) container).motionX = value.getX();
-                ((Entity) container).motionY = value.getY();
-                ((Entity) container).motionZ = value.getZ();
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                DataTransactionBuilder.errorResult(newValue);
-            }
+        if (supports(container)) {
+            final Entity entity = (Entity) container;
+            final Vector3d oldValue = new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+            ((IMixinEntity) entity).setEyeHeight(value.getY() - oldValue.getY());
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, value),
+                new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, oldValue));
         }
-        return DataTransactionBuilder.failResult(newValue);
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, value));
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionBuilder.failNoData();
     }
+
 }

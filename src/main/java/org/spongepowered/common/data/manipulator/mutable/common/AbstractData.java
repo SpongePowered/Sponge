@@ -71,7 +71,7 @@ import javax.annotation.Nullable;
  * all of the implementation methods provided here are handled using those. This
  * was done to avoid having to override {@link #getKeys()} and {@link #getValues()},
  * let alone using {@link ValueProcessor}s for simple setters and getters. I believe
- * this to be faster than haivng to retrieve a processor from a map, checking if
+ * this to be faster than having to retrieve a processor from a map, checking if
  * the class is an instance of the type implementation to access the setters
  * and getters.</p>
  *

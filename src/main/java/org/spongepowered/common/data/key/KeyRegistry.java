@@ -59,6 +59,8 @@ public class KeyRegistry {
         keyMap.put("sign_lines", makeListKey(Text.class, of("SignLines")));
         keyMap.put("skull_type", makeSingleKey(SkullType.class, Value.class, of("SkullType")));
         keyMap.put("velocity", makeSingleKey(Vector3d.class, Value.class, of("Velocity")));
+        keyMap.put("eye_height", makeSingleKey(Double.class, Value.class, of("EyeHeight")));
+        keyMap.put("eye_location", makeSingleKey(Vector3d.class, Value.class, of("EyeLocation")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

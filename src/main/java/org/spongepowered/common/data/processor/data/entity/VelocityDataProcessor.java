@@ -165,7 +165,7 @@ public class VelocityDataProcessor implements DataProcessor<VelocityData, Immuta
 
     @Override
     public ImmutableVelocityData createImmutable() {
-        return new ImmutableSpongeVelocityData(new Vector3d());
+        return new ImmutableSpongeVelocityData(Vector3d.ZERO);
     }
 
     @Override
