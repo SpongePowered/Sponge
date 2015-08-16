@@ -186,7 +186,7 @@ public class LegacyTextRepresentation implements TextRepresentation {
 
         char[] result = text.toCharArray();
         for (; pos < last; pos++) {
-            if (isFormat(result[pos + 1])) {
+            if (result[pos] == from && isFormat(result[pos + 1])) {
                 result[pos] = to;
             }
         }
