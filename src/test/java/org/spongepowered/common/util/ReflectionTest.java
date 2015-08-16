@@ -63,8 +63,8 @@ public class ReflectionTest {
 
     @Test
     public void testNulls() {
-        findConstructor(Dummy.class, null);
-        createInstance(Dummy.class, null);
+        findConstructor(Dummy.class, (Object) null);
+        createInstance(Dummy.class, (Object) null);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -91,6 +91,7 @@ public class SkullValueProcessor implements ValueProcessor<SkullType, Value<Skul
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
+        @SuppressWarnings("unchecked")
         BaseValue<SkullType> realValue = (BaseValue<SkullType>) value;
         ImmutableValue<SkullType> proposedValue = this.getNewValue(realValue.get()).asImmutable();
         ImmutableValue<SkullType> oldValue;

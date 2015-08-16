@@ -47,7 +47,6 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -164,39 +163,39 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public Location getLocation() {
-        return new Location((Extent) this.worldObj, getPosition());
+    public Location<World> getLocation() {
+        return new Location<World>((World) this.worldObj, getPosition());
     }
 
     @Override
-    public void setLocation(Location location) {
+    public void setLocation(Location<World> location) {
         setLocation(location, true);
     }
 
     @Override
-    public boolean setLocationSafely(Location location) {
+    public boolean setLocationSafely(Location<World> location) {
         return setLocation(location, false);
     }
 
     @Override
-    public void setLocationAndRotation(Location location, Vector3d rotation) {
+    public void setLocationAndRotation(Location<World> location, Vector3d rotation) {
         setLocation(location);
         setRotation(rotation);
     }
 
     @Override
-    public boolean setLocationAndRotationSafely(Location location, Vector3d rotation) {
+    public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation) {
         boolean relocated = setLocation(location, false);
         setRotation(rotation);
         return relocated;
     }
 
     @Override
-    public boolean setLocationAndRotationSafely(Location location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+    public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         return setLocationAndRotation(location, rotation, relativePositions, true);
     }
 
-    public boolean setLocation(Location location, boolean forced) {
+    public boolean setLocation(Location<World> location, boolean forced) {
         if (isRemoved()) {
             return false;
         }
@@ -207,7 +206,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (!forced) {
             // Validate
             TeleportHelper teleportHelper = Sponge.getGame().getTeleportHelper();
-            Optional<Location> safeLocation = teleportHelper.getSafeLocation(location);
+            Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
             if (!safeLocation.isPresent()) {
                 return false;
             } else {
@@ -231,7 +230,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         net.minecraft.world.World nmsWorld = null;
-        if (location.getExtent() instanceof World && ((World) location.getExtent()).getUniqueId() != ((World) this.worldObj).getUniqueId()) {
+        if (location.getExtent().getUniqueId() != ((World) this.worldObj).getUniqueId()) {
             nmsWorld = (net.minecraft.world.World) location.getExtent();
             if (thisEntity instanceof EntityPlayerMP) {
                 // Close open containers
@@ -272,12 +271,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public void setLocationAndRotation(Location location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+    public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         setLocationAndRotation(location, rotation, relativePositions, false);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public boolean setLocationAndRotation(Location location, Vector3d rotation, EnumSet<RelativePositions> relativePositions, boolean forced) {
+    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions, boolean forced) {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
@@ -312,7 +311,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
                     .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
-                Location resultantLocation = getLocation();
+                Location<World> resultantLocation = getLocation();
                 Vector3d resultantRotation = getRotation();
 
                 if (relativePositions.contains(RelativePositions.X)) {
@@ -355,12 +354,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public Transform getTransform() {
-        return new SpongeTransform(getWorld(), getPosition(), getRotation(), getScale());
+    public Transform<World> getTransform() {
+        return new SpongeTransform<World>(getWorld(), getPosition(), getRotation(), getScale());
     }
 
     @Override
-    public void setTransform(Transform transform) {
+    public void setTransform(Transform<World> transform) {
         setLocation(transform.getLocation());
         setRotation(transform.getRotation());
         setScale(transform.getScale());
@@ -373,7 +372,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             if (props.get().isEnabled()) {
                 Optional<World> world = Sponge.getGame().getServer().loadWorld(worldName);
                 if (world.isPresent()) {
-                    Location location = new Location(world.get(), position);
+                    Location<World> location = new Location<World>(world.get(), position);
                     return setLocationSafely(location);
                 }
             }
@@ -504,7 +503,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     // for sponge internal use only
     @SuppressWarnings("unchecked")
-    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location location, int currentDim, int targetDim, boolean forced) {
+    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim, boolean forced) {
         MinecraftServer mcServer = MinecraftServer.getServer();
         final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
         final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);

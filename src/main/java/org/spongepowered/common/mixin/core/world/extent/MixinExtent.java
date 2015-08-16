@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world.extent;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -52,7 +51,6 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
@@ -127,33 +125,8 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public Location getLocation(int x, int y, int z) {
-        return getLocation(new Vector3i(x, y, z));
-    }
-
-    @Override
-    public Location getLocation(Vector3i position) {
-        return new Location(this, position);
-    }
-
-    @Override
-    public Location getLocation(double x, double y, double z) {
-        return getLocation(new Vector3d(x, y, z));
-    }
-
-    @Override
-    public Location getLocation(Vector3d position) {
-        return new Location(this, position);
-    }
-
-    @Override
     public Optional<TileEntity> getTileEntity(Vector3i position) {
         return getTileEntity(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public Optional<TileEntity> getTileEntity(Location blockLoc) {
-        return getTileEntity(blockLoc.getBlockX(), blockLoc.getBlockY(), blockLoc.getBlockZ());
     }
 
     @Override

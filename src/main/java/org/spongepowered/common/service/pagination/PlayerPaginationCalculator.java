@@ -51,9 +51,9 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
     private static final int LINE_WIDTH = 320;
 
     static {
-        ConfigurationLoader<CommentedConfigurationNode> loader = ((HoconConfigurationLoader.Builder)HoconConfigurationLoader.builder()
+        ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
                 .setURL(PlayerPaginationCalculator.class.getResource("font-sizes.json"))
-                .setPreservesHeader(false)).build();
+                .setPreservesHeader(false).build();
         try {
             ConfigurationNode node = loader.load();
             NON_UNICODE_CHARS = node.getNode("non-unicode").getString();

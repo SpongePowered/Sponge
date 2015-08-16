@@ -37,6 +37,7 @@ import org.spongepowered.api.text.selector.Selectors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 
 import java.util.Collection;
@@ -116,7 +117,7 @@ public class SpongeSelector implements Selector {
     }
 
     @Override
-    public Set<Entity> resolve(Location location) {
+    public Set<Entity> resolve(Location<World> location) {
         return new SelectorResolver(location, this, false).resolve();
     }
 
@@ -136,7 +137,7 @@ public class SpongeSelector implements Selector {
     }
 
     @Override
-    public Set<Entity> resolveForce(Location location) {
+    public Set<Entity> resolveForce(Location<World> location) {
         return new SelectorResolver(location, this, true).resolve();
     }
 

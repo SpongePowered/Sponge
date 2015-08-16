@@ -54,8 +54,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract BlockPos getPos();
 
     @Override
-    public Location getLocation() {
-        return new Location((World) this.worldObj, VecHelper.toVector(this.getPos()));
+    public Location<World> getLocation() {
+        return new Location<World>((World) this.worldObj, VecHelper.toVector(this.getPos()));
     }
 
     @Override

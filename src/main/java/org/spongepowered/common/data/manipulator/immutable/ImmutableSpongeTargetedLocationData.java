@@ -30,20 +30,21 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocatio
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTargetedLocationData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingleData<Location, ImmutableTargetedLocationData, TargetedLocationData>
+public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingleData<Location<World>, ImmutableTargetedLocationData, TargetedLocationData>
     implements ImmutableTargetedLocationData {
 
-    public ImmutableSpongeTargetedLocationData(Location value) {
+    public ImmutableSpongeTargetedLocationData(Location<World> value) {
         super(ImmutableTargetedLocationData.class, value, Keys.TARGETED_LOCATION);
     }
 
     @Override
     protected ImmutableValue<?> getValueGetter() {
-        return new ImmutableSpongeValue<Location>(Keys.TARGETED_LOCATION, new Location(this.value.getExtent(), new Vector3d()), this.value);
+        return new ImmutableSpongeValue<Location<World>>(Keys.TARGETED_LOCATION, new Location<World>(this.value.getExtent(), Vector3d.ZERO), this.value);
     }
 
     @Override
@@ -52,8 +53,8 @@ public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingle
     }
 
     @Override
-    public ImmutableValue<Location> target() {
-        return new ImmutableSpongeValue<Location>(Keys.TARGETED_LOCATION, this.value);
+    public ImmutableValue<Location<World>> target() {
+        return new ImmutableSpongeValue<Location<World>>(Keys.TARGETED_LOCATION, this.value);
     }
 
     @Override

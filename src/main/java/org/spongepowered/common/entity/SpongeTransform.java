@@ -38,24 +38,24 @@ import org.spongepowered.api.world.extent.Extent;
 import javax.annotation.Nullable;
 
 @NonnullByDefault
-public class SpongeTransform implements Transform {
+public class SpongeTransform<E extends Extent> implements Transform<E> {
 
-    @Nullable private Extent extent;
+    @Nullable private E extent;
     private Vector3d position;
     private Vector3d rotation;
     private Vector3d scale;
-    @Nullable private Location location = null;
+    @Nullable private Location<E> location = null;
     @Nullable private Quaterniond rotationQuaternion = null;
 
     public SpongeTransform() {
         this(null, Vector3d.ZERO, Vector3d.ZERO, Vector3d.ONE);
     }
 
-    public SpongeTransform(@Nullable Extent extent, Vector3d position) {
+    public SpongeTransform(@Nullable E extent, Vector3d position) {
         this(extent, position, Vector3d.ZERO, Vector3d.ONE);
     }
 
-    public SpongeTransform(@Nullable Extent extent, Vector3d position, Vector3d rotation, Vector3d scale) {
+    public SpongeTransform(@Nullable E extent, Vector3d position, Vector3d rotation, Vector3d scale) {
         this.extent = extent;
         this.position = checkNotNull(position, "position");
         this.rotation = checkNotNull(rotation, "rotation");
@@ -63,16 +63,16 @@ public class SpongeTransform implements Transform {
     }
 
     @Override
-    public Location getLocation() {
+    public Location<E> getLocation() {
         checkState(extent != null, "Transform has no extent");
         if (this.location == null) {
-            this.location = new Location(this.extent, this.position);
+            this.location = new Location<E>(this.extent, this.position);
         }
         return this.location;
     }
 
     @Override
-    public Transform setLocation(Location location) {
+    public Transform<E> setLocation(Location<E> location) {
         checkNotNull(location, "location");
         setExtent(location.getExtent());
         setPosition(location.getPosition());
@@ -80,13 +80,13 @@ public class SpongeTransform implements Transform {
     }
 
     @Override
-    public Extent getExtent() {
+    public E getExtent() {
         checkState(extent != null, "Transform has no extent");
         return this.extent;
     }
 
     @Override
-    public Transform setExtent(Extent extent) {
+    public Transform<E> setExtent(E extent) {
         checkNotNull(extent, "extent");
         this.extent = extent;
         this.location = null;
@@ -99,7 +99,7 @@ public class SpongeTransform implements Transform {
     }
 
     @Override
-    public Transform setPosition(Vector3d position) {
+    public Transform<E> setPosition(Vector3d position) {
         checkNotNull(position, "position");
         this.position = position;
         this.location = null;
@@ -112,7 +112,7 @@ public class SpongeTransform implements Transform {
     }
 
     @Override
-    public Transform setRotation(Vector3d rotation) {
+    public Transform<E> setRotation(Vector3d rotation) {
         checkNotNull(rotation, "rotation");
         this.rotation = rotation;
         this.rotationQuaternion = null;
@@ -128,7 +128,7 @@ public class SpongeTransform implements Transform {
     }
 
     @Override
-    public Transform setRotation(Quaterniond rotation) {
+    public Transform<E> setRotation(Quaterniond rotation) {
         checkNotNull(rotation, "rotation");
         final Vector3d axesAngles = rotation.getAxesAnglesDeg();
         this.rotation = new Vector3d(axesAngles.getX(), -axesAngles.getY(), axesAngles.getZ());
@@ -157,14 +157,14 @@ public class SpongeTransform implements Transform {
     }
 
     @Override
-    public Transform setScale(Vector3d scale) {
+    public Transform<E> setScale(Vector3d scale) {
         checkNotNull(scale, "scale");
         this.scale = scale;
         return this;
     }
 
     @Override
-    public Transform add(Transform other) {
+    public Transform<E> add(Transform<E> other) {
         checkNotNull(other, "other");
         addTranslation(other.getPosition());
         addRotation(other.getRotationAsQuaternion());
@@ -173,27 +173,27 @@ public class SpongeTransform implements Transform {
     }
 
     @Override
-    public Transform addTranslation(Vector3d translation) {
+    public Transform<E> addTranslation(Vector3d translation) {
         checkNotNull(translation, "translation");
         setPosition(getPosition().add(translation));
         return this;
     }
 
     @Override
-    public Transform addRotation(Vector3d rotation) {
+    public Transform<E> addRotation(Vector3d rotation) {
         checkNotNull(rotation, "rotation");
         return addRotation(Quaterniond.fromAxesAnglesDeg(rotation.getX(), -rotation.getY(), rotation.getZ()));
     }
 
     @Override
-    public Transform addRotation(Quaterniond rotation) {
+    public Transform<E> addRotation(Quaterniond rotation) {
         checkNotNull(rotation, "rotation");
         setRotation(rotation.mul(getRotationAsQuaternion()));
         return this;
     }
 
     @Override
-    public Transform addScale(Vector3d scale) {
+    public Transform<E> addScale(Vector3d scale) {
         checkNotNull(scale, "scale");
         setScale(getScale().mul(scale));
         return this;

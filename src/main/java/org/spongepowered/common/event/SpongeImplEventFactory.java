@@ -34,6 +34,7 @@ import org.spongepowered.api.event.world.WorldLoadEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 /**
  * Utility that fires events that normally Forge fires at (in spots). Typically
@@ -48,11 +49,11 @@ public class SpongeImplEventFactory {
         return SpongeEventFactory.createWorldLoad(game, world);
     }
 
-    public static PlayerJoinEvent createPlayerJoin(Game game, Player player, Location location, Text text, MessageSink sink) {
+    public static PlayerJoinEvent createPlayerJoin(Game game, Player player, Location<World> location, Text text, MessageSink sink) {
         return SpongeEventFactory.createPlayerJoin(game, player, location, text, sink);
     }
 
-    public static PlayerRespawnEvent createPlayerRespawn(Game game, Player player, boolean bedSpawn, Location respawnLocation) {
+    public static PlayerRespawnEvent createPlayerRespawn(Game game, Player player, boolean bedSpawn, Location<World> respawnLocation) {
         return SpongeEventFactory.createPlayerRespawn(game, player, respawnLocation, bedSpawn);
     }
 

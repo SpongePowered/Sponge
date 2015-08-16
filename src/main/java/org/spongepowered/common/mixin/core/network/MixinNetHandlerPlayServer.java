@@ -65,6 +65,7 @@ import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -95,7 +96,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     private boolean justTeleported = false;
 
-    private Location lastMoveLocation = null;
+    private Location<World> lastMoveLocation = null;
 
     @Override
     public Player getPlayer() {
@@ -256,7 +257,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "setPlayerLocation(DDDFFLjava/util/Set;)V", at = @At(value = "RETURN"))
-    public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, Set relativeSet, CallbackInfo ci) {
+    public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, Set<?> relativeSet, CallbackInfo ci) {
         this.justTeleported = true;
     }
 
@@ -267,13 +268,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             Vector3d fromrot = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
-            Location from = player.getLocation();
+            Location<World> from = player.getLocation();
             if (this.lastMoveLocation != null) {
                  from = this.lastMoveLocation;
             }
 
             Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-            Location to = new Location(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
+            Location<World> to = new Location<World>(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             boolean rotationOnly = !packetIn.isMoving() && packetIn.getRotating();

@@ -617,6 +617,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
         Map<String, ? extends CatalogType> tempMap = this.catalogTypeMap.get(checkNotNull(typeClass, "null type class"));
@@ -1937,13 +1938,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public Transform createTransform() {
-        return new SpongeTransform();
+    public <E extends Extent> Transform<E> createTransform() {
+        return new SpongeTransform<E>();
     }
 
     @Override
-    public Transform createTransform(Extent extent) {
-        return new SpongeTransform(extent, Vector3d.ZERO);
+    public <E extends Extent> Transform<E> createTransform(E extent) {
+        return new SpongeTransform<E>(extent, Vector3d.ZERO);
     }
 
     @Override

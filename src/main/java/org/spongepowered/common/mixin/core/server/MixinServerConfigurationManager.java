@@ -253,7 +253,7 @@ public abstract class MixinServerConfigurationManager {
         if (!conqueredEnd && targetDimension == 0) {
             targetDimension = playerIn.dimension;
         }
-        Location location = this.getPlayerRespawnLocation(playerIn, targetDimension);
+        Location<World> location = this.getPlayerRespawnLocation(playerIn, targetDimension);
 
         // Keep players out of blocks
         Vector3d tempPos = ((Player) playerIn).getLocation().getPosition();
@@ -327,7 +327,7 @@ public abstract class MixinServerConfigurationManager {
     }
 
     // Internal. Note: Has side-effects
-    private Location getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
+    private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
@@ -371,7 +371,7 @@ public abstract class MixinServerConfigurationManager {
         if (spawnPos == null) {
             spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
         }
-        return new Location((World) targetWorld, spawnPos);
+        return new Location<World>((World) targetWorld, spawnPos);
     }
 
     @Overwrite
