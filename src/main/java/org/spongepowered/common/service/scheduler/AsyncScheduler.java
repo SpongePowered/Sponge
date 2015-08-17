@@ -90,7 +90,7 @@ public class AsyncScheduler extends SchedulerBase {
                     // There is an offset and the task hasn't run yet
                     this.minimumTimeout = Math.min(task.offset - timeSinceLast, this.minimumTimeout);
                 }
-                if (task.period > 0 && task.getState() == ScheduledTask.ScheduledTaskState.RUNNING) {
+                if (task.period > 0 && task.getState().isActive) {
                     // The task repeats and has run after the initial delay
                     this.minimumTimeout = Math.min(task.period - timeSinceLast, this.minimumTimeout);
                 }

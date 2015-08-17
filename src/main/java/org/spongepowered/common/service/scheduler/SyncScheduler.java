@@ -50,7 +50,7 @@ public class SyncScheduler extends SchedulerBase {
             } else {
                 return super.getTimestamp(task);
             }
-        } else if (task.getState() == ScheduledTask.ScheduledTaskState.RUNNING || task.getState() == ScheduledTask.ScheduledTaskState.SWITCHING) {
+        } else if (task.getState().isActive) {
             // The timestamp is based on the period
             if (task.intervalIsTicks) {
                 return this.counter;
