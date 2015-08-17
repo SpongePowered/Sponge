@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import net.minecraft.entity.Entity;
 
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
@@ -39,7 +39,6 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 

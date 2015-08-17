@@ -25,10 +25,9 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
-import net.minecraft.entity.Entity;
 
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -37,9 +36,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -47,11 +44,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 
 public class SneakingDataProcessor implements DataProcessor<SneakingData, ImmutableSneakingData> {
