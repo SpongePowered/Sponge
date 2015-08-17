@@ -46,18 +46,6 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableData<Im
     public ImmutableSpongeRepresentedItemData(ItemStack itemStack) {
         super(ImmutableRepresentedItemData.class);
         this.itemStack = checkNotNull(itemStack).copy();
-        registerFieldGetter(Keys.REPRESENTED_ITEM, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getItemStack();
-            }
-        });
-        registerKeyValue(Keys.REPRESENTED_ITEM, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return item();
-            }
-        });
     }
 
     @Override
@@ -88,5 +76,21 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableData<Im
 
     public ItemStack getItemStack() {
         return this.itemStack.copy();
+    }
+
+    @Override
+    protected void registerStuff() {
+        registerFieldGetter(Keys.REPRESENTED_ITEM, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getItemStack();
+            }
+        });
+        registerKeyValue(Keys.REPRESENTED_ITEM, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return item();
+            }
+        });
     }
 }

@@ -29,11 +29,9 @@ import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
-
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
-
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -49,9 +47,10 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
-public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableHealthData> {
+public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData, ImmutableHealthData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {

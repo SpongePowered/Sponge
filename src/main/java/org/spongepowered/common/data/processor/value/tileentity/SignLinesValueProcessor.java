@@ -36,7 +36,6 @@ import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.BaseValue;
@@ -45,8 +44,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
@@ -55,11 +53,10 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
-public class SignLinesValueProcessor implements ValueProcessor<List<Text>, ListValue<Text>> {
+public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<Text>, ListValue<Text>> {
 
-    @Override
-    public Key<? extends BaseValue<List<Text>>> getKey() {
-        return Keys.SIGN_LINES;
+    public SignLinesValueProcessor() {
+        super(Keys.SIGN_LINES);
     }
 
     @Override

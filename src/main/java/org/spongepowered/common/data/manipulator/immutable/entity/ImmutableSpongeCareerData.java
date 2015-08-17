@@ -37,6 +37,7 @@ public class ImmutableSpongeCareerData extends AbstractImmutableSingleCatalogDat
     public ImmutableSpongeCareerData(Career value) {
         super(ImmutableCareerData.class, value, Keys.CAREER, SpongeCareerData.class);
     }
+
     @Override
     public ImmutableValue<Career> career() {
         return type();

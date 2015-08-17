@@ -31,10 +31,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFoodData, FoodData> implements ImmutableFoodData {
 
@@ -90,6 +92,61 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
     @Override
     public ImmutableBoundedValue<Double> saturation() {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.SATURATION, (double) this.foodSaturationLevel,
-                (double) this.foodSaturationLevel);
+                                                 (double) this.foodSaturationLevel);
+    }
+
+    public int getFood() {
+        return this.foodLevel;
+    }
+
+    public double getExhaustion() {
+        return this.foodExhaustionLevel;
+    }
+
+    public double getSaturation() {
+        return this.foodSaturationLevel;
+    }
+
+    @Override
+    protected void registerStuff() {
+        registerFieldGetter(Keys.FOOD_LEVEL, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getFood();
+            }
+        });
+        registerKeyValue(Keys.FOOD_LEVEL, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return foodLevel();
+            }
+        });
+
+        registerFieldGetter(Keys.EXHAUSTION, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getExhaustion();
+            }
+        });
+        registerKeyValue(Keys.EXHAUSTION, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return exhaustion();
+            }
+        });
+
+        registerFieldGetter(Keys.SATURATION, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getSaturation();
+            }
+        });
+        registerKeyValue(Keys.SATURATION, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return saturation();
+            }
+        });
+
     }
 }

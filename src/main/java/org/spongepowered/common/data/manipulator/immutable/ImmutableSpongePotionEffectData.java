@@ -72,4 +72,9 @@ public class ImmutableSpongePotionEffectData extends AbstractImmutableData<Immut
         return new MemoryDataContainer()
             .set(Keys.POTION_EFFECTS, this.effects);
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

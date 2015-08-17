@@ -45,10 +45,11 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
-public class BreathingDataProcessor implements DataProcessor<BreathingData, ImmutableBreathingData> {
+public class BreathingDataProcessor extends AbstractSpongeDataProcessor<BreathingData, ImmutableBreathingData> {
 
     @Override
     public Optional<BreathingData> build(DataView container) throws InvalidDataException {

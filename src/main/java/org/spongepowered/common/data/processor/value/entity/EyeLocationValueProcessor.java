@@ -30,22 +30,20 @@ import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IMixinEntity;
 
 @SuppressWarnings("ConstantConditions")
-public class EyeLocationValueProcessor implements ValueProcessor<Vector3d, Value<Vector3d>> {
+public class EyeLocationValueProcessor extends AbstractSpongeValueProcessor<Vector3d, Value<Vector3d>> {
 
-    @Override
-    public Key<? extends BaseValue<Vector3d>> getKey() {
-        return Keys.EYE_LOCATION;
+    public EyeLocationValueProcessor() {
+        super(Keys.EYE_LOCATION);
     }
 
     @Override

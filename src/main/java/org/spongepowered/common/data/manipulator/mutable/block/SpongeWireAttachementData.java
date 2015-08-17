@@ -108,8 +108,8 @@ public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, 
             .set(Keys.WIRE_ATTACHMENT_WEST.getQuery(), this.wireAttachmentMap.get(Direction.WEST).getId());
     }
 
-
-    private void registerStuff() {
+    @Override
+    protected void registerStuff() {
         // north
         // TODO register things
     }

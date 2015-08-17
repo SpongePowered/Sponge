@@ -31,20 +31,18 @@ import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
-public class FoodExhaustionValueProcessor implements ValueProcessor<Double, MutableBoundedValue<Double>> {
+public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<Double, MutableBoundedValue<Double>> {
 
-    @Override
-    public Key<? extends BaseValue<Double>> getKey() {
-        return Keys.EXHAUSTION;
+    public FoodExhaustionValueProcessor() {
+        super(Keys.EXHAUSTION);
     }
 
     @Override

@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -59,6 +58,10 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
         super(manipulatorClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey);
+    }
+
+    @Override
+    protected void registerStuff() {
         registerFieldGetter(usedKey, new GetterFunction<Object>() {
             @Override
             public Object get() {

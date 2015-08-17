@@ -29,22 +29,20 @@ import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IMixinEntity;
 
 @SuppressWarnings("ConstantConditions")
-public class EyeHeightValueProcessor implements ValueProcessor<Double, Value<Double>> {
+public class EyeHeightValueProcessor extends AbstractSpongeValueProcessor<Double, Value<Double>> {
 
-    @Override
-    public Key<? extends BaseValue<Double>> getKey() {
-        return Keys.EYE_HEIGHT;
+    public EyeHeightValueProcessor() {
+        super(Keys.EYE_HEIGHT);
     }
 
     @Override

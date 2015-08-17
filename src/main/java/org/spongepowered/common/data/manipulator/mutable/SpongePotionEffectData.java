@@ -72,4 +72,9 @@ public class SpongePotionEffectData extends AbstractData<PotionEffectData, Immut
         return new MemoryDataContainer()
             .set(Keys.POTION_EFFECTS.getQuery(), this.effects);
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

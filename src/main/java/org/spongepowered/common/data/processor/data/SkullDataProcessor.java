@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
@@ -44,15 +43,15 @@ import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.processor.common.SkullUtils;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class SkullDataProcessor implements DataProcessor<SkullData, ImmutableSkullData> {
+public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, ImmutableSkullData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {

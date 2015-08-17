@@ -30,7 +30,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
@@ -39,16 +38,15 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
-public class CareerValueProcessor implements ValueProcessor<Career, Value<Career>> {
+public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, Value<Career>> {
 
-    @Override
-    public Key<? extends BaseValue<Career>> getKey() {
-        return Keys.CAREER;
+    public CareerValueProcessor() {
+        super(Keys.CAREER);
     }
 
     @Override

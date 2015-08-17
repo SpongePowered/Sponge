@@ -100,4 +100,9 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
             .set(Keys.CONNECTED_EAST.getQuery(), this.directions.contains(Direction.EAST))
             .set(Keys.CONNECTED_WEST.getQuery(), this.directions.contains(Direction.WEST));
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

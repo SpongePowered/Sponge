@@ -31,10 +31,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeBreathingData extends AbstractImmutableData<ImmutableBreathingData, BreathingData> implements ImmutableBreathingData {
 
@@ -82,4 +84,44 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.MAX_AIR, this.maxAir, this.maxAir);
     }
 
+    public int getMaxAir() {
+        return this.maxAir;
+    }
+
+    public int getRemainingAir() {
+        return this.remainingAir;
+    }
+
+    @Override
+    protected void registerStuff() {
+        registerFieldGetter(Keys.MAX_AIR, new GetterFunction<Object>() {
+
+            @Override
+            public Object get() {
+                return getMaxAir();
+            }
+        });
+        registerKeyValue(Keys.MAX_AIR, new GetterFunction<ImmutableValue<?>>() {
+
+            @Override
+            public ImmutableValue<?> get() {
+                return maxAir();
+            }
+        });
+
+        registerFieldGetter(Keys.REMAINING_AIR, new GetterFunction<Object>() {
+
+            @Override
+            public Object get() {
+                return getRemainingAir();
+            }
+        });
+        registerKeyValue(Keys.REMAINING_AIR, new GetterFunction<ImmutableValue<?>>() {
+
+            @Override
+            public ImmutableValue<?> get() {
+                return remainingAir();
+            }
+        });
+    }
 }

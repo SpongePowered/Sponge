@@ -45,9 +45,10 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 
-public class FoodDataProcessor implements DataProcessor<FoodData, ImmutableFoodData> {
+public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, ImmutableFoodData> {
 
     @Override
     public Optional<FoodData> build(DataView container) throws InvalidDataException {

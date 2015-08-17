@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.data;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
-
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
@@ -37,7 +39,13 @@ import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.util.BlockDataProcessorDelegate;
+import org.spongepowered.common.data.util.ComparatorUtil;
+import org.spongepowered.common.data.util.DataProcessorDelegate;
+import org.spongepowered.common.data.util.ValueProcessorDelegate;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -45,27 +53,49 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
     private static final SpongeDataRegistry instance = new SpongeDataRegistry();
 
+    // Builders
+
     private final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> builderMap = new MapMaker()
-                                                                                                            .concurrencyLevel(4)
-                                                                                                            .makeMap();
+        .concurrencyLevel(4)
+        .makeMap();
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> immutableBuilderMap = new MapMaker()
-                                                                                                                            .concurrencyLevel(4)
-                                                                                                                            .makeMap();
-    private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessor<?, ?>> processorMap = new MapMaker()
-                                                                                                        .concurrencyLevel(4)
-                                                                                                        .makeMap();
-    private Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessor<?, ?>> immutableProcessorMap = new MapMaker()
-                                                                                                                    .concurrencyLevel(4)
-                                                                                                                    .makeMap();
-    private final Map<Key<? extends BaseValue<?>>, ValueProcessor<?, ?>> valueProcessorMap = new MapMaker()
-                                                                                                .concurrencyLevel(4)
-                                                                                                .makeMap();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, BlockDataProcessor<?>> blockDataMap = new MapMaker()
-                                                                                                                .concurrencyLevel(4)
-                                                                                                                .makeMap();
+        .concurrencyLevel(4)
+        .makeMap();
+
+    // Registrations
+
+    private final Map<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> processorMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<BlockDataProcessor<?>>> blockDataMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
     private final Map<Class<? extends Value<?>>, BlockValueProcessor<?, ?>> blockValueMap = new MapMaker()
-                                                                                                .concurrencyLevel(4)
-                                                                                                .makeMap();
+        .concurrencyLevel(4)
+        .makeMap();
+
+    // Processor delegates
+
+    private final Map<Key<? extends BaseValue<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, BlockDataProcessorDelegate<?>> blockDataProcessorDelegates = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+
+    private static boolean allowRegistrations = true;
 
     private SpongeDataRegistry() {
     }
@@ -75,11 +105,31 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return SpongeDataRegistry.instance;
     }
 
+    public static void finalizeRegistration() {
+        allowRegistrations = false;
+        final SpongeDataRegistry registry = instance;
+        for (Map.Entry<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> entry : registry.valueProcessorMap.entrySet()) {
+            ImmutableList.Builder<ValueProcessor<?, ?>> valueListBuilder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.VALUE_PROCESSOR_COMPARATOR);
+            valueListBuilder.addAll(entry.getValue());
+            final ValueProcessorDelegate<?, ?> delegate = new ValueProcessorDelegate(entry.getKey(), valueListBuilder.build());
+            registry.valueDelegates.put(entry.getKey(), delegate);
+        }
+        for (Map.Entry<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> entry : registry.processorMap.entrySet()) {
+            ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
+            dataListBuilder.addAll(entry.getValue());
+            final DataProcessorDelegate<?, ?> delegate = new DataProcessorDelegate(dataListBuilder.build());
+            registry.dataProcessorDelegates.put(entry.getKey(), delegate);
+        }
+    }
+
 
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(Class<T> manipulatorClass,
                                                                                                      Class<I> immutableManipulatorClass,
                                                                                                      DataManipulatorBuilder<T, I> builder) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
         if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
             this.builderMap.put(manipulatorClass, checkNotNull(builder));
             this.immutableBuilderMap.put(checkNotNull(immutableManipulatorClass), builder);
@@ -100,97 +150,108 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return Optional.fromNullable((DataManipulatorBuilder<T, I>) (Object) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerDataProcessor(Class<T> manipulatorClass,
-                                                                                                                  Class<I> immutableManipulatorClass,
-                                                                                                                  DataProcessor<T, I> processor) {
-        checkState(!this.processorMap.containsKey(checkNotNull(manipulatorClass)), "Already registered a DataProcessor for the given "
-                                                                                   + "DataManipulator: " + manipulatorClass.getCanonicalName());
-        this.processorMap.put(manipulatorClass, checkNotNull(processor));
-        this.immutableProcessorMap.put(immutableManipulatorClass, processor);
-    }
-
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
     registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
                                  Class<? extends I> implImClass, DataProcessor<T, I> processor) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
         checkState(!this.processorMap.containsKey(checkNotNull(manipulatorClass)), "Already registered a DataProcessor for the given "
                                                                                    + "DataManipulator: " + manipulatorClass.getCanonicalName());
         checkState(!this.processorMap.containsKey(checkNotNull(implClass)), "Already registered a DataProcessor for the given "
                                                                             + "DataManipulator: " + implClass.getCanonicalName());
-        this.builderMap.put(manipulatorClass, processor);
-        this.immutableBuilderMap.put(immutableDataManipulator, processor);
-        this.processorMap.put(manipulatorClass, checkNotNull(processor));
-        this.processorMap.put(implClass, processor);
-        this.immutableProcessorMap.put(immutableDataManipulator, processor);
-        this.immutableProcessorMap.put(implImClass, processor);
-    }
-
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getUtil(Class<T>
-                                                                                                                                 manipulatorClass) {
-        return Optional.fromNullable((DataProcessor<T, I>) (Object) this.processorMap.get(checkNotNull(manipulatorClass)));
-    }
-
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerBlockProcessor(Class<I> manipulatorclass,
-                                                                                                                   BlockDataProcessor<I> util) {
-        if (!this.blockDataMap.containsKey(checkNotNull(manipulatorclass))) {
-            this.blockDataMap.put(manipulatorclass, checkNotNull(util));
-        } else {
-            throw new IllegalStateException("Already registered a SpongeBlockProcessor for the given DataManipulator: " + manipulatorclass
-                .getCanonicalName());
+        checkArgument(!(processor instanceof DataProcessorDelegate), "Cannot register DataProcessorDelegates!");
+        if (!this.builderMap.containsKey(manipulatorClass)) {
+            this.builderMap.put(manipulatorClass, processor);
+            this.immutableBuilderMap.put(immutableDataManipulator, processor);
         }
+
+        List<DataProcessor<?, ?>> processorList = this.processorMap.get(manipulatorClass);
+        if (processorList == null) {
+            processorList = Collections.synchronizedList(Lists.<DataProcessor<?, ?>>newArrayList());
+            this.processorMap.put(manipulatorClass, processorList);
+            this.processorMap.put(implClass, processorList);
+        }
+        checkArgument(!processorList.contains(processor), "Duplicate DataProcessor Registration!");
+        processorList.add(processor);
+
+        List<DataProcessor<?, ?>> immutableProcessorList = this.immutableProcessorMap.get(immutableDataManipulator);
+        if (immutableProcessorList == null) {
+            immutableProcessorList = Collections.synchronizedList(Lists.<DataProcessor<?, ?>>newArrayList());
+            this.immutableProcessorMap.put(immutableDataManipulator, processorList);
+            this.immutableProcessorMap.put(implImClass, processorList);
+        }
+        checkArgument(!immutableProcessorList.contains(processor), "Duplicate DataProcessor Registration!");
+        immutableProcessorList.add(processor);
     }
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerBlockProcessorAndImpl(Class<I> manipulatorClass,
-        Class<? extends I> implClass, BlockDataProcessor<I> processor) {
+                                                                                                                          Class<? extends I> implClass,
+                                                                                                                          BlockDataProcessor<I> processor) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
         checkState(!this.blockDataMap.containsKey(checkNotNull(manipulatorClass)), "Already registered a DataProcessor for the given "
                                                                                    + "ImmutableDataManipulator: "
                                                                                    + manipulatorClass.getCanonicalName());
         checkState(!this.blockDataMap.containsKey(checkNotNull(implClass)), "Already registered a DataProcessor for the given "
                                                                             + "DataManipulator: " + implClass.getCanonicalName());
-        this.blockDataMap.put(manipulatorClass, checkNotNull(processor));
-        this.blockDataMap.put(implClass, processor);
+        List<BlockDataProcessor<?>> processorList = this.blockDataMap.get(manipulatorClass);
+        if (processorList == null) {
+            processorList = Collections.synchronizedList(Lists.<BlockDataProcessor<?>>newArrayList());
+            this.blockDataMap.put(manipulatorClass, processorList);
+            this.blockDataMap.put(implClass, processorList);
+        }
+        checkArgument(!processorList.contains(processor), "Duplicate DataProcessor Registration!");
+        processorList.add(processor);
     }
 
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
         Class<T> mutableClass) {
-        return Optional.fromNullable((DataProcessor<T, I>) (Object) this.processorMap.get(checkNotNull(mutableClass)));
+        return Optional.fromNullable((DataProcessor<T, I>) (Object) this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
     }
 
     public Optional<DataProcessor<?, ?>> getWildProcessor(Class<? extends DataManipulator<?, ?>> mutableClass) {
-        return Optional.<DataProcessor<?, ?>>fromNullable(this.processorMap.get(checkNotNull(mutableClass)));
-    }
-
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
-    getImmutableProcessor(Class<I> immutableClass) {
-        return Optional.fromNullable((DataProcessor<T, I>) (Object) this.immutableProcessorMap.get(checkNotNull(immutableClass)));
-    }
-
-    public <I extends ImmutableDataManipulator<I, ?>> Optional<BlockDataProcessor<I>> getBlockDataFor(Class<I> manipulatorClass) {
-        return Optional.fromNullable((BlockDataProcessor<I>) (Object) this.blockDataMap.get(checkNotNull(manipulatorClass)));
-    }
-
-    public <E, V extends BaseValue<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
-        checkState(!this.valueProcessorMap.containsKey(key), "Already have a registered value processor for that key!");
-        this.valueProcessorMap.put(key, valueProcessor);
-    }
-
-
-    public <E, V extends BaseValue<E>> Optional<ValueProcessor<E, V>> getValueProcessor(Key<V> key) {
-        return Optional.fromNullable((ValueProcessor<E, V>) (Object) this.valueProcessorMap.get(key));
-    }
-
-    public Optional<ValueProcessor<?, ?>> getWildValueProcessor(Key<?> key) {
-        return Optional.<ValueProcessor<?, ?>>fromNullable(this.valueProcessorMap.get(key));
-    }
-
-    public <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
-        return Optional.<ValueProcessor<E, ? extends BaseValue<E>>>fromNullable(
-            (ValueProcessor<E, ? extends BaseValue<E>>) (Object) this.valueProcessorMap.get
-                (key));
+        return Optional.<DataProcessor<?, ?>>fromNullable(this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
     }
 
     @SuppressWarnings("rawtypes")
     public Optional<DataProcessor> getWildDataProcessor(Class<? extends DataManipulator> class1) {
-        return Optional.<DataProcessor>fromNullable(this.processorMap.get(checkNotNull(class1)));
+        return Optional.<DataProcessor>fromNullable(this.dataProcessorDelegates.get(checkNotNull(class1)));
+    }
+
+    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
+    getImmutableProcessor(Class<I> immutableClass) {
+        return Optional.fromNullable((DataProcessor<T, I>) (Object) this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
+    }
+
+    public <I extends ImmutableDataManipulator<I, ?>> Optional<BlockDataProcessor<I>> getBlockDataFor(Class<I> manipulatorClass) {
+        return Optional.fromNullable((BlockDataProcessor<I>) (Object) this.blockDataProcessorDelegates.get(checkNotNull(manipulatorClass)));
+    }
+
+
+    public <E, V extends BaseValue<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
+        checkNotNull(valueProcessor);
+        checkArgument(!(valueProcessor instanceof ValueProcessorDelegate), "Cannot register ValueProcessorDelegates! READ THE DOCS!");
+        checkNotNull(key);
+        List<ValueProcessor<?, ?>> processorList = this.valueProcessorMap.get(key);
+        if (processorList == null) {
+            processorList = Collections.synchronizedList(Lists.<ValueProcessor<?, ?>>newArrayList());
+            this.valueProcessorMap.put(key, processorList);
+        }
+        checkArgument(!processorList.contains(valueProcessor), "Duplicate ValueProcessor registration!");
+        processorList.add(valueProcessor);
+    }
+
+    public <E, V extends BaseValue<E>> Optional<ValueProcessor<E, V>> getValueProcessor(Key<V> key) {
+        return Optional.fromNullable((ValueProcessor<E, V>) (Object) this.valueDelegates.get(key));
+    }
+
+    public Optional<ValueProcessor<?, ?>> getWildValueProcessor(Key<?> key) {
+        return Optional.<ValueProcessor<?, ?>>fromNullable(this.valueDelegates.get(key));
+    }
+
+    public <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
+        return Optional.<ValueProcessor<E, ? extends BaseValue<E>>>fromNullable(
+            (ValueProcessor<E, ? extends BaseValue<E>>) (Object) this.valueDelegates.get
+                (key));
     }
 }

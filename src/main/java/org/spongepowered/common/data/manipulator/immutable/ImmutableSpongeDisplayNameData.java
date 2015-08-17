@@ -36,6 +36,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<ImmutableDisplayNameData, DisplayNameData> implements ImmutableDisplayNameData {
 
@@ -78,5 +79,43 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
         return new MemoryDataContainer()
             .set(Keys.DISPLAY_NAME.getQuery(), Texts.json().to(this.displayName))
             .set(Keys.SHOWS_DISPLAY_NAME, this.displays);
+    }
+
+    public Text getDisplayName() {
+        return this.displayName;
+    }
+
+    public boolean isDisplays() {
+        return this.displays;
+    }
+
+    @Override
+    protected void registerStuff() {
+        registerFieldGetter(Keys.DISPLAY_NAME, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getDisplayName();
+            }
+        });
+        registerKeyValue(Keys.DISPLAY_NAME, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return displayName();
+            }
+        });
+
+        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return isDisplays();
+            }
+        });
+
+        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return customNameVisible();
+            }
+        });
     }
 }

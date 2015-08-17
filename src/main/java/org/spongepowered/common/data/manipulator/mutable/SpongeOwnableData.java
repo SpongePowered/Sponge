@@ -75,4 +75,9 @@ public class SpongeOwnableData extends AbstractData<OwnableData, ImmutableOwnabl
         return new MemoryDataContainer()
             .set(Keys.OWNED_BY_PROFILE.getQuery(), this.profile);
     }
+
+    @Override
+    protected void registerStuff() {
+
+    }
 }

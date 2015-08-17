@@ -32,21 +32,19 @@ import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class VelocityValueProcessor implements ValueProcessor<Vector3d, Value<Vector3d>> {
+public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3d, Value<Vector3d>> {
 
-    @Override
-    public Key<? extends BaseValue<Vector3d>> getKey() {
-        return Keys.VELOCITY;
+    public VelocityValueProcessor() {
+        super(Keys.VELOCITY);
     }
 
     @Override

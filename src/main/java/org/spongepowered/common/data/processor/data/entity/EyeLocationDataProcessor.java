@@ -43,12 +43,13 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.IMixinEntity;
 import org.spongepowered.common.util.VecHelper;
 
 @SuppressWarnings("ConstantConditions")
-public class EyeLocationDataProcessor implements DataProcessor<EyeLocationData, ImmutableEyeLocationData> {
+public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLocationData, ImmutableEyeLocationData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {

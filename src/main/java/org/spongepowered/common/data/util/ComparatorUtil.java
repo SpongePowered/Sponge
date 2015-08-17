@@ -24,9 +24,30 @@
  */
 package org.spongepowered.common.data.util;
 
+import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.ValueProcessor;
+
 import java.util.Comparator;
 
 public class ComparatorUtil {
+
+    /**
+     * This will compare two {@link ValueProcessor}s where the higher priority
+     * will compare opposite to the lower prioirty.
+     */
+    public static final Comparator<ValueProcessor<?, ?>> VALUE_PROCESSOR_COMPARATOR = new Comparator<ValueProcessor<?, ?>>() {
+        @Override
+        public int compare(ValueProcessor<?, ?> o1, ValueProcessor<?, ?> o2) {
+            return intComparator().compare(o2.getPriority(), o1.getPriority()); // We want the higher number to be higher priority
+        }
+    };
+
+    public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR = new Comparator<DataProcessor<?, ?>>() {
+        @Override
+        public int compare(DataProcessor<?, ?> o1, DataProcessor<?, ?> o2) {
+            return intComparator().compare(o2.getPriority(), o1.getPriority());
+        }
+    };
 
     public static Comparator<Integer> intComparator() {
         return new Comparator<Integer>() {

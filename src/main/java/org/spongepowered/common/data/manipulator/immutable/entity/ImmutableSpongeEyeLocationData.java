@@ -93,4 +93,8 @@ public class ImmutableSpongeEyeLocationData extends AbstractImmutableData<Immuta
         return entityLocation;
     }
 
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

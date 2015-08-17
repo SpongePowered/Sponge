@@ -48,8 +48,9 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 
-public class VelocityDataProcessor implements DataProcessor<VelocityData, ImmutableVelocityData> {
+public class VelocityDataProcessor extends AbstractSpongeDataProcessor<VelocityData, ImmutableVelocityData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {

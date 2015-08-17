@@ -47,9 +47,9 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.text.SpongeTexts;
@@ -57,7 +57,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
-public class SignDataProcessor implements DataProcessor<SignData, ImmutableSignData> {
+public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, ImmutableSignData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {

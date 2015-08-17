@@ -74,4 +74,9 @@ public class ImmutableSpongeTradeOfferData extends AbstractImmutableData<Immutab
     public int compareTo(ImmutableTradeOfferData o) {
         return 0;
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

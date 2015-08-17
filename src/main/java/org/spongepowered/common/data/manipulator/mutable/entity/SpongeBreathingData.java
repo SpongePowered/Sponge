@@ -107,7 +107,8 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
         this.remainingAir = remainingAir;
     }
 
-    private void registerStuff() {
+    @Override
+    protected void registerStuff() {
         registerFieldGetter(Keys.MAX_AIR, new GetterFunction<Object>() {
 
             @Override

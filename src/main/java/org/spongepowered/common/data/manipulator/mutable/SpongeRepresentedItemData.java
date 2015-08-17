@@ -72,4 +72,9 @@ public class SpongeRepresentedItemData extends AbstractData<RepresentedItemData,
         return new MemoryDataContainer()
             .set(Keys.REPRESENTED_ITEM.getQuery(), this.itemStack);
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

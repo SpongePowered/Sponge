@@ -71,4 +71,9 @@ public class ImmutableSpongeOwnableData extends AbstractImmutableData<ImmutableO
         return new MemoryDataContainer()
             .set(Keys.OWNED_BY_PROFILE, this.profile);
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

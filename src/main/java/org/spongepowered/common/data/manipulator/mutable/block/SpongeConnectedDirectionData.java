@@ -93,4 +93,9 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     public DataContainer toContainer() {
         return new MemoryDataContainer(); // todo
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

@@ -96,4 +96,9 @@ public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFire
                 .set(Keys.FIREWORK_EFFECTS.getQuery(), this.fireworkEffects)
                 .set(Keys.FIREWORK_FLIGHT_MODIFIER.getQuery(), this.flightModifier);
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

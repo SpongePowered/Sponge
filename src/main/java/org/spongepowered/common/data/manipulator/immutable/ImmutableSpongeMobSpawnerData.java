@@ -150,4 +150,9 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
             .set(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, this.nextToSpawn)
             .set(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

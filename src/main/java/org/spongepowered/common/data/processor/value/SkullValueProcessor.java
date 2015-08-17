@@ -32,7 +32,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
@@ -40,16 +39,15 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SkullValueProcessor implements ValueProcessor<SkullType, Value<SkullType>> {
+public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType, Value<SkullType>> {
 
-    @Override
-    public Key<? extends BaseValue<SkullType>> getKey() {
-        return Keys.SKULL_TYPE;
+    public SkullValueProcessor() {
+        super(Keys.SKULL_TYPE);
     }
 
     @Override

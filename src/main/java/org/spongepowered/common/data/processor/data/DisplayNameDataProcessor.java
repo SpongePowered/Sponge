@@ -47,13 +47,13 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 
 @SuppressWarnings("deprecation")
-public class DisplayNameDataProcessor implements DataProcessor<DisplayNameData, ImmutableDisplayNameData> {
+public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<DisplayNameData, ImmutableDisplayNameData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {

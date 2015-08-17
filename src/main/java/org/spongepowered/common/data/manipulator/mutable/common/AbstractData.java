@@ -103,6 +103,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
 
     protected AbstractData(Class<M> manipulatorClass) {
         this.manipulatorClass = checkNotNull(manipulatorClass);
+        registerStuff();
     }
 
     /**
@@ -152,6 +153,8 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     protected final void registerFieldSetter(Key<?> key, SetterFunction<Object> function) {
         this.keyFieldSetterMap.put(checkNotNull(key), checkNotNull(function));
     }
+
+    protected abstract void registerStuff();
 
     // ---------------
     // Note! These fill methods return NEW instances!

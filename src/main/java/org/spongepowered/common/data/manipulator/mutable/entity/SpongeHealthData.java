@@ -111,7 +111,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
         return this;
     }
 
-    private void registerStuff() {
+    protected void registerStuff() {
         registerFieldGetter(Keys.HEALTH, new GetterFunction<Object>() {
             @Override
             public Object get() {

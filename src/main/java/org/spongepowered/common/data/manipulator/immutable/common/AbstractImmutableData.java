@@ -95,6 +95,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
 
     protected AbstractImmutableData(Class<I> immutableClass) {
         this.immutableClass = checkNotNull(immutableClass);
+        registerStuff();
     }
 
     /**
@@ -128,6 +129,8 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     protected final void registerFieldGetter(Key<?> key, GetterFunction<?> function) {
         this.keyFieldGetterMap.put(checkNotNull(key), checkNotNull(function));
     }
+
+    protected abstract void registerStuff();
 
     @Override
     public <E> Optional<I> with(Key<? extends BaseValue<E>> key, E value) {

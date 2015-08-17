@@ -79,4 +79,9 @@ public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSign
     public int compareTo(ImmutableSignData o) {
         return 0;
     }
+
+    @Override
+    protected void registerStuff() {
+
+    }
 }

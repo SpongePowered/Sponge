@@ -101,4 +101,9 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
     public int compareTo(ImmutableCommandData o) {
         return 0;
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

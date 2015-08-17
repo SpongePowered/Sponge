@@ -38,6 +38,20 @@ import org.spongepowered.api.service.persistence.DataBuilder;
 
 public interface DataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends DataBuilder<M>,
                                                                                                                         DataManipulatorBuilder<M, I> {
+    /**
+     * Gets the priority of this processor. A single {@link Key} can have
+     * multiple {@link DataProcessor}s such that mods introducing
+     * changes to the game can provide their own {@link DataProcessor}s
+     * for specific cases. The notion is that the higher the priority, the
+     * earlier the processor is used. If for any reason a processor's method
+     * is returning an {@link Optional#absent()} or
+     * {@link DataTransactionResult} with a failure, the next processor in
+     * line will be used. By default, all Sponge processors are with a
+     * priority of 100.
+     *
+     * @return The priority of the processor
+     */
+    int getPriority();
 
     boolean supports(DataHolder dataHolder);
 

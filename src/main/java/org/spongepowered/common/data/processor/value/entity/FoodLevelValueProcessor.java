@@ -31,20 +31,18 @@ import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
-public class FoodLevelValueProcessor implements ValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
-    @Override
-    public Key<? extends BaseValue<Integer>> getKey() {
-        return Keys.FOOD_LEVEL;
+    public FoodLevelValueProcessor() {
+        super(Keys.FOOD_LEVEL);
     }
 
     @Override

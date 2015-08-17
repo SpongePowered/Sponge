@@ -58,7 +58,6 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
         super(DisplayNameData.class);
         this.displayName = checkNotNull(displayName);
         this.displays = renders;
-        registerStuff();
     }
 
     @Override
@@ -114,7 +113,8 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
         return this;
     }
 
-    private void registerStuff() {
+    @Override
+    protected void registerStuff() {
         registerFieldGetter(Keys.DISPLAY_NAME, new GetterFunction<Object>() {
             @Override
             public Object get() {

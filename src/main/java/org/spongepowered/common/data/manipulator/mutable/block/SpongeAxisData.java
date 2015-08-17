@@ -46,17 +46,12 @@ public class SpongeAxisData extends AbstractSingleEnumData<Axis, AxisData, Immut
     }
 
     @Override
-    public Value<Axis> axis() {
-        return new SpongeValue<Axis>(Keys.AXIS, getValue());
-    }
-
-    @Override
     protected Value<?> getValueGetter() {
-        return axis();
+        return type();
     }
 
     @Override
     public Value<Axis> type() {
-        return axis();
+        return new SpongeValue<Axis>(Keys.AXIS, getValue());
     }
 }

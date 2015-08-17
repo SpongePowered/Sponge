@@ -84,4 +84,9 @@ public class ImmutableSpongeFireworkData extends AbstractImmutableData<Immutable
             .set(Keys.FIREWORK_EFFECTS, this.fireworkEffects)
             .set(Keys.FIREWORK_FLIGHT_MODIFIER, this.modifier);
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

@@ -159,4 +159,9 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
             .set(Keys.SPAWNER_ENTITIES.getQuery(), this.entities);
 
     }
+
+    @Override
+    protected void registerStuff() {
+        // TODO
+    }
 }

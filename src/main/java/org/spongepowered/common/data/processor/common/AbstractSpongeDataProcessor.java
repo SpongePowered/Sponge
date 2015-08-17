@@ -1,7 +1,7 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of SpongeAPI, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered.org <http://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,24 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
-import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+package org.spongepowered.common.data.processor.common;
 
-public class SpongeCareerData extends AbstractSingleCatalogData<Career, CareerData, ImmutableCareerData> implements CareerData {
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.common.data.DataProcessor;
 
-    public SpongeCareerData(Career value) {
-        super(CareerData.class, value, Keys.CAREER, ImmutableSpongeCareerData.class);
+public abstract class AbstractSpongeDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
+
+    @Override
+    public int getPriority() {
+        return 100;
     }
-
-    public SpongeCareerData() {
-        this(Careers.ARMORER);
-    }
-
 }

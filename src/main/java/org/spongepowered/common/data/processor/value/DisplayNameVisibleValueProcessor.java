@@ -33,21 +33,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.IWorldNameable;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class DisplayNameVisibleValueProcessor implements ValueProcessor<Boolean, Value<Boolean>> {
+public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
-    @Override
-    public Key<? extends BaseValue<Boolean>> getKey() {
-        return Keys.SHOWS_DISPLAY_NAME;
+    public DisplayNameVisibleValueProcessor() {
+        super(Keys.SHOWS_DISPLAY_NAME);
     }
 
     @Override

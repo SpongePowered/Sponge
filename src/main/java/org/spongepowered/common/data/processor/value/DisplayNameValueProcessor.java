@@ -36,7 +36,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.IWorldNameable;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -44,17 +43,16 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 @SuppressWarnings("deprecation")
-public class DisplayNameValueProcessor implements ValueProcessor<Text, Value<Text>> {
+public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text, Value<Text>> {
 
-    @Override
-    public Key<? extends BaseValue<Text>> getKey() {
-        return Keys.DISPLAY_NAME;
+    public DisplayNameValueProcessor() {
+        super(Keys.DISPLAY_NAME);
     }
 
     @Override

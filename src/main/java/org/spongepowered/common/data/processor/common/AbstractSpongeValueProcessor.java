@@ -22,24 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.entity;
+package org.spongepowered.common.data.processor.common;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
-import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public class SpongeCareerData extends AbstractSingleCatalogData<Career, CareerData, ImmutableCareerData> implements CareerData {
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.data.ValueProcessor;
 
-    public SpongeCareerData(Career value) {
-        super(CareerData.class, value, Keys.CAREER, ImmutableSpongeCareerData.class);
+public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
+
+    private final Key<V> key;
+
+    protected AbstractSpongeValueProcessor(Key<V> key) {
+        this.key = checkNotNull(key, "The key is null!");
     }
 
-    public SpongeCareerData() {
-        this(Careers.ARMORER);
+    @Override
+    public final Key<? extends BaseValue<E>> getKey() {
+        return this.key;
     }
 
+    @Override
+    public int getPriority() {
+        return 100;
+    }
 }
