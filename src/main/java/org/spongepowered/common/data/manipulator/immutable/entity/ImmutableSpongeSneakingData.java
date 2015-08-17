@@ -45,7 +45,10 @@ public class ImmutableSpongeSneakingData extends AbstractImmutableSingleData<Boo
 
 	@Override
 	public int compareTo(ImmutableSneakingData o) {
-		return Boolean.compare(o.sneaking().get().booleanValue(), this.value);
+		// hack-a-round to emulate jre7's Boolean.compareTo
+		if (o.sneaking().get().booleanValue() && !this.value.booleanValue()) return 1;
+		if (!o.sneaking().get().booleanValue() && this.value.booleanValue()) return -1;
+		return 0;
 	}
 
 	@Override
