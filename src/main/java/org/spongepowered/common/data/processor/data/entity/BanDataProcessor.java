@@ -42,6 +42,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBanData;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class BanDataProcessor implements DataProcessor<BanData, ImmutableBanData> {
@@ -57,7 +58,7 @@ public class BanDataProcessor implements DataProcessor<BanData, ImmutableBanData
             final SpongeBanData healthData = new SpongeBanData(
                     (Set<Ban.User>) Sponge.getGame().getServiceManager().provide(BanService.class).get()
                             .getBansFor((User) dataHolder));
-            return Optional.<BanData>of(healthData).or(Optional.<SpongeBanData>absent());
+            return Optional.<BanData>of(healthData);
         } else {
             return Optional.absent();
         }
