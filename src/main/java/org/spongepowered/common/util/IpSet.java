@@ -49,19 +49,20 @@ public class IpSet implements Predicate<InetAddress> {
     @Override
     public boolean apply(InetAddress input) {
         byte[] address = input.getAddress();
-        if (address.length != this.addr.getAddress().length) {
+        byte[] checkAddr = this.addr.getAddress();
+        if (address.length != checkAddr.length) {
             return false;
         }
 
-        byte completeSegments = (byte) (prefixLen >> 3);
-        byte overlap = (byte) (prefixLen & 7);
+        byte completeSegments = (byte) (this.prefixLen >> 3);
+        byte overlap = (byte) (this.prefixLen & 7);
         for (byte i = 0; i < completeSegments; ++i) {
-            if (address[i] != addr.getAddress()[i]) {
+            if (address[i] != checkAddr[i]) {
                 return false;
             }
         }
         for (byte i = 0; i < overlap; ++i) {
-            if (((addr.getAddress()[completeSegments + 1] >> (7 - i)) & 0x1) != ((address[completeSegments + 1] >> (7 - i)) & 0x1)) {
+            if (((checkAddr[completeSegments + 1] >> (7 - i)) & 0x1) != ((address[completeSegments + 1] >> (7 - i)) & 0x1)) {
                 return false;
             }
         }

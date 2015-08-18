@@ -31,6 +31,9 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>> extends
@@ -41,6 +44,11 @@ public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I exten
     public AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         this.mutableClass = checkNotNull(mutableClass);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, this.usedKey, this.value, this.value);
     }
 
     @Override

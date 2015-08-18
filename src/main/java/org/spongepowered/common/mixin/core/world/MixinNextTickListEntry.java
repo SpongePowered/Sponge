@@ -31,7 +31,6 @@ import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
@@ -44,18 +43,18 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinBlock
     @Shadow public long scheduledTime;
     @Shadow public BlockPos position;
 
-    private Location location;
+    private Location<org.spongepowered.api.world.World> location;
     private World world;
 
     @Override
     public void setWorld(World world) {
         checkState(this.location == null, "World already known");
-        this.location = new Location((Extent) world, VecHelper.toVector(this.position));
+        this.location = new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) world, VecHelper.toVector(this.position));
         this.world = world;
     }
 
     @Override
-    public Location getLocation() {
+    public Location<org.spongepowered.api.world.World> getLocation() {
         checkState(this.location != null, "Unable to determine location at this time");
         return this.location;
     }

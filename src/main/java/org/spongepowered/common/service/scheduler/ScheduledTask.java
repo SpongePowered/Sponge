@@ -53,19 +53,25 @@ public class ScheduledTask implements Task {
         /**
          * Never ran before, waiting for the offset to pass.
          */
-        WAITING,
+        WAITING(false),
         /**
          * In the process of switching to the running state.
          */
-        SWITCHING,
+        SWITCHING(true),
         /**
          * Has ran, and will continue to unless removed from the task map.
          */
-        RUNNING,
+        RUNNING(true),
         /**
          * Task cancelled, scheduled to be removed from the task map.
          */
-        CANCELED,
+        CANCELED(false);
+
+        public final boolean isActive;
+
+        private ScheduledTaskState(boolean active) {
+            this.isActive = active;
+        }
     }
 
     ScheduledTask(TaskSynchronicity syncType, Runnable task, String taskName, long delay, boolean delayIsTicks, long interval,

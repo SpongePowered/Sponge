@@ -53,13 +53,7 @@ public class Tr extends Element {
     public TextBuilder toText() throws Exception {
         ImmutableList.Builder<Object> build = ImmutableList.builder();
         for (Object child : this.mixedContent) {
-            if (child instanceof String) {
-                build.add(((String) child).replace('\u000B', ' '));
-            } else if (child instanceof Element) {
-                build.add(((Element) child).toText().build());
-            } else {
-                throw new IllegalArgumentException("What is this even? " + child);
-            }
+            build.add(builderFromObject(child).build());
         }
         TextBuilder builder = Texts.builder(new SpongeTranslation(this.key), build.build().toArray());
         applyTextActions(builder);

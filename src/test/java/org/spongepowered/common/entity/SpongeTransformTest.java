@@ -52,13 +52,13 @@ public class SpongeTransformTest {
         final Vector3d position1 = new Vector3d(1, 2, 3);
         final Vector3d position2 = new Vector3d(4, 5, 6);
 
-        final Transform transform = new SpongeTransform(this.mockExtent1, position1);
-        Assert.assertEquals(new Location(this.mockExtent1, position1), transform.getLocation());
+        final Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, position1);
+        Assert.assertEquals(new Location<Extent>(this.mockExtent1, position1), transform.getLocation());
         Assert.assertEquals(this.mockExtent1, transform.getExtent());
         assertEquals(position1, transform.getPosition());
 
-        transform.setLocation(new Location(this.mockExtent2, position2));
-        Assert.assertEquals(new Location(this.mockExtent2, position2), transform.getLocation());
+        transform.setLocation(new Location<Extent>(this.mockExtent2, position2));
+        Assert.assertEquals(new Location<Extent>(this.mockExtent2, position2), transform.getLocation());
         Assert.assertEquals(this.mockExtent2, transform.getExtent());
         assertEquals(position2, transform.getPosition());
 
@@ -79,10 +79,10 @@ public class SpongeTransformTest {
         final Vector3d rotation2 = new Vector3d(45, 135, 225);
         final Quaterniond rotationQuat2 = Quaterniond.fromAxesAnglesDeg(rotation2.getX(), -rotation2.getY(), rotation2.getZ());
         final Quaterniond rotationQuat1Plus2 = rotationQuat2.mul(rotationQuat1);
-        final Vector3d axesAnglesDeg = rotationQuat1Plus2.getAxesAngleDeg();
+        final Vector3d axesAnglesDeg = rotationQuat1Plus2.getAxesAnglesDeg();
         final Vector3d rotation1Plus2 = new Vector3d(axesAnglesDeg.getX(), -axesAnglesDeg.getY(), axesAnglesDeg.getZ());
 
-        final Transform transform = new SpongeTransform(this.mockExtent1, Vector3d.ZERO, rotation1, Vector3d.ONE);
+        final Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO, rotation1, Vector3d.ONE);
         assertEquals(rotation1, transform.getRotation());
         assertEquals(rotationQuat1, transform.getRotationAsQuaternion());
         Assert.assertEquals(rotation1.getX(), transform.getPitch(), EPSILON);
@@ -111,7 +111,7 @@ public class SpongeTransformTest {
         final Vector3d scale1 = new Vector3d(1, 2, 3);
         final Vector3d scale2 = new Vector3d(4, 5, 6);
 
-        final Transform transform = new SpongeTransform(this.mockExtent1, Vector3d.ZERO, Vector3d.ZERO, scale1);
+        final Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO, Vector3d.ZERO, scale1);
         assertEquals(scale1, transform.getScale());
 
         transform.setScale(scale2);
@@ -123,8 +123,31 @@ public class SpongeTransformTest {
 
     @Test
     public void testValid() {
-        Assert.assertFalse(new SpongeTransform(this.mockExtent1, Vector3d.ZERO).isValid());
-        Assert.assertTrue(new SpongeTransform(this.mockExtent2, Vector3d.ZERO).isValid());
+        final Transform<Extent> transform = new SpongeTransform<Extent>();
+        Assert.assertFalse(transform.isValid());
+        transform.setExtent(this.mockExtent1);
+        Assert.assertFalse(transform.isValid());
+        transform.invalidate();
+        Assert.assertFalse(transform.isValid());
+        transform.setExtent(this.mockExtent2);
+        Assert.assertTrue(transform.isValid());
+        transform.invalidate();
+        Assert.assertFalse(transform.isValid());
+
+        try {
+            transform.getExtent();
+            Assert.fail();
+        } catch (IllegalStateException ignored) {
+        }
+
+        try {
+            transform.getLocation();
+            Assert.fail();
+        } catch (IllegalStateException ignored) {
+        }
+
+        Assert.assertFalse(new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO).isValid());
+        Assert.assertTrue(new SpongeTransform<Extent>(this.mockExtent2, Vector3d.ZERO).isValid());
     }
 
     @Test
@@ -133,17 +156,18 @@ public class SpongeTransformTest {
         final Quaterniond rotation = Quaterniond.fromAxesAnglesDeg(20, 30, 60);
         final Vector3d scale = new Vector3d(4, 5, 6);
 
-        Assert.assertEquals(Matrix4d.createTranslation(position), new SpongeTransform(this.mockExtent1, position).toMatrix());
-        Assert.assertEquals(Matrix4d.createRotation(rotation), new SpongeTransform(this.mockExtent1, Vector3d.ZERO).setRotation(rotation).toMatrix());
+        Assert.assertEquals(Matrix4d.createTranslation(position), new SpongeTransform<Extent>(this.mockExtent1, position).toMatrix());
+        Assert.assertEquals(Matrix4d.createRotation(rotation),
+            new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO).setRotation(rotation).toMatrix());
         Assert.assertEquals(Matrix4d.createScaling(scale.toVector4(1)),
-            new SpongeTransform(this.mockExtent1, Vector3d.ZERO).setScale(scale).toMatrix());
+            new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO).setScale(scale).toMatrix());
         Assert.assertEquals(
             new Matrix4d(
                 4, 0, 0, 1,
                 0, 5, 0, 2,
                 0, 0, 6, 3,
                 0, 0, 0, 1
-            ), new SpongeTransform(this.mockExtent1, position, Vector3d.ZERO, scale).toMatrix());
+            ), new SpongeTransform<Extent>(this.mockExtent1, position, Vector3d.ZERO, scale).toMatrix());
     }
 
     @Test
@@ -152,7 +176,7 @@ public class SpongeTransformTest {
         final Quaterniond rotation = Quaterniond.fromAngleDegAxis(90, Vector3d.UNIT_Y);
         final Vector3d scale = new Vector3d(4, 5, 6);
 
-        final Transform transform = new SpongeTransform(this.mockExtent1, position);
+        final Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, position);
         assertTransforms(new Vector3d(11, 12, 13), transform, new Vector3d(10, 10, 10));
 
         transform.addScale(scale);
@@ -165,7 +189,7 @@ public class SpongeTransformTest {
         assertTransforms(new Vector3d(-158, 254, -354), transform, new Vector3d(10, 10, 10));
     }
 
-    private void assertTransforms(Vector3d expected, Transform with, Vector3d original) {
+    private void assertTransforms(Vector3d expected, Transform<Extent> with, Vector3d original) {
         assertEquals(expected, with.toMatrix().transform(original.toVector4(1)).toVector3());
     }
 

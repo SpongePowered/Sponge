@@ -32,18 +32,20 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.util.GetterFunction;
+import org.spongepowered.common.util.SetterFunction;
 
 import java.util.List;
 
 @NonnullByDefault
 public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> implements SignData {
-    public static final DataQuery LINES = new DataQuery("Lines");
     private final List<Text> lines;
 
     public SpongeSignData() {
@@ -53,6 +55,25 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     public SpongeSignData(List<Text> lines) {
         super(SignData.class);
         this.lines = lines;
+        registerFieldGetter(Keys.SIGN_LINES, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getLines();
+            }
+        });
+        registerFieldSetter(Keys.SIGN_LINES, new SetterFunction<Object>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void set(Object value) {
+                setLines((List<Text>) value);
+            }
+        });
+        registerKeyValue(Keys.SIGN_LINES, new GetterFunction<Value<?>>() {
+            @Override
+            public Value<?> get() {
+                return lines();
+            }
+        });
     }
 
     @Override
@@ -66,7 +87,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
         for (Text line : this.lines) {
             jsonLines.add(Texts.json().to(line));
         }
-        return new MemoryDataContainer().set(LINES, jsonLines);
+        return new MemoryDataContainer().set(Keys.SIGN_LINES.getQuery(), jsonLines);
     }
 
     @Override
@@ -82,5 +103,15 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     @Override
     public ImmutableSignData asImmutable() {
         return new ImmutableSpongeSignData(this.lines);
+    }
+
+    public List<Text> getLines() {
+        return Lists.newArrayList(this.lines);
+    }
+
+    public void setLines(List<Text> lines) {
+        for (int i = 0; i < 4; i++) {
+            this.lines.set(i, lines.get(i));
+        }
     }
 }

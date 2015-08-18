@@ -29,8 +29,10 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.util.Comparator;
@@ -61,6 +63,11 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
         this.mutableClass = mutableClass;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return new ImmutableSpongeBoundedValue<T>(this.usedKey, this.lowerBound, this.value, this.comparator, this.lowerBound, this.upperBound);
     }
 
     @Override

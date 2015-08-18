@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.pagination;
 
+import com.flowpowered.math.GenericMath;
 import com.google.common.base.Strings;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -50,9 +51,9 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
     private static final int LINE_WIDTH = 320;
 
     static {
-        ConfigurationLoader<CommentedConfigurationNode> loader = ((HoconConfigurationLoader.Builder)HoconConfigurationLoader.builder()
+        ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
                 .setURL(PlayerPaginationCalculator.class.getResource("font-sizes.json"))
-                .setPreservesHeader(false)).build();
+                .setPreservesHeader(false).build();
         try {
             ConfigurationNode node = loader.load();
             NON_UNICODE_CHARS = node.getNode("non-unicode").getString();
@@ -140,11 +141,11 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
         double paddingNecessary = LINE_WIDTH - length;
         TextBuilder build =  Texts.builder();
         if (length == 0) {
-            build.append(Texts.of(Strings.repeat(padding, (int) Math.floor((double) LINE_WIDTH / paddingLength))));
+            build.append(Texts.of(Strings.repeat(padding, GenericMath.floor((double) LINE_WIDTH / paddingLength))));
         } else {
             paddingNecessary -= getWidth(' ', text.getStyle().contains(TextStyles.BOLD)) * 2;
-            double paddingCount = Math.floor(paddingNecessary / paddingLength);
-            int beforePadding = (int) Math.floor(paddingCount / 2.0);
+            int paddingCount = GenericMath.floor(paddingNecessary / paddingLength);
+            int beforePadding = GenericMath.floor(paddingCount / 2.0);
             int afterPadding = (int) Math.ceil(paddingCount / 2.0);
             if (beforePadding > 0) {
                 if (beforePadding > 1) {

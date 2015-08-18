@@ -31,14 +31,15 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocatio
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeTargetedLocationData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeTargetedLocationData extends AbstractSingleData<Location, TargetedLocationData, ImmutableTargetedLocationData>
+public class SpongeTargetedLocationData extends AbstractSingleData<Location<World>, TargetedLocationData, ImmutableTargetedLocationData>
     implements TargetedLocationData {
 
-    public SpongeTargetedLocationData(Location value) {
+    public SpongeTargetedLocationData(Location<World> value) {
         super(TargetedLocationData.class, value, Keys.TARGETED_LOCATION);
     }
 
@@ -63,8 +64,8 @@ public class SpongeTargetedLocationData extends AbstractSingleData<Location, Tar
     }
 
     @Override
-    public Value<Location> target() {
-        return new SpongeValue<Location>(Keys.TARGETED_LOCATION, this.getValue());
+    public Value<Location<World>> target() {
+        return new SpongeValue<Location<World>>(Keys.TARGETED_LOCATION, this.getValue());
     }
 
     @Override

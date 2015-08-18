@@ -37,25 +37,25 @@ import org.spongepowered.api.world.World;
 public class SpongeTeleportHelper implements TeleportHelper {
 
     @Override
-    public Optional<Location> getSafeLocation(Location location) {
+    public Optional<Location<World>> getSafeLocation(Location<World> location) {
         return getSafeLocation(location, DEFAULT_HEIGHT, DEFAULT_WIDTH);
     }
 
     @Override
-    public Optional<Location> getSafeLocation(Location location, final int height, final int width) {
+    public Optional<Location<World>> getSafeLocation(Location<World> location, final int height, final int width) {
         // Check around the player first in a configurable radius:
-        final Optional<Location> safe = checkAboveAndBelowLocation(location, height, width);
+        final Optional<Location<World>> safe = checkAboveAndBelowLocation(location, height, width);
         if (safe.isPresent()) {
             // Add 0.5 to X and Z of block position so always in centre of block
-            return Optional.of(new Location(safe.get().getExtent(), safe.get().getBlockPosition().toDouble().add(0.5, 0, 0.5)));
+            return Optional.of(new Location<World>(safe.get().getExtent(), safe.get().getBlockPosition().toDouble().add(0.5, 0, 0.5)));
         }
         return safe;
     }
 
-    private Optional<Location> checkAboveAndBelowLocation(Location location, final int height, final int width) {
+    private Optional<Location<World>> checkAboveAndBelowLocation(Location<World> location, final int height, final int width) {
         // For now this will just do a straight up block.
         // Check the main level
-        Optional<Location> safe = checkAroundLocation(location, width);
+        Optional<Location<World>> safe = checkAroundLocation(location, width);
 
         if (safe.isPresent()) {
             return safe;
@@ -79,8 +79,8 @@ public class SpongeTeleportHelper implements TeleportHelper {
         return Optional.absent();
     }
 
-    private Optional<Location> checkAroundLocation(Location location, final int radius) {
-        if (isSafeLocation((World) location.getExtent(), location.getBlockPosition())) {
+    private Optional<Location<World>> checkAroundLocation(Location<World> location, final int radius) {
+        if (isSafeLocation(location.getExtent(), location.getBlockPosition())) {
             return Optional.of(location);
         }
 
@@ -90,15 +90,15 @@ public class SpongeTeleportHelper implements TeleportHelper {
             if (safePosition.isPresent()) {
                 // If a safe area was found: Return the checkLoc, it is the safe
                 // location.
-                return Optional.of(new Location(location.getExtent(), safePosition.get()));
+                return Optional.of(new Location<World>(location.getExtent(), safePosition.get()));
             }
         }
 
         return Optional.absent();
     }
 
-    private Optional<Vector3i> checkAroundSpecificDiameter(Location checkLoc, final int radius) {
-        World world = (World) checkLoc.getExtent();
+    private Optional<Vector3i> checkAroundSpecificDiameter(Location<World> checkLoc, final int radius) {
+        World world = checkLoc.getExtent();
         Vector3i blockPos = checkLoc.getBlockPosition();
         // Check out at the radius provided.
         blockPos = blockPos.add(radius, 0, 0);

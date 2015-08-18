@@ -43,11 +43,7 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
     private final E maximum;
 
     public SpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, Comparator<E> comparator, E minimum, E maximum) {
-        super(key, defaultValue);
-        this.comparator = checkNotNull(comparator);
-        this.minimum = checkNotNull(minimum);
-        this.maximum = checkNotNull(maximum);
-        checkState(comparator.compare(minimum, maximum) >= 0);
+        this(key, defaultValue, comparator, minimum, maximum, defaultValue);
     }
 
     public SpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, Comparator<E> comparator, E minimum, E maximum, E actualValue) {

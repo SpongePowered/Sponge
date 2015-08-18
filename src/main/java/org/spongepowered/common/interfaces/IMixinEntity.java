@@ -47,6 +47,8 @@ public interface IMixinEntity {
 
     void inactiveTick();
 
+    void setEyeHeight(Double value);
+
     NBTTagCompound getSpongeData();
 
     /**

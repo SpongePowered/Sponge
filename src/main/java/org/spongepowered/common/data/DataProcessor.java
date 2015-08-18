@@ -67,12 +67,6 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
 
     Optional<M> fill(DataContainer container, M m);
 
-    Optional<I> fillImmutable(DataHolder dataHolder, I immutable);
-
-    Optional<I> fillImmutable(DataHolder dataHolder, I immutable, MergeFunction overlap);
-
-    Optional<I> fillImmutable(DataContainer container, I immutableManipulator);
-
     /**
      * Sets the data from the {@link DataManipulator}. Usually, if a
      * {@link DataHolder} is being offered a {@link DataManipulator} with a

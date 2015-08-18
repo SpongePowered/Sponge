@@ -41,8 +41,8 @@ import org.spongepowered.common.util.VecHelper;
 public abstract class MixinLocatedSource implements LocatedSource, IMixinCommandSource {
 
     @Override
-    public Location getLocation() {
-        return new Location((World) asICommandSender().getEntityWorld(), VecHelper.toVector(asICommandSender().getPositionVector()));
+    public Location<World> getLocation() {
+        return new Location<World>((World) asICommandSender().getEntityWorld(), VecHelper.toVector(asICommandSender().getPositionVector()));
     }
 
     @Override

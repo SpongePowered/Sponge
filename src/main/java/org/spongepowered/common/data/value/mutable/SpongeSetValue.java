@@ -41,11 +41,15 @@ import java.util.Set;
 public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, SetValue<E>, ImmutableSetValue<E>> implements SetValue<E> {
 
     public SpongeSetValue(Key<? extends BaseValue<Set<E>>> key) {
-        super(key, Sets.<E>newHashSet());
+        this(key, Sets.<E>newHashSet());
     }
 
     public SpongeSetValue(Key<? extends BaseValue<Set<E>>> key, Set<E> actualValue) {
-        super(key, Sets.<E>newHashSet(), actualValue);
+        this(key, Sets.<E>newHashSet(), actualValue);
+    }
+
+    public SpongeSetValue(Key<? extends BaseValue<Set<E>>> key, Set<E> defaultSet, Set<E> actualValue) {
+        super(key, Sets.newHashSet(defaultSet), Sets.newHashSet(actualValue));
     }
 
     @Override

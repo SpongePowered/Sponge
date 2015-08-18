@@ -63,6 +63,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterator<IChatComponent> childrenIterator() {
         return getSiblings().iterator();

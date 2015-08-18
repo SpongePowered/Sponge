@@ -114,7 +114,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     public MutableBiomeArea getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                new ObjectArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
+                return new ObjectArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());

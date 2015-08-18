@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -42,6 +43,7 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -104,6 +106,26 @@ public abstract class MixinChunk implements Chunk {
     @Override
     public Vector3i getPosition() {
         return this.chunkPos;
+    }
+
+    @Override
+    public Location<Chunk> getLocation(int x, int y, int z) {
+        return getLocation(new Vector3i(x, y, z));
+    }
+
+    @Override
+    public Location<Chunk> getLocation(Vector3i position) {
+        return new Location<Chunk>(this, position);
+    }
+
+    @Override
+    public Location<Chunk> getLocation(double x, double y, double z) {
+        return getLocation(new Vector3d(x, y, z));
+    }
+
+    @Override
+    public Location<Chunk> getLocation(Vector3d position) {
+        return new Location<Chunk>(this, position);
     }
 
     @Override

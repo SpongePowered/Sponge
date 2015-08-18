@@ -84,6 +84,4 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
             .set(Keys.MAX_HEALTH.getQuery(), this.maxHealth);
     }
 
-
-
 }

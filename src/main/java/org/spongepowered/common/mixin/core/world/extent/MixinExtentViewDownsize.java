@@ -55,6 +55,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -457,7 +458,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
         final Collection<TileEntity> tileEntities = this.extent.getTileEntities();
         for (Iterator<TileEntity> iterator = tileEntities.iterator(); iterator.hasNext(); ) {
             final TileEntity tileEntity = iterator.next();
-            final Location block = tileEntity.getLocation();
+            final Location<World> block = tileEntity.getLocation();
             if (!VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax)) {
                 iterator.remove();
             }
@@ -485,7 +486,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
 
     @Override
     public boolean spawnEntity(Entity entity) {
-        final Location location = entity.getLocation();
+        final Location<World> location = entity.getLocation();
         checkRange(location.getX(), location.getY(), location.getZ());
         return this.extent.spawnEntity(entity);
     }
@@ -495,7 +496,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
         final Collection<Entity> entities = this.extent.getEntities();
         for (Iterator<Entity> iterator = entities.iterator(); iterator.hasNext(); ) {
             final Entity tileEntity = iterator.next();
-            final Location block = tileEntity.getLocation();
+            final Location<World> block = tileEntity.getLocation();
             if (!VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax)) {
                 iterator.remove();
             }
@@ -557,7 +558,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
 
         @Override
         public boolean apply(Entity input) {
-            final Location block = input.getLocation();
+            final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }
 
@@ -575,7 +576,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
 
         @Override
         public boolean apply(TileEntity input) {
-            final Location block = input.getLocation();
+            final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }
 

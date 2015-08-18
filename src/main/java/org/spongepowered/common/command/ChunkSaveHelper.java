@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command;
 
+import com.flowpowered.math.GenericMath;
 import com.google.gson.stream.JsonWriter;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import net.minecraft.entity.Entity;
@@ -80,7 +81,7 @@ public class ChunkSaveHelper {
                     chunkEntityCounts.adjustOrPutValue(chunkCoords, 1, 1);
                     classEntityCounts.adjustOrPutValue(entity.getClass(), 1, 1);
                     if ((entity.getBoundingBox() != null) && logAll) {
-                        BlockPos coords = new BlockPos((int) Math.floor(entity.posX), (int) Math.floor(entity.posY), (int) Math.floor(entity.posZ));
+                        BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
                         if (!collidingCoords.contains(coords)) {
                             collidingCoords.add(coords);
                             int size = entity.worldObj.getEntitiesWithinAABBExcludingEntity(entity, entity.getBoundingBox().expand(1, 1, 1)).size();

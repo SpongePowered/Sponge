@@ -37,6 +37,9 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
+import org.spongepowered.common.mixin.core.item.inventory.MixinItemStack;
+
+import javax.annotation.Nullable;
 
 // All implementors of ArmorEquipable
 @Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayerMP.class, EntitySkeleton.class, EntityZombie.class, EntityHuman.class})
@@ -50,42 +53,67 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
     private static final int SLOT_HELMET = 4;
 
     public Optional<ItemStack> equipable$getHelmet() {
-        return Optional.fromNullable((ItemStack) this.getEquipmentInSlot(SLOT_HELMET));
+        @Nullable final net.minecraft.item.ItemStack itemStack = this.getEquipmentInSlot(SLOT_HELMET);
+        return Optional.fromNullable(itemStack == null ? null : (ItemStack) itemStack.copy());
     }
 
     public void equipable$setHelmet(ItemStack helmet) {
-        this.setCurrentItemOrArmor(SLOT_HELMET, (net.minecraft.item.ItemStack) helmet);
+        if (helmet == null) {
+            this.setCurrentItemOrArmor(SLOT_HELMET, null);
+        } else {
+            this.setCurrentItemOrArmor(SLOT_HELMET, (net.minecraft.item.ItemStack) helmet.copy());
+        }
     }
 
     public Optional<ItemStack> equipable$getChestplate() {
-        return Optional.fromNullable((ItemStack) this.getEquipmentInSlot(SLOT_CHESTPLATE));
+        @Nullable final net.minecraft.item.ItemStack itemStack = this.getEquipmentInSlot(SLOT_CHESTPLATE);
+        return Optional.fromNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setChestplate(ItemStack chestplate) {
-        this.setCurrentItemOrArmor(SLOT_CHESTPLATE, (net.minecraft.item.ItemStack) chestplate);
+        if (chestplate == null) {
+            this.setCurrentItemOrArmor(SLOT_CHESTPLATE, null);
+        } else {
+            this.setCurrentItemOrArmor(SLOT_CHESTPLATE, (net.minecraft.item.ItemStack) chestplate.copy());
+        }
     }
 
     public Optional<ItemStack> equipable$getLeggings() {
-        return Optional.fromNullable((ItemStack) this.getEquipmentInSlot(SLOT_LEGGINGS));
+        @Nullable final net.minecraft.item.ItemStack itemStack = this.getEquipmentInSlot(SLOT_LEGGINGS);
+        return Optional.fromNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setLeggings(ItemStack leggings) {
-        this.setCurrentItemOrArmor(SLOT_LEGGINGS, (net.minecraft.item.ItemStack) leggings);
+        if (leggings == null) {
+            this.setCurrentItemOrArmor(SLOT_LEGGINGS, null);
+        } else {
+            this.setCurrentItemOrArmor(SLOT_LEGGINGS, ((net.minecraft.item.ItemStack) leggings.copy()));
+        }
     }
 
     public Optional<ItemStack> equipable$getBoots() {
-        return Optional.fromNullable((ItemStack) this.getEquipmentInSlot(SLOT_BOOTS));
+        @Nullable final net.minecraft.item.ItemStack itemStack = this.getEquipmentInSlot(SLOT_BOOTS);
+        return Optional.fromNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setBoots(ItemStack boots) {
-        this.setCurrentItemOrArmor(SLOT_BOOTS, (net.minecraft.item.ItemStack) boots);
+        if (boots == null) {
+            this.setCurrentItemOrArmor(SLOT_BOOTS, null);
+        } else {
+            this.setCurrentItemOrArmor(SLOT_BOOTS, ((net.minecraft.item.ItemStack) boots.copy()));
+        }
     }
 
     public Optional<ItemStack> equipable$getItemInHand() {
-        return Optional.fromNullable((ItemStack) this.getEquipmentInSlot(SLOT_HAND));
+        @Nullable final net.minecraft.item.ItemStack itemStack = this.getEquipmentInSlot(SLOT_HAND);
+        return Optional.fromNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setItemInHand(ItemStack itemInHand) {
-        this.setCurrentItemOrArmor(SLOT_HAND, (net.minecraft.item.ItemStack) itemInHand);
+        if (itemInHand == null) {
+            this.setCurrentItemOrArmor(SLOT_HAND, null);
+        } else {
+            this.setCurrentItemOrArmor(SLOT_HAND, ((net.minecraft.item.ItemStack) itemInHand.copy()));
+        }
     }
 }

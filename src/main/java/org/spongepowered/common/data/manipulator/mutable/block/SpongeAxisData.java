@@ -54,4 +54,9 @@ public class SpongeAxisData extends AbstractSingleEnumData<Axis, AxisData, Immut
     protected Value<?> getValueGetter() {
         return axis();
     }
+
+    @Override
+    public Value<Axis> type() {
+        return axis();
+    }
 }

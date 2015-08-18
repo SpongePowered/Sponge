@@ -141,7 +141,7 @@ public class SelectorResolver {
         this(extents, null, null, selector, force);
     }
 
-    public SelectorResolver(Location location, Selector selector, boolean force) {
+    public SelectorResolver(Location<World> location, Selector selector, boolean force) {
         this(ImmutableSet.of(location.getExtent()), location.getPosition(), null, selector, force);
     }
 

@@ -37,7 +37,7 @@ import net.minecraft.util.IChatComponent;
 /**
  * Function to kick a player.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class PlayerKickHelper {
     private PlayerKickHelper() {
     }
@@ -57,7 +57,7 @@ public class PlayerKickHelper {
                         ply.playerNetServerHandler.getNetworkManager().closeChannel(component);
                     }
                 });
-        ply.playerNetServerHandler.getNetworkManager().disableAutoRead();;
+        ply.playerNetServerHandler.getNetworkManager().disableAutoRead();
         Futures.getUnchecked(MinecraftServer.getServer().addScheduledTask(new Runnable() {
             @Override
             public void run() {

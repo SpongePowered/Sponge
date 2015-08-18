@@ -32,12 +32,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -53,7 +50,7 @@ import javax.annotation.Nullable;
 
 /**
  * So, considering this is the root of the immutable variants of
- * {@link DataManipulator}, otherwise known as {@link                                     ImmutableDataManipulator}s.
+ * {@link DataManipulator}, otherwise known as {@link ImmutableDataManipulator}s.
  * The advantage of these types of {@link DataManipulator}s is that they can not be
  * mutated once created. In other words, it's safe to pass around these immutable
  * variants across threads without worry of the underlying values being changed.
@@ -130,39 +127,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
      */
     protected final void registerFieldGetter(Key<?> key, GetterFunction<?> function) {
         this.keyFieldGetterMap.put(checkNotNull(key), checkNotNull(function));
-    }
-
-    // The following use traditional processors to handle information
-    // Mostly because they involve immutability
-
-    @Override
-    public Optional<I> fill(DataHolder dataHolder) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        if (!processor.isPresent()) {
-            return Optional.absent();
-        }
-        return processor.get().fillImmutable(dataHolder, (I) (Object) this);
-    }
-
-    @Override
-    public Optional<I> fill(DataHolder dataHolder, MergeFunction overlap) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        if (!processor.isPresent()) {
-            return Optional.absent();
-        }
-        return processor.get().fillImmutable(dataHolder, (I) (Object) this, overlap);
-    }
-
-    @Override
-    public Optional<I> from(DataContainer container) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        if (!processor.isPresent()) {
-            return Optional.absent();
-        }
-        return processor.get().fillImmutable(container, (I) (Object) this);
     }
 
     @Override

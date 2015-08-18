@@ -96,11 +96,21 @@ import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableEyeLocationData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
+import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
+import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
@@ -156,6 +166,7 @@ import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.type.WallType;
+import org.spongepowered.api.data.value.ValueBuilder;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
@@ -227,7 +238,6 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.WorldBuilder;
@@ -235,6 +245,7 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -246,7 +257,6 @@ import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
 import org.spongepowered.common.configuration.SpongeConfig;
-import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
@@ -267,24 +277,49 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeMobSpawnerBu
 import org.spongepowered.common.data.builder.block.tileentity.SpongeNoteBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
+import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeEyeLocationData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
+import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
+import org.spongepowered.common.data.processor.data.SkullDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.EyeLocationDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.FoodDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
+import org.spongepowered.common.data.processor.value.SkullValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.EyeHeightValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.EyeLocationValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.FoodExhaustionValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.FoodLevelValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.FoodSaturationValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.type.SpongeTreeType;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
@@ -435,7 +470,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, SelectorType> selectorMappings = Maps.newHashMap();
 
     private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
-    private final Map<String, SkullType> skullTypeMappings = Maps.newHashMap();
+    public final Map<String, SkullType> skullTypeMappings = Maps.newLinkedHashMap();
     private final Map<String, TreeType> treeTypeMappings = Maps.newHashMap();
     private final Map<String, BannerPatternShape> bannerPatternShapeMappings = Maps.newHashMap();
     public final Map<String, BannerPatternShape> idToBannerPatternShapeMappings = Maps.newHashMap();
@@ -472,7 +507,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private final Map<String, GeneratorType> generatorTypeMappings = Maps.newHashMap();
 
-    protected final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
+    public static final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
+    public static final Map<String, ItemType> itemTypeMappings = Maps.newHashMap();
 
     private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
             new ImmutableMap.Builder<String, EntityInteractionType>()
@@ -486,7 +522,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(Art.class, this.artMappings)
                     .put(Attribute.class, ImmutableMap.<String, CatalogType>of()) // TODO
                     .put(BiomeType.class, this.biomeTypeMappings)
-                    .put(BlockType.class, this.blockTypeMappings)
+                    .put(BlockType.class, blockTypeMappings)
                     .put(Career.class, this.careerMappings)
                     .put(ChatType.class, chatTypeMappings)
                     .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
@@ -514,7 +550,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(HorseColor.class, SpongeEntityConstants.HORSE_COLORS)
                     .put(HorseStyle.class, SpongeEntityConstants.HORSE_STYLES)
                     .put(HorseVariant.class, SpongeEntityConstants.HORSE_VARIANTS)
-                    .put(ItemType.class, ImmutableMap.<String, CatalogType>of()) // TODO handle special case of items
+                    .put(ItemType.class, itemTypeMappings)
                     .put(ObjectiveDisplayMode.class, objectiveDisplayModeMappings)
                     .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
                     .put(Operation.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -592,6 +628,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
         Map<String, ? extends CatalogType> tempMap = this.catalogTypeMap.get(checkNotNull(typeClass, "null type class"));
@@ -695,6 +732,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public ExplosionBuilder createExplosionBuilder() {
         return new SpongeExplosionBuilder();
+    }
+
+    @Override
+    public ValueBuilder createValueBuilder() {
+        return new SpongeValueBuilder();
     }
 
     @Override
@@ -1581,17 +1623,42 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         final HealthDataProcessor healthProcessor = new HealthDataProcessor();
         service.registerBuilder(HealthData.class, healthProcessor);
         dataRegistry.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
-                                                  ImmutableSpongeHealthData.class, healthProcessor);
+                ImmutableSpongeHealthData.class, healthProcessor);
 
         final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
         service.registerBuilder(DisplayNameData.class, displayNameDataProcessor);
         dataRegistry.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
-                                                  ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
+                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
 
         final CareerDataProcessor careerDataProcessor = new CareerDataProcessor();
         service.registerBuilder(CareerData.class, careerDataProcessor);
         dataRegistry.registerDataProcessorAndImpl(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
-                                                  ImmutableSpongeCareerData.class, careerDataProcessor);
+                ImmutableSpongeCareerData.class, careerDataProcessor);
+
+        final SignDataProcessor signDataProcessor = new SignDataProcessor();
+        service.registerBuilder(SignData.class, signDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class,
+                ImmutableSignData.class, ImmutableSpongeSignData.class, signDataProcessor);
+
+        final SkullDataProcessor skullDataProcessor = new SkullDataProcessor();
+        service.registerBuilder(SkullData.class, skullDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
+                ImmutableSpongeSkullData.class, skullDataProcessor);
+
+        final VelocityDataProcessor velocityDataProcessor = new VelocityDataProcessor();
+        service.registerBuilder(VelocityData.class, velocityDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
+                ImmutableSpongeVelocityData.class, velocityDataProcessor);
+
+        final EyeLocationDataProcessor eyeLocationDataProcessor = new EyeLocationDataProcessor();
+        service.registerBuilder(EyeLocationData.class, eyeLocationDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(EyeLocationData.class, SpongeEyeLocationData.class, ImmutableEyeLocationData.class,
+                ImmutableSpongeEyeLocationData.class, eyeLocationDataProcessor);
+
+        final FoodDataProcessor foodDataProcessor = new FoodDataProcessor();
+        service.registerBuilder(FoodData.class, foodDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(FoodData.class, SpongeFoodData.class, ImmutableFoodData.class,
+                ImmutableSpongeFoodData.class, foodDataProcessor);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -1599,7 +1666,14 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.DISPLAY_NAME, new DisplayNameValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SHOWS_DISPLAY_NAME, new DisplayNameVisibleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.CAREER, new CareerValueProcessor());
-
+        dataRegistry.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SKULL_TYPE, new SkullValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.VELOCITY, new VelocityValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.EYE_HEIGHT, new EyeHeightValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.EYE_LOCATION, new EyeLocationValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
 
     }
 
@@ -1898,8 +1972,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public Transform createTransform(Extent extent) {
-        return new SpongeTransform(extent, Vector3d.ZERO);
+    public <E extends Extent> Transform<E> createTransform() {
+        return new SpongeTransform<E>();
+    }
+
+    @Override
+    public <E extends Extent> Transform<E> createTransform(E extent) {
+        return new SpongeTransform<E>(extent, Vector3d.ZERO);
     }
 
     @Override

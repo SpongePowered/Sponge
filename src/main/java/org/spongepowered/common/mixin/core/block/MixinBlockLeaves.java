@@ -45,7 +45,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.LeafDecayEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -64,7 +63,8 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
     @Inject(method = "updateTick", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockLeaves;destroy(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), cancellable = true)
     public void callLeafDecay(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        Location location = new Location((Extent) worldIn, VecHelper.toVector(pos));
+        Location<org.spongepowered.api.world.World> location =
+            new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) worldIn, VecHelper.toVector(pos));
         BlockSnapshot postChange = location.getBlockSnapshot();
         postChange.setBlockState(BlockTypes.AIR.getDefaultState());
         final LeafDecayEvent event = SpongeEventFactory.createLeafDecay(Sponge.getGame(), null, location, postChange); //TODO Fix null cause
