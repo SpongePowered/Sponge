@@ -47,6 +47,7 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -76,7 +77,7 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
 
     @Override
     public ImmutableTameableData asImmutable() {
-        return new SpongeImmutableTameableData(this.owner);
+        return new ImmutableSpongeTameableData(this.owner);
     }
 
     @Override
