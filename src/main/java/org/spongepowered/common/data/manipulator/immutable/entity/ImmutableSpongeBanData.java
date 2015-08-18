@@ -36,14 +36,11 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 
 import java.util.Set;
 
-public class ImmutableSpongeBanData extends AbstractImmutableSingleData<Set, ImmutableBanData, BanData>
+public class ImmutableSpongeBanData extends AbstractImmutableSingleData<Set<Ban.User>, ImmutableBanData, BanData>
         implements ImmutableBanData {
 
-    private final Set<Ban.User> bans;
-
     public ImmutableSpongeBanData(Set<Ban.User> bans) {
-        super(ImmutableBanData.class, bans, null);
-        this.bans = bans;
+        super(ImmutableBanData.class, bans, Keys.USER_BANS);
     }
 
     @Override
@@ -53,12 +50,12 @@ public class ImmutableSpongeBanData extends AbstractImmutableSingleData<Set, Imm
 
     @Override
     public BanData asMutable() {
-        return new SpongeBanData(this.bans);
+        return new SpongeBanData(this.getValue());
     }
 
     @Override
     public ImmutableSetValue<Ban.User> bans() {
-        return new ImmutableSpongeSetValue<Ban.User>(Keys.USER_BANS, this.bans);
+        return new ImmutableSpongeSetValue<Ban.User>(Keys.USER_BANS, this.getValue());
     }
 
     @Override

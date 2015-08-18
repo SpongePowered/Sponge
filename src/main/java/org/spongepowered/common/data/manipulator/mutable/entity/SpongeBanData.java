@@ -38,13 +38,10 @@ import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Set;
 
-public class SpongeBanData extends AbstractSingleData<Set, BanData, ImmutableBanData> implements BanData {
-
-    private final Set<Ban.User> bans;
+public class SpongeBanData extends AbstractSingleData<Set<Ban.User>, BanData, ImmutableBanData> implements BanData {
 
     public SpongeBanData(Set<Ban.User> bans) {
         super(BanData.class, bans, Keys.USER_BANS);
-        this.bans = bans;
     }
 
     @Override
@@ -54,12 +51,12 @@ public class SpongeBanData extends AbstractSingleData<Set, BanData, ImmutableBan
 
     @Override
     public BanData copy() {
-        return new SpongeBanData(this.bans);
+        return new SpongeBanData(this.getValue());
     }
 
     @Override
     public ImmutableBanData asImmutable() {
-        return new ImmutableSpongeBanData(this.bans);
+        return new ImmutableSpongeBanData(this.getValue());
     }
 
     @Override
@@ -70,11 +67,11 @@ public class SpongeBanData extends AbstractSingleData<Set, BanData, ImmutableBan
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(Keys.USER_BANS, this.bans);
+                .set(Keys.USER_BANS, this.getValue());
     }
 
     @Override
     public SetValue<Ban.User> bans() {
-        return new SpongeSetValue<Ban.User>(Keys.USER_BANS, this.bans);
+        return new SpongeSetValue<Ban.User>(Keys.USER_BANS, this.getValue());
     }
 }
