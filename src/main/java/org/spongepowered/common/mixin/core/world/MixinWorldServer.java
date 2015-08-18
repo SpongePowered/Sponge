@@ -138,7 +138,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     @Redirect(method = "updateAllPlayersSleepingFlag()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/entity/player/EntityPlayer;isSpectator()Z"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
     public boolean isSpectatorOrIgnored(EntityPlayer entityPlayer) {
         // spectators are excluded from the sleep tally in vanilla
         // this redirect expands that check to include sleep-ignored players as well
@@ -147,7 +147,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"))
     public boolean isPlayerFullyAsleep(EntityPlayer entityPlayer) {
         // if isPlayerFullyAsleep() returns false areAllPlayerAsleep() breaks its loop and returns false
         // this redirect forces it to return true if the player is sleep-ignored even if they're not sleeping
@@ -156,7 +156,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/entity/player/EntityPlayer;isSpectator()Z"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
     public boolean isSpectatorAndNotIgnored(EntityPlayer entityPlayer) {
         // if a player is marked as a spectator areAllPlayersAsleep() breaks its loop and returns false
         // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator
