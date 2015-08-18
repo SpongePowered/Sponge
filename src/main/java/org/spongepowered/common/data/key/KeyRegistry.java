@@ -36,6 +36,7 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -61,6 +62,8 @@ public class KeyRegistry {
         keyMap.put("velocity", makeSingleKey(Vector3d.class, Value.class, of("Velocity")));
         keyMap.put("eye_height", makeSingleKey(Double.class, Value.class, of("EyeHeight")));
         keyMap.put("eye_location", makeSingleKey(Vector3d.class, Value.class, of("EyeLocation")));
+        keyMap.put("vehicle", makeSingleKey(Entity.class, Value.class, of("Vehicle")));
+        keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
         keyMap.put("food_level", makeSingleKey(Integer.class, Value.class, of("FoodLevel")));
         keyMap.put("saturation", makeSingleKey(Double.class, Value.class, of("FoodSaturationLevel")));
         keyMap.put("exhaustion", makeSingleKey(Double.class, Value.class, of("FoodExhaustionLevel")));
