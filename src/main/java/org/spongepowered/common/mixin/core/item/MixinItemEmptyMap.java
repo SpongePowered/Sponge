@@ -22,15 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity;
+package org.spongepowered.common.mixin.core.item;
 
-public interface IMixinEntityLivingBase {
+import net.minecraft.item.ItemEmptyMap;
+import net.minecraft.item.ItemMapBase;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldSavedData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.world.DimensionManager;
 
-    double getLastDamage();
+@Mixin(ItemEmptyMap.class)
+public class MixinItemEmptyMap extends ItemMapBase {
 
-    void setLastDamage(double damage);
+    @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    private int getOverworldUniqueDataId(World worldIn, String key) {
+        return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
+    }
 
-    int getMaxAir();
-
-    void setMaxAir(int max);
+    @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
+            + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
+    private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
+        DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
+    }
 }
