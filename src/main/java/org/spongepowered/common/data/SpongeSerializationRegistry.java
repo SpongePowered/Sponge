@@ -66,6 +66,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedD
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSittingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
@@ -96,6 +97,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
@@ -157,6 +159,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.ShearedD
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.SittingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.SlimeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.SneakingDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.VehicleDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VillagerZombieBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.item.BreakableDataBuilder;
@@ -189,6 +192,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSittingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSlimeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVehicleData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
@@ -219,6 +223,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedDat
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
@@ -249,6 +254,7 @@ import org.spongepowered.common.data.processor.data.entity.ShearedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SittingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SlimeDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SneakingDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.VehicleDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VillagerZombieProcessor;
 import org.spongepowered.common.data.processor.data.item.BreakableDataProcessor;
@@ -262,6 +268,7 @@ import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
 import org.spongepowered.common.data.processor.value.ItemEnchantmentValueProcessor;
 import org.spongepowered.common.data.processor.value.RepresentedItemValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.BaseVehicleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EntityDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ExperienceFromStartOfLevelValueProcessor;
@@ -290,6 +297,7 @@ import org.spongepowered.common.data.processor.value.entity.ScreamingValueProces
 import org.spongepowered.common.data.processor.value.entity.SlimeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TotalExperienceValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.VehicleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VillagerZombieValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
@@ -476,6 +484,12 @@ public class SpongeSerializationRegistry {
         service.registerBuilder(AuthorData.class, itemAuthorDataBuilder);
         dataRegistry.registerDataProcessorAndImplBuilder(AuthorData.class, SpongeAuthorData.class, ImmutableAuthorData.class,
                 ImmutableSpongeAuthorData.class, itemAuthorDataProcessor, itemAuthorDataBuilder);
+        
+        final VehicleDataProcessor vehicleDataProcessor = new VehicleDataProcessor();
+        final VehicleDataBuilder vehicleDataBuilder = new VehicleDataBuilder();
+        service.registerBuilder(VehicleData.class, vehicleDataBuilder);
+        dataRegistry.registerDataProcessorAndImplBuilder(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
+                ImmutableSpongeVehicleData.class, vehicleDataProcessor, vehicleDataBuilder);
 
         final BreakableDataProcessor breakableDataProcessor = new BreakableDataProcessor();
         final BreakableDataBuilder breakableDataBuilder = new BreakableDataBuilder();
@@ -533,6 +547,8 @@ public class SpongeSerializationRegistry {
 
 
         // Values
+        dataRegistry.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIRE_TICKS, new FireTicksValueProcessor());
