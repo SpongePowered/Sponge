@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -31,7 +32,11 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBanData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.util.ban.BanFactory;
+import org.spongepowered.api.util.ban.Bans;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBanData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
@@ -42,6 +47,10 @@ public class SpongeBanData extends AbstractSingleData<Set<Ban.User>, BanData, Im
 
     public SpongeBanData(Set<Ban.User> bans) {
         super(BanData.class, bans, Keys.USER_BANS);
+    }
+
+    public SpongeBanData() {
+        this(Sets.<Ban.User>newConcurrentHashSet());
     }
 
     @Override
