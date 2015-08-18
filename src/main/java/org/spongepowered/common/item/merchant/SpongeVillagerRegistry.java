@@ -37,7 +37,6 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.api.item.merchant.generator.TraceableTradeOfferGenerator;
 import org.spongepowered.api.item.merchant.generator.TradeOfferGenerator;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeProfession;
@@ -260,7 +259,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         if (generator instanceof ITradeList) {
             return (ITradeList) generator;
         }
-        return new TradeOfferGeneratorAsITradeList(new TraceableTradeOfferGenerator(generator));
+        return new TradeOfferGeneratorAsITradeList(generator);
     }
 
     static class TradeOfferGeneratorAsITradeList implements ITradeList, TradeOfferGenerator {
