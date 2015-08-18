@@ -104,6 +104,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public int newLevel = 0;
     public int newTotalExperience = 0;
     public boolean keepsLevel = false;
+    private boolean sleepingIgnored;
 
     private final User user = Sponge.getGame().getServiceManager().provideUnchecked(UserStorage.class).getOrCreate((GameProfile) getGameProfile());
 
@@ -413,5 +414,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public ICommandSender asICommandSender() {
         return (ICommandSender) this;
+    }
+
+    @Override
+    public boolean isSleepingIgnored() {
+        return this.sleepingIgnored;
+    }
+
+    @Override
+    public void setSleepingIgnored(boolean sleepingIgnored) {
+        this.sleepingIgnored = sleepingIgnored;
     }
 }
