@@ -76,6 +76,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -210,6 +211,8 @@ public class KeyRegistry {
         keyMap.put("fall_distance", makeSingleKey(Float.class, MutableBoundedValue.class, of("FallDistance")));
         keyMap.put("cooldown", makeSingleKey(Integer.class, Value.class, of("Cooldown")));
         keyMap.put("note_pitch", makeSingleKey(NotePitch.class, Value.class, of("Note")));
+        keyMap.put("vehicle", makeSingleKey(Entity.class, Value.class, of("Vehicle")));
+        keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

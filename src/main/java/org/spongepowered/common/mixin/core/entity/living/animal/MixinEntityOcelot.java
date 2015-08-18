@@ -54,7 +54,9 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
 
     @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityOcelot;isTamed()Z", shift = At.Shift.BEFORE, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
-        this.currentItemStack = currentItemStack.copy();
+        if (currentItemStack != null) {
+            this.currentItemStack = currentItemStack.copy();
+        }
     }
 
     @Surrogate
