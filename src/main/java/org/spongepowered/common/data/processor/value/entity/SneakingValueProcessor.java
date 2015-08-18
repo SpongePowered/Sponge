@@ -42,7 +42,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SneakingValueProcessor implements ValueProcessor<Boolean, Value<Boolean>> {
-	
+
     @Override
     public Key<? extends BaseValue<Boolean>> getKey() {
         return Keys.IS_SNEAKING;
@@ -51,7 +51,7 @@ public class SneakingValueProcessor implements ValueProcessor<Boolean, Value<Boo
     @Override
     public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof Entity) {
-            return Optional.of(Boolean.valueOf(((Entity) container).isSneaking()));
+            return Optional.of(((Entity) container).isSneaking());
         }
         return Optional.absent();
     }
@@ -60,7 +60,7 @@ public class SneakingValueProcessor implements ValueProcessor<Boolean, Value<Boo
     public Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
         if (container instanceof Entity) {
             final boolean sneaking = ((Entity) container).isSneaking();
-            return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.IS_SNEAKING, Boolean.FALSE, Boolean.valueOf(sneaking)));
+            return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, sneaking));
         }
         return Optional.absent();
     }
@@ -73,12 +73,12 @@ public class SneakingValueProcessor implements ValueProcessor<Boolean, Value<Boo
     @Override
     public DataTransactionResult transform(ValueContainer<?> container, Function<Boolean, Boolean> function) {
         if (container instanceof Entity) {
-            final Boolean old = getValueFromContainer(container).get();
-            final ImmutableValue<Boolean> oldValue = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, Boolean.FALSE, old);
-            final Boolean sneaking = checkNotNull(checkNotNull(function, "function").apply(old), "The function returned a null value!");
-            final ImmutableValue<Boolean> newVal = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, Boolean.FALSE, sneaking);
+            final boolean old = getValueFromContainer(container).get();
+            final ImmutableValue<Boolean> oldValue = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, false, old);
+            final boolean sneaking = checkNotNull(checkNotNull(function, "function").apply(old), "The function returned a null value!");
+            final ImmutableValue<Boolean> newVal = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, false, sneaking);
             try {
-                ((Entity) container).setSneaking(sneaking.booleanValue());
+                ((Entity) container).setSneaking(sneaking);
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newVal);
             }
@@ -94,10 +94,10 @@ public class SneakingValueProcessor implements ValueProcessor<Boolean, Value<Boo
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> newValue = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, Boolean.FALSE, value);
+        final ImmutableValue<Boolean> newValue = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, false, value);
         if (container instanceof Entity) {
-            final Boolean old = getValueFromContainer(container).get();
-            final ImmutableValue<Boolean> oldValue = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, Boolean.FALSE, old);
+            final boolean old = getValueFromContainer(container).get();
+            final ImmutableValue<Boolean> oldValue = new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, false, old);
             try {
                 ((Entity)container).setSneaking(value.booleanValue());
                 return DataTransactionBuilder.successReplaceResult(newValue, oldValue);

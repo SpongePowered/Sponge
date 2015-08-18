@@ -37,7 +37,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SpongeSneakingData extends AbstractSingleData<Boolean, SneakingData, ImmutableSneakingData> implements SneakingData {
     
     public SpongeSneakingData(boolean sneaking) {
-        super(SneakingData.class, Boolean.valueOf(sneaking), Keys.IS_SNEAKING);
+        super(SneakingData.class, sneaking, Keys.IS_SNEAKING);
     }
 
     public SpongeSneakingData() {
@@ -68,7 +68,7 @@ public class SpongeSneakingData extends AbstractSingleData<Boolean, SneakingData
 
     @Override
     public SpongeValue<Boolean> sneaking() {
-        return new SpongeValue<Boolean>(Keys.IS_SNEAKING, Boolean.FALSE, getValue());
+        return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, getValue());
     }
 
     @Override

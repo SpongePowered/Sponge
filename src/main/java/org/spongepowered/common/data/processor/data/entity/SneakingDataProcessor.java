@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
+import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
@@ -45,13 +47,14 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
-import org.spongepowered.common.data.util.DataUtil;
 
 public class SneakingDataProcessor implements DataProcessor<SneakingData, ImmutableSneakingData> {
 
     @Override
     public Optional<SneakingData> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
+        checkDataExists(container, Keys.IS_SNEAKING.getQuery());
+        final boolean sneaking = getData(container, Keys.IS_SNEAKING, Boolean.class);
+        return Optional.<SneakingData>of(new SpongeSneakingData(sneaking));
     }
 
     @Override
@@ -92,7 +95,7 @@ public class SneakingDataProcessor implements DataProcessor<SneakingData, Immuta
         if (dataHolder instanceof Entity) {
             final Value<Boolean> sneakingValue = manipulator.sneaking();
             final boolean sneaking = ((Entity) dataHolder).isSneaking();
-            sneakingValue.set(Boolean.valueOf(sneaking));
+            sneakingValue.set(sneaking);
             return Optional.of(manipulator.set(sneakingValue));
         }
         return Optional.absent();
@@ -100,7 +103,7 @@ public class SneakingDataProcessor implements DataProcessor<SneakingData, Immuta
 
     @Override
     public Optional<SneakingData> fill(DataHolder dataHolder, SneakingData manipulator, MergeFunction overlap) {
-        if ((dataHolder instanceof Entity)) {
+        if (dataHolder instanceof Entity) {
             final Optional<SneakingData> oldData = from(dataHolder);
             final SneakingData newData = checkNotNull(overlap, "Merge function was null!").merge(oldData.orNull(), manipulator);
             final Value<Boolean> newValue = newData.sneaking();
@@ -111,7 +114,7 @@ public class SneakingDataProcessor implements DataProcessor<SneakingData, Immuta
 
     @Override
     public Optional<SneakingData> fill(DataContainer container, SneakingData sneakingData) {
-        sneakingData.set(Keys.IS_SNEAKING, DataUtil.getData(container, Keys.IS_SNEAKING));
+        sneakingData.set(Keys.IS_SNEAKING, getData(container, Keys.IS_SNEAKING));
         return Optional.of(sneakingData);
     }
 
@@ -121,9 +124,9 @@ public class SneakingDataProcessor implements DataProcessor<SneakingData, Immuta
             final ImmutableValue<Boolean> newValue = manipulator.sneaking().asImmutable();
             final SneakingData old = from(dataHolder).get();
             final ImmutableValue<Boolean> oldValue = old.asImmutable().sneaking();
-            final Boolean sneaking = manipulator.sneaking().get();
+            final boolean sneaking = manipulator.sneaking().get();
             try {
-                ((Entity) dataHolder).setSneaking(sneaking.booleanValue());
+                ((Entity) dataHolder).setSneaking(sneaking);
                 return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
             } catch (Exception e) {
                 DataTransactionBuilder.errorResult(newValue);
@@ -139,9 +142,9 @@ public class SneakingDataProcessor implements DataProcessor<SneakingData, Immuta
             final SneakingData old = from(dataHolder).get();
             final ImmutableValue<Boolean> oldValue = old.asImmutable().sneaking();
             final SneakingData newData = checkNotNull(function, "function").merge(old, manipulator);
-            final Boolean sneaking = newData.sneaking().get();
+            final boolean sneaking = newData.sneaking().get();
             try {
-                ((Entity) dataHolder).setSneaking(sneaking.booleanValue());
+                ((Entity) dataHolder).setSneaking(sneaking);
                 return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
             } catch (Exception e) {
                 DataTransactionBuilder.errorResult(newValue);
