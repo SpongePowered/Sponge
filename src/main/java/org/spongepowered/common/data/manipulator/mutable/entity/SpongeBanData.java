@@ -34,15 +34,32 @@ import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBanData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+import org.spongepowered.common.util.GetterFunction;
 
 import java.util.Set;
 
-public class SpongeBanData extends AbstractSingleData<Set<Ban.User>, BanData, ImmutableBanData> implements BanData {
+public class SpongeBanData extends AbstractData<BanData, ImmutableBanData> implements BanData {
+
+    private final Set<Ban.User> bans;
 
     public SpongeBanData(Set<Ban.User> bans) {
-        super(BanData.class, bans, Keys.USER_BANS);
+        super(BanData.class);
+        this.bans = bans;
+
+        registerFieldGetter(Keys.USER_BANS, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return bans();
+            }
+        });
+        registerKeyValue(Keys.USER_BANS, new GetterFunction<Value<?>>() {
+            @Override
+            public Value<?> get() {
+                return bans();
+            }
+        });
     }
 
     public SpongeBanData() {
@@ -50,33 +67,28 @@ public class SpongeBanData extends AbstractSingleData<Set<Ban.User>, BanData, Im
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return bans();
-    }
-
-    @Override
     public BanData copy() {
-        return new SpongeBanData(this.getValue());
+        return new SpongeBanData(this.bans);
     }
 
     @Override
     public ImmutableBanData asImmutable() {
-        return new ImmutableSpongeBanData(this.getValue());
+        return new ImmutableSpongeBanData(this.bans);
     }
 
     @Override
     public int compareTo(BanData o) {
-        return 0;
+        return o.bans().get() == this.bans ? 1 : 0;
     }
 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(Keys.USER_BANS, this.getValue());
+                .set(Keys.USER_BANS, this.bans);
     }
 
     @Override
     public SetValue<Ban.User> bans() {
-        return new SpongeSetValue<Ban.User>(Keys.USER_BANS, this.getValue());
+        return new SpongeSetValue<Ban.User>(Keys.USER_BANS, this.bans);
     }
 }
