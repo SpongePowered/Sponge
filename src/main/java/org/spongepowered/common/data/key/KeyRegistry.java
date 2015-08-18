@@ -61,6 +61,9 @@ public class KeyRegistry {
         keyMap.put("velocity", makeSingleKey(Vector3d.class, Value.class, of("Velocity")));
         keyMap.put("eye_height", makeSingleKey(Double.class, Value.class, of("EyeHeight")));
         keyMap.put("eye_location", makeSingleKey(Vector3d.class, Value.class, of("EyeLocation")));
+        keyMap.put("food_level", makeSingleKey(Integer.class, Value.class, of("FoodLevel")));
+        keyMap.put("saturation", makeSingleKey(Double.class, Value.class, of("FoodSaturationLevel")));
+        keyMap.put("exhaustion", makeSingleKey(Double.class, Value.class, of("FoodExhaustionLevel")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
