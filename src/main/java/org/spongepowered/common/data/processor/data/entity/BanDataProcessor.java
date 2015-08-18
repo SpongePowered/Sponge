@@ -42,7 +42,6 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBanData;
 
-import java.util.Collection;
 import java.util.Set;
 
 public class BanDataProcessor implements DataProcessor<BanData, ImmutableBanData> {
