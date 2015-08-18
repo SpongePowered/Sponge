@@ -30,4 +30,7 @@ public interface IMixinEntityLivingBase {
 
     void setLastDamage(double damage);
 
+    int getMaxAir();
+
+    void setMaxAir(int max);
 }
