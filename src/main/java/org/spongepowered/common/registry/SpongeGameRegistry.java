@@ -116,6 +116,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameMode
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
@@ -132,6 +133,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
@@ -338,6 +340,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.GameMode
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.HealthDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.HorseDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.ScreamingDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.SneakingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemLoreDataBuilder;
@@ -356,6 +359,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHorseData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
@@ -372,6 +376,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeDa
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
@@ -388,6 +393,7 @@ import org.spongepowered.common.data.processor.data.entity.GameModeDataProcessor
 import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HorseDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.SneakingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemEnchantmentDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemLoreDataProcessor;
@@ -412,6 +418,7 @@ import org.spongepowered.common.data.processor.value.entity.MaxAirValueProcessor
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ScreamingValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
@@ -1856,6 +1863,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(HorseData.class, SpongeHorseData.class, ImmutableHorseData.class,
                 ImmutableSpongeHorseData.class, horseDataProcessor, horseDataBuilder);
 
+        final SneakingDataProcessor sneakingDataProcessor = new SneakingDataProcessor();
+        final SneakingDataBuilder sneakingDataBuilder = new SneakingDataBuilder();
+        service.registerBuilder(SneakingData.class, sneakingDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(SneakingData.class, SpongeSneakingData.class, ImmutableSneakingData.class,
+            ImmutableSpongeSneakingData.class, sneakingDataProcessor, sneakingDataBuilder);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1880,6 +1893,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.HORSE_VARIANT, new HorseVariantValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ITEM_LORE, new ItemLoreValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BOOK_PAGES, new BookPagesValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.IS_SNEAKING, new SneakingValueProcessor());
+
     }
 
     private void setNotePitches() {
