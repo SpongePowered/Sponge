@@ -35,10 +35,8 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
-import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.player.Player;
@@ -73,7 +71,8 @@ public class GameModeDataProcessor implements DataProcessor<GameModeData, Immuta
     @Override
     public Optional<GameModeData> fill(DataHolder dataHolder, GameModeData manipulator) {
         if (dataHolder instanceof EntityPlayerMP) {
-            return Optional.of(manipulator.set(Keys.GAME_MODE, (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType())));
+            return Optional.of(manipulator.set(Keys.GAME_MODE,
+                    (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType())));
         }
         return Optional.absent();
     }
@@ -168,6 +167,11 @@ public class GameModeDataProcessor implements DataProcessor<GameModeData, Immuta
 
     @Override
     public Optional<GameModeData> build(DataView container) throws InvalidDataException {
+        final String modeId = DataUtil.getData(container, Keys.GAME_MODE, String.class);
+        final Optional<GameMode> optional = Sponge.getSpongeRegistry().getType(GameMode.class, modeId);
+        if (optional.isPresent()) {
+            return Optional.<GameModeData>of(new SpongeGameModeData(optional.get()));
+        }
         return Optional.absent();
     }
 }
