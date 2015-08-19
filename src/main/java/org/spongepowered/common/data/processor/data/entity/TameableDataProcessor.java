@@ -60,7 +60,7 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
     @Override
     public Optional<TameableData> from(DataHolder dataHolder) {
         if(dataHolder instanceof EntityTameable) {
-            final Optional<UUID> uuidOptional = asUUID(((EntityTameable) dataHolder));
+            final Optional<UUID> uuidOptional = getTamer(((EntityTameable) dataHolder));
             return Optional.<TameableData>of(new SpongeTameableData(uuidOptional.orNull()));
         } else {
             return Optional.absent();
@@ -70,7 +70,7 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
     @Override
     public Optional<TameableData> fill(DataHolder dataHolder, TameableData manipulator) {
         if(dataHolder instanceof EntityTameable) {
-            manipulator.set(Keys.TAMED_OWNER, (asUUID((EntityTameable) dataHolder)));
+            manipulator.set(Keys.TAMED_OWNER, (getTamer((EntityTameable) dataHolder)));
             return Optional.of(manipulator);
         }
         return Optional.absent();
@@ -152,7 +152,7 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
     @Override
     public Optional<TameableData> createFrom(DataHolder dataHolder) {
         if(dataHolder instanceof EntityTameable) {
-            final Optional<UUID> uuidOptional = asUUID((EntityTameable) dataHolder);
+            final Optional<UUID> uuidOptional = getTamer((EntityTameable) dataHolder);
             return Optional.<TameableData>of(new SpongeTameableData(uuidOptional.orNull()));
         }
         return Optional.absent();
