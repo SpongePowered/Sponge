@@ -356,7 +356,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
-    public DataTransactionResult offer(int x, int y, int z, BaseValue<?> value) {
+    public <E> DataTransactionResult offer(int x, int y, int z, BaseValue<E> value) {
         checkRange(x, y, z);
         return this.extent.offer(x, y, z, value);
     }

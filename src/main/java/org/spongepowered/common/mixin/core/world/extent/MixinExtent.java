@@ -373,7 +373,7 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public DataTransactionResult offer(Vector3i coordinates, BaseValue<?> value) {
+    public <E> DataTransactionResult offer(Vector3i coordinates, BaseValue<E> value) {
         return offer(coordinates.getX(), coordinates.getY(), coordinates.getZ(), value);
     }
 

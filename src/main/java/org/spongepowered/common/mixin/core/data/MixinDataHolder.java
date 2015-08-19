@@ -108,7 +108,7 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public DataTransactionResult offer(BaseValue<?> value) {
+    public <E> DataTransactionResult offer(BaseValue<E> value) {
         Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(value.getKey());
         if (optional.isPresent()) {
             return optional.get().offerToStore(this, value);
