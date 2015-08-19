@@ -48,7 +48,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeDa
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeData, ImmutableGameModeData> {
 
@@ -119,21 +118,21 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, GameModeData manipulator, MergeFunction function) {
-        if (dataHolder instanceof IMixinVillager) {
-            final GameMode oldCareer =
+        if (dataHolder instanceof EntityPlayerMP) {
+            final GameMode oldMode =
                     (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType());
             final GameModeData oldData = from(dataHolder).get();
-            final ImmutableValue<GameMode> newCareer = function.merge(oldData, manipulator).type().asImmutable();
+            final ImmutableValue<GameMode> newMode = function.merge(oldData, manipulator).type().asImmutable();
             try {
-                ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) newCareer.get()));
+                ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) newMode.get()));
                 return DataTransactionBuilder.builder()
                         .replace(ImmutableDataCachingUtil
-                                .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldCareer, oldCareer))
-                        .success(newCareer)
+                                .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode))
+                        .success(newMode)
                         .result(DataTransactionResult.Type.SUCCESS)
                         .build();
             } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newCareer);
+                return DataTransactionBuilder.errorResult(newMode);
             }
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
