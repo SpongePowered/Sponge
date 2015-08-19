@@ -31,18 +31,11 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeAttachedData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeAttachedData extends AbstractImmutableBooleanData<ImmutableAttachedData, AttachedData> implements ImmutableAttachedData {
 
     public ImmutableSpongeAttachedData(boolean attached) {
         super(ImmutableAttachedData.class, attached, Keys.ATTACHED, SpongeAttachedData.class);
-        registerKeyValue(Keys.ATTACHED, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return attached();
-            }
-        });
     }
 
     @Override

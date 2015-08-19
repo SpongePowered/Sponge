@@ -24,30 +24,29 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class HealthValueProcessor implements ValueProcessor<Double, MutableBoundedValue<Double>> {
+public class HealthValueProcessor extends AbstractSpongeValueProcessor<Double, MutableBoundedValue<Double>> {
+
+    public HealthValueProcessor() {
+        super(Keys.HEALTH);
+    }
 
     @Override
-    public Key<? extends BaseValue<Double>> getKey() {
-        return Keys.HEALTH;
+    public MutableBoundedValue<Double> constructValue(Double defaultValue) {
+        return new SpongeBoundedValue<Double>(Keys.HEALTH, 0D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -75,45 +74,27 @@ public class HealthValueProcessor implements ValueProcessor<Double, MutableBound
     }
 
     @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Double, Double> function) {
-        if (container instanceof EntityLivingBase) {
-            final double oldMaxHealth = getValueFromContainer(container).get();
-            final double newMaxHealth = checkNotNull(function.apply(oldMaxHealth));
-            return offerToStore(container, newMaxHealth);
-        } else {
-            return DataTransactionBuilder.failNoData();
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final BaseValue<Double> actualValue = (BaseValue<Double>) value;
-        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, actualValue.get(), 20D,
+    public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
+        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, value, 20D,
                                                                                                     doubleComparator(), 1D,
                                                                                                     (double) Float.MAX_VALUE);
         if (container instanceof EntityLivingBase) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            final ImmutableBoundedValue<Double> newHealthValue = new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, actualValue.get(), maxHealth,
+            final ImmutableBoundedValue<Double> newHealthValue = new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, value, maxHealth,
                                                                                                          doubleComparator(), 0D, maxHealth);
             final ImmutableBoundedValue<Double> oldHealthValue = getApiValueFromContainer(container).get().asImmutable();
-            if (actualValue.get() > maxHealth) {
+            if (value > maxHealth) {
                 return DataTransactionBuilder.errorResult(newHealthValue);
             }
             try {
-                ((EntityLivingBase) container).setHealth(actualValue.get().floatValue());
+                ((EntityLivingBase) container).setHealth(value.floatValue());
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newHealthValue);
             }
             return builder.success(newHealthValue).replace(oldHealthValue).result(DataTransactionResult.Type.SUCCESS).build();
         }
         return DataTransactionBuilder.failResult(proposedValue);
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
-        return offerToStore(container, new SpongeValue<Double>(Keys.HEALTH, value, value));
     }
 
     @Override

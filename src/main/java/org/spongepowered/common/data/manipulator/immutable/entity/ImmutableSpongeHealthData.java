@@ -33,10 +33,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHealthData, HealthData> implements ImmutableHealthData {
 
@@ -47,6 +49,7 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
         super(ImmutableHealthData.class);
         this.health = health;
         this.maxHealth = maxHealth;
+        registerGetters();
     }
 
     @Override
@@ -84,4 +87,40 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
             .set(Keys.MAX_HEALTH.getQuery(), this.maxHealth);
     }
 
+    @Override
+    protected void registerGetters() {
+        registerFieldGetter(Keys.HEALTH, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getHealth();
+            }
+        });
+        registerKeyValue(Keys.HEALTH, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return health();
+            }
+        });
+
+        registerFieldGetter(Keys.MAX_HEALTH, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getMaxHealth();
+            }
+        });
+        registerKeyValue(Keys.MAX_HEALTH, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return maxHealth();
+            }
+        });
+    }
+
+    public double getHealth() {
+        return this.health;
+    }
+
+    public double getMaxHealth() {
+        return this.maxHealth;
+    }
 }

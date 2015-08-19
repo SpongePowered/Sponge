@@ -33,9 +33,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.ShiftClickAction;
-import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyle;
+import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
@@ -53,8 +52,7 @@ import java.util.Map;
 @Mixin(value = Text.class, remap = false)
 public abstract class MixinText implements IMixinText {
 
-    @Shadow protected TextColor color;
-    @Shadow protected TextStyle style;
+    @Shadow protected TextFormat format;
     @Shadow protected ImmutableList<Text> children;
     @Shadow protected Optional<ClickAction<?>> clickAction;
     @Shadow protected Optional<HoverAction<?>> hoverAction;
@@ -76,16 +74,16 @@ public abstract class MixinText implements IMixinText {
             component = createComponent(locale);
             ChatStyle style = component.getChatStyle();
 
-            if (this.color != TextColors.NONE) {
-                style.setColor(((SpongeTextColor) this.color).getHandle());
+            if (this.format.getColor() != TextColors.NONE) {
+                style.setColor(((SpongeTextColor) this.format.getColor()).getHandle());
             }
 
-            if (!this.style.isEmpty()) {
-                style.setBold(this.style.isBold().orNull());
-                style.setItalic(this.style.isItalic().orNull());
-                style.setUnderlined(this.style.hasUnderline().orNull());
-                style.setStrikethrough(this.style.hasStrikethrough().orNull());
-                style.setObfuscated(this.style.isObfuscated().orNull());
+            if (!this.format.getStyle().isEmpty()) {
+                style.setBold(this.format.getStyle().isBold().orNull());
+                style.setItalic(this.format.getStyle().isItalic().orNull());
+                style.setUnderlined(this.format.getStyle().hasUnderline().orNull());
+                style.setStrikethrough(this.format.getStyle().hasStrikethrough().orNull());
+                style.setObfuscated(this.format.getStyle().isObfuscated().orNull());
             }
 
             if (this.clickAction.isPresent()) {

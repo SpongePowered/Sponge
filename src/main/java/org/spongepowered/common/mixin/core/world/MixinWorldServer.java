@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.util.BlockPos;
 import net.minecraft.village.VillageCollection;
@@ -33,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
+import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -135,4 +137,30 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.pendingTickListEntriesTreeSet.remove(update);
     }
 
+    @Redirect(method = "updateAllPlayersSleepingFlag()V", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
+    public boolean isSpectatorOrIgnored(EntityPlayer entityPlayer) {
+        // spectators are excluded from the sleep tally in vanilla
+        // this redirect expands that check to include sleep-ignored players as well
+        boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
+        return ignore || entityPlayer.isPlayerFullyAsleep();
+    }
+
+    @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"))
+    public boolean isPlayerFullyAsleep(EntityPlayer entityPlayer) {
+        // if isPlayerFullyAsleep() returns false areAllPlayerAsleep() breaks its loop and returns false
+        // this redirect forces it to return true if the player is sleep-ignored even if they're not sleeping
+        boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
+        return ignore || entityPlayer.isPlayerFullyAsleep();
+    }
+
+    @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
+    public boolean isSpectatorAndNotIgnored(EntityPlayer entityPlayer) {
+        // if a player is marked as a spectator areAllPlayersAsleep() breaks its loop and returns false
+        // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator
+        boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
+        return !ignore && entityPlayer.isPlayerFullyAsleep();
+    }
 }

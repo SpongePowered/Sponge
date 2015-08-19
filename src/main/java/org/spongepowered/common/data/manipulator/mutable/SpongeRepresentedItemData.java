@@ -45,6 +45,7 @@ public class SpongeRepresentedItemData extends AbstractData<RepresentedItemData,
     public SpongeRepresentedItemData(ItemStack itemStack) {
         super(RepresentedItemData.class);
         this.itemStack = checkNotNull(itemStack).copy();
+        registerGettersAndSetters();
     }
 
     @Override
@@ -71,5 +72,10 @@ public class SpongeRepresentedItemData extends AbstractData<RepresentedItemData,
     public DataContainer toContainer() {
         return new MemoryDataContainer()
             .set(Keys.REPRESENTED_ITEM.getQuery(), this.itemStack);
+    }
+
+    @Override
+    protected void registerGettersAndSetters() {
+        // TODO
     }
 }

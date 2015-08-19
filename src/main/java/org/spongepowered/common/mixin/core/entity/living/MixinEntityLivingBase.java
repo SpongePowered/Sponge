@@ -190,10 +190,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         setAir(air);
     }
 
+    @Override
     public int getMaxAir() {
         return this.maxAir;
     }
 
+    @Override
     public void setMaxAir(int air) {
         this.maxAir = air;
     }

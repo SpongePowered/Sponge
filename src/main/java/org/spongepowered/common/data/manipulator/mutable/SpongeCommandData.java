@@ -56,7 +56,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
 
     public SpongeCommandData() {
         super(CommandData.class);
-        registerStuff();
+        registerGettersAndSetters();
     }
 
     @Override
@@ -156,7 +156,8 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     // Beware, all ye to enter here
-    private void registerStuff() {
+    @Override
+    protected void registerGettersAndSetters() {
         // Keys.COMMAND
         registerFieldGetter(Keys.COMMAND, new GetterFunction<Object>() {
             @Override

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
@@ -54,26 +53,8 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
 
     public SpongeSignData(List<Text> lines) {
         super(SignData.class);
+        registerGettersAndSetters();
         this.lines = lines;
-        registerFieldGetter(Keys.SIGN_LINES, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getLines();
-            }
-        });
-        registerFieldSetter(Keys.SIGN_LINES, new SetterFunction<Object>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void set(Object value) {
-                setLines((List<Text>) value);
-            }
-        });
-        registerKeyValue(Keys.SIGN_LINES, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return lines();
-            }
-        });
     }
 
     @Override
@@ -113,5 +94,28 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
         for (int i = 0; i < 4; i++) {
             this.lines.set(i, lines.get(i));
         }
+    }
+
+    @Override
+    protected void registerGettersAndSetters() {
+        registerFieldGetter(Keys.SIGN_LINES, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getLines();
+            }
+        });
+        registerFieldSetter(Keys.SIGN_LINES, new SetterFunction<Object>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void set(Object value) {
+                setLines((List<Text>) value);
+            }
+        });
+        registerKeyValue(Keys.SIGN_LINES, new GetterFunction<Value<?>>() {
+            @Override
+            public Value<?> get() {
+                return lines();
+            }
+        });
     }
 }

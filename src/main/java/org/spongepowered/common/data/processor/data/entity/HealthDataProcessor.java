@@ -29,29 +29,24 @@ import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
-
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
-
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
-public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableHealthData> {
+public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData, ImmutableHealthData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {
@@ -76,16 +71,6 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
     }
 
     @Override
-    public Optional<HealthData> fill(DataHolder dataHolder, HealthData manipulator) {
-        if (dataHolder instanceof EntityLivingBase) {
-            manipulator.set(Keys.MAX_HEALTH, (double) ((EntityLivingBase) dataHolder).getMaxHealth());
-            manipulator.set(Keys.HEALTH, (double) ((EntityLivingBase) dataHolder).getHealth());
-            return Optional.of(manipulator);
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<HealthData> fill(DataHolder dataHolder, HealthData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof EntityLivingBase) {
             final HealthData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
@@ -104,14 +89,15 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
     }
 
     @Override
-    public DataTransactionResult set(DataHolder dataHolder, HealthData manipulator) {
+    public DataTransactionResult set(DataHolder dataHolder, HealthData manipulator, MergeFunction function) {
         if (dataHolder instanceof EntityLivingBase) {
             DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final double prevMaxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
             final double prevHealth = ((EntityLivingBase) dataHolder).getHealth();
             final EntityLivingBase livingBase = ((EntityLivingBase) dataHolder);
-            final float newMaxHealth = manipulator.maxHealth().get().floatValue();
-            final float newHealth = manipulator.health().get().floatValue();
+            final HealthData newData = checkNotNull(function).merge(from(dataHolder).orNull(), manipulator);
+            final float newMaxHealth = newData.maxHealth().get().floatValue();
+            final float newHealth = newData.health().get().floatValue();
 
             try {
                 builder.replace(
@@ -124,7 +110,7 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
                     new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, (double) newMaxHealth, (double) newMaxHealth, doubleComparator(), 1D,
                                                             (double) Float.MAX_VALUE),
                     new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, (double) newHealth, (double) newHealth, doubleComparator(), 0D,
-                                                                     (double) Float.MAX_VALUE))
+                                                            (double) Float.MAX_VALUE))
                     .result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
             } catch (Exception e) {
@@ -134,17 +120,12 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
                     new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, (double) newMaxHealth, (double) newMaxHealth, doubleComparator(), 1D,
                                                             (double) Float.MAX_VALUE),
                     new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, (double) newHealth, (double) newHealth, doubleComparator(), 0D,
-                                                                    (double) Float.MAX_VALUE))
+                                                            (double) Float.MAX_VALUE))
                     .result(DataTransactionResult.Type.ERROR);
                 return builder.build();
             }
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, HealthData manipulator, MergeFunction function) {
-        return null;
     }
 
     @Override
@@ -158,16 +139,6 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
     }
 
     @Override
-    public HealthData create() {
-        return new SpongeHealthData();
-    }
-
-    @Override
-    public ImmutableHealthData createImmutable() {
-        return new ImmutableSpongeHealthData(20D, 20D);
-    }
-
-    @Override
     public Optional<HealthData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityLivingBase) {
             final double maxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
@@ -177,8 +148,4 @@ public class HealthDataProcessor implements DataProcessor<HealthData, ImmutableH
         return Optional.absent();
     }
 
-    @Override
-    public Optional<HealthData> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
-    }
 }

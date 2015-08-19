@@ -49,6 +49,7 @@ public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSign
         super(ImmutableSignData.class);
         this.lines = ImmutableList.copyOf(lines);
         this.linesValues = new ImmutableSpongeListValue<Text>(Keys.SIGN_LINES, this.lines);
+        registerGetters();
     }
 
     @Override
@@ -78,5 +79,10 @@ public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSign
     @Override
     public int compareTo(ImmutableSignData o) {
         return 0;
+    }
+
+    @Override
+    protected void registerGetters() {
+
     }
 }

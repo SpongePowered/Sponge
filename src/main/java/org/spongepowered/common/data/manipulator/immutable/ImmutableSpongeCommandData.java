@@ -52,6 +52,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
         this.success = success;
         this.tracks = tracks;
         this.lastOutput = lastOutput;
+        registerGetters();
     }
 
     @Override
@@ -100,5 +101,10 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
     @Override
     public int compareTo(ImmutableCommandData o) {
         return 0;
+    }
+
+    @Override
+    protected void registerGetters() {
+        // TODO
     }
 }

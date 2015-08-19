@@ -64,6 +64,11 @@ public class KeyRegistry {
         keyMap.put("eye_height", makeSingleKey(Double.class, Value.class, of("EyeHeight")));
         keyMap.put("eye_location", makeSingleKey(Vector3d.class, Value.class, of("EyeLocation")));
         keyMap.put("tamed_owner", makeSingleKey(UUID.class, OptionalValue.class, of("TamerUUID")));
+        keyMap.put("food_level", makeSingleKey(Integer.class, Value.class, of("FoodLevel")));
+        keyMap.put("saturation", makeSingleKey(Double.class, Value.class, of("FoodSaturationLevel")));
+        keyMap.put("exhaustion", makeSingleKey(Double.class, Value.class, of("FoodExhaustionLevel")));
+        keyMap.put("max_air", makeSingleKey(Integer.class, Value.class, of("MaxAir")));
+        keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

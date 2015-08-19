@@ -153,8 +153,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
         this.keyFieldSetterMap.put(checkNotNull(key), checkNotNull(function));
     }
 
-    // ---------------
-    // Note! These fill methods return NEW instances!
+    protected abstract void registerGettersAndSetters();
 
     @Override
     public Optional<M> fill(DataHolder dataHolder) {
@@ -164,7 +163,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
             return Optional.absent();
         }
         // .... and delegate to the processor!
-        return processor.get().fill(dataHolder, copy());
+        return processor.get().fill(dataHolder, copy(), MergeFunction.IGNORE_ALL);
     }
 
     @Override

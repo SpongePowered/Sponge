@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
@@ -55,6 +54,21 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * @return The associated key for this processor
      */
     Key<? extends BaseValue<E>> getKey();
+
+    /**
+     * Gets the priority of this processor. A single {@link Key} can have
+     * multiple {@link ValueProcessor}s such that mods introducing
+     * changes to the game can provide their own {@link ValueProcessor}s
+     * for specific cases. The notion is that the higher the priority, the
+     * earlier the processor is used. If for any reason a processor's method
+     * is returning an {@link Optional#absent()} or
+     * {@link DataTransactionResult} with a failure, the next processor in
+     * line will be used. By default, all Sponge processors are with a
+     * priority of 100.
+     *
+     * @return The priority of the processor
+     */
+    int getPriority();
 
     /**
      * Gets the underlying value as an {@link Optional}. This is the direct
@@ -123,29 +137,6 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * @return True if the container supports the value
      */
     boolean supports(ValueContainer<?> container);
-
-    /**
-     * Applies a transformation of the provided {@link Function} onto the
-     * provided {@link ValueContainer}. Usually this will mean retrieving
-     * the data from the {@link ValueContainer} then calling
-     * {@link Function#apply(Object)} and submitting the applied value.
-     *
-     * @param container The value container
-     * @param function The function
-     * @return The transaction result
-     */
-    DataTransactionResult transform(ValueContainer<?> container, Function<E, E> function);
-
-    /**
-     * Offers the provided {@link BaseValue} containing a value of the
-     * appropriate value type of this {@link ValueProcessor} to offer
-     * back to the {@link ValueContainer}.
-     *
-     * @param container The value container
-     * @param value The value
-     * @return The transaction result
-     */
-    DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value);
 
     /**
      * Offers the provided {@link BaseValue} containing a value of the

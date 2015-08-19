@@ -30,14 +30,26 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.service.persistence.DataBuilder;
 
-public interface DataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends DataBuilder<M>,
-                                                                                                                        DataManipulatorBuilder<M, I> {
+public interface DataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> {
+
+    /**
+     * Gets the priority of this processor. A single {@link Key} can have
+     * multiple {@link DataProcessor}s such that mods introducing
+     * changes to the game can provide their own {@link DataProcessor}s
+     * for specific cases. The notion is that the higher the priority, the
+     * earlier the processor is used. If for any reason a processor's method
+     * is returning an {@link Optional#absent()} or
+     * {@link DataTransactionResult} with a failure, the next processor in
+     * line will be used. By default, all Sponge processors are with a
+     * priority of 100.
+     *
+     * @return The priority of the processor
+     */
+    int getPriority();
 
     boolean supports(DataHolder dataHolder);
 
@@ -45,7 +57,7 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
      * Attempts to get the given {@link DataManipulator} of type {@code T} if
      * and only if the manipulator's required data exists from the
      * {@link DataHolder}. This is conceptually different from
-     * {@link DataManipulatorBuilder#createFrom(DataHolder)} since a new instance
+     * {@link DataProcessor#createFrom(DataHolder)} since a new instance
      * isn't returned even if the {@link DataManipulator} is applicable.
      *
      * <p>This is a processor method for {@link DataHolder#get(Class)}.</p>
@@ -55,13 +67,7 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
      */
     Optional<M> from(DataHolder dataHolder);
 
-    /**
-     * Attempts to fill the given {@link DataManipulator}
-     * @param dataHolder
-     * @param manipulator
-     * @return
-     */
-    Optional<M> fill(DataHolder dataHolder, M manipulator);
+    Optional<M> createFrom(DataHolder dataHolder);
 
     Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap);
 
@@ -85,8 +91,6 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
      * @param manipulator The manipulator to set the data from
      * @return The transaction result
      */
-    DataTransactionResult set(DataHolder dataHolder, M manipulator);
-
     DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function);
 
     Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable);

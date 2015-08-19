@@ -44,12 +44,11 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 
-public class VelocityDataProcessor implements DataProcessor<VelocityData, ImmutableVelocityData> {
+public class VelocityDataProcessor extends AbstractSpongeDataProcessor<VelocityData, ImmutableVelocityData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {
@@ -63,19 +62,6 @@ public class VelocityDataProcessor implements DataProcessor<VelocityData, Immuta
             final double y = ((Entity) dataHolder).motionY;
             final double z = ((Entity) dataHolder).motionZ;
             return Optional.<VelocityData>of(new SpongeVelocityData(new Vector3d(x, y, z)));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<VelocityData> fill(DataHolder dataHolder, VelocityData manipulator) {
-        if (dataHolder instanceof Entity) {
-            final Value<Vector3d> velocityValue = manipulator.velocity();
-            final double x = ((Entity) dataHolder).motionX;
-            final double y = ((Entity) dataHolder).motionY;
-            final double z = ((Entity) dataHolder).motionZ;
-            velocityValue.set(new Vector3d(x, y, z));
-            return Optional.of(manipulator.set(velocityValue));
         }
         return Optional.absent();
     }
@@ -103,25 +89,6 @@ public class VelocityDataProcessor implements DataProcessor<VelocityData, Immuta
         final double z = getData(internalView, SpongeVelocityData.VELOCITY_Z, Double.class);
         final Value<Vector3d> value = velocityData.velocity();
         return Optional.of(velocityData.set(value.set(new Vector3d(x, y, z))));
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, VelocityData manipulator) {
-        if (dataHolder instanceof Entity) {
-            final ImmutableValue<Vector3d> newValue = manipulator.velocity().asImmutable();
-            final VelocityData old = from(dataHolder).get();
-            final ImmutableValue<Vector3d> oldValue = old.asImmutable().velocity();
-            final Vector3d newVec = manipulator.velocity().get();
-            try {
-                ((Entity) dataHolder).motionX = newVec.getX();
-                ((Entity) dataHolder).motionY = newVec.getY();
-                ((Entity) dataHolder).motionZ = newVec.getZ();
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                DataTransactionBuilder.errorResult(newValue);
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
     @Override
@@ -159,16 +126,6 @@ public class VelocityDataProcessor implements DataProcessor<VelocityData, Immuta
     }
 
     @Override
-    public VelocityData create() {
-        return new SpongeVelocityData();
-    }
-
-    @Override
-    public ImmutableVelocityData createImmutable() {
-        return new ImmutableSpongeVelocityData(Vector3d.ZERO);
-    }
-
-    @Override
     public Optional<VelocityData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
             final double x = ((Entity) dataHolder).motionX;
@@ -177,19 +134,5 @@ public class VelocityDataProcessor implements DataProcessor<VelocityData, Immuta
             return Optional.<VelocityData>of(new SpongeVelocityData(new Vector3d(x, y, z)));
         }
         return Optional.absent();
-    }
-
-    @Override
-    public Optional<VelocityData> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, Keys.VELOCITY.getQuery());
-        final DataView internalView = container.getView(Keys.VELOCITY.getQuery()).get();
-        checkDataExists(internalView, SpongeVelocityData.VELOCITY_X);
-        checkDataExists(internalView, SpongeVelocityData.VELOCITY_Y);
-        checkDataExists(internalView, SpongeVelocityData.VELOCITY_Z);
-        final double x = getData(internalView, SpongeVelocityData.VELOCITY_X, Double.class);
-        final double y = getData(internalView, SpongeVelocityData.VELOCITY_Y, Double.class);
-        final double z = getData(internalView, SpongeVelocityData.VELOCITY_Z, Double.class);
-        final VelocityData velocityData = new SpongeVelocityData(new Vector3d(x, y, z));
-        return Optional.of(velocityData);
     }
 }

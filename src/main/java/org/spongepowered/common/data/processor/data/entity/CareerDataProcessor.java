@@ -30,27 +30,23 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
-public class CareerDataProcessor implements DataProcessor<CareerData, ImmutableCareerData> {
+public class CareerDataProcessor extends AbstractSpongeDataProcessor<CareerData, ImmutableCareerData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {
@@ -66,18 +62,10 @@ public class CareerDataProcessor implements DataProcessor<CareerData, ImmutableC
     }
 
     @Override
-    public Optional<CareerData> fill(DataHolder dataHolder, CareerData manipulator) {
-        if (dataHolder instanceof IMixinVillager) {
-            return Optional.of(manipulator.set(Keys.CAREER, ((IMixinVillager) dataHolder).getCareer()));
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<CareerData> fill(DataHolder dataHolder, CareerData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof IMixinVillager) {
             final CareerData original = from(dataHolder).get();
-            return Optional.of(manipulator.set(Keys.CAREER, overlap.merge(manipulator, original).career().get()));
+            return Optional.of(manipulator.set(Keys.CAREER, overlap.merge(manipulator, original).type().get()));
         }
         return Optional.absent();
     }
@@ -93,30 +81,11 @@ public class CareerDataProcessor implements DataProcessor<CareerData, ImmutableC
     }
 
     @Override
-    public DataTransactionResult set(DataHolder dataHolder, CareerData manipulator) {
-        if (dataHolder instanceof IMixinVillager) {
-            final Career oldCareer = ((IMixinVillager) dataHolder).getCareer();
-            final ImmutableValue<Career> newCareer = manipulator.career().asImmutable();
-            try {
-                ((IMixinVillager) dataHolder).setCareer(manipulator.career().get());
-                return DataTransactionBuilder.builder()
-                    .replace(ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, Keys.CAREER, oldCareer, oldCareer))
-                    .success(newCareer)
-                    .result(DataTransactionResult.Type.SUCCESS)
-                    .build();
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newCareer);
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
-    }
-
-    @Override
     public DataTransactionResult set(DataHolder dataHolder, CareerData manipulator, MergeFunction function) {
         if (dataHolder instanceof IMixinVillager) {
             final Career oldCareer = ((IMixinVillager) dataHolder).getCareer();
             final CareerData oldData = from(dataHolder).get();
-            final ImmutableValue<Career> newCareer = function.merge(oldData, manipulator).career().asImmutable();
+            final ImmutableValue<Career> newCareer = function.merge(oldData, manipulator).type().asImmutable();
             try {
                 ((IMixinVillager) dataHolder).setCareer(newCareer.get());
                 return DataTransactionBuilder.builder()
@@ -142,27 +111,8 @@ public class CareerDataProcessor implements DataProcessor<CareerData, ImmutableC
     }
 
     @Override
-    public CareerData create() {
-        return new SpongeCareerData();
-    }
-
-    @Override
-    public ImmutableCareerData createImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeCareerData.class, Careers.ARMORER);
-    }
-
-    @Override
     public Optional<CareerData> createFrom(DataHolder dataHolder) {
         return from(dataHolder);
     }
 
-    @Override
-    public Optional<CareerData> build(DataView container) throws InvalidDataException {
-        final String careerId = DataUtil.getData(container, Keys.CAREER, String.class);
-        final Optional<Career> optional = Sponge.getSpongeRegistry().getType(Career.class, careerId);
-        if (optional.isPresent()) {
-            return Optional.<CareerData>of(new SpongeCareerData(optional.get()));
-        }
-        return Optional.absent();
-    }
 }

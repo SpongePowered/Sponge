@@ -45,6 +45,7 @@ public class SpongePotionEffectData extends AbstractData<PotionEffectData, Immut
     public SpongePotionEffectData(List<PotionEffect> effects) {
         super(PotionEffectData.class);
         this.effects = Lists.newArrayList(effects);
+        registerGettersAndSetters();
     }
 
     @Override
@@ -71,5 +72,10 @@ public class SpongePotionEffectData extends AbstractData<PotionEffectData, Immut
     public DataContainer toContainer() {
         return new MemoryDataContainer()
             .set(Keys.POTION_EFFECTS.getQuery(), this.effects);
+    }
+
+    @Override
+    protected void registerGettersAndSetters() {
+        // TODO
     }
 }

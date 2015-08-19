@@ -129,6 +129,8 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         this.keyFieldGetterMap.put(checkNotNull(key), checkNotNull(function));
     }
 
+    protected abstract void registerGetters();
+
     @Override
     public <E> Optional<I> with(Key<? extends BaseValue<E>> key, E value) {
         // Basic stuff, getting the processor....

@@ -68,6 +68,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         this.spawnRange = spawnRange;
         this.nextEntityToSpawn = nextEntityToSpawn;
         this.entities = entities;
+        registerGettersAndSetters();
     }
 
     public SpongeMobSpawnerData() {
@@ -158,5 +159,10 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
             .set(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN.getQuery(), this.nextEntityToSpawn)
             .set(Keys.SPAWNER_ENTITIES.getQuery(), this.entities);
 
+    }
+
+    @Override
+    protected void registerGettersAndSetters() {
+        // TODO
     }
 }

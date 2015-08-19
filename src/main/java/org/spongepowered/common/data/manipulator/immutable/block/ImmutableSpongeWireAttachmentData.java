@@ -108,4 +108,9 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
             .set(Keys.WIRE_ATTACHMENT_SOUTH.getQuery(), this.wireAttachmentMap.get(Direction.SOUTH).getId())
             .set(Keys.WIRE_ATTACHMENT_WEST.getQuery(), this.wireAttachmentMap.get(Direction.WEST).getId());
     }
+
+    @Override
+    protected void registerGetters() {
+        // TODO
+    }
 }

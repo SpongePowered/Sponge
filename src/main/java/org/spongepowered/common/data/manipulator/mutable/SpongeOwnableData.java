@@ -45,6 +45,7 @@ public class SpongeOwnableData extends AbstractData<OwnableData, ImmutableOwnabl
     public SpongeOwnableData(GameProfile profile) {
         super(OwnableData.class);
         this.profile = checkNotNull(profile);
+        registerGettersAndSetters();
     }
 
     @Override
@@ -74,5 +75,10 @@ public class SpongeOwnableData extends AbstractData<OwnableData, ImmutableOwnabl
     public DataContainer toContainer() {
         return new MemoryDataContainer()
             .set(Keys.OWNED_BY_PROFILE.getQuery(), this.profile);
+    }
+
+    @Override
+    protected void registerGettersAndSetters() {
+
     }
 }

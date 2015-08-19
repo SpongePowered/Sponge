@@ -30,21 +30,22 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 
 public interface BlockDataProcessor<T extends ImmutableDataManipulator<T, ?>> {
 
+    int getPriority();
+
     Optional<T> fromBlockPos(World world, BlockPos blockPos);
 
-    DataTransactionResult setData(World world, BlockPos blockPos, T manipulator);
+    Optional<T> createFrom(IBlockState blockState);
 
     Optional<BlockState> withData(IBlockState blockState, T manipulator);
 
-    boolean remove(World world, BlockPos blockPos);
+    DataTransactionResult setData(World world, BlockPos blockPos, T manipulator);
 
     Optional<BlockState> removeFrom(IBlockState blockState);
 
-    Optional<T> createFrom(IBlockState blockState);
+    boolean remove(World world, BlockPos blockPos);
 
 }

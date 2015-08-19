@@ -55,6 +55,7 @@ public class SpongeTradeOfferData extends AbstractData<TradeOfferData, Immutable
     public SpongeTradeOfferData(List<TradeOffer> tradeOffers) {
         super(TradeOfferData.class);
         this.offers.addAll(tradeOffers);
+        registerGettersAndSetters();
     }
 
     public List<TradeOffer> getOffers() {
@@ -97,5 +98,10 @@ public class SpongeTradeOfferData extends AbstractData<TradeOfferData, Immutable
     @Override
     public ListValue<TradeOffer> tradeOffers() {
         return new SpongeListValue<TradeOffer>(Keys.TRADE_OFFERS, this.offers);
+    }
+
+    @Override
+    protected void registerGettersAndSetters() {
+        // TODO
     }
 }

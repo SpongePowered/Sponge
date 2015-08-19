@@ -24,30 +24,29 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.IWorldNameable;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class DisplayNameVisibleValueProcessor implements ValueProcessor<Boolean, Value<Boolean>> {
+public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
+
+    public DisplayNameVisibleValueProcessor() {
+        super(Keys.SHOWS_DISPLAY_NAME);
+    }
 
     @Override
-    public Key<? extends BaseValue<Boolean>> getKey() {
-        return Keys.SHOWS_DISPLAY_NAME;
+    public Value<Boolean> constructValue(Boolean defaultValue) {
+        return new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
     }
 
     @Override
@@ -72,21 +71,6 @@ public class DisplayNameVisibleValueProcessor implements ValueProcessor<Boolean,
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof Entity || container instanceof ItemStack || container instanceof IWorldNameable;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Boolean, Boolean> function) {
-        final Optional<Boolean> optional = getValueFromContainer(container);
-        if (optional.isPresent()) {
-            final boolean newDisplays = checkNotNull(function.apply(optional.get()));
-            return offerToStore(container, newDisplays);
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((Boolean) value.get()));
     }
 
     @Override

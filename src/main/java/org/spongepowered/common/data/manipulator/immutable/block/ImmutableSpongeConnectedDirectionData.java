@@ -49,6 +49,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     public ImmutableSpongeConnectedDirectionData(Set<Direction> directions) {
         super(ImmutableConnectedDirectionData.class);
         this.directions = Sets.immutableEnumSet(directions);
+        registerGetters();
     }
 
     @Override
@@ -99,5 +100,10 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
             .set(Keys.CONNECTED_SOUTH.getQuery(), this.directions.contains(Direction.SOUTH))
             .set(Keys.CONNECTED_EAST.getQuery(), this.directions.contains(Direction.EAST))
             .set(Keys.CONNECTED_WEST.getQuery(), this.directions.contains(Direction.WEST));
+    }
+
+    @Override
+    protected void registerGetters() {
+        // TODO
     }
 }
