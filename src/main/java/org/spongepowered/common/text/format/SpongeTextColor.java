@@ -34,7 +34,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import java.awt.Color;
 
 @NonnullByDefault
-public class SpongeTextColor implements TextColor.Base {
+public class SpongeTextColor implements TextColor {
 
     private final EnumChatFormatting handle;
     private final Color color;
@@ -61,12 +61,6 @@ public class SpongeTextColor implements TextColor.Base {
     @Override
     public Color getColor() {
         return this.color;
-    }
-
-    @Override
-    @Deprecated
-    public char getCode() {
-        return this.handle.formattingCode;
     }
 
     @Override

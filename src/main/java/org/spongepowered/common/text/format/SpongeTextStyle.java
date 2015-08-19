@@ -53,12 +53,6 @@ public class SpongeTextStyle extends TextStyle.Base {
         return this.handle.name();
     }
 
-    @Override
-    @Deprecated
-    public char getCode() {
-        return this.handle.formattingCode;
-    }
-
     public static SpongeTextStyle of(EnumChatFormatting handle) {
         if (handle == EnumChatFormatting.RESET) {
             return new SpongeTextStyle(handle, false, false, false, false, false);
