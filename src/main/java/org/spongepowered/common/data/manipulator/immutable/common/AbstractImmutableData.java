@@ -95,7 +95,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
 
     protected AbstractImmutableData(Class<I> immutableClass) {
         this.immutableClass = checkNotNull(immutableClass);
-        registerStuff();
     }
 
     /**

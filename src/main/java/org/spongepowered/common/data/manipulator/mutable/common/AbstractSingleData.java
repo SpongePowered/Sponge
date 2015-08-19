@@ -58,6 +58,7 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
         super(manipulatorClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey);
+        registerStuff();
     }
 
     @Override

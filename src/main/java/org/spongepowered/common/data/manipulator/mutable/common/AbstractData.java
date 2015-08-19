@@ -103,7 +103,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
 
     protected AbstractData(Class<M> manipulatorClass) {
         this.manipulatorClass = checkNotNull(manipulatorClass);
-        registerStuff();
     }
 
     /**

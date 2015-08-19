@@ -47,6 +47,7 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
         super(immutableClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey);
+        registerStuff();
     }
 
     protected abstract ImmutableValue<?> getValueGetter();
