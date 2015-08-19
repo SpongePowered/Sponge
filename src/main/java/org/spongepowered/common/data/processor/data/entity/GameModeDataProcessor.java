@@ -35,16 +35,20 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
+import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
@@ -68,16 +72,28 @@ public class GameModeDataProcessor implements DataProcessor<GameModeData, Immuta
 
     @Override
     public Optional<GameModeData> fill(DataHolder dataHolder, GameModeData manipulator) {
+        if (dataHolder instanceof EntityPlayerMP) {
+            return Optional.of(manipulator.set(Keys.GAME_MODE, (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType())));
+        }
         return Optional.absent();
     }
 
     @Override
     public Optional<GameModeData> fill(DataHolder dataHolder, GameModeData manipulator, MergeFunction overlap) {
+        if (dataHolder instanceof EntityPlayerMP) {
+            final GameModeData original = from(dataHolder).get();
+            return Optional.of(manipulator.set(Keys.GAME_MODE, overlap.merge(manipulator, original).type().get()));
+        }
         return Optional.absent();
     }
 
     @Override
     public Optional<GameModeData> fill(DataContainer container, GameModeData gameModeData) {
+        final String modeId = DataUtil.getData(container, Keys.GAME_MODE, String.class);
+        final Optional<GameMode> optional = Sponge.getSpongeRegistry().getType(GameMode.class, modeId);
+        if (optional.isPresent()) {
+            gameModeData.set(Keys.GAME_MODE, optional.get());
+        }
         return Optional.absent();
     }
 
