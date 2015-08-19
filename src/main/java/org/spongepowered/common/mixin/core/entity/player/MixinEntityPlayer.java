@@ -56,30 +56,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos spawnChunk;
     @Shadow protected FoodStats foodStats;
 
-    public double getExhaustion() {
-        return this.getFoodStats().foodExhaustionLevel;
-    }
-
-    public void setExhaustion(double exhaustion) {
-        this.getFoodStats().foodExhaustionLevel = (float) exhaustion;
-    }
-
-    public double getSaturation() {
-        return this.getFoodStats().getSaturationLevel();
-    }
-
-    public void setSaturation(double saturation) {
-        this.getFoodStats().setFoodSaturationLevel((float) saturation);
-    }
-
-    public double getFoodLevel() {
-        return this.getFoodStats().getFoodLevel();
-    }
-
-    public void setFoodLevel(double hunger) {
-        this.getFoodStats().setFoodLevel((int) hunger);
-    }
-
     // utility method for getting the total experience at an arbitrary level
     // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()
     private int xpAtLevel(int level) {

@@ -140,7 +140,7 @@ public class FoodDataProcessor implements DataProcessor<FoodData, ImmutableFoodD
             }
 
             ((EntityPlayer) dataHolder).getFoodStats().setFoodLevel(manipulator.foodLevel().get());
-            ((EntityPlayer) dataHolder).getFoodStats().setFoodSaturationLevel(manipulator.saturation().get().floatValue());
+            ((EntityPlayer) dataHolder).getFoodStats().foodSaturationLevel = manipulator.saturation().get().floatValue();
             ((EntityPlayer) dataHolder).getFoodStats().foodExhaustionLevel = manipulator.exhaustion().get().floatValue();
             if (oldData.isPresent()) {
                 return DataTransactionBuilder.successReplaceResult(manipulator.getValues(), oldData.get().getValues());

@@ -82,7 +82,7 @@ public class FoodSaturationValueProcessor implements ValueProcessor<Double, Muta
             if (player.getFoodStats() != null) {
                 final Double oldValue = (double) player.getFoodStats().getSaturationLevel();
                 final Double newValue = function.apply(oldValue);
-                player.getFoodStats().setFoodSaturationLevel(newValue.floatValue());
+                player.getFoodStats().foodSaturationLevel = newValue.floatValue();
                 return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Double>(Keys.SATURATION, newValue),
                         new ImmutableSpongeValue<Double>(Keys.SATURATION, oldValue));
             }
@@ -105,7 +105,7 @@ public class FoodSaturationValueProcessor implements ValueProcessor<Double, Muta
             final EntityPlayer player = (EntityPlayer) container;
             if (player.getFoodStats() != null) {
                 final Double oldValue = (double) player.getFoodStats().getSaturationLevel();
-                player.getFoodStats().setFoodSaturationLevel(value.floatValue());
+                player.getFoodStats().foodSaturationLevel = value.floatValue();
                 return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Double>(Keys.SATURATION, value),
                         new ImmutableSpongeValue<Double>(Keys.SATURATION, oldValue));
             }
