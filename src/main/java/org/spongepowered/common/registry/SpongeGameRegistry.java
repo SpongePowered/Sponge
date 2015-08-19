@@ -101,6 +101,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathin
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableEyeLocationData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
@@ -110,6 +111,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -293,6 +295,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
@@ -302,6 +305,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingD
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
@@ -311,6 +315,7 @@ import org.spongepowered.common.data.processor.data.entity.BreathingDataProcesso
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.EyeLocationDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FoodDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.GameModeDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
@@ -323,6 +328,7 @@ import org.spongepowered.common.data.processor.value.entity.EyeLocationValueProc
 import org.spongepowered.common.data.processor.value.entity.FoodExhaustionValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.FoodLevelValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.FoodSaturationValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.GameModeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
@@ -1679,6 +1685,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(BreathingData.class, SpongeBreathingData.class, ImmutableBreathingData.class,
                 ImmutableSpongeBreathingData.class, breathingDataProcessor, breathingDataBuilder);
 
+        final GameModeDataProcessor gameModeDataProcessor = new GameModeDataProcessor();
+        service.registerBuilder(GameModeData.class, gameModeDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
+                ImmutableSpongeGameModeData.class, gameModeDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1695,7 +1706,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_AIR, new MaxAirValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REMAINING_AIR, new RemainingAirValueProcessor());
-
+        dataRegistry.registerValueProcessor(Keys.GAME_MODE, new GameModeValueProcessor());
     }
 
     private void setNotePitches() {
