@@ -44,6 +44,7 @@ import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
@@ -103,12 +104,8 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
             final ImmutableValue<GameMode> newMode = manipulator.type().asImmutable();
             try {
                 ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) manipulator.type().get()));
-                return DataTransactionBuilder.builder()
-                        .replace(ImmutableDataCachingUtil
-                                .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode))
-                        .success(newMode)
-                        .result(DataTransactionResult.Type.SUCCESS)
-                        .build();
+                return DataTransactionBuilder.successReplaceResult(ImmutableDataCachingUtil
+                        .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode), newMode);
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newMode);
             }
@@ -125,12 +122,8 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
             final ImmutableValue<GameMode> newMode = function.merge(oldData, manipulator).type().asImmutable();
             try {
                 ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) newMode.get()));
-                return DataTransactionBuilder.builder()
-                        .replace(ImmutableDataCachingUtil
-                                .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode))
-                        .success(newMode)
-                        .result(DataTransactionResult.Type.SUCCESS)
-                        .build();
+                return DataTransactionBuilder.successReplaceResult(ImmutableDataCachingUtil
+                        .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode), newMode);
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newMode);
             }
@@ -141,7 +134,11 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     @Override
     public Optional<ImmutableGameModeData> with(Key<? extends BaseValue<?>> key, Object value,
             ImmutableGameModeData immutable) {
-        return Optional.absent();
+        if (!key.equals(Keys.GAME_MODE)) {
+            return Optional.absent();
+        }
+        final ImmutableGameModeData data = new ImmutableSpongeGameModeData((GameMode) value);
+        return Optional.of(data);
     }
 
     @Override
