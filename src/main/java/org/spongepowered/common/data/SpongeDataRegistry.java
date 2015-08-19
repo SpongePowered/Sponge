@@ -115,6 +115,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
             final ValueProcessorDelegate<?, ?> delegate = new ValueProcessorDelegate(entry.getKey(), valueListBuilder.build());
             registry.valueDelegates.put(entry.getKey(), delegate);
         }
+        registry.valueProcessorMap.clear();
         for (Map.Entry<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> entry : registry.processorMap.entrySet()) {
             ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
             Collections.sort(entry.getValue(), ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
@@ -122,6 +123,23 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
             final DataProcessorDelegate<?, ?> delegate = new DataProcessorDelegate(dataListBuilder.build());
             registry.dataProcessorDelegates.put(entry.getKey(), delegate);
         }
+        registry.processorMap.clear();
+        for (Map.Entry<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> entry : registry.immutableProcessorMap.entrySet()) {
+            ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
+            dataListBuilder.addAll(entry.getValue());
+            final DataProcessorDelegate<?, ?> delegate = new DataProcessorDelegate(dataListBuilder.build());
+            registry.immutableDataProcessorDelegates.put(entry.getKey(), delegate);
+        }
+        registry.immutableProcessorMap.clear();
+        for (Map.Entry<Class<? extends ImmutableDataManipulator<?, ?>>, List<BlockDataProcessor<?>>> entry : registry.blockDataMap.entrySet()) {
+            ImmutableList.Builder<BlockDataProcessor<?>> dataListBuilder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.BLOCK_DATA_PROCESSOR_COMPARATOR);
+            dataListBuilder.addAll(entry.getValue());
+            final BlockDataProcessorDelegate<?> delegate = new BlockDataProcessorDelegate(dataListBuilder.build());
+            registry.blockDataProcessorDelegates.put(entry.getKey(), delegate);
+        }
+        registry.blockDataMap.clear();
     }
 
 
