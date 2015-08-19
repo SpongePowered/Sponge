@@ -87,6 +87,13 @@ public class KeyRegistry {
         keyMap.put("exhaustion", makeSingleKey(Double.TYPE, Value.class, of("FoodExhaustionLevel")));
         keyMap.put("max_air", makeSingleKey(Integer.TYPE, Value.class, of("MaxAir")));
         keyMap.put("remaining_air", makeSingleKey(Integer.TYPE, Value.class, of("RemainingAir")));
+        keyMap.put("fire_ticks", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("FireTicks")));
+        keyMap.put("fire_damage_delay", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("FireDamageDelay")));
+        keyMap.put("food_level", makeSingleKey(Integer.TYPE, Value.class, of("FoodLevel")));
+        keyMap.put("saturation", makeSingleKey(Double.TYPE, Value.class, of("FoodSaturationLevel")));
+        keyMap.put("exhaustion", makeSingleKey(Double.TYPE, Value.class, of("FoodExhaustionLevel")));
+        keyMap.put("max_air", makeSingleKey(Integer.TYPE, Value.class, of("MaxAir")));
+        keyMap.put("remaining_air", makeSingleKey(Integer.TYPE, Value.class, of("RemainingAir")));
         keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
         keyMap.put("is_screaming", makeSingleKey(Boolean.TYPE, Value.class, of("IsScreaming")));
         keyMap.put("shrub_type", makeSingleKey(ShrubType.class, Value.class, of("ShrubType")));
