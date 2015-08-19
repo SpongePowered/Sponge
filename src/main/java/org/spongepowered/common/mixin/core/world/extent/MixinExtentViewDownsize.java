@@ -469,7 +469,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getTileEntities(Predicates.and(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getTileEntities(Predicates.<TileEntity>and(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
@@ -507,7 +507,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getEntities(Predicates.and(new EntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getEntities(Predicates.<Entity>and(new EntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
