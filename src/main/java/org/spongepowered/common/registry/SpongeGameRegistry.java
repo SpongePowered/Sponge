@@ -2031,5 +2031,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setCoal();
         setFishes();
         setEntityTypes();
+        SpongeDataRegistry.finalizeRegistration();
     }
 }
