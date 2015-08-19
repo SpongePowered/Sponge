@@ -51,24 +51,16 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
     }
 
     @Override
+    public Value<SkullType> constructValue(SkullType defaultValue) {
+        return new SpongeValue<SkullType>(Keys.SKULL_TYPE, SkullTypes.SKELETON, defaultValue);
+    }
+
+    @Override
     public Optional<SkullType> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof TileEntitySkull) {
             return Optional.of(SkullUtils.getSkullType((TileEntitySkull) container));
         } else if (SkullUtils.isValidItemStack(container)) {
             return Optional.of(SkullUtils.getSkullType((ItemStack) container));
-        }
-        return Optional.absent();
-    }
-
-    private SpongeValue<SkullType> getNewValue(SkullType skullType) {
-        return new SpongeValue<SkullType>(this.getKey(), SkullTypes.SKELETON, skullType);
-    }
-
-    @Override
-    public Optional<Value<SkullType>> getApiValueFromContainer(ValueContainer<?> container) {
-        Optional<SkullType> optSkull = this.getValueFromContainer(container);
-        if (optSkull.isPresent()) {
-            return Optional.<Value<SkullType>>of(this.getNewValue(optSkull.get()));
         }
         return Optional.absent();
     }
@@ -79,24 +71,14 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
     }
 
     @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<SkullType, SkullType> function) {
-        if (this.supports(container)) {
-            SkullType oldValue = this.getValueFromContainer(container).get();
-            return this.offerToStore(container, checkNotNull(function.apply(oldValue)));
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
+    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<SkullType> value) {
         @SuppressWarnings("unchecked")
-        BaseValue<SkullType> realValue = (BaseValue<SkullType>) value;
-        ImmutableValue<SkullType> proposedValue = this.getNewValue(realValue.get()).asImmutable();
+        ImmutableValue<SkullType> proposedValue = this.constructValue(value.get()).asImmutable();
         ImmutableValue<SkullType> oldValue;
 
         DataTransactionBuilder builder = DataTransactionBuilder.builder();
 
-        int skullType = ((SpongeSkullType) realValue.get()).getByteId();
+        int skullType = ((SpongeSkullType) value.get()).getByteId();
 
         if (container instanceof TileEntitySkull) {
             oldValue = getApiValueFromContainer(container).get().asImmutable();
@@ -114,7 +96,7 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, SkullType value) {
-        return this.offerToStore(container, this.getNewValue(value));
+        return this.offerToStore(container, this.constructValue(value));
     }
 
     @Override

@@ -52,44 +52,17 @@ public class EyeLocationValueProcessor extends AbstractSpongeValueProcessor<Vect
     }
 
     @Override
+    public Value<Vector3d> constructValue(Vector3d defaultValue) {
+        return new SpongeValue<Vector3d>(Keys.EYE_LOCATION, defaultValue);
+    }
+
+    @Override
     public Optional<Vector3d> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final Entity entity = (Entity) container;
             return Optional.of(new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ));
         }
         return Optional.absent();
-    }
-
-    @Override
-    public Optional<Value<Vector3d>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final Entity entity = (Entity) container;
-            return Optional.<Value<Vector3d>>of(new SpongeValue<Vector3d>(Keys.EYE_LOCATION, new Vector3d(entity.posX, entity.posY, entity.posZ),
-                new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ)));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Vector3d, Vector3d> function) {
-        if (supports(container)) {
-            final Entity entity = (Entity) container;
-            final Vector3d oldValue = new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-            final Vector3d newValue = function.apply(oldValue);
-            ((IMixinEntity) entity).setEyeHeight(newValue.getY() - oldValue.getY());
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, newValue),
-                new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, oldValue));
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final Object object = value.get();
-        if (object instanceof Vector3d) {
-            return offerToStore(container, (Vector3d) object);
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

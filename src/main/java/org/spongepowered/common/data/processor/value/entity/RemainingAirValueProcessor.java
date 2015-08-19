@@ -46,6 +46,11 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
     }
 
     @Override
+    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+        return new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+    }
+
+    @Override
     public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final EntityLivingBase entity = (EntityLivingBase) container;
@@ -55,40 +60,8 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
     }
 
     @Override
-    public Optional<MutableBoundedValue<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityLivingBase entity = (EntityLivingBase) container;
-            return Optional.<MutableBoundedValue<Integer>>of(new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, intComparator(), 0,
-                    Integer.MAX_VALUE, entity.getAir()));
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof EntityLivingBase;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Integer, Integer> function) {
-        if (supports(container)) {
-            final EntityLivingBase entity = (EntityLivingBase) container;
-            final Integer oldValue = entity.getAir();
-            final Integer newValue = function.apply(oldValue);
-            entity.setAir(newValue);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, newValue),
-                    new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, oldValue));
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final Object object = value.get();
-        if (object instanceof Number) {
-            return offerToStore(container, ((Number) object).intValue());
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

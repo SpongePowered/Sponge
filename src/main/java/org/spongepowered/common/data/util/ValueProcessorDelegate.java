@@ -52,6 +52,11 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
     }
 
     @Override
+    public V constructValue(E defaultValue) {
+        return null;
+    }
+
+    @Override
     public Key<? extends BaseValue<E>> getKey() {
         return this.key;
     }
@@ -111,7 +116,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
+    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<E> value) {
         for (ValueProcessor<E, V> processor : this.processors) {
             if (processor.supports(container)) {
                 final DataTransactionResult result = processor.offerToStore(container, value);

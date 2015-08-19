@@ -49,6 +49,11 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
+    public Value<Boolean> constructValue(Boolean defaultValue) {
+        return new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
+    }
+
+    @Override
     public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof Entity) {
             return Optional.of(((Entity) container).getAlwaysRenderNameTag());
@@ -70,21 +75,6 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof Entity || container instanceof ItemStack || container instanceof IWorldNameable;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Boolean, Boolean> function) {
-        final Optional<Boolean> optional = getValueFromContainer(container);
-        if (optional.isPresent()) {
-            final boolean newDisplays = checkNotNull(function.apply(optional.get()));
-            return offerToStore(container, newDisplays);
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((Boolean) value.get()));
     }
 
     @Override

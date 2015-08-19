@@ -49,6 +49,15 @@ import org.spongepowered.api.entity.Entity;
 public interface ValueProcessor<E, V extends BaseValue<E>> {
 
     /**
+     * Builds a {@link Value} of the type produced by this processor from an
+     * input, actual value.
+     *
+     * @param defaultValue The actual value
+     * @return The constructed {@link Value}
+     */
+    V constructValue(E defaultValue);
+
+    /**
      * Gets the associated {@link Key} that this {@link ValueProcessor}
      * will handle.
      *
@@ -160,7 +169,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * @param value The value
      * @return The transaction result
      */
-    DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value);
+    DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<E> value);
 
     /**
      * Offers the provided {@link BaseValue} containing a value of the

@@ -48,6 +48,11 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
     }
 
     @Override
+    public Value<Vector3d> constructValue(Vector3d defaultValue) {
+        return new SpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, defaultValue);
+    }
+
+    @Override
     public Optional<Vector3d> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof Entity) {
             return Optional.of(new Vector3d(((Entity) container).motionX, ((Entity) container).motionY, ((Entity) container).motionZ));
@@ -56,43 +61,8 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
     }
 
     @Override
-    public Optional<Value<Vector3d>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            final double x = ((Entity) container).motionX;
-            final double y = ((Entity) container).motionY;
-            final double z = ((Entity) container).motionZ;
-            return Optional.<Value<Vector3d>>of(new SpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, new Vector3d(x, y, z)));
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof Entity;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Vector3d, Vector3d> function) {
-        if (container instanceof Entity) {
-            final Vector3d old = getValueFromContainer(container).get();
-            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, old);
-            final Vector3d newVec = checkNotNull(checkNotNull(function, "function").apply(old), "The function returned a null value!");
-            final ImmutableValue<Vector3d> newVal = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, newVec);
-            try {
-                ((Entity) container).motionX = newVec.getX();
-                ((Entity) container).motionY = newVec.getY();
-                ((Entity) container).motionZ = newVec.getZ();
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newVal);
-            }
-            return DataTransactionBuilder.successReplaceResult(newVal, oldValue);
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((Vector3d) value.get()));
     }
 
     @Override

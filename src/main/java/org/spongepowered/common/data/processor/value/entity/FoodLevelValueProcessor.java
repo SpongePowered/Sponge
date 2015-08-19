@@ -46,6 +46,11 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Intege
     }
 
     @Override
+    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+        return new SpongeBoundedValue<Integer>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+    }
+
+    @Override
     public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
@@ -57,44 +62,8 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Intege
     }
 
     @Override
-    public Optional<MutableBoundedValue<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                return Optional.<MutableBoundedValue<Integer>>of(new SpongeBoundedValue<Integer>(Keys.FOOD_LEVEL, 20, intComparator(), 0,
-                        Integer.MAX_VALUE, player.getFoodStats().getFoodLevel()));
-            }
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof EntityPlayer;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Integer, Integer> function) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                final Integer oldValue = player.getFoodStats().getFoodLevel();
-                final Integer newValue = function.apply(oldValue);
-                player.getFoodStats().setFoodLevel(newValue);
-                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, newValue),
-                        new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, oldValue));
-            }
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final Object object = value.get();
-        if (object instanceof Number) {
-            return offerToStore(container, ((Number) object).intValue());
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

@@ -46,6 +46,11 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<D
     }
 
     @Override
+    public MutableBoundedValue<Double> constructValue(Double defaultValue) {
+        return new SpongeBoundedValue<Double>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, defaultValue);
+    }
+
+    @Override
     public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
@@ -57,44 +62,8 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<D
     }
 
     @Override
-    public Optional<MutableBoundedValue<Double>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                return Optional.<MutableBoundedValue<Double>>of(new SpongeBoundedValue<Double>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D,
-                        Double.MAX_VALUE, (double) player.getFoodStats().getSaturationLevel()));
-            }
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof EntityPlayer;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Double, Double> function) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                final Double oldValue = (double) player.getFoodStats().getSaturationLevel();
-                final Double newValue = function.apply(oldValue);
-                player.getFoodStats().foodSaturationLevel = newValue.floatValue();
-                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Double>(Keys.SATURATION, newValue),
-                        new ImmutableSpongeValue<Double>(Keys.SATURATION, oldValue));
-            }
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final Object object = value.get();
-        if (object instanceof Number) {
-            return offerToStore(container, ((Number) object).doubleValue());
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

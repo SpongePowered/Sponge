@@ -50,18 +50,14 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Double
     }
 
     @Override
-    public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof EntityLivingBase) {
-            return Optional.of((double) ((EntityLivingBase) container).getMaxHealth());
-        }
-        return Optional.absent();
+    public MutableBoundedValue<Double> constructValue(Double defaultValue) {
+        return new SpongeBoundedValue<Double>(Keys.MAX_HEALTH, 20D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
     }
 
     @Override
-    public Optional<MutableBoundedValue<Double>> getApiValueFromContainer(ValueContainer<?> container) {
+    public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof EntityLivingBase) {
-            final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            return Optional.<MutableBoundedValue<Double>>of(new SpongeBoundedValue<Double>(Keys.MAX_HEALTH, 20D, doubleComparator(), 1D, (double) Float.MAX_VALUE, maxHealth));
+            return Optional.of((double) ((EntityLivingBase) container).getMaxHealth());
         }
         return Optional.absent();
     }
@@ -71,22 +67,10 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Double
         return container instanceof EntityLivingBase;
     }
 
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Double, Double> function) {
-        if (container instanceof EntityLivingBase) {
-            final double oldMaxHealth = getValueFromContainer(container).get();
-            final double newMaxHealth = checkNotNull(function.apply(oldMaxHealth));
-            return offerToStore(container, newMaxHealth);
-        } else {
-            return DataTransactionBuilder.failNoData();
-        }
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final BaseValue<Double> actualValue = (BaseValue<Double>) value;
-        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, actualValue.get(), 20D,
+    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<Double> value) {
+        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, value.get(), 20D,
                                                                                                     doubleComparator(), 1D,
                                                                                                     (double) Float.MAX_VALUE);
         if (container instanceof EntityLivingBase) {
@@ -94,7 +78,7 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Double
             final ImmutableBoundedValue<Double> oldHealthValue = getApiValueFromContainer(container).get().asImmutable();
 
             try {
-                ((EntityLivingBase) container).getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(actualValue.get());
+                ((EntityLivingBase) container).getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(value.get());
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(proposedValue);
             }

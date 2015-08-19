@@ -56,6 +56,11 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
     }
 
     @Override
+    public Value<Text> constructValue(Text defaultValue) {
+        return new SpongeValue<Text>(Keys.DISPLAY_NAME, defaultValue);
+    }
+
+    @Override
     public Optional<Text> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof Entity && ((Entity) container).hasCustomName()) {
             return Optional.of(Texts.legacy().fromUnchecked(((Entity) container).getCustomNameTag()));
@@ -81,48 +86,8 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
     }
 
     @Override
-    public Optional<Value<Text>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity && ((Entity) container).hasCustomName()) {
-            return Optional.<Value<Text>>of(new SpongeValue<Text>(Keys.DISPLAY_NAME, Texts.legacy().fromUnchecked(((Entity) container).getCustomNameTag())));
-        } else if (container instanceof EntityPlayer) {
-            return Optional.<Value<Text>>of(new SpongeValue<Text>(Keys.DISPLAY_NAME, Texts.legacy().fromUnchecked(
-                ((EntityPlayer) container).getCommandSenderName())));
-        } else if (container instanceof ItemStack) {
-            if (((ItemStack) container).getItem() == Items.written_book) {
-                final NBTTagCompound mainCompound = ((ItemStack) container).getTagCompound();
-                final String titleString = mainCompound.getString("title");
-                return Optional.<Value<Text>>of(new SpongeValue<Text>(Keys.DISPLAY_NAME, Texts.legacy().fromUnchecked(titleString)));
-            }
-            final NBTTagCompound mainCompound = ((ItemStack) container).getSubCompound("display", false);
-            if (mainCompound != null && mainCompound.hasKey("Name", 8)) {
-                final String displayString = mainCompound.getString("Name");
-                return Optional.<Value<Text>>of(new SpongeValue<Text>(Keys.DISPLAY_NAME, Texts.legacy().fromUnchecked(displayString)));
-            } else {
-                return Optional.absent();
-            }
-        } else if (container instanceof IWorldNameable && ((IWorldNameable) container).hasCustomName()) {
-            return Optional.<Value<Text>>of(new SpongeValue<Text>(Keys.DISPLAY_NAME,
-                                                                  Texts.legacy().fromUnchecked(((IWorldNameable) container).getCommandSenderName())));
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof Entity || container instanceof IWorldNameable || container instanceof ItemStack;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Text, Text> function) {
-        if (supports(container)) {
-            return offerToStore(container, checkNotNull(function.apply(getValueFromContainer(container).orNull())));
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((Text) value.get()));
     }
 
     @Override

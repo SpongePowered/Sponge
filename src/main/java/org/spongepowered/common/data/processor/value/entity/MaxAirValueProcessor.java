@@ -47,6 +47,11 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
     }
 
     @Override
+    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+        return new SpongeBoundedValue<Integer>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+    }
+
+    @Override
     public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
@@ -55,41 +60,10 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
         return Optional.absent();
     }
 
-    @Override
-    public Optional<MutableBoundedValue<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
-            return Optional.<MutableBoundedValue<Integer>>of(new SpongeBoundedValue<Integer>(Keys.MAX_AIR, 300, intComparator(), 0,
-                    Integer.MAX_VALUE, entity.getMaxAir()));
-        }
-        return Optional.absent();
-    }
 
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof EntityLivingBase;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Integer, Integer> function) {
-        if (supports(container)) {
-            final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
-            final Integer oldValue = entity.getMaxAir();
-            final Integer newValue = function.apply(oldValue);
-            entity.setMaxAir(newValue);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, newValue),
-                    new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, oldValue));
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final Object object = value.get();
-        if (object instanceof Number) {
-            return offerToStore(container, ((Number) object).intValue());
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

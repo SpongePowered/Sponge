@@ -51,43 +51,17 @@ public class EyeHeightValueProcessor extends AbstractSpongeValueProcessor<Double
     }
 
     @Override
+    public Value<Double> constructValue(Double defaultValue) {
+        return new SpongeValue<Double>(Keys.EYE_HEIGHT, defaultValue);
+    }
+
+    @Override
     public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final Entity entity = (Entity) container;
             return Optional.of((double) entity.getEyeHeight());
         }
         return Optional.absent();
-    }
-
-    @Override
-    public Optional<Value<Double>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final Entity entity = (Entity) container;
-            return Optional.<Value<Double>>of(new SpongeValue<Double>(Keys.EYE_HEIGHT, 0d, (double) entity.getEyeHeight()));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Double, Double> function) {
-        if (supports(container)) {
-            final Entity entity = (Entity) container;
-            final Double oldValue = (double) entity.getEyeHeight();
-            final Double newValue = function.apply(oldValue);
-            ((IMixinEntity) entity).setEyeHeight(newValue);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Double>(Keys.EYE_HEIGHT, newValue),
-                new ImmutableSpongeValue<Double>(Keys.EYE_HEIGHT, oldValue));
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final Object object = value.get();
-        if (object instanceof Number) {
-            return offerToStore(container, ((Number) object).doubleValue());
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

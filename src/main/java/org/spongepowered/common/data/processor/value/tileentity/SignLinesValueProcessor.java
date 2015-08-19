@@ -60,6 +60,11 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
     }
 
     @Override
+    public ListValue<Text> constructValue(List<Text> defaultValue) {
+        return new SpongeListValue<Text>(Keys.SIGN_LINES, defaultValue);
+    }
+
+    @Override
     public Optional<List<Text>> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof TileEntitySign) {
             final IChatComponent[] rawLines = ((TileEntitySign) container).signText;
@@ -93,28 +98,8 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
     }
 
     @Override
-    public Optional<ListValue<Text>> getApiValueFromContainer(ValueContainer<?> container) {
-        final Optional<List<Text>> optional = getValueFromContainer(container);
-        if (optional.isPresent()) {
-            return Optional.<ListValue<Text>>of(new SpongeListValue<Text>(Keys.SIGN_LINES, optional.get()));
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof TileEntitySign || (container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.sign));
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<List<Text>, List<Text>> function) {
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((List<Text>) value.get()));
     }
 
     @Override

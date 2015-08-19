@@ -109,11 +109,13 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> DataTransactionResult offer(BaseValue<E> value) {
-        Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(value.getKey());
+        @SuppressWarnings("unchecked") Key<BaseValue<E>> sanitizedKey = (Key<BaseValue<E>>) value.getKey();
+        Optional<? extends ValueProcessor<E, ? extends BaseValue<E>>> optional =
+            SpongeDataRegistry.getInstance().getValueProcessor(sanitizedKey);
         if (optional.isPresent()) {
             return optional.get().offerToStore(this, value);
         }
-        return null;
+        return DataTransactionBuilder.failNoData();
     }
 
     @Override

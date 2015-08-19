@@ -50,16 +50,13 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, V
     }
 
     @Override
-    public Optional<Career> getValueFromContainer(ValueContainer<?> container) {
-        return container instanceof IMixinVillager ? Optional.of(((IMixinVillager) container).getCareer()) : Optional.<Career>absent();
+    public Value<Career> constructValue(Career defaultValue) {
+        return new SpongeValue<Career>(Keys.CAREER, defaultValue);
     }
 
     @Override
-    public Optional<Value<Career>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof IMixinVillager) {
-            return Optional.<Value<Career>>of(new SpongeValue<Career>(Keys.CAREER, ((IMixinVillager) container).getCareer()));
-        }
-        return Optional.absent();
+    public Optional<Career> getValueFromContainer(ValueContainer<?> container) {
+        return container instanceof IMixinVillager ? Optional.of(((IMixinVillager) container).getCareer()) : Optional.<Career>absent();
     }
 
     @Override
@@ -82,11 +79,6 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, V
             }
         }
         return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((Career) value.get()));
     }
 
     @Override
