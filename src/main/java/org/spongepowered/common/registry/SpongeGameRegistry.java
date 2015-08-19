@@ -186,9 +186,11 @@ import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOfferBuilder;
+import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.potion.PotionEffectBuilder;
 import org.spongepowered.api.potion.PotionEffectType;
@@ -340,6 +342,7 @@ import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
+import org.spongepowered.common.item.merchant.SpongeVillagerRegistry;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 import org.spongepowered.common.rotation.SpongeRotation;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
@@ -886,6 +889,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
+    public VillagerRegistry getVillagerRegistry() {
+        return SpongeVillagerRegistry.getInstance();
+    }
+
+    @Override
     public RecipeRegistry getRecipeRegistry() {
         throw new UnsupportedOperationException(); // TODO
     }
@@ -1090,25 +1098,36 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private void setCareersAndProfessions() {
         try {
             Professions.class.getDeclaredField("FARMER").set(null, new SpongeProfession(0, "farmer"));
-            Careers.class.getDeclaredField("FARMER").set(null, new SpongeCareer(0, "farmer", Professions.FARMER));
-            Careers.class.getDeclaredField("FISHERMAN").set(null, new SpongeCareer(1, "fisherman", Professions.FARMER));
-            Careers.class.getDeclaredField("SHEPHERD").set(null, new SpongeCareer(2, "shepherd", Professions.FARMER));
-            Careers.class.getDeclaredField("FLETCHER").set(null, new SpongeCareer(3, "fletcher", Professions.FARMER));
+            Careers.class.getDeclaredField("FARMER").set(null,
+                    new SpongeCareer(0, "farmer", Professions.FARMER, new SpongeTranslation("entity.Villager.farmer")));
+            Careers.class.getDeclaredField("FISHERMAN").set(null,
+                    new SpongeCareer(1, "fisherman", Professions.FARMER, new SpongeTranslation("entity.Villager.fisherman")));
+            Careers.class.getDeclaredField("SHEPHERD").set(null,
+                    new SpongeCareer(2, "shepherd", Professions.FARMER, new SpongeTranslation("entity.Villager.shepherd")));
+            Careers.class.getDeclaredField("FLETCHER").set(null,
+                    new SpongeCareer(3, "fletcher", Professions.FARMER, new SpongeTranslation("entity.Villager.fletcher")));
 
             Professions.class.getDeclaredField("LIBRARIAN").set(null, new SpongeProfession(1, "librarian"));
-            Careers.class.getDeclaredField("LIBRARIAN").set(null, new SpongeCareer(0, "librarian", Professions.LIBRARIAN));
+            Careers.class.getDeclaredField("LIBRARIAN").set(null,
+                    new SpongeCareer(0, "librarian", Professions.LIBRARIAN, new SpongeTranslation("entity.Villager.librarian")));
 
             Professions.class.getDeclaredField("PRIEST").set(null, new SpongeProfession(2, "priest"));
-            Careers.class.getDeclaredField("CLERIC").set(null, new SpongeCareer(0, "cleric", Professions.PRIEST));
+            Careers.class.getDeclaredField("CLERIC").set(null,
+                    new SpongeCareer(0, "cleric", Professions.PRIEST, new SpongeTranslation("entity.Villager.cleric")));
 
             Professions.class.getDeclaredField("BLACKSMITH").set(null, new SpongeProfession(3, "blacksmith"));
-            Careers.class.getDeclaredField("ARMORER").set(null, new SpongeCareer(0, "armor", Professions.BLACKSMITH));
-            Careers.class.getDeclaredField("WEAPON_SMITH").set(null, new SpongeCareer(1, "weapon", Professions.BLACKSMITH));
-            Careers.class.getDeclaredField("TOOL_SMITH").set(null, new SpongeCareer(2, "tool", Professions.BLACKSMITH));
+            Careers.class.getDeclaredField("ARMORER").set(null,
+                    new SpongeCareer(0, "armor", Professions.BLACKSMITH, new SpongeTranslation("entity.Villager.armor")));
+            Careers.class.getDeclaredField("WEAPON_SMITH").set(null,
+                    new SpongeCareer(1, "weapon", Professions.BLACKSMITH, new SpongeTranslation("entity.Villager.weapon")));
+            Careers.class.getDeclaredField("TOOL_SMITH").set(null,
+                    new SpongeCareer(2, "tool", Professions.BLACKSMITH, new SpongeTranslation("entity.Villager.tool")));
 
             Professions.class.getDeclaredField("BUTCHER").set(null, new SpongeProfession(4, "butcher"));
-            Careers.class.getDeclaredField("BUTCHER").set(null, new SpongeCareer(0, "butcher", Professions.BUTCHER));
-            Careers.class.getDeclaredField("LEATHERWORKER").set(null, new SpongeCareer(1, "leatherworker", Professions.BUTCHER));
+            Careers.class.getDeclaredField("BUTCHER").set(null,
+                    new SpongeCareer(0, "butcher", Professions.BUTCHER, new SpongeTranslation("entity.Villager.butcher")));
+            Careers.class.getDeclaredField("LEATHERWORKER").set(null,
+                    new SpongeCareer(1, "leatherworker", Professions.BUTCHER, new SpongeTranslation("entity.Villager.leather")));
 
             this.professionMappings.put(Professions.FARMER.getName().toLowerCase(), Professions.FARMER);
             this.professionMappings.put(Professions.LIBRARIAN.getName().toLowerCase(), Professions.LIBRARIAN);

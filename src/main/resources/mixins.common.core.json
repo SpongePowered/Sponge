@@ -160,6 +160,7 @@
         "item.data.MixinItemPotion",
         "item.inventory.MixinContainer",
         "item.inventory.MixinItemStack",
+        "item.merchant.MixinITradeList",
         "item.merchant.MixinMerchantRecipe",
         "network.MixinNetHandlerPlayServer",
         "network.packet.MixinS3BPacketScoreboardObjective",
