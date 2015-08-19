@@ -105,7 +105,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     public void damageD(double amount) {
-        Living thisEntity = (Living) this;
+        Living thisEntity = this;
         DamageSource source = DamageSource.generic;
         if (thisEntity instanceof Human) {
             source = net.minecraft.util.DamageSource.causePlayerDamage((EntityPlayer) thisEntity);
@@ -125,7 +125,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     public void setHealthD(double health) {
-        Living thisEntity = (Living) this;
+        Living thisEntity = this;
         setHealth((float) health);
 
         if (thisEntity instanceof EntityPlayer && health == 0) {
