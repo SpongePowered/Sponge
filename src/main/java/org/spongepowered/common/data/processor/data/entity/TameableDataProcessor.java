@@ -164,21 +164,21 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
         return Optional.absent();
     }
 
-    private static String asString(final Optional<UUID> uuidOptional) {
+    public static String asString(final Optional<UUID> uuidOptional) {
         if(uuidOptional.isPresent()) {
             UUIDTypeAdapter.fromUUID(uuidOptional.get());
         }
         return "";
     }
 
-    private static Optional<UUID> asUUID(@Nullable final EntityTameable tameable) {
+    public static Optional<UUID> getTamer(@Nullable final EntityTameable tameable) {
         if(tameable == null) {
             return Optional.absent();
         }
         return asUUID(tameable.getOwnerId());
     }
 
-    private static Optional<UUID> asUUID(@Nullable final String sUUID) {
+    public static Optional<UUID> asUUID(@Nullable final String sUUID) {
         if(sUUID == null) {
             return Optional.absent();
         }
