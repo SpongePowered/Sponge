@@ -31,9 +31,6 @@ import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 
-/**
- * Created by jamie on 18/08/15.
- */
 public class ImmutableSpongeGameModeData extends AbstractImmutableSingleCatalogData<GameMode,
         ImmutableGameModeData, GameModeData> implements ImmutableGameModeData {
 

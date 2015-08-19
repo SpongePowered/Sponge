@@ -26,20 +26,27 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 public class GameModeDataProcessor implements DataProcessor<GameModeData, ImmutableGameModeData> {
 
@@ -76,12 +83,45 @@ public class GameModeDataProcessor implements DataProcessor<GameModeData, Immuta
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, GameModeData manipulator) {
-        return null;
+        if (dataHolder instanceof EntityPlayerMP) {
+            final GameMode oldMode =
+                    (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType());
+            final ImmutableValue<GameMode> newMode = manipulator.type().asImmutable();
+            try {
+                ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) manipulator.type().get()));
+                return DataTransactionBuilder.builder()
+                        .replace(ImmutableDataCachingUtil
+                                .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode))
+                        .success(newMode)
+                        .result(DataTransactionResult.Type.SUCCESS)
+                        .build();
+            } catch (Exception e) {
+                return DataTransactionBuilder.errorResult(newMode);
+            }
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, GameModeData manipulator, MergeFunction function) {
-        return null;
+        if (dataHolder instanceof IMixinVillager) {
+            final GameMode oldCareer =
+                    (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType());
+            final GameModeData oldData = from(dataHolder).get();
+            final ImmutableValue<GameMode> newCareer = function.merge(oldData, manipulator).type().asImmutable();
+            try {
+                ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) newCareer.get()));
+                return DataTransactionBuilder.builder()
+                        .replace(ImmutableDataCachingUtil
+                                .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldCareer, oldCareer))
+                        .success(newCareer)
+                        .result(DataTransactionResult.Type.SUCCESS)
+                        .build();
+            } catch (Exception e) {
+                return DataTransactionBuilder.errorResult(newCareer);
+            }
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
     @Override
@@ -92,7 +132,7 @@ public class GameModeDataProcessor implements DataProcessor<GameModeData, Immuta
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return null;
+        return DataTransactionBuilder.failNoData();
     }
 
     @Override
