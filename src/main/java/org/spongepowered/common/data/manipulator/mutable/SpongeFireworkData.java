@@ -52,6 +52,7 @@ public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFire
         super(FireworkData.class);
         this.fireworkEffects = Lists.newArrayList(effects);
         this.flightModifier = modifier >= 0 ? modifier : 0;
+        registerGettersAndSetters();
     }
 
     public SpongeFireworkData(List<FireworkEffect> effects) {
@@ -98,7 +99,7 @@ public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFire
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         // TODO
     }
 }

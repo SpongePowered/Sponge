@@ -31,7 +31,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableEyeLocationData;
@@ -39,8 +38,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
@@ -66,15 +63,6 @@ public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLoc
     }
 
     @Override
-    public Optional<EyeLocationData> fill(DataHolder dataHolder, EyeLocationData manipulator) {
-        if (supports(dataHolder)) {
-            manipulator.set(Keys.EYE_HEIGHT, (double) ((Entity) dataHolder).getEyeHeight());
-            return Optional.of(manipulator);
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<EyeLocationData> fill(DataHolder dataHolder, EyeLocationData manipulator, MergeFunction overlap) {
         if (supports(dataHolder)) {
             final EyeLocationData merged = overlap.merge(manipulator.copy(), from(dataHolder).get());
@@ -91,17 +79,6 @@ public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLoc
             return Optional.of(eyeLocationData.set(Keys.EYE_LOCATION, DataUtil.getData(container, Keys.EYE_LOCATION, Vector3d.class)));
         }
         return Optional.absent();
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, EyeLocationData manipulator) {
-        if (!supports(dataHolder)) {
-            return DataTransactionBuilder.failResult(manipulator.getValues());
-        }
-        final ImmutableValue<Double> oldValue = from(dataHolder).get().eyeHeight().asImmutable();
-        final ImmutableValue<Double> newValue = manipulator.eyeHeight().asImmutable();
-        ((IMixinEntity) dataHolder).setEyeHeight(newValue.get());
-        return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
     }
 
     @Override
@@ -135,30 +112,10 @@ public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLoc
     }
 
     @Override
-    public EyeLocationData create() {
-        return new SpongeEyeLocationData();
-    }
-
-    @Override
-    public ImmutableEyeLocationData createImmutable() {
-        return new ImmutableSpongeEyeLocationData();
-    }
-
-    @Override
     public Optional<EyeLocationData> createFrom(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             final Entity entity = (Entity) dataHolder;
             return Optional.<EyeLocationData>of(new SpongeEyeLocationData(VecHelper.toVector(entity.getPositionVector()), entity.getEyeHeight()));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<EyeLocationData> build(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.EYE_HEIGHT.getQuery()) && container.contains(Keys.EYE_LOCATION.getQuery())) {
-            final Double eyeHeight = DataUtil.getData(container, Keys.EYE_HEIGHT, Double.class);
-            final Vector3d eyeLocation = DataUtil.getData(container, Keys.EYE_LOCATION, Vector3d.class);
-            return Optional.<EyeLocationData>of(new SpongeEyeLocationData(eyeLocation.sub(0, eyeHeight, 0), eyeHeight, eyeLocation));
         }
         return Optional.absent();
     }

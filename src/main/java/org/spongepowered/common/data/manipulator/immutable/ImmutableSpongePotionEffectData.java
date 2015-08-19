@@ -45,6 +45,7 @@ public class ImmutableSpongePotionEffectData extends AbstractImmutableData<Immut
     public ImmutableSpongePotionEffectData(List<PotionEffect> effects) {
         super(ImmutablePotionEffectData.class);
         this.effects = ImmutableList.copyOf(effects);
+        registerGetters();
     }
 
     @Override
@@ -74,7 +75,7 @@ public class ImmutableSpongePotionEffectData extends AbstractImmutableData<Immut
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

@@ -67,6 +67,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
         this.spawnRange = spawnRange;
         this.nextToSpawn = nextToSpawn;
         this.entitiesToSpawn = entitiesToSpawn;
+        registerGetters();
     }
 
     @Override
@@ -152,7 +153,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

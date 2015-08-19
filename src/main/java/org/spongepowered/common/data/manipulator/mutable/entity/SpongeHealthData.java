@@ -51,7 +51,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
         this.health = health;
         checkArgument(maxHealth > 0);
         this.maxHealth = maxHealth;
-        registerStuff();
+        registerGettersAndSetters();
     }
 
     public SpongeHealthData() {
@@ -111,7 +111,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
         return this;
     }
 
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.HEALTH, new GetterFunction<Object>() {
             @Override
             public Object get() {

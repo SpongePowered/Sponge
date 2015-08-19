@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
@@ -47,15 +46,6 @@ import org.spongepowered.api.entity.Entity;
  * @param <V> The type of Value
  */
 public interface ValueProcessor<E, V extends BaseValue<E>> {
-
-    /**
-     * Builds a {@link Value} of the type produced by this processor from an
-     * input, actual value.
-     *
-     * @param defaultValue The actual value
-     * @return The constructed {@link Value}
-     */
-    V constructValue(E defaultValue);
 
     /**
      * Gets the associated {@link Key} that this {@link ValueProcessor}
@@ -147,29 +137,6 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * @return True if the container supports the value
      */
     boolean supports(ValueContainer<?> container);
-
-    /**
-     * Applies a transformation of the provided {@link Function} onto the
-     * provided {@link ValueContainer}. Usually this will mean retrieving
-     * the data from the {@link ValueContainer} then calling
-     * {@link Function#apply(Object)} and submitting the applied value.
-     *
-     * @param container The value container
-     * @param function The function
-     * @return The transaction result
-     */
-    DataTransactionResult transform(ValueContainer<?> container, Function<E, E> function);
-
-    /**
-     * Offers the provided {@link BaseValue} containing a value of the
-     * appropriate value type of this {@link ValueProcessor} to offer
-     * back to the {@link ValueContainer}.
-     *
-     * @param container The value container
-     * @param value The value
-     * @return The transaction result
-     */
-    DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<E> value);
 
     /**
      * Offers the provided {@link BaseValue} containing a value of the

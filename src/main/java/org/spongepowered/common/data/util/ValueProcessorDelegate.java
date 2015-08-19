@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.util;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -49,11 +48,6 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
     public ValueProcessorDelegate(Key<V> key, ImmutableList<ValueProcessor<E, V>> processors) {
         this.key = key;
         this.processors = processors;
-    }
-
-    @Override
-    public V constructValue(E defaultValue) {
-        return null;
     }
 
     @Override
@@ -100,32 +94,6 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
             }
         }
         return false;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<E, E> function) {
-        for (ValueProcessor<E, V> processor : this.processors) {
-            if (processor.supports(container)) {
-                final DataTransactionResult result = processor.transform(container, function);
-                if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                    return result;
-                }
-            }
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<E> value) {
-        for (ValueProcessor<E, V> processor : this.processors) {
-            if (processor.supports(container)) {
-                final DataTransactionResult result = processor.offerToStore(container, value);
-                if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                    return result;
-                }
-            }
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

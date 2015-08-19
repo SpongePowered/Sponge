@@ -110,7 +110,7 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

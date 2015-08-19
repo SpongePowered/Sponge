@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySkull;
@@ -71,14 +68,14 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<SkullType> value) {
+    public DataTransactionResult offerToStore(ValueContainer<?> container, SkullType value) {
         @SuppressWarnings("unchecked")
-        ImmutableValue<SkullType> proposedValue = this.constructValue(value.get()).asImmutable();
+        ImmutableValue<SkullType> proposedValue = this.constructValue(value).asImmutable();
         ImmutableValue<SkullType> oldValue;
 
         DataTransactionBuilder builder = DataTransactionBuilder.builder();
 
-        int skullType = ((SpongeSkullType) value.get()).getByteId();
+        int skullType = ((SpongeSkullType) value).getByteId();
 
         if (container instanceof TileEntitySkull) {
             oldValue = getApiValueFromContainer(container).get().asImmutable();
@@ -92,11 +89,6 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
 
         return builder.success(proposedValue).replace(oldValue).result(DataTransactionResult.Type.SUCCESS).build();
 
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, SkullType value) {
-        return this.offerToStore(container, this.constructValue(value));
     }
 
     @Override

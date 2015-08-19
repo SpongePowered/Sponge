@@ -49,6 +49,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     public ImmutableSpongeConnectedDirectionData(Set<Direction> directions) {
         super(ImmutableConnectedDirectionData.class);
         this.directions = Sets.immutableEnumSet(directions);
+        registerGetters();
     }
 
     @Override
@@ -102,7 +103,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

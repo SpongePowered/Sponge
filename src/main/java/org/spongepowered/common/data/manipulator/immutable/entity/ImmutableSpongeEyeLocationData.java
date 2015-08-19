@@ -57,6 +57,7 @@ public class ImmutableSpongeEyeLocationData extends AbstractImmutableData<Immuta
         this.entityLocation = entityLocation;
         this.eyeHeight = eyeHeight;
         this.eyeLocation = eyeLocation;
+        registerGetters();
     }
 
     @Override
@@ -94,7 +95,7 @@ public class ImmutableSpongeEyeLocationData extends AbstractImmutableData<Immuta
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

@@ -33,7 +33,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
@@ -41,12 +40,11 @@ import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
-import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -69,19 +67,6 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
     }
 
     @Override
-    public Optional<SkullData> fill(DataHolder dataHolder, SkullData manipulator) {
-        if (this.supports(dataHolder)) {
-            if (dataHolder instanceof TileEntitySkull) {
-                manipulator.set(Keys.SKULL_TYPE, SkullUtils.getSkullType((TileEntitySkull) dataHolder));
-            } else {
-                manipulator.set(Keys.SKULL_TYPE, SkullUtils.getSkullType((ItemStack) dataHolder));
-            }
-            return Optional.of(manipulator);
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<SkullData> fill(DataHolder dataHolder, SkullData manipulator, MergeFunction overlap) {
         if (this.supports(dataHolder)) {
             SkullData merged = overlap.merge(checkNotNull(manipulator.copy()), this.from(dataHolder).get());
@@ -92,7 +77,8 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
 
     @Override
     public Optional<SkullData> fill(DataContainer container, SkullData skullData) {
-        return Optional.of(skullData.set(Keys.SKULL_TYPE, Sponge.getGame().getRegistry().getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
+        return Optional.of(skullData.set(Keys.SKULL_TYPE, Sponge.getGame().getRegistry()
+            .getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
     }
 
     private DataTransactionResult setImpl(DataHolder dataHolder, SkullData manipulator, SpongeSkullType newType) {
@@ -116,12 +102,8 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
             itemStack.setItemDamage(newType.getByteId());
         }
 
-        return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<SkullType>(Keys.SKULL_TYPE, newType), new ImmutableSpongeValue<SkullType>(Keys.SKULL_TYPE, oldType));
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, SkullData manipulator) {
-        return this.setImpl(dataHolder, manipulator, (SpongeSkullType) manipulator.type().get());
+        return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<SkullType>(Keys.SKULL_TYPE, newType),
+                                                           new ImmutableSpongeValue<SkullType>(Keys.SKULL_TYPE, oldType));
     }
 
     @Override
@@ -147,25 +129,8 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
     }
 
     @Override
-    public SkullData create() {
-        return new SpongeSkullData(SkullUtils.DEFAULT_TYPE);
-    }
-
-    @Override
-    public ImmutableSkullData createImmutable() {
-        return new ImmutableSpongeSkullData(SkullUtils.DEFAULT_TYPE);
-    }
-
-    @Override
     public Optional<SkullData> createFrom(DataHolder dataHolder) {
         return this.from(dataHolder);
     }
 
-    @Override
-    public Optional<SkullData> build(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.SKULL_TYPE.getQuery())) {
-            return Optional.<SkullData>of(new SpongeSkullData(Sponge.getGame().getRegistry().getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
-        }
-        return Optional.absent();
-    }
 }

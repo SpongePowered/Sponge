@@ -45,6 +45,7 @@ public class SpongeRepresentedItemData extends AbstractData<RepresentedItemData,
     public SpongeRepresentedItemData(ItemStack itemStack) {
         super(RepresentedItemData.class);
         this.itemStack = checkNotNull(itemStack).copy();
+        registerGettersAndSetters();
     }
 
     @Override
@@ -74,7 +75,7 @@ public class SpongeRepresentedItemData extends AbstractData<RepresentedItemData,
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         // TODO
     }
 }

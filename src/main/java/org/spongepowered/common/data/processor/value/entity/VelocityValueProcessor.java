@@ -24,16 +24,12 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;

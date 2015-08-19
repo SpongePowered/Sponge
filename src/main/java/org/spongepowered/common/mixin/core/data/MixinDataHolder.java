@@ -91,11 +91,10 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> DataTransactionResult transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
-        final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = SpongeDataRegistry.getInstance().getBaseValueProcessor(key);
-        if (optional.isPresent()) {
-            return optional.get().transform(this, checkNotNull(function));
+        if (supports(key)) {
+            return offer(key, checkNotNull(function.apply(get(key).orNull())));
         }
-        return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+        return DataTransactionBuilder.failNoData();
     }
 
     @Override
@@ -109,13 +108,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> DataTransactionResult offer(BaseValue<E> value) {
-        @SuppressWarnings("unchecked") Key<BaseValue<E>> sanitizedKey = (Key<BaseValue<E>>) value.getKey();
-        Optional<? extends ValueProcessor<E, ? extends BaseValue<E>>> optional =
-            SpongeDataRegistry.getInstance().getValueProcessor(sanitizedKey);
-        if (optional.isPresent()) {
-            return optional.get().offerToStore(this, value);
-        }
-        return DataTransactionBuilder.failNoData();
+        return offer(value.getKey(), value.get());
     }
 
     @Override

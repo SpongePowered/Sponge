@@ -277,6 +277,15 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeMobSpawnerBu
 import org.spongepowered.common.data.builder.block.tileentity.SpongeNoteBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.DisplayNameDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.SkullDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.BreathingDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.CareerDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.EyeLocationDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.FoodDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.HealthDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.tileentity.SignDataBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
@@ -1617,49 +1626,58 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(Skull.class, new SpongeSkullBuilder(game));
 
         final HealthDataProcessor healthProcessor = new HealthDataProcessor();
-        service.registerBuilder(HealthData.class, healthProcessor);
+        final HealthDataBuilder healthDataBuilder = new HealthDataBuilder();
+        service.registerBuilder(HealthData.class, healthDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
-                ImmutableSpongeHealthData.class, healthProcessor);
+                ImmutableSpongeHealthData.class, healthProcessor, healthDataBuilder);
 
         final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
-        service.registerBuilder(DisplayNameData.class, displayNameDataProcessor);
+        final DisplayNameDataBuilder displayNameDataBuilder = new DisplayNameDataBuilder();
+        service.registerBuilder(DisplayNameData.class, displayNameDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
-                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
+                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor, displayNameDataBuilder);
 
         final CareerDataProcessor careerDataProcessor = new CareerDataProcessor();
-        service.registerBuilder(CareerData.class, careerDataProcessor);
+        final CareerDataBuilder careerDataBuilder = new CareerDataBuilder();
+        service.registerBuilder(CareerData.class, careerDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
-                ImmutableSpongeCareerData.class, careerDataProcessor);
+                ImmutableSpongeCareerData.class, careerDataProcessor, careerDataBuilder);
 
         final SignDataProcessor signDataProcessor = new SignDataProcessor();
-        service.registerBuilder(SignData.class, signDataProcessor);
+        final SignDataBuilder signDataBuilder = new SignDataBuilder();
+        service.registerBuilder(SignData.class, signDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class,
-                ImmutableSignData.class, ImmutableSpongeSignData.class, signDataProcessor);
+                ImmutableSignData.class, ImmutableSpongeSignData.class, signDataProcessor, signDataBuilder);
 
         final SkullDataProcessor skullDataProcessor = new SkullDataProcessor();
-        service.registerBuilder(SkullData.class, skullDataProcessor);
+        final SkullDataBuilder skullDataBuilder = new SkullDataBuilder();
+        service.registerBuilder(SkullData.class, skullDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
-                ImmutableSpongeSkullData.class, skullDataProcessor);
+                ImmutableSpongeSkullData.class, skullDataProcessor, skullDataBuilder);
 
         final VelocityDataProcessor velocityDataProcessor = new VelocityDataProcessor();
-        service.registerBuilder(VelocityData.class, velocityDataProcessor);
+        final VelocityDataBuilder velocityDataBuilder = new VelocityDataBuilder();
+        service.registerBuilder(VelocityData.class, velocityDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
-                ImmutableSpongeVelocityData.class, velocityDataProcessor);
+                ImmutableSpongeVelocityData.class, velocityDataProcessor, velocityDataBuilder);
 
         final EyeLocationDataProcessor eyeLocationDataProcessor = new EyeLocationDataProcessor();
-        service.registerBuilder(EyeLocationData.class, eyeLocationDataProcessor);
+        final EyeLocationDataBuilder eyeLocationDataBuilder = new EyeLocationDataBuilder();
+        service.registerBuilder(EyeLocationData.class, eyeLocationDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(EyeLocationData.class, SpongeEyeLocationData.class, ImmutableEyeLocationData.class,
-                ImmutableSpongeEyeLocationData.class, eyeLocationDataProcessor);
+                ImmutableSpongeEyeLocationData.class, eyeLocationDataProcessor, eyeLocationDataBuilder);
 
         final FoodDataProcessor foodDataProcessor = new FoodDataProcessor();
-        service.registerBuilder(FoodData.class, foodDataProcessor);
+        final FoodDataBuilder foodDataBuilder = new FoodDataBuilder();
+        service.registerBuilder(FoodData.class, foodDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(FoodData.class, SpongeFoodData.class, ImmutableFoodData.class,
-                ImmutableSpongeFoodData.class, foodDataProcessor);
+                ImmutableSpongeFoodData.class, foodDataProcessor, foodDataBuilder);
 
         final BreathingDataProcessor breathingDataProcessor = new BreathingDataProcessor();
-        service.registerBuilder(BreathingData.class, breathingDataProcessor);
+        final BreathingDataBuilder breathingDataBuilder = new BreathingDataBuilder();
+        service.registerBuilder(BreathingData.class, breathingDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(BreathingData.class, SpongeBreathingData.class, ImmutableBreathingData.class,
-                ImmutableSpongeBreathingData.class, breathingDataProcessor);
+                ImmutableSpongeBreathingData.class, breathingDataProcessor, breathingDataBuilder);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());

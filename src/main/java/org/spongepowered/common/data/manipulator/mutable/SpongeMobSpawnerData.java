@@ -68,6 +68,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         this.spawnRange = spawnRange;
         this.nextEntityToSpawn = nextEntityToSpawn;
         this.entities = entities;
+        registerGettersAndSetters();
     }
 
     public SpongeMobSpawnerData() {
@@ -161,7 +162,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         // TODO
     }
 }

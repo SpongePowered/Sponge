@@ -53,6 +53,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
 
     public SpongeSignData(List<Text> lines) {
         super(SignData.class);
+        registerGettersAndSetters();
         this.lines = lines;
     }
 
@@ -96,7 +97,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.SIGN_LINES, new GetterFunction<Object>() {
             @Override
             public Object get() {

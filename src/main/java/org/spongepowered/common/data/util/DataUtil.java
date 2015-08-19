@@ -84,7 +84,7 @@ public class DataUtil {
         DataManipulator<?, ?> manipulator, DataHolder dataHolder) {
         final Optional<DataProcessor<T, I>> optional = SpongeDataRegistry.getInstance().getProcessor((Class<T>) manipulator.getClass());
         if (optional.isPresent()) {
-            return optional.get().set(dataHolder, (T) manipulator);
+            return optional.get().set(dataHolder, (T) manipulator, MergeFunction.IGNORE_ALL);
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }
@@ -104,7 +104,7 @@ public class DataUtil {
     public static DataTransactionResult offerPlain(DataManipulator manipulator, DataHolder dataHolder) {
         final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(manipulator.getClass());
         if (optional.isPresent()) {
-            return optional.get().set(dataHolder, manipulator);
+            return optional.get().set(dataHolder, manipulator, MergeFunction.IGNORE_ALL);
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }

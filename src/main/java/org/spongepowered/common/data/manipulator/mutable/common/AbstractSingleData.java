@@ -58,24 +58,24 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
         super(manipulatorClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey);
-        registerStuff();
+        registerGettersAndSetters();
     }
 
     @Override
-    protected void registerStuff() {
-        registerFieldGetter(usedKey, new GetterFunction<Object>() {
+    protected void registerGettersAndSetters() {
+        registerFieldGetter(this.usedKey, new GetterFunction<Object>() {
             @Override
             public Object get() {
                 return getValue();
             }
         });
-        registerFieldSetter(usedKey, new SetterFunction<Object>() {
+        registerFieldSetter(this.usedKey, new SetterFunction<Object>() {
             @Override
             public void set(Object value) {
                 setValue((T) value);
             }
         });
-        registerKeyValue(usedKey, new GetterFunction<Value<?>>() {
+        registerKeyValue(this.usedKey, new GetterFunction<Value<?>>() {
             @Override
             public Value<?> get() {
                 return getValueGetter();

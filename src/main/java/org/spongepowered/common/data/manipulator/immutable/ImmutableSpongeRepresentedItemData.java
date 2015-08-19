@@ -46,6 +46,7 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableData<Im
     public ImmutableSpongeRepresentedItemData(ItemStack itemStack) {
         super(ImmutableRepresentedItemData.class);
         this.itemStack = checkNotNull(itemStack).copy();
+        registerGetters();
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableData<Im
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         registerFieldGetter(Keys.REPRESENTED_ITEM, new GetterFunction<Object>() {
             @Override
             public Object get() {

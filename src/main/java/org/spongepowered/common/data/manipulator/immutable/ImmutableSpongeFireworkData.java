@@ -51,6 +51,7 @@ public class ImmutableSpongeFireworkData extends AbstractImmutableData<Immutable
         super(ImmutableFireworkData.class);
         this.fireworkEffects = ImmutableList.copyOf(effects);
         this.modifier = flightModifier;
+        registerGetters();
     }
 
     @Override
@@ -86,7 +87,7 @@ public class ImmutableSpongeFireworkData extends AbstractImmutableData<Immutable
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

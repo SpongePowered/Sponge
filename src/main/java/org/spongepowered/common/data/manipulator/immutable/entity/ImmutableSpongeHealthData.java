@@ -49,6 +49,7 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
         super(ImmutableHealthData.class);
         this.health = health;
         this.maxHealth = maxHealth;
+        registerGetters();
     }
 
     @Override
@@ -87,7 +88,7 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         registerFieldGetter(Keys.HEALTH, new GetterFunction<Object>() {
             @Override
             public Object get() {

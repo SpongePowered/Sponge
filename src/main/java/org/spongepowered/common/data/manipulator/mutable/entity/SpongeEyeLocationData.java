@@ -57,7 +57,7 @@ public class SpongeEyeLocationData extends AbstractData<EyeLocationData, Immutab
         this.entityLocation = entityLocation;
         this.eyeHeight = eyeHeight;
         this.eyeLocation = eyeLocation;
-        registerStuff();
+        registerGettersAndSetters();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class SpongeEyeLocationData extends AbstractData<EyeLocationData, Immutab
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.EYE_HEIGHT, new GetterFunction<Object>() {
             @Override
             public Object get() {

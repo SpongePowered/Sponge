@@ -47,6 +47,7 @@ public class ImmutableSpongeTradeOfferData extends AbstractImmutableData<Immutab
     public ImmutableSpongeTradeOfferData(List<TradeOffer> offers) {
         super(ImmutableTradeOfferData.class);
         this.offers = ImmutableList.copyOf(checkNotNull(offers));
+        registerGetters();
     }
 
     @Override
@@ -76,7 +77,7 @@ public class ImmutableSpongeTradeOfferData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

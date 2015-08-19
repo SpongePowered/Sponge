@@ -26,13 +26,11 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import org.spongepowered.api.data.DataTransactionBuilder;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
 
 public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
@@ -43,6 +41,15 @@ public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> im
         this.key = checkNotNull(key, "The key is null!");
     }
 
+    /**
+     * Builds a {@link Value} of the type produced by this processor from an
+     * input, actual value.
+     *
+     * @param defaultValue The actual value
+     * @return The constructed {@link Value}
+     */
+    protected abstract V constructValue(E defaultValue);
+
     @Override
     public final Key<? extends BaseValue<E>> getKey() {
         return this.key;
@@ -51,21 +58,6 @@ public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> im
     @Override
     public int getPriority() {
         return 100;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<E> value) {
-        return offerToStore(container, value.get());
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<E, E> function) {
-        Optional<E> optionalValue = getValueFromContainer(container);
-        if (optionalValue.isPresent()) {
-            return offerToStore(container, checkNotNull(function.apply(optionalValue.get()), "function returned null"));
-        } else {
-            return DataTransactionBuilder.failNoData();
-        }
     }
 
     @Override

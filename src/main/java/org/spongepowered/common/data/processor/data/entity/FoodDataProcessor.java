@@ -34,43 +34,16 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataTransactionResult.Type;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
 
 public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, ImmutableFoodData> {
-
-    @Override
-    public Optional<FoodData> build(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.FOOD_LEVEL.getQuery()) && container.contains(Keys.SATURATION.getQuery())
-                && container.contains(Keys.EXHAUSTION.getQuery())) {
-            final int foodLevel = DataUtil.getData(container, Keys.FOOD_LEVEL, Integer.class);
-            final float foodSaturationLevel = DataUtil.getData(container, Keys.SATURATION, Double.class).floatValue();
-            final float foodExhaustionLevel = DataUtil.getData(container, Keys.EXHAUSTION, Double.class).floatValue();
-            return Optional.<FoodData>of(new SpongeFoodData(foodLevel, foodSaturationLevel, foodExhaustionLevel));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public FoodData create() {
-        return new SpongeFoodData();
-    }
-
-    @Override
-    public ImmutableFoodData createImmutable() {
-        return new ImmutableSpongeFoodData(20, 5.0F, 0);
-    }
 
     @Override
     public Optional<FoodData> createFrom(DataHolder dataHolder) {
@@ -93,17 +66,6 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
     }
 
     @Override
-    public Optional<FoodData> fill(DataHolder dataHolder, FoodData manipulator) {
-        if (supports(dataHolder)) {
-            manipulator.set(Keys.FOOD_LEVEL, ((EntityPlayer) dataHolder).getFoodStats().getFoodLevel());
-            manipulator.set(Keys.SATURATION, (double) ((EntityPlayer) dataHolder).getFoodStats().getSaturationLevel());
-            manipulator.set(Keys.SATURATION, (double) ((EntityPlayer) dataHolder).getFoodStats().foodExhaustionLevel);
-            return Optional.of(manipulator);
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<FoodData> fill(DataHolder dataHolder, FoodData manipulator, MergeFunction overlap) {
         if (supports(dataHolder)) {
             final FoodData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
@@ -122,12 +84,6 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
         foodData.set(Keys.EXHAUSTION, getData(container, Keys.EXHAUSTION));
         return Optional.of(foodData);
     }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, FoodData manipulator) {
-        return set(dataHolder, manipulator, null);
-    }
-
     @Override
     public DataTransactionResult set(DataHolder dataHolder, FoodData manipulator, MergeFunction function) {
         if (!supports(dataHolder)) {
@@ -136,17 +92,15 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
 
         try {
             Optional<FoodData> oldData = from(dataHolder);
-            if (function != null && oldData.isPresent()) {
-                manipulator = function.merge(oldData.get(), manipulator);
-            }
+            final FoodData foodData = checkNotNull(function).merge(oldData.orNull(), manipulator);
 
-            ((EntityPlayer) dataHolder).getFoodStats().setFoodLevel(manipulator.foodLevel().get());
-            ((EntityPlayer) dataHolder).getFoodStats().foodSaturationLevel = manipulator.saturation().get().floatValue();
-            ((EntityPlayer) dataHolder).getFoodStats().foodExhaustionLevel = manipulator.exhaustion().get().floatValue();
+            ((EntityPlayer) dataHolder).getFoodStats().setFoodLevel(foodData.foodLevel().get());
+            ((EntityPlayer) dataHolder).getFoodStats().foodSaturationLevel = foodData.saturation().get().floatValue();
+            ((EntityPlayer) dataHolder).getFoodStats().foodExhaustionLevel = foodData.exhaustion().get().floatValue();
             if (oldData.isPresent()) {
-                return DataTransactionBuilder.successReplaceResult(manipulator.getValues(), oldData.get().getValues());
+                return DataTransactionBuilder.successReplaceResult(foodData.getValues(), oldData.get().getValues());
             } else {
-                return DataTransactionBuilder.builder().success(manipulator.getValues()).build();
+                return DataTransactionBuilder.builder().success(foodData.getValues()).build();
             }
         } catch (Exception e) {
             return DataTransactionBuilder.builder().reject(manipulator.getValues()).result(Type.ERROR).build();

@@ -30,13 +30,11 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 
 public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
@@ -76,19 +74,6 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     }
 
     @Override
-    public Optional<M> fill(DataHolder dataHolder, M manipulator) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                final Optional<M> optional = processor.fill(dataHolder, manipulator);
-                if (optional.isPresent()) {
-                    return optional;
-                }
-            }
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
         for (DataProcessor<M, I> processor : this.processors) {
             if (processor.supports(dataHolder)) {
@@ -110,19 +95,6 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
             }
         }
         return Optional.absent();
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, M manipulator) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                final DataTransactionResult result = processor.set(dataHolder, manipulator);
-                if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                    return result;
-                }
-            }
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override
@@ -163,16 +135,6 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     }
 
     @Override
-    public M create() {
-        return this.processors.get(0).create();
-    }
-
-    @Override
-    public I createImmutable() {
-        return this.processors.get(0).createImmutable();
-    }
-
-    @Override
     public Optional<M> createFrom(DataHolder dataHolder) {
         for (DataProcessor<M, I> processor : this.processors) {
             if (processor.supports(dataHolder)) {
@@ -180,17 +142,6 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 if (optional.isPresent()) {
                     return optional;
                 }
-            }
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<M> build(DataView container) throws InvalidDataException {
-        for (DataProcessor<M, I> processor : this.processors) {
-            final Optional<M> optional = processor.build(container);
-            if (optional.isPresent()) {
-                return optional;
             }
         }
         return Optional.absent();

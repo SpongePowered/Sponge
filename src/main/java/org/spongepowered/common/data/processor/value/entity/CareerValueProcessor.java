@@ -24,16 +24,12 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -62,23 +58,6 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, V
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof IMixinVillager;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Career, Career> function) {
-        if (container instanceof IMixinVillager) {
-            final Career old = ((IMixinVillager) container).getCareer();
-            final ImmutableValue<Career> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, old, Careers.ARMORER);
-            final Career newCareer = checkNotNull(function.apply(old));
-            final ImmutableValue<Career> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, newCareer, Careers.ARMORER);
-            try {
-                ((IMixinVillager) container).setCareer(newCareer);
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newValue);
-            }
-        }
-        return DataTransactionBuilder.failNoData();
     }
 
     @Override

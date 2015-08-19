@@ -34,42 +34,18 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataTransactionResult.Type;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
 public class BreathingDataProcessor extends AbstractSpongeDataProcessor<BreathingData, ImmutableBreathingData> {
 
-    @Override
-    public Optional<BreathingData> build(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.MAX_AIR.getQuery()) && container.contains(Keys.REMAINING_AIR.getQuery())) {
-            final int maxAir = DataUtil.getData(container, Keys.MAX_AIR, Integer.class);
-            final int remainingAir = DataUtil.getData(container, Keys.REMAINING_AIR, Integer.class);
-            return Optional.<BreathingData>of(new SpongeBreathingData(maxAir, remainingAir));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public BreathingData create() {
-        return new SpongeBreathingData();
-    }
-
-    @Override
-    public ImmutableBreathingData createImmutable() {
-        return new ImmutableSpongeBreathingData(300, 300);
-    }
 
     @Override
     public Optional<BreathingData> createFrom(DataHolder dataHolder) {
@@ -91,16 +67,6 @@ public class BreathingDataProcessor extends AbstractSpongeDataProcessor<Breathin
     }
 
     @Override
-    public Optional<BreathingData> fill(DataHolder dataHolder, BreathingData manipulator) {
-        if (supports(dataHolder)) {
-            manipulator.set(Keys.MAX_AIR, ((IMixinEntityLivingBase) dataHolder).getMaxAir());
-            manipulator.set(Keys.REMAINING_AIR, ((EntityLivingBase) dataHolder).getAir());
-            return Optional.of(manipulator);
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<BreathingData> fill(DataHolder dataHolder, BreathingData manipulator, MergeFunction overlap) {
         if (supports(dataHolder)) {
             final BreathingData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
@@ -119,11 +85,6 @@ public class BreathingDataProcessor extends AbstractSpongeDataProcessor<Breathin
     }
 
     @Override
-    public DataTransactionResult set(DataHolder dataHolder, BreathingData manipulator) {
-        return set(dataHolder, manipulator, null);
-    }
-
-    @Override
     public DataTransactionResult set(DataHolder dataHolder, BreathingData manipulator, MergeFunction function) {
         if (!supports(dataHolder)) {
             return DataTransactionBuilder.failResult(manipulator.getValues());
@@ -132,16 +93,14 @@ public class BreathingDataProcessor extends AbstractSpongeDataProcessor<Breathin
         try {
             EntityLivingBase entity = (EntityLivingBase) dataHolder;
             Optional<BreathingData> oldData = from(dataHolder);
-            if (function != null && oldData.isPresent()) {
-                manipulator = function.merge(oldData.get(), manipulator);
-            }
+            final BreathingData breathingData = checkNotNull(function).merge(oldData.orNull(), manipulator);
 
-            ((IMixinEntityLivingBase) entity).setMaxAir(manipulator.maxAir().get());
-            entity.setAir(manipulator.remainingAir().get());
+            ((IMixinEntityLivingBase) entity).setMaxAir(breathingData.maxAir().get());
+            entity.setAir(breathingData.remainingAir().get());
             if (oldData.isPresent()) {
-                return DataTransactionBuilder.successReplaceResult(manipulator.getValues(), oldData.get().getValues());
+                return DataTransactionBuilder.successReplaceResult(breathingData.getValues(), oldData.get().getValues());
             } else {
-                return DataTransactionBuilder.builder().success(manipulator.getValues()).build();
+                return DataTransactionBuilder.builder().success(breathingData.getValues()).build();
             }
         } catch (Exception e) {
             return DataTransactionBuilder.builder().reject(manipulator.getValues()).result(Type.ERROR).build();

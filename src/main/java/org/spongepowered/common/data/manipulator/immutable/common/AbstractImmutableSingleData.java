@@ -47,13 +47,13 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
         super(immutableClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey);
-        registerStuff();
+        registerGetters();
     }
 
     protected abstract ImmutableValue<?> getValueGetter();
 
     public T getValue() {
-        return value;
+        return this.value;
     }
 
     @SuppressWarnings("unchecked")
@@ -71,7 +71,7 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         registerFieldGetter(this.usedKey, new GetterFunction<Object>() {
             @Override
             public Object get() {

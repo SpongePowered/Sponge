@@ -49,6 +49,7 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
         this.foodLevel = foodLevel;
         this.foodSaturationLevel = foodSaturationLevel;
         this.foodExhaustionLevel = foodExhaustionLevel;
+        registerGetters();
     }
 
     @Override
@@ -108,7 +109,7 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         registerFieldGetter(Keys.FOOD_LEVEL, new GetterFunction<Object>() {
             @Override
             public Object get() {

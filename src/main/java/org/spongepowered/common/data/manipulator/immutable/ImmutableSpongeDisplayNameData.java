@@ -47,6 +47,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
         super(ImmutableDisplayNameData.class);
         this.displayName = displayName;
         this.displays = displays;
+        registerGetters();
     }
 
     @Override
@@ -90,7 +91,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         registerFieldGetter(Keys.DISPLAY_NAME, new GetterFunction<Object>() {
             @Override
             public Object get() {

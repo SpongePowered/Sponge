@@ -44,6 +44,7 @@ public class ImmutableSpongeOwnableData extends AbstractImmutableData<ImmutableO
     public ImmutableSpongeOwnableData(GameProfile profile) {
         super(ImmutableOwnableData.class);
         this.profile = checkNotNull(profile);
+        registerGetters();
     }
 
     @Override
@@ -73,7 +74,7 @@ public class ImmutableSpongeOwnableData extends AbstractImmutableData<ImmutableO
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         // TODO
     }
 }

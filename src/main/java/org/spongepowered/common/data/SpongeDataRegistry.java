@@ -170,7 +170,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
     registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-                                 Class<? extends I> implImClass, DataProcessor<T, I> processor) {
+                                 Class<? extends I> implImClass, DataProcessor<T, I> processor, DataManipulatorBuilder<T, I> builder) {
         checkState(allowRegistrations, "Registrations are no longer allowed!");
         checkState(!this.processorMap.containsKey(checkNotNull(manipulatorClass)), "Already registered a DataProcessor for the given "
                                                                                    + "DataManipulator: " + manipulatorClass.getCanonicalName());
@@ -178,8 +178,8 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
                                                                             + "DataManipulator: " + implClass.getCanonicalName());
         checkArgument(!(processor instanceof DataProcessorDelegate), "Cannot register DataProcessorDelegates!");
         if (!this.builderMap.containsKey(manipulatorClass)) {
-            this.builderMap.put(manipulatorClass, processor);
-            this.immutableBuilderMap.put(immutableDataManipulator, processor);
+            this.builderMap.put(manipulatorClass, builder);
+            this.immutableBuilderMap.put(immutableDataManipulator, builder);
         }
 
         List<DataProcessor<?, ?>> processorList = this.processorMap.get(manipulatorClass);

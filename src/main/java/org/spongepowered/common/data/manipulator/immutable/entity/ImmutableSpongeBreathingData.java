@@ -47,6 +47,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
         super(ImmutableBreathingData.class);
         this.maxAir = maxAir;
         this.remainingAir = remainingAir;
+        registerGetters();
     }
 
     @Override
@@ -93,7 +94,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGetters() {
         registerFieldGetter(Keys.MAX_AIR, new GetterFunction<Object>() {
 
             @Override

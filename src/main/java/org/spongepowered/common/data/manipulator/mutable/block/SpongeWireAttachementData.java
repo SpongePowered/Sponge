@@ -50,7 +50,7 @@ public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, 
     public SpongeWireAttachementData(Map<Direction, WireAttachmentType> attachmentMap) {
         super(WireAttachmentData.class);
         this.wireAttachmentMap = Maps.newHashMap(attachmentMap);
-        registerStuff();
+        registerGettersAndSetters();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, 
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         // north
         // TODO register things
     }

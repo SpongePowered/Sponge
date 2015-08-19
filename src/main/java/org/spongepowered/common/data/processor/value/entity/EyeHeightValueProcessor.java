@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;

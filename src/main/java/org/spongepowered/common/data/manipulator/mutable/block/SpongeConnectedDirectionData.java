@@ -46,6 +46,7 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
 
     public SpongeConnectedDirectionData(Set<Direction> connectedDirections) {
         super(ConnectedDirectionData.class);
+        registerGettersAndSetters();
         this.connectedDirections = EnumSet.copyOf(connectedDirections);
     }
 
@@ -95,7 +96,7 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     @Override
-    protected void registerStuff() {
+    protected void registerGettersAndSetters() {
         // TODO
     }
 }
