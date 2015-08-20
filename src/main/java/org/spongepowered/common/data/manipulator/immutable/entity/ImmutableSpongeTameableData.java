@@ -50,7 +50,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
 
     @Override
     public ImmutableOptionalValue<UUID> owner() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeOptionalValue.class, Keys.TAMED_OWNER, Optional.fromNullable(this.owner), Optional.absent());//TODO: fix
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeOptionalValue.class, Keys.TAMED_OWNER, Optional.fromNullable(this.owner), Optional.<UUID>absent());
     }
 
     @Override
