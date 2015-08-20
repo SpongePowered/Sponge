@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
@@ -50,7 +50,6 @@ import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -307,14 +306,84 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
-    public WorldBorder getWorldBorder() {
-        net.minecraft.world.border.WorldBorder border = new net.minecraft.world.border.WorldBorder();
-        border.setCenter(this.borderCenterX, this.borderCenterZ);
-        border.setDamageAmount(this.borderDamagePerBlock);
-        border.setDamageBuffer(this.borderSafeZone);
-        border.setWarningDistance(this.borderWarningDistance);
-        border.setWarningTime(this.borderWarningTime);
-        return (WorldBorder) border;
+    public Vector3d getWorldBorderCenter() {
+        return new Vector3d(this.borderCenterX, 0, this.borderCenterZ);
+    }
+
+    @Override
+    public void setWorldBorderCenter(double x, double z) {
+        this.borderCenterX = x;
+        this.borderCenterZ = z;
+    }
+
+    @Override
+    public double getWorldBorderDiameter() {
+        return this.borderSize;
+    }
+
+    @Override
+    public void setWorldBorderDiameter(double diameter) {
+        this.borderSize = diameter;
+    }
+
+    @Override
+    public double getWorldBorderTargetDiameter() {
+        return this.borderSizeLerpTarget;
+    }
+
+    @Override
+    public void setWorldBorderTargetDiameter(double diameter) {
+        this.borderSizeLerpTarget = diameter;
+    }
+
+    @Override
+    public double getWorldBorderDamageThreshold() {
+        return this.borderSafeZone;
+    }
+
+    @Override
+    public void setWorldBorderDamageThreshold(double distance) {
+        this.borderSafeZone = distance;
+    }
+
+    @Override
+    public double getWorldBorderDamageAmount() {
+        return this.borderDamagePerBlock;
+    }
+
+    @Override
+    public void setWorldBorderDamageAmount(double damage) {
+        this.borderDamagePerBlock = damage;
+    }
+
+    @Override
+    public int getWorldBorderWarningTime() {
+        return this.borderWarningTime;
+    }
+
+    @Override
+    public void setWorldBorderWarningTime(int time) {
+        this.borderWarningTime = time;
+    }
+
+    @Override
+    public int getWorldBorderWarningDistance() {
+        return this.borderWarningDistance;
+    }
+
+    @Override
+    public void setWorldBorderWarningDistance(int distance) {
+        this.borderWarningDistance = distance;
+    }
+
+    @Override
+    public long getWorldBorderTimeRemaining() {
+        return this.borderSizeLerpTime;
+    }
+
+    @Override
+    public void setWorldBorderTimeRemaining(long time) {
+        this.borderSizeLerpTime = time;
     }
 
     @Override

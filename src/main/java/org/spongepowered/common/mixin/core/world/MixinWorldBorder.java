@@ -48,6 +48,7 @@ public abstract class MixinWorldBorder implements WorldBorder {
     @Shadow private double endDiameter;
     @Shadow private long endTime;
     @Shadow private long startTime;
+    @Shadow private double damageAmount;
 
 
     @Shadow public abstract double getCenterX();
@@ -166,13 +167,11 @@ public abstract class MixinWorldBorder implements WorldBorder {
         setDamageBuffer(distance);
     }
 
-    @Override
-    public int getDamageAmount() {
-        return ((int) shadow$getDamageAmount());
+    public double border$getDamageAmount() {
+        return this.damageAmount;
     }
 
-    @Override
-    public void setDamageAmount(int damage) {
-        shadow$setDamageAmount(damage);
+    public void border$setDamageAmount(double damage) {
+        this.damageAmount = damage;
     }
 }
