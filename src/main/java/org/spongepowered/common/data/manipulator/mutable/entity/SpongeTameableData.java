@@ -43,11 +43,17 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class SpongeTameableData extends AbstractData<TameableData, ImmutableTameableData> implements TameableData  {
+
     @Nullable private UUID owner;
+
     public SpongeTameableData(@Nullable UUID owner) {
         super(TameableData.class);
         this.owner = owner;
-        registerStuff();
+        registerGettersAndSetters();
+    }
+
+    public SpongeTameableData() {
+        this(null);
     }
 
     @Override
@@ -82,11 +88,13 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
         return Optional.fromNullable(owner);
     }
 
-    public void setOwner(@Nullable UUID owner){
+    public SpongeTameableData setOwner(@Nullable UUID owner){
         this.owner = new UUID(owner.getMostSignificantBits(), owner.getLeastSignificantBits());
+        return this;
     }
 
-    private void registerStuff() {
+    @Override
+    protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.TAMED_OWNER, new GetterFunction<Object>() {
             @Override
             public Object get() {
