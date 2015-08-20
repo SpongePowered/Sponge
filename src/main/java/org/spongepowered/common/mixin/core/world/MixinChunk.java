@@ -54,6 +54,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
+import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 @NonnullByDefault
@@ -250,7 +251,7 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public Extent getExtentView(DiscreteTransform3 transform) {
-        return null;
+        return ExtentViewTransform.newInstance(this, transform);
     }
 
     @Override

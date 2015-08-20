@@ -131,6 +131,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
+import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.gen.CustomChunkProviderGenerate;
 import org.spongepowered.common.world.gen.CustomWorldChunkManager;
 import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
@@ -911,7 +912,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Extent getExtentView(DiscreteTransform3 transform) {
-        return null;
+        return ExtentViewTransform.newInstance(this, transform);
     }
 
     @Override

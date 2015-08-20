@@ -212,6 +212,7 @@
         "world.difficulty.MixinEnumDifficulty",
         "world.extent.MixinExtent",
         "world.extent.MixinExtentViewDownsize",
+        "world.extent.MixinExtentViewTransform",
         "world.storage.MixinWorldInfo",
         "world.storage.MixinSaveHandler"
     ],

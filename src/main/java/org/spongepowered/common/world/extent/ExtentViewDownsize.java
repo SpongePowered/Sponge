@@ -54,7 +54,7 @@ public class ExtentViewDownsize {
     }
 
     public static Extent newInstance(Extent extent, Vector3i blockMin, Vector3i blockMax) {
-        return (Extent) (Object) new ExtentViewDownsize(extent, blockMin, blockMax);
+        return (Extent) new ExtentViewDownsize(extent, blockMin, blockMax);
     }
 
 }
