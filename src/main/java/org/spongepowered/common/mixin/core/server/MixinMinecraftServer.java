@@ -555,6 +555,14 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
+    public Optional<WorldProperties> getDefaultWorld() {
+        if (DimensionManager.getWorldFromDimId(0) != null) {
+            return Optional.of(((World) DimensionManager.getWorldFromDimId(0)).getProperties());
+        }
+        return Optional.absent();
+    }
+
+    @Override
     public AnvilSaveHandler getHandler(String worldName) {
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             return new AnvilSaveHandler(new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
