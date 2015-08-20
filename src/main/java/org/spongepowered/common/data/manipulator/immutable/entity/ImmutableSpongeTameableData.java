@@ -32,10 +32,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
+import org.spongepowered.common.util.GetterFunction;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -74,5 +76,25 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(Keys.TAMED_OWNER.getQuery(), this.owner);
+    }
+
+    @Override
+    protected void registerGetters() {
+        registerFieldGetter(Keys.TAMED_OWNER, new GetterFunction<Object>() {
+            @Override
+            public Object get() {
+                return getOwner();
+            }
+        });
+        registerKeyValue(Keys.TAMED_OWNER, new GetterFunction<ImmutableValue<?>>() {
+            @Override
+            public ImmutableValue<?> get() {
+                return owner();
+            }
+        });
+    }
+
+    public Optional<UUID> getOwner() {
+        return Optional.fromNullable(this.owner);
     }
 }

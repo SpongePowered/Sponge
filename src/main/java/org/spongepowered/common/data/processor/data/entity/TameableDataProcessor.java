@@ -41,16 +41,20 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameable
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.data.value.AbstractBaseValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class TameableDataProcessor implements DataProcessor<TameableData, ImmutableTameableData> {
+public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableData, ImmutableTameableData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {
@@ -65,15 +69,6 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
         } else {
             return Optional.absent();
         }
-    }
-
-    @Override
-    public Optional<TameableData> fill(DataHolder dataHolder, TameableData manipulator) {
-        if(dataHolder instanceof EntityTameable) {
-            manipulator.set(Keys.TAMED_OWNER, (getTamer((EntityTameable) dataHolder)));
-            return Optional.of(manipulator);
-        }
-        return Optional.absent();
     }
 
     @Override
@@ -93,19 +88,19 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
     }
 
     @Override
-    public DataTransactionResult set(final DataHolder dataHolder, final TameableData manipulator) {
+    public DataTransactionResult set(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
         if(dataHolder instanceof EntityTameable) {
             final EntityTameable entityTameable = (EntityTameable) dataHolder;
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final String sPrevTamer = entityTameable.getOwnerId();
-            final Optional<UUID> prevTamer = asUUID(sPrevTamer);
-            final Optional<UUID> newTamer = manipulator.owner().get();
+            final Optional<UUID> prevTamer = TameableDataProcessor.asUUID(sPrevTamer);
+            final TameableData newdata = checkNotNull(overlap).merge(from(dataHolder).orNull(), manipulator);
             //Shouldn't this use the ImmutableDataCachingUtil?
             final ImmutableSpongeOptionalValue<UUID> prevValue = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, prevTamer);
-            final ImmutableSpongeOptionalValue<UUID> newValue = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, newTamer);
+            final ImmutableValue<Optional<UUID>> newValue = newdata.owner().asImmutable();
             try {
                 builder.replace(prevValue);
-                entityTameable.setOwnerId(asString(newTamer));
+                entityTameable.setOwnerId(asString(newdata.owner().get()));
                 builder.success(newValue)
                     .result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
@@ -117,12 +112,6 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
             }
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
-        //Health was unimplemented, is there something stopping implementation?
-        return null;
     }
 
     @Override
@@ -139,28 +128,11 @@ public class TameableDataProcessor implements DataProcessor<TameableData, Immuta
     }
 
     @Override
-    public TameableData create() {
-        return new SpongeTameableData(null);
-    }
-
-    @Override
-    public ImmutableTameableData createImmutable() {
-        //TODO: Check ImmutableDataCachingUtil?
-        return new ImmutableSpongeTameableData(null);
-    }
-
-    @Override
     public Optional<TameableData> createFrom(DataHolder dataHolder) {
         if(dataHolder instanceof EntityTameable) {
             final Optional<UUID> uuidOptional = getTamer((EntityTameable) dataHolder);
             return Optional.<TameableData>of(new SpongeTameableData(uuidOptional.orNull()));
         }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<TameableData> build(DataView container) throws InvalidDataException {
-        //TODO: Why?
         return Optional.absent();
     }
 

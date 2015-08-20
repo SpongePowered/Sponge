@@ -38,17 +38,22 @@ import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.data.entity.TameableDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 
 import java.util.UUID;
 
-public class TameableOwnerValueProcessor implements ValueProcessor<Optional<UUID>, OptionalValue<UUID>> {
+public class TameableOwnerValueProcessor extends AbstractSpongeValueProcessor<Optional<UUID>, OptionalValue<UUID>> {
+
+    public TameableOwnerValueProcessor() {
+        super(Keys.TAMED_OWNER);
+    }
 
     @Override
-    public Key<? extends BaseValue<Optional<UUID>>> getKey() {
-        return Keys.TAMED_OWNER;
+    protected OptionalValue<UUID> constructValue(Optional<UUID> defaultValue) {
+        return new SpongeOptionalValue<UUID>(this.getKey(), defaultValue);
     }
 
     @Override
@@ -75,29 +80,17 @@ public class TameableOwnerValueProcessor implements ValueProcessor<Optional<UUID
     }
 
     @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<Optional<UUID>, Optional<UUID>> function) {
-        if(container instanceof EntityTameable) {
-            final Optional<UUID> oldUUID = TameableDataProcessor.getTamer((EntityTameable) container);
-            final Optional<UUID> newUUID = Preconditions.checkNotNull(function).apply(oldUUID);
-            return offerToStore(container, newUUID);
-        } else {
-            return DataTransactionBuilder.failNoData();
-        }
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        final OptionalValue<UUID> actualValue = (OptionalValue<UUID>) value;
-        final ImmutableSpongeOptionalValue<UUID> proposedValue = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, actualValue.get());
+    public DataTransactionResult offerToStore(ValueContainer<?> container, Optional<UUID> value) {
+        final ImmutableSpongeOptionalValue<UUID> proposedValue = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, value);
 
         if(container instanceof EntityTameable) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<UUID> tamer = TameableDataProcessor.getTamer((EntityTameable) container);
             final ImmutableValue<Optional<UUID>> oldTamer = this.getApiValueFromContainer(container).get().asImmutable();
-            final ImmutableOptionalValue<UUID> newTamer = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, actualValue.get());
+            final ImmutableOptionalValue<UUID> newTamer = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, value);
 
             try {
-                ((EntityTameable) container).setOwnerId(TameableDataProcessor.asString(actualValue.get()));
+                ((EntityTameable) container).setOwnerId(TameableDataProcessor.asString(value));
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newTamer);
             }
@@ -105,11 +98,6 @@ public class TameableOwnerValueProcessor implements ValueProcessor<Optional<UUID
         }
 
         return DataTransactionBuilder.failResult(proposedValue);
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Optional<UUID> value) {
-        return offerToStore(container, new SpongeOptionalValue<UUID>(Keys.TAMED_OWNER, value));
     }
 
     @Override
