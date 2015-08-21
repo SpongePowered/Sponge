@@ -289,6 +289,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.EyeLocat
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.FoodDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.GameModeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.HealthDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.SneakingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.tileentity.SignDataBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
@@ -1699,9 +1700,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 ImmutableSpongeGameModeData.class, gameModeDataProcessor, gameModeDataBuilder);
 
         final SneakingDataProcessor sneakingDataProcessor = new SneakingDataProcessor();
-        service.registerBuilder(SneakingData.class, sneakingDataProcessor);
+        final SneakingDataBuilder sneakingDataBuilder = new SneakingDataBuilder();
+        service.registerBuilder(SneakingData.class, sneakingDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(SneakingData.class, SpongeSneakingData.class, ImmutableSneakingData.class,
-            ImmutableSpongeSneakingData.class, sneakingDataProcessor);
+            ImmutableSpongeSneakingData.class, sneakingDataProcessor, sneakingDataBuilder);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
