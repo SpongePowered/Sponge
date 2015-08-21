@@ -28,35 +28,17 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeSneakingData extends AbstractImmutableSingleData<Boolean, ImmutableSneakingData, SneakingData> implements ImmutableSneakingData {
+public class ImmutableSpongeSneakingData extends AbstractImmutableBooleanData<ImmutableSneakingData, SneakingData> implements ImmutableSneakingData {
 
     public ImmutableSpongeSneakingData(boolean sneaking) {
-        super(ImmutableSneakingData.class, sneaking, Keys.IS_SNEAKING);
+        super(ImmutableSneakingData.class, sneaking, Keys.IS_SNEAKING, SneakingData.class);
     }
-
-    @Override
-    public SneakingData asMutable() {
-        return new SpongeSneakingData(this.value.booleanValue());
-    }
-
-    @Override
-    public int compareTo(ImmutableSneakingData o) {
-        if (value.booleanValue() && !o.sneaking().get().booleanValue()) return 1;
-        if (value.booleanValue() && o.sneaking().get().booleanValue()) return -1;
-        return 0;
-    }
-
+    
     @Override
     public ImmutableValue<Boolean> sneaking() {
         return new ImmutableSpongeValue<Boolean>(Keys.IS_SNEAKING, false, this.value);
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return sneaking();
     }
 }

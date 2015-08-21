@@ -24,55 +24,26 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeSneakingData extends AbstractSingleData<Boolean, SneakingData, ImmutableSneakingData> implements SneakingData {
+public class SpongeSneakingData extends AbstractBooleanData<SneakingData, ImmutableSneakingData> implements SneakingData {
     
     public SpongeSneakingData(boolean sneaking) {
-        super(SneakingData.class, sneaking, Keys.IS_SNEAKING);
+        super(SneakingData.class, sneaking, Keys.IS_SNEAKING, ImmutableSneakingData.class);
     }
 
-    public SpongeSneakingData() {
-        this(false);
-    }
+	@Override
+	public Value<Boolean> sneaking() {
+		return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, getValue());
+	}
 
-    @Override
-    public SpongeSneakingData copy() {
-        return new SpongeSneakingData(getValue().booleanValue());
-    }
-
-    @Override
-    public ImmutableSneakingData asImmutable() {
-        return new ImmutableSpongeSneakingData(getValue().booleanValue());
-    }
-
-    @Override
-    public int compareTo(SneakingData o) {
-        if (getValue().booleanValue() && !o.sneaking().get().booleanValue()) return 1;
-        if (!getValue().booleanValue() && o.sneaking().get().booleanValue()) return -1;
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.IS_SNEAKING, getValue());
-    }
-
-    @Override
-    public SpongeValue<Boolean> sneaking() {
-        return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return sneaking();
-    }
+	@Override
+	protected Value<?> getValueGetter() {
+		return sneaking();
+	}
 }

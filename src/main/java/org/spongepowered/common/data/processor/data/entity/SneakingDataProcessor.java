@@ -59,7 +59,7 @@ public class SneakingDataProcessor implements DataProcessor<SneakingData, Immuta
 
     @Override
     public SneakingData create() {
-        return new SpongeSneakingData();
+        return new SpongeSneakingData(false);
     }
 
     @Override
