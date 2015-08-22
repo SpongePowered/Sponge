@@ -56,7 +56,7 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
 
     @Override
     protected Value<GameMode> constructValue(GameMode defaultValue) {
-        return new SpongeValue<GameMode>(getKey(), defaultValue);
+        return new SpongeValue<GameMode>(getKey(), defaultValue, GameModes.NOT_SET);
     }
 
     @Override
