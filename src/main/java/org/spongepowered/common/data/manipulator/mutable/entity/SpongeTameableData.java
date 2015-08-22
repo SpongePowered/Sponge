@@ -89,7 +89,8 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
     }
 
     public SpongeTameableData setOwner(@Nullable UUID owner){
-        this.owner = new UUID(owner.getMostSignificantBits(), owner.getLeastSignificantBits());
+        //No null checking or copying required, UUID is final & immutable.
+        this.owner = owner;
         return this;
     }
 
