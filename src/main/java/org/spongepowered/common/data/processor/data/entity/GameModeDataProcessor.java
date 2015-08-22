@@ -60,7 +60,7 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     public Optional<GameModeData> from(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             if (dataHolder instanceof EntityPlayerMP) {
-                Optional.of(new SpongeGameModeData(
+                return Optional.<GameModeData>of(new SpongeGameModeData(
                         (GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType()));
             }
         }

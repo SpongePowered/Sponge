@@ -285,6 +285,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.Breathin
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.CareerDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.EyeLocationDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.FoodDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.GameModeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.HealthDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.tileentity.SignDataBuilder;
@@ -1686,9 +1687,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 ImmutableSpongeBreathingData.class, breathingDataProcessor, breathingDataBuilder);
 
         final GameModeDataProcessor gameModeDataProcessor = new GameModeDataProcessor();
-        service.registerBuilder(GameModeData.class, gameModeDataProcessor);
+        final GameModeDataBuilder gameModeDataBuilder = new GameModeDataBuilder();
+        service.registerBuilder(GameModeData.class, gameModeDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
-                ImmutableSpongeGameModeData.class, gameModeDataProcessor);
+                ImmutableSpongeGameModeData.class, gameModeDataProcessor, gameModeDataBuilder);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
