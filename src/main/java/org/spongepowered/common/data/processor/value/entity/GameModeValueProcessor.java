@@ -62,9 +62,7 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
     @Override
     public Optional<Value<GameMode>> getApiValueFromContainer(ValueContainer<?> container) {
         if (container instanceof EntityPlayerMP) {
-            return Optional.<Value<GameMode>>of(
-                    new SpongeValue<GameMode>(Keys.GAME_MODE, (GameMode) ((Object) ((EntityPlayerMP)
-                            container).theItemInWorldManager.getGameType())));
+            return Optional.of(constructValue(getValueFromContainer(container).get()));
         }
         return Optional.absent();
     }
