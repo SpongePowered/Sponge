@@ -36,6 +36,7 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.registry.RegistryHelper;

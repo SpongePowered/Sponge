@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataContainer;
@@ -60,7 +61,7 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
         if (supports(dataHolder)) {
             if (dataHolder instanceof EntityPlayerMP) {
                 Optional.of(new SpongeGameModeData(
-                        (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType())));
+                        (GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType()));
             }
         }
         return Optional.absent();
@@ -87,13 +88,14 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, GameModeData manipulator, MergeFunction function) {
+        Preconditions.checkNotNull(function, "MergeFunction cannot be null!");
         if (dataHolder instanceof EntityPlayerMP) {
             final GameMode oldMode =
-                    (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType());
+                    (GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType();
             final GameModeData oldData = from(dataHolder).get();
             final ImmutableValue<GameMode> newMode = function.merge(oldData, manipulator).type().asImmutable();
             try {
-                ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) newMode.get()));
+                ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) (Object) newMode.get());
                 return DataTransactionBuilder.successReplaceResult(ImmutableDataCachingUtil
                         .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode), newMode);
             } catch (Exception e) {
