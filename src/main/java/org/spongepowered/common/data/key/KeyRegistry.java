@@ -35,6 +35,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
@@ -42,6 +43,7 @@ import org.spongepowered.common.registry.RegistryHelper;
 
 import java.awt.Color;
 import java.util.Map;
+import java.util.UUID;
 
 @SuppressWarnings({"unchecked"})
 public class KeyRegistry {
@@ -61,6 +63,7 @@ public class KeyRegistry {
         keyMap.put("velocity", makeSingleKey(Vector3d.class, Value.class, of("Velocity")));
         keyMap.put("eye_height", makeSingleKey(Double.class, Value.class, of("EyeHeight")));
         keyMap.put("eye_location", makeSingleKey(Vector3d.class, Value.class, of("EyeLocation")));
+        keyMap.put("tamed_owner", makeSingleKey(UUID.class, OptionalValue.class, of("TamerUUID")));
         keyMap.put("food_level", makeSingleKey(Integer.class, Value.class, of("FoodLevel")));
         keyMap.put("saturation", makeSingleKey(Double.class, Value.class, of("FoodSaturationLevel")));
         keyMap.put("exhaustion", makeSingleKey(Double.class, Value.class, of("FoodExhaustionLevel")));
