@@ -31,7 +31,6 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 import org.spongepowered.common.data.processor.data.entity.TameableDataProcessor;
@@ -39,6 +38,7 @@ import org.spongepowered.common.data.processor.data.entity.TameableDataProcessor
 import java.util.UUID;
 
 public class TameableDataBuilder implements DataManipulatorBuilder<TameableData, ImmutableTameableData> {
+
     @Override
     public TameableData create() {
         return new SpongeTameableData();
@@ -47,8 +47,8 @@ public class TameableDataBuilder implements DataManipulatorBuilder<TameableData,
     @Override
     public Optional<TameableData> createFrom(DataHolder dataHolder) {
         if(dataHolder instanceof EntityTameable) {
-            Optional<UUID> dhAsTameable = TameableDataProcessor.getTamer((EntityTameable) dataHolder);
-            return Optional.<TameableData>of(new SpongeTameableData(dhAsTameable.orNull()));
+            Optional<UUID> optionalUUID = TameableDataProcessor.getTamer((EntityTameable) dataHolder);
+            return Optional.<TameableData>of(new SpongeTameableData(optionalUUID.orNull()));
         } else {
             return Optional.absent();
         }

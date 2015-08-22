@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -68,13 +69,15 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     @Override
     public int compareTo(ImmutableTameableData o) {
         return ComparisonChain.start()
-                .compare(owner, o.owner().get().orNull())
+                //Must use a nullsFirst or nullsLast or else ComparisonChain throws an NPE.
+                .compare(owner, o.owner().get().orNull(), Ordering.natural().nullsFirst())
                 .result();
     }
 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
+                //TODO: .set will checkNotNull this.owner.
                 .set(Keys.TAMED_OWNER.getQuery(), this.owner);
     }
 
