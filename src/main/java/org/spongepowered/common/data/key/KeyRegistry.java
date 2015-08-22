@@ -65,6 +65,7 @@ import org.spongepowered.common.registry.RegistryHelper;
 
 import java.awt.Color;
 import java.util.Map;
+import java.util.UUID;
 
 @SuppressWarnings({"unchecked"})
 public class KeyRegistry {
@@ -148,6 +149,7 @@ public class KeyRegistry {
         keyMap.put("is_sitting", makeSingleKey(Boolean.class, Value.class, of("IsSitting")));
         keyMap.put("is_sheared", makeSingleKey(Boolean.class, Value.class, of("IsSheared")));
         keyMap.put("pig_saddle", makeSingleKey(Boolean.class, Value.class, of("IsPigSaddled")));
+        keyMap.put("tamed_owner", makeSingleKey(UUID.class, OptionalValue.class, of("TamerUUID")));
 
     }
 
