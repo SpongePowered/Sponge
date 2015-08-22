@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
+import org.spongepowered.api.event.entity.EntityBreedWithEntityEvent;
+
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.passive.EntityAnimal;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.EntityBreedEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,7 +49,7 @@ public abstract class MixinEntityAIMate {
 
     @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/entity/passive/EntityAnimal.createChild(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callBreedEvent(CallbackInfo ci, EntityAgeable entityageable) {
-        final EntityBreedEvent event = SpongeEventFactory.createEntityBreed(Sponge.getGame(), (Ageable)entityageable, (Ageable)this.theAnimal, (Ageable)this.targetMate);
+        final EntityBreedWithEntityEvent event = SpongeEventFactory.createEntityBreedWithEntity(Sponge.getGame(), (Ageable)entityageable, (Ageable)this.theAnimal, (Ageable)this.targetMate);
         Sponge.getGame().getEventManager().post(event);
         if(event.isCancelled()) {
             ci.cancel();

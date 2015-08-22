@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
+import org.spongepowered.api.event.entity.player.PlayerChangeSignEvent;
 
+import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
@@ -56,7 +57,6 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.tileentity.SignChangeEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.player.PlayerMoveEvent;
 import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
@@ -142,7 +142,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
     public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
-        final Optional<SignData> existingSignData = ((Sign) tileentitysign).getData();
+        final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
         if (!existingSignData.isPresent()) {
             // TODO Unsure if this is the best to do here...
             throw new RuntimeException("Critical error! Sign data not present on sign!");
@@ -155,10 +155,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
-        final SignChangeEvent event = SpongeEventFactory.createSignChange(Sponge.getGame(), new Cause(null, this.playerEntity, null), (Sign)
+        final PlayerChangeSignEvent event = SpongeEventFactory.createSignChange(Sponge.getGame(), new Cause(null, this.playerEntity, null), (Sign)
                 tileentitysign, changedSignData.asImmutable(), changedSignData);
         if (!Sponge.getGame().getEventManager().post(event)) {
-            ((Sign) tileentitysign).offer(event.getNewData());
+            ((Sign) tileentitysign).offer(event.getTarget().get(SignData.class).get());
         } else {
             // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
             // it will be the text of the sign that was showing in the world
@@ -304,9 +304,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                     player.setLocationAndRotation(from, fromrot);
                     this.lastMoveLocation = from;
                     ci.cancel();
-                } else if (!event.getNewLocation().equals(to)) {
-                    player.setLocationAndRotation(event.getNewLocation(), event.getRotation());
-                    this.lastMoveLocation = event.getNewLocation();
+                } else if (!event.getNewTransform().getLocation().equals(to)) {
+                    player.setLocationAndRotation(event.getNewTransform().getLocation(), event.getNewTransform().getRotation());
+                    this.lastMoveLocation = event.getNewTransform().getLocation();
                     ci.cancel();
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {
                     this.lastMoveLocation = player.getLocation();
@@ -314,7 +314,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                     this.justTeleported = false;
                     ci.cancel();
                 } else {
-                    this.lastMoveLocation = event.getNewLocation();
+                    this.lastMoveLocation = event.getNewTransform().getLocation();
                 }
             }
         }

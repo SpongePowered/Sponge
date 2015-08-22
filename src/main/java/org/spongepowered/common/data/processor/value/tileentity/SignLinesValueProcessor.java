@@ -104,7 +104,7 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
     public DataTransactionResult offerToStore(ValueContainer<?> container, List<Text> value) {
         final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<Text>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
         if (container instanceof TileEntitySign) {
-            final Optional<SignData> oldData = ((Sign) container).getData();
+            final Optional<SignData> oldData = ((Sign) container).get(SignData.class);
             if (oldData.isPresent()) {
                 DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 builder.replace(oldData.get().getValues());

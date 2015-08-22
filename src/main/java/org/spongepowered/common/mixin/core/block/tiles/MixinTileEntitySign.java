@@ -66,11 +66,6 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
     }
 
     @Override
-    public Optional<SignData> getData() {
-        return get(SignData.class);
-    }
-
-    @Override
     public String getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_COMMAND_BLOCK;
     }

@@ -137,7 +137,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
     @Override
     public DataTransactionResult set(DataHolder dataHolder, SignData manipulator, MergeFunction function) {
         if (dataHolder instanceof TileEntitySign) {
-            final Optional<SignData> oldData = ((Sign) dataHolder).getData();
+            final Optional<SignData> oldData = ((Sign) dataHolder).get(SignData.class);
             if (oldData.isPresent()) {
                 DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 builder.replace(oldData.get().getValues());

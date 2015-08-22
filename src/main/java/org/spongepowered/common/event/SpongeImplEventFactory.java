@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.event;
 
+import org.spongepowered.api.event.action.LoadWorldEvent;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
 import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
 import org.spongepowered.api.event.entity.player.PlayerRespawnEvent;
-import org.spongepowered.api.event.world.WorldLoadEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.Location;
@@ -45,7 +46,7 @@ import org.spongepowered.api.world.World;
  */
 public class SpongeImplEventFactory {
 
-    public static WorldLoadEvent createWorldLoad(Game game, org.spongepowered.api.world.World world) {
+    public static LoadWorldEvent createWorldLoad(Game game, org.spongepowered.api.world.World world) {
         return SpongeEventFactory.createWorldLoad(game, world);
     }
 

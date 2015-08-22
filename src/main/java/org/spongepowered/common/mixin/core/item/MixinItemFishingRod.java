@@ -57,7 +57,7 @@ public abstract class MixinItemFishingRod extends Item {
             // only fire event on server-side to avoid crash on client
             if (!player.worldObj.isRemote
                     && Sponge.getGame().getEventManager()
-                            .post(SpongeEventFactory.createPlayerCastFishingLineEvent(Sponge.getGame(), (Player) player, (FishHook) fishHook))) {
+                            .post(SpongeEventFactory.createPlayerCastFishingLine(Sponge.getGame(), (Player) player, (FishHook) fishHook))) {
                 return itemStack;
             }
 

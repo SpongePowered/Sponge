@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import org.spongepowered.api.event.entity.player.PlayerRetractFishingLineEvent;
+
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -38,7 +40,6 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.player.fishing.PlayerRetractFishingLineEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -105,7 +106,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     public boolean onAttackEntityFrom(Entity entity, DamageSource damageSource, float damage) {
         if (entity.worldObj.isRemote
                 || !Sponge.getGame().getEventManager()
-                        .post(SpongeEventFactory.createPlayerHookedEntityEvent(Sponge.getGame(), (Player) this.angler, this,
+                        .post(SpongeEventFactory.createPlayerHookEntity(Sponge.getGame(), (Player) this.angler, this,
                                 (org.spongepowered.api.entity.Entity) entity))) {
             if (this.getShooter() instanceof Entity) {
                 damageSource = DamageHandler.damage(this, (Entity) this.getShooter());
@@ -139,11 +140,11 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         }
 
         PlayerRetractFishingLineEvent event = SpongeEventFactory
-                .createPlayerRetractFishingLineEvent(Sponge.getGame(), (Player) this.angler, this,
+                .createPlayerRetractFishingLine(Sponge.getGame(), (Player) this.angler, this,
                         (org.spongepowered.api.item.inventory.ItemStack) itemStack, (org.spongepowered.api.entity.Entity) this.caughtEntity, exp);
         byte b0 = 0;
         if (!Sponge.getGame().getEventManager().post(event)) {
-            exp = event.getExp();
+            exp = event.getExperience();
             if (event.getCaughtEntity().isPresent()) {
                 this.caughtEntity = (Entity) event.getCaughtEntity().get();
 
