@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataContainer;
@@ -38,11 +39,10 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameMode
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
+import org.spongepowered.api.entity.player.gamemode.GameModes;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
@@ -52,6 +52,11 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeData, ImmutableGameModeData> {
+
+    private static ImmutableValue<GameMode> getGameModeValue(GameMode gameMode) {
+        return ImmutableDataCachingUtil
+                .getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, gameMode, GameModes.SURVIVAL);
+    }
 
     @Override
     public boolean supports(DataHolder dataHolder) {
@@ -85,12 +90,12 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
         if (optional.isPresent()) {
             gameModeData.set(Keys.GAME_MODE, optional.get());
         }
-        return Optional.absent();
+        return Optional.of(gameModeData);
     }
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, GameModeData manipulator, MergeFunction function) {
-        Preconditions.checkNotNull(function, "MergeFunction cannot be null!");
+        checkNotNull(function, "MergeFunction cannot be null!");
         if (dataHolder instanceof EntityPlayerMP) {
             final GameMode oldMode =
                     (GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType();
@@ -98,8 +103,7 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
             final ImmutableValue<GameMode> newMode = function.merge(oldData, manipulator).type().asImmutable();
             try {
                 ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) (Object) newMode.get());
-                return DataTransactionBuilder.successReplaceResult(ImmutableDataCachingUtil
-                        .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode), newMode);
+                return DataTransactionBuilder.successReplaceResult(getGameModeValue(oldMode), newMode);
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newMode);
             }
@@ -113,8 +117,8 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
         if (!key.equals(Keys.GAME_MODE)) {
             return Optional.absent();
         }
-        final ImmutableGameModeData data = new ImmutableSpongeGameModeData((GameMode) value);
-        return Optional.of(data);
+        return Optional.<ImmutableGameModeData>of(
+                ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGameModeData.class, (GameMode) value));
     }
 
     @Override
