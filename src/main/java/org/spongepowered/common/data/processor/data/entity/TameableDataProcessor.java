@@ -123,7 +123,6 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         //Fail to remove data, at this stage untameable tameables are not supported.
-        //TODO: Does this negatively affect other DataHolders like configs?
         return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
 
