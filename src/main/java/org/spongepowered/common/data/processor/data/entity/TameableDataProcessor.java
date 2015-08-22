@@ -74,7 +74,7 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
     @Override
     public Optional<TameableData> fill(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
         if(dataHolder instanceof EntityTameable) {
-            final TameableData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
+            final TameableData merged = checkNotNull(overlap, "MergeFunction cannot be null!").merge(checkNotNull(manipulator).copy(), from(dataHolder).orNull());
             manipulator.set(Keys.TAMED_OWNER, merged.owner().get());
             return Optional.of(manipulator);
         }
