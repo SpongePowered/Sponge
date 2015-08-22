@@ -31,7 +31,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
@@ -41,7 +40,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
@@ -69,15 +67,6 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     }
 
     @Override
-    public Optional<GameModeData> fill(DataHolder dataHolder, GameModeData manipulator) {
-        if (dataHolder instanceof EntityPlayerMP) {
-            return Optional.of(manipulator.set(Keys.GAME_MODE,
-                    (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType())));
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public Optional<GameModeData> fill(DataHolder dataHolder, GameModeData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof EntityPlayerMP) {
             final GameModeData original = from(dataHolder).get();
@@ -94,23 +83,6 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
             gameModeData.set(Keys.GAME_MODE, optional.get());
         }
         return Optional.absent();
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, GameModeData manipulator) {
-        if (dataHolder instanceof EntityPlayerMP) {
-            final GameMode oldMode =
-                    (GameMode) ((Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType());
-            final ImmutableValue<GameMode> newMode = manipulator.type().asImmutable();
-            try {
-                ((EntityPlayerMP) dataHolder).setGameType((WorldSettings.GameType) ((Object) manipulator.type().get()));
-                return DataTransactionBuilder.successReplaceResult(ImmutableDataCachingUtil
-                        .getWildValue(ImmutableSpongeValue.class, Keys.GAME_MODE, oldMode, oldMode), newMode);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newMode);
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
     @Override
@@ -147,27 +119,7 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     }
 
     @Override
-    public GameModeData create() {
-        return new SpongeGameModeData();
-    }
-
-    @Override
-    public ImmutableGameModeData createImmutable() {
-        return create().asImmutable();
-    }
-
-    @Override
     public Optional<GameModeData> createFrom(DataHolder dataHolder) {
         return from(dataHolder);
-    }
-
-    @Override
-    public Optional<GameModeData> build(DataView container) throws InvalidDataException {
-        final String modeId = DataUtil.getData(container, Keys.GAME_MODE, String.class);
-        final Optional<GameMode> optional = Sponge.getSpongeRegistry().getType(GameMode.class, modeId);
-        if (optional.isPresent()) {
-            return Optional.<GameModeData>of(new SpongeGameModeData(optional.get()));
-        }
-        return Optional.absent();
     }
 }

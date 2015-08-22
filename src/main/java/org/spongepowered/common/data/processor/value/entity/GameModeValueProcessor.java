@@ -24,16 +24,12 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -59,6 +55,11 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
     }
 
     @Override
+    protected Value<GameMode> constructValue(GameMode defaultValue) {
+        return new SpongeValue<GameMode>(Keys.GAME_MODE, defaultValue);
+    }
+
+    @Override
     public Optional<Value<GameMode>> getApiValueFromContainer(ValueContainer<?> container) {
         if (container instanceof EntityPlayerMP) {
             return Optional.<Value<GameMode>>of(
@@ -71,30 +72,6 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof EntityPlayerMP;
-    }
-
-    @Override
-    public DataTransactionResult transform(ValueContainer<?> container, Function<GameMode, GameMode> function) {
-        if (container instanceof EntityPlayerMP) {
-            final GameMode old = (GameMode) ((Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
-            final ImmutableValue<GameMode> oldValue = ImmutableDataCachingUtil
-                    .getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, old, GameModes.SURVIVAL);
-            final GameMode newMode = checkNotNull(function.apply(old));
-            final ImmutableValue<GameMode> newValue = ImmutableDataCachingUtil
-                    .getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, newMode, GameModes.SURVIVAL);
-            try {
-                ((EntityPlayerMP) container).setGameType((WorldSettings.GameType) ((Object) newMode));
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newValue);
-            }
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, BaseValue<?> value) {
-        return offerToStore(container, ((GameMode) value.get()));
     }
 
     @Override
