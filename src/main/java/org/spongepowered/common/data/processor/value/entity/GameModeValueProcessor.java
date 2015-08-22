@@ -49,14 +49,14 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
     @Override
     public Optional<GameMode> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof EntityPlayerMP) {
-            return Optional.of((GameMode) ((Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType()));
+            return Optional.of((GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
         }
         return Optional.absent();
     }
 
     @Override
     protected Value<GameMode> constructValue(GameMode defaultValue) {
-        return new SpongeValue<GameMode>(Keys.GAME_MODE, defaultValue);
+        return new SpongeValue<GameMode>(getKey(), defaultValue);
     }
 
     @Override
@@ -74,25 +74,26 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, GameMode value) {
+        final ImmutableValue<GameMode> newValue = getGameModeValue(value);
         if (container instanceof EntityPlayerMP) {
-            final GameMode old = (GameMode) ((Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
-            final ImmutableValue<GameMode> oldValue = ImmutableDataCachingUtil
-                    .getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, old, GameModes.SURVIVAL);
-            final ImmutableValue<GameMode> newValue = ImmutableDataCachingUtil
-                    .getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, value, GameModes.SURVIVAL);
+            final GameMode old = (GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType();
+            final ImmutableValue<GameMode> oldValue = getGameModeValue(old);
             try {
-                ((EntityPlayerMP) container).setGameType((WorldSettings.GameType) ((Object) value));
+                ((EntityPlayerMP) container).setGameType((WorldSettings.GameType) (Object) value);
                 return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newValue);
             }
         }
-        return DataTransactionBuilder.failResult(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys
-                .GAME_MODE, value, GameModes.SURVIVAL));
+        return DataTransactionBuilder.failResult(newValue);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionBuilder.failNoData();
+    }
+
+    private static ImmutableValue<GameMode> getGameModeValue(GameMode gameMode) {
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, gameMode, GameModes.SURVIVAL);
     }
 }
