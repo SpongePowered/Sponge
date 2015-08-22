@@ -67,6 +67,7 @@ public class KeyRegistry {
         keyMap.put("exhaustion", makeSingleKey(Double.class, Value.class, of("FoodExhaustionLevel")));
         keyMap.put("max_air", makeSingleKey(Integer.class, Value.class, of("MaxAir")));
         keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
+        keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
