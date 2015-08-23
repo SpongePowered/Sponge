@@ -39,8 +39,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
     public SneakingValueProcessor() {
-		super(Keys.IS_SNEAKING);
-	}
+        super(Keys.IS_SNEAKING);
+    }
 
     @Override
     public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
@@ -85,8 +85,9 @@ public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean
         return DataTransactionBuilder.failNoData();
     }
 
-	@Override
-	protected Value<Boolean> constructValue(Boolean defaultValue) {
-		return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, defaultValue);
-	}
+    @Override
+    protected Value<Boolean> constructValue(Boolean sneaking) {
+        return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, sneaking);
+    }
+
 }

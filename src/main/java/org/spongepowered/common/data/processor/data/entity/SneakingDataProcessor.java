@@ -41,7 +41,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 
@@ -110,7 +110,7 @@ public class SneakingDataProcessor extends AbstractSpongeDataProcessor<SneakingD
         if (!key.equals(Keys.IS_SNEAKING)) {
             return Optional.absent();
         }
-        final ImmutableSneakingData data = new ImmutableSpongeSneakingData(((Boolean) value).booleanValue());
+        final ImmutableSneakingData data = ImmutableDataCachingUtil.getManipulator(ImmutableSneakingData.class, (Boolean) value);
         return Optional.of(data);
     }
 

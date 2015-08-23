@@ -37,13 +37,13 @@ public class SpongeSneakingData extends AbstractBooleanData<SneakingData, Immuta
         super(SneakingData.class, sneaking, Keys.IS_SNEAKING, ImmutableSneakingData.class);
     }
 
-	@Override
-	public Value<Boolean> sneaking() {
-		return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, getValue());
-	}
+    @Override
+    public Value<Boolean> sneaking() {
+        return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, getValue());
+    }
 
-	@Override
-	protected Value<?> getValueGetter() {
-		return sneaking();
-	}
+    @Override
+    protected Value<?> getValueGetter() {
+        return sneaking();
+    }
 }

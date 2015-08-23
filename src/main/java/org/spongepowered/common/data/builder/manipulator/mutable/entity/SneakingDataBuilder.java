@@ -40,25 +40,25 @@ import com.google.common.base.Optional;
 
 public class SneakingDataBuilder implements DataManipulatorBuilder<SneakingData, ImmutableSneakingData> {
 
-	@Override
-	public Optional<SneakingData> build(DataView container) throws InvalidDataException {
-		checkDataExists(container, Keys.IS_SNEAKING.getQuery());
+    @Override
+    public Optional<SneakingData> build(DataView container) throws InvalidDataException {
+        checkDataExists(container, Keys.IS_SNEAKING.getQuery());
         final boolean sneaking = getData(container, Keys.IS_SNEAKING, Boolean.class);
         return Optional.<SneakingData>of(new SpongeSneakingData(sneaking));
-	}
+    }
 
-	@Override
-	public SneakingData create() {
-		return new SpongeSneakingData(false);
-	}
+    @Override
+    public SneakingData create() {
+        return new SpongeSneakingData(false);
+    }
 
-	@Override
-	public Optional<SneakingData> createFrom(DataHolder dataHolder) {
-		if (dataHolder instanceof Entity) {
+    @Override
+    public Optional<SneakingData> createFrom(DataHolder dataHolder) {
+        if (dataHolder instanceof Entity) {
             final boolean sneaking = ((Entity) dataHolder).isSneaking();
             return Optional.<SneakingData>of(new SpongeSneakingData(sneaking));
         }
         return Optional.absent();
-	}
+    }
 
 }
