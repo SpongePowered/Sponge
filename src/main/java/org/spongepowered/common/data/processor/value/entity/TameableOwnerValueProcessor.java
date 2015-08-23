@@ -83,10 +83,10 @@ public class TameableOwnerValueProcessor extends AbstractSpongeValueProcessor<Op
 
             try {
                 ((EntityTameable) container).setOwnerId(TameableDataProcessor.asString(value));
+                return builder.success(newTamer).replace(oldTamer).result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(newTamer);
             }
-            return builder.success(newTamer).replace(oldTamer).result(DataTransactionResult.Type.SUCCESS).build();
         }
 
         return DataTransactionBuilder.failResult(proposedValue);
