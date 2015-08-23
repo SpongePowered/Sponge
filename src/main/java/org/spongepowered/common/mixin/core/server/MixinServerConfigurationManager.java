@@ -63,8 +63,8 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
 import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
-import org.spongepowered.api.event.entity.player.PlayerRespawnEvent;
+import org.spongepowered.api.event.source.entity.living.player.PlayerJoinEvent;
+import org.spongepowered.api.event.target.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -280,7 +280,7 @@ public abstract class MixinServerConfigurationManager {
         playerIn.setSneaking(false);
 
         // ### PHASE 4 ### Fire event and set new location on the player
-        final PlayerRespawnEvent event =
+        final RespawnPlayerEvent event =
                 SpongeImplEventFactory.createPlayerRespawn(Sponge.getGame(), (Player) playerIn, this.tempIsBedSpawn, location);
         this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);

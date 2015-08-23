@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import org.spongepowered.api.event.entity.player.PlayerChangeSignEvent;
-
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
+
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
@@ -58,8 +57,9 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.entity.player.PlayerMoveEvent;
-import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
+import org.spongepowered.api.event.source.entity.living.player.PlayerChangeSignEvent;
+import org.spongepowered.api.event.source.entity.living.player.PlayerQuitEvent;
+import org.spongepowered.api.event.target.entity.living.player.MovePlayerEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.text.Text;
@@ -85,17 +85,13 @@ import java.util.Set;
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Shadow private static Logger logger;
-
     @Shadow public NetworkManager netManager;
-
     @Shadow public EntityPlayerMP playerEntity;
-
     @Shadow private MinecraftServer serverController;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);
 
     private boolean justTeleported = false;
-
     private Location<World> lastMoveLocation = null;
 
     @Override
@@ -298,7 +294,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             // These magic numbers are sad but help prevent excessive lag from this event.
             // eventually it would be nice to not have them
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
-                PlayerMoveEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, from, to, torot);
+                MovePlayerEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, from, to, torot);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setLocationAndRotation(from, fromrot);

@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.event;
 
-import org.spongepowered.api.event.action.LoadWorldEvent;
-
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
-import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
-import org.spongepowered.api.event.entity.player.PlayerRespawnEvent;
+import org.spongepowered.api.event.source.entity.living.player.PlayerJoinEvent;
+import org.spongepowered.api.event.source.entity.living.player.PlayerQuitEvent;
+import org.spongepowered.api.event.target.entity.living.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.target.world.LoadWorldEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.Location;
@@ -54,7 +53,7 @@ public class SpongeImplEventFactory {
         return SpongeEventFactory.createPlayerJoin(game, player, location, text, sink);
     }
 
-    public static PlayerRespawnEvent createPlayerRespawn(Game game, Player player, boolean bedSpawn, Location<World> respawnLocation) {
+    public static RespawnPlayerEvent createPlayerRespawn(Game game, Player player, boolean bedSpawn, Location<World> respawnLocation) {
         return SpongeEventFactory.createPlayerRespawn(game, player, respawnLocation, bedSpawn);
     }
 

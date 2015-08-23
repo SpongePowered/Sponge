@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import org.spongepowered.api.event.world.WorldTickBlockEvent;
+import org.spongepowered.api.event.source.world.WorldTickBlockEvent;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;

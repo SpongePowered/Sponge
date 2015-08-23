@@ -31,7 +31,7 @@ import com.google.common.base.Throwables;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.event.server.StatusPingEvent;
+import org.spongepowered.api.event.target.server.PingServerEvent;
 import org.spongepowered.api.status.Favicon;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +45,7 @@ import java.io.IOException;
 import javax.annotation.Nullable;
 
 @Mixin(ServerStatusResponse.class)
-public abstract class MixinServerStatusResponse implements StatusPingEvent.Response {
+public abstract class MixinServerStatusResponse implements PingServerEvent.Response {
 
     @Shadow
     private IChatComponent serverMotd;

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import org.spongepowered.api.event.entity.player.PlayerRetractFishingLineEvent;
-
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -40,6 +38,7 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.source.entity.living.player.PlayerRetractFishingLineEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;

@@ -30,7 +30,7 @@ import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.server.StatusPingEvent;
+import org.spongepowered.api.event.target.server.PingServerEvent;
 import org.spongepowered.api.status.StatusClient;
 import org.spongepowered.api.status.StatusResponse;
 import org.spongepowered.common.Sponge;
@@ -62,7 +62,7 @@ public final class SpongeStatusResponse {
 
     private static ServerStatusResponse call(ServerStatusResponse response, StatusClient client) {
         if (!Sponge.getGame().getEventManager().post(SpongeEventFactory.createStatusPing(Sponge.getGame(), client,
-                (StatusPingEvent.Response) response))) {
+                (PingServerEvent.Response) response))) {
             return response;
         } else {
             return null;
@@ -77,7 +77,7 @@ public final class SpongeStatusResponse {
         ServerStatusResponse clone = new ServerStatusResponse();
         clone.setServerDescription(original.getServerDescription());
         if (original.getFavicon() != null) {
-            ((StatusPingEvent.Response) clone).setFavicon(((StatusResponse) original).getFavicon().get());
+            ((PingServerEvent.Response) clone).setFavicon(((StatusResponse) original).getFavicon().get());
         }
 
         clone.setPlayerCountData(clone(original.getPlayerCountData()));

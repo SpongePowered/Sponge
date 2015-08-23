@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import org.spongepowered.api.event.entity.EntityBreedWithEntityEvent;
-
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.passive.EntityAnimal;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.source.entity.EntityBreedWithEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

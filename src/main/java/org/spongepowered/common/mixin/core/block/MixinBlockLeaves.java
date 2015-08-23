@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import org.spongepowered.api.event.world.WorldDecayBlockEvent;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
+
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockOldLeaf;
@@ -43,6 +42,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.source.world.WorldDecayBlockEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;

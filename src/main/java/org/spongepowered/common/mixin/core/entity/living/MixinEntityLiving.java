@@ -36,8 +36,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.EntityLeashEvent;
-import org.spongepowered.api.event.entity.EntityUnleashEvent;
+import org.spongepowered.api.event.target.entity.LeashEntityEvent;
+import org.spongepowered.api.event.target.entity.UnleashEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -95,7 +95,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
-            final EntityLeashEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Player)playerIn);
+            final LeashEntityEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Player)playerIn);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -107,7 +107,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!entity.worldObj.isRemote) {
-            final EntityUnleashEvent event = SpongeEventFactory.createEntityUnleash(Sponge.getGame(), this, (Entity)entity);
+            final UnleashEntityEvent event = SpongeEventFactory.createEntityUnleash(Sponge.getGame(), this, (Entity)entity);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();
