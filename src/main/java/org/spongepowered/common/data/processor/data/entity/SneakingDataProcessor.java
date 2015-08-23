@@ -111,7 +111,7 @@ public class SneakingDataProcessor extends AbstractSpongeDataProcessor<SneakingD
         if (!key.equals(Keys.IS_SNEAKING)) {
             return Optional.absent();
         }
-        final ImmutableSneakingData data = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSneakingData.class, (Boolean) value);
+        final ImmutableSneakingData data = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSneakingData.class, value);
         return Optional.of(data);
     }
 
