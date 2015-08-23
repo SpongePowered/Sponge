@@ -95,7 +95,7 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
             final String sPrevTamer = entityTameable.getOwnerId();
             final Optional<UUID> prevTamer = TameableDataProcessor.asUUID(sPrevTamer);
             final TameableData newdata = checkNotNull(overlap, "MergeFunction must not be null").merge(from(dataHolder).orNull(), checkNotNull(manipulator));
-            final ImmutableSpongeOptionalValue<UUID> prevValue = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, prevTamer);
+            final ImmutableSpongeOptionalValue<UUID> prevValue = ImmutableSpongeTameableData.createValue(prevTamer);
             final ImmutableValue<Optional<UUID>> newValue = newdata.owner().asImmutable();
             try {
                 builder.replace(prevValue);

@@ -38,6 +38,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.data.entity.TameableDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
@@ -72,13 +73,13 @@ public class TameableOwnerValueProcessor extends AbstractSpongeValueProcessor<Op
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Optional<UUID> value) {
-        final ImmutableSpongeOptionalValue<UUID> proposedValue = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, value);
+        final ImmutableSpongeOptionalValue<UUID> proposedValue = ImmutableSpongeTameableData.createValue(value);
 
         if(container instanceof EntityTameable) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<UUID> tamer = TameableDataProcessor.getTamer((EntityTameable) container);
             final ImmutableValue<Optional<UUID>> oldTamer = this.getApiValueFromContainer(container).get().asImmutable();
-            final ImmutableOptionalValue<UUID> newTamer = new ImmutableSpongeOptionalValue<UUID>(Keys.TAMED_OWNER, value);
+            final ImmutableOptionalValue<UUID> newTamer = ImmutableSpongeTameableData.createValue(value);
 
             try {
                 ((EntityTameable) container).setOwnerId(TameableDataProcessor.asString(value));

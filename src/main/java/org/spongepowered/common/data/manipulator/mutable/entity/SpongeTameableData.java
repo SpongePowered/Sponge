@@ -69,7 +69,8 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
 
     @Override
     public ImmutableTameableData asImmutable() {
-        return new ImmutableSpongeTameableData(this.owner);
+
+        return ImmutableSpongeTameableData.create(this.owner);
     }
 
     @Override
