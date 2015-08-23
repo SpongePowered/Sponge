@@ -155,7 +155,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
-        final PlayerChangeSignEvent event = SpongeEventFactory.createSignChange(Sponge.getGame(), new Cause(null, this.playerEntity, null), (Sign)
+        final PlayerChangeSignEvent event = SpongeEventFactory.createSignChange(Sponge.getGame(), Cause.of(this.playerEntity), (Sign)
                 tileentitysign, changedSignData.asImmutable(), changedSignData);
         if (!Sponge.getGame().getEventManager().post(event)) {
             ((Sign) tileentitysign).offer(event.getTarget().get(SignData.class).get());

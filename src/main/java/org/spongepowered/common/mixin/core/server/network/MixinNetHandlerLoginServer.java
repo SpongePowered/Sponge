@@ -78,7 +78,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
         if (kickReason != null) {
             disconnectMessage = Texts.of(kickReason);
             // TODO actually make a proper cause
-            disconnectCause = new Cause(null, kickReason, null);
+            disconnectCause = Cause.of(kickReason);
         }
         this.clientConEvent =
                 SpongeEventFactory.createClientConnect(Sponge.getGame(), this, (GameProfile) profile, disconnectMessage, disconnectCause);

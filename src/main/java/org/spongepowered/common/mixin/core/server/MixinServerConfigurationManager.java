@@ -284,11 +284,11 @@ public abstract class MixinServerConfigurationManager {
                 SpongeImplEventFactory.createPlayerRespawn(Sponge.getGame(), (Player) playerIn, this.tempIsBedSpawn, location);
         this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);
-        location = event.getNewRespawnTransform().getLocation();
+        location = event.getTransform().getLocation();
 
         if (!(location.getExtent() instanceof WorldServer)) {
             Sponge.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
-            location = event.getNewRespawnTransform().getLocation();
+            location = event.getTransform().getLocation();
         }
         final WorldServer targetWorld = (WorldServer) location.getExtent();
 

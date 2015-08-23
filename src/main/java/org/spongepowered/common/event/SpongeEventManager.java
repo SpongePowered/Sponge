@@ -26,7 +26,6 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
@@ -261,6 +260,12 @@ public class SpongeEventManager implements EventManager {
 
     public boolean post(Event event, Order order) {
         return post(event, getHandlerCache(event).getHandlersByOrder(order));
+    }
+
+    @Override
+    public <T extends Event> void register(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
+            EventHandler<? super T> handler) {
+        // TODO Auto-generated method stub
     }
 
 }
