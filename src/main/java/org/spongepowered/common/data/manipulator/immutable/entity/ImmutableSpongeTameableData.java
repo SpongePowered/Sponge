@@ -45,9 +45,11 @@ import java.util.UUID;
 
 public class ImmutableSpongeTameableData extends AbstractImmutableData<ImmutableTameableData, TameableData> implements ImmutableTameableData {
 
-    @Nullable private final UUID owner;
+    //Lazily initialized, do not use directly, use create & createValue factory methods instead.
     @Nullable private static ImmutableSpongeTameableData empty = null;
     @Nullable private static ImmutableSpongeOptionalValue<UUID> emptyValue = null;
+
+    @Nullable private final UUID owner;
 
     public ImmutableSpongeTameableData(@Nullable UUID owner) {
         super(ImmutableTameableData.class);
@@ -126,7 +128,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
         }
     }
 
-    public ImmutableOptionalValue<UUID> createValue(@Nullable UUID owner) {
+    public static ImmutableOptionalValue<UUID> createValue(@Nullable UUID owner) {
         if(owner == null) {
             return getEmptyValue();
         } else {
