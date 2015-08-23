@@ -49,7 +49,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     @Nullable private static ImmutableSpongeTameableData empty = null;
     @Nullable private static ImmutableSpongeOptionalValue<UUID> emptyValue = null;
 
-    private ImmutableSpongeTameableData(@Nullable UUID owner, Class clazz) {
+    public ImmutableSpongeTameableData(@Nullable UUID owner) {
         super(ImmutableTameableData.class);
         this.owner = owner;
     }
