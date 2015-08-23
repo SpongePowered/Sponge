@@ -42,6 +42,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 
@@ -74,7 +75,7 @@ public class SneakingDataProcessor extends AbstractSpongeDataProcessor<SneakingD
     public Optional<SneakingData> fill(DataHolder dataHolder, SneakingData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof Entity) {
             final Optional<SneakingData> oldData = from(dataHolder);
-            final SneakingData newData = checkNotNull(overlap, "Merge function was null!").merge(oldData.orNull(), manipulator);
+            final SneakingData newData = checkNotNull(overlap, "Merge function was null!").merge(manipulator, oldData.orNull());
             final Value<Boolean> newValue = newData.sneaking();
             return Optional.of(manipulator.set(newValue));
         }
@@ -110,7 +111,7 @@ public class SneakingDataProcessor extends AbstractSpongeDataProcessor<SneakingD
         if (!key.equals(Keys.IS_SNEAKING)) {
             return Optional.absent();
         }
-        final ImmutableSneakingData data = ImmutableDataCachingUtil.getManipulator(ImmutableSneakingData.class, (Boolean) value);
+        final ImmutableSneakingData data = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSneakingData.class, (Boolean) value);
         return Optional.of(data);
     }
 
