@@ -232,9 +232,5 @@
         "server.MixinDedicatedServer",
         "network.rcon.MixinRConConsoleSource",
         "network.rcon.MixinRConThreadClient"
-    ],
-    "client": [
-        "client.MixinMinecraft",
-        "client.server.MixinIntegratedServer"
     ]
 }

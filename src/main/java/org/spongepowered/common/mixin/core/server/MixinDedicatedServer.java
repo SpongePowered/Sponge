@@ -24,22 +24,28 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.google.common.base.Optional;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.io.File;
-import java.net.Proxy;
+import java.net.InetSocketAddress;
 
 @Mixin(DedicatedServer.class)
 public abstract class MixinDedicatedServer extends MinecraftServer {
 
     @Shadow private boolean guiIsEnabled;
+    @Shadow public abstract String getServerHostname();
+    @Shadow public abstract int getPort();
 
-    public MixinDedicatedServer(Proxy proxy, File workDir) {
-        super(proxy, workDir);
+    public MixinDedicatedServer() {
+        super(null, null, null);
+    }
+
+    public Optional<InetSocketAddress> getBoundAddress() {
+        return Optional.of(new InetSocketAddress(getServerHostname(), getPort()));
     }
 
     /**

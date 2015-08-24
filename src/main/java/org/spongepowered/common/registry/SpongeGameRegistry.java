@@ -940,7 +940,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     public WorldSettings.GameType getGameType(GameMode mode) {
-        return WorldSettings.GameType.getByName(mode.getTranslation().getId());
+        // TODO: This is client-only
+        //return WorldSettings.GameType.getByName(mode.getTranslation().getId());
+        throw new UnsupportedOperationException();
     }
 
     public com.google.common.base.Optional<WorldProperties> getWorldProperties(UUID uuid) {
