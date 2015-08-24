@@ -94,7 +94,7 @@ public class SneakingDataProcessor extends AbstractSpongeDataProcessor<SneakingD
             final ImmutableValue<Boolean> newValue = manipulator.sneaking().asImmutable();
             final SneakingData oldData = from(dataHolder).get();
             final ImmutableValue<Boolean> oldValue = oldData.sneaking().asImmutable();
-            final SneakingData mergedData = checkNotNull(function, "function").merge(old, manipulator);
+            final SneakingData mergedData = checkNotNull(function, "function").merge(oldData, manipulator);
             final ImmutableValue<Boolean> mergedValue = mergedData.sneaking().asImmutable();
             final boolean sneaking = mergedData.sneaking().get();
             try {
