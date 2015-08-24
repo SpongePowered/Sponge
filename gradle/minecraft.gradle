@@ -4,6 +4,8 @@ apply from: api.file('gradle/java.gradle')
 
 evaluationDependsOn api.path
 
+minecraftPlugin.replacer.putReplacement('SRG_DIR', "$DIR_MCP_MAPPINGS/srgs")
+
 // Mixins
 ext {
     mixinSrg = new File(project.buildDir, 'tmp/mixins/mixins.srg')
@@ -11,13 +13,12 @@ ext {
 }
 
 minecraft {
-    if (project.ext.has('forgeVersion')) {
-        version = "1.8-$forgeVersion"
-    } else {
+    if (!project.ext.has('forgeBuild')) {
         version = '1.8'
     }
 
     mappings = 'snapshot_20150301'
+    runDir = 'run'
 }
 
 // Compile options
@@ -42,10 +43,27 @@ setupDecompWorkspace.dependsOn copySrgs
 setupDevWorkspace.dependsOn copySrgs
 compileJava.dependsOn copySrgs
 
+deobfMcMCP { failOnAtError = false }
+deobfMcSRG { failOnAtError = false }
+
+plugins.withId('net.minecraftforge.gradle.tweaker-server') {
+    // Scan for access transformers
+    sourceSets.main.resources.files.each {
+        if (it.name.endsWith('_at.cfg')) {
+            logger.lifecycle("Found AccessTransformer in main resources: $it.name")
+            minecraft.at it
+        }
+    }
+
+    afterEvaluate {
+        reobfJar.primarySrg = minecraftPlugin.delayedFile('{SRG_DIR}/mcp-srg.srg')
+    }
+}
+
 // Configure reobfuscation for mixins
-reobf.doFirst {
+reobfJar.doFirst {
     if (project.mixinSrg.exists()) {
-        addExtraSrgFile project.mixinSrg
+        addSecondarySrgFile project.mixinSrg
     }
 }
 
