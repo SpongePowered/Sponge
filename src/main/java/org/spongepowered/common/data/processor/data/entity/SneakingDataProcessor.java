@@ -92,13 +92,14 @@ public class SneakingDataProcessor extends AbstractSpongeDataProcessor<SneakingD
     public DataTransactionResult set(DataHolder dataHolder, SneakingData manipulator, MergeFunction function) {
         if (dataHolder instanceof Entity) {
             final ImmutableValue<Boolean> newValue = manipulator.sneaking().asImmutable();
-            final SneakingData old = from(dataHolder).get();
-            final ImmutableValue<Boolean> oldValue = old.sneaking().asImmutable();
-            final SneakingData newData = checkNotNull(function, "function").merge(old, manipulator);
-            final boolean sneaking = newData.sneaking().get();
+            final SneakingData oldData = from(dataHolder).get();
+            final ImmutableValue<Boolean> oldValue = oldData.sneaking().asImmutable();
+            final SneakingData mergedData = checkNotNull(function, "function").merge(old, manipulator);
+            final ImmutableValue<Boolean> mergedValue = mergedData.sneaking().asImmutable();
+            final boolean sneaking = mergedData.sneaking().get();
             try {
                 ((Entity) dataHolder).setSneaking(sneaking);
-                return DataTransactionBuilder.successReplaceResult(newData.sneaking().asImmutable(), oldValue);
+                return DataTransactionBuilder.successReplaceResult(mergedValue, oldValue);
             } catch (Exception e) {
                 DataTransactionBuilder.errorResult(newValue);
             }
