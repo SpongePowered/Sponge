@@ -169,13 +169,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void sendMessage(ChatType type, String... messages) {
-        for (String text : messages) {
-            this.playerNetServerHandler.sendPacket(new S02PacketChat(new ChatComponentText(text), ((SpongeChatType) type).getByteId()));
-        }
-    }
-
-    @Override
     public void sendMessage(ChatType type, Iterable<Text> messages) {
         for (Text text : messages) {
             if (type == ChatTypes.ACTION_BAR) {
