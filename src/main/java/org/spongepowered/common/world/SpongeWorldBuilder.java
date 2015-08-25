@@ -65,6 +65,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
     private boolean keepSpawnLoaded;
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
+    private int dimensionId; // internal use only
 
     public SpongeWorldBuilder() {
         reset();
@@ -204,6 +205,11 @@ public class SpongeWorldBuilder implements WorldBuilder {
         return this;
     }
 
+    public WorldBuilder dimensionId(int id) {
+        this.dimensionId = id;
+        return this;
+    }
+
     @Override
     public Optional<World> build() throws IllegalStateException {
         final WorldCreationSettings settings = buildSettings();
@@ -223,6 +229,9 @@ public class SpongeWorldBuilder implements WorldBuilder {
         ((IMixinWorldSettings) (Object) settings).setEnabled(this.worldEnabled);
         ((IMixinWorldSettings) (Object) settings).setKeepSpawnLoaded(this.keepSpawnLoaded);
         ((IMixinWorldSettings) (Object) settings).setLoadOnStartup(this.loadOnStartup);
+        if (this.dimensionId != 0) {
+            ((IMixinWorldSettings) (Object) settings).setDimensionId(this.dimensionId);
+        }
         return (WorldCreationSettings) (Object) settings;
     }
 

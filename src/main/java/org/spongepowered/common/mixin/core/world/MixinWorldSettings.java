@@ -52,30 +52,16 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     private boolean loadOnStartup;
     private boolean keepSpawnLoaded;
     private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
+    private int dimId;
 
-    @Shadow
-    private long seed;
-
-    @Shadow
-    private WorldSettings.GameType theGameType;
-
-    @Shadow
-    private boolean mapFeaturesEnabled;
-
-    @Shadow
-    private boolean hardcoreEnabled;
-
-    @Shadow
-    private WorldType terrainType;
-
-    @Shadow
-    private boolean commandsAllowed;
-
-    @Shadow
-    private boolean bonusChestEnabled;
-
-    @Shadow
-    private String worldName;
+    @Shadow private long seed;
+    @Shadow private WorldSettings.GameType theGameType;
+    @Shadow private boolean mapFeaturesEnabled;
+    @Shadow private boolean hardcoreEnabled;
+    @Shadow private WorldType terrainType;
+    @Shadow private boolean commandsAllowed;
+    @Shadow private boolean bonusChestEnabled;
+    @Shadow private String worldName;
 
     @Override
     public String getWorldName() {
@@ -180,5 +166,16 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
             return ImmutableList.of();
         }
         return this.generatorModifiers;
+    }
+
+    // Internal use only
+    @Override
+    public void setDimensionId(int id) {
+        this.dimId = id;
+    }
+
+    @Override
+    public int getDimensionId() {
+        return this.dimId;
     }
 }

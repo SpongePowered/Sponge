@@ -43,4 +43,8 @@ public interface IMixinWorldSettings {
     void setLoadOnStartup(boolean loadOnStartup);
 
     void setKeepSpawnLoaded(boolean keepSpawnLoaded);
+
+    void setDimensionId(int id);
+
+    int getDimensionId();
 }

@@ -73,6 +73,7 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -125,15 +126,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow
     @SideOnly(Side.SERVER)
     public abstract int getPort();
-
-    @Override
-    public Optional<World> loadWorld(UUID uuid) {
-        String worldFolder = Sponge.getSpongeRegistry().getWorldFolder(uuid);
-        if (worldFolder != null) {
-            return loadWorld(worldFolder);
-        }
-        return Optional.absent();
-    }
 
     @Override
     public Optional<World> getWorld(String worldName) {
@@ -404,6 +396,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
+    public Optional<World> loadWorld(UUID uuid) {
+        String worldFolder = Sponge.getSpongeRegistry().getWorldFolder(uuid);
+        if (worldFolder != null) {
+            return loadWorld(worldFolder);
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<World> loadWorld(WorldProperties properties) {
+        if (properties == null) {
+            return Optional.absent();
+        }
+        return loadWorld(properties.getWorldName());
+    }
+
+    @Override
     public Optional<World> loadWorld(String worldName) {
         final Optional<World> optExisting = getWorld(worldName);
         if (optExisting.isPresent()) {
@@ -501,7 +510,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
         }
 
-        dim = DimensionManager.getNextFreeDimId();
+        if (((IMixinWorldSettings)settings).getDimensionId() != 0) {
+            dim = ((IMixinWorldSettings)settings).getDimensionId();
+        } else {
+            dim = DimensionManager.getNextFreeDimId();
+        }
         worldInfo = new WorldInfo((WorldSettings) (Object) settings, settings.getWorldName());
         UUID uuid = UUID.randomUUID();
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
