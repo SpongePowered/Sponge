@@ -164,12 +164,12 @@ public class SpongeEventManager implements EventManager {
 
     private static <T extends Event> RegisteredHandler<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Subscribe subscribe,
             EventHandler<? super T> handler) {
-        return createRegistration(plugin, eventClass, subscribe.order(), subscribe.ignoreCancelled(), handler);
+        return createRegistration(plugin, eventClass, subscribe.order(), subscribe.ignoreCancelled(), subscribe.beforeModifications(), handler);
     }
 
     private static <T extends Event> RegisteredHandler<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Order order,
-            boolean ignoreCancelled, EventHandler<? super T> handler) {
-        return new RegisteredHandler<T>(plugin, eventClass, order, handler, ignoreCancelled);
+            boolean ignoreCancelled, boolean beforeModifications, EventHandler<? super T> handler) {
+        return new RegisteredHandler<T>(plugin, eventClass, order, handler, ignoreCancelled, beforeModifications);
     }
 
     private PluginContainer getPlugin(Object plugin) {
@@ -190,7 +190,13 @@ public class SpongeEventManager implements EventManager {
 
     @Override
     public <T extends Event> void register(Object plugin, Class<T> eventClass, Order order, EventHandler<? super T> handler) {
-        register(createRegistration(getPlugin(plugin), eventClass, order, false, handler));
+        register(createRegistration(getPlugin(plugin), eventClass, order, false, false, handler));
+    }
+
+    @Override
+    public <T extends Event> void register(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
+            EventHandler<? super T> handler) {
+        register(createRegistration(getPlugin(plugin), eventClass, order, false, beforeModifications, handler));
     }
 
     private void unregister(Predicate<RegisteredHandler<?>> unregister) {
@@ -260,12 +266,6 @@ public class SpongeEventManager implements EventManager {
 
     public boolean post(Event event, Order order) {
         return post(event, getHandlerCache(event).getHandlersByOrder(order));
-    }
-
-    @Override
-    public <T extends Event> void register(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
-            EventHandler<? super T> handler) {
-        // TODO Auto-generated method stub
     }
 
 }

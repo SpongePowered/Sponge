@@ -820,6 +820,16 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return ImmutableList.copyOf(this.dimensionTypeMappings.values());
     }
 
+    public DimensionType getDimensionTypeFromProvider(int id) {
+        for (DimensionType type : getDimensionTypes()) {
+            SpongeDimensionType spongeType = (SpongeDimensionType) type;
+            if (spongeType.getDimensionTypeId() == id) {
+                return spongeType;
+            }
+        }
+        return DimensionTypes.OVERWORLD;
+    }
+
     public void registerDimensionType(DimensionType type) {
         this.dimensionTypeMappings.put(type.getName(), type);
         this.dimensionClassMappings.put(type.getDimensionClass(), type);

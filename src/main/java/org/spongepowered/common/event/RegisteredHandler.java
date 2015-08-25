@@ -47,13 +47,15 @@ public final class RegisteredHandler<T extends Event> implements SpongeEventHand
     private final EventHandler<? super T> handler;
 
     private final boolean ignoreCancelled;
+    private final boolean beforeModifications;
 
-    RegisteredHandler(PluginContainer plugin, Class<T> eventClass, Order order, EventHandler<? super T> handler, boolean ignoreCancelled) {
+    RegisteredHandler(PluginContainer plugin, Class<T> eventClass, Order order, EventHandler<? super T> handler, boolean ignoreCancelled, boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventClass = checkNotNull(eventClass, "eventClass");
         this.order = checkNotNull(order, "order");
         this.handler = checkNotNull(handler, "handler");
         this.ignoreCancelled = ignoreCancelled;
+        this.beforeModifications = beforeModifications;
     }
 
     public PluginContainer getPlugin() {
@@ -66,6 +68,10 @@ public final class RegisteredHandler<T extends Event> implements SpongeEventHand
 
     public Order getOrder() {
         return this.order;
+    }
+
+    public boolean isBeforeModifications() {
+        return this.beforeModifications;
     }
 
     @Override
