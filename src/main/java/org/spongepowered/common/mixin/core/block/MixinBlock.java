@@ -132,7 +132,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        final WorldTickBlockEvent event = SpongeEventFactory.createWorldTickBlock(Sponge.getGame(), Cause.of((World)world),
+        final WorldTickBlockEvent event = SpongeEventFactory.createWorldTickBlock(Sponge.getGame(), Cause.of(world),
             new Location<World>((World)world, VecHelper.toVector(pos)));
         Sponge.getGame().getEventManager().post(event);
         if(event.isCancelled()) {

@@ -35,7 +35,6 @@ import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTransaction;
@@ -49,6 +48,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.source.world.WorldDecayBlockEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -66,13 +66,13 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockLeaves;destroy(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), cancellable = true)
-    public void callLeafDecay(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        Location<org.spongepowered.api.world.World> location =
-            new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) worldIn, VecHelper.toVector(pos));
+    public void callLeafDecay(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+        Location<World> location =
+            new Location<World>((World) worldIn, VecHelper.toVector(pos));
         BlockSnapshot blockOriginal = location.getBlockSnapshot();
         BlockSnapshot blockReplacement = blockOriginal.setState(BlockTypes.AIR.getDefaultState());
         ImmutableList<BlockTransaction> transactions = new ImmutableList.Builder<BlockTransaction>().add(new BlockTransaction(blockOriginal, blockReplacement)).build();
-        final WorldDecayBlockEvent event = SpongeEventFactory.createWorldDecayBlock(Sponge.getGame(), Cause.of(worldIn), transactions);
+        final WorldDecayBlockEvent event = SpongeEventFactory.createWorldDecayBlock(Sponge.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             ci.cancel();
@@ -114,7 +114,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
         return new SpongeTreeData(treeType);
     }
 
-    public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos) {
+    public DataTransactionResult setTreeData(TreeData treeData, net.minecraft.world.World world, BlockPos blockPos) {
         final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
         return failResult(treeData.type().asImmutable());
     }

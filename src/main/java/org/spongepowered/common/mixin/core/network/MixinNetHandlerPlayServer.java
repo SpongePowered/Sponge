@@ -54,6 +54,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -294,7 +295,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             // These magic numbers are sad but help prevent excessive lag from this event.
             // eventually it would be nice to not have them
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
-                MovePlayerEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, from, to, torot);
+                Transform<World> oldTransform = player.getTransform().setLocation(from).setRotation(fromrot);
+                Transform<World> newTransform = player.getTransform().setLocation(to).setRotation(torot);
+                MovePlayerEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, oldTransform, newTransform, oldTransform);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setLocationAndRotation(from, fromrot);
