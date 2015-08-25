@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import org.spongepowered.api.event.source.world.WorldTickBlockEvent;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -35,15 +34,17 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.source.world.WorldTickBlockEvent;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -130,9 +131,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
-    public void callRandomTickEvent(World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        final WorldTickBlockEvent event = SpongeEventFactory.createWorldTickBlock(Sponge.getGame(), null,
-            new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World)world, VecHelper.toVector(pos))); //TODO Fix null Cause
+    public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+        final WorldTickBlockEvent event = SpongeEventFactory.createWorldTickBlock(Sponge.getGame(), Cause.of((World)world),
+            new Location<World>((World)world, VecHelper.toVector(pos)));
         Sponge.getGame().getEventManager().post(event);
         if(event.isCancelled()) {
             ci.cancel();
@@ -155,7 +156,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(net.minecraft.world.World world, BlockPos blockPos) {
         return ImmutableList.of();
     }
 
@@ -165,7 +166,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public void resetBlockState(World world, BlockPos blockPos) {
+    public void resetBlockState(net.minecraft.world.World world, BlockPos blockPos) {
         world.setBlockState(blockPos, shadow$getDefaultState());
     }
 

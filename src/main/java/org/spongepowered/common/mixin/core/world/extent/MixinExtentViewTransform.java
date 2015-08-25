@@ -49,6 +49,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.Direction;
@@ -483,10 +484,10 @@ public abstract class MixinExtentViewTransform implements Extent {
     }
 
     @Override
-    public boolean spawnEntity(Entity entity) {
+    public boolean spawnEntity(Entity entity, Cause cause) {
         final Location<World> location = entity.getLocation();
         entity.setLocation(new Location<World>(location.getExtent(), inverseTransform(location.getPosition())));
-        return this.extent.spawnEntity(entity);
+        return this.extent.spawnEntity(entity, cause);
     }
 
     private Vector3d inverseTransform(Vector3d vector) {

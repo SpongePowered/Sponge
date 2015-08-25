@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockOldLeaf;
@@ -36,12 +38,14 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTransaction;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.source.world.WorldDecayBlockEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
@@ -65,9 +69,10 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
     public void callLeafDecay(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         Location<org.spongepowered.api.world.World> location =
             new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) worldIn, VecHelper.toVector(pos));
-        BlockSnapshot postChange = location.getBlockSnapshot();
-        location.setBlock(BlockTypes.AIR.getDefaultState());
-        final WorldDecayBlockEvent event = SpongeEventFactory.createWorldDecayBlock(Sponge.getGame(), null, location, postChange); //TODO Fix null cause
+        BlockSnapshot blockOriginal = location.getBlockSnapshot();
+        BlockSnapshot blockReplacement = blockOriginal.setState(BlockTypes.AIR.getDefaultState());
+        ImmutableList<BlockTransaction> transactions = new ImmutableList.Builder<BlockTransaction>().add(new BlockTransaction(blockOriginal, blockReplacement)).build();
+        final WorldDecayBlockEvent event = SpongeEventFactory.createWorldDecayBlock(Sponge.getGame(), Cause.of(worldIn), transactions);
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             ci.cancel();

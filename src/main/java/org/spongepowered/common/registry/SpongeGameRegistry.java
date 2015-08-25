@@ -67,6 +67,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.attribute.Attribute;
@@ -74,6 +75,8 @@ import org.spongepowered.api.attribute.AttributeBuilder;
 import org.spongepowered.api.attribute.AttributeCalculator;
 import org.spongepowered.api.attribute.AttributeModifierBuilder;
 import org.spongepowered.api.attribute.Operation;
+import org.spongepowered.api.block.BlockSnapshotBuilder;
+import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.block.tileentity.CommandBlock;
@@ -178,11 +181,23 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.EntityInteractionType;
 import org.spongepowered.api.entity.EntityInteractionTypes;
+import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.entity.player.gamemode.GameModes;
+import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.damage.source.ProjectileDamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCauseBuilder;
+import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCauseBuilder;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCauseBuilder;
+import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCauseBuilder;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCauseBuilder;
+import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCauseBuilder;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.FireworkEffectBuilder;
@@ -2020,6 +2035,81 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public ExtentBufferFactory getExtentBufferFactory() {
         return SpongeExtentBufferFactory.INSTANCE;
+    }
+
+    @Override
+    public BlockStateBuilder createBlockStateBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public BlockSnapshotBuilder createBlockSnapshotBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public EntitySnapshotBuilder createEntitySnapshotBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public GameDictionary getGameDictionary() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public BlockDamageSourceBuilder createBlockDamageSourceBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public DamageSourceBuilder createDamageSourceBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public EntityDamageSourceBuilder createEntityDamageSourceBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public FallingBlockDamageSourceBuilder createFallingBlockDamageSourceBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public ProjectileDamageSourceBuilder createProjectileDamageSourceBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public SpawnCauseBuilder createSpawnCauseBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public BlockSpawnCauseBuilder createBlockSpawnCauseBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public EntitySpawnCauseBuilder createEntitySpawnCauseBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public BreedingSpawnCauseBuilder createBreedingSpawnCauseBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public MobSpawnerSpawnCauseBuilder createMobSpawnerSpawnCauseBuilder() {
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override
+    public WeatherSpawnCauseBuilder createWeatherSpawnCauseBuilder() {
+        throw new UnsupportedOperationException(); 
     }
 
     public void preInit() {

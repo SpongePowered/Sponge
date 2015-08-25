@@ -84,6 +84,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -427,7 +428,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean spawnEntity(Entity entity) {
+    public boolean spawnEntity(Entity entity, Cause cause) {
         checkNotNull(entity, "Entity cannot be null!");
         if (entity instanceof EntityFishHook && ((EntityFishHook) entity).angler == null) {
             // TODO MixinEntityFishHook.setShooter makes angler null sometimes,
