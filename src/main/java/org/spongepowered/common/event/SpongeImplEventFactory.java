@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.source.entity.living.player.PlayerJoinEvent;
 import org.spongepowered.api.event.source.entity.living.player.PlayerQuitEvent;
+import org.spongepowered.api.event.source.server.ServerLoadWorldEvent;
 import org.spongepowered.api.event.target.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.target.world.LoadWorldEvent;
 import org.spongepowered.api.text.Text;
@@ -45,8 +46,8 @@ import org.spongepowered.api.world.World;
  */
 public class SpongeImplEventFactory {
 
-    public static LoadWorldEvent createWorldLoad(Game game, org.spongepowered.api.world.World world) {
-        return SpongeEventFactory.createWorldLoad(game, world);
+    public static ServerLoadWorldEvent createServerLoadWorld(Game game, org.spongepowered.api.world.World world) {
+        return SpongeEventFactory.createServerLoadWorld(game, world);
     }
 
     public static PlayerJoinEvent createPlayerJoin(Game game, Player player, Location<World> location, Text text, MessageSink sink) {
