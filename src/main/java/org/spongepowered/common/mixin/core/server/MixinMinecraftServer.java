@@ -520,6 +520,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
         ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
+        ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
         ((WorldProperties) worldInfo).setKeepSpawnLoaded(settings.doesKeepSpawnLoaded());
         ((WorldProperties) worldInfo).setLoadOnStartup(settings.loadOnStartup());
         ((WorldProperties) worldInfo).setEnabled(settings.isEnabled());

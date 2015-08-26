@@ -80,6 +80,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private DimensionType dimensionType;
     private boolean loadOnStartup;
     private boolean keepSpawnLoaded;
+    private boolean isMod;
     private ImmutableCollection<String> generatorModifiers;
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
@@ -464,6 +465,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public void setIsMod(boolean flag) {
+        this.isMod = flag;
+    }
+
+    @Override
+    public boolean getIsMod() {
+        return this.isMod;
+    }
+
+    @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
         if (this.generatorModifiers == null) {
             return ImmutableList.of();
@@ -525,6 +536,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.worldEnabled = nbt.getBoolean("enabled");
         this.keepSpawnLoaded = nbt.getBoolean("keepSpawnLoaded");
         this.loadOnStartup = nbt.getBoolean("loadOnStartup");
+        this.isMod = nbt.getBoolean("isMod");
         for (DimensionType type : Sponge.getSpongeRegistry().dimensionClassMappings.values()) {
             if (type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType"))) {
                 this.dimensionType = type;
@@ -572,6 +584,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.spongeNbt.setBoolean("enabled", this.worldEnabled);
         this.spongeNbt.setBoolean("keepSpawnLoaded", this.keepSpawnLoaded);
         this.spongeNbt.setBoolean("loadOnStartup", this.loadOnStartup);
+        if (this.isMod) {
+            this.spongeNbt.setBoolean("isMod", this.isMod);
+        }
 
         if (this.generatorModifiers != null) {
             NBTTagList generatorModifierNbt = new NBTTagList();

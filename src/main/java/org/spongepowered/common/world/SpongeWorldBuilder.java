@@ -63,9 +63,10 @@ public class SpongeWorldBuilder implements WorldBuilder {
     private boolean worldEnabled;
     private boolean loadOnStartup;
     private boolean keepSpawnLoaded;
+    private boolean isMod;
+    private int dimensionId; // internal use only
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
-    private int dimensionId; // internal use only
 
     public SpongeWorldBuilder() {
         reset();
@@ -205,8 +206,13 @@ public class SpongeWorldBuilder implements WorldBuilder {
         return this;
     }
 
-    public WorldBuilder dimensionId(int id) {
+    public SpongeWorldBuilder dimensionId(int id) {
         this.dimensionId = id;
+        return this;
+    }
+
+    public SpongeWorldBuilder isMod(boolean flag) {
+        this.isMod = flag;
         return this;
     }
 
@@ -231,6 +237,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
         ((IMixinWorldSettings) (Object) settings).setLoadOnStartup(this.loadOnStartup);
         if (this.dimensionId != 0) {
             ((IMixinWorldSettings) (Object) settings).setDimensionId(this.dimensionId);
+            ((IMixinWorldSettings) (Object) settings).setIsMod(this.isMod);
         }
         return (WorldCreationSettings) (Object) settings;
     }
@@ -249,6 +256,8 @@ public class SpongeWorldBuilder implements WorldBuilder {
         this.keepSpawnLoaded = false;
         this.generatorSettings = new MemoryDataContainer();
         this.generatorModifiers = ImmutableList.of();
+        this.dimensionId = 0;
+        this.isMod = false;
         return this;
     }
 

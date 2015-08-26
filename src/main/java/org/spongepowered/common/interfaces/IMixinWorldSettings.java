@@ -47,4 +47,8 @@ public interface IMixinWorldSettings {
     void setDimensionId(int id);
 
     int getDimensionId();
+
+    void setIsMod(boolean isMod);
+
+    boolean getIsMod();
 }

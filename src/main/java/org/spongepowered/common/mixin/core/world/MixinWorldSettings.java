@@ -52,7 +52,9 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     private boolean loadOnStartup;
     private boolean keepSpawnLoaded;
     private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
+    // internal use only
     private int dimId;
+    private boolean isMod;
 
     @Shadow private long seed;
     @Shadow private WorldSettings.GameType theGameType;
@@ -177,5 +179,15 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     @Override
     public int getDimensionId() {
         return this.dimId;
+    }
+
+    @Override
+    public void setIsMod(boolean flag) {
+        this.isMod = flag;
+    }
+
+    @Override
+    public boolean getIsMod() {
+        return this.isMod;
     }
 }

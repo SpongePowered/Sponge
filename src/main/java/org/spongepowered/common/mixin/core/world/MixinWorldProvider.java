@@ -33,6 +33,7 @@ import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -171,5 +172,10 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         } else {
             return ((IMixinWorldType) this.terrainType).getMinimumSpawnHeight(this.worldObj);
         }
+    }
+
+    @Override
+    public GeneratorType getGeneratorType() {
+        return (GeneratorType) this.terrainType;
     }
 }

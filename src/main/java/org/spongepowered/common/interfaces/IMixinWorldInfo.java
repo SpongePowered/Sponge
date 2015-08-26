@@ -50,4 +50,8 @@ public interface IMixinWorldInfo {
     void setWorldName(String name);
 
     void readSpongeNbt(NBTTagCompound spongeNbt);
+
+    void setIsMod(boolean isMod);
+
+    boolean getIsMod();
 }
