@@ -460,14 +460,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("normal", (Difficulty) (Object) EnumDifficulty.NORMAL)
             .put("hard", (Difficulty) (Object) EnumDifficulty.HARD)
             .build();
-    public final Map<String, SpongeEntityType> entityIdToTypeMappings = Maps.newHashMap();
     private static final ImmutableMap<String, ObjectiveDisplayMode> objectiveDisplayModeMappings =
             new ImmutableMap.Builder<String, ObjectiveDisplayMode>()
                     .put("integer", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.INTEGER)
                     .put("hearts", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.HEARTS)
                     .build();
 
-    public final Map<Class<? extends Entity>, SpongeEntityType> entityClassToTypeMappings = Maps.newHashMap();
+    public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
     public final Map<String, Enchantment> enchantmentMappings = Maps.newHashMap();
     private final Map<String, Career> careerMappings = Maps.newHashMap();
     private final Map<String, Profession> professionMappings = Maps.newHashMap();
@@ -500,7 +499,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, CookedFish> cookedFishMappings = Maps.newHashMap();
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
     private final Map<String, Art> artMappings = Maps.newHashMap();
-    private final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
+    protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
     private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
             .put("dead_bush", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
             .put("tall_grass", (ShrubType) (Object) BlockTallGrass.EnumType.GRASS)
@@ -624,7 +623,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         if (!id.contains(":")) {
             id = "minecraft:" + id;
         }
-        return com.google.common.base.Optional.fromNullable((EntityType) this.entityIdToTypeMappings.get(id));
+        return com.google.common.base.Optional.fromNullable((EntityType) this.entityTypeMappings.get(id));
     }
 
     public com.google.common.base.Optional<BiomeType> getBiome(String id) {
@@ -1906,8 +1905,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 }
                 EntityType entityType = SpongeGameRegistry.this.entityTypeMappings.get(fieldName.toLowerCase());
                 SpongeGameRegistry.this.entityClassToTypeMappings
-                        .put(((SpongeEntityType) entityType).entityClass, (SpongeEntityType) entityType);
-                SpongeGameRegistry.this.entityIdToTypeMappings.put(((SpongeEntityType) entityType).getId(), ((SpongeEntityType) entityType));
+                        .put(((SpongeEntityType) entityType).entityClass, entityType);
+                // remove old mapping
+                SpongeGameRegistry.this.entityTypeMappings.remove(fieldName.toLowerCase());
+                // add new mapping with minecraft id
+                SpongeGameRegistry.this.entityTypeMappings.put(((SpongeEntityType) entityType).getId(), entityType);
                 return entityType;
             }
         });
