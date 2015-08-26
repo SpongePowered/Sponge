@@ -26,6 +26,7 @@ package org.spongepowered.common.data.key;
 
 import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
+import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
@@ -33,14 +34,15 @@ import com.google.common.collect.MapMaker;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.registry.RegistryHelper;
-
 import java.awt.Color;
 import java.util.Map;
 
@@ -68,6 +70,8 @@ public class KeyRegistry {
         keyMap.put("max_air", makeSingleKey(Integer.class, Value.class, of("MaxAir")));
         keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
         keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
+        keyMap.put("banner_patterns", makeSetKey(PatternListValue.class, of("BannerPatterns")));
+        keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
