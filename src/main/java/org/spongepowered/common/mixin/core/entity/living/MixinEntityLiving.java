@@ -95,7 +95,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
-            final LeashEntityEvent event = SpongeEventFactory.createEntityLeash(Sponge.getGame(), this, (Player)playerIn);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntity(Sponge.getGame(), this, (Player)playerIn);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -107,7 +107,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!entity.worldObj.isRemote) {
-            final UnleashEntityEvent event = SpongeEventFactory.createEntityUnleash(Sponge.getGame(), this, (Entity)entity);
+            final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntity(Sponge.getGame(), this, (Entity)entity);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();

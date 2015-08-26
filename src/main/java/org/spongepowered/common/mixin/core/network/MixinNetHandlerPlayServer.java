@@ -152,7 +152,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
-        final PlayerChangeSignEvent event = SpongeEventFactory.createSignChange(Sponge.getGame(), Cause.of(this.playerEntity), (Sign)
+        final PlayerChangeSignEvent event = SpongeEventFactory.createPlayerChangeSign(Sponge.getGame(), Cause.of(this.playerEntity), (Sign)
                 tileentitysign, changedSignData.asImmutable(), changedSignData);
         if (!Sponge.getGame().getEventManager().post(event)) {
             ((Sign) tileentitysign).offer(event.getTarget().get(SignData.class).get());
@@ -297,7 +297,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> oldTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> newTransform = player.getTransform().setLocation(to).setRotation(torot);
-                MovePlayerEvent event = SpongeEventFactory.createPlayerMove(Sponge.getGame(), player, oldTransform, newTransform, oldTransform);
+                MovePlayerEvent event = SpongeEventFactory.createMovePlayer(Sponge.getGame(), player, oldTransform, newTransform, oldTransform);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setLocationAndRotation(from, fromrot);

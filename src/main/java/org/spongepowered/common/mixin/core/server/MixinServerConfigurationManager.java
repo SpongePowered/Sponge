@@ -210,7 +210,7 @@ public abstract class MixinServerConfigurationManager {
                 SpongeTexts.toText(chatcomponenttranslation), ((Player) playerIn).getMessageSink());
         Sponge.getGame().getEventManager().post(event);
         // Set the resolved location of the event onto the player
-        ((Player) playerIn).setLocation(event.getTransform().getLocation());
+        ((Player) playerIn).setLocation(event.getSourceTransform().getLocation());
 
         logger.info(playerIn.getCommandSenderName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " at (" + playerIn.posX
                 + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
@@ -284,11 +284,11 @@ public abstract class MixinServerConfigurationManager {
                 SpongeImplEventFactory.createPlayerRespawn(Sponge.getGame(), (Player) playerIn, this.tempIsBedSpawn, location);
         this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);
-        location = event.getTransform().getLocation();
+        location = event.getOriginTransform().getLocation();
 
         if (!(location.getExtent() instanceof WorldServer)) {
             Sponge.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
-            location = event.getTransform().getLocation();
+            location = event.getOriginTransform().getLocation();
         }
         final WorldServer targetWorld = (WorldServer) location.getExtent();
 

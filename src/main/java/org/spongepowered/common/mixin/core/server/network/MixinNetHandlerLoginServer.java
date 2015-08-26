@@ -81,7 +81,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
             disconnectCause = Cause.of(kickReason);
         }
         this.clientConEvent =
-                SpongeEventFactory.createClientConnect(Sponge.getGame(), this, (GameProfile) profile, disconnectMessage, disconnectCause);
+                SpongeEventFactory.createGameClientConnect(Sponge.getGame(), this, (GameProfile) profile, disconnectMessage, disconnectCause);
         if (kickReason != null) {
             this.clientConEvent.setCancelled(true);
         }
@@ -138,7 +138,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
 
     @Override
     public boolean fireAuthEvent() {
-        GameClientAuthEvent event = SpongeEventFactory.createClientAuth(Sponge.getGame(), this, (GameProfile) this.loginGameProfile, null, null);
+        GameClientAuthEvent event = SpongeEventFactory.createGameClientAuth(Sponge.getGame(), this, (GameProfile) this.loginGameProfile, null, null);
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             this.disconnectClient(event.getDisconnectMessage());
