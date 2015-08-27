@@ -69,8 +69,8 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
     public void callLeafDecay(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         Location<World> location =
             new Location<World>((World) worldIn, VecHelper.toVector(pos));
-        BlockSnapshot blockOriginal = location.getBlockSnapshot();
-        BlockSnapshot blockReplacement = blockOriginal.setState(BlockTypes.AIR.getDefaultState());
+        BlockSnapshot blockOriginal = location.createSnapshot();
+        BlockSnapshot blockReplacement = blockOriginal.withState(BlockTypes.AIR.getDefaultState());
         ImmutableList<BlockTransaction> transactions = new ImmutableList.Builder<BlockTransaction>().add(new BlockTransaction(blockOriginal, blockReplacement)).build();
         final WorldDecayBlockEvent event = SpongeEventFactory.createWorldDecayBlock(Sponge.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
         Sponge.getGame().getEventManager().post(event);
