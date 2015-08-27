@@ -46,6 +46,8 @@ import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -272,6 +274,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         compound.setInteger("maxAir", this.maxAir);
+    }
+
+    @Override
+    public Text getTeamRepresentation() {
+        return Texts.of(this.getUniqueID().toString());
     }
 
     @Override

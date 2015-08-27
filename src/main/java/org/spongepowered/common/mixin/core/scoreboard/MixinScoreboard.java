@@ -39,6 +39,7 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -172,12 +173,13 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
     }
 
     @Inject(method = "addPlayerToTeam", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/scoreboard/Scoreboard;getTeam(Ljava/lang/String;)Lnet/minecraft/scoreboard/ScorePlayerTeam;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void onAddPlayerToTeam(String player, String newTeam, CallbackInfoReturnable<Boolean> ci, ScorePlayerTeam team) {
+    public void onAddPlayerToTeam(String player, String newTeam, CallbackInfoReturnable<Boolean> ci, ScorePlayerTeam team) throws
+                                                                                                                           TextMessageException {
         if (shouldEcho()) {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
                 this.scoreboard.allowRecursion = false;
-                spongeTeam.addUser(this.getUser(player));
+                spongeTeam.addMember(Texts.legacy().from(player));
                 this.scoreboard.allowRecursion = true;
                 ci.setReturnValue(true);
             }
@@ -185,13 +187,13 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
     }
 
     @Inject(method = "removePlayerFromTeam", at = @At("HEAD"), cancellable = true)
-    public void onRemovePlayerFromTeam(String name, ScorePlayerTeam team, CallbackInfo ci) {
+    public void onRemovePlayerFromTeam(String name, ScorePlayerTeam team, CallbackInfo ci) throws TextMessageException {
         if (shouldEcho()) {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
                 Optional<Player> spongePlayer = Sponge.getGame().getServer().getPlayer(name);
                     this.scoreboard.allowRecursion = false;
-                    spongeTeam.removeUser(this.getUser(name));
+                    spongeTeam.removeMember(Texts.legacy().from(name));
                     this.scoreboard.allowRecursion = true;
                     ci.cancel();
             }
@@ -208,20 +210,6 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
                     name));
             this.scoreboard.allowRecursion = true;
             cir.setReturnValue(spongeScore.getScore(objective));
-        }
-    }
-
-    private User getUser(String name) {
-        try {
-            UserStorage storage = Sponge.getGame().getServiceManager().provideUnchecked(UserStorage.class);
-            Optional<User> optUser = storage.get(name);
-            if (!optUser.isPresent()) {
-                GameProfile profile = Sponge.getGame().getServiceManager().provideUnchecked(GameProfileResolver.class).get(name).get();
-                return storage.getOrCreate(profile);
-            }
-            return optUser.get();
-        } catch (Exception e) {
-            throw new RuntimeException("An error ocured while attempting to lookup a user for a scoreboard!", e);
         }
     }
 

@@ -59,7 +59,7 @@ public class SpongeScoreboard implements Scoreboard {
     private Map<DisplaySlot, Objective> displaySlots = Maps.newHashMap();
     private Multimap<Criterion, Objective> criteria = HashMultimap.create();
     private Map<String, Team> teams = Maps.newHashMap();
-    private Map<User, Team> userTeams = Maps.newHashMap();
+    private Map<Text, Team> memberTeams = Maps.newHashMap();
 
     public Set<net.minecraft.scoreboard.Scoreboard> scoreboards = Sets.newHashSet();
 
@@ -171,8 +171,8 @@ public class SpongeScoreboard implements Scoreboard {
     }
 
     @Override
-    public Optional<Team> getUserTeam(User user) {
-        return Optional.fromNullable(this.userTeams.get(user));
+    public Optional<Team> getMemberTeam(Text member) {
+        return Optional.fromNullable(this.memberTeams.get(member));
     }
 
     @Override
@@ -180,27 +180,27 @@ public class SpongeScoreboard implements Scoreboard {
         return Optional.fromNullable(this.teams.get(teamName));
     }
 
-    public void addUserToTeam(User user, Team team) {
+    public void addMemberToTeam(Text member, Team team) {
         this.allowRecursion = false;
-        if (this.userTeams.containsKey(user)) {
-            this.userTeams.get(user).removeUser(user);
+        if (this.memberTeams.containsKey(member)) {
+            this.memberTeams.get(member).removeMember(member);
         }
-        this.userTeams.put(user, team);
+        this.memberTeams.put(member, team);
         for (ScorePlayerTeam scoreTeam: ((SpongeTeam) team).getTeams().values()) {
-            scoreTeam.theScoreboard.addPlayerToTeam(user.getName(), team.getName());
+            scoreTeam.theScoreboard.addPlayerToTeam(Texts.legacy().to(member), team.getName());
         }
         this.allowRecursion = true;
     }
 
-    public void removeUserFromTeam(User user) {
-        if (this.userTeams.containsKey(user)) {
-            for (ScorePlayerTeam scoreTeam : ((SpongeTeam) this.userTeams.get(user)).getTeams().values()) {
-                if (scoreTeam.theScoreboard.getPlayersTeam(user.getName()) != null) {
-                    scoreTeam.theScoreboard.removePlayerFromTeam(user.getName(), scoreTeam);
+    public void removeMemberFromTeam(Text member) {
+        if (this.memberTeams.containsKey(member)) {
+            for (ScorePlayerTeam scoreTeam : ((SpongeTeam) this.memberTeams.get(member)).getTeams().values()) {
+                if (scoreTeam.theScoreboard.getPlayersTeam(Texts.legacy().to(member)) != null) {
+                    scoreTeam.theScoreboard.removePlayerFromTeam(Texts.legacy().to(member), scoreTeam);
                 }
             }
         }
-        this.userTeams.remove(user);
+        this.memberTeams.remove(member);
     }
 
     @Override
@@ -208,16 +208,16 @@ public class SpongeScoreboard implements Scoreboard {
         this.removeTeamInternal(team);
         this.teams.remove(team.getName());
 
-        Set<User> keysToRemove = Sets.newHashSet();
+        Set<Text> keysToRemove = Sets.newHashSet();
 
-        for (Map.Entry<User, Team> userTeam: this.userTeams.entrySet()) {
+        for (Map.Entry<Text, Team> userTeam: this.memberTeams.entrySet()) {
             if (team.equals(userTeam.getValue())) {
                 keysToRemove.add(userTeam.getKey());
             }
         }
 
-        for (User user: keysToRemove) {
-            this.userTeams.remove(user);
+        for (Text member: keysToRemove) {
+            this.memberTeams.remove(member);
         }
     }
 
@@ -315,8 +315,8 @@ public class SpongeScoreboard implements Scoreboard {
             team.func_178772_a(((SpongeVisibility) spongeTeam.getNameTagVisibility()).getHandle());
             team.func_178773_b(((SpongeVisibility) spongeTeam.getDeathTextVisibility()).getHandle());
 
-            for (User user: spongeTeam.getUsers()) {
-                scoreboard.addPlayerToTeam(user.getName(), team.getRegisteredName());
+            for (Text member: spongeTeam.getMembers()) {
+                scoreboard.addPlayerToTeam(Texts.legacy().to(member), team.getRegisteredName());
             }
         }
     }

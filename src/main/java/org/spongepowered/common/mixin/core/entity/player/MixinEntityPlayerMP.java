@@ -363,6 +363,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public Text getTeamRepresentation() {
+        return Texts.of(this.getName());
+    }
+
+    @Override
     public net.minecraft.scoreboard.Scoreboard getWorldScoreboard() {
         return this.mcScoreboard;
     }

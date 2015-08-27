@@ -27,7 +27,6 @@ package org.spongepowered.common.scoreboard.builder;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.TeamBuilder;
 import org.spongepowered.api.scoreboard.Visibilities;
@@ -52,7 +51,7 @@ public class SpongeTeamBuilder implements TeamBuilder {
     private boolean showFriendlyInvisibles = false;
     private Visibility nameTagVisibility = Visibilities.ALL;
     private Visibility deathMessageVisibility = Visibilities.ALL;
-    private Set<User> users = new HashSet<User>();
+    private Set<Text> members = new HashSet<Text>();
 
     @Override
     public TeamBuilder name(String name) {
@@ -113,8 +112,8 @@ public class SpongeTeamBuilder implements TeamBuilder {
     }
 
     @Override
-    public TeamBuilder users(Set<User> users) {
-        this.users = checkNotNull(users, "Users cannot be null!");
+    public TeamBuilder members(Set<Text> members) {
+        this.members = checkNotNull(members, "Members cannot be null!");
         return this;
     }
 
@@ -129,6 +128,6 @@ public class SpongeTeamBuilder implements TeamBuilder {
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
         return new SpongeTeam(this.name, this.displayName, this.color, this.prefix, this.suffix, this.allowFriendlyFire, this.showFriendlyInvisibles,
-                this.nameTagVisibility, this.deathMessageVisibility, this.users);
+                this.nameTagVisibility, this.deathMessageVisibility, new HashSet(this.members));
     }
 }

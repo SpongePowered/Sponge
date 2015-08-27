@@ -26,7 +26,6 @@ package org.spongepowered.common.scoreboard;
 
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.EnumChatFormatting;
-import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibilities;
@@ -47,7 +46,7 @@ import java.util.Set;
 public class SpongeTeam implements Team {
 
     private Map<net.minecraft.scoreboard.Scoreboard, ScorePlayerTeam> teams = new HashMap<net.minecraft.scoreboard.Scoreboard, ScorePlayerTeam>();
-    private Set<User> users = new HashSet<User>();
+    private Set<Text> members = new HashSet<Text>();
 
     private String name;
     private Text displayName;
@@ -64,8 +63,8 @@ public class SpongeTeam implements Team {
     public boolean allowRecursion = true;
 
     public SpongeTeam(String name, Text displayName, TextColor color, Text prefix, Text suffix, boolean allowFriendlyFire,
-                      boolean seeFriendlyInvisibles, Visibility nameTagVisibility, Visibility deathMessageVisibility, Set<User> users) {
-        this.users = users;
+                      boolean seeFriendlyInvisibles, Visibility nameTagVisibility, Visibility deathMessageVisibility, Set<Text> members) {
+        this.members = members;
         this.name = name;
         this.displayName = displayName;
         this.color = color;
@@ -262,30 +261,29 @@ public class SpongeTeam implements Team {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public Set<User> getUsers() {
-        return new HashSet(this.users);
+    public Set<Text> getMembers() {
+        return new HashSet<Text>(this.members);
     }
 
     @Override
-    public void addUser(User user) {
-        if (this.users.contains(user)) {
+    public void addMember(Text member) {
+        if (this.members.contains(member)) {
             return;
         }
         this.allowRecursion = false;
-        this.users.add(user);
+        this.members.add(member);
         for (Scoreboard scoreboard: this.getScoreboards()) {
-            ((SpongeScoreboard) scoreboard).addUserToTeam(user, this);
+            ((SpongeScoreboard) scoreboard).addMemberToTeam(member, this);
         }
         this.allowRecursion = true;
     }
 
     @Override
-    public boolean removeUser(User user) {
+    public boolean removeMember(Text member) {
         this.allowRecursion = false;
-        boolean present = this.users.remove(user);
+        boolean present = this.members.remove(member);
         for (Scoreboard scoreboard: this.getScoreboards()) {
-            ((SpongeScoreboard) scoreboard).removeUserFromTeam(user);
+            ((SpongeScoreboard) scoreboard).removeMemberFromTeam(member);
         }
         this.allowRecursion = true;
         return present;
@@ -318,8 +316,8 @@ public class SpongeTeam implements Team {
         team.func_178772_a(((SpongeVisibility) this.nameTagVisibility).getHandle());
         team.func_178773_b(((SpongeVisibility) this.deathMessageVisibility).getHandle());
 
-        for (User user: this.users) {
-            scoreboard.addPlayerToTeam(user.getName(), team.getRegisteredName());
+        for (Text member: this.members) {
+            scoreboard.addPlayerToTeam(Texts.legacy().to(member), team.getRegisteredName());
         }
 
     }

@@ -45,6 +45,8 @@ import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.entity.player.gamemode.GameModes;
 import org.spongepowered.api.scoreboard.Team;
+import org.spongepowered.api.scoreboard.TeamMember;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.Argument.Invertible;
@@ -408,13 +410,16 @@ public class SelectorResolver {
 
                 @Override
                 public boolean apply(Entity input) {
-                    return inverted ^ collectUsers(teams).contains(input);
+                    if (input instanceof TeamMember) {
+                        return inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
+                    }
+                    return false;
                 }
 
-                private Collection<User> collectUsers(Collection<Team> teams) {
-                    ImmutableSet.Builder<User> users = ImmutableSet.builder();
+                private Collection<Text> collectMembers(Collection<Team> teams) {
+                    ImmutableSet.Builder<Text> users = ImmutableSet.builder();
                     for (Team t : teams) {
-                        users.addAll(t.getUsers());
+                        users.addAll(t.getMembers());
                     }
                     return users.build();
                 }
