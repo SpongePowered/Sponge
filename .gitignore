@@ -11,7 +11,7 @@ dist
 lib
 out
 run
-target
+/target
 *.com
 *.class
 *.dll
