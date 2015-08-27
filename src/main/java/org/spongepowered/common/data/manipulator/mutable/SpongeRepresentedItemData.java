@@ -24,58 +24,51 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackComparators;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeItemValue;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeRepresentedItemData extends AbstractData<RepresentedItemData, ImmutableRepresentedItemData> implements RepresentedItemData {
+public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnapshot, RepresentedItemData, ImmutableRepresentedItemData> implements RepresentedItemData {
 
-    private ItemStack itemStack;
-
-    public SpongeRepresentedItemData(ItemStack itemStack) {
-        super(RepresentedItemData.class);
-        this.itemStack = checkNotNull(itemStack).copy();
-        registerGettersAndSetters();
+    public SpongeRepresentedItemData(ItemStackSnapshot itemStack) {
+        super(RepresentedItemData.class, itemStack, Keys.REPRESENTED_ITEM);
     }
 
     @Override
-    public Value<ItemStack> item() {
-        return new SpongeItemValue(Keys.REPRESENTED_ITEM, this.itemStack.copy());
+    public Value<ItemStackSnapshot> item() {
+        return new SpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, this.getValue());
     }
 
     @Override
     public RepresentedItemData copy() {
-        return new SpongeRepresentedItemData(this.itemStack.copy());
+        return new SpongeRepresentedItemData(this.getValue());
     }
 
     @Override
     public ImmutableRepresentedItemData asImmutable() {
-        return new ImmutableSpongeRepresentedItemData(this.itemStack);
+        return new ImmutableSpongeRepresentedItemData(this.getValue());
     }
 
     @Override
     public int compareTo(RepresentedItemData o) {
-        return ItemStackComparators.ALL.compare(o.item().get(), this.itemStack);
+        return 0; // TODO
     }
 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-            .set(Keys.REPRESENTED_ITEM.getQuery(), this.itemStack);
+            .set(Keys.REPRESENTED_ITEM, this.getValue());
     }
 
     @Override
-    protected void registerGettersAndSetters() {
-        // TODO
+    protected Value<?> getValueGetter() {
+        return item();
     }
 }
