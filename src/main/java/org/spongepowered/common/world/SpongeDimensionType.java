@@ -84,7 +84,7 @@ public class SpongeDimensionType implements DimensionType {
         }
 
         DimensionType other = (DimensionType) obj;
-        if (!this.name.equals(other.getName())) {
+        if (!this.name.equalsIgnoreCase(other.getName())) {
             return false;
         }
         if (!this.dimensionClass.equals(other.getDimensionClass())) {
