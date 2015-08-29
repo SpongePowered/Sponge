@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.status;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ServerStatusResponse;
-import org.spongepowered.api.event.target.server.PingServerEvent;
+import org.spongepowered.api.event.server.PingServerEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;

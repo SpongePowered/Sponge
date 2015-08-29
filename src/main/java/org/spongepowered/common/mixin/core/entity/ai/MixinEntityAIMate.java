@@ -29,7 +29,7 @@ import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.passive.EntityAnimal;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.target.entity.BreedEntityEvent;
+import org.spongepowered.api.event.entity.BreedEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

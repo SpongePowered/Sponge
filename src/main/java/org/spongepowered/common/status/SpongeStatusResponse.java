@@ -30,7 +30,7 @@ import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.target.server.PingServerEvent;
+import org.spongepowered.api.event.server.PingServerEvent;
 import org.spongepowered.api.status.StatusClient;
 import org.spongepowered.api.status.StatusResponse;
 import org.spongepowered.common.Sponge;

@@ -39,7 +39,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.source.world.WorldTickBlockEvent;
+import org.spongepowered.api.event.world.WorldTickBlockEvent;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;

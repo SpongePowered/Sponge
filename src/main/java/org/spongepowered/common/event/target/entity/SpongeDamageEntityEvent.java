@@ -32,8 +32,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.target.entity.AttackEntityEvent;
-import org.spongepowered.api.event.target.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.util.Tuple;
 
 import java.util.LinkedHashMap;
