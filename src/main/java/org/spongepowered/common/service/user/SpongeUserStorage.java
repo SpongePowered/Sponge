@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.GameProfile;
-import org.spongepowered.api.entity.player.User;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorage;
 
 import java.util.Collection;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.interfaces;
 
-import org.spongepowered.api.entity.player.User;
+import org.spongepowered.api.entity.living.player.User;
 
 public interface IMixinEntityPlayerMP {
 

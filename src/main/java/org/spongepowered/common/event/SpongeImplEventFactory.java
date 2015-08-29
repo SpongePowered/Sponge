@@ -25,13 +25,12 @@
 package org.spongepowered.common.event;
 
 import org.spongepowered.api.Game;
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.source.entity.living.player.PlayerJoinEvent;
-import org.spongepowered.api.event.source.entity.living.player.PlayerQuitEvent;
 import org.spongepowered.api.event.source.server.ServerLoadWorldEvent;
-import org.spongepowered.api.event.target.entity.living.player.RespawnPlayerEvent;
-import org.spongepowered.api.event.target.world.LoadWorldEvent;
+import org.spongepowered.api.event.source.entity.living.human.player.PlayerQuitEvent;
+import org.spongepowered.api.event.source.entity.living.human.player.PlayerJoinEvent;
+import org.spongepowered.api.event.target.entity.living.human.player.RespawnPlayerEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.Location;

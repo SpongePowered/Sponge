@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.text.title;
 import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S45PacketTitle;
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.asm.mixin.Mixin;

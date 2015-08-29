@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.world.WorldSettings;
-import org.spongepowered.api.entity.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;

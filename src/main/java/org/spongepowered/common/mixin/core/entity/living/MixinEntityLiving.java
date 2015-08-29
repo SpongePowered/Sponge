@@ -34,7 +34,7 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.target.entity.LeashEntityEvent;
 import org.spongepowered.api.event.target.entity.UnleashEntityEvent;

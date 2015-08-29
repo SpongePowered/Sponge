@@ -34,11 +34,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.source.entity.living.player.PlayerRetractFishingLineEvent;
+import org.spongepowered.api.event.target.entity.FishingEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -46,7 +46,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.entity.DamageHandler;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -108,7 +107,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                         .post(SpongeEventFactory.createPlayerHookEntity(Sponge.getGame(), (Player) this.angler, this,
                                 (org.spongepowered.api.entity.Entity) entity))) {
             if (this.getShooter() instanceof Entity) {
-                damageSource = DamageHandler.damage(this, (Entity) this.getShooter());
+                DamageSource.causeThrownDamage((Entity)(Object)this, (Entity) this.getShooter());
             }
             return entity.attackEntityFrom(damageSource, (float) this.getDamage());
         }
@@ -138,12 +137,11 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             exp = this.rand.nextInt(6) + 1;
         }
 
-        PlayerRetractFishingLineEvent event = SpongeEventFactory
+        FishingEvent.Retract.SourcePlayer event = SpongeEventFactory
                 .createPlayerRetractFishingLine(Sponge.getGame(), (Player) this.angler, this,
                         (org.spongepowered.api.item.inventory.ItemStack) itemStack, (org.spongepowered.api.entity.Entity) this.caughtEntity, exp);
         byte b0 = 0;
         if (!Sponge.getGame().getEventManager().post(event)) {
-            exp = event.getExperience();
             if (event.getCaughtEntity().isPresent()) {
                 this.caughtEntity = (Entity) event.getCaughtEntity().get();
 

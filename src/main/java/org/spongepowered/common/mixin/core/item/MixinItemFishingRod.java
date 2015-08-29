@@ -31,7 +31,7 @@ import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;

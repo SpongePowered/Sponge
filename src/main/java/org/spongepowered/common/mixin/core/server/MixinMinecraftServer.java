@@ -46,7 +46,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;

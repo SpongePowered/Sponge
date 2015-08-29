@@ -55,12 +55,12 @@ import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.source.entity.living.player.PlayerChangeSignEvent;
-import org.spongepowered.api.event.source.entity.living.player.PlayerQuitEvent;
-import org.spongepowered.api.event.target.entity.living.player.MovePlayerEvent;
+import org.spongepowered.api.event.source.entity.living.human.player.PlayerQuitEvent;
+import org.spongepowered.api.event.source.entity.living.human.player.PlayerChangeSignEvent;
+import org.spongepowered.api.event.target.entity.DisplaceEntityEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.text.Text;
@@ -297,7 +297,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> oldTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> newTransform = player.getTransform().setLocation(to).setRotation(torot);
-                MovePlayerEvent event = SpongeEventFactory.createMovePlayer(Sponge.getGame(), player, oldTransform, newTransform, oldTransform);
+                DisplaceEntityEvent.TargetPlayer event = SpongeEventFactory.createMovePlayer(Sponge.getGame(), player, oldTransform, newTransform, oldTransform);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setLocationAndRotation(from, fromrot);

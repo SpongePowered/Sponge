@@ -37,7 +37,7 @@ import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
 import net.minecraft.world.storage.SaveHandler;
-import org.spongepowered.api.entity.player.User;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.util.SpongeHooks;

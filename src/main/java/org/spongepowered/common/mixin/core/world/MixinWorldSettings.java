@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.entity.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;

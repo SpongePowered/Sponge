@@ -35,12 +35,13 @@ import net.minecraft.world.WorldType;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.entity.player.gamemode.GameMode;
-import org.spongepowered.api.entity.player.gamemode.GameModes;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.TeleporterAgent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBuilder;
 import org.spongepowered.api.world.WorldCreationSettings;
@@ -214,6 +215,12 @@ public class SpongeWorldBuilder implements WorldBuilder {
     public SpongeWorldBuilder isMod(boolean flag) {
         this.isMod = flag;
         return this;
+    }
+
+    @Override
+    public WorldBuilder teleporterAgent(TeleporterAgent agent) {
+        // TODO
+        return null;
     }
 
     @Override
