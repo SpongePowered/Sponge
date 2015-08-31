@@ -33,6 +33,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityType;
 
 public interface DataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> {
 
@@ -52,6 +53,8 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
     int getPriority();
 
     boolean supports(DataHolder dataHolder);
+
+    boolean supports(EntityType type);
 
     /**
      * Attempts to get the given {@link DataManipulator} of type {@code T} if

@@ -48,6 +48,7 @@ import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -278,12 +279,12 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     }
 
     @Override
-    public ImmutableSet<Key<?>> getKeys() {
+    public Set<Key<?>> getKeys() {
         return ImmutableSet.copyOf(this.keyFieldSetterMap.keySet());
     }
 
     @Override
-    public ImmutableSet<ImmutableValue<?>> getValues() {
+    public Set<ImmutableValue<?>> getValues() {
         ImmutableSet.Builder<ImmutableValue<?>> builder = ImmutableSet.builder();
         for (GetterFunction<Value<?>> function : this.keyValueMap.values()) {
             builder.add(checkNotNull(function.get()).asImmutable());

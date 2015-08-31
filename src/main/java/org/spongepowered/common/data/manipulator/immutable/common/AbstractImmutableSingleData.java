@@ -37,6 +37,8 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.util.GetterFunction;
 
+import java.util.Set;
+
 public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
         extends AbstractImmutableData<I, M> {
 
@@ -103,7 +105,7 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
     }
 
     @Override
-    public ImmutableSet<Key<?>> getKeys() {
+    public Set<Key<?>> getKeys() {
         return ImmutableSet.<Key<?>>of(this.usedKey);
     }
 

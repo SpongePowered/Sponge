@@ -40,6 +40,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 
+import java.util.List;
+
 @NonnullByDefault
 @Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)
 public abstract class MixinBlockState extends BlockStateBase implements BlockState {
@@ -57,7 +59,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators() {
+    public List<ImmutableDataManipulator<?, ?>> getManipulators() {
         if (this.manipulators == null) {
             this.manipulators = ((IMixinBlock) this.block).getManipulators(this);
         }

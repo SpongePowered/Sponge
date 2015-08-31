@@ -34,15 +34,20 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+
+import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -54,6 +59,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
     private final ImmutableSet<ImmutableValue<?>> values;
     private final ImmutableSet<Key<?>> keys;
+
+    public SpongeBlockSnapshot(BlockState blockState) {
+        this(blockState, null, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+    }
+
+    public SpongeBlockSnapshot(BlockState blockState, @Nullable Location<World> location) {
+        this(blockState, location, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+    }
 
     public SpongeBlockSnapshot(BlockState blockState, @Nullable Location<World> location, ImmutableList<ImmutableDataManipulator<?, ?>> extraData) {
         this.blockState = checkNotNull(blockState);
@@ -68,6 +81,26 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             keyBuilder.addAll(manipulator.getKeys());
         }
         this.values = builder.build();
+        this.keys = keyBuilder.build();
+    }
+
+    public SpongeBlockSnapshot(BlockState blockState, TileEntity entity) {
+        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        for (DataManipulator<?, ?> manipulator : entity.getContainers()) {
+            builder.add(manipulator.asImmutable());
+        }
+        this.blockState = checkNotNull(blockState);
+        this.location = entity.getLocation();
+        this.extraData = builder.build();
+        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
+        valueBuilder.addAll(this.blockState.getValues());
+        keyBuilder.addAll(this.blockState.getKeys());
+        for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
+            valueBuilder.addAll(manipulator.getValues());
+            keyBuilder.addAll(manipulator.getKeys());
+        }
+        this.values = valueBuilder.build();
         this.keys = keyBuilder.build();
     }
 
@@ -87,7 +120,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public ImmutableCollection<ImmutableDataManipulator<?, ?>> getManipulators() {
+    public List<ImmutableDataManipulator<?, ?>> getManipulators() {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder().addAll(this.blockState.getManipulators()).addAll(this.extraData).build();
     }
 
@@ -228,12 +261,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public ImmutableSet<Key<?>> getKeys() {
+    public Set<Key<?>> getKeys() {
         return this.keys;
     }
 
     @Override
-    public ImmutableSet<ImmutableValue<?>> getValues() {
+    public Set<ImmutableValue<?>> getValues() {
         return this.values;
     }
 }

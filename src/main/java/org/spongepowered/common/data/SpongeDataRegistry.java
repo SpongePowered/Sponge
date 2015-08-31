@@ -168,6 +168,10 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return Optional.fromNullable((DataManipulatorBuilder<T, I>) (Object) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 
+    public Optional<DataManipulatorBuilder<?, ?>> getWildBuilderForImmutable(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return Optional.<DataManipulatorBuilder<?, ?>>fromNullable((DataManipulatorBuilder<?, ?>) (Object) this.immutableBuilderMap.get(checkNotNull(immutable)));
+    }
+
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
     registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
                                  Class<? extends I> implImClass, DataProcessor<T, I> processor, DataManipulatorBuilder<T, I> builder) {
@@ -238,6 +242,10 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
     getImmutableProcessor(Class<I> immutableClass) {
         return Optional.fromNullable((DataProcessor<T, I>) (Object) this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
+    }
+
+    public Optional<DataProcessor> getWildImmutableProcessor(Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
+        return Optional.<DataProcessor>fromNullable(this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 
     public <I extends ImmutableDataManipulator<I, ?>> Optional<BlockDataProcessor<I>> getBlockDataFor(Class<I> manipulatorClass) {
