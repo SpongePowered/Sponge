@@ -67,7 +67,7 @@ public abstract class MixinText implements IMixinText {
 
     private IChatComponent initializeComponent(Locale locale) {
         if (this.localizedComponents == null) {
-            this.localizedComponents = Collections.synchronizedMap(new HashMap<Locale, IChatComponent>());
+            this.localizedComponents = Collections.synchronizedMap(new HashMap<>());
         }
         IChatComponent component = this.localizedComponents.get(locale);
         if (component == null) {

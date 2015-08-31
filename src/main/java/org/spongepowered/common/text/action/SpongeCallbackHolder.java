@@ -27,7 +27,6 @@ package org.spongepowered.common.text.action;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -35,22 +34,21 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.Consumer;
-import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.args.ArgumentParseException;
 import org.spongepowered.api.util.command.args.CommandArgs;
 import org.spongepowered.api.util.command.args.CommandContext;
 import org.spongepowered.api.util.command.args.CommandElement;
-import org.spongepowered.api.util.command.spec.CommandExecutor;
 import org.spongepowered.api.util.command.spec.CommandSpec;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -94,12 +92,9 @@ public class SpongeCallbackHolder {
         return CommandSpec.builder()
                 .description(t("Execute a callback registered as part of a Text object. Primarily for internal use"))
                 .arguments(new CallbackCommandElement(t("callback")))
-                .executor(new CommandExecutor() {
-                    @Override
-                    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                        args.<Consumer<CommandSource>>getOne("callback").get().accept(src);
-                        return CommandResult.success();
-                    }
+                .executor((src, args) -> {
+                    args.<Consumer<CommandSource>>getOne("callback").get().accept(src);
+                    return CommandResult.success();
                 }).build();
     }
 

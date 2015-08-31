@@ -26,7 +26,6 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
@@ -38,8 +37,6 @@ import org.spongepowered.api.util.command.CommandSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 /**
  * Pagination occurring for an iterable -- we don't know its size.
@@ -69,17 +66,10 @@ class IterablePagination extends ActivePagination {
         this.lastPage = page;
 
         if (getMaxContentLinesPerPage() <= 0) {
-            return Lists.newArrayList(Iterators.transform(this.countIterator, new Function<Map.Entry<Text, Integer>, Text>() {
-
-                @Nullable
-                @Override
-                public Text apply(Map.Entry<Text, Integer> input) {
-                    return input.getKey();
-                }
-            }));
+            return Lists.newArrayList(Iterators.transform(this.countIterator, Map.Entry::getKey));
         }
 
-        List<Text> ret = new ArrayList<Text>(getMaxContentLinesPerPage());
+        List<Text> ret = new ArrayList<>(getMaxContentLinesPerPage());
         int addedLines = 0;
         while (addedLines <= getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {
