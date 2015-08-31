@@ -114,14 +114,17 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer) {
-        // This has to use offerWildCard because of eclipse and OpenJDK6
-        return DataUtil.offerPlain((DataManipulator<?, ?>) (Object) valueContainer, this);
+        return offer(valueContainer, MergeFunction.IGNORE_ALL);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        // This has to use offerWildCard because of eclipse and OpenJDK6
-        return DataUtil.offerPlain((DataManipulator<?, ?>) (Object) valueContainer, this, function);
+        final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(valueContainer.getClass());
+        if (optional.isPresent()) {
+            return optional.get().set(this, valueContainer, function);
+        }
+        return DataTransactionBuilder.failResult(valueContainer.getValues());
     }
 
     @Override
