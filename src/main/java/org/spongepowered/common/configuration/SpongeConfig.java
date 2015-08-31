@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.configuration;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
@@ -49,8 +46,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
 public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
@@ -172,9 +168,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         try {
             this.configMapper.serialize(this.root.getNode(this.modId));
             this.loader.save(this.root);
-        } catch (IOException e) {
-            LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
-        } catch (ObjectMappingException e) {
+        } catch (IOException | ObjectMappingException e) {
             LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
         }
     }
@@ -186,9 +180,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                             TypeSerializers.getDefaultSerializers().newChild().registerType(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer()))
                     .setHeader(HEADER));
             this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
-        } catch (IOException e) {
-            LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
-        } catch (ObjectMappingException e) {
+        } catch (IOException | ObjectMappingException e) {
             LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
         }
     }
@@ -229,7 +221,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private ModuleCategory mixins = new ModuleCategory();
 
         @Setting("ip-sets")
-        private Map<String, List<IpSet>> ipSets = new HashMap<String, List<IpSet>>();
+        private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
         @Setting(value = MODULE_BUNGEECORD)
         private BungeeCordCategory bungeeCord = new BungeeCordCategory();
@@ -251,17 +243,20 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
 
         public Map<String, Predicate<InetAddress>> getIpSets() {
-            return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
-                @Nullable
-                @Override
-                public Predicate<InetAddress> apply(List<IpSet> input) {
-                    return Predicates.and(input);
-                }
-            }));
+            return ImmutableMap.copyOf(Maps.transformValues(this.ipSets,
+                    set -> set.stream()
+                            .<Predicate<InetAddress>>map(i -> i)
+                            .reduce(Predicate::and).orElse(val -> false)));
         }
 
         public Predicate<InetAddress> getIpSet(String name) {
-            return this.ipSets.containsKey(name) ? Predicates.<InetAddress>and(this.ipSets.get(name)) : null;
+            List<IpSet> ret = this.ipSets.get(name);
+            if (ret == null) {
+                return null;
+            }
+            return ret.stream()
+                    .<Predicate<InetAddress>>map(i -> i)
+                    .reduce(Predicate::and).orElse(val -> false);
         }
     }
 
@@ -348,7 +343,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class SqlCategory extends Category {
         @Setting(comment = "Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
-        private Map<String, String> aliases = new HashMap<String, String>();
+        private Map<String, String> aliases = new HashMap<>();
 
         public Map<String, String> getAliases() {
             return this.aliases;
@@ -358,7 +353,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class CommandsCategory extends Category {
         @Setting(comment = "A mapping from unqualified command alias to plugin id of the plugin that should handle a certain command")
-        private Map<String, String> aliases = new HashMap<String, String>();
+        private Map<String, String> aliases = new HashMap<>();
 
         public Map<String, String> getAliases() {
             return this.aliases;

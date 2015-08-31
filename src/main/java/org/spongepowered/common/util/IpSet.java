@@ -26,7 +26,6 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -36,6 +35,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.function.Predicate;
 
 public class IpSet implements Predicate<InetAddress> {
     private final InetAddress addr;
@@ -47,7 +47,7 @@ public class IpSet implements Predicate<InetAddress> {
     }
 
     @Override
-    public boolean apply(InetAddress input) {
+    public boolean test(InetAddress input) {
         byte[] address = input.getAddress();
         byte[] checkAddr = this.addr.getAddress();
         if (address.length != checkAddr.length) {

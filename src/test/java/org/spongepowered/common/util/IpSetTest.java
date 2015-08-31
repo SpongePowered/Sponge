@@ -35,29 +35,29 @@ public class IpSetTest {
     @Test
     public void testIpv4Set() throws UnknownHostException {
         IpSet spec = IpSet.fromCidr("10.42.0.0/16");
-        assertTrue(spec.apply(InetAddress.getByName("10.42.2.5")));
-        assertFalse(spec.apply(InetAddress.getByName("10.43.2.5")));
+        assertTrue(spec.test(InetAddress.getByName("10.42.2.5")));
+        assertFalse(spec.test(InetAddress.getByName("10.43.2.5")));
     }
 
     @Test
     public void testIpv6Set() throws UnknownHostException {
         IpSet spec = IpSet.fromCidr("[fc00::]/8");
-        assertTrue(spec.apply(InetAddress.getByName("fcc0:c0b2:2a14:7afc:5216:1854:1a2f:2c13")));
+        assertTrue(spec.test(InetAddress.getByName("fcc0:c0b2:2a14:7afc:5216:1854:1a2f:2c13")));
         spec = IpSet.fromCidr("::/0");
-        assertTrue(spec.apply(InetAddress.getByName("::dead:beef")));
+        assertTrue(spec.test(InetAddress.getByName("::dead:beef")));
     }
 
     @Test
     public void testNonByteAlignedSets() throws UnknownHostException {
         IpSet spec = IpSet.fromCidr("[2064:45:300::]/40");
-        assertTrue(spec.apply(InetAddress.getByName("2064:45:310::cafe")));
-        assertFalse(spec.apply(InetAddress.getByName("2064:45:410::cafe")));
+        assertTrue(spec.test(InetAddress.getByName("2064:45:310::cafe")));
+        assertFalse(spec.test(InetAddress.getByName("2064:45:410::cafe")));
     }
 
     @Test
     public void testFullLengthSets() throws UnknownHostException {
         IpSet specv4 = IpSet.fromCidr("10.0.0.1/32");
-        assertTrue(specv4.apply(InetAddress.getByName("10.0.0.1")));
-        assertFalse(specv4.apply(InetAddress.getByName("10.0.0.2")));
+        assertTrue(specv4.test(InetAddress.getByName("10.0.0.1")));
+        assertFalse(specv4.test(InetAddress.getByName("10.0.0.2")));
     }
 }

@@ -48,7 +48,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public Map<Subject, Boolean> getAllWithPermission(String permission) {
-        final Map<Subject, Boolean> ret = new HashMap<Subject, Boolean>();
+        final Map<Subject, Boolean> ret = new HashMap<>();
         for (Subject subj : getAllSubjects()) {
             Tristate state = subj.getPermissionValue(subj.getActiveContexts(), permission);
             if (state != Tristate.UNDEFINED) {
@@ -60,7 +60,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public Map<Subject, Boolean> getAllWithPermission(Set<Context> contexts, String permission) {
-        final Map<Subject, Boolean> ret = new HashMap<Subject, Boolean>();
+        final Map<Subject, Boolean> ret = new HashMap<>();
         for (Subject subj : getAllSubjects()) {
             Tristate state = subj.getPermissionValue(contexts, permission);
             if (state != Tristate.UNDEFINED) {

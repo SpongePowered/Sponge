@@ -27,7 +27,6 @@ package org.spongepowered.common.service.pagination;
 import static org.spongepowered.api.util.command.args.GenericArguments.integer;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
@@ -36,6 +35,7 @@ import org.spongepowered.api.service.pagination.PaginationBuilder;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.StartsWithPredicate;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandResult;
@@ -62,7 +62,7 @@ import javax.annotation.Nullable;
 public class SpongePaginationService implements PaginationService {
 
     static class SourcePaginations {
-        private final Map<UUID, ActivePagination> paginations = new ConcurrentHashMap<UUID, ActivePagination>();
+        private final Map<UUID, ActivePagination> paginations = new ConcurrentHashMap<>();
         private volatile UUID lastUuid;
 
         public ActivePagination get(UUID uuid) {
@@ -84,8 +84,7 @@ public class SpongePaginationService implements PaginationService {
             return this.lastUuid;
         }
     }
-    final ConcurrentMap<Class<? extends CommandSource>, PaginationCalculator<?>> calculators = new ConcurrentHashMap<Class<? extends
-            CommandSource>, PaginationCalculator<?>>();
+    final ConcurrentMap<Class<? extends CommandSource>, PaginationCalculator<?>> calculators = new ConcurrentHashMap<>();
     final ConcurrentMap<CommandSource, SourcePaginations> activePaginations = new MapMaker().weakKeys().makeMap();
     private final AtomicBoolean commandRegistered = new AtomicBoolean();
 
@@ -105,31 +104,22 @@ public class SpongePaginationService implements PaginationService {
                     .arguments(new ActivePaginationCommandElement(t("pagination-id")))
                     .child(CommandSpec.builder()
                             .description(t("Go to the next page"))
-                            .executor(new CommandExecutor() {
-                                @Override
-                                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                                    args.<ActivePagination>getOne("pagination-id").get().nextPage();
-                                    return CommandResult.success();
-                                }
+                            .executor((src, args) -> {
+                                args.<ActivePagination>getOne("pagination-id").get().nextPage();
+                                return CommandResult.success();
                             }).build(), "next", "n")
                     .child(CommandSpec.builder()
                             .description(t("Go to the previous page"))
-                            .executor(new CommandExecutor() {
-                                @Override
-                                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                                    args.<ActivePagination>getOne("pagination-id").get().previousPage();
-                                    return CommandResult.success();
-                                }
+                            .executor((src, args) -> {
+                                args.<ActivePagination>getOne("pagination-id").get().previousPage();
+                                return CommandResult.success();
                             }).build(), "previous", "prev", "p")
                     .child(CommandSpec.builder()
                             .description(t("Go to a specific page"))
                             .arguments(integer(t("page")))
-                            .executor(new CommandExecutor() {
-                                @Override
-                                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                                    args.<ActivePagination>getOne("pagination-id").get().specificPage(args.<Integer>getOne("page").get());
-                                    return CommandResult.success();
-                                }
+                            .executor((src, args) -> {
+                                args.<ActivePagination>getOne("pagination-id").get().specificPage(args.<Integer>getOne("page").get());
+                                return CommandResult.success();
                             }).build(), "page")
                     .build(), "pagination", "page");
         }
@@ -216,10 +206,12 @@ public class SpongePaginationService implements PaginationService {
 
             final Optional<String> optNext = args.nextIfPresent();
             if (optNext.isPresent()) {
-                return ImmutableList.copyOf(Iterables.filter(
-                        Iterables.transform(paginations.keys(), Functions.toStringFunction()), new StartsWithPredicate(optNext.get())));
+                return paginations.keys().stream()
+                        .map(Object::toString)
+                        .filter(new StartsWithPredicate(optNext.get()))
+                        .collect(GuavaCollectors.toImmutableList());
             } else {
-                return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Functions.toStringFunction()));
+                return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
             }
         }
     }
