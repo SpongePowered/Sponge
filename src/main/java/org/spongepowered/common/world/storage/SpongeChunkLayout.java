@@ -28,9 +28,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.storage.ChunkLayout;
+
+import java.util.Optional;
 
 public final class SpongeChunkLayout implements ChunkLayout {
 
@@ -112,7 +113,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
     @Override
     public Optional<Vector3i> toChunk(int x, int y, int z) {
         final Vector3i chunkCoords = new Vector3i(x >> 4, y >> 8, z >> 4);
-        return isValidChunk(chunkCoords) ? Optional.of(chunkCoords) : Optional.<Vector3i>absent();
+        return isValidChunk(chunkCoords) ? Optional.of(chunkCoords) : Optional.<Vector3i>empty();
     }
 
     @Override
@@ -123,7 +124,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public Optional<Vector3i> toWorld(int x, int y, int z) {
-        return isValidChunk(x, y, z) ? Optional.of(new Vector3i(x << 4, 0, z << 4)) : Optional.<Vector3i>absent();
+        return isValidChunk(x, y, z) ? Optional.of(new Vector3i(x << 4, 0, z << 4)) : Optional.<Vector3i>empty();
     }
 
     @Override
@@ -136,7 +137,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
     @Override
     public Optional<Vector3i> addToChunk(int cx, int cy, int cz, int ox, int oy, int oz) {
         final Vector3i newChunkCoords = new Vector3i(cx + ox, cy + oy, cz + oz);
-        return isValidChunk(newChunkCoords) ? Optional.of(newChunkCoords) : Optional.<Vector3i>absent();
+        return isValidChunk(newChunkCoords) ? Optional.of(newChunkCoords) : Optional.<Vector3i>empty();
     }
 
     @Override

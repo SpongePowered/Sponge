@@ -28,7 +28,6 @@ import static org.spongepowered.api.util.command.args.GenericArguments.optional;
 import static org.spongepowered.api.util.command.args.GenericArguments.string;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -51,6 +50,7 @@ import org.spongepowered.api.util.command.spec.CommandSpec;
 import org.spongepowered.common.Sponge;
 
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.TreeSet;
 
 public class SpongeHelpCommand {
@@ -129,7 +129,7 @@ public class SpongeHelpCommand {
         if (longDescription.isPresent()) {
             text.onHover(TextActions.showText(longDescription.get()));
         }
-        return Texts.of(text, " ", description.or(mapping.getCallable().getUsage(source)));
+        return Texts.of(text, " ", description.orElse(mapping.getCallable().getUsage(source)));
     }
 
 }

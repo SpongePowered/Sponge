@@ -25,9 +25,6 @@
 package org.spongepowered.common;
 
 import com.google.common.base.Predicate;
-import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.common.command.SpongeHelpCommand;
-
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -40,6 +37,7 @@ import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.command.SimpleCommandService;
 import org.spongepowered.api.service.config.ConfigService;
 import org.spongepowered.api.service.pagination.PaginationService;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.rcon.RconService;
@@ -51,6 +49,7 @@ import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
+import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;

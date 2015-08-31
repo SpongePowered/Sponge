@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntitySign;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+
+import java.util.Optional;
 
 public class SpongeSignBuilder extends AbstractTileBuilder<Sign> {
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -34,10 +33,11 @@ import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class SkullDataBuilder implements DataManipulatorBuilder<SkullData, ImmutableSkullData> {
 
@@ -57,6 +57,6 @@ public class SkullDataBuilder implements DataManipulatorBuilder<SkullData, Immut
             return Optional.<SkullData>of(new SpongeSkullData(
                 Sponge.getGame().getRegistry().getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

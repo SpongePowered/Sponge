@@ -25,7 +25,6 @@
 package org.spongepowered.common.text.selector;
 
 import org.spongepowered.api.CatalogType;
-
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;

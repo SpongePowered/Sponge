@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
@@ -37,6 +36,8 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class GameModeDataBuilder implements DataManipulatorBuilder<GameModeData, ImmutableGameModeData> {
 
@@ -51,7 +52,7 @@ public class GameModeDataBuilder implements DataManipulatorBuilder<GameModeData,
             return Optional.<GameModeData>of(new SpongeGameModeData(
                     (GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -61,6 +62,6 @@ public class GameModeDataBuilder implements DataManipulatorBuilder<GameModeData,
         if (optional.isPresent()) {
             return Optional.<GameModeData>of(new SpongeGameModeData(optional.get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

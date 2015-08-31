@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.ItemStack;
@@ -46,6 +45,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
+import java.util.Optional;
+
 public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData, ImmutableHealthData> {
 
     @Override
@@ -55,7 +56,7 @@ public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData,
 
     @SuppressWarnings("unused")
     @Override
-    public Optional<HealthData> from(DataHolder dataHolder) {
+    public java.util.Optional<HealthData> from(DataHolder dataHolder) {
         if (dataHolder instanceof EntityLivingBase) {
             final SpongeHealthData healthData = new SpongeHealthData();
             final double health = ((EntityLivingBase) dataHolder).getHealth();
@@ -63,26 +64,26 @@ public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData,
             return Optional.<HealthData>of(healthData.setHealth(health).setMaxHealth(maxHealth));
         } else if (dataHolder instanceof ItemStack) {
             final ItemStack itemStack = ((ItemStack) dataHolder);
-            return Optional.absent(); // Pending decision on whether we should store custom data onto itemstacks
+            return Optional.empty(); // Pending decision on whether we should store custom data onto itemstacks
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
 
     }
 
     @Override
-    public Optional<HealthData> fill(DataHolder dataHolder, HealthData manipulator, MergeFunction overlap) {
+    public java.util.Optional<HealthData> fill(DataHolder dataHolder, HealthData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof EntityLivingBase) {
             final HealthData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
             manipulator.set(Keys.MAX_HEALTH, merged.maxHealth().get())
                 .set(Keys.HEALTH, merged.health().get());
             return Optional.of(manipulator);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<HealthData> fill(DataContainer container, HealthData healthData) {
+    public java.util.Optional<HealthData> fill(DataContainer container, HealthData healthData) {
         healthData.set(Keys.MAX_HEALTH, getData(container, Keys.MAX_HEALTH));
         healthData.set(Keys.HEALTH, getData(container, Keys.HEALTH));
         return Optional.of(healthData);
@@ -95,7 +96,7 @@ public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData,
             final double prevMaxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
             final double prevHealth = ((EntityLivingBase) dataHolder).getHealth();
             final EntityLivingBase livingBase = ((EntityLivingBase) dataHolder);
-            final HealthData newData = checkNotNull(function).merge(from(dataHolder).orNull(), manipulator);
+            final HealthData newData = checkNotNull(function).merge(from(dataHolder).orElse(null), manipulator);
             final float newMaxHealth = newData.maxHealth().get().floatValue();
             final float newHealth = newData.health().get().floatValue();
 
@@ -129,8 +130,8 @@ public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData,
     }
 
     @Override
-    public Optional<ImmutableHealthData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableHealthData immutable) {
-        return Optional.absent();
+    public java.util.Optional<ImmutableHealthData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableHealthData immutable) {
+        return Optional.empty();
     }
 
     @Override
@@ -139,13 +140,13 @@ public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData,
     }
 
     @Override
-    public Optional<HealthData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<HealthData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityLivingBase) {
             final double maxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
             final double health = ((EntityLivingBase) dataHolder).getHealth();
             return Optional.<HealthData>of(new SpongeHealthData(health, maxHealth));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

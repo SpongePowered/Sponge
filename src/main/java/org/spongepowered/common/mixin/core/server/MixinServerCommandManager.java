@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import org.spongepowered.common.command.WrapperCommandSource;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.CommandResultStats;
@@ -44,11 +42,13 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(ServerCommandManager.class)
@@ -83,7 +83,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         updateStat(sender, CommandResultStats.Type.AFFECTED_ITEMS, result.getAffectedItems());
         updateStat(sender, CommandResultStats.Type.QUERY_RESULT, result.getQueryResult());
         updateStat(sender, CommandResultStats.Type.SUCCESS_COUNT, result.getSuccessCount());
-        return result.getSuccessCount().or(0);
+        return result.getSuccessCount().orElse(0);
 
         //return super.executeCommand(sender, command); // Try Vanilla instead
     }

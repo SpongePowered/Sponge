@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.explosive;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
@@ -37,6 +36,8 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(net.minecraft.entity.item.EntityTNTPrimed.class)
@@ -82,6 +83,6 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
 
     @Override
     public Optional<Living> getDetonator() {
-        return Optional.fromNullable((Living) this.tntPlacedBy);
+        return Optional.ofNullable((Living) this.tntPlacedBy);
     }
 }

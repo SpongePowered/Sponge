@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -36,6 +35,8 @@ import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 public class SpongePotionEffectBuilder implements DataBuilder<PotionEffect> {
 

@@ -40,8 +40,8 @@ import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeBreathingData extends AbstractImmutableData<ImmutableBreathingData, BreathingData> implements ImmutableBreathingData {
 
-    private int maxAir;
-    private int remainingAir;
+    private final int maxAir;
+    private final int remainingAir;
 
     public ImmutableSpongeBreathingData(int maxAir, int remainingAir) {
         super(ImmutableBreathingData.class);
@@ -85,11 +85,11 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.MAX_AIR, this.maxAir, this.maxAir);
     }
 
-    public int getMaxAir() {
+    private int getMaxAir() {
         return this.maxAir;
     }
 
-    public int getRemainingAir() {
+    private int getRemainingAir() {
         return this.remainingAir;
     }
 

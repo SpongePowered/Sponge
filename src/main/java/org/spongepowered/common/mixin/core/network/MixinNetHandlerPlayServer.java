@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.network;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
@@ -79,6 +78,7 @@ import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)

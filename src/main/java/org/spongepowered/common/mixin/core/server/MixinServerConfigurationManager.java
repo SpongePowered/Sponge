@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
@@ -84,6 +83,7 @@ import org.spongepowered.common.world.border.PlayerBorderListener;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;

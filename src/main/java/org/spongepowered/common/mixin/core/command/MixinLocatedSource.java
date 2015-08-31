@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import org.spongepowered.common.interfaces.IMixinCommandSender;
-
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntityCommandBlock;
@@ -33,6 +31,7 @@ import org.spongepowered.api.util.command.source.LocatedSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.util.VecHelper;
 

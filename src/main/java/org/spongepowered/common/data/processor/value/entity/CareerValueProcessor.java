@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -39,6 +38,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
+import java.util.Optional;
+
 public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, Value<Career>> {
 
     public CareerValueProcessor() {
@@ -51,7 +52,7 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, V
     }
 
     @Override
-    public Optional<Career> getValueFromContainer(ValueContainer<?> container) {
+    public java.util.Optional<Career> getValueFromContainer(ValueContainer<?> container) {
         return container instanceof IMixinVillager ? Optional.of(((IMixinVillager) container).getCareer()) : Optional.<Career>absent();
     }
 

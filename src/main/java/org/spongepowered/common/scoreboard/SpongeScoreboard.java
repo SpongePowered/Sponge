@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scoreboard;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -34,7 +33,6 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
@@ -49,6 +47,7 @@ import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -74,12 +73,12 @@ public class SpongeScoreboard implements Scoreboard {
 
     @Override
     public Optional<Objective> getObjective(String name) {
-        return Optional.fromNullable(this.objectives.get(name));
+        return Optional.ofNullable(this.objectives.get(name));
     }
 
     @Override
     public Optional<Objective> getObjective(DisplaySlot slot) {
-        return Optional.fromNullable(this.displaySlots.get(slot));
+        return Optional.ofNullable(this.displaySlots.get(slot));
     }
 
     @Override
@@ -172,12 +171,12 @@ public class SpongeScoreboard implements Scoreboard {
 
     @Override
     public Optional<Team> getMemberTeam(Text member) {
-        return Optional.fromNullable(this.memberTeams.get(member));
+        return Optional.ofNullable(this.memberTeams.get(member));
     }
 
     @Override
     public Optional<Team> getTeam(String teamName) {
-        return Optional.fromNullable(this.teams.get(teamName));
+        return Optional.ofNullable(this.teams.get(teamName));
     }
 
     public void addMemberToTeam(Text member, Team team) {

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -36,6 +35,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IMixinEntity;
+
+import java.util.Optional;
 
 @SuppressWarnings("ConstantConditions")
 public class EyeLocationValueProcessor extends AbstractSpongeValueProcessor<Vector3d, Value<Vector3d>> {
@@ -55,12 +56,12 @@ public class EyeLocationValueProcessor extends AbstractSpongeValueProcessor<Vect
     }
 
     @Override
-    public Optional<Vector3d> getValueFromContainer(ValueContainer<?> container) {
+    public java.util.Optional<Vector3d> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final Entity entity = (Entity) container;
             return Optional.of(new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

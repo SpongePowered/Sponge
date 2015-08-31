@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataContainer;
@@ -51,6 +50,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcesso
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
+import java.util.Optional;
+
 public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeData, ImmutableGameModeData> {
 
     private static ImmutableValue<GameMode> getGameModeValue(GameMode gameMode) {
@@ -63,28 +64,28 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     }
 
     @Override
-    public Optional<GameModeData> from(DataHolder dataHolder) {
+    public java.util.Optional<GameModeData> from(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             if (dataHolder instanceof EntityPlayerMP) {
                 return Optional.<GameModeData>of(new SpongeGameModeData((GameMode) (Object) ((EntityPlayerMP) dataHolder)
                     .theItemInWorldManager.getGameType()));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<GameModeData> fill(DataHolder dataHolder, GameModeData manipulator, MergeFunction overlap) {
+    public java.util.Optional<GameModeData> fill(DataHolder dataHolder, GameModeData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof EntityPlayerMP) {
             checkNotNull(overlap, "Merge function cannot be null!");
             final GameModeData original = from(dataHolder).get();
             return Optional.of(manipulator.set(Keys.GAME_MODE, overlap.merge(manipulator, original).type().get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<GameModeData> fill(DataContainer container, GameModeData gameModeData) {
+    public java.util.Optional<GameModeData> fill(DataContainer container, GameModeData gameModeData) {
         final String modeId = DataUtil.getData(container, Keys.GAME_MODE, String.class);
         final Optional<GameMode> optional = Sponge.getSpongeRegistry().getType(GameMode.class, modeId);
         if (optional.isPresent()) {
@@ -111,10 +112,10 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     }
 
     @Override
-    public Optional<ImmutableGameModeData> with(Key<? extends BaseValue<?>> key, Object value,
-            ImmutableGameModeData immutable) {
+    public java.util.Optional<ImmutableGameModeData> with(Key<? extends BaseValue<?>> key, Object value,
+                                                          ImmutableGameModeData immutable) {
         if (!key.equals(Keys.GAME_MODE)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.<ImmutableGameModeData>of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGameModeData.class, (GameMode) value));
     }
@@ -125,7 +126,7 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     }
 
     @Override
-    public Optional<GameModeData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<GameModeData> createFrom(DataHolder dataHolder) {
         return from(dataHolder);
     }
 }

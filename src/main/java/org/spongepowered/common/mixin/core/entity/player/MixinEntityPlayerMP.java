@@ -30,7 +30,6 @@ import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -40,7 +39,6 @@ import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.LocaleUtils;
@@ -94,6 +92,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)

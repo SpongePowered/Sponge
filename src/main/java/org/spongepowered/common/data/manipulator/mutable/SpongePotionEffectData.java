@@ -50,7 +50,7 @@ public class SpongePotionEffectData extends AbstractData<PotionEffectData, Immut
 
     @Override
     public ListValue<PotionEffect> effects() {
-        return new SpongeListValue<PotionEffect>(Keys.POTION_EFFECTS, this.effects);
+        return new SpongeListValue<>(Keys.POTION_EFFECTS, this.effects);
     }
 
     @Override
@@ -74,8 +74,18 @@ public class SpongePotionEffectData extends AbstractData<PotionEffectData, Immut
             .set(Keys.POTION_EFFECTS.getQuery(), this.effects);
     }
 
+    public List<PotionEffect> getEffects() {
+        return Lists.newArrayList(this.effects);
+    }
+
+    public void setEffects(List<PotionEffect> effects) {
+        this.effects = Lists.newArrayList(effects);
+    }
+
     @Override
     protected void registerGettersAndSetters() {
-        // TODO
+        registerFieldGetter(Keys.POTION_EFFECTS, this::getEffects);
+        registerFieldSetter(Keys.POTION_EFFECTS, value1 -> setEffects((List<PotionEffect>) value1));
+        registerKeyValue(Keys.POTION_EFFECTS, this::effects);
     }
 }

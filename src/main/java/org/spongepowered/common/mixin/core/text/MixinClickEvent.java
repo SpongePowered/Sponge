@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.event.ClickEvent;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
@@ -39,6 +38,7 @@ import org.spongepowered.common.text.action.SpongeCallbackHolder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(ClickEvent.class)

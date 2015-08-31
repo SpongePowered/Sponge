@@ -26,10 +26,9 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
@@ -42,6 +41,8 @@ import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectio
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -76,7 +77,7 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
     }
 
     @Override
-    public ImmutableWeightedEntityCollectionValue with(WeightedEntity... elements) {
+    public ImmutableWeightedEntityCollectionValue with(Iterable<WeightedEntity> elements) {
         final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
         weightedEntities.addAll(this.actualValue);
         weightedEntities.addAll(ImmutableList.copyOf(elements));
@@ -117,7 +118,7 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
     public ImmutableWeightedEntityCollectionValue withoutAll(Predicate<WeightedEntity> predicate) {
         final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
         for (WeightedEntity entity : this.actualValue) {
-            if (!predicate.apply(entity)) {
+            if (!predicate.test(entity)) {
                 weightedEntities.add(entity);
             }
         }
@@ -131,7 +132,7 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
 
     @Override
     public ImmutableWeightedEntityCollectionValue with(EntityType entityType, Collection<DataManipulator<?, ?>> entityData) {
-        return with(new WeightedEntity(entityType, 1, entityData));
+        return with(Lists.newArrayList(new WeightedEntity(entityType, 1, entityData)));
     }
 
     @Nullable

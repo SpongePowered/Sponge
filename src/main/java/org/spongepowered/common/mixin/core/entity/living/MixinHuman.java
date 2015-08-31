@@ -26,13 +26,14 @@ package org.spongepowered.common.mixin.core.entity.living;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+
+import java.util.Optional;
 
 @Mixin(value = EntityHuman.class, remap = false)
 public abstract class MixinHuman extends MixinEntityLivingBase implements Human {
@@ -52,7 +53,7 @@ public abstract class MixinHuman extends MixinEntityLivingBase implements Human 
 
     @Override
     public Optional<Inventory> getOpenInventory() {
-        return Optional.fromNullable(this.openInventory);
+        return Optional.ofNullable(this.openInventory);
     }
 
     @Override

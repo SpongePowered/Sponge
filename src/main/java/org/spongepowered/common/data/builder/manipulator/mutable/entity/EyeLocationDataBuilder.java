@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -36,6 +35,8 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
 import org.spongepowered.common.data.util.DataUtil;
 
+import java.util.Optional;
+
 public class EyeLocationDataBuilder implements DataManipulatorBuilder<EyeLocationData, ImmutableEyeLocationData> {
 
     @Override
@@ -44,7 +45,7 @@ public class EyeLocationDataBuilder implements DataManipulatorBuilder<EyeLocatio
     }
 
     @Override
-    public Optional<EyeLocationData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<EyeLocationData> createFrom(DataHolder dataHolder) {
         return null;
     }
 
@@ -55,6 +56,6 @@ public class EyeLocationDataBuilder implements DataManipulatorBuilder<EyeLocatio
             final Vector3d eyeLocation = DataUtil.getData(container, Keys.EYE_LOCATION, Vector3d.class);
             return Optional.<EyeLocationData>of(new SpongeEyeLocationData(eyeLocation.sub(0, eyeHeight, 0), eyeHeight, eyeLocation));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

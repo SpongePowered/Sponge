@@ -41,7 +41,7 @@ import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeRepresentedItemData extends AbstractImmutableData<ImmutableRepresentedItemData, RepresentedItemData> implements ImmutableRepresentedItemData {
 
-    private ItemStack itemStack;
+    private final ItemStack itemStack;
 
     public ImmutableSpongeRepresentedItemData(ItemStack itemStack) {
         super(ImmutableRepresentedItemData.class);

@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
@@ -41,7 +40,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.entity.player.gamemode.GameMode;
 import org.spongepowered.api.entity.player.gamemode.GameModes;
 import org.spongepowered.api.scoreboard.Team;
@@ -68,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -176,7 +175,7 @@ public class SelectorResolver {
         addTeamFilters(filters);
         addScoreFilters(filters);
         SelectorType selectorType = sel.getType();
-        Optional<Argument.Invertible<EntityType>> type = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
+        Optional<Invertible<EntityType>> type = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
         // isn't an ALL_ENTITIES selector or it is a RANDOM selector for only players
         boolean isPlayerOnlySelector =
             selectorType == SelectorTypes.ALL_PLAYERS || selectorType == SelectorTypes.NEAREST_PLAYER
@@ -233,7 +232,7 @@ public class SelectorResolver {
 
     private void addGamemodeFilters(List<Predicate<Entity>> filters) {
         Selector sel = this.selector;
-        Optional<GameMode> gamemode = sel.get(ArgumentTypes.GAME_MODE);
+        java.util.Optional<GameMode> gamemode = sel.get(ArgumentTypes.GAME_MODE);
         // If the gamemode is NOT_SET, that means accept any
         if (gamemode.isPresent() && gamemode.get() != GameModes.NOT_SET) {
             final GameMode actualMode = gamemode.get();
@@ -241,7 +240,7 @@ public class SelectorResolver {
 
                 @Override
                 public boolean apply(Entity input) {
-                    Optional<GameModeData> mode = input.get(GameModeData.class);
+                    java.util.Optional<GameModeData> mode = input.get(GameModeData.class);
                     return mode.isPresent() && mode.get() == actualMode;
                 }
 
@@ -251,30 +250,20 @@ public class SelectorResolver {
 
     private void addLevelFilters(List<Predicate<Entity>> filters) {
         Selector sel = this.selector;
-        Optional<Integer> levelMin = sel.get(ArgumentTypes.LEVEL.minimum());
-        Optional<Integer> levelMax = sel.get(ArgumentTypes.LEVEL.maximum());
+        java.util.Optional<Integer> levelMin = sel.get(ArgumentTypes.LEVEL.minimum());
+        java.util.Optional<Integer> levelMax = sel.get(ArgumentTypes.LEVEL.maximum());
         if (levelMin.isPresent()) {
             final int actualMin = levelMin.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().level().get() >= actualMin;
-                }
-
+            filters.add(input -> {
+                java.util.Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                return xp.isPresent() && xp.get().level().get() >= actualMin;
             });
         }
         if (levelMax.isPresent()) {
             final int actualMax = levelMax.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().level().get() <= actualMax;
-                }
-
+            filters.add(input -> {
+                java.util.Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                return xp.isPresent() && xp.get().level().get() <= actualMax;
             });
         }
     }
@@ -285,14 +274,9 @@ public class SelectorResolver {
         if (nameOpt.isPresent()) {
             final String name = nameOpt.get().getValue();
             final boolean inverted = nameOpt.get().isInverted();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
-                    return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
-                }
-
+            filters.add(input -> {
+                java.util.Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
+                return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
             });
         }
     }
@@ -403,7 +387,7 @@ public class SelectorResolver {
             final boolean inverted = teamArg.isInverted();
             ImmutableSet.Builder<Team> teamBuilder = ImmutableSet.builder();
             for (World w : worlds) {
-                teamBuilder.addAll(w.getScoreboard().getTeam(teamArg.getValue()).asSet());
+                teamBuilder.addAll(w.getScoreboard().getTeam(teamArg.getValue()).asSet()); // TODO
             }
             final Collection<Team> teams = teamBuilder.build();
             filters.add(new Predicate<Entity>() {

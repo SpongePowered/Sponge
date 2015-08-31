@@ -24,20 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.entity.player.User;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.service.profile.GameProfileResolver;
-import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -59,6 +54,7 @@ import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(Scoreboard.class)

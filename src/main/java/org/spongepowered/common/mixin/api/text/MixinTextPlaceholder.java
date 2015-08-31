@@ -25,7 +25,6 @@
 
 package org.spongepowered.common.mixin.api.text;
 
-import com.google.common.base.Optional;
 import net.minecraft.util.ChatComponentStyle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,6 +33,7 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.ChatComponentPlaceholder;
 
 import java.util.Locale;
+import java.util.Optional;
 
 @Mixin(value = Text.Placeholder.class, remap = false)
 public class MixinTextPlaceholder extends MixinText {

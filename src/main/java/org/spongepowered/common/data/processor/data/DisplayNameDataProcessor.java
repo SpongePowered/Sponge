@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -50,6 +49,8 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 
+import java.util.Optional;
+
 @SuppressWarnings("deprecation")
 public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<DisplayNameData, ImmutableDisplayNameData> {
 
@@ -59,7 +60,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
     }
 
     @Override
-    public Optional<DisplayNameData> from(DataHolder dataHolder) {
+    public java.util.Optional<DisplayNameData> from(DataHolder dataHolder) {
         if (dataHolder instanceof Entity && ((Entity) dataHolder).hasCustomName()) {
             final String displayName = ((Entity) dataHolder).getCustomNameTag();
             final boolean shows = ((Entity) dataHolder).getAlwaysRenderNameTag();
@@ -78,7 +79,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                 final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(displayString));
                 return Optional.of(data);
             } else {
-                return Optional.absent();
+                return Optional.empty();
             }
         } else if (dataHolder instanceof IWorldNameable) {
             if (((IWorldNameable) dataHolder).hasCustomName()) {
@@ -87,23 +88,23 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                 return Optional.of(data);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<DisplayNameData> fill(DataHolder dataHolder, DisplayNameData manipulator, MergeFunction overlap) {
+    public java.util.Optional<DisplayNameData> fill(DataHolder dataHolder, DisplayNameData manipulator, MergeFunction overlap) {
         if (supports(dataHolder)) {
-            final DisplayNameData data = from(dataHolder).orNull();
+            final DisplayNameData data = from(dataHolder).orElse(null);
             final DisplayNameData newData = checkNotNull(overlap.merge(checkNotNull(manipulator), data));
             final Text display = newData.displayName().get();
             final boolean displays = newData.customNameVisible().get();
             return Optional.of(manipulator.set(Keys.DISPLAY_NAME, display).set(Keys.SHOWS_DISPLAY_NAME, displays));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<DisplayNameData> fill(DataContainer container, DisplayNameData displayNameData) {
+    public java.util.Optional<DisplayNameData> fill(DataContainer container, DisplayNameData displayNameData) {
         final String json = DataUtil.getData(container, Keys.DISPLAY_NAME, String.class);
         final Text displayName = Texts.json().fromUnchecked(json);
         final boolean shows = DataUtil.getData(container, Keys.SHOWS_DISPLAY_NAME);
@@ -116,7 +117,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
     }
 
     @Override
-    public Optional<ImmutableDisplayNameData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableDisplayNameData immutable) {
+    public java.util.Optional<ImmutableDisplayNameData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableDisplayNameData immutable) {
         if (key == Keys.DISPLAY_NAME) {
             return Optional.<ImmutableDisplayNameData>of(
                     new ImmutableSpongeDisplayNameData((Text) value, immutable.customNameVisible().get()));
@@ -124,7 +125,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
             return Optional.<ImmutableDisplayNameData>of(
                     new ImmutableSpongeDisplayNameData(immutable.displayName().get(), (Boolean) value));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -163,7 +164,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
     }
 
     @Override
-    public Optional<DisplayNameData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<DisplayNameData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
             if (((Entity) dataHolder).hasCustomName()) {
                 return from(dataHolder);
@@ -179,6 +180,6 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
         } else if (dataHolder instanceof IWorldNameable) {
             return from(dataHolder);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

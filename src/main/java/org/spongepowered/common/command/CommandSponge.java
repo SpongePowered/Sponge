@@ -34,7 +34,6 @@ import static org.spongepowered.api.util.command.args.GenericArguments.string;
 import static org.spongepowered.api.util.command.args.GenericArguments.world;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
@@ -71,6 +70,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 

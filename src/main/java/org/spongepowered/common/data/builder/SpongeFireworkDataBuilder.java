@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -40,6 +39,7 @@ import org.spongepowered.common.Sponge;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Optional;
 
 public class SpongeFireworkDataBuilder implements DataBuilder<FireworkEffect> {
 

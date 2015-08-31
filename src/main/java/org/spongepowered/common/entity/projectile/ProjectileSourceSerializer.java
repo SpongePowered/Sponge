@@ -57,7 +57,7 @@ public class ProjectileSourceSerializer {
     public static ProjectileSource fromNbt(World worldObj, NBTBase tag) {
         if (tag instanceof NBTTagString) {
             Entity entity =
-                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((NBTTagString) tag).getString())).orNull();
+                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((NBTTagString) tag).getString())).orElse(null);
             if (entity instanceof ProjectileSource) {
                 return (ProjectileSource) entity;
             }

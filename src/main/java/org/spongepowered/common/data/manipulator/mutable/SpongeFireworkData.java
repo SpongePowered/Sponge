@@ -45,7 +45,7 @@ import java.util.List;
 
 public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFireworkData> implements FireworkData {
 
-    private List<FireworkEffect> fireworkEffects;
+    private final List<FireworkEffect> fireworkEffects;
     private int flightModifier = 0;
 
     public SpongeFireworkData(List<FireworkEffect> effects, int modifier) {
@@ -65,12 +65,12 @@ public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFire
 
     @Override
     public ListValue<FireworkEffect> effects() {
-        return new SpongeListValue<FireworkEffect>(Keys.FIREWORK_EFFECTS, Lists.newArrayList(this.fireworkEffects));
+        return new SpongeListValue<>(Keys.FIREWORK_EFFECTS, Lists.newArrayList(this.fireworkEffects));
     }
 
     @Override
     public MutableBoundedValue<Integer> flightModifier() {
-        return new SpongeBoundedValue<Integer>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, intComparator(), 0, Integer.MAX_VALUE, this.flightModifier);
+        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, intComparator(), 0, Integer.MAX_VALUE, this.flightModifier);
     }
 
     @Override

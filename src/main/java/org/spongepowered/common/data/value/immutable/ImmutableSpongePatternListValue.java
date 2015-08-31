@@ -26,8 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -43,6 +41,8 @@ import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<PatternLayer> implements ImmutablePatternListValue {
 
@@ -104,7 +104,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     public ImmutablePatternListValue withoutAll(Predicate<PatternLayer> predicate) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         for (PatternLayer existing : this.actualValue) {
-            if (checkNotNull(predicate).apply(existing)) {
+            if (checkNotNull(predicate).test(existing)) {
                 builder.add(existing);
             }
         }

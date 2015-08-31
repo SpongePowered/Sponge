@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.util;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -36,6 +35,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.data.DataProcessor;
+
+import java.util.Optional;
 
 public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
 
@@ -70,7 +71,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -83,7 +84,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -94,7 +95,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -118,7 +119,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -144,6 +145,6 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

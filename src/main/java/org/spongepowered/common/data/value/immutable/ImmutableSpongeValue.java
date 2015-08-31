@@ -26,13 +26,14 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.value.AbstractBaseValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.function.Function;
 
 public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements ImmutableValue<E> {
 

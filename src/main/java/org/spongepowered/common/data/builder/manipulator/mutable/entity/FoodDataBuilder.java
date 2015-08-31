@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -34,6 +33,8 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class FoodDataBuilder implements DataManipulatorBuilder<FoodData, ImmutableFoodData> {
 
@@ -57,6 +58,6 @@ public class FoodDataBuilder implements DataManipulatorBuilder<FoodData, Immutab
             final float foodExhaustionLevel = DataUtil.getData(container, Keys.EXHAUSTION, Double.class).floatValue();
             return Optional.<FoodData>of(new SpongeFoodData(foodLevel, foodSaturationLevel, foodExhaustionLevel));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

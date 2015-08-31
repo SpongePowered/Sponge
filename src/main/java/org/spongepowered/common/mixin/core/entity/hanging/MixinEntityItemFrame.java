@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.hanging;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.hanging.ItemFrame;
@@ -34,6 +33,8 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -58,7 +59,7 @@ public abstract class MixinEntityItemFrame extends EntityHanging implements Item
     }
 
     public Optional<ItemStack> getItem() {
-        return Optional.fromNullable((ItemStack) getDisplayedItem());
+        return Optional.ofNullable((ItemStack) getDisplayedItem());
     }
 
     public void setItem(@Nullable ItemStack item) {

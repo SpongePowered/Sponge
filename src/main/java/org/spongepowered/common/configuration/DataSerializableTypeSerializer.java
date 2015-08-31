@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.configuration;
 
-import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.InvalidTypeException;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
+import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be

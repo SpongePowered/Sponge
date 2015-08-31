@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -35,6 +34,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IMixinEntity;
+
+import java.util.Optional;
 
 @SuppressWarnings("ConstantConditions")
 public class EyeHeightValueProcessor extends AbstractSpongeValueProcessor<Double, Value<Double>> {
@@ -54,12 +55,12 @@ public class EyeHeightValueProcessor extends AbstractSpongeValueProcessor<Double
     }
 
     @Override
-    public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
+    public java.util.Optional<Double> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final Entity entity = (Entity) container;
             return Optional.of((double) entity.getEyeHeight());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

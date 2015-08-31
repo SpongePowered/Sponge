@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -32,7 +31,6 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -40,6 +38,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType, Value<SkullType>> {
 
@@ -53,13 +53,13 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
     }
 
     @Override
-    public Optional<SkullType> getValueFromContainer(ValueContainer<?> container) {
+    public java.util.Optional<SkullType> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof TileEntitySkull) {
             return Optional.of(SkullUtils.getSkullType((TileEntitySkull) container));
         } else if (SkullUtils.isValidItemStack(container)) {
             return Optional.of(SkullUtils.getSkullType((ItemStack) container));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

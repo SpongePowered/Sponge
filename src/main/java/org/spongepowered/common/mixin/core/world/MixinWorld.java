@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
@@ -94,13 +93,13 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
@@ -144,6 +143,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -267,14 +267,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Optional<Chunk> getChunk(int x, int y, int z) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.theChunkProviderServer.chunkExists(x, z)) {
             chunk = worldserver.theChunkProviderServer.provideChunk(x, z);
         }
-        return Optional.fromNullable((Chunk) chunk);
+        return Optional.ofNullable((Chunk) chunk);
     }
 
     @Override
@@ -285,14 +285,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Optional<Chunk> loadChunk(int x, int y, int z, boolean shouldGenerate) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.theChunkProviderServer.chunkExists(x, z) || shouldGenerate) {
             chunk = worldserver.theChunkProviderServer.loadChunk(x, z);
         }
-        return Optional.fromNullable((Chunk) chunk);
+        return Optional.ofNullable((Chunk) chunk);
     }
 
     @Override
@@ -354,7 +354,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(EntityDragonPart.class)) {
             // Unable to construct these
-            return Optional.absent();
+            return Optional.empty();
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
@@ -392,7 +392,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
             }
             if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
 
@@ -406,7 +406,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             ((EntityPainting) entity).art = EnumArt.KEBAB;
         }
 
-        return Optional.fromNullable(entity);
+        return Optional.ofNullable(entity);
     }
 
     @Override
@@ -417,13 +417,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer) {
         // TODO once entity containers are implemented
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer, Vector3d position) {
         // TODO once entity containers are implemented
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -563,14 +563,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Optional<Entity> getEntity(UUID uuid) {
         World spongeWorld = this;
         if (spongeWorld instanceof WorldServer) {
-            return Optional.fromNullable((Entity) ((WorldServer) (Object) this).getEntityFromUuid(uuid));
+            return Optional.ofNullable((Entity) ((WorldServer) (Object) this).getEntityFromUuid(uuid));
         }
         for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
             if (entity.getUniqueID().equals(uuid)) {
                 return Optional.of((Entity) entity);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -664,7 +664,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Optional<TileEntity> getTileEntity(int x, int y, int z) {
         net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
         if (tileEntity == null) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             return Optional.of((TileEntity) tileEntity);
         }
@@ -891,7 +891,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(explosion, "explosion");
         checkNotNull(explosion.getOrigin(), "origin");
 
-        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orNull(), explosion
+        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orElse(null), explosion
                 .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks());
     }

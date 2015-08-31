@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
@@ -47,6 +46,7 @@ import org.spongepowered.common.data.util.ValueProcessorDelegate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 public final class SpongeDataRegistry implements DataManipulatorRegistry {
@@ -67,7 +67,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     private final Map<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> processorMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
-    private Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
+    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
     private final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
@@ -159,13 +159,13 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
     getBuilder(Class<T> manipulatorClass) {
-        return Optional.fromNullable((DataManipulatorBuilder<T, I>) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
+        return Optional.ofNullable((DataManipulatorBuilder<T, I>) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
     getBuilderForImmutable(Class<I> immutableManipulatorClass) {
-        return Optional.fromNullable((DataManipulatorBuilder<T, I>) (Object) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
+        return Optional.ofNullable((DataManipulatorBuilder<T, I>) (Object) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
@@ -223,25 +223,25 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
         Class<T> mutableClass) {
-        return Optional.fromNullable((DataProcessor<T, I>) (Object) this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
+        return Optional.ofNullable((DataProcessor<T, I>) (Object) this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
     }
 
     public Optional<DataProcessor<?, ?>> getWildProcessor(Class<? extends DataManipulator<?, ?>> mutableClass) {
-        return Optional.<DataProcessor<?, ?>>fromNullable(this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
+        return Optional.<DataProcessor<?, ?>>ofNullable(this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
     }
 
     @SuppressWarnings("rawtypes")
     public Optional<DataProcessor> getWildDataProcessor(Class<? extends DataManipulator> class1) {
-        return Optional.<DataProcessor>fromNullable(this.dataProcessorDelegates.get(checkNotNull(class1)));
+        return Optional.<DataProcessor>ofNullable(this.dataProcessorDelegates.get(checkNotNull(class1)));
     }
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
     getImmutableProcessor(Class<I> immutableClass) {
-        return Optional.fromNullable((DataProcessor<T, I>) (Object) this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
+        return Optional.ofNullable((DataProcessor<T, I>) (Object) this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 
     public <I extends ImmutableDataManipulator<I, ?>> Optional<BlockDataProcessor<I>> getBlockDataFor(Class<I> manipulatorClass) {
-        return Optional.fromNullable((BlockDataProcessor<I>) (Object) this.blockDataProcessorDelegates.get(checkNotNull(manipulatorClass)));
+        return Optional.ofNullable((BlockDataProcessor<I>) (Object) this.blockDataProcessorDelegates.get(checkNotNull(manipulatorClass)));
     }
 
 
@@ -260,15 +260,15 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     }
 
     public <E, V extends BaseValue<E>> Optional<ValueProcessor<E, V>> getValueProcessor(Key<V> key) {
-        return Optional.fromNullable((ValueProcessor<E, V>) (Object) this.valueDelegates.get(key));
+        return Optional.ofNullable((ValueProcessor<E, V>) (Object) this.valueDelegates.get(key));
     }
 
     public Optional<ValueProcessor<?, ?>> getWildValueProcessor(Key<?> key) {
-        return Optional.<ValueProcessor<?, ?>>fromNullable(this.valueDelegates.get(key));
+        return Optional.<ValueProcessor<?, ?>>ofNullable(this.valueDelegates.get(key));
     }
 
     public <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
-        return Optional.<ValueProcessor<E, ? extends BaseValue<E>>>fromNullable(
+        return Optional.<ValueProcessor<E, ? extends BaseValue<E>>>ofNullable(
             (ValueProcessor<E, ? extends BaseValue<E>>) (Object) this.valueDelegates.get
                 (key));
     }

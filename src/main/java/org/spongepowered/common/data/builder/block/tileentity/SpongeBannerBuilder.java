@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Banner;
@@ -40,6 +39,7 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
 

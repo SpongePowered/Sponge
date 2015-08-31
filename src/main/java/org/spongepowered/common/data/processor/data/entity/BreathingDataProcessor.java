@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.data.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -44,16 +43,18 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingD
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
+import java.util.Optional;
+
 public class BreathingDataProcessor extends AbstractSpongeDataProcessor<BreathingData, ImmutableBreathingData> {
 
 
     @Override
-    public Optional<BreathingData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<BreathingData> createFrom(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             EntityLivingBase entity = (EntityLivingBase) dataHolder;
             return Optional.<BreathingData>of(new SpongeBreathingData(((IMixinEntityLivingBase) dataHolder).getMaxAir(), entity.getAir()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -62,23 +63,23 @@ public class BreathingDataProcessor extends AbstractSpongeDataProcessor<Breathin
     }
 
     @Override
-    public Optional<BreathingData> from(DataHolder dataHolder) {
+    public java.util.Optional<BreathingData> from(DataHolder dataHolder) {
         return createFrom(dataHolder);
     }
 
     @Override
-    public Optional<BreathingData> fill(DataHolder dataHolder, BreathingData manipulator, MergeFunction overlap) {
+    public java.util.Optional<BreathingData> fill(DataHolder dataHolder, BreathingData manipulator, MergeFunction overlap) {
         if (supports(dataHolder)) {
             final BreathingData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
             manipulator.set(Keys.MAX_AIR, merged.maxAir().get())
                     .set(Keys.REMAINING_AIR, merged.remainingAir().get());
             return Optional.of(manipulator);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<BreathingData> fill(DataContainer container, BreathingData BreathingData) {
+    public java.util.Optional<BreathingData> fill(DataContainer container, BreathingData BreathingData) {
         BreathingData.set(Keys.MAX_AIR, getData(container, Keys.MAX_AIR));
         BreathingData.set(Keys.REMAINING_AIR, getData(container, Keys.REMAINING_AIR));
         return Optional.of(BreathingData);
@@ -93,7 +94,7 @@ public class BreathingDataProcessor extends AbstractSpongeDataProcessor<Breathin
         try {
             EntityLivingBase entity = (EntityLivingBase) dataHolder;
             Optional<BreathingData> oldData = from(dataHolder);
-            final BreathingData breathingData = checkNotNull(function).merge(oldData.orNull(), manipulator);
+            final BreathingData breathingData = checkNotNull(function).merge(oldData.orElse(null), manipulator);
 
             ((IMixinEntityLivingBase) entity).setMaxAir(breathingData.maxAir().get());
             entity.setAir(breathingData.remainingAir().get());
@@ -108,8 +109,8 @@ public class BreathingDataProcessor extends AbstractSpongeDataProcessor<Breathin
     }
 
     @Override
-    public Optional<ImmutableBreathingData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableBreathingData immutable) {
-        return Optional.absent();
+    public java.util.Optional<ImmutableBreathingData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableBreathingData immutable) {
+        return Optional.empty();
     }
 
     @Override

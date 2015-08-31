@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player;
 
-import com.google.common.base.Optional;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
@@ -38,6 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**

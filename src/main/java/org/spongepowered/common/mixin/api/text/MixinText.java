@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.text;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatStyle;
@@ -48,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 @Mixin(value = Text.class, remap = false)
 public abstract class MixinText implements IMixinText {
@@ -79,11 +79,11 @@ public abstract class MixinText implements IMixinText {
             }
 
             if (!this.format.getStyle().isEmpty()) {
-                style.setBold(this.format.getStyle().isBold().orNull());
-                style.setItalic(this.format.getStyle().isItalic().orNull());
-                style.setUnderlined(this.format.getStyle().hasUnderline().orNull());
-                style.setStrikethrough(this.format.getStyle().hasStrikethrough().orNull());
-                style.setObfuscated(this.format.getStyle().isObfuscated().orNull());
+                style.setBold(this.format.getStyle().isBold().orElse(null));
+                style.setItalic(this.format.getStyle().isItalic().orElse(null));
+                style.setUnderlined(this.format.getStyle().hasUnderline().orElse(null));
+                style.setStrikethrough(this.format.getStyle().hasStrikethrough().orElse(null));
+                style.setObfuscated(this.format.getStyle().isObfuscated().orElse(null));
             }
 
             if (this.clickAction.isPresent()) {

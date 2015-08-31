@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.interfaces;
 
-import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 public interface IMixinScoreObjective {
