@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.data.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -45,16 +44,18 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 
+import java.util.Optional;
+
 public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, ImmutableFoodData> {
 
     @Override
-    public Optional<FoodData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<FoodData> createFrom(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             EntityPlayer player = (EntityPlayer) dataHolder;
             return Optional.<FoodData>of(new SpongeFoodData(player.getFoodStats().getFoodLevel(), player.getFoodStats().foodSaturationLevel, player
                     .getFoodStats().foodExhaustionLevel));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -63,12 +64,12 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
     }
 
     @Override
-    public Optional<FoodData> from(DataHolder dataHolder) {
+    public java.util.Optional<FoodData> from(DataHolder dataHolder) {
         return createFrom(dataHolder);
     }
 
     @Override
-    public Optional<FoodData> fill(DataHolder dataHolder, FoodData manipulator, MergeFunction overlap) {
+    public java.util.Optional<FoodData> fill(DataHolder dataHolder, FoodData manipulator, MergeFunction overlap) {
         if (supports(dataHolder)) {
             final FoodData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
             manipulator.set(Keys.FOOD_LEVEL, merged.foodLevel().get())
@@ -76,11 +77,11 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
                     .set(Keys.EXHAUSTION, merged.exhaustion().get());
             return Optional.of(manipulator);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<FoodData> fill(DataContainer container, FoodData foodData) {
+    public java.util.Optional<FoodData> fill(DataContainer container, FoodData foodData) {
         foodData.set(Keys.FOOD_LEVEL, getData(container, Keys.FOOD_LEVEL));
         foodData.set(Keys.SATURATION, getData(container, Keys.SATURATION));
         foodData.set(Keys.EXHAUSTION, getData(container, Keys.EXHAUSTION));
@@ -94,7 +95,7 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
 
         try {
             Optional<FoodData> oldData = from(dataHolder);
-            final FoodData foodData = checkNotNull(function).merge(oldData.orNull(), manipulator);
+            final FoodData foodData = checkNotNull(function).merge(oldData.orElse(null), manipulator);
 
             ((EntityPlayer) dataHolder).getFoodStats().setFoodLevel(foodData.foodLevel().get());
             ((EntityPlayer) dataHolder).getFoodStats().foodSaturationLevel = foodData.saturation().get().floatValue();
@@ -110,8 +111,8 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
     }
 
     @Override
-    public Optional<ImmutableFoodData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableFoodData immutable) {
-        return Optional.absent();
+    public java.util.Optional<ImmutableFoodData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableFoodData immutable) {
+        return Optional.empty();
     }
 
     @Override

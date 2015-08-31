@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -68,6 +67,7 @@ import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @NonnullByDefault
@@ -392,7 +392,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (this.theGameRules.hasRule(gameRule)) {
             return Optional.of(this.theGameRules.getGameRuleStringValue(gameRule));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -507,7 +507,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
             return Optional.<DataView> of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.util.Vec3;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
@@ -38,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class MixinExplosion implements Explosion {
@@ -75,7 +75,7 @@ public abstract class MixinExplosion implements Explosion {
 
     @Override
     public Optional<Explosive> getSourceExplosive() {
-        return Optional.fromNullable((Explosive) this.exploder);
+        return Optional.ofNullable((Explosive) this.exploder);
     }
 
     @Override

@@ -28,7 +28,6 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
@@ -38,6 +37,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocity
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
+
+import java.util.Optional;
 
 public class VelocityDataBuilder implements DataManipulatorBuilder<VelocityData, ImmutableVelocityData> {
 
@@ -54,7 +55,7 @@ public class VelocityDataBuilder implements DataManipulatorBuilder<VelocityData,
             final double z = ((Entity) dataHolder).motionZ;
             return Optional.<VelocityData>of(new SpongeVelocityData(new Vector3d(x, y, z)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

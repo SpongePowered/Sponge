@@ -78,37 +78,38 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> remainingDelay() {
-        return new SpongeBoundedValue<Short>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay, this.remainingDelay);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay, this.remainingDelay);
     }
 
     @Override
     public MutableBoundedValue<Short> minimumSpawnDelay() {
-        return new SpongeBoundedValue<Short>(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.minimumDelay);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.minimumDelay);
     }
 
     @Override
     public MutableBoundedValue<Short> maximumSpawnDelay() {
-        return new SpongeBoundedValue<Short>(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.maximumDelay);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.maximumDelay);
     }
 
     @Override
     public MutableBoundedValue<Short> spawnCount() {
-        return new SpongeBoundedValue<Short>(Keys.SPAWNER_SPAWN_COUNT, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.count);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_SPAWN_COUNT, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.count);
     }
 
     @Override
     public MutableBoundedValue<Short> maximumNearbyEntities() {
-        return new SpongeBoundedValue<Short>(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.maximumEntities);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE,
+                                        this.maximumEntities);
     }
 
     @Override
     public MutableBoundedValue<Short> requiredPlayerRange() {
-        return new SpongeBoundedValue<Short>(Keys.SPAWNER_REQURED_PLAYER_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.playerRange);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_REQURED_PLAYER_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.playerRange);
     }
 
     @Override
     public MutableBoundedValue<Short> spawnRange() {
-        return new SpongeBoundedValue<Short>(Keys.SPAWNER_SPAWN_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.spawnRange);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_SPAWN_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.spawnRange);
     }
 
     @Override

@@ -29,7 +29,6 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -49,6 +48,8 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 
+import java.util.Optional;
+
 public class VelocityDataProcessor extends AbstractSpongeDataProcessor<VelocityData, ImmutableVelocityData> {
 
     @Override
@@ -57,29 +58,29 @@ public class VelocityDataProcessor extends AbstractSpongeDataProcessor<VelocityD
     }
 
     @Override
-    public Optional<VelocityData> from(DataHolder dataHolder) {
+    public java.util.Optional<VelocityData> from(DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
             final double x = ((Entity) dataHolder).motionX;
             final double y = ((Entity) dataHolder).motionY;
             final double z = ((Entity) dataHolder).motionZ;
             return Optional.<VelocityData>of(new SpongeVelocityData(new Vector3d(x, y, z)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<VelocityData> fill(DataHolder dataHolder, VelocityData manipulator, MergeFunction overlap) {
+    public java.util.Optional<VelocityData> fill(DataHolder dataHolder, VelocityData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof Entity) {
             final Optional<VelocityData> oldData = from(dataHolder);
-            final VelocityData newData = checkNotNull(overlap, "Merge function was null!").merge(oldData.orNull(), manipulator);
+            final VelocityData newData = checkNotNull(overlap, "Merge function was null!").merge(oldData.orElse(null), manipulator);
             final Value<Vector3d> newValue = newData.velocity();
             return Optional.of(manipulator.set(newValue));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<VelocityData> fill(DataContainer container, VelocityData velocityData) {
+    public java.util.Optional<VelocityData> fill(DataContainer container, VelocityData velocityData) {
         checkDataExists(container, Keys.VELOCITY.getQuery());
         final DataView internalView = container.getView(Keys.VELOCITY.getQuery()).get();
         checkDataExists(internalView, SpongeVelocityData.VELOCITY_X);
@@ -113,9 +114,9 @@ public class VelocityDataProcessor extends AbstractSpongeDataProcessor<VelocityD
     }
 
     @Override
-    public Optional<ImmutableVelocityData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableVelocityData immutable) {
+    public java.util.Optional<ImmutableVelocityData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableVelocityData immutable) {
         if (!key.equals(Keys.VELOCITY)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         final ImmutableVelocityData data = new ImmutableSpongeVelocityData((Vector3d) value);
         return Optional.of(data);
@@ -127,14 +128,14 @@ public class VelocityDataProcessor extends AbstractSpongeDataProcessor<VelocityD
     }
 
     @Override
-    public Optional<VelocityData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<VelocityData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
             final double x = ((Entity) dataHolder).motionX;
             final double y = ((Entity) dataHolder).motionY;
             final double z = ((Entity) dataHolder).motionZ;
             return Optional.<VelocityData>of(new SpongeVelocityData(new Vector3d(x, y, z)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

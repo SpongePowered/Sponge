@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
@@ -38,6 +37,7 @@ import org.spongepowered.api.util.weighted.WeightedEntity;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedEntityCollectionValue;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectionValue<WeightedEntity, WeightedEntityCollectionValue,
     ImmutableWeightedEntityCollectionValue> implements WeightedEntityCollectionValue {
@@ -55,7 +55,7 @@ public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectio
     public WeightedEntityCollectionValue filter(Predicate<? super WeightedEntity> predicate) {
         final WeightedCollection<WeightedEntity> collection = new WeightedCollection<WeightedEntity>();
         for (WeightedEntity entity : this.actualValue) {
-            if (checkNotNull(predicate).apply(entity)) {
+            if (checkNotNull(predicate).test(entity)) {
                 collection.add(entity);
             }
         }

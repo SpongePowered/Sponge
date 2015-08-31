@@ -26,8 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -38,6 +36,8 @@ import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E, Set<E>, ImmutableSetValue<E>, SetValue<E>>
     implements ImmutableSetValue<E> {
@@ -97,7 +97,7 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     public ImmutableSetValue<E> withoutAll(Predicate<E> predicate) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         for (E existingElement : this.actualValue) {
-            if (checkNotNull(predicate).apply(existingElement)) {
+            if (checkNotNull(predicate).test(existingElement)) {
                 builder.add(existingElement);
             }
         }

@@ -25,9 +25,10 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.text.format.TextColor;
+
+import java.util.Optional;
 
 public class SpongeDisplaySlot implements DisplaySlot {
 
@@ -37,7 +38,7 @@ public class SpongeDisplaySlot implements DisplaySlot {
 
     public SpongeDisplaySlot(String name, TextColor textColor, int id) {
         this.name = name;
-        this.textColor = Optional.fromNullable(textColor);
+        this.textColor = Optional.ofNullable(textColor);
         this.id = id;
     }
 
@@ -78,6 +79,6 @@ public class SpongeDisplaySlot implements DisplaySlot {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.name, this.textColor.orNull(), this.id);
+        return Objects.hashCode(this.name, this.textColor.orElse(null), this.id);
     }
 }

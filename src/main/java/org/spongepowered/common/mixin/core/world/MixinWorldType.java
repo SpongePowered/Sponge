@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
@@ -55,6 +54,8 @@ import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
 import org.spongepowered.common.world.gen.SpongeGeneratorPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldType.class)

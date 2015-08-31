@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.text.title;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S45PacketTitle;
 import org.spongepowered.api.entity.living.player.Player;
@@ -36,6 +35,7 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Mixin(value = Title.class, remap = false)
 public abstract class MixinTitle implements IMixinTitle {
@@ -63,7 +63,7 @@ public abstract class MixinTitle implements IMixinTitle {
                 packets[i++] = new S45PacketTitle(S45PacketTitle.Type.RESET, null);
             }
             if (this.fadeIn.isPresent() || this.stay.isPresent() || this.fadeOut.isPresent()) {
-                packets[i++] = new S45PacketTitle(this.fadeIn.or(20), this.stay.or(60), this.fadeOut.or(20));
+                packets[i++] = new S45PacketTitle(this.fadeIn.orElse(20), this.stay.orElse(60), this.fadeOut.orElse(20));
             }
             if (this.subtitle.isPresent()) {
                 packets[i++] = new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent(((Player) player)

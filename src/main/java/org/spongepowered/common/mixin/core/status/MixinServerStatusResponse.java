@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.status;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.IChatComponent;
@@ -41,6 +40,7 @@ import org.spongepowered.common.status.SpongeFavicon;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -81,7 +81,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
 
     @Override
     public Optional<Players> getPlayers() {
-        return Optional.fromNullable((Players) this.playerCount);
+        return Optional.ofNullable((Players) this.playerCount);
     }
 
     @Override
@@ -104,7 +104,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
 
     @Override
     public Optional<Favicon> getFavicon() {
-        return Optional.fromNullable(this.faviconHandle);
+        return Optional.ofNullable(this.faviconHandle);
     }
 
     @Override

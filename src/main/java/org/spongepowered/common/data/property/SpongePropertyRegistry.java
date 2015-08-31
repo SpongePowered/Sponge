@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.property;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.PropertyStore;
+
+import java.util.Optional;
 
 public class SpongePropertyRegistry implements PropertyRegistry {
 
@@ -47,6 +48,6 @@ public class SpongePropertyRegistry implements PropertyRegistry {
 
     @Override
     public <T extends Property<?, ?>> Optional<PropertyStore<T>> getStore(Class<T> propertyClass) {
-        return Optional.absent();
+        return Optional.empty();
     }
 }

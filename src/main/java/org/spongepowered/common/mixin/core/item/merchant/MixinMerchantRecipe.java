@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.item.merchant;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -34,6 +33,8 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(net.minecraft.village.MerchantRecipe.class)
@@ -60,7 +61,7 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
 
     @Override
     public Optional<ItemStack> getSecondBuyingItem() {
-        return Optional.fromNullable((ItemStack) getSecondItemToBuy());
+        return Optional.ofNullable((ItemStack) getSecondItemToBuy());
     }
 
     @Override

@@ -40,9 +40,9 @@ import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFoodData, FoodData> implements ImmutableFoodData {
 
-    private int foodLevel;
-    private float foodSaturationLevel;
-    private float foodExhaustionLevel;
+    private final int foodLevel;
+    private final float foodSaturationLevel;
+    private final float foodExhaustionLevel;
 
     public ImmutableSpongeFoodData(int foodLevel, float foodSaturationLevel, float foodExhaustionLevel) {
         super(ImmutableFoodData.class);

@@ -41,7 +41,7 @@ public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I exten
 
     private final Class<? extends M> mutableClass;
 
-    public AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
+    protected AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         this.mutableClass = checkNotNull(mutableClass);
     }

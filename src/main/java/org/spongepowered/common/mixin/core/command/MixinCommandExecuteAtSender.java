@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -43,6 +42,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(targets = IMixinCommandSender.EXECUTE_COMMAND_SENDER)

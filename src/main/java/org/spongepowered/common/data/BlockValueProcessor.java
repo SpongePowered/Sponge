@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+
+import java.util.Optional;
 
 public interface BlockValueProcessor<E, V extends BaseValue<E>> {
 

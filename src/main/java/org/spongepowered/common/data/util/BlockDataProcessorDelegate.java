@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.util;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -34,6 +33,8 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.common.data.BlockDataProcessor;
+
+import java.util.Optional;
 
 public final class BlockDataProcessorDelegate<I extends ImmutableDataManipulator<I, ?>> implements BlockDataProcessor<I> {
 
@@ -56,7 +57,7 @@ public final class BlockDataProcessorDelegate<I extends ImmutableDataManipulator
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -67,18 +68,18 @@ public final class BlockDataProcessorDelegate<I extends ImmutableDataManipulator
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<BlockState> withData(IBlockState blockState, I manipulator) {
+    public java.util.Optional<BlockState> withData(IBlockState blockState, I manipulator) {
         for (BlockDataProcessor<I> processor : this.processors) {
             final Optional<BlockState> optional = processor.withData(blockState, manipulator);
             if (optional.isPresent()) {
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -93,14 +94,14 @@ public final class BlockDataProcessorDelegate<I extends ImmutableDataManipulator
     }
 
     @Override
-    public Optional<BlockState> removeFrom(IBlockState blockState) {
+    public java.util.Optional<BlockState> removeFrom(IBlockState blockState) {
         for (BlockDataProcessor<I> processor : this.processors) {
             final Optional<BlockState> optional = processor.removeFrom(blockState);
             if (optional.isPresent()) {
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
@@ -52,6 +50,9 @@ import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.HashMap;
+import java.util.Optional;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -71,7 +72,7 @@ public abstract class MixinItemStack implements ItemStack {
     @Shadow(prefix = "shadow$")
     public abstract Item shadow$getItem();
 
-    private Map<Class<? extends DataManipulator<?, ?>>, ImmutableDataManipulator<?, ?>> dataMap = Maps.newHashMap();
+    private Map<Class<? extends DataManipulator<?, ?>>, ImmutableDataManipulator<?, ?>> dataMap = new HashMap<>();
 
     @Override
     public ItemType getItem() {

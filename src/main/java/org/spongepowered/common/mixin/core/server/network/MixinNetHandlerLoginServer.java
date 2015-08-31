@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import com.google.common.base.Optional;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.login.server.S00PacketDisconnect;
 import net.minecraft.server.MinecraftServer;
@@ -56,6 +55,7 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Optional;
 
 @Mixin(NetHandlerLoginServer.class)
 public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IMixinNetHandlerLoginServer {

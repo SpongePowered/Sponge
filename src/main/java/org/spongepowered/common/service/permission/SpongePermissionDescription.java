@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -43,6 +42,7 @@ import org.spongepowered.api.util.Tristate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
  * Basic implementation of {@link PermissionDescription}. Can only be used in
@@ -127,7 +127,7 @@ class SpongePermissionDescription implements PermissionDescription {
         private final PluginContainer owner;
         private String id;
         private Text description;
-        private Optional<String> suggestedRank = Optional.absent();
+        private Optional<String> suggestedRank = Optional.empty();
         private final Map<String, Tristate> roleAssignments = new LinkedHashMap<String, Tristate>();
 
         Builder(SpongePermissionService permissionService, PluginContainer owner) {

@@ -25,13 +25,13 @@
 package org.spongepowered.common.status;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.status.StatusClient;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 
 public class SpongeStatusClient implements StatusClient {
 
@@ -53,7 +53,7 @@ public class SpongeStatusClient implements StatusClient {
 
     @Override
     public Optional<InetSocketAddress> getVirtualHost() {
-        return Optional.fromNullable(this.connection.getVirtualHost());
+        return Optional.ofNullable(this.connection.getVirtualHost());
     }
 
     @Override

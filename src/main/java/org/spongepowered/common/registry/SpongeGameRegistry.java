@@ -409,6 +409,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
@@ -620,24 +621,24 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                                                                           // DO
                                                                           // THIS!!?!
 
-    public com.google.common.base.Optional<PotionEffectType> getPotion(String id) {
-        return com.google.common.base.Optional.fromNullable((PotionEffectType) Potion.getPotionFromResourceLocation(id));
+    public Optional<PotionEffectType> getPotion(String id) {
+        return Optional.ofNullable((PotionEffectType) Potion.getPotionFromResourceLocation(id));
     }
 
-    public com.google.common.base.Optional<EntityType> getEntity(String id) {
+    public Optional<EntityType> getEntity(String id) {
         if (!id.contains(":")) {
             id = "minecraft:" + id;
         }
-        return com.google.common.base.Optional.fromNullable((EntityType) this.entityTypeMappings.get(id));
+        return Optional.ofNullable((EntityType) this.entityTypeMappings.get(id));
     }
 
-    public com.google.common.base.Optional<BiomeType> getBiome(String id) {
+    public Optional<BiomeType> getBiome(String id) {
         for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
             if (biome != null && biome.biomeName.equalsIgnoreCase(id)) {
-                return com.google.common.base.Optional.of((BiomeType) biome);
+                return Optional.of((BiomeType) biome);
             }
         }
-        return com.google.common.base.Optional.absent();
+        return Optional.empty();
     }
 
     public List<BiomeType> getBiomes() {
@@ -646,16 +647,16 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends CatalogType> com.google.common.base.Optional<T> getType(Class<T> typeClass, String id) {
+    public <T extends CatalogType> Optional<T> getType(Class<T> typeClass, String id) {
         Map<String, ? extends CatalogType> tempMap = this.catalogTypeMap.get(checkNotNull(typeClass, "null type class"));
         if (tempMap == null) {
-            return com.google.common.base.Optional.absent();
+            return Optional.empty();
         } else {
             T type = (T) tempMap.get(id.toLowerCase());
             if (type == null) {
-                return com.google.common.base.Optional.absent();
+                return Optional.empty();
             } else {
-                return com.google.common.base.Optional.of(type);
+                return Optional.of(type);
             }
         }
     }
@@ -676,7 +677,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public <T> com.google.common.base.Optional<T> createBuilderOfType(Class<T> builderClass) {
+    public <T> Optional<T> createBuilderOfType(Class<T> builderClass) {
         return null;
     }
 
@@ -828,8 +829,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.worldFolderUniqueIdMappings.put(uuid, folderName);
     }
 
-    public com.google.common.base.Optional<WorldProperties> getWorldProperties(String worldName) {
-        return com.google.common.base.Optional.fromNullable(this.worldPropertiesNameMappings.get(worldName));
+    public Optional<WorldProperties> getWorldProperties(String worldName) {
+        return Optional.ofNullable(this.worldPropertiesNameMappings.get(worldName));
     }
 
     public Collection<WorldProperties> getAllWorldProperties() {
@@ -852,8 +853,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return WorldSettings.GameType.getByName(mode.getTranslation().getId());
     }
 
-    public com.google.common.base.Optional<WorldProperties> getWorldProperties(UUID uuid) {
-        return com.google.common.base.Optional.fromNullable(this.worldPropertiesUuidMappings.get(uuid));
+    public Optional<WorldProperties> getWorldProperties(UUID uuid) {
+        return Optional.ofNullable(this.worldPropertiesUuidMappings.get(uuid));
     }
 
     @Override
@@ -866,13 +867,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public com.google.common.base.Optional<Rotation> getRotationFromDegree(int degrees) {
+    public Optional<Rotation> getRotationFromDegree(int degrees) {
         for (Rotation rotation : rotationMappings.values()) {
             if (rotation.getAngle() == degrees) {
-                return com.google.common.base.Optional.of(rotation);
+                return Optional.of(rotation);
             }
         }
-        return com.google.common.base.Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -926,8 +927,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public com.google.common.base.Optional<Translation> getTranslationById(String id) {
-        return com.google.common.base.Optional.<Translation>of(new SpongeTranslation(id));
+    public Optional<Translation> getTranslationById(String id) {
+        return Optional.<Translation>of(new SpongeTranslation(id));
     }
 
     private void setParticles() {
@@ -1964,22 +1965,22 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public com.google.common.base.Optional<EntityStatistic> getEntityStatistic(StatisticGroup statisticGroup, EntityType entityType) {
+    public Optional<EntityStatistic> getEntityStatistic(StatisticGroup statisticGroup, EntityType entityType) {
         throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
-    public com.google.common.base.Optional<ItemStatistic> getItemStatistic(StatisticGroup statisticGroup, ItemType itemType) {
+    public Optional<ItemStatistic> getItemStatistic(StatisticGroup statisticGroup, ItemType itemType) {
         throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
-    public com.google.common.base.Optional<BlockStatistic> getBlockStatistic(StatisticGroup statisticGroup, BlockType blockType) {
+    public Optional<BlockStatistic> getBlockStatistic(StatisticGroup statisticGroup, BlockType blockType) {
         throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
-    public com.google.common.base.Optional<TeamStatistic> getTeamStatistic(StatisticGroup statisticGroup, TextColor teamColor) {
+    public Optional<TeamStatistic> getTeamStatistic(StatisticGroup statisticGroup, TextColor teamColor) {
         throw new UnsupportedOperationException(); // TODO
     }
 
@@ -1994,12 +1995,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public com.google.common.base.Optional<ResourcePack> getById(String id) {
+    public Optional<ResourcePack> getById(String id) {
         throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
-    public com.google.common.base.Optional<DisplaySlot> getDisplaySlotForColor(TextColor color) {
+    public Optional<DisplaySlot> getDisplaySlotForColor(TextColor color) {
         throw new UnsupportedOperationException(); // TODO
     }
 

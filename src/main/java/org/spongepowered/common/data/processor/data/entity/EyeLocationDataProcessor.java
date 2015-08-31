@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -46,6 +45,8 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.IMixinEntity;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Optional;
+
 @SuppressWarnings("ConstantConditions")
 public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLocationData, ImmutableEyeLocationData> {
 
@@ -55,31 +56,31 @@ public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLoc
     }
 
     @Override
-    public Optional<EyeLocationData> from(DataHolder dataHolder) {
+    public java.util.Optional<EyeLocationData> from(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             final Entity entity = (Entity) dataHolder;
             return Optional.<EyeLocationData>of(new SpongeEyeLocationData(VecHelper.toVector(entity.getPositionVector()), entity.getEyeHeight()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<EyeLocationData> fill(DataHolder dataHolder, EyeLocationData manipulator, MergeFunction overlap) {
+    public java.util.Optional<EyeLocationData> fill(DataHolder dataHolder, EyeLocationData manipulator, MergeFunction overlap) {
         if (supports(dataHolder)) {
             final EyeLocationData merged = overlap.merge(manipulator.copy(), from(dataHolder).get());
             return Optional.of(manipulator.set(Keys.EYE_HEIGHT, merged.eyeHeight().get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<EyeLocationData> fill(DataContainer container, EyeLocationData eyeLocationData) {
+    public java.util.Optional<EyeLocationData> fill(DataContainer container, EyeLocationData eyeLocationData) {
         if (container.contains(Keys.EYE_HEIGHT.getQuery())) {
             return Optional.of(eyeLocationData.set(Keys.EYE_HEIGHT, DataUtil.getData(container, Keys.EYE_HEIGHT, Double.class)));
         } else if (container.contains(Keys.EYE_LOCATION.getQuery())) {
             return Optional.of(eyeLocationData.set(Keys.EYE_LOCATION, DataUtil.getData(container, Keys.EYE_LOCATION, Vector3d.class)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -96,7 +97,7 @@ public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLoc
     }
 
     @Override
-    public Optional<ImmutableEyeLocationData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableEyeLocationData immutable) {
+    public java.util.Optional<ImmutableEyeLocationData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableEyeLocationData immutable) {
         final Vector3d entityLocation = ((ImmutableSpongeEyeLocationData) immutable).getEntityLocation();
         if (Keys.EYE_HEIGHT.equals(key)) {
             return Optional.<ImmutableEyeLocationData>of(new ImmutableSpongeEyeLocationData(entityLocation, ((Number) value).doubleValue()));
@@ -104,7 +105,7 @@ public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLoc
             return Optional.<ImmutableEyeLocationData>of(new ImmutableSpongeEyeLocationData(entityLocation, ((Vector3d) value).getY() -
                 entityLocation.getY()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -113,12 +114,12 @@ public class EyeLocationDataProcessor extends AbstractSpongeDataProcessor<EyeLoc
     }
 
     @Override
-    public Optional<EyeLocationData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<EyeLocationData> createFrom(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             final Entity entity = (Entity) dataHolder;
             return Optional.<EyeLocationData>of(new SpongeEyeLocationData(VecHelper.toVector(entity.getPositionVector()), entity.getEyeHeight()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

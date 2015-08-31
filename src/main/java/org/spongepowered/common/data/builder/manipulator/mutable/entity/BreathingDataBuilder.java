@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -34,6 +33,8 @@ import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class BreathingDataBuilder implements DataManipulatorBuilder<BreathingData, ImmutableBreathingData> {
 
@@ -45,7 +46,7 @@ public class BreathingDataBuilder implements DataManipulatorBuilder<BreathingDat
             final int remainingAir = DataUtil.getData(container, Keys.REMAINING_AIR, Integer.class);
             return Optional.<BreathingData>of(new SpongeBreathingData(maxAir, remainingAir));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

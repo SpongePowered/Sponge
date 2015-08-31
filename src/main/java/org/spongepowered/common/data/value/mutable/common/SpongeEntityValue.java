@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.data.value.mutable.common;
 
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.KeyFactory;
 import org.spongepowered.api.data.value.BaseValue;
@@ -40,6 +37,8 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -52,7 +51,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     }
 
     public SpongeEntityValue(Key<? extends BaseValue<Optional<Entity>>> key, Optional<Entity> actualValue) {
-        super(key, Optional.<Entity>absent());
+        super(key, Optional.<Entity>empty());
         if (actualValue.isPresent()) {
             this.weakReference = new WeakReference<Entity>(actualValue.get());
         } else {
@@ -62,7 +61,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
 
     @Override
     public Optional<Entity> get() {
-        return fromNullable(this.weakReference.get());
+        return Optional.ofNullable(this.weakReference.get());
     }
 
     @Override
@@ -87,7 +86,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
 
     @Override
     public OptionalValue<Entity> transform(Function<Optional<Entity>, Optional<Entity>> function) {
-        final Optional<Entity> optional = checkNotNull(checkNotNull(function).apply(fromNullable(this.weakReference.get())));
+        final Optional<Entity> optional = checkNotNull(checkNotNull(function).apply(Optional.ofNullable(this.weakReference.get())));
         if (optional.isPresent()) {
             this.weakReference = new WeakReference<Entity>(optional.get());
         } else {

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
@@ -58,6 +56,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @NonnullByDefault
@@ -148,7 +147,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public Optional<ItemBlock> getHeldItem() {
-        return Optional.fromNullable((ItemBlock) Item.getItemFromBlock((Block) (Object) this));
+        return Optional.ofNullable((ItemBlock) Item.getItemFromBlock((Block) (Object) this));
     }
 
     @Override

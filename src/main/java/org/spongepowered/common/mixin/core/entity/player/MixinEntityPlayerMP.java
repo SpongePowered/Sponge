@@ -30,7 +30,6 @@ import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -93,6 +92,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)

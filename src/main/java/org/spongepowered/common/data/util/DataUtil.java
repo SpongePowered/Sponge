@@ -26,7 +26,6 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -40,6 +39,8 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
+
+import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 public class DataUtil {

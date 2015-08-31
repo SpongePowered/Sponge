@@ -25,7 +25,6 @@
 package org.spongepowered.common.world;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import org.spongepowered.api.block.BlockType;
@@ -33,6 +32,8 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
+
+import java.util.Optional;
 
 public class SpongeTeleportHelper implements TeleportHelper {
 
@@ -76,7 +77,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private Optional<Location<World>> checkAroundLocation(Location<World> location, final int radius) {
@@ -94,7 +95,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private Optional<Vector3i> checkAroundSpecificDiameter(Location<World> checkLoc, final int radius) {
@@ -145,7 +146,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
                 return Optional.of(blockPos);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public boolean isSafeLocation(World world, Vector3i blockPos) {

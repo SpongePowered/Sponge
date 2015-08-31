@@ -41,7 +41,7 @@ public abstract class AbstractImmutableBooleanData<I extends ImmutableDataManipu
 
     private final Class<? extends M> mutableClass;
 
-    public AbstractImmutableBooleanData(Class<I> immutableClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey,
+    protected AbstractImmutableBooleanData(Class<I> immutableClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey,
                                         Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         this.mutableClass = checkNotNull(mutableClass);

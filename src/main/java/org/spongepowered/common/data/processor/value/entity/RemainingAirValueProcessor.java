@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -36,6 +35,8 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+
+import java.util.Optional;
 
 public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
@@ -49,12 +50,12 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
     }
 
     @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
+    public java.util.Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final EntityLivingBase entity = (EntityLivingBase) container;
             return Optional.of(entity.getAir());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

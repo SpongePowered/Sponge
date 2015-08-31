@@ -50,7 +50,7 @@ public class SpongeOwnableData extends AbstractData<OwnableData, ImmutableOwnabl
 
     @Override
     public Value<GameProfile> profile() {
-        return new SpongeValue<GameProfile>(Keys.OWNED_BY_PROFILE, this.profile);
+        return new SpongeValue<>(Keys.OWNED_BY_PROFILE, this.profile);
     }
 
     @Override
@@ -79,6 +79,16 @@ public class SpongeOwnableData extends AbstractData<OwnableData, ImmutableOwnabl
 
     @Override
     protected void registerGettersAndSetters() {
+        registerFieldGetter(Keys.OWNED_BY_PROFILE, this::getProfile);
+        registerFieldSetter(Keys.OWNED_BY_PROFILE, value1 -> setProfile((GameProfile) value1));
+        registerKeyValue(Keys.OWNED_BY_PROFILE, this::profile);
+    }
 
+    private GameProfile getProfile() {
+        return this.profile;
+    }
+
+    public void setProfile(GameProfile profile) {
+        this.profile = checkNotNull(profile);
     }
 }

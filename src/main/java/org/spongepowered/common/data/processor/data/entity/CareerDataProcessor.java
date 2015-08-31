@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -48,6 +47,8 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
+import java.util.Optional;
+
 public class CareerDataProcessor extends AbstractSpongeDataProcessor<CareerData, ImmutableCareerData> {
 
     @Override
@@ -56,30 +57,30 @@ public class CareerDataProcessor extends AbstractSpongeDataProcessor<CareerData,
     }
 
     @Override
-    public Optional<CareerData> from(DataHolder dataHolder) {
+    public java.util.Optional<CareerData> from(DataHolder dataHolder) {
         if (dataHolder instanceof IMixinVillager) {
             return Optional.<CareerData>of(new SpongeCareerData(((IMixinVillager) dataHolder).getCareer()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<CareerData> fill(DataHolder dataHolder, CareerData manipulator, MergeFunction overlap) {
+    public java.util.Optional<CareerData> fill(DataHolder dataHolder, CareerData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof IMixinVillager) {
             final CareerData original = from(dataHolder).get();
             return Optional.of(manipulator.set(Keys.CAREER, overlap.merge(manipulator, original).type().get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<CareerData> fill(DataContainer container, CareerData careerData) {
+    public java.util.Optional<CareerData> fill(DataContainer container, CareerData careerData) {
         final String careerId = DataUtil.getData(container, Keys.CAREER, String.class);
         final Optional<Career> optional = Sponge.getSpongeRegistry().getType(Career.class, careerId);
         if (optional.isPresent()) {
             careerData.set(Keys.CAREER, optional.get());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -103,7 +104,7 @@ public class CareerDataProcessor extends AbstractSpongeDataProcessor<CareerData,
     }
 
     @Override
-    public Optional<ImmutableCareerData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableCareerData immutable) {
+    public java.util.Optional<ImmutableCareerData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableCareerData immutable) {
         return null;
     }
 
@@ -113,7 +114,7 @@ public class CareerDataProcessor extends AbstractSpongeDataProcessor<CareerData,
     }
 
     @Override
-    public Optional<CareerData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<CareerData> createFrom(DataHolder dataHolder) {
         return from(dataHolder);
     }
 

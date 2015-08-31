@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.service.config;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.config.ConfigRoot;
 import org.spongepowered.api.service.config.ConfigService;
 
 import java.io.File;
+import java.util.Optional;
 
 import javax.inject.Inject;
 

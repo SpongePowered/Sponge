@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.player.EntityPlayer;
@@ -67,6 +66,7 @@ import org.spongepowered.common.world.DimensionManager;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 

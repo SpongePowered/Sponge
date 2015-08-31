@@ -42,7 +42,8 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
 
     private final Class<? extends M> mutableClass;
 
-    public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
+    protected AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, Key<? extends BaseValue<E>> usedKey,
+                                                 Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         this.mutableClass = checkNotNull(mutableClass);
     }

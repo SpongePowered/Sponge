@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.data.util;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.util.Optional;
 
 /**
  * A standard utility class for interacting and manipulating {@link ItemStack}s
@@ -75,7 +76,7 @@ public class NbtDataUtil {
         if (itemStack.hasTagCompound()) {
             return Optional.of(itemStack.getTagCompound());
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

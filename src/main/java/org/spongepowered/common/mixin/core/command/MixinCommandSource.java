@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -40,6 +39,8 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
+
+import java.util.Optional;
 
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
         targets = IMixinCommandSender.SIGN_CLICK_SENDER)
@@ -80,7 +81,7 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
     @Override
     public Optional<CommandSource> getCommandSource() {
         if (this instanceof User && !((User) this).isOnline()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.<CommandSource>of(this);
     }

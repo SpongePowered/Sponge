@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.IWorldNameable;
@@ -38,6 +37,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Optional;
+
 public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
     public DisplayNameVisibleValueProcessor() {
@@ -50,22 +51,22 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
+    public java.util.Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof Entity) {
             return Optional.of(((Entity) container).getAlwaysRenderNameTag());
         } else if (container instanceof ItemStack || container instanceof IWorldNameable) {
             return Optional.of(true);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
+    public java.util.Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<Boolean> optional = getValueFromContainer(container);
         if (optional.isPresent()) {
             return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

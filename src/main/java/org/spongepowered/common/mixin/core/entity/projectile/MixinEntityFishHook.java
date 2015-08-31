@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
@@ -53,6 +52,8 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -94,7 +95,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
     @Override
     public Optional<Entity> getHookedEntity() {
-        return Optional.fromNullable((Entity) this.caughtEntity);
+        return Optional.ofNullable((Entity) this.caughtEntity);
     }
 
     @Override

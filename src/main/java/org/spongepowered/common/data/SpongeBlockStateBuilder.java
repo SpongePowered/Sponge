@@ -26,7 +26,6 @@ package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
@@ -39,6 +38,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
@@ -82,13 +82,13 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     public BlockState build() {
         IBlockState blockState = ((IBlockState) this.blockType.getDefaultState());
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-            blockState = (IBlockState) ((BlockState) blockState).with( manipulator);
+            blockState = (IBlockState) ((BlockState) blockState).with(manipulator).get();
         }
         return (BlockState) blockState;
     }
 
     @Override
     public Optional<BlockState> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
+        return Optional.empty();
     }
 }

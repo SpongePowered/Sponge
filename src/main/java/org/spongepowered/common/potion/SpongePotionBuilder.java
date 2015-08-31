@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -36,6 +35,8 @@ import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectBuilder;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+
+import java.util.Optional;
 
 public class SpongePotionBuilder implements PotionEffectBuilder {
 
@@ -71,7 +72,7 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
 
     @Override
     public Optional<PotionEffect> build(DataView container) throws InvalidDataException {
-        return Optional.absent(); // TODO
+        return Optional.empty(); // TODO
     }
 
     @Override

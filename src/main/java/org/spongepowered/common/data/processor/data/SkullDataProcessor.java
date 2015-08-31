@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataContainer;
@@ -49,6 +48,8 @@ import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
+import java.util.Optional;
+
 public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, ImmutableSkullData> {
 
     @Override
@@ -57,26 +58,26 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
     }
 
     @Override
-    public Optional<SkullData> from(DataHolder dataHolder) {
+    public java.util.Optional<SkullData> from(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntitySkull) {
             return Optional.<SkullData>of(new SpongeSkullData(SkullUtils.getSkullType((TileEntitySkull) dataHolder)));
         } else if (SkullUtils.isValidItemStack(dataHolder)) {
             return Optional.<SkullData>of(new SpongeSkullData(SkullUtils.getSkullType((ItemStack) dataHolder)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<SkullData> fill(DataHolder dataHolder, SkullData manipulator, MergeFunction overlap) {
+    public java.util.Optional<SkullData> fill(DataHolder dataHolder, SkullData manipulator, MergeFunction overlap) {
         if (this.supports(dataHolder)) {
             SkullData merged = overlap.merge(checkNotNull(manipulator.copy()), this.from(dataHolder).get());
             return Optional.of(manipulator.set(Keys.SKULL_TYPE, merged.type().get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    public Optional<SkullData> fill(DataContainer container, SkullData skullData) {
+    public java.util.Optional<SkullData> fill(DataContainer container, SkullData skullData) {
         return Optional.of(skullData.set(Keys.SKULL_TYPE, Sponge.getGame().getRegistry()
             .getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
     }
@@ -116,11 +117,11 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
     }
 
     @Override
-    public Optional<ImmutableSkullData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableSkullData immutable) {
+    public java.util.Optional<ImmutableSkullData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableSkullData immutable) {
         if (key.equals(Keys.SKULL_TYPE)) {
             return Optional.<ImmutableSkullData>of(new ImmutableSpongeSkullData((SkullType) value));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -129,7 +130,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
     }
 
     @Override
-    public Optional<SkullData> createFrom(DataHolder dataHolder) {
+    public java.util.Optional<SkullData> createFrom(DataHolder dataHolder) {
         return this.from(dataHolder);
     }
 

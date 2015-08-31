@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.living;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -60,6 +59,7 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -173,7 +173,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     public Optional<Living> getLastAttackerAPI() {
-        return Optional.fromNullable((Living) getLastAttacker());
+        return Optional.ofNullable((Living) getLastAttacker());
     }
 
     public double getEyeHeightD() {

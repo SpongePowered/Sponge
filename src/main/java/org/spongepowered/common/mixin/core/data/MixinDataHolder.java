@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -49,6 +47,9 @@ import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import javax.annotation.Nullable;
 
 @Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 999)
@@ -60,7 +61,7 @@ public abstract class MixinDataHolder implements DataHolder {
         if (optional.isPresent()) {
             return optional.get().getFor(this);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -70,7 +71,7 @@ public abstract class MixinDataHolder implements DataHolder {
         if (optional.isPresent()) {
             return (Optional<T>) optional.get().from(this);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -80,7 +81,7 @@ public abstract class MixinDataHolder implements DataHolder {
         if (optional.isPresent()) {
             return (Optional<T>) optional.get().createFrom(this);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -92,7 +93,7 @@ public abstract class MixinDataHolder implements DataHolder {
     @Override
     public <E> DataTransactionResult transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
         if (supports(key)) {
-            return offer(key, checkNotNull(function.apply(get(key).orNull())));
+            return offer(key, checkNotNull(function.apply(get(key).orElse(null))));
         }
         return DataTransactionBuilder.failNoData();
     }
@@ -220,18 +221,18 @@ public abstract class MixinDataHolder implements DataHolder {
         if (optional.isPresent()) {
             return optional.get().getValueFromContainer(this);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Nullable
     @Override
     public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orNull();
+        return get(key).orElse(null);
     }
 
     @Override
     public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).or(checkNotNull(defaultValue));
+        return get(key).orElse(checkNotNull(defaultValue));
     }
 
     @Override
@@ -240,7 +241,7 @@ public abstract class MixinDataHolder implements DataHolder {
         if (optional.isPresent()) {
             return optional.get().getApiValueFromContainer(this);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

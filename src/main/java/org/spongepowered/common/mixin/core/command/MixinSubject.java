@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
@@ -50,6 +49,7 @@ import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;

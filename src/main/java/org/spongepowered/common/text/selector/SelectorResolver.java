@@ -27,9 +27,6 @@ package org.spongepowered.common.text.selector;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -67,7 +64,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A resolver that acts like Vanilla Minecraft in many regards.
@@ -75,25 +75,10 @@ import java.util.Set;
 // TODO decide if we want selector resolvers as part of the API, ask @kenzierocks for details
 public class SelectorResolver {
 
-    private static final Function<CommandSource, String> GET_NAME =
-        new Function<CommandSource, String>() {
-
-            @Override
-            public String apply(CommandSource input) {
-                return input.getName();
-            }
-
-        };
+    private static final Function<CommandSource, String> GET_NAME = CommandSource::getName;
     private static final Vector3d ORIGIN = new Vector3d(0, 0, 0);
     private static final Set<ArgumentType<?>> LOCATION_BASED_ARGUMENTS;
-    private static final Function<Number, Double> TO_DOUBLE = new Function<Number, Double>() {
-
-        @Override
-        public Double apply(Number input) {
-            return input.doubleValue();
-        }
-
-    };
+    private static final Function<Number, Double> TO_DOUBLE = Number::doubleValue;
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
 
     static {
@@ -121,14 +106,7 @@ public class SelectorResolver {
     }
 
     private static <I, R> Predicate<I> requireTypePredicate(Class<I> inputType, final Class<R> requiredType) {
-        return new Predicate<I>() {
-
-            @Override
-            public boolean apply(I input) {
-                return requiredType.isInstance(input);
-            }
-
-        };
+        return input -> requiredType.isInstance(input);
     }
 
     private final Collection<Extent> extents;
@@ -147,14 +125,14 @@ public class SelectorResolver {
     }
 
     public SelectorResolver(CommandSource origin, Selector selector, boolean force) {
-        this(Optional.fromNullable(extentFromSource(origin)).asSet(), positionFromSource(origin), origin, selector, force);
+        this(Optional.ofNullable(extentFromSource(origin)).map(ImmutableSet::of).orElse(ImmutableSet.<Extent>of()), positionFromSource(origin), origin, selector, force);
     }
 
     private SelectorResolver(Collection<? extends Extent> extents, Vector3d position,
         CommandSource original, Selector selector, boolean force) {
         this.extents = ImmutableSet.copyOf(extents);
         this.position = position == null ? ORIGIN : position;
-        this.original = Optional.fromNullable(original);
+        this.original = Optional.ofNullable(original);
         this.selector = checkNotNull(selector);
         this.selectorFilter = makeFilter();
         this.alwaysUsePosition = force;
@@ -254,26 +232,16 @@ public class SelectorResolver {
         Optional<Integer> levelMax = sel.get(ArgumentTypes.LEVEL.maximum());
         if (levelMin.isPresent()) {
             final int actualMin = levelMin.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().level().get() >= actualMin;
-                }
-
+            filters.add(input -> {
+                java.util.Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                return xp.isPresent() && xp.get().level().get() >= actualMin;
             });
         }
         if (levelMax.isPresent()) {
             final int actualMax = levelMax.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().level().get() <= actualMax;
-                }
-
+            filters.add(input -> {
+                java.util.Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                return xp.isPresent() && xp.get().level().get() <= actualMax;
             });
         }
     }
@@ -284,14 +252,9 @@ public class SelectorResolver {
         if (nameOpt.isPresent()) {
             final String name = nameOpt.get().getValue();
             final boolean inverted = nameOpt.get().isInverted();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
-                    return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
-                }
-
+            filters.add(input -> {
+                java.util.Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
+                return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
             });
         }
     }
