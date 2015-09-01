@@ -49,13 +49,7 @@ public class AsyncScheduler extends SchedulerBase {
     AsyncScheduler() {
         super(ScheduledTask.TaskSynchronicity.ASYNCHRONOUS);
 
-        Thread thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                mainLoop();
-            }
-        });
+        Thread thread = new Thread(this::mainLoop);
         thread.setName("Sponge Async Scheduler Thread");
         thread.setDaemon(true);
         thread.start();

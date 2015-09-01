@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
+import org.spongepowered.api.service.scheduler.SpongeExecutorService;
 import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.service.scheduler.TaskBuilder;
 import org.spongepowered.common.Sponge;
@@ -64,7 +65,12 @@ public class SpongeScheduler implements SchedulerService {
 
     @Override
     public Optional<Task> getTaskById(UUID id) {
-        return this.syncScheduler.getTask(id).orElse(this.asyncScheduler.getTask(id));
+        Optional<Task> syncTask = this.syncScheduler.getTask(id);
+        if (syncTask.isPresent()) {
+            return syncTask;
+        } else {
+            return this.asyncScheduler.getTask(id);
+        }
     }
 
     @Override
@@ -115,6 +121,16 @@ public class SpongeScheduler implements SchedulerService {
         }
 
         return allTasks;
+    }
+
+    @Override
+    public SpongeExecutorService syncExecutor(Object plugin) {
+        return new SchedulerExecutionService(() -> createTaskBuilder(), checkPluginInstance(plugin).getInstance());
+    }
+
+    @Override
+    public SpongeExecutorService asyncExecutor(Object plugin) {
+        return new SchedulerExecutionService(() -> createTaskBuilder().async(), checkPluginInstance(plugin).getInstance());
     }
 
     /**

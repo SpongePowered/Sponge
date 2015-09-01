@@ -83,7 +83,7 @@ abstract class SchedulerBase {
     }
 
     protected Optional<Task> getTask(UUID id) {
-        return Optional.<Task>fromNullable(this.taskMap.get(id));
+        return Optional.ofNullable(this.taskMap.get(id));
     }
 
     protected Set<Task> getScheduledTasks() {
@@ -170,17 +170,13 @@ abstract class SchedulerBase {
      * @param task The task to start
      */
     protected void startTask(final ScheduledTask task) {
-        this.executeTaskRunnable(new Runnable() {
-
-            @Override
-            public void run() {
-                task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
-                try {
-                    task.getRunnable().run();
-                } catch (Throwable t) {
-                    Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
-                            task.getOwner(), t);
-                }
+        this.executeTaskRunnable(() -> {
+            task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+            try {
+                task.getRunnable().run();
+            } catch (Throwable t) {
+                Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
+                        task.getOwner(), t);
             }
         });
     }
