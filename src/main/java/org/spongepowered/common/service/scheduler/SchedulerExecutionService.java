@@ -53,7 +53,14 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
 
     @Override
     public void shutdown() {
-        //NOOP
+        // Since this class is delegating its work to SchedulerService
+        // and we have no way to stopping execution without keeping
+        // track of all the submitted tasks, it makes sense that
+        // this ExecutionService cannot be shut down.
+
+        // While it is technically possible to cancel all tasks for
+        // a plugin through the SchedulerService, we have no way to
+        // ensure those tasks were created through this interface.
     }
 
     @Override
@@ -135,7 +142,7 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
      * @return The current time relative to {@link ScheduledTask#timestamp}
      */
     private static long taskCurrentTimestamp() {
-        return System.currentTimeMillis();
+        return System.nanoTime();
     }
 
     private static class SpongeTaskFuture<V> implements SpongeFuture<V> {
@@ -163,9 +170,9 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
             long elapsedTime = SchedulerExecutionService.taskCurrentTimestamp() - this.task.getTimestamp();
             if (this.task.getState() == ScheduledTask.ScheduledTaskState.RUNNING) {
                 //Use the interval to determine the current delay
-                return unit.convert(this.task.getInterval() - elapsedTime, TimeUnit.MILLISECONDS);
+                return unit.convert(this.task.period - elapsedTime, TimeUnit.NANOSECONDS);
             } else {
-                return unit.convert(this.task.getDelay() - elapsedTime, TimeUnit.MILLISECONDS);
+                return unit.convert(this.task.offset - elapsedTime, TimeUnit.NANOSECONDS);
             }
         }
 
@@ -176,7 +183,7 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
             if (other == this) {
                 return 0;
             }
-            return Long.compare(this.getDelay(TimeUnit.MILLISECONDS), other.getDelay(TimeUnit.MILLISECONDS));
+            return Long.compare(this.getDelay(TimeUnit.NANOSECONDS), other.getDelay(TimeUnit.NANOSECONDS));
         }
 
         @Override

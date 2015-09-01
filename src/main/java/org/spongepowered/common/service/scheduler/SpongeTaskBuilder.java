@@ -41,9 +41,9 @@ public class SpongeTaskBuilder implements TaskBuilder {
     private Runnable runnable;
     private ScheduledTask.TaskSynchronicity syncType;
     private String name;
-    private long delay;
+    private long delay; //milliseconds
     private long tickDelay;
-    private long interval;
+    private long interval; //milliseconds
     private long tickInterval;
 
     public SpongeTaskBuilder() {
@@ -125,8 +125,8 @@ public class SpongeTaskBuilder implements TaskBuilder {
         } else {
             name = this.name;
         }
-        long delay = this.tickDelay != -1 ? this.tickDelay : this.delay;
-        long interval = this.tickInterval != -1 ? this.tickInterval : this.interval;
+        long delay = this.tickDelay != -1 ? this.tickDelay : TimeUnit.MILLISECONDS.toNanos(this.delay);
+        long interval = this.tickInterval != -1 ? this.tickInterval : TimeUnit.MILLISECONDS.toNanos(this.interval);
         ScheduledTask task = new ScheduledTask(this.syncType, this.runnable, name, delay, this.tickDelay != -1, interval, this.tickInterval != -1,
                 pluginContainer);
         SpongeScheduler.getInstance().submit(task);
