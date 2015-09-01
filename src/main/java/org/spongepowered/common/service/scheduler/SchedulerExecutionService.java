@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.scheduler;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.service.scheduler.SpongeExecutorService;
 import org.spongepowered.api.service.scheduler.Task;
@@ -90,7 +91,7 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
 
     @Override
     public SpongeFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        final FutureTask<?> runnable = new FutureTask<>(command, null);
+        final FutureTask<?> runnable = new ThrowingFutureTask<>(command);
 
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
@@ -101,7 +102,7 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
 
     @Override
     public <V> SpongeFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-        final FutureTask<V> runnable = new FutureTask<>(callable);
+        final FutureTask<V> runnable = new ThrowingFutureTask<>(callable);
 
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
@@ -221,15 +222,44 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
     }
 
     /**
+     * An extension of the JREs FutureTask that throws exceptions of the
+     * underlying Runnable/Callable, which is the normal behaviour
+     * of {@link Task}s
+     */
+    private static class ThrowingFutureTask<V> extends FutureTask<V> {
+
+        private ThrowingFutureTask(Callable<V> callable) {
+            super(callable);
+        }
+
+        private ThrowingFutureTask(Runnable runnable) {
+            super(runnable, null);
+        }
+
+        @Override
+        protected void done() {
+            super.done();
+
+            try {
+                get();
+            } catch (InterruptedException ignored) {
+                //Cannot happen since we're in done()
+            } catch (ExecutionException e) {
+                throw Throwables.propagate(e.getCause());
+            }
+        }
+    }
+
+    /**
      * An extension of the JREs FutureTask that can be repeatedly executed,
      * required for scheduling on an interval.
      */
-    private static class RepeatableFutureTask<V> extends FutureTask<V> {
+    private static class RepeatableFutureTask<V> extends ThrowingFutureTask<V> {
 
         @Nullable private Task owningTask = null;
 
         protected RepeatableFutureTask(Runnable runnable) {
-            super(runnable, null);
+            super(runnable);
         }
 
         protected void setTask(Task task) {
@@ -237,22 +267,28 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
 
             // Since it is set after being scheduled, it might have thrown
             // an exception already
-            if (super.isDone() && !super.isCancelled()) {
+            if (isDone() && !isCancelled()) {
                 this.owningTask.cancel();
             }
         }
 
         @Override
-        public void run() {
-            super.runAndReset();
-
+        protected void done() {
             // A repeating task that is done but hasn't been cancelled has
             // failed exceptionally. Following the contract of
             // ScheduledExecutorService, this means the task has to be stopped.
-            if (super.isDone() && !super.isCancelled() && this.owningTask != null) {
-                //TODO: should this be logged?
+            if (!isCancelled() && this.owningTask != null) {
                 this.owningTask.cancel();
             }
+
+            // The ThrowingFutureTask will make sure the exception gets thrown,
+            // if there is any.
+            super.done();
+        }
+
+        @Override
+        public void run() {
+            super.runAndReset();
         }
     }
 }
