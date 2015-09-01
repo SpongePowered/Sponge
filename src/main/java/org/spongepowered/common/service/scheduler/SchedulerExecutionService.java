@@ -240,6 +240,8 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
         protected void done() {
             super.done();
 
+            if (isCancelled()) return;
+
             try {
                 get();
             } catch (InterruptedException ignored) {
