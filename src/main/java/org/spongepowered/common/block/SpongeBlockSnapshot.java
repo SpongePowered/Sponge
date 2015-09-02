@@ -210,7 +210,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public ImmutableCollection<ImmutableDataManipulator<?, ?>> getContainers() {
+    public List<ImmutableDataManipulator<?, ?>> getContainers() {
         return getManipulators();
     }
 

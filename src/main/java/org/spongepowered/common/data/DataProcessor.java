@@ -54,8 +54,6 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
 
     boolean supports(DataHolder dataHolder);
 
-    boolean supports(EntityType type);
-
     /**
      * Attempts to get the given {@link DataManipulator} of type {@code T} if
      * and only if the manipulator's required data exists from the

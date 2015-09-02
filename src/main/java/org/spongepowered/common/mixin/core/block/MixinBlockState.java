@@ -34,19 +34,22 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @NonnullByDefault
 @Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)
 public abstract class MixinBlockState extends BlockStateBase implements BlockState {
 
-    @Shadow
+    @Shadow 
     @SuppressWarnings("rawtypes")
     private ImmutableMap properties;
     @Shadow private Block block;
@@ -59,18 +62,29 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> getManipulators() {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators() {
         if (this.manipulators == null) {
             this.manipulators = ((IMixinBlock) this.block).getManipulators(this);
         }
         return this.manipulators;
     }
 
-
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-            .set(of("BlockType"), this.getType().getId())
-            .set(of("Data"), this.getManipulators());
+                .set(of("BlockType"), this.getType().getId())
+                .set(of("Data"), this.getManipulators());
+    }
+
+    @Override
+    public Set<Key<?>> getKeys() {
+        // TODO
+        return new HashSet<Key<?>>();
+    }
+
+    @Override
+    public Set<ImmutableValue<?>> getValues() {
+        // TODO
+        return new HashSet<ImmutableValue<?>>();
     }
 }

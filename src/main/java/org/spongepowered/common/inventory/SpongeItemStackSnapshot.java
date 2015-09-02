@@ -27,7 +27,6 @@ package org.spongepowered.common.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
@@ -137,6 +136,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return Optional.absent();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
         final Optional<T> optional = get(containerClass);
@@ -204,6 +204,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return Optional.of(copy.createSnapshot());
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<ItemStackSnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         final ItemStack copiedStack = this.privateStack.copy();
@@ -231,7 +232,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public ImmutableCollection<ImmutableDataManipulator<?, ?>> getContainers() {
+    public List<ImmutableDataManipulator<?, ?>> getContainers() {
         return this.manipulators;
     }
 
