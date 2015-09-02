@@ -106,12 +106,20 @@ public class ScheduledTask implements Task {
 
     @Override
     public long getDelay() {
-        return TimeUnit.NANOSECONDS.toMillis(this.offset);
+        if (this.delayIsTicks) {
+            return this.offset;
+        } else {
+            return TimeUnit.NANOSECONDS.toMillis(this.offset);
+        }
     }
 
     @Override
     public long getInterval() {
-        return TimeUnit.NANOSECONDS.toMillis(this.period);
+        if (this.intervalIsTicks) {
+            return this.period;
+        } else {
+            return TimeUnit.NANOSECONDS.toMillis(this.period);
+        }
     }
 
     @Override
