@@ -22,26 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
-
-import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-
-public interface BlockValueProcessor<E, V extends BaseValue<E>> {
-
-    Key<? extends BaseValue<E>> getKey();
-
-    int getPriority();
-
-    boolean supports(IBlockState blockState);
-
-    Optional<E> getValueForBlockState(IBlockState blockState);
-
-    Optional<V> getApiValueForBlockState(IBlockState blockState);
-
-    Optional<BlockState> offerValue(IBlockState blockState, E baseValue);
-
-}
+/**
+ * A majority of these interfaces are to aid in manipulating block states and blocks
+ * for a specific {@link org.spongepowered.api.data.manipulator.DataManipulator}. The one
+ * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
+ * for the benefit of being able to "reset" the block to a "default state".
+ */
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.block.types;

@@ -38,7 +38,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.WorldTickBlockEvent;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.text.translation.Translation;
@@ -57,6 +56,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.List;
 import java.util.Random;
 
 @NonnullByDefault
@@ -132,7 +132,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        final WorldTickBlockEvent event = SpongeEventFactory.createWorldTickBlock(Sponge.getGame(), Cause.of(world),
+        final WorldTickBlockEvent event = SpongeEventFactory.createWorldTickBlockEvent(Sponge.getGame(), (World) world, (BlockState) state,
             new Location<World>((World)world, VecHelper.toVector(pos)));
         Sponge.getGame().getEventManager().post(event);
         if(event.isCancelled()) {
@@ -156,18 +156,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(net.minecraft.world.World world, BlockPos blockPos) {
+    public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.of();
-    }
-
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.of();
-    }
-
-    @Override
-    public void resetBlockState(net.minecraft.world.World world, BlockPos blockPos) {
-        world.setBlockState(blockPos, shadow$getDefaultState());
     }
 
     @Override

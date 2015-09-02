@@ -24,18 +24,20 @@
  */
 package org.spongepowered.common.interfaces.block;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.BlockDataProcessor;
+
+import java.util.List;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their
@@ -55,19 +57,31 @@ import org.spongepowered.common.data.BlockDataProcessor;
 public interface IMixinBlock {
 
     /**
-     * Gets all the applicable {@link ImmutableDataManipulator}s possible for
-     * the {@link Block} type at he provided {@link BlockPos} and {@link World}.
+     * Gets all the {@link ImmutableDataManipulator}s for the provided
+     * {@link IBlockState}.
      *
-     * @param world
-     * @param blockPos
-     * @return
+     * @param blockState The block state being passed in
+     * @return The list of immutable manipulators
      */
-    ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos);
+    List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState);
 
-    ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState);
+    boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable);
 
-    void resetBlockState(World world, BlockPos blockPos);
+    /**
+     * Gets the list of applicable keys. Usually this list is just an
+     * immutable list of the possible keys associated with this block type.
+     *
+     * @return The list of keys applicable to this block type
+     */
+    List<Key<?>> getApplicableKeys();
 
+    List<ImmutableValue<?>> getValues(IBlockState blockState);
+
+    /**
+     * Gets the default {@link BlockState} as an api representation.
+     *
+     * @return The default blockstate
+     */
     BlockState getDefaultBlockState();
 
     // Automatically implemented by forge due to identical signature

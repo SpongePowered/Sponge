@@ -29,7 +29,6 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.block.BlockSnapshot;

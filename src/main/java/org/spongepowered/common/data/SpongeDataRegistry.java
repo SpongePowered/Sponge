@@ -38,8 +38,8 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.util.BlockDataProcessorDelegate;
+import org.spongepowered.common.data.util.BlockValueProcessorDelegate;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
@@ -76,7 +76,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<BlockDataProcessor<?>>> blockDataMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
-    private final Map<Class<? extends Value<?>>, BlockValueProcessor<?, ?>> blockValueMap = new MapMaker()
+    private final Map<Key<? extends BaseValue<?>>, List<BlockValueProcessor<?, ?>>> blockValueMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
 
@@ -92,6 +92,9 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         .concurrencyLevel(4)
         .makeMap();
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, BlockDataProcessorDelegate<?>> blockDataProcessorDelegates = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Key<? extends BaseValue<?>>, BlockValueProcessorDelegate<?, ?>> blockValueProcessorDelegates = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
 
@@ -140,6 +143,15 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
             registry.blockDataProcessorDelegates.put(entry.getKey(), delegate);
         }
         registry.blockDataMap.clear();
+        for (Map.Entry<Key<? extends BaseValue<?>>, List<BlockValueProcessor<?, ?>>> entry : registry.blockValueMap.entrySet()) {
+            ImmutableList.Builder<BlockValueProcessor<?, ?>> valueListBuilder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.BLOCK_VALUE_PROCESSOR_COMPARATOR);
+            valueListBuilder.addAll(entry.getValue());
+            final BlockValueProcessorDelegate<?, ?> delegate = new BlockValueProcessorDelegate(entry.getKey(), valueListBuilder.build());
+            registry.blockValueProcessorDelegates.put(entry.getKey(), delegate);
+        }
+        registry.blockValueMap.clear();
+
     }
 
 
@@ -244,12 +256,18 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return Optional.fromNullable((DataProcessor<T, I>) (Object) this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 
+    @SuppressWarnings("rawtypes")
     public Optional<DataProcessor> getWildImmutableProcessor(Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
         return Optional.<DataProcessor>fromNullable(this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 
     public <I extends ImmutableDataManipulator<I, ?>> Optional<BlockDataProcessor<I>> getBlockDataFor(Class<I> manipulatorClass) {
         return Optional.fromNullable((BlockDataProcessor<I>) (Object) this.blockDataProcessorDelegates.get(checkNotNull(manipulatorClass)));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Optional<BlockDataProcessor> getWildBlockDataProcessor(Class<? extends ImmutableDataManipulator> immutableClass) {
+        return Optional.<BlockDataProcessor>fromNullable(this.blockDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 
 
@@ -279,5 +297,18 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return Optional.<ValueProcessor<E, ? extends BaseValue<E>>>fromNullable(
             (ValueProcessor<E, ? extends BaseValue<E>>) (Object) this.valueDelegates.get
                 (key));
+    }
+
+    public <E, V extends BaseValue<E>> Optional<BlockValueProcessor<E, V>> getBlockValueProcessor(Key<V> key) {
+        return Optional.fromNullable((BlockValueProcessor<E, V>) (Object) this.blockValueProcessorDelegates.get(key));
+    }
+
+    public Optional<BlockValueProcessor<?, ?>> getWildBlockValueProcessor(Key<?> key) {
+        return Optional.<BlockValueProcessor<?, ?>>fromNullable(this.blockValueProcessorDelegates.get(key));
+    }
+
+    public <E> Optional<BlockValueProcessor<E, ?>> getBaseBlockValueProcessor(Key<? extends BaseValue<E>> key) {
+        return Optional.<BlockValueProcessor<E, ?>>fromNullable(
+                (BlockValueProcessor<E, ? extends BaseValue<E>>) (Object) this.blockValueProcessorDelegates.get(key));
     }
 }

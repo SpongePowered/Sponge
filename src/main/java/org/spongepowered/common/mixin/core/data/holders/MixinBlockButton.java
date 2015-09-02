@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.data.holders;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockButton;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.PoweredData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,8 +56,4 @@ public abstract class MixinBlockButton extends MixinBlock implements IMixinPower
         return (BlockState) ((IBlockState) blockState).withProperty(BlockButton.POWERED, false);
     }
 
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos) {
-        return super.getManipulators(world, blockPos);
-    }
 }
