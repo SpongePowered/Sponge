@@ -167,12 +167,15 @@ public class SchedulerExecutionService extends AbstractExecutorService implement
 
         @Override
         public long getDelay(TimeUnit unit) {
-            long elapsedTime = SchedulerExecutionService.taskCurrentTimestamp() - this.task.getTimestamp();
+            // Since these tasks are scheduled through
+            // SchedulerExecutionService, they are
+            // always realtime-based, not tick-based.
+            long elapsedTimeNs = SchedulerExecutionService.taskCurrentTimestamp() - this.task.getTimestamp();
             if (this.task.getState() == ScheduledTask.ScheduledTaskState.RUNNING) {
                 //Use the interval to determine the current delay
-                return unit.convert(this.task.period - elapsedTime, TimeUnit.NANOSECONDS);
+                return unit.convert(this.task.period - elapsedTimeNs, TimeUnit.NANOSECONDS);
             } else {
-                return unit.convert(this.task.offset - elapsedTime, TimeUnit.NANOSECONDS);
+                return unit.convert(this.task.offset - elapsedTimeNs, TimeUnit.NANOSECONDS);
             }
         }
 
