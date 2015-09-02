@@ -29,14 +29,15 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.Task;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An internal representation of a {@link Task} created by a plugin.
  */
 public class ScheduledTask implements Task {
 
-    final long offset;
-    final long period;
+    final long offset; //nanoseconds or ticks
+    final long period; //nanoseconds or ticks
     final boolean delayIsTicks;
     final boolean intervalIsTicks;
     private final PluginContainer owner;
@@ -105,12 +106,20 @@ public class ScheduledTask implements Task {
 
     @Override
     public long getDelay() {
-        return this.offset;
+        if (this.delayIsTicks) {
+            return this.offset;
+        } else {
+            return TimeUnit.NANOSECONDS.toMillis(this.offset);
+        }
     }
 
     @Override
     public long getInterval() {
-        return this.period;
+        if (this.intervalIsTicks) {
+            return this.period;
+        } else {
+            return TimeUnit.NANOSECONDS.toMillis(this.period);
+        }
     }
 
     @Override

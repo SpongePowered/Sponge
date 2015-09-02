@@ -52,14 +52,14 @@ abstract class SchedulerBase {
 
     /**
      * Gets the timestamp to update the timestamp of a task. This method is task
-     * sensitive to support different timestamp types i.e. wall clock and ticks.
+     * sensitive to support different timestamp types i.e. system clock and ticks.
      *
      * @param task The task
      * @return Timestamp for the task
      */
     protected long getTimestamp(ScheduledTask task) {
-        // Supports wall clock time by default
-        return System.currentTimeMillis();
+        // Supports system clock time by default
+        return System.nanoTime();
     }
 
     /**
@@ -83,7 +83,7 @@ abstract class SchedulerBase {
     }
 
     protected Optional<Task> getTask(UUID id) {
-        return Optional.<Task>fromNullable(this.taskMap.get(id));
+        return Optional.ofNullable(this.taskMap.get(id));
     }
 
     protected Set<Task> getScheduledTasks() {
@@ -170,17 +170,13 @@ abstract class SchedulerBase {
      * @param task The task to start
      */
     protected void startTask(final ScheduledTask task) {
-        this.executeTaskRunnable(new Runnable() {
-
-            @Override
-            public void run() {
-                task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
-                try {
-                    task.getRunnable().run();
-                } catch (Throwable t) {
-                    Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
-                            task.getOwner(), t);
-                }
+        this.executeTaskRunnable(() -> {
+            task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+            try {
+                task.getRunnable().run();
+            } catch (Throwable t) {
+                Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
+                        task.getOwner(), t);
             }
         });
     }

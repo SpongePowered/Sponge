@@ -36,14 +36,14 @@ import java.util.concurrent.TimeUnit;
 
 public class SpongeTaskBuilder implements TaskBuilder {
 
-    private static final long TICK_DURATION = 50;
+    private static final long TICK_DURATION = TimeUnit.MILLISECONDS.toNanos(50);
 
     private Runnable runnable;
     private ScheduledTask.TaskSynchronicity syncType;
     private String name;
-    private long delay;
+    private long delay; //nanoseconds
     private long tickDelay;
-    private long interval;
+    private long interval; //nanoseconds
     private long tickInterval;
 
     public SpongeTaskBuilder() {
@@ -73,7 +73,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     @Override
     public TaskBuilder delay(long delay, TimeUnit unit) {
         checkArgument(delay >= 0, "Delay cannot be negative");
-        this.delay = checkNotNull(unit, "unit").toMillis(delay);
+        this.delay = checkNotNull(unit, "unit").toNanos(delay);
         this.tickDelay = -1;
         return this;
     }
@@ -82,7 +82,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     public TaskBuilder delay(long delay) {
         checkArgument(delay >= 0, "Delay cannot be negative");
         if (this.syncType == ScheduledTask.TaskSynchronicity.ASYNCHRONOUS) {
-            this.delay = delay;
+            this.delay = TimeUnit.MILLISECONDS.toNanos(delay);
         } else {
             this.tickDelay = delay;
         }
@@ -92,7 +92,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     @Override
     public TaskBuilder interval(long interval, TimeUnit unit) {
         checkArgument(interval >= 0, "Interval cannot be negative");
-        this.interval = checkNotNull(unit, "unit").toMillis(interval);
+        this.interval = checkNotNull(unit, "unit").toNanos(interval);
         this.tickInterval = -1;
         return this;
     }
@@ -101,7 +101,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     public TaskBuilder interval(long interval) {
         checkArgument(interval >= 0, "Interval cannot be negative");
         if (this.syncType == ScheduledTask.TaskSynchronicity.ASYNCHRONOUS) {
-            this.interval = interval;
+            this.interval = TimeUnit.MILLISECONDS.toNanos(interval);
         } else {
             this.tickInterval = interval;
         }
