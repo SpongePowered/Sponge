@@ -124,12 +124,12 @@ public class SpongeScheduler implements SchedulerService {
     }
 
     @Override
-    public SpongeExecutorService syncExecutor(Object plugin) {
+    public SpongeExecutorService createSyncExecutor(Object plugin) {
         return new SchedulerExecutionService(() -> createTaskBuilder(), checkPluginInstance(plugin).getInstance());
     }
 
     @Override
-    public SpongeExecutorService asyncExecutor(Object plugin) {
+    public SpongeExecutorService createAsyncExecutor(Object plugin) {
         return new SchedulerExecutionService(() -> createTaskBuilder().async(), checkPluginInstance(plugin).getInstance());
     }
 
