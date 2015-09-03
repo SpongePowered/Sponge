@@ -44,6 +44,8 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
@@ -134,5 +136,10 @@ public class VelocityDataProcessor extends AbstractSpongeDataProcessor<VelocityD
             return Optional.<VelocityData>of(new SpongeVelocityData(new Vector3d(x, y, z)));
         }
         return Optional.absent();
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return Entity.class.isAssignableFrom(entityType.getEntityClass());
     }
 }

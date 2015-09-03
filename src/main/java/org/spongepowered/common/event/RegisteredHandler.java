@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventHandler;
+import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.plugin.PluginContainer;
 
@@ -44,12 +44,12 @@ public final class RegisteredHandler<T extends Event> implements SpongeEventHand
     private final Class<T> eventClass;
     private final Order order;
 
-    private final EventHandler<? super T> handler;
+    private final EventListener<? super T> handler;
 
     private final boolean ignoreCancelled;
     private final boolean beforeModifications;
 
-    RegisteredHandler(PluginContainer plugin, Class<T> eventClass, Order order, EventHandler<? super T> handler, boolean ignoreCancelled, boolean beforeModifications) {
+    RegisteredHandler(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> handler, boolean ignoreCancelled, boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventClass = checkNotNull(eventClass, "eventClass");
         this.order = checkNotNull(order, "order");

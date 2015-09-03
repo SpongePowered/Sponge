@@ -42,6 +42,9 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthDa
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -146,6 +149,11 @@ public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData,
             return Optional.<HealthData>of(new SpongeHealthData(health, maxHealth));
         }
         return Optional.absent();
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return Living.class.isAssignableFrom(entityType.getEntityClass());
     }
 
 }

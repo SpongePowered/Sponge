@@ -28,20 +28,43 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.List;
 
 @Mixin(BlockFlower.class)
 public abstract class MixinBlockFlower extends MixinBlock {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos) {
-        return getManipulators(world.getBlockState(blockPos));
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.of();
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.of();
+    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return ImmutablePlantData.class.isAssignableFrom(immutable);
+    }
+
+    @Override
+    public List<Key<?>> getApplicableKeys() {
+        return ImmutableList.<Key<?>>of(Keys.PLANT_TYPE);
+    }
+
+    @Override
+    public List<ImmutableValue<?>> getValues(IBlockState blockState) {
+        return ImmutableList.<ImmutableValue<?>>of(((BlockState) blockState).getValue(Keys.PLANT_TYPE).get().asImmutable());
+    }
+
+    @Override
+    public boolean isFlammable(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing) {
+        return false;
     }
 }

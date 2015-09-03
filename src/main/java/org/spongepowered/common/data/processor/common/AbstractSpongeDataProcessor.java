@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.common;
 
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.DataProcessor;
 
 public abstract class AbstractSpongeDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
@@ -33,5 +34,10 @@ public abstract class AbstractSpongeDataProcessor<M extends DataManipulator<M, I
     @Override
     public int getPriority() {
         return 100;
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return false;
     }
 }

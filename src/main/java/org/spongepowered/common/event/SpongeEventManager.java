@@ -37,9 +37,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventHandler;
+import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.event.EventManager;
@@ -130,16 +130,16 @@ public class SpongeEventManager implements EventManager {
         }
     }
 
-    public void register(PluginContainer plugin, Object listener) {
+    public void registerListener(PluginContainer plugin, Object listenerObject) {
         checkNotNull(plugin, "plugin");
-        checkNotNull(listener, "listener");
+        checkNotNull(listenerObject, "listener");
 
         List<RegisteredHandler<?>> handlers = Lists.newArrayList();
 
-        Class<?> handle = listener.getClass();
+        Class<?> handle = listenerObject.getClass();
         for (Method method : handle.getMethods()) {
-            Subscribe subscribe = method.getAnnotation(Subscribe.class);
-            if (subscribe != null) {
+            Listener listener = method.getAnnotation(Listener.class);
+            if (listener != null) {
                 if (isValidHandler(method)) {
                     @SuppressWarnings("unchecked")
                     Class<? extends Event> eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
@@ -151,10 +151,10 @@ public class SpongeEventManager implements EventManager {
                         continue;
                     }
 
-                    handlers.add(createRegistration(plugin, eventClass, subscribe, handler));
+                    handlers.add(createRegistration(plugin, eventClass, listener, handler));
                 } else {
                     Sponge.getLogger().warn("The method {} on {} has @{} but has the wrong signature", method, handle.getName(),
-                            Subscribe.class.getName());
+                            Listener.class.getName());
                 }
             }
         }
@@ -162,13 +162,13 @@ public class SpongeEventManager implements EventManager {
         register(handlers);
     }
 
-    private static <T extends Event> RegisteredHandler<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Subscribe subscribe,
-            EventHandler<? super T> handler) {
+    private static <T extends Event> RegisteredHandler<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Listener subscribe,
+            EventListener<? super T> handler) {
         return createRegistration(plugin, eventClass, subscribe.order(), subscribe.ignoreCancelled(), subscribe.beforeModifications(), handler);
     }
 
     private static <T extends Event> RegisteredHandler<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Order order,
-            boolean ignoreCancelled, boolean beforeModifications, EventHandler<? super T> handler) {
+            boolean ignoreCancelled, boolean beforeModifications, EventListener<? super T> handler) {
         return new RegisteredHandler<T>(plugin, eventClass, order, handler, ignoreCancelled, beforeModifications);
     }
 
@@ -179,23 +179,23 @@ public class SpongeEventManager implements EventManager {
     }
 
     @Override
-    public void register(Object plugin, Object listener) {
-        register(getPlugin(plugin), listener);
+    public void registerListeners(Object plugin, Object listener) {
+        registerListener(getPlugin(plugin), listener);
     }
 
     @Override
-    public <T extends Event> void register(Object plugin, Class<T> eventClass, EventHandler<? super T> handler) {
-        register(plugin, eventClass, Order.DEFAULT, handler);
+    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, EventListener<? super T> handler) {
+        registerListener(plugin, eventClass, Order.DEFAULT, handler);
     }
 
     @Override
-    public <T extends Event> void register(Object plugin, Class<T> eventClass, Order order, EventHandler<? super T> handler) {
+    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, EventListener<? super T> handler) {
         register(createRegistration(getPlugin(plugin), eventClass, order, false, false, handler));
     }
 
     @Override
-    public <T extends Event> void register(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
-            EventHandler<? super T> handler) {
+    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
+                                           EventListener<? super T> handler) {
         register(createRegistration(getPlugin(plugin), eventClass, order, false, beforeModifications, handler));
     }
 
@@ -219,7 +219,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     @Override
-    public void unregister(final Object listener) {
+    public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
         unregister(new Predicate<RegisteredHandler<?>>() {
 
@@ -231,7 +231,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     @Override
-    public void unregisterPlugin(Object pluginObj) {
+    public void unregisterPluginListeners(Object pluginObj) {
         final PluginContainer plugin = getPlugin(pluginObj);
         unregister(new Predicate<RegisteredHandler<?>>() {
 

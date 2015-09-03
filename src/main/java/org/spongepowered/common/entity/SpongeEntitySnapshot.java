@@ -130,9 +130,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         } else { // try harder
             final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
             if (processorOptional.isPresent()) {
-                // TODO if (processorOptional.get().supports(this.entityType)) {
-                    return Optional.of((T) (Object) SpongeDataRegistry.getInstance().getWildBuilderForImmutable(containerClass).get().create());
-                //}
+                if (processorOptional.get().supports(this.entityType)) {
+                    return Optional.of((T) (Object) SpongeDataRegistry.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
+                }
             }
         }
         return Optional.absent();
@@ -147,7 +147,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
-        return processorOptional.isPresent(); // TODO && processorOptional.get().supports(this.entityType);
+        return processorOptional.isPresent() && processorOptional.get().supports(this.entityType);
     }
 
     @Override
@@ -163,49 +163,85 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         if (createNew) {
-            return Optional.of((EntitySnapshot) new SpongeEntitySnapshot(this.entityUuid, this.world, this.entityType, builder.build()));
+            return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.world, this.entityType, builder.build()));
         }
-        return null;
+        return Optional.absent();
     }
 
     @Override
     public <E> Optional<EntitySnapshot> with(Key<? extends BaseValue<E>> key, E value) {
-        return null;
+        if (!supports(key)) {
+            return Optional.absent();
+        }
+        return Optional.absent();
     }
 
     @Override
     public Optional<EntitySnapshot> with(BaseValue<?> value) {
-        return null;
+        return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<EntitySnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        return null;
+        if (!supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
+            return Optional.absent();
+        }
+        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        boolean createNew = false;
+        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+            if (manipulator.getClass().isAssignableFrom(valueContainer.getClass())) {
+                builder.add(valueContainer);
+                createNew = true;
+            } else {
+                builder.add(manipulator);
+            }
+        }
+        if (createNew) {
+            return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.world, this.entityType, builder.build()));
+        }
+        return Optional.<EntitySnapshot>of(this);
     }
 
     @Override
     public Optional<EntitySnapshot> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
-        return null;
+        EntitySnapshot snapshot = this;
+        for (ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
+            final Optional<EntitySnapshot> optional = with(manipulator);
+            if (optional.isPresent()) {
+                snapshot = optional.get();
+            }
+        }
+        return snapshot == this ? Optional.<EntitySnapshot>absent() : Optional.of(snapshot);
     }
 
     @Override
     public Optional<EntitySnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
-        return null;
+        if (!supports(containerClass)) {
+            return Optional.absent();
+        }
+        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+            if (!containerClass.isInstance(manipulator)) {
+                builder.add(manipulator);
+            }
+        }
+        return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.world, this.entityType, builder.build()));
     }
 
     @Override
     public EntitySnapshot merge(EntitySnapshot that) {
-        return null;
+        return this;
     }
 
     @Override
     public EntitySnapshot merge(EntitySnapshot that, MergeFunction function) {
-        return null;
+        return this;
     }
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getContainers() {
-        return null;
+        return this.getManipulators();
     }
 
     @SuppressWarnings("unchecked")
@@ -245,13 +281,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public boolean supports(Key<?> key) {
-
-        return false;
+        return this.keys.contains(key);
     }
 
     @Override
     public boolean supports(BaseValue<?> baseValue) {
-        return false;
+        return supports(baseValue.getKey());
     }
 
     @Override

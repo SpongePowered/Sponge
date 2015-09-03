@@ -55,8 +55,4 @@ public abstract class MixinBlockCake extends MixinBlock implements IMixinBlockLa
         return null;
     }
 
-    @Override
-    public BlockState resetLayerData(BlockState blockState) {
-        return ((BlockState) ((IBlockState) blockState).withProperty(BlockCake.BITES, 0));
-    }
 }

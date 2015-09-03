@@ -213,6 +213,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public BlockState merge(BlockState that, MergeFunction function) {
         if (!getType().equals(that.getType())) {
@@ -220,7 +221,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         } else {
             BlockState temp = this;
             for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-                @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orNull();
+                @Nullable ImmutableDataManipulator old = temp.get(manipulator.getClass()).orNull();
                 Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
                 if (optional.isPresent()) {
                     temp = optional.get();
@@ -233,7 +234,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     }
 
     @Override
-    public Collection<ImmutableDataManipulator<?, ?>> getContainers() {
+    public List<ImmutableDataManipulator<?, ?>> getContainers() {
         return this.getManipulators();
     }
 

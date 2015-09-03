@@ -44,8 +44,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.world.WorldDecayBlockEvent;
+import org.spongepowered.api.event.block.DecayBlockEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -72,7 +71,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
         BlockSnapshot blockOriginal = location.createSnapshot();
         BlockSnapshot blockReplacement = blockOriginal.withState(BlockTypes.AIR.getDefaultState());
         ImmutableList<BlockTransaction> transactions = new ImmutableList.Builder<BlockTransaction>().add(new BlockTransaction(blockOriginal, blockReplacement)).build();
-        final WorldDecayBlockEvent event = SpongeEventFactory.createWorldDecayBlock(Sponge.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
+        final DecayBlockEvent.SourceWorld event = SpongeEventFactory.createDecayBlockEventSourceWorld(Sponge.getGame(), transactions, (World) worldIn);
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             ci.cancel();

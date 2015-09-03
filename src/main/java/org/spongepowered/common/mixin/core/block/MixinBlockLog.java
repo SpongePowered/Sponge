@@ -42,6 +42,7 @@ import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 
 @NonnullByDefault
@@ -57,7 +58,7 @@ public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTre
             type = (BlockPlanks.EnumType) blockState.getValue(BlockNewLog.VARIANT);
         }
 
-        TreeType treeType = null;
+        TreeType treeType = TreeTypes.OAK;
 
         switch(type) {
             case OAK:
@@ -80,7 +81,9 @@ public abstract class MixinBlockLog extends MixinBlock implements IMixinBlockTre
                 break;
         }
 
-        return null;
+        final TreeData data = new SpongeTreeData(treeType);
+
+        return data;
     }
 
     public DataTransactionResult setTreeData(TreeData treeData, World world, BlockPos blockPos) {

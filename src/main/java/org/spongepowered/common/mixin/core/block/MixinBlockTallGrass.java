@@ -32,16 +32,13 @@ import net.minecraft.world.World;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.List;
+
 @Mixin(BlockTallGrass.class)
 public abstract class MixinBlockTallGrass extends MixinBlock {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+    public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.of();
-    }
-
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos) {
-        return getManipulators(world.getBlockState(blockPos));
     }
 }

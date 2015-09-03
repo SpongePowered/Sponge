@@ -40,6 +40,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathin
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
@@ -117,4 +119,8 @@ public class BreathingDataProcessor extends AbstractSpongeDataProcessor<Breathin
         return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
 
+    @Override
+    public boolean supports(EntityType entityType) {
+        return Living.class.isAssignableFrom(entityType.getEntityClass());
+    }
 }

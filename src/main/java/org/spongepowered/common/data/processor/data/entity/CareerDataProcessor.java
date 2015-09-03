@@ -38,6 +38,8 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
@@ -115,4 +117,8 @@ public class CareerDataProcessor extends AbstractSpongeDataProcessor<CareerData,
         return from(dataHolder);
     }
 
+    @Override
+    public boolean supports(EntityType entityType) {
+        return Villager.class.isAssignableFrom(entityType.getEntityClass());
+    }
 }

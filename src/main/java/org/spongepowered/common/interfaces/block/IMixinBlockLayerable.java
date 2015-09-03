@@ -48,11 +48,4 @@ public interface IMixinBlockLayerable extends IMixinBlock {
 
     BlockState setLayerData(IBlockState blockState, LayeredData data);
 
-    /**
-     * Resets the direction on the given {@link BlockState}
-     * @param blockState
-     * @return
-     */
-    BlockState resetLayerData(BlockState blockState);
-
 }

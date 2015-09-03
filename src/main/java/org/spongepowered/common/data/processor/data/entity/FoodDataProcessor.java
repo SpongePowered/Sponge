@@ -40,6 +40,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 
@@ -117,4 +119,8 @@ public class FoodDataProcessor extends AbstractSpongeDataProcessor<FoodData, Imm
         return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
 
+    @Override
+    public boolean supports(EntityType entityType) {
+        return Player.class.isAssignableFrom(entityType.getEntityClass());
+    }
 }

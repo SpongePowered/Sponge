@@ -25,9 +25,9 @@
 package org.spongepowered.common.event;
 
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventHandler;
+import org.spongepowered.api.event.EventListener;
 
-public interface SpongeEventHandler<T extends Event> extends EventHandler<T> {
+public interface SpongeEventHandler<T extends Event> extends EventListener<T> {
 
     Object getHandle();
 

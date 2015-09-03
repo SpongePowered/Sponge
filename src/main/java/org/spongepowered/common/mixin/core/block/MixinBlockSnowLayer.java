@@ -47,9 +47,4 @@ public abstract class MixinBlockSnowLayer extends MixinBlock implements IMixinBl
         return null;
     }
 
-    @Override
-    public BlockState resetLayerData(BlockState blockState) {
-        return ((BlockState) ((IBlockState) blockState).withProperty(BlockSnow.LAYERS, 1));
-    }
-
 }

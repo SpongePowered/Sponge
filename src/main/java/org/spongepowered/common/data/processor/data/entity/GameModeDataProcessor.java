@@ -40,6 +40,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -127,5 +128,10 @@ public class GameModeDataProcessor extends AbstractSpongeDataProcessor<GameModeD
     @Override
     public Optional<GameModeData> createFrom(DataHolder dataHolder) {
         return from(dataHolder);
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return Player.class.isAssignableFrom(entityType.getEntityClass());
     }
 }

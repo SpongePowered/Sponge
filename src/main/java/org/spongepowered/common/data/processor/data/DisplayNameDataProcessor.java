@@ -42,6 +42,8 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.Sponge;
@@ -180,5 +182,10 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
             return from(dataHolder);
         }
         return Optional.absent();
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return Entity.class.isAssignableFrom(entityType.getEntityClass());
     }
 }
