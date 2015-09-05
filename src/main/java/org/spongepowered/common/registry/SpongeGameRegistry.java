@@ -182,7 +182,7 @@ import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.Transform.Builder;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
@@ -362,6 +362,7 @@ import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
@@ -2013,8 +2014,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
+    public <E extends Extent> Transform.Builder<E> createTransformBuilder() {
+        return new SpongeTransform.SpongeBuilder<E>();
+    }
+
+    @Override
     public BlockStateBuilder createBlockStateBuilder() {
-        throw new UnsupportedOperationException(); 
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -2084,11 +2090,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public WeatherSpawnCauseBuilder createWeatherSpawnCauseBuilder() {
-        throw new UnsupportedOperationException(); 
-    }
-
-    @Override
-    public <E extends Extent> Builder<E> createTransformBuilder() {
         throw new UnsupportedOperationException(); 
     }
 

@@ -40,27 +40,35 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 public class SpongeTransform<E extends Extent> implements Transform<E> {
 
-    @Nullable private E extent;
-    private Vector3d position;
-    private Vector3d rotation;
-    private Vector3d scale;
+    private final E extent;
+    private final Vector3d position;
+    private final Vector3d rotation;
+    private final Vector3d scale;
     @Nullable private Location<E> location = null;
     @Nullable private Quaterniond rotationQuaternion = null;
-
-    public SpongeTransform() {
-        this(null, Vector3d.ZERO, Vector3d.ZERO, Vector3d.ONE);
-    }
 
     public SpongeTransform(Location<E> location) {
         this(location.getExtent(), location.getPosition());
     }
 
-    public SpongeTransform(@Nullable E extent, Vector3d position) {
-        this(extent, position, Vector3d.ZERO, Vector3d.ONE);
+    public SpongeTransform(E extent) {
+        this(extent, Vector3d.ZERO);
     }
 
-    public SpongeTransform(@Nullable E extent, Vector3d position, Vector3d rotation, Vector3d scale) {
-        this.extent = extent;
+    public SpongeTransform(E extent, Vector3d position) {
+        this(extent, position, Vector3d.ZERO);
+    }
+
+    public SpongeTransform(E extent, Vector3d position, Vector3d rotation) {
+        this(extent, position, rotation, Vector3d.ONE);
+    }
+
+    public SpongeTransform(Location<E> location, Vector3d rotation, Vector3d scale) {
+        this(location.getExtent(), location.getPosition(), rotation, scale);
+    }
+
+    public SpongeTransform(E extent, Vector3d position, Vector3d rotation, Vector3d scale) {
+        this.extent = checkNotNull(extent, "extent");
         this.position = checkNotNull(position, "position");
         this.rotation = checkNotNull(rotation, "rotation");
         this.scale = checkNotNull(scale, "scale");
@@ -68,7 +76,6 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
 
     @Override
     public Location<E> getLocation() {
-        checkState(extent != null, "Transform has no extent");
         if (this.location == null) {
             this.location = new Location<E>(this.extent, this.position);
         }
@@ -76,25 +83,8 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     }
 
     @Override
-    public Transform<E> setLocation(Location<E> location) {
-        checkNotNull(location, "location");
-        setExtent(location.getExtent());
-        setPosition(location.getPosition());
-        return this;
-    }
-
-    @Override
     public E getExtent() {
-        checkState(extent != null, "Transform has no extent");
         return this.extent;
-    }
-
-    @Override
-    public Transform<E> setExtent(E extent) {
-        checkNotNull(extent, "extent");
-        this.extent = extent;
-        this.location = null;
-        return this;
     }
 
     @Override
@@ -103,42 +93,18 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     }
 
     @Override
-    public Transform<E> setPosition(Vector3d position) {
-        checkNotNull(position, "position");
-        this.position = position;
-        this.location = null;
-        return this;
-    }
-
-    @Override
     public Vector3d getRotation() {
         return this.rotation;
     }
 
     @Override
-    public Transform<E> setRotation(Vector3d rotation) {
-        checkNotNull(rotation, "rotation");
-        this.rotation = rotation;
-        this.rotationQuaternion = null;
-        return this;
-    }
-
-    @Override
     public Quaterniond getRotationAsQuaternion() {
         if (this.rotationQuaternion == null) {
-            this.rotationQuaternion = Quaterniond.fromAxesAnglesDeg(this.rotation.getX(), -this.rotation.getY(), this.rotation.getZ());
+            this.rotationQuaternion = fromAxesAngles(this.rotation);
         }
         return this.rotationQuaternion;
     }
 
-    @Override
-    public Transform<E> setRotation(Quaterniond rotation) {
-        checkNotNull(rotation, "rotation");
-        final Vector3d axesAngles = rotation.getAxesAnglesDeg();
-        this.rotation = new Vector3d(axesAngles.getX(), -axesAngles.getY(), axesAngles.getZ());
-        this.rotationQuaternion = rotation;
-        return this;
-    }
 
     @Override
     public double getPitch() {
@@ -161,46 +127,74 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     }
 
     @Override
+    public Transform<E> setLocation(Location<E> location) {
+        checkNotNull(location, "location");
+        return new SpongeTransform<E>(location, getRotation(), getScale());
+    }
+
+    @Override
+    public Transform<E> setExtent(E extent) {
+        checkNotNull(extent, "extent");
+        return new SpongeTransform<E>(extent, getPosition(), getRotation(), getScale());
+    }
+
+    @Override
+    public Transform<E> setPosition(Vector3d position) {
+        checkNotNull(position, "position");
+        return new SpongeTransform<E>(getExtent(), position, getRotation(), getScale());
+    }
+
+    @Override
+    public Transform<E> setRotation(Quaterniond rotation) {
+        checkNotNull(rotation, "rotation");
+        return setRotation(toAxesAngles(rotation));
+    }
+
+    @Override
+    public Transform<E> setRotation(Vector3d rotation) {
+        checkNotNull(rotation, "rotation");
+        return new SpongeTransform<E>(getExtent(), getPosition(), rotation, getScale());
+    }
+
+    @Override
     public Transform<E> setScale(Vector3d scale) {
         checkNotNull(scale, "scale");
-        this.scale = scale;
-        return this;
+        return new SpongeTransform<E>(getExtent(), getPosition(), getRotation(), scale);
     }
 
     @Override
     public Transform<E> add(Transform<E> other) {
         checkNotNull(other, "other");
-        addTranslation(other.getPosition());
-        addRotation(other.getRotationAsQuaternion());
-        addScale(other.getScale());
-        return this;
+        return new SpongeTransform<E>(
+            getExtent(),
+            getPosition().add(other.getPosition()),
+            toAxesAngles(other.getRotationAsQuaternion().mul(getRotationAsQuaternion())),
+            getScale().mul(other.getScale())
+        );
     }
 
     @Override
     public Transform<E> addTranslation(Vector3d translation) {
         checkNotNull(translation, "translation");
-        setPosition(getPosition().add(translation));
-        return this;
+        return new SpongeTransform<E>(getExtent(), getPosition().add(translation));
     }
 
     @Override
     public Transform<E> addRotation(Vector3d rotation) {
         checkNotNull(rotation, "rotation");
-        return addRotation(Quaterniond.fromAxesAnglesDeg(rotation.getX(), -rotation.getY(), rotation.getZ()));
+        return addRotation(fromAxesAngles(rotation));
     }
 
     @Override
     public Transform<E> addRotation(Quaterniond rotation) {
         checkNotNull(rotation, "rotation");
-        setRotation(rotation.mul(getRotationAsQuaternion()));
-        return this;
+        return new SpongeTransform<E>(getExtent(), getPosition(), toAxesAngles(rotation.mul(getRotationAsQuaternion())), getScale());
     }
 
     @Override
     public Transform<E> addScale(Vector3d scale) {
         checkNotNull(scale, "scale");
-        setScale(getScale().mul(scale));
-        return this;
+        return new SpongeTransform<E>(getExtent(), getPosition(), getRotation(), getScale().mul(scale));
     }
 
     @Override
@@ -210,7 +204,7 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
 
     @Override
     public boolean isValid() {
-        return this.extent != null && this.extent.isLoaded();
+        return this.extent.isLoaded();
     }
 
     @Override
@@ -220,11 +214,68 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
 
     @Override
     public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
         if (!(other instanceof SpongeTransform<?>)) {
             return false;
         }
-        SpongeTransform<?> otherLoc = (SpongeTransform<?>) other;
-        return otherLoc.extent.equals(this.extent) && otherLoc.getPosition().equals(this.getPosition())
-                && otherLoc.getRotation().equals(this.getRotation()) && otherLoc.getScale().equals(this.getScale());
+        final SpongeTransform<?> otherTransform = (SpongeTransform<?>) other;
+        return otherTransform.extent.equals(this.extent) && otherTransform.getPosition().equals(getPosition())
+            && otherTransform.getRotation().equals(getRotation()) && otherTransform.getScale().equals(getScale());
     }
+
+    private static Vector3d toAxesAngles(Quaterniond quaternion) {
+        final Vector3d axesAngles = quaternion.getAxesAnglesDeg();
+        return new Vector3d(axesAngles.getX(), -axesAngles.getY(), axesAngles.getZ());
+    }
+
+    private static Quaterniond fromAxesAngles(Vector3d angles) {
+        return Quaterniond.fromAxesAnglesDeg(angles.getX(), -angles.getY(), angles.getZ());
+    }
+
+    public static class SpongeBuilder<E extends Extent> implements Transform.Builder<E> {
+
+        @Nullable private E extent = null;
+        private Vector3d position = Vector3d.ZERO;
+        private Vector3d rotation = Vector3d.ZERO;
+        private Vector3d scale = Vector3d.ONE;
+
+        @Override
+        public Builder<E> extent(E extent) {
+            this.extent = checkNotNull(extent, "extent");
+            return this;
+        }
+
+        @Override
+        public Builder<E> position(Vector3d position) {
+            this.position = checkNotNull(position, "position");
+            return this;
+        }
+
+        @Override
+        public Builder<E> rotation(Vector3d rotation) {
+            this.rotation = checkNotNull(rotation, "rotation");
+            return this;
+        }
+
+        @Override
+        public Builder<E> rotation(Quaterniond rotation) {
+            return rotation(toAxesAngles(checkNotNull(rotation, "rotation")));
+        }
+
+        @Override
+        public Builder<E> scale(Vector3d scale) {
+            this.scale = checkNotNull(scale, "scale");
+            return this;
+        }
+
+        @Override
+        public Transform<E> build() {
+            checkState(extent != null, "Extent hasn't been set");
+            return new SpongeTransform<E>(extent, position, rotation, scale);
+        }
+
+    }
+
 }
