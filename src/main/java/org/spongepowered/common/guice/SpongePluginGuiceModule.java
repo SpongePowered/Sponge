@@ -31,6 +31,7 @@ import com.google.inject.TypeLiteral;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.config.ConfigDir;
 import org.spongepowered.api.service.config.DefaultConfig;
@@ -170,9 +171,9 @@ public class SpongePluginGuiceModule extends AbstractModule {
         private final SchedulerService schedulerService;
 
         @Inject
-        private SynchronousExecutorProvider(PluginContainer container, SchedulerService schedulerService) {
+        private SynchronousExecutorProvider(PluginContainer container, Game game) {
             this.container = container;
-            this.schedulerService = schedulerService;
+            this.schedulerService = game.getScheduler();
         }
 
         @Override
@@ -188,9 +189,9 @@ public class SpongePluginGuiceModule extends AbstractModule {
         private final SchedulerService schedulerService;
 
         @Inject
-        private AsynchronousExecutorProvider(PluginContainer container, SchedulerService schedulerService) {
+        private AsynchronousExecutorProvider(PluginContainer container, Game game) {
             this.container = container;
-            this.schedulerService = schedulerService;
+            this.schedulerService = game.getScheduler();
         }
 
         @Override
