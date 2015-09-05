@@ -62,7 +62,7 @@ public class SpongeEventManager implements EventManager {
     private final Object lock = new Object();
 
     private final PluginManager pluginManager;
-    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.handler");
+    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener");
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
 
     /**
@@ -146,7 +146,7 @@ public class SpongeEventManager implements EventManager {
                     Class<? extends Event> eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
                     AnnotatedEventListener handler;
                     try {
-                        handler = this.handlerFactory.create(listener, method);
+                        handler = this.handlerFactory.create(listenerObject, method);
                     } catch (Exception e) {
                         Sponge.getLogger().error("Failed to create handler for {} on {}", method, handle, e);
                         continue;

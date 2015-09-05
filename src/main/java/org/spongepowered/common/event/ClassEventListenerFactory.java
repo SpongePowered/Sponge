@@ -82,7 +82,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         Class<?> handle = method.getDeclaringClass();
         Class<?> eventClass = method.getParameterTypes()[0];
         String name = this.targetPackage
-                + eventClass.getSimpleName() + "Handler_" +  handle.getSimpleName() + '_' + method.getName()
+                + eventClass.getSimpleName() + "Listener_" +  handle.getSimpleName() + '_' + method.getName()
                 + this.id.incrementAndGet();
         return this.classLoader.defineClass(name, generateClass(name, handle, method, eventClass));
     }
