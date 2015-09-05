@@ -24,17 +24,21 @@
  */
 package org.spongepowered.common.event;
 
+
 import org.spongepowered.api.Game;
+import org.spongepowered.api.GameProfile;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.server.ServerLoadWorldEvent;
-import org.spongepowered.api.event.entity.living.player.PlayerQuitEvent;
-import org.spongepowered.api.event.entity.living.player.PlayerJoinEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.Sponge;
 
 /**
  * Utility that fires events that normally Forge fires at (in spots). Typically
@@ -45,20 +49,20 @@ import org.spongepowered.api.world.World;
  */
 public class SpongeImplEventFactory {
 
-    public static ServerLoadWorldEvent createServerLoadWorld(Game game, org.spongepowered.api.world.World world) {
-        return SpongeEventFactory.createServerLoadWorld(game, world);
+    public static LoadWorldEvent createLoadWorldEvent(Game game, World world) {
+        return SpongeEventFactory.createLoadWorldEvent(Cause.of(Sponge.getGame().getServer()), game, world);
     }
 
-    public static PlayerJoinEvent createPlayerJoin(Game game, Player player, Location<World> location, Text text, MessageSink sink) {
-        return SpongeEventFactory.createPlayerJoin(game, player, location, text, sink);
+    public static ClientConnectionEvent.Join createClientConnectionEventJoin(RemoteConnection connection, Transform<World> fromTransform, Game game, Text message, Text originalMessage, MessageSink originalSink, GameProfile profile, MessageSink sink, Player targetEntity, Transform<World> toTransform) {
+        return SpongeEventFactory.createClientConnectionEventJoin(connection, fromTransform, game, message, originalMessage, originalSink, profile, sink, targetEntity, toTransform);
     }
 
-    public static RespawnPlayerEvent createPlayerRespawn(Game game, Player player, boolean bedSpawn, Location<World> respawnLocation) {
-        return SpongeEventFactory.createRespawnPlayer(game, player, respawnLocation, bedSpawn);
+    public static RespawnPlayerEvent createRespawnPlayerEvent(boolean bedSpawn, Transform<World> fromTransform, Game game, Player targetEntity, Transform<World> toTransform) {
+        return SpongeEventFactory.createRespawnPlayerEvent(bedSpawn, fromTransform, game, targetEntity, toTransform);
     }
 
-    public static PlayerQuitEvent createPlayerQuit(Game game, Player player, Text message, MessageSink sink) {
-        return SpongeEventFactory.createPlayerQuit(game, player, message, sink);
+    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(RemoteConnection connection, Game game, Text message, Text originalMessage, MessageSink originalSink, GameProfile profile, MessageSink sink, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventDisconnect(connection, game, message, originalMessage, originalSink, profile, sink, targetEntity);
     }
 
 }

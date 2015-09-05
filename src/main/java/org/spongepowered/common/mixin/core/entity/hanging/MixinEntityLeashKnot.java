@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.hanging;
 
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.LeashHitch;
 import org.spongepowered.api.util.annotation.NonnullByDefault;

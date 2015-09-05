@@ -57,14 +57,18 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.entity.living.player.PlayerQuitEvent;
-import org.spongepowered.api.event.entity.living.player.PlayerChangeSignEvent;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -80,6 +84,7 @@ import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)
@@ -152,10 +157,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
-        final PlayerChangeSignEvent event = SpongeEventFactory.createPlayerChangeSign(Sponge.getGame(), Cause.of(this.playerEntity), (Sign)
-            tileentitysign, changedSignData.asImmutable(), changedSignData);
+        final ChangeSignEvent.SourcePlayer event = SpongeEventFactory.createChangeSignEventSourcePlayer(Cause.of(this.playerEntity), Sponge.getGame(), changedSignData.asImmutable(), (Player) this.playerEntity, (Sign)
+            tileentitysign, changedSignData);
         if (!Sponge.getGame().getEventManager().post(event)) {
-            ((Sign) tileentitysign).offer(event.getTarget().get(SignData.class).get());
+            ((Sign) tileentitysign).offer(event.getTargetTile().get(SignData.class).get());
         } else {
             // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
             // it will be the text of the sign that was showing in the world
@@ -295,18 +300,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             // These magic numbers are sad but help prevent excessive lag from this event.
             // eventually it would be nice to not have them
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
-                Transform<World> oldTransform = player.getTransform().setLocation(from).setRotation(fromrot);
-                Transform<World> newTransform = player.getTransform().setLocation(to).setRotation(torot);
-                DisplaceEntityEvent.TargetPlayer event = SpongeEventFactory.createMovePlayer(Sponge.getGame(), player, oldTransform, newTransform,
-                                                                                             oldTransform);
+                Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
+                Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
+                DisplaceEntityEvent.TargetPlayer event = SpongeEventFactory.createDisplaceEntityEventTargetPlayer(fromTransform, Sponge.getGame(), player, toTransform);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setLocationAndRotation(from, fromrot);
                     this.lastMoveLocation = from;
                     ci.cancel();
-                } else if (!event.getNewTransform().getLocation().equals(to)) {
-                    player.setLocationAndRotation(event.getNewTransform().getLocation(), event.getNewTransform().getRotation());
-                    this.lastMoveLocation = event.getNewTransform().getLocation();
+                } else if (!event.getToTransform().getLocation().equals(to)) {
+                    player.setLocationAndRotation(event.getToTransform().getLocation(), event.getToTransform().getRotation());
+                    this.lastMoveLocation = event.getToTransform().getLocation();
                     ci.cancel();
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {
                     this.lastMoveLocation = player.getLocation();
@@ -314,7 +318,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                     this.justTeleported = false;
                     ci.cancel();
                 } else {
-                    this.lastMoveLocation = event.getNewTransform().getLocation();
+                    this.lastMoveLocation = event.getToTransform().getLocation();
                 }
             }
         }
@@ -344,12 +348,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V"))
     public void onDisconnectPlayer(IChatComponent reason, CallbackInfo ci) {
-        PlayerQuitEvent event =
-                SpongeImplEventFactory.createPlayerQuit(Sponge.getGame(), (Player) this.playerEntity, SpongeTexts.toText(this.tmpQuitMessage),
-                        ((Player) this.playerEntity).getMessageSink());
+        Text message = SpongeTexts.toText(this.tmpQuitMessage);
+        Text newMessage = Texts.of(message);
+        Player player = (Player) this.playerEntity;
+        Set<CommandSource> sources = new HashSet<CommandSource>();
+        sources.add(player);
+        MessageSink originalSink = MessageSinks.to(sources);
+        ClientConnectionEvent.Disconnect event =
+                SpongeImplEventFactory.createClientConnectionEventDisconnect(player.getConnection(), Sponge.getGame(), message, newMessage, originalSink, player.getProfile(), player.getMessageSink(), player);
         this.tmpQuitMessage = null;
         Sponge.getGame().getEventManager().post(event);
-        event.getSink().sendMessage(event.getNewMessage());
+        event.getSink().sendMessage(event.getMessage());
     }
 
 }

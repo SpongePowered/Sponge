@@ -45,9 +45,9 @@ import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.translator.DataTranslator;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.translator.DataTranslator;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;

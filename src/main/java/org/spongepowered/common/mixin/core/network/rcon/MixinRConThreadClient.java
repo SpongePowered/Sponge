@@ -102,7 +102,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
         if (this.source == null) {
             initSource();
         }
-        RconLoginEvent event = SpongeEventFactory.createRconLogin(Sponge.getGame(), ((RconSource) this.source));
+        RconLoginEvent event = SpongeEventFactory.createRconLoginEvent(((RconSource) this.source));
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             this.loggedIn = false;
@@ -116,7 +116,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
             initSource();
         }
         if (this.loggedIn) {
-            Sponge.getGame().getEventManager().post(SpongeEventFactory.createRconQuit(Sponge.getGame(), (RconSource) this.source));
+            Sponge.getGame().getEventManager().post(SpongeEventFactory.createRconDisconnectEvent((RconSource) this.source));
         }
     }
 }

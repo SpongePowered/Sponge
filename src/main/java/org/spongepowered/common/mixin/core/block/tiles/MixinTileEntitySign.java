@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -34,11 +33,9 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.interfaces.IMixinSubject;
 
 import java.util.List;

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
 
@@ -45,6 +44,7 @@ import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.DecayBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -71,7 +71,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
         BlockSnapshot blockOriginal = location.createSnapshot();
         BlockSnapshot blockReplacement = blockOriginal.withState(BlockTypes.AIR.getDefaultState());
         ImmutableList<BlockTransaction> transactions = new ImmutableList.Builder<BlockTransaction>().add(new BlockTransaction(blockOriginal, blockReplacement)).build();
-        final DecayBlockEvent.SourceWorld event = SpongeEventFactory.createDecayBlockEventSourceWorld(Sponge.getGame(), transactions, (World) worldIn);
+        final DecayBlockEvent.SourceWorld event = SpongeEventFactory.createDecayBlockEventSourceWorld(Cause.of(worldIn), Sponge.getGame(), (World) worldIn, transactions);
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             ci.cancel();

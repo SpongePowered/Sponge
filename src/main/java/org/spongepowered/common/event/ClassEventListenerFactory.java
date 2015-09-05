@@ -48,37 +48,37 @@ import org.spongepowered.api.event.Event;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class ClassEventHandlerFactory implements AnnotatedEventHandler.Factory {
+public final class ClassEventListenerFactory implements AnnotatedEventListener.Factory {
 
     private final AtomicInteger id = new AtomicInteger();
     private final LocalClassLoader classLoader = new LocalClassLoader(getClass().getClassLoader());
-    private final LoadingCache<Method, Class<? extends AnnotatedEventHandler>> cache = CacheBuilder.newBuilder()
+    private final LoadingCache<Method, Class<? extends AnnotatedEventListener>> cache = CacheBuilder.newBuilder()
             .concurrencyLevel(1)
             .weakValues()
-            .build(new CacheLoader<Method, Class<? extends AnnotatedEventHandler>>() {
+            .build(new CacheLoader<Method, Class<? extends AnnotatedEventListener>>() {
 
                 @Override
-                public Class<? extends AnnotatedEventHandler> load(Method method) throws Exception {
+                public Class<? extends AnnotatedEventListener> load(Method method) throws Exception {
                     return createClass(method);
                 }
             });
 
     private final String targetPackage;
 
-    public ClassEventHandlerFactory(String targetPackage) {
+    public ClassEventListenerFactory(String targetPackage) {
         checkNotNull(targetPackage, "targetPackage");
         checkArgument(!targetPackage.isEmpty(), "targetPackage cannot be empty");
         this.targetPackage = targetPackage + '.';
     }
 
     @Override
-    public AnnotatedEventHandler create(Object handle, Method method) throws Exception {
+    public AnnotatedEventListener create(Object handle, Method method) throws Exception {
         return this.cache.get(method)
                 .getConstructor(method.getDeclaringClass())
                 .newInstance(handle);
     }
 
-    private Class<? extends AnnotatedEventHandler> createClass(Method method) {
+    private Class<? extends AnnotatedEventListener> createClass(Method method) {
         Class<?> handle = method.getDeclaringClass();
         Class<?> eventClass = method.getParameterTypes()[0];
         String name = this.targetPackage
@@ -87,7 +87,7 @@ public final class ClassEventHandlerFactory implements AnnotatedEventHandler.Fac
         return this.classLoader.defineClass(name, generateClass(name, handle, method, eventClass));
     }
 
-    private static final String BASE_HANDLER = Type.getInternalName(AnnotatedEventHandler.class);
+    private static final String BASE_HANDLER = Type.getInternalName(AnnotatedEventListener.class);
     private static final String HANDLE_METHOD_DESCRIPTOR = '(' + Type.getDescriptor(Event.class) + ")V";
 
     private static byte[] generateClass(String name, Class<?> handle, Method method, Class<?> eventClass) {

@@ -31,9 +31,12 @@ import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -54,10 +57,11 @@ public abstract class MixinItemFishingRod extends Item {
             player.fishEntity.handleHookRetraction();
         } else {
             EntityFishHook fishHook = new EntityFishHook(world, player);
+            EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();
             // only fire event on server-side to avoid crash on client
             if (!player.worldObj.isRemote
                     && Sponge.getGame().getEventManager()
-                            .post(SpongeEventFactory.createPlayerCastFishingLine(Sponge.getGame(), (Player) player, (FishHook) fishHook))) {
+                            .post(SpongeEventFactory.createFishingEventCastSourcePlayer(Cause.of(player), (FishHook) fishHook, Sponge.getGame(), fishHookSnapshot, (Player) player))) {
                 return itemStack;
             }
 

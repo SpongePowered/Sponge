@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.server;
 
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.local.LocalAddress;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.asm.mixin.Mixin;

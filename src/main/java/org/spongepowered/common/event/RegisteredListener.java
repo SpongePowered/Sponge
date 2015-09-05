@@ -37,23 +37,23 @@ import org.spongepowered.api.plugin.PluginContainer;
 import java.util.EnumMap;
 import java.util.List;
 
-public final class RegisteredHandler<T extends Event> implements SpongeEventHandler<T>, Comparable<RegisteredHandler<?>> {
+public final class RegisteredListener<T extends Event> implements SpongeEventListener<T>, Comparable<RegisteredListener<?>> {
 
     private final PluginContainer plugin;
 
     private final Class<T> eventClass;
     private final Order order;
 
-    private final EventListener<? super T> handler;
+    private final EventListener<? super T> listener;
 
     private final boolean ignoreCancelled;
     private final boolean beforeModifications;
 
-    RegisteredHandler(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> handler, boolean ignoreCancelled, boolean beforeModifications) {
+    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean ignoreCancelled, boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventClass = checkNotNull(eventClass, "eventClass");
         this.order = checkNotNull(order, "order");
-        this.handler = checkNotNull(handler, "handler");
+        this.listener = checkNotNull(listener, "listener");
         this.ignoreCancelled = ignoreCancelled;
         this.beforeModifications = beforeModifications;
     }
@@ -76,11 +76,11 @@ public final class RegisteredHandler<T extends Event> implements SpongeEventHand
 
     @Override
     public Object getHandle() {
-        if (this.handler instanceof SpongeEventHandler) {
-            return ((SpongeEventHandler<?>) this.handler).getHandle();
+        if (this.listener instanceof SpongeEventListener) {
+            return ((SpongeEventListener<?>) this.listener).getHandle();
         }
 
-        return this.handler;
+        return this.listener;
     }
 
     @Override
@@ -89,39 +89,39 @@ public final class RegisteredHandler<T extends Event> implements SpongeEventHand
             return;
         }
 
-        this.handler.handle(event);
+        this.listener.handle(event);
     }
 
     @Override
-    public int compareTo(RegisteredHandler<?> handler) {
+    public int compareTo(RegisteredListener<?> handler) {
         return this.order.compareTo(handler.order);
     }
 
     public static final class Cache {
 
-        private final List<RegisteredHandler<?>> handlers;
-        private final EnumMap<Order, List<RegisteredHandler<?>>> handlersByOrder;
+        private final List<RegisteredListener<?>> listeners;
+        private final EnumMap<Order, List<RegisteredListener<?>>> listenersByOrder;
 
         private static final Order[] ORDERS = Order.values();
 
-        Cache(List<RegisteredHandler<?>> handlers) {
-            this.handlers = handlers;
+        Cache(List<RegisteredListener<?>> listeners) {
+            this.listeners = listeners;
 
-            this.handlersByOrder = Maps.newEnumMap(Order.class);
+            this.listenersByOrder = Maps.newEnumMap(Order.class);
             for (Order order : ORDERS) {
-                this.handlersByOrder.put(order, Lists.<RegisteredHandler<?>>newArrayList());
+                this.listenersByOrder.put(order, Lists.<RegisteredListener<?>>newArrayList());
             }
-            for (RegisteredHandler<?> handler : handlers) {
-                this.handlersByOrder.get(handler.getOrder()).add(handler);
+            for (RegisteredListener<?> handler : listeners) {
+                this.listenersByOrder.get(handler.getOrder()).add(handler);
             }
         }
 
-        public List<RegisteredHandler<?>> getHandlers() {
-            return this.handlers;
+        public List<RegisteredListener<?>> getListeners() {
+            return this.listeners;
         }
 
-        public List<RegisteredHandler<?>> getHandlersByOrder(Order order) {
-            return this.handlersByOrder.get(checkNotNull(order, "order"));
+        public List<RegisteredListener<?>> getListenersByOrder(Order order) {
+            return this.listenersByOrder.get(checkNotNull(order, "order"));
         }
 
     }

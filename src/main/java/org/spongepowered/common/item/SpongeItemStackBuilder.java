@@ -32,16 +32,14 @@ import static org.spongepowered.common.item.ItemsHelper.validateData;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import net.minecraft.item.Item;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public class SpongeItemStackBuilder implements ItemStackBuilder {
     private Set<DataManipulator<?, ?>> itemDataSet;

@@ -30,26 +30,22 @@ import org.spongepowered.api.event.Event;
 
 import java.lang.reflect.Method;
 
-public final class InvokeEventHandlerFactory implements AnnotatedEventHandler.Factory {
+public abstract class AnnotatedEventListener implements SpongeEventListener<Event> {
 
-    @Override
-    public AnnotatedEventHandler create(Object handle, Method method) throws Exception {
-        return new InvokeEventHandler(handle, method);
+    protected final Object handle;
+
+    protected AnnotatedEventListener(Object handle) {
+        this.handle = checkNotNull(handle, "handle");
     }
 
-    private static class InvokeEventHandler extends AnnotatedEventHandler {
+    @Override
+    public final Object getHandle() {
+        return this.handle;
+    }
 
-        private final Method method;
+    interface Factory {
 
-        private InvokeEventHandler(Object handle, Method method) {
-            super(handle);
-            this.method = checkNotNull(method, "method");
-        }
-
-        @Override
-        public void handle(Event event) throws Exception {
-            this.method.invoke(this.handle, event);
-        }
+        AnnotatedEventListener create(Object handle, Method method) throws Exception;
 
     }
 

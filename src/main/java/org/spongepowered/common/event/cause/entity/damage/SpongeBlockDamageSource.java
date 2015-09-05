@@ -34,7 +34,7 @@ import org.spongepowered.api.world.World;
 public class SpongeBlockDamageSource implements BlockDamageSource {
 
     private final Location<World> location;
-    private final BlockSnapshot blockState;
+    private final BlockSnapshot blockSnapshot;
     private final DamageType damageType;
     private final boolean isAbsolute;
     private final boolean bypassesArmor;
@@ -45,7 +45,7 @@ public class SpongeBlockDamageSource implements BlockDamageSource {
     public SpongeBlockDamageSource(Location<World> location, BlockSnapshot blockState, DamageType damageType, boolean isAbsolute, boolean bypassesArmor,
                                    boolean difficultyScaled, boolean explosive, boolean magical) {
         this.location = location;
-        this.blockState = blockState;
+        this.blockSnapshot = blockState;
         this.damageType = damageType;
         this.isAbsolute = isAbsolute;
         this.bypassesArmor = bypassesArmor;
@@ -60,8 +60,8 @@ public class SpongeBlockDamageSource implements BlockDamageSource {
     }
 
     @Override
-    public BlockSnapshot getBlockState() {
-        return this.blockState;
+    public BlockSnapshot getBlockSnapshot() {
+        return this.blockSnapshot;
     }
 
     @Override
@@ -103,7 +103,7 @@ public class SpongeBlockDamageSource implements BlockDamageSource {
     public String toString() {
         return Objects.toStringHelper(this)
             .add("location", this.location)
-            .add("blockState", this.blockState)
+            .add("blockState", this.blockSnapshot)
             .add("damageType", this.damageType.getId())
             .add("isAbsolute", this.isAbsolute)
             .add("bypassesArmor", this.bypassesArmor)
@@ -116,7 +116,7 @@ public class SpongeBlockDamageSource implements BlockDamageSource {
     @Override
     public int hashCode() {
         return Objects.hashCode(this.location,
-                                this.blockState,
+                                this.blockSnapshot,
                                 this.damageType,
                                 this.isAbsolute,
                                 this.bypassesArmor,
@@ -135,7 +135,7 @@ public class SpongeBlockDamageSource implements BlockDamageSource {
         }
         final SpongeBlockDamageSource other = (SpongeBlockDamageSource) obj;
         return Objects.equal(this.location, other.location)
-               && Objects.equal(this.blockState, other.blockState)
+               && Objects.equal(this.blockSnapshot, other.blockSnapshot)
                && Objects.equal(this.damageType, other.damageType)
                && Objects.equal(this.isAbsolute, other.isAbsolute)
                && Objects.equal(this.bypassesArmor, other.bypassesArmor)

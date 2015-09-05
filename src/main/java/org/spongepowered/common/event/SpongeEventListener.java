@@ -24,29 +24,11 @@
  */
 package org.spongepowered.common.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventListener;
 
-import java.lang.reflect.Method;
+public interface SpongeEventListener<T extends Event> extends EventListener<T> {
 
-public abstract class AnnotatedEventHandler implements SpongeEventHandler<Event> {
-
-    protected final Object handle;
-
-    protected AnnotatedEventHandler(Object handle) {
-        this.handle = checkNotNull(handle, "handle");
-    }
-
-    @Override
-    public final Object getHandle() {
-        return this.handle;
-    }
-
-    interface Factory {
-
-        AnnotatedEventHandler create(Object handle, Method method) throws Exception;
-
-    }
+    Object getHandle();
 
 }

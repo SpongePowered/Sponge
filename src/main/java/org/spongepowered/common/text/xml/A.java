@@ -27,7 +27,6 @@ package org.spongepowered.common.text.xml;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.action.TextActions;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.bind.annotation.XmlAttribute;

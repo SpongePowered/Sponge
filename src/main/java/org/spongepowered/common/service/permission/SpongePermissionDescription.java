@@ -43,7 +43,6 @@ import org.spongepowered.api.util.Tristate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Basic implementation of {@link PermissionDescription}. Can only be used in

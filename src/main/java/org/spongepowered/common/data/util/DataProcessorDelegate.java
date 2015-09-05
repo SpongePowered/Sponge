@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.DataProcessor;
 
 public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
@@ -57,6 +58,11 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 return true;
             }
         }
+        return false;
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
         return false;
     }
 
@@ -146,4 +152,5 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
         }
         return Optional.absent();
     }
+
 }

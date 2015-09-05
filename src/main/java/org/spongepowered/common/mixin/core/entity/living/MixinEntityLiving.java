@@ -36,6 +36,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -95,7 +96,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntity(Sponge.getGame(), this, (Player)playerIn);
+            Entity leashedEntity = (Entity)(Object) this;
+            final LeashEntityEvent.SourcePlayer event = SpongeEventFactory.createLeashEntityEventSourcePlayer(Cause.of(playerIn), Sponge.getGame(), (Player)playerIn, leashedEntity);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -107,7 +109,13 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!entity.worldObj.isRemote) {
-            final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntity(Sponge.getGame(), this, (Entity)entity);
+            UnleashEntityEvent event;
+            Entity leashedEntity = (Entity)(Object) this;
+            if (entity instanceof EntityPlayer) {
+                event = SpongeEventFactory.createUnleashEntityEventSourcePlayer(Cause.of(entity), Sponge.getGame(), (Player) entity, leashedEntity);
+            } else {
+                event = SpongeEventFactory.createUnleashEntityEventSourceEntity(Cause.of(entity), Sponge.getGame(), (Entity) entity, leashedEntity);
+            }
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();

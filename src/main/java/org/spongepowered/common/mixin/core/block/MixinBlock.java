@@ -38,7 +38,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.world.WorldTickBlockEvent;
+import org.spongepowered.api.event.block.TickBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -132,7 +133,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        final WorldTickBlockEvent event = SpongeEventFactory.createWorldTickBlockEvent(Sponge.getGame(), (World) world, (BlockState) state,
+        final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Cause.of(world), Sponge.getGame(), (BlockState) state,
             new Location<World>((World)world, VecHelper.toVector(pos)));
         Sponge.getGame().getEventManager().post(event);
         if(event.isCancelled()) {

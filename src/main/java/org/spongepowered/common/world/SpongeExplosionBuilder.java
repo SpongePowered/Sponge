@@ -29,9 +29,9 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.explosion.ExplosionBuilder;
-import org.spongepowered.api.world.World;
 
 public class SpongeExplosionBuilder implements ExplosionBuilder {
 

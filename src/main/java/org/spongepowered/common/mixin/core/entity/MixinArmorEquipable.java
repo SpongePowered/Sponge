@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
-import org.spongepowered.common.mixin.core.item.inventory.MixinItemStack;
 
 import javax.annotation.Nullable;
 

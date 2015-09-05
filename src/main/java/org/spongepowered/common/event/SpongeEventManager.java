@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
@@ -61,17 +62,17 @@ public class SpongeEventManager implements EventManager {
     private final Object lock = new Object();
 
     private final PluginManager pluginManager;
-    private final AnnotatedEventHandler.Factory handlerFactory = new ClassEventHandlerFactory("org.spongepowered.common.event.handler");
-    private final Multimap<Class<?>, RegisteredHandler<?>> handlersByEvent = HashMultimap.create();
+    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.handler");
+    private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
 
     /**
      * A cache of all the handlers for an event type for quick event posting.
      * <p>The cache is currently entirely invalidated if handlers are added or removed.</p>
      */
-    private final LoadingCache<Class<? extends Event>, RegisteredHandler.Cache> handlersCache =
-            CacheBuilder.newBuilder().build(new CacheLoader<Class<? extends Event>, RegisteredHandler.Cache>() {
+    private final LoadingCache<Class<? extends Event>, RegisteredListener.Cache> handlersCache =
+            CacheBuilder.newBuilder().build(new CacheLoader<Class<? extends Event>, RegisteredListener.Cache>() {
                 @Override
-                public RegisteredHandler.Cache load(Class<? extends Event> eventClass) throws Exception {
+                public RegisteredListener.Cache load(Class<? extends Event> eventClass) throws Exception {
                     return bakeHandlers(eventClass);
                 }
             });
@@ -81,8 +82,8 @@ public class SpongeEventManager implements EventManager {
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
     }
 
-    private RegisteredHandler.Cache bakeHandlers(Class<?> rootEvent) {
-        List<RegisteredHandler<?>> handlers = Lists.newArrayList();
+    private RegisteredListener.Cache bakeHandlers(Class<?> rootEvent) {
+        List<RegisteredListener<?>> handlers = Lists.newArrayList();
         @SuppressWarnings({"unchecked", "rawtypes"})
         Set<Class<?>> types = (Set) TypeToken.of(rootEvent).getTypes().rawTypes();
 
@@ -95,7 +96,7 @@ public class SpongeEventManager implements EventManager {
         }
 
         Collections.sort(handlers);
-        return new RegisteredHandler.Cache(handlers);
+        return new RegisteredListener.Cache(handlers);
     }
 
     private static boolean isValidHandler(Method method) {
@@ -110,15 +111,15 @@ public class SpongeEventManager implements EventManager {
         return parameters.length == 1 && Event.class.isAssignableFrom(parameters[0]);
     }
 
-    private void register(RegisteredHandler<?> handler) {
-        register(Collections.<RegisteredHandler<?>>singletonList(handler));
+    private void register(RegisteredListener<?> handler) {
+        register(Collections.<RegisteredListener<?>>singletonList(handler));
     }
 
-    private void register(List<RegisteredHandler<?>> handlers) {
+    private void register(List<RegisteredListener<?>> handlers) {
         synchronized (this.lock) {
             boolean changed = false;
 
-            for (RegisteredHandler<?> handler : handlers) {
+            for (RegisteredListener<?> handler : handlers) {
                 if (this.handlersByEvent.put(handler.getEventClass(), handler)) {
                     changed = true;
                 }
@@ -134,7 +135,7 @@ public class SpongeEventManager implements EventManager {
         checkNotNull(plugin, "plugin");
         checkNotNull(listenerObject, "listener");
 
-        List<RegisteredHandler<?>> handlers = Lists.newArrayList();
+        List<RegisteredListener<?>> handlers = Lists.newArrayList();
 
         Class<?> handle = listenerObject.getClass();
         for (Method method : handle.getMethods()) {
@@ -143,7 +144,7 @@ public class SpongeEventManager implements EventManager {
                 if (isValidHandler(method)) {
                     @SuppressWarnings("unchecked")
                     Class<? extends Event> eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
-                    AnnotatedEventHandler handler;
+                    AnnotatedEventListener handler;
                     try {
                         handler = this.handlerFactory.create(listener, method);
                     } catch (Exception e) {
@@ -162,14 +163,14 @@ public class SpongeEventManager implements EventManager {
         register(handlers);
     }
 
-    private static <T extends Event> RegisteredHandler<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Listener subscribe,
+    private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Listener listener,
             EventListener<? super T> handler) {
-        return createRegistration(plugin, eventClass, subscribe.order(), subscribe.ignoreCancelled(), subscribe.beforeModifications(), handler);
+        return createRegistration(plugin, eventClass, listener.order(), listener.ignoreCancelled(), listener.beforeModifications(), handler);
     }
 
-    private static <T extends Event> RegisteredHandler<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Order order,
+    private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Order order,
             boolean ignoreCancelled, boolean beforeModifications, EventListener<? super T> handler) {
-        return new RegisteredHandler<T>(plugin, eventClass, order, handler, ignoreCancelled, beforeModifications);
+        return new RegisteredListener<T>(plugin, eventClass, order, handler, ignoreCancelled, beforeModifications);
     }
 
     private PluginContainer getPlugin(Object plugin) {
@@ -199,13 +200,13 @@ public class SpongeEventManager implements EventManager {
         register(createRegistration(getPlugin(plugin), eventClass, order, false, beforeModifications, handler));
     }
 
-    private void unregister(Predicate<RegisteredHandler<?>> unregister) {
+    private void unregister(Predicate<RegisteredListener<?>> unregister) {
         synchronized (this.lock) {
             boolean changed = false;
 
-            Iterator<RegisteredHandler<?>> itr = this.handlersByEvent.values().iterator();
+            Iterator<RegisteredListener<?>> itr = this.handlersByEvent.values().iterator();
             while (itr.hasNext()) {
-                RegisteredHandler<?> handler = itr.next();
+                RegisteredListener<?> handler = itr.next();
                 if (unregister.apply(handler)) {
                     itr.remove();
                     changed = true;
@@ -221,10 +222,10 @@ public class SpongeEventManager implements EventManager {
     @Override
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
-        unregister(new Predicate<RegisteredHandler<?>>() {
+        unregister(new Predicate<RegisteredListener<?>>() {
 
             @Override
-            public boolean apply(RegisteredHandler<?> handler) {
+            public boolean apply(RegisteredListener<?> handler) {
                 return listener.equals(handler.getHandle());
             }
         });
@@ -233,22 +234,22 @@ public class SpongeEventManager implements EventManager {
     @Override
     public void unregisterPluginListeners(Object pluginObj) {
         final PluginContainer plugin = getPlugin(pluginObj);
-        unregister(new Predicate<RegisteredHandler<?>>() {
+        unregister(new Predicate<RegisteredListener<?>>() {
 
             @Override
-            public boolean apply(RegisteredHandler<?> handler) {
+            public boolean apply(RegisteredListener<?> handler) {
                 return plugin.equals(handler.getPlugin());
             }
         });
     }
 
-    protected RegisteredHandler.Cache getHandlerCache(Event event) {
+    protected RegisteredListener.Cache getHandlerCache(Event event) {
         return this.handlersCache.getUnchecked(checkNotNull(event, "event").getClass());
     }
 
     @SuppressWarnings("unchecked")
-    protected static boolean post(Event event, List<RegisteredHandler<?>> handlers) {
-        for (@SuppressWarnings("rawtypes") RegisteredHandler handler : handlers) {
+    protected static boolean post(Event event, List<RegisteredListener<?>> handlers) {
+        for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try {
                 handler.handle(event);
             } catch (Throwable e) {
@@ -261,11 +262,11 @@ public class SpongeEventManager implements EventManager {
 
     @Override
     public boolean post(Event event) {
-        return post(event, getHandlerCache(event).getHandlers());
+        return post(event, getHandlerCache(event).getListeners());
     }
 
     public boolean post(Event event, Order order) {
-        return post(event, getHandlerCache(event).getHandlersByOrder(order));
+        return post(event, getHandlerCache(event).getListenersByOrder(order));
     }
 
 }

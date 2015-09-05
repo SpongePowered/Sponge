@@ -35,12 +35,12 @@ import net.minecraft.util.IChatComponent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.network.GameClientAuthEvent;
-import org.spongepowered.api.event.network.GameClientConnectEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -64,14 +64,17 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
     @Shadow private MinecraftServer server;
     @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
 
-    private GameClientConnectEvent clientConEvent;
+    private ClientConnectionEvent.Login clientConEvent;
 
     @Shadow
     abstract public String getConnectionInfo();
+    @Shadow
+    abstract public com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
 
     @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
             + "allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))
     public String onAllowUserToConnect(ServerConfigurationManager confMgr, SocketAddress address, com.mojang.authlib.GameProfile profile) {
+        /* TODO
         String kickReason = confMgr.allowUserToConnect(address, profile);
         Text disconnectMessage = null;
         Cause disconnectCause = null;
@@ -81,11 +84,12 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
             disconnectCause = Cause.of(kickReason);
         }
         this.clientConEvent =
-                SpongeEventFactory.createGameClientConnect(Sponge.getGame(), this, (GameProfile) profile, disconnectMessage, disconnectCause);
+                SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), this, (GameProfile) profile, disconnectMessage, disconnectCause);
         if (kickReason != null) {
             this.clientConEvent.setCancelled(true);
         }
-        Sponge.getGame().getEventManager().post(this.clientConEvent);
+        Sponge.getGame().getEventManager().post(this.clientConEvent);*/
+        System.out.println("tryAcceptPlayer");
         return null; // We handle disconnecting
     }
 
@@ -100,7 +104,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
             + "closeConnection(Ljava/lang/String;)V", shift = At.Shift.BY, by = -6), cancellable = true)
     public void onTryAcceptPlayer(CallbackInfo ci) {
         if (this.clientConEvent.isCancelled()) {
-            disconnectClient(this.clientConEvent.getDisconnectMessage());
+            disconnectClient(Optional.fromNullable(this.clientConEvent.getMessage()));
             ci.cancel();
         }
         this.clientConEvent = null;
@@ -138,10 +142,25 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
 
     @Override
     public boolean fireAuthEvent() {
-        GameClientAuthEvent event = SpongeEventFactory.createGameClientAuth(Sponge.getGame(), this, (GameProfile) this.loginGameProfile, null, null);
+        String kickReason = this.server.getConfigurationManager().allowUserToConnect(this.networkManager.getRemoteAddress(), this.loginGameProfile);
+        Text disconnectMessage = null;
+        if (kickReason != null) {
+            disconnectMessage = Texts.of(kickReason);
+        }
+
+        MessageSink sink = MessageSinks.toAll();
+        System.out.println("fireAuthEvent");
+        ClientConnectionEvent.Login event = null;
+        try {
+             event = SpongeEventFactory.createClientConnectionEventLogin(this, Sponge.getGame(), disconnectMessage, disconnectMessage, sink, (GameProfile) this.loginGameProfile, sink);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        System.out.println("fireAuthEvent post");
+
         Sponge.getGame().getEventManager().post(event);
-        if (event.isCancelled()) {
-            this.disconnectClient(event.getDisconnectMessage());
+        if (event != null && event.isCancelled()) {
+            this.disconnectClient(Optional.fromNullable(event.getMessage()));
         }
         return event.isCancelled();
     }

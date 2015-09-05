@@ -74,9 +74,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.location = location;
         this.extraData = extraData;
         ImmutableMap.Builder<Key<?>, ImmutableValue<?>> builder = ImmutableMap.builder();
-        for (ImmutableValue<?> value : this.blockState.getValues()) {
+        // TODO
+        /*for (ImmutableValue<?> value : this.blockState.getValues()) {
             builder.put(value.getKey(), value);
-        }
+        }*/
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
             for (ImmutableValue<?> value : manipulator.getValues()) {
                 builder.put(value.getKey(), value);

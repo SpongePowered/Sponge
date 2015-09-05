@@ -107,6 +107,32 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         return TO_ALL;
     }
 
+    public static final MessageSink TO_ALL_PLAYERS = new MessageSink() {
+        @Override
+        public Iterable<CommandSource> getRecipients() {
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            Set<CommandSource> ret = new HashSet(MinecraftServer.getServer().getConfigurationManager().playerEntityList);
+            return ret;
+        }
+    };
+
+    @Override
+    public MessageSink toAllPlayers() {
+        return TO_ALL_PLAYERS;
+    }
+
+    public static final MessageSink TO_NONE = new MessageSink() {
+        @Override
+        public Iterable<CommandSource> getRecipients() {
+            return new HashSet<CommandSource>();
+        }
+    };
+
+    @Override
+    public MessageSink toNone() {
+        return TO_NONE;
+    }
+
     private static class CombinedSink extends MessageSink {
         private final Iterable<MessageSink> contents;
 
@@ -162,4 +188,5 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
     public MessageSink to(Set<CommandSource> sources) {
         return new FixedSink(sources);
     }
+
 }

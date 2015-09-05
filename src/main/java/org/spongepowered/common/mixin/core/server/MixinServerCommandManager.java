@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import org.spongepowered.common.command.WrapperCommandSource;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.command.CommandHandler;
@@ -44,6 +43,7 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 

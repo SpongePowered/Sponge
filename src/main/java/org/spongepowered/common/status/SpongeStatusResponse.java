@@ -61,8 +61,8 @@ public final class SpongeStatusResponse {
     }
 
     private static ServerStatusResponse call(ServerStatusResponse response, StatusClient client) {
-        if (!Sponge.getGame().getEventManager().post(SpongeEventFactory.createPingServer(Sponge.getGame(), client,
-                (PingServerEvent.Response) response))) {
+        if (!Sponge.getGame().getEventManager().post(SpongeEventFactory.createPingServerEvent(client, Sponge.getGame(),
+                (PingServerEvent.Response) response, Sponge.getGame().getServer()))) {
             return response;
         } else {
             return null;

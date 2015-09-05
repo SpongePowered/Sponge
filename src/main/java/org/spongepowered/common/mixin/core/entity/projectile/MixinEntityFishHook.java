@@ -25,20 +25,24 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import com.google.common.base.Optional;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.FishingEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackTransaction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -58,14 +62,14 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
     @Shadow private boolean inGround;
     @Shadow private EntityPlayer angler;
-    @Shadow public Entity caughtEntity;
+    @Shadow public net.minecraft.entity.Entity caughtEntity;
     @Shadow private int ticksCatchable;
-    @Shadow public abstract ItemStack getFishingResult();
+    @Shadow public abstract net.minecraft.item.ItemStack getFishingResult();
 
     @Nullable
     public ProjectileSource projectileSource;
     private double damageAmount;
-    private ItemStack fishingRod;
+    private net.minecraft.item.ItemStack fishingRod;
 
     @Override
     public ProjectileSource getShooter() {
@@ -89,27 +93,29 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     }
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> getHookedEntity() {
-        return Optional.fromNullable((org.spongepowered.api.entity.Entity) this.caughtEntity);
+    public Optional<Entity> getHookedEntity() {
+        return Optional.fromNullable((Entity) this.caughtEntity);
     }
 
     @Override
-    public void setHookedEntity(@Nullable org.spongepowered.api.entity.Entity entity) {
-        this.caughtEntity = (Entity) entity;
+    public void setHookedEntity(@Nullable Entity entity) {
+        this.caughtEntity = (net.minecraft.entity.Entity) entity;
     }
 
     @Redirect(method = "onUpdate()V", at =
             @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
         )
-    public boolean onAttackEntityFrom(Entity entity, DamageSource damageSource, float damage) {
-        if (entity.worldObj.isRemote
-                || !Sponge.getGame().getEventManager()
-                        .post(SpongeEventFactory.createPlayerHookEntity(Sponge.getGame(), (Player) this.angler, this,
-                                (org.spongepowered.api.entity.Entity) entity))) {
-            if (this.getShooter() instanceof Entity) {
-                DamageSource.causeThrownDamage((Entity)(Object)this, (Entity) this.getShooter());
+    public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
+        if (entity.worldObj.isRemote) {
+            EntitySnapshot fishHookSnapshot = ((FishHook) this).createSnapshot();
+            EntitySnapshot hookedEntitySnapshot = ((Entity) entity).createSnapshot();
+            FishingEvent.Hook.SourcePlayer event = SpongeEventFactory.createFishingEventHookSourcePlayer(Cause.of(this.angler), (FishHook) this, Sponge.getGame(), Optional.fromNullable((Entity) entity), fishHookSnapshot, hookedEntitySnapshot, (Player) this.angler,(Entity) entity);
+            if (!Sponge.getGame().getEventManager().post(event)) {
+                if (this.getShooter() instanceof Entity) {
+                    DamageSource.causeThrownDamage((net.minecraft.entity.Entity)(Object) this, (net.minecraft.entity.Entity) this.getShooter());
+                }
+                return entity.attackEntityFrom(damageSource, (float) this.getDamage());
             }
-            return entity.attackEntityFrom(damageSource, (float) this.getDamage());
         }
         return false;
     }
@@ -130,20 +136,29 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             return 0;
         }
 
-        ItemStack itemStack = null;
+        net.minecraft.item.ItemStack itemStack = null;
         int exp = 0;
         if (this.ticksCatchable > 0) {
             itemStack = this.getFishingResult();
             exp = this.rand.nextInt(6) + 1;
         }
 
-        FishingEvent.Retract.SourcePlayer event = SpongeEventFactory
-                .createPlayerRetractFishingLine(Sponge.getGame(), (Player) this.angler, this,
-                        (org.spongepowered.api.item.inventory.ItemStack) itemStack, (org.spongepowered.api.entity.Entity) this.caughtEntity, exp);
+        EntitySnapshot fishHookSnapshot = ((FishHook) this).createSnapshot();
+        EntitySnapshot caughtSnapshot = null;
+        if (this.caughtEntity != null) {
+            caughtSnapshot = ((Entity) this.caughtEntity).createSnapshot();
+        }
+
+        ItemStackTransaction transaction = null;
+        if (itemStack != null) {
+            transaction = new ItemStackTransaction(((ItemStack) itemStack).createSnapshot());
+        }
+
+        FishingEvent.Retract.SourcePlayer event = SpongeEventFactory.createFishingEventRetractSourcePlayer(Optional.fromNullable((Entity) this.caughtEntity), Cause.of(this.angler), (FishHook) this, Sponge.getGame(), Optional.fromNullable(transaction), Optional.fromNullable(caughtSnapshot), fishHookSnapshot, (Player) this.angler);
         byte b0 = 0;
         if (!Sponge.getGame().getEventManager().post(event)) {
             if (event.getCaughtEntity().isPresent()) {
-                this.caughtEntity = (Entity) event.getCaughtEntity().get();
+                this.caughtEntity = (net.minecraft.entity.Entity) event.getCaughtEntity().get();
 
                 double entityitem = this.angler.posX - this.posX;
                 double d2 = this.angler.posY - this.posY;
@@ -156,8 +171,9 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 b0 = 3;
             }
 
-            if (event.getCaughtItem().isPresent()) {
-                EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, (ItemStack) event.getCaughtItem().get());
+            if (event.getItemStackTransaction().isPresent()) {
+                ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().get().getFinalSnapshot();
+                EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, (net.minecraft.item.ItemStack) itemSnapshot.createStack());
                 double d1 = this.angler.posX - this.posX;
                 double d3 = this.angler.posY - this.posY;
                 double d5 = this.angler.posZ - this.posZ;
@@ -190,7 +206,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     }
 
     @Override
-    public void setFishingRodItemStack(ItemStack fishingRod) {
+    public void setFishingRodItemStack(net.minecraft.item.ItemStack fishingRod) {
         this.fishingRod = fishingRod;
     }
 

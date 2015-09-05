@@ -51,6 +51,10 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
         this(null, Vector3d.ZERO, Vector3d.ZERO, Vector3d.ONE);
     }
 
+    public SpongeTransform(Location<E> location) {
+        this(location.getExtent(), location.getPosition());
+    }
+
     public SpongeTransform(@Nullable E extent, Vector3d position) {
         this(extent, position, Vector3d.ZERO, Vector3d.ONE);
     }

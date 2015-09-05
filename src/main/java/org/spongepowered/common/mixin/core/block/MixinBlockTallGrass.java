@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.asm.mixin.Mixin;
 

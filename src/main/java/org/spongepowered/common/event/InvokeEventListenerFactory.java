@@ -24,11 +24,33 @@
  */
 package org.spongepowered.common.event;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventListener;
 
-public interface SpongeEventHandler<T extends Event> extends EventListener<T> {
+import java.lang.reflect.Method;
 
-    Object getHandle();
+public final class InvokeEventListenerFactory implements AnnotatedEventListener.Factory {
+
+    @Override
+    public AnnotatedEventListener create(Object handle, Method method) throws Exception {
+        return new InvokeEventHandler(handle, method);
+    }
+
+    private static class InvokeEventHandler extends AnnotatedEventListener {
+
+        private final Method method;
+
+        private InvokeEventHandler(Object handle, Method method) {
+            super(handle);
+            this.method = checkNotNull(method, "method");
+        }
+
+        @Override
+        public void handle(Event event) throws Exception {
+            this.method.invoke(this.handle, event);
+        }
+
+    }
 
 }

@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.command;
 
-import com.google.common.base.Throwables;
-
 import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandHandler;

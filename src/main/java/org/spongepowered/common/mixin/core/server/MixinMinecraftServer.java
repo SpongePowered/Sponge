@@ -48,6 +48,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
@@ -350,7 +351,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 world.getWorldInfo().setGameType(this.getGameType());
             }
             Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
-            Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createServerLoadWorld(Sponge.getGame(), (org.spongepowered.api.world.World)
+            Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (org.spongepowered.api.world.World)
                     world));
         }
 
@@ -469,7 +470,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldProvider) world.provider).setDimension(dim);
 
         world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
-        Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createServerLoadWorld(Sponge.getGame(), (World) world));
+        Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (World) world));
         if (!isSinglePlayer()) {
             world.getWorldInfo().setGameType(getGameType());
         }
@@ -535,8 +536,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
 
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createServerCreateWorld(Sponge.getGame(), (WorldProperties)
-                worldInfo, settings));
+        Sponge.getGame().getEventManager().post(SpongeEventFactory.createCreateWorldEvent(Cause.of(this), Sponge.getGame(), settings, (WorldProperties)
+                worldInfo));
         return Optional.of((WorldProperties) worldInfo);
     }
 

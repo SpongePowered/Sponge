@@ -76,11 +76,6 @@ public abstract class MixinBlockStandingSign extends MixinBlock implements IMixi
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(world.getBlockState(blockPos))); // TODO for now.
-    }
-
-    @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState)); // TODO for now.
     }

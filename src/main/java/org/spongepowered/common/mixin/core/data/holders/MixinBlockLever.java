@@ -80,11 +80,6 @@ public abstract class MixinBlockLever extends MixinBlock implements IMixinBlockD
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(World world, BlockPos blockPos) {
-        return getManipulators(world.getBlockState(blockPos));
-    }
-
-    @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getAxisData(blockState), getDirectionalData(blockState), getPoweredData(blockState));
     }

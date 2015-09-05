@@ -55,7 +55,6 @@ import org.spongepowered.common.data.BlockValueProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 

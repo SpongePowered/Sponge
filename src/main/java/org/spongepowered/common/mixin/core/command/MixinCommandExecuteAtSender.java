@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.command;
 
 import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
