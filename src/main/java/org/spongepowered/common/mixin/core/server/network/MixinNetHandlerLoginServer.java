@@ -74,22 +74,19 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
     @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
             + "allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))
     public String onAllowUserToConnect(ServerConfigurationManager confMgr, SocketAddress address, com.mojang.authlib.GameProfile profile) {
-        /* TODO
         String kickReason = confMgr.allowUserToConnect(address, profile);
-        Text disconnectMessage = null;
-        Cause disconnectCause = null;
+        Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
         if (kickReason != null) {
             disconnectMessage = Texts.of(kickReason);
-            // TODO actually make a proper cause
-            disconnectCause = Cause.of(kickReason);
         }
-        this.clientConEvent =
-                SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), this, (GameProfile) profile, disconnectMessage, disconnectCause);
+
+        MessageSink sink = MessageSinks.toAll();
+        this.clientConEvent = SpongeEventFactory.createClientConnectionEventLogin(this, Sponge.getGame(), disconnectMessage, disconnectMessage, sink, (GameProfile) this.loginGameProfile, sink);
         if (kickReason != null) {
             this.clientConEvent.setCancelled(true);
         }
-        Sponge.getGame().getEventManager().post(this.clientConEvent);*/
-        System.out.println("tryAcceptPlayer");
+
+        Sponge.getGame().getEventManager().post(this.clientConEvent);
         return null; // We handle disconnecting
     }
 
@@ -142,22 +139,8 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
 
     @Override
     public boolean fireAuthEvent() {
-        String kickReason = this.server.getConfigurationManager().allowUserToConnect(this.networkManager.getRemoteAddress(), this.loginGameProfile);
-        Text disconnectMessage = null;
-        if (kickReason != null) {
-            disconnectMessage = Texts.of(kickReason);
-        }
-
-        MessageSink sink = MessageSinks.toAll();
-        System.out.println("fireAuthEvent");
-        ClientConnectionEvent.Login event = null;
-        try {
-             event = SpongeEventFactory.createClientConnectionEventLogin(this, Sponge.getGame(), disconnectMessage, disconnectMessage, sink, (GameProfile) this.loginGameProfile, sink);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        System.out.println("fireAuthEvent post");
-
+        Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
+        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(this, Sponge.getGame(), disconnectMessage, disconnectMessage, (GameProfile) this.loginGameProfile);
         Sponge.getGame().getEventManager().post(event);
         if (event != null && event.isCancelled()) {
             this.disconnectClient(Optional.fromNullable(event.getMessage()));

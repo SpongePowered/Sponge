@@ -305,11 +305,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 DisplaceEntityEvent.TargetPlayer event = SpongeEventFactory.createDisplaceEntityEventTargetPlayer(fromTransform, Sponge.getGame(), player, toTransform);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
-                    player.setLocationAndRotation(from, fromrot);
+                    player.setTransform(fromTransform);
                     this.lastMoveLocation = from;
                     ci.cancel();
-                } else if (!event.getToTransform().getLocation().equals(to)) {
-                    player.setLocationAndRotation(event.getToTransform().getLocation(), event.getToTransform().getRotation());
+                } else if (!event.getToTransform().equals(toTransform)) {
+                    player.setTransform(event.getToTransform());
                     this.lastMoveLocation = event.getToTransform().getLocation();
                     ci.cancel();
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {

@@ -223,4 +223,13 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
         return "Transform{location=" + getLocation() + ", rotation=" + getRotation() + ", scale=" + getScale() + '}';
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof SpongeTransform<?>)) {
+            return false;
+        }
+        SpongeTransform<?> otherLoc = (SpongeTransform<?>) other;
+        return otherLoc.extent.equals(this.extent) && otherLoc.getPosition().equals(this.getPosition())
+                && otherLoc.getRotation().equals(this.getRotation()) && otherLoc.getScale().equals(this.getScale());
+    }
 }

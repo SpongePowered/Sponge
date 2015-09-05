@@ -133,6 +133,7 @@ public abstract class MixinServerConfigurationManager {
         playerprofilecache.addEntry(gameprofile);
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
         WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
+        Transform<World> fromTransform = ((Player)playerIn).getTransform();
 
         if (worldserver == null) {
             playerIn.dimension = 0;
@@ -212,14 +213,14 @@ public abstract class MixinServerConfigurationManager {
 
         // Fire PlayerJoinEvent
         Player player = (Player) playerIn;
-        Transform<World> fromTransform = player.getTransform();
+        Transform<World> toTransform = player.getTransform();
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         Text message = SpongeTexts.toText(chatcomponenttranslation);
         MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(player.getConnection(), fromTransform, Sponge.getGame(), originalMessage, message, originalSink, player.getProfile(), player.getMessageSink(), player, fromTransform);
+        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(player.getConnection(), fromTransform, Sponge.getGame(), originalMessage, message, originalSink, player.getProfile(), player.getMessageSink(), player, toTransform);
         Sponge.getGame().getEventManager().post(event);
         // Set the resolved location of the event onto the player
-        ((Player) playerIn).setLocation(event.getToTransform().getLocation());
+        ((Player) playerIn).setTransform(event.getToTransform());
 
         logger.info(playerIn.getCommandSenderName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " at (" + playerIn.posX
                 + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
@@ -263,8 +264,7 @@ public abstract class MixinServerConfigurationManager {
             targetDimension = playerIn.dimension;
         }
         Transform<World> fromTransform = ((Player) playerIn).getTransform();
-        Transform<World> toTransform = this.getPlayerRespawnLocation(playerIn, targetDimension);
-        Location<World> location = toTransform.getLocation();
+        Location<World> location = this.getPlayerRespawnLocation(playerIn, targetDimension);
 
         // Keep players out of blocks
         Vector3d tempPos = ((Player) playerIn).getLocation().getPosition();
@@ -289,6 +289,7 @@ public abstract class MixinServerConfigurationManager {
             ((IMixinEntityPlayerMP) playerIn).reset();
         }
         playerIn.setSneaking(false);
+        Transform<World> toTransform = new SpongeTransform<World>(location);
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
@@ -338,12 +339,11 @@ public abstract class MixinServerConfigurationManager {
     }
 
     // Internal. Note: Has side-effects
-    private Transform<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
+    private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
-            Location<World> location = ((World) this.mcServer.getEntityWorld()).getSpawnLocation();
-            return new SpongeTransform<World>(location);
+            return ((World) this.mcServer.getEntityWorld()).getSpawnLocation();
         }
         Dimension targetDim = (Dimension) targetWorld.provider;
         // Cannot respawn in requested world, use the fallback dimension for
@@ -383,8 +383,7 @@ public abstract class MixinServerConfigurationManager {
         if (spawnPos == null) {
             spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
         }
-        Location<World> location = new Location<World>((World) targetWorld, spawnPos);
-        return new SpongeTransform<World>(location);
+        return new Location<World>((World) targetWorld, spawnPos);
     }
 
     @Overwrite
