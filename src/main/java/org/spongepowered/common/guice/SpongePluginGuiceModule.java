@@ -35,9 +35,9 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.config.ConfigDir;
 import org.spongepowered.api.service.config.DefaultConfig;
 import org.spongepowered.api.service.scheduler.Asynchronous;
+import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.scheduler.SpongeExecutorService;
 import org.spongepowered.api.service.scheduler.Synchronous;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.plugin.SpongePluginContainer;
 import org.spongepowered.common.service.config.SpongeConfigService;
 
@@ -167,15 +167,17 @@ public class SpongePluginGuiceModule extends AbstractModule {
     private static class SynchronousExecutorProvider implements Provider<SpongeExecutorService> {
 
         private final PluginContainer container;
+        private final SchedulerService schedulerService;
 
         @Inject
-        private SynchronousExecutorProvider(PluginContainer container) {
+        private SynchronousExecutorProvider(PluginContainer container, SchedulerService schedulerService) {
             this.container = container;
+            this.schedulerService = schedulerService;
         }
 
         @Override
         public SpongeExecutorService get() {
-            return Sponge.getGame().getScheduler().createSyncExecutor(this.container.getInstance());
+            return this.schedulerService.createSyncExecutor(this.container.getInstance());
         }
 
     }
@@ -183,15 +185,17 @@ public class SpongePluginGuiceModule extends AbstractModule {
     private static class AsynchronousExecutorProvider implements Provider<SpongeExecutorService> {
 
         private final PluginContainer container;
+        private final SchedulerService schedulerService;
 
         @Inject
-        private AsynchronousExecutorProvider(PluginContainer container) {
+        private AsynchronousExecutorProvider(PluginContainer container, SchedulerService schedulerService) {
             this.container = container;
+            this.schedulerService = schedulerService;
         }
 
         @Override
         public SpongeExecutorService get() {
-            return Sponge.getGame().getScheduler().createAsyncExecutor(this.container.getInstance());
+            return this.schedulerService.createAsyncExecutor(this.container.getInstance());
         }
 
     }
