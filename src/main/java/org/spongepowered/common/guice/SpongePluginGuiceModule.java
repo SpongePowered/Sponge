@@ -34,6 +34,10 @@ import org.slf4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.config.ConfigDir;
 import org.spongepowered.api.service.config.DefaultConfig;
+import org.spongepowered.api.service.scheduler.Asynchronous;
+import org.spongepowered.api.service.scheduler.SpongeExecutorService;
+import org.spongepowered.api.service.scheduler.Synchronous;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.plugin.SpongePluginContainer;
 import org.spongepowered.common.service.config.SpongeConfigService;
 
@@ -75,6 +79,10 @@ public class SpongePluginGuiceModule extends AbstractModule {
         bind(new TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>>() {
         }).annotatedWith(privateConfigFile)
                 .toProvider(PrivateHoconConfigProvider.class); // Loader for plugin-private directory config file
+
+        // SpongeExecutorServices
+        bind(SpongeExecutorService.class).annotatedWith(Synchronous.class).toProvider(SynchronousExecutorProvider.class);
+        bind(SpongeExecutorService.class).annotatedWith(Asynchronous.class).toProvider(AsynchronousExecutorProvider.class);
     }
 
     private static class PrivateConfigDirProvider implements Provider<File> {
@@ -152,6 +160,38 @@ public class SpongePluginGuiceModule extends AbstractModule {
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
             return SpongeConfigService.getPrivateRoot(this.container).getConfig();
+        }
+
+    }
+
+    private static class SynchronousExecutorProvider implements Provider<SpongeExecutorService> {
+
+        private final PluginContainer container;
+
+        @Inject
+        private SynchronousExecutorProvider(PluginContainer container) {
+            this.container = container;
+        }
+
+        @Override
+        public SpongeExecutorService get() {
+            return Sponge.getGame().getScheduler().createSyncExecutor(this.container.getInstance());
+        }
+
+    }
+
+    private static class AsynchronousExecutorProvider implements Provider<SpongeExecutorService> {
+
+        private final PluginContainer container;
+
+        @Inject
+        private AsynchronousExecutorProvider(PluginContainer container) {
+            this.container = container;
+        }
+
+        @Override
+        public SpongeExecutorService get() {
+            return Sponge.getGame().getScheduler().createAsyncExecutor(this.container.getInstance());
         }
 
     }
