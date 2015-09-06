@@ -179,8 +179,6 @@ import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
-import org.spongepowered.api.entity.EntityInteractionType;
-import org.spongepowered.api.entity.EntityInteractionTypes;
 import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -361,7 +359,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.effect.sound.SpongeSound;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.entity.SpongeEntityInteractionType;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
@@ -546,12 +543,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
     public static final Map<String, ItemType> itemTypeMappings = Maps.newHashMap();
 
-    private static final ImmutableMap<String, EntityInteractionType> entityInteractionTypeMappings =
-            new ImmutableMap.Builder<String, EntityInteractionType>()
-                    .put("attack", new SpongeEntityInteractionType("attack"))
-                    .put("pick_block", new SpongeEntityInteractionType("pick_block"))
-                    .put("use", new SpongeEntityInteractionType("use"))
-                    .build();
     protected Map<Class<? extends CatalogType>, Map<String, ? extends CatalogType>> catalogTypeMap =
             ImmutableMap.<Class<? extends CatalogType>, Map<String, ? extends CatalogType>>builder()
                     .put(Achievement.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -564,7 +555,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
                     .put(CookedFish.class, this.cookedFishMappings)
                     .put(DyeColor.class, this.dyeColorMappings)
-                    .put(EntityInteractionType.class, entityInteractionTypeMappings)
                     .put(CoalType.class, this.coaltypeMappings)
                     .put(NotePitch.class, this.notePitchMappings)
                     .put(ComparatorType.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -1821,10 +1811,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         });
     }
 
-    private void setEntityInteractionTypes() {
-        RegistryHelper.mapFields(EntityInteractionTypes.class, SpongeGameRegistry.entityInteractionTypeMappings);
-    }
-
     private void setArts() {
         RegistryHelper.mapFields(Arts.class, new Function<String, Art>() {
 
@@ -2137,7 +2123,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setTreeTypes();
         setNotePitches();
         setBannerPatternShapes();
-        setEntityInteractionTypes();
         setFlowerMappings();
         setDoublePlantMappings();
         setShrubTypeMappings();

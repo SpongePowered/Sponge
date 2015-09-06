@@ -64,6 +64,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
@@ -217,7 +218,7 @@ public abstract class MixinServerConfigurationManager {
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         Text message = SpongeTexts.toText(chatcomponenttranslation);
         MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(player.getConnection(), fromTransform, Sponge.getGame(), originalMessage, message, originalSink, player.getProfile(), player.getMessageSink(), player, toTransform);
+        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player.getConnection(), player.getProfile(), player);
         Sponge.getGame().getEventManager().post(event);
         // Set the resolved location of the event onto the player
         ((Player) playerIn).setTransform(event.getToTransform());
@@ -293,7 +294,7 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplEventFactory.createRespawnPlayerEvent(this.tempIsBedSpawn, fromTransform, Sponge.getGame(), (Player) playerIn, toTransform);
+                SpongeImplEventFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);
         location = event.getToTransform().getLocation();

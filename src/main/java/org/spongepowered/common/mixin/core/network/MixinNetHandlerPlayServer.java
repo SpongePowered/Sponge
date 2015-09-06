@@ -157,8 +157,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
-        final ChangeSignEvent.SourcePlayer event = SpongeEventFactory.createChangeSignEventSourcePlayer(Cause.of(this.playerEntity), Sponge.getGame(), changedSignData.asImmutable(), (Player) this.playerEntity, (Sign)
-            tileentitysign, changedSignData);
+        final ChangeSignEvent event =
+                SpongeEventFactory.createChangeSignEvent(Sponge.getGame(), Cause.of(this.playerEntity), changedSignData.asImmutable(),
+                        changedSignData, (Sign) tileentitysign);
         if (!Sponge.getGame().getEventManager().post(event)) {
             ((Sign) tileentitysign).offer(event.getTargetTile().get(SignData.class).get());
         } else {
@@ -236,7 +237,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                             }
 
                             commandblocklogic.func_145756_e();
-                            this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", new Object[]{s1}));
+                            this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
                         }
                     } catch (Exception exception1) {
                         logger.error("Couldn\'t set command block", exception1);
@@ -272,7 +273,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
             Location<World> from = player.getLocation();
             if (this.lastMoveLocation != null) {
-                 from = this.lastMoveLocation;
+                from = this.lastMoveLocation;
             }
 
             Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
@@ -302,7 +303,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                DisplaceEntityEvent.TargetPlayer event = SpongeEventFactory.createDisplaceEntityEventTargetPlayer(fromTransform, Sponge.getGame(), player, toTransform);
+                DisplaceEntityEvent.TargetPlayer event =
+                        SpongeEventFactory.createDisplaceEntityEventTargetPlayer(Sponge.getGame(), fromTransform, toTransform, player);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setTransform(fromTransform);
@@ -355,7 +357,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         sources.add(player);
         MessageSink originalSink = MessageSinks.to(sources);
         ClientConnectionEvent.Disconnect event =
-                SpongeImplEventFactory.createClientConnectionEventDisconnect(player.getConnection(), Sponge.getGame(), message, newMessage, originalSink, player.getProfile(), player.getMessageSink(), player);
+                SpongeImplEventFactory.createClientConnectionEventDisconnect(Sponge.getGame(), Cause.of(player), message, newMessage,
+                        originalSink, player.getMessageSink(), player.getConnection(), player.getProfile(), player);
         this.tmpQuitMessage = null;
         Sponge.getGame().getEventManager().post(event);
         event.getSink().sendMessage(event.getMessage());

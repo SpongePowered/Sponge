@@ -70,11 +70,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (DataManipulator<?, ?> manipulator : itemStack.getContainers()) {
+        // TODO
+        /*for (DataManipulator<?, ?> manipulator : itemStack.getContainers()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
-        }
+        }*/
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();

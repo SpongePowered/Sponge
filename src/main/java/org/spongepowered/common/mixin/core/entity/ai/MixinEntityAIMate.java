@@ -51,7 +51,7 @@ public abstract class MixinEntityAIMate {
 
     @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/entity/passive/EntityAnimal.createChild(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callBreedEvent(CallbackInfo ci, EntityAgeable entityageable) {
-        final BreedEntityEvent.SourceEntity event = SpongeEventFactory.createBreedEntityEventBreed(Cause.of(this.theAnimal), Sponge.getGame(), Optional.<Vector3d>absent(), (Ageable)entityageable, (Ageable)this.theAnimal, (Ageable)this.targetMate);
+        final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(Sponge.getGame(), Cause.of(this.theAnimal), Optional.<Vector3d>absent(), (Ageable)entityageable, (Ageable)this.targetMate);
         Sponge.getGame().getEventManager().post(event);
         if(event.isCancelled()) {
             ci.cancel();

@@ -36,6 +36,7 @@ import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
@@ -45,6 +46,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @SuppressWarnings("serial")
@@ -135,6 +137,11 @@ public abstract class MixinItemStack implements ItemStack {
         }
         builder.onHover(TextActions.showItem(this));
         return builder.build();
+    }
+
+    @Override
+    public ItemStackSnapshot createSnapshot() {
+        return new SpongeItemStackSnapshot(this);
     }
 
 }

@@ -34,7 +34,6 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
@@ -97,7 +96,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
-            final LeashEntityEvent.SourcePlayer event = SpongeEventFactory.createLeashEntityEventSourcePlayer(Cause.of(playerIn), Sponge.getGame(), (Player)playerIn, leashedEntity);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getGame(), Cause.of(playerIn), leashedEntity);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -109,13 +108,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!entity.worldObj.isRemote) {
-            UnleashEntityEvent event;
             Entity leashedEntity = (Entity)(Object) this;
-            if (entity instanceof EntityPlayer) {
-                event = SpongeEventFactory.createUnleashEntityEventSourcePlayer(Cause.of(entity), Sponge.getGame(), (Player) entity, leashedEntity);
-            } else {
-                event = SpongeEventFactory.createUnleashEntityEventSourceEntity(Cause.of(entity), Sponge.getGame(), (Entity) entity, leashedEntity);
-            }
+            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getGame(), Cause.of(entity), leashedEntity);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();

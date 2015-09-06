@@ -536,7 +536,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
 
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createConstructWorldEvent(Cause.of(this), Sponge.getGame(), settings, (WorldProperties)
+        Sponge.getGame().getEventManager().post(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this), settings, (WorldProperties)
                 worldInfo));
         return Optional.of((WorldProperties) worldInfo);
     }

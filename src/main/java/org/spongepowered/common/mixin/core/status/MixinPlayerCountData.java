@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.status;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ServerStatusResponse;
-import org.spongepowered.api.event.server.PingServerEvent;
+import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Mixin(ServerStatusResponse.PlayerCountData.class)
-public abstract class MixinPlayerCountData implements PingServerEvent.Response.Players {
+public abstract class MixinPlayerCountData implements ClientPingServerEvent.Response.Players {
 
     private List<GameProfile> profiles;
 

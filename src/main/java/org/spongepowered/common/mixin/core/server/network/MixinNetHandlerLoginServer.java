@@ -35,6 +35,7 @@ import net.minecraft.util.IChatComponent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.text.Text;
@@ -81,7 +82,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
         }
 
         MessageSink sink = MessageSinks.toAll();
-        this.clientConEvent = SpongeEventFactory.createClientConnectionEventLogin(this, Sponge.getGame(), disconnectMessage, disconnectMessage, sink, (GameProfile) this.loginGameProfile, sink);
+        this.clientConEvent = SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, this, (GameProfile) this.loginGameProfile);
         if (kickReason != null) {
             this.clientConEvent.setCancelled(true);
         }
@@ -140,7 +141,8 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
     @Override
     public boolean fireAuthEvent() {
         Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
-        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(this, Sponge.getGame(), disconnectMessage, disconnectMessage, (GameProfile) this.loginGameProfile);
+        MessageSink sink = MessageSinks.toAll();
+        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, this, (GameProfile) this.loginGameProfile);
         Sponge.getGame().getEventManager().post(event);
         if (event != null && event.isCancelled()) {
             this.disconnectClient(Optional.fromNullable(event.getMessage()));
