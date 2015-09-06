@@ -32,6 +32,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -46,6 +47,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.List;
 import java.util.Set;
@@ -60,6 +62,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
     private final ImmutableMap<Key<?>, ImmutableValue<?>> keyValueMap;
     private final ImmutableSet<ImmutableValue<?>> valueSet;
+    private final NBTTagCompound compound;
 
     public SpongeBlockSnapshot(BlockState blockState) {
         this(blockState, null, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
@@ -74,10 +77,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.location = location;
         this.extraData = extraData;
         ImmutableMap.Builder<Key<?>, ImmutableValue<?>> builder = ImmutableMap.builder();
-        // TODO
-        /*for (ImmutableValue<?> value : this.blockState.getValues()) {
+        for (ImmutableValue<?> value : this.blockState.getValues()) {
             builder.put(value.getKey(), value);
-        }*/
+        }
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
             for (ImmutableValue<?> value : manipulator.getValues()) {
                 builder.put(value.getKey(), value);
@@ -85,6 +87,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         this.keyValueMap = builder.build();
         this.valueSet = ImmutableSet.copyOf(this.keyValueMap.values());
+        if (location != null && location.hasTileEntity()) {
+            this.compound = new NBTTagCompound();
+            ((net.minecraft.tileentity.TileEntity) location.getTileEntity().get()).writeToNBT(this.compound);
+        } else {
+            this.compound = new NBTTagCompound();
+        }
     }
 
     public SpongeBlockSnapshot(BlockState blockState, TileEntity entity) {
@@ -106,6 +114,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         this.keyValueMap = keyValueBuilder.build();
         this.valueSet = ImmutableSet.copyOf(this.keyValueMap.values());
+        this.compound = new NBTTagCompound();
+        ((net.minecraft.tileentity.TileEntity) entity).writeToNBT(this.compound);
     }
 
     @Override
@@ -133,7 +143,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return new MemoryDataContainer()
             .set(of("Location"), this.location == null ? "null" : this.location)
             .set(of("BlockState"), this.blockState)
-            .set(of("ExtraData"), this.extraData);
+            .set(of("ExtraData"), this.extraData)
+            .set(of("UnsafeCompound"), NbtTranslator.getInstance().translateFrom(this.compound));
     }
 
     @Override
@@ -299,5 +310,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public Set<ImmutableValue<?>> getValues() {
         return this.valueSet;
+    }
+
+    public NBTTagCompound getCompound() {
+        return ((NBTTagCompound) this.compound.copy());
     }
 }
