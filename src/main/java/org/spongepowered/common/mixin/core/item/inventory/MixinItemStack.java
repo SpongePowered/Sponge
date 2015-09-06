@@ -27,11 +27,13 @@ package org.spongepowered.common.mixin.core.item.inventory;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemType;
@@ -46,8 +48,13 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 @NonnullByDefault
@@ -64,6 +71,8 @@ public abstract class MixinItemStack implements ItemStack {
     public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow(prefix = "shadow$")
     public abstract Item shadow$getItem();
+
+    private Map<Class<? extends DataManipulator<?, ?>>, ImmutableDataManipulator<?, ?>> dataMap = Maps.newHashMap();
 
     @Override
     public ItemType getItem() {
@@ -144,4 +153,8 @@ public abstract class MixinItemStack implements ItemStack {
         return new SpongeItemStackSnapshot(this);
     }
 
+    @Override
+    public Collection<DataManipulator<?, ?>> getContainers() {
+        return ((IMixinItem) this.getItem()).getManipulatorsFor((net.minecraft.item.ItemStack) (Object) this);
+    }
 }

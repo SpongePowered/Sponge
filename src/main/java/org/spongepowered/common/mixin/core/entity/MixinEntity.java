@@ -28,6 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -38,6 +39,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -63,6 +65,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Random;
 import java.util.UUID;
@@ -633,5 +636,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         container.set(of("z"), this.getLocation().getZ());
         container.set(of("entityType"), this.getClass().getSimpleName());
         return container;
+    }
+
+    @Override
+    public Collection<DataManipulator<?, ?>> getContainers() {
+        return Lists.newArrayList(); // TODO figure this one out.
     }
 }
