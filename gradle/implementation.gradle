@@ -63,6 +63,7 @@ shadowJar {
         // Common
         include project(common.path)
         include dependency('org.spongepowered:mixin')
+        include dependency('org.spongepowered:event-gen-core')
 
         // SpongeAPI
         include project(api.path)
