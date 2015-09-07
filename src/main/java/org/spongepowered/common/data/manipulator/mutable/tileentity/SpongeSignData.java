@@ -78,7 +78,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
 
     @Override
     public SignData copy() {
-        return new SpongeSignData(this.lines);
+        return new SpongeSignData(Lists.newArrayList(this.lines));
     }
 
     @Override
