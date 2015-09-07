@@ -91,7 +91,7 @@ public final class WorldGeneratorRegistry {
         for (WorldGeneratorModifier modifier : modifiers) {
             checkNotNull(modifier, "modifier (in collection)");
             String id = modifier.getId();
-            checkArgument(this.modifiers.containsKey(id),
+            checkArgument(this.modifiers.containsKey(id.toLowerCase()),
                     "unregistered modifier in collection");
             ids.add(id);
         }
@@ -110,7 +110,7 @@ public final class WorldGeneratorRegistry {
     public Collection<WorldGeneratorModifier> toModifiers(Collection<String> ids) {
         List<WorldGeneratorModifier> modifiers = Lists.newArrayList();
         for (String id : ids) {
-            WorldGeneratorModifier modifier = this.modifiers.get(id);
+            WorldGeneratorModifier modifier = this.modifiers.get(id.toLowerCase());
             if (modifier != null) {
                 modifiers.add(modifier);
             } else {
