@@ -53,12 +53,10 @@ public class SpongeTransformTest {
         final Vector3d position2 = new Vector3d(4, 5, 6);
 
         final Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, position1);
-        Assert.assertEquals(new Location<Extent>(this.mockExtent1, position1), transform.getLocation());
         Assert.assertEquals(this.mockExtent1, transform.getExtent());
         assertEquals(position1, transform.getPosition());
 
         transform.setLocation(new Location<Extent>(this.mockExtent2, position2));
-        Assert.assertEquals(new Location<Extent>(this.mockExtent2, position2), transform.getLocation());
         Assert.assertEquals(this.mockExtent2, transform.getExtent());
         assertEquals(position2, transform.getPosition());
 
@@ -127,24 +125,8 @@ public class SpongeTransformTest {
         Assert.assertFalse(transform.isValid());
         transform.setExtent(this.mockExtent1);
         Assert.assertFalse(transform.isValid());
-        transform.invalidate();
-        Assert.assertFalse(transform.isValid());
         transform.setExtent(this.mockExtent2);
         Assert.assertTrue(transform.isValid());
-        transform.invalidate();
-        Assert.assertFalse(transform.isValid());
-
-        try {
-            transform.getExtent();
-            Assert.fail();
-        } catch (IllegalStateException ignored) {
-        }
-
-        try {
-            transform.getLocation();
-            Assert.fail();
-        } catch (IllegalStateException ignored) {
-        }
 
         Assert.assertFalse(new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO).isValid());
         Assert.assertTrue(new SpongeTransform<Extent>(this.mockExtent2, Vector3d.ZERO).isValid());
