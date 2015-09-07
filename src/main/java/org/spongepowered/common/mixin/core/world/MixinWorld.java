@@ -920,31 +920,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public BlockSnapshot createSnapshot(Vector3i position) {
-        World world = ((World) this);
-        BlockState state = world.getBlock(position);
-        Optional<TileEntity> te = world.getTileEntity(position);
-        if (te.isPresent()) {
-            return new SpongeBlockSnapshot(state, new Location<World>(this, position), te.get());
-        }
-        return new SpongeBlockSnapshot(state, new Location<World>((World) this, position),
-                ImmutableList.<ImmutableDataManipulator<?, ?>>of());
-    }
-
-    @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
-        Vector3i position = new Vector3i(x, y, z);
-        return createSnapshot(position);
+        World world = ((World) this);
+        BlockState state = world.getBlock(x, y, z);
+        Optional<TileEntity> te = world.getTileEntity(x, y, z);
+        if (te.isPresent()) {
+            return new SpongeBlockSnapshot(state, new Location<World>(this, x, y, z), te.get());
+        }
+        return new SpongeBlockSnapshot(state, new Location<World>((World) this, x, y, z),
+                ImmutableList.<ImmutableDataManipulator<?, ?>>of());
     }
 
     @Override
     public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
         return snapshot.restore(force, notifyNeighbors);
-    }
-
-    @Override
-    public boolean restoreSnapshot(Vector3i position, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
-        return restoreSnapshot(position.getX(), position.getY(), position.getZ(), snapshot, force, notifyNeighbors);
     }
 
     @Override
