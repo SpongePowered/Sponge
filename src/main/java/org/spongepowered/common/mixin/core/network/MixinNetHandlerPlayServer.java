@@ -161,7 +161,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 SpongeEventFactory.createChangeSignEvent(Sponge.getGame(), Cause.of(this.playerEntity), changedSignData.asImmutable(),
                         changedSignData, (Sign) tileentitysign);
         if (!Sponge.getGame().getEventManager().post(event)) {
-            ((Sign) tileentitysign).offer(event.getTargetTile().get(SignData.class).get());
+            ((Sign) tileentitysign).offer(event.getText());
         } else {
             // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
             // it will be the text of the sign that was showing in the world
