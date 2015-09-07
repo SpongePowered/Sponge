@@ -26,7 +26,6 @@ package org.spongepowered.common.event;
 
 
 import org.spongepowered.api.Game;
-import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -34,7 +33,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.World;
@@ -53,16 +51,16 @@ public class SpongeImplEventFactory {
         return SpongeEventFactory.createLoadWorldEvent(game, Cause.of(Sponge.getGame().getServer()), world);
     }
 
-    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Transform<World> fromTransform, Transform<World> toTransform, RemoteConnection connection, GameProfile profile, Player targetEntity) {
-        return SpongeEventFactory.createClientConnectionEventJoin(game, cause, originalMessage, message, originalSink, sink, fromTransform, toTransform, connection, profile, targetEntity);
+    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Transform<World> fromTransform, Transform<World> toTransform, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventJoin(game, cause, originalMessage, message, originalSink, sink, fromTransform, toTransform, targetEntity);
     }
 
     public static RespawnPlayerEvent createRespawnPlayerEvent(Game game, Cause cause, Transform<World> fromTransform, Transform<World> toTransform, Player targetEntity, boolean bedSpawn) {
         return SpongeEventFactory.createRespawnPlayerEvent(game, cause, fromTransform, toTransform, targetEntity, bedSpawn);
     }
 
-    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, RemoteConnection connection, GameProfile profile, Player targetEntity) {
-        return SpongeEventFactory.createClientConnectionEventDisconnect(game, cause, originalMessage, message, originalSink, sink, connection, profile, targetEntity);
+    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventDisconnect(game, cause, originalMessage, message, originalSink, sink, targetEntity);
     }
 
 }

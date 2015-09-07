@@ -30,7 +30,7 @@ import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.rcon.RconLoginEvent;
+import org.spongepowered.api.event.network.rcon.RconConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.util.command.source.RconSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -102,7 +102,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
         if (this.source == null) {
             initSource();
         }
-        RconLoginEvent event = SpongeEventFactory.createRconLoginEvent(((RconSource) this.source));
+        RconConnectionEvent.Login event = SpongeEventFactory.createRconConnectionEventLogin(((RconSource) this.source));
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             this.loggedIn = false;
@@ -116,7 +116,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
             initSource();
         }
         if (this.loggedIn) {
-            Sponge.getGame().getEventManager().post(SpongeEventFactory.createRconDisconnectEvent((RconSource) this.source));
+            Sponge.getGame().getEventManager().post(SpongeEventFactory.createRconConnectionEventDisconnect((RconSource) this.source));
         }
     }
 }

@@ -214,11 +214,6 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     }
 
     @Override
-    public void invalidate() {
-        this.extent = null;
-    }
-
-    @Override
     public String toString() {
         return "Transform{location=" + getLocation() + ", rotation=" + getRotation() + ", scale=" + getScale() + '}';
     }

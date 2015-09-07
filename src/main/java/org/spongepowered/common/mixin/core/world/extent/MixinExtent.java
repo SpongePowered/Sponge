@@ -121,8 +121,8 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public void restoreSnapshot(Vector3i position, BlockSnapshot snapshot) {
-        restoreSnapshot(position.getX(), position.getY(), position.getZ(), snapshot);
+    public boolean restoreSnapshot(Vector3i position, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        return restoreSnapshot(position.getX(), position.getY(), position.getZ(), snapshot, force, notifyNeighbors);
     }
 
     @Override

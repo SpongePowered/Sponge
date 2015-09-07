@@ -73,10 +73,12 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
@@ -118,6 +120,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -914,6 +917,46 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Extent getRelativeExtentView() {
         return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
+    }
+
+    @Override
+    public BlockSnapshot createSnapshot(Vector3i position) {
+        World world = ((World) this);
+        BlockState state = world.getBlock(position);
+        Optional<TileEntity> te = world.getTileEntity(position);
+        if (te.isPresent()) {
+            return new SpongeBlockSnapshot(state, new Location<World>(this, position), te.get());
+        }
+        return new SpongeBlockSnapshot(state, new Location<World>((World) this, position),
+                ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+    }
+
+    @Override
+    public BlockSnapshot createSnapshot(int x, int y, int z) {
+        Vector3i position = new Vector3i(x, y, z);
+        return createSnapshot(position);
+    }
+
+    @Override
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        return snapshot.restore(force, notifyNeighbors);
+    }
+
+    @Override
+    public boolean restoreSnapshot(Vector3i position, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        return restoreSnapshot(position.getX(), position.getY(), position.getZ(), snapshot, force, notifyNeighbors);
+    }
+
+    @Override
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        Optional<Location<World>> location = snapshot.getLocation();
+        if (!location.isPresent()) {
+            Sponge.getLogger().error("Unable to restore snapshot @ " + location.get() + ". World does not exist.");
+            return false;
+        }
+
+        snapshot.withLocation(new Location<World>(this, new Vector3i(x, y, z)));
+        return snapshot.restore(force, notifyNeighbors);
     }
 
 }

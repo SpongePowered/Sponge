@@ -218,7 +218,7 @@ public abstract class MixinServerConfigurationManager {
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         Text message = SpongeTexts.toText(chatcomponenttranslation);
         MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player.getConnection(), player.getProfile(), player);
+        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player);
         Sponge.getGame().getEventManager().post(event);
         // Set the resolved location of the event onto the player
         ((Player) playerIn).setTransform(event.getToTransform());

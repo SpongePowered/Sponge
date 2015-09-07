@@ -92,7 +92,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public BlockSnapshot snapshotFor(Location<World> location) {
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
-            return new SpongeBlockSnapshot(this, location.getTileEntity().get());
+            return new SpongeBlockSnapshot(this, location, location.getTileEntity().get());
         }
         return new SpongeBlockSnapshot(this, location);
     }

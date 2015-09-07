@@ -53,7 +53,6 @@ import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("serial")

@@ -358,7 +358,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         MessageSink originalSink = MessageSinks.to(sources);
         ClientConnectionEvent.Disconnect event =
                 SpongeImplEventFactory.createClientConnectionEventDisconnect(Sponge.getGame(), Cause.of(player), message, newMessage,
-                        originalSink, player.getMessageSink(), player.getConnection(), player.getProfile(), player);
+                        originalSink, player.getMessageSink(), player);
         this.tmpQuitMessage = null;
         Sponge.getGame().getEventManager().post(event);
         event.getSink().sendMessage(event.getMessage());

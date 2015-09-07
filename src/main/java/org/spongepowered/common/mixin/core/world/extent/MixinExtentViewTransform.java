@@ -168,9 +168,9 @@ public abstract class MixinExtentViewTransform implements Extent {
     }
 
     @Override
-    public void restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot) {
-        this.extent.restoreSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), snapshot);
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        return this.extent.restoreSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+            this.inverseTransform.transformZ(x, y, z), snapshot, force, notifyNeighbors);
     }
 
     @Override

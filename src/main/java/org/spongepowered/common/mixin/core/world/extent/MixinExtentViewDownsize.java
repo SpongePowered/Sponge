@@ -184,9 +184,9 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
-    public void restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
         checkRange(x, y, z);
-        this.extent.restoreSnapshot(x, y, z, snapshot);
+        return this.extent.restoreSnapshot(x, y, z, snapshot, force, notifyNeighbors);
     }
 
     @Override

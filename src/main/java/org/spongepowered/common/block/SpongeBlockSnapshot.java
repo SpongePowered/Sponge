@@ -27,12 +27,15 @@ package org.spongepowered.common.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -46,11 +49,14 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -58,28 +64,37 @@ import javax.annotation.Nullable;
 public class SpongeBlockSnapshot implements BlockSnapshot {
 
     private final BlockState blockState;
+    private final UUID worldUniqueId;
+    private final Vector3i pos;
     @Nullable private final Location<World> location;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
     private final ImmutableMap<Key<?>, ImmutableValue<?>> keyValueMap;
     private final ImmutableSet<ImmutableValue<?>> valueSet;
     private final NBTTagCompound compound;
 
-    public SpongeBlockSnapshot(BlockState blockState) {
-        this(blockState, null, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+    public SpongeBlockSnapshot(BlockState blockState, World world, Vector3i pos) {
+        this(blockState, new Location<World>(world, pos), ImmutableList.<ImmutableDataManipulator<?, ?>>of());
     }
 
-    public SpongeBlockSnapshot(BlockState blockState, @Nullable Location<World> location) {
+    public SpongeBlockSnapshot(BlockState blockState, Location<World> location) {
         this(blockState, location, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
     }
 
-    public SpongeBlockSnapshot(BlockState blockState, @Nullable Location<World> location, ImmutableList<ImmutableDataManipulator<?, ?>> extraData) {
+    public SpongeBlockSnapshot(BlockState blockState, Location<World> location, NBTTagCompound nbt) {
+        this(blockState, location, (TileEntity) net.minecraft.tileentity.TileEntity.createAndLoadEntity(nbt));
+    }
+
+    public SpongeBlockSnapshot(BlockState blockState, Location<World> location, ImmutableList<ImmutableDataManipulator<?, ?>> extraData) {
         this.blockState = checkNotNull(blockState);
         this.location = location;
+        this.pos = location.getBlockPosition();
+        this.worldUniqueId = location.getExtent().getUniqueId();
         this.extraData = extraData;
         ImmutableMap.Builder<Key<?>, ImmutableValue<?>> builder = ImmutableMap.builder();
-        for (ImmutableValue<?> value : this.blockState.getValues()) {
+        // TODO
+        /*for (ImmutableValue<?> value : this.blockState.getValues()) {
             builder.put(value.getKey(), value);
-        }
+        }*/
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
             for (ImmutableValue<?> value : manipulator.getValues()) {
                 builder.put(value.getKey(), value);
@@ -95,18 +110,21 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
     }
 
-    public SpongeBlockSnapshot(BlockState blockState, TileEntity entity) {
+    public SpongeBlockSnapshot(BlockState blockState, Location<World> location, TileEntity entity) {
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (DataManipulator<?, ?> manipulator : entity.getContainers()) {
             builder.add(manipulator.asImmutable());
         }
         this.blockState = checkNotNull(blockState);
         this.location = entity.getLocation();
+        this.pos = location.getBlockPosition();
+        this.worldUniqueId = location.getExtent().getUniqueId();
         this.extraData = builder.build();
         ImmutableMap.Builder<Key<?>, ImmutableValue<?>> keyValueBuilder = ImmutableMap.builder();
-        for (ImmutableValue<?> value : this.blockState.getValues()) {
+        // TODO
+        /*for (ImmutableValue<?> value : this.blockState.getValues()) {
             keyValueBuilder.put(value.getKey(), value);
-        }
+        }*/
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
             for (ImmutableValue<?> value : manipulator.getValues()) {
                 keyValueBuilder.put(value.getKey(), value);
@@ -126,6 +144,57 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public BlockSnapshot withState(BlockState blockState) {
         return new SpongeBlockSnapshot(checkNotNull(blockState), this.location, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+    }
+
+    @Override
+    public BlockSnapshot withLocation(Location<World> location) {
+        return new SpongeBlockSnapshot(this.blockState, location, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+    }
+
+    @Override
+    public BlockSnapshot withContainer(DataContainer container) {
+        return new SpongeBlockSnapshot(this.blockState, this.location, NbtTranslator.getInstance().translateData(container));
+    }
+
+    @Override
+    public UUID getWorldUniqueId() {
+        return this.worldUniqueId;
+    }
+
+    @Override
+    public Vector3i getPosition() {
+        return this.pos;
+    }
+
+    @Override
+    public boolean restore(boolean force, boolean notifyNeighbors) {
+        if (!Sponge.getGame().getServer().getWorld(this.worldUniqueId).isPresent()) {
+            return false;
+        }
+
+        net.minecraft.world.World world = (net.minecraft.world.World) Sponge.getGame().getServer().getWorld(this.worldUniqueId).get();
+        BlockPos pos = VecHelper.toBlockPos(this.pos);
+        IBlockState current = world.getBlockState(pos);
+        IBlockState replaced = (IBlockState) this.blockState;
+        if (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced)) {
+            if (force) {
+                world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
+            } else {
+                return false;
+            }
+        }
+
+        world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
+        world.markBlockForUpdate(pos);
+        net.minecraft.tileentity.TileEntity te = null;
+        if (this.compound != null) {
+            te = world.getTileEntity(pos);
+            if (te != null) {
+                te.readFromNBT(this.compound);
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -315,4 +384,5 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public NBTTagCompound getCompound() {
         return ((NBTTagCompound) this.compound.copy());
     }
+
 }
