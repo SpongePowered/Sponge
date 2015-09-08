@@ -27,12 +27,12 @@ package org.spongepowered.common.service.user;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Sets;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorage;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,7 +84,7 @@ public class SpongeUserStorage implements UserStorage {
     public Collection<GameProfile> match(String lastKnownName) {
         lastKnownName = checkNotNull(lastKnownName, "lastKnownName").toLowerCase(Locale.ROOT);
         Collection<org.spongepowered.api.GameProfile> allProfiles = UserDiscoverer.getAllProfiles();
-        Collection<org.spongepowered.api.GameProfile> matching = Sets.newHashSet();
+        Collection<org.spongepowered.api.GameProfile> matching = new HashSet<>();
         for (org.spongepowered.api.GameProfile profile : allProfiles) {
             if (profile.getName().startsWith(lastKnownName)) {
                 matching.add(profile);

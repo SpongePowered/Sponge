@@ -33,7 +33,6 @@ import static org.spongepowered.api.util.command.args.GenericArguments.seq;
 import static org.spongepowered.api.util.command.args.GenericArguments.string;
 import static org.spongepowered.api.util.command.args.GenericArguments.world;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
@@ -352,13 +351,7 @@ public class CommandSponge {
 
         @Override
         protected Iterable<String> getChoices(CommandSource source) {
-            return Iterables.transform(Sponge.getGame().getPluginManager().getPlugins(), new Function<PluginContainer, String>() {
-                @Nullable
-                @Override
-                public String apply(@Nullable PluginContainer input) {
-                    return input.getId();
-                }
-            });
+            return Iterables.transform(Sponge.getGame().getPluginManager().getPlugins(), PluginContainer::getId);
         }
 
         @Override

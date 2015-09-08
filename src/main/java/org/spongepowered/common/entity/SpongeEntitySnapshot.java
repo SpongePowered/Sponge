@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataContainer;
@@ -48,8 +46,10 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -80,12 +80,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<UUID> getUniqueId() {
-        return Optional.fromNullable(this.entityUuid);
+        return Optional.ofNullable(this.entityUuid);
     }
 
     @Override
     public Optional<Transform<World>> getTransform() {
-        return Optional.fromNullable(this.transform);
+        return Optional.ofNullable(this.transform);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        return Optional.fromNullable(this.transform == null ? null : this.transform.getLocation());
+        return Optional.ofNullable(this.transform == null ? null : this.transform.getLocation());
     }
 
     @Override
@@ -119,7 +119,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of((T) manipulator);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -136,7 +136,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("rawtypes")
@@ -160,21 +160,21 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 createNew = true;
-                manipulator.with(key, checkNotNull(function.apply(manipulator.get(key).orNull())));
+                manipulator.with(key, checkNotNull(function.apply(manipulator.get(key).orElse(null))));
             }
         }
         if (createNew) {
             return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.transform, this.entityType, builder.build()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public <E> Optional<EntitySnapshot> with(Key<? extends BaseValue<E>> key, E value) {
         if (!supports(key)) {
-            return Optional.absent();
+            return Optional.empty();
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -186,7 +186,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public Optional<EntitySnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
         if (!supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
-            return Optional.absent();
+            return Optional.empty();
         }
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         boolean createNew = false;
@@ -213,13 +213,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 snapshot = optional.get();
             }
         }
-        return snapshot == this ? Optional.<EntitySnapshot>absent() : Optional.of(snapshot);
+        return snapshot == this ? Optional.empty() : Optional.of(snapshot);
     }
 
     @Override
     public Optional<EntitySnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         if (!supports(containerClass)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
@@ -227,7 +227,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 builder.add(manipulator);
             }
         }
-        return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.transform, this.entityType, builder.build()));
+        return Optional.of(new SpongeEntitySnapshot(this.entityUuid, this.transform, this.entityType, builder.build()));
     }
 
     @Override
@@ -254,18 +254,18 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of((E) value.get());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Nullable
     @Override
     public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orNull();
+        return get(key).orElse(null);
     }
 
     @Override
     public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).or(defaultValue);
+        return get(key).orElse(defaultValue);
     }
 
     @SuppressWarnings("unchecked")
@@ -277,7 +277,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of((V) value.asMutable());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

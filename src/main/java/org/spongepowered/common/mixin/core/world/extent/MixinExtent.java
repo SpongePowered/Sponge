@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.extent;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -76,6 +75,8 @@ import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 @Mixin({World.class, Chunk.class, ExtentViewDownsize.class, ExtentViewTransform.class})
 public abstract class MixinExtent implements Extent {
@@ -364,12 +365,12 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public ImmutableSet<Key<?>> getKeys(Vector3i coordinates) {
+    public Set<Key<?>> getKeys(Vector3i coordinates) {
         return getKeys(coordinates.getX(), coordinates.getY(), coordinates.getZ());
     }
 
     @Override
-    public ImmutableSet<ImmutableValue<?>> getValues(Vector3i coordinates) {
+    public Set<ImmutableValue<?>> getValues(Vector3i coordinates) {
         return getValues(coordinates.getX(), coordinates.getY(), coordinates.getZ());
     }
 

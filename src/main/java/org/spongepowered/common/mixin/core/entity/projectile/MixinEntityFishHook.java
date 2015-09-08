@@ -108,9 +108,10 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         )
     public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
         if (entity.worldObj.isRemote) {
-            EntitySnapshot fishHookSnapshot = ((FishHook) this).createSnapshot();
+            EntitySnapshot fishHookSnapshot = this.createSnapshot();
             EntitySnapshot hookedEntitySnapshot = ((Entity) entity).createSnapshot();
-            FishingEvent.Hook event = SpongeEventFactory.createFishingEventHook(Sponge.getGame(), Cause.of(this.angler), fishHookSnapshot, (FishHook) this, hookedEntitySnapshot, Optional.fromNullable((Entity) entity), (Entity) entity);
+            FishingEvent.Hook event = SpongeEventFactory.createFishingEventHook(Sponge.getGame(), Cause.of(this.angler), fishHookSnapshot,
+                    (FishHook) this, hookedEntitySnapshot, Optional.ofNullable((Entity) entity), (Entity) entity);
             if (!Sponge.getGame().getEventManager().post(event)) {
                 if (this.getShooter() instanceof Entity) {
                     DamageSource.causeThrownDamage((net.minecraft.entity.Entity)(Object) this, (net.minecraft.entity.Entity) this.getShooter());
@@ -155,7 +156,9 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             transaction = new ItemStackTransaction(((ItemStack) itemStack).createSnapshot());
         }
 
-        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler), Optional.fromNullable(caughtSnapshot), Optional.fromNullable((Entity) this.caughtEntity), exp, exp, fishHookSnapshot, (FishHook) this, Optional.fromNullable(transaction), (Player) this.angler);
+        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler),
+                Optional.ofNullable(caughtSnapshot), Optional.ofNullable((Entity) this.caughtEntity), exp, exp, fishHookSnapshot, this,
+                Optional.ofNullable(transaction), (Player) this.angler);
         byte b0 = 0;
         if (!Sponge.getGame().getEventManager().post(event)) {
             if (event.getCaughtEntity().isPresent()) {

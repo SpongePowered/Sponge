@@ -57,7 +57,7 @@ public class SpongeCallbackHolder {
     public static final String CALLBACK_COMMAND_QUALIFIED = "/sponge:" + CALLBACK_COMMAND;
     private static final SpongeCallbackHolder INSTANCE = new SpongeCallbackHolder();
 
-    private static final ConcurrentMap<UUID, Consumer<CommandSource>> reverseMap = new ConcurrentHashMap<UUID, Consumer<CommandSource>>();
+    private static final ConcurrentMap<UUID, Consumer<CommandSource>> reverseMap = new ConcurrentHashMap<>();
     private static final LoadingCache<Consumer<CommandSource>, UUID> callbackCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES)
             .removalListener(new RemovalListener<Consumer<CommandSource>, UUID>() {
                 @Override

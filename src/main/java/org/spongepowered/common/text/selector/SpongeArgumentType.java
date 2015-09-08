@@ -26,9 +26,6 @@ package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.selector.ArgumentType;
@@ -36,23 +33,18 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.Sponge;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @NonnullByDefault
 public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>> implements ArgumentType<T> {
 
-    private static final Map<String, Function<String, ?>> converters = Maps.newHashMap();
+    private static final Map<String, Function<String, ?>> converters = new HashMap<>();
 
     static {
-        converters.put(String.class.getName(), Functions.<String>identity());
-        converters.put(EntityType.class.getName(), new Function<String, EntityType>() {
-
-            @Override
-            public EntityType apply(String input) {
-                return Sponge.getSpongeRegistry().getEntity(input.toLowerCase()).orNull();
-            }
-
-        });
+        converters.put(String.class.getName(), Function.identity());
+        converters.put(EntityType.class.getName(), input -> Sponge.getSpongeRegistry().getEntity(input.toLowerCase()).orElse(null));
     }
 
     @SuppressWarnings("unchecked")
@@ -64,14 +56,9 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
             } catch (NoSuchMethodException ignored) {
                 if (CatalogType.class.isAssignableFrom(type)) {
                     final Class<? extends CatalogType> type2 = type.asSubclass(CatalogType.class);
-                    converters.put(converterKey, new Function<String, T>() {
-
-                        @Override
-                        public T apply(String input) {
-                            // assume it exists for now
-                            return (T) Sponge.getGame().getRegistry().getType(type2, input).get();
-                        }
-
+                    converters.put(converterKey, input -> {
+                        // assume it exists for now
+                        return (T) Sponge.getGame().getRegistry().getType(type2, input).get();
                     });
                 } else {
                     throw new IllegalStateException("can't convert " + type);

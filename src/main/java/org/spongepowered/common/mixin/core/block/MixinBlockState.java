@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.core.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -56,7 +54,9 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -113,7 +113,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
                 return Optional.of((T) manipulator);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -124,7 +124,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
                 return Optional.of(((T) manipulator));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -135,7 +135,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
         if (!supports(checkNotNull(key))) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             E current = this.get(key).get();
             final E newVal = checkNotNull(function.apply(current));
@@ -144,21 +144,22 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
                 return optional.get().offerValue(this, newVal);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public <E> Optional<BlockState> with(Key<? extends BaseValue<E>> key, E value) {
         if (!supports(key)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         final Optional<BlockValueProcessor<E, ?>> optional = SpongeDataRegistry.getInstance().getBaseBlockValueProcessor(key);
         if (optional.isPresent()) {
             return optional.get().offerValue(this, value);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<BlockState> with(BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
@@ -169,7 +170,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
         final Optional<BlockDataProcessor> optional = SpongeDataRegistry.getInstance().getWildBlockDataProcessor(valueContainer.getClass());
         if (!optional.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             return optional.get().withData(this, valueContainer);
         }
@@ -183,7 +184,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
             if (optional.isPresent()) {
                 state = optional.get();
             } else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
         return Optional.of(state);
@@ -191,7 +192,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public Optional<BlockState> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -212,7 +213,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public BlockState merge(BlockState that, MergeFunction function) {
         if (!getType().equals(that.getType())) {
@@ -220,7 +221,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         } else {
             BlockState temp = this;
             for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-                @Nullable ImmutableDataManipulator old = temp.get(manipulator.getClass()).orNull();
+                @Nullable ImmutableDataManipulator old = temp.get(manipulator.getClass()).orElse(null);
                 Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
                 if (optional.isPresent()) {
                     temp = optional.get();
@@ -246,7 +247,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         if (this.keyMap.containsKey(checkNotNull(key))) {
             return Optional.of((E) this.keyMap.get(key));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private void generateKeyMap() {
@@ -262,12 +263,12 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Nullable
     @Override
     public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orNull();
+        return get(key).orElse(null);
     }
 
     @Override
     public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).or(checkNotNull(defaultValue));
+        return get(key).orElse(checkNotNull(defaultValue));
     }
 
     @SuppressWarnings("unchecked")
@@ -279,7 +280,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
                 return Optional.of((V) value.asMutable());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

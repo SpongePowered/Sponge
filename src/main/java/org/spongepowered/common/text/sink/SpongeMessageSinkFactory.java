@@ -25,16 +25,12 @@
 package org.spongepowered.common.text.sink;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinkFactory;
@@ -45,8 +41,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import javax.annotation.Nullable;
 
 /**
  * Implementation of factory to create message sinks.
@@ -67,21 +61,12 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         public Iterable<CommandSource> getRecipients() {
             PermissionService service =  Sponge.getGame().getServiceManager().provideUnchecked(PermissionService.class);
             return Iterables.concat(
-                    Iterables.transform(service.getKnownSubjects().values(), new Function<SubjectCollection, Iterable<CommandSource>>() {
-                @Nullable
-                @Override
-                public Iterable<CommandSource> apply(SubjectCollection input) {
-                    return Iterables.filter(Iterables.transform(Maps.filterValues(input.getAllWithPermission(PermissionSink.this.permission),
-                                    Predicates.equalTo(true)).keySet(),
-                            new Function<Subject, CommandSource>() {
-                                @Nullable
-                                @Override
-                                public CommandSource apply(@Nullable Subject input) {
-                                    return input.getCommandSource().orNull();
-                                }
-                            }), Predicates.notNull());
-                }
-            }));
+                    Iterables.transform(service.getKnownSubjects().values(),
+                            input -> {
+                                return Iterables.filter(Iterables.transform(Maps.filterValues(input.getAllWithPermission(PermissionSink.this
+                                            .permission), value -> value.equals(true)).keySet(), input1 -> input1.getCommandSource().orElse(null)),
+                                        test -> test != null);
+                            }));
         }
     }
 
@@ -124,7 +109,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
     public static final MessageSink TO_NONE = new MessageSink() {
         @Override
         public Iterable<CommandSource> getRecipients() {
-            return new HashSet<CommandSource>();
+            return new HashSet<>();
         }
     };
 
@@ -154,13 +139,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
 
         @Override
         public Iterable<CommandSource> getRecipients() {
-            return ImmutableSet.copyOf(Iterables.concat(Iterables.transform(this.contents, new Function<MessageSink, Iterable<CommandSource>>() {
-                @Nullable
-                @Override
-                public Iterable<CommandSource> apply(@Nullable MessageSink input) {
-                    return input.getRecipients();
-                }
-            })));
+            return ImmutableSet.copyOf(Iterables.concat(Iterables.transform(this.contents, MessageSink::getRecipients)));
         }
     }
 
@@ -173,7 +152,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         private final Set<CommandSource> contents;
 
         private FixedSink(Set<CommandSource> provided) {
-            Set<CommandSource> contents = Collections.newSetFromMap(new WeakHashMap<CommandSource, Boolean>());
+            Set<CommandSource> contents = Collections.newSetFromMap(new WeakHashMap<>());
             contents.addAll(provided);
             this.contents = Collections.unmodifiableSet(contents);
         }

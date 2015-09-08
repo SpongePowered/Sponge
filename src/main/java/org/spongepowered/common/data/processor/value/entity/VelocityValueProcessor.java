@@ -46,7 +46,7 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
 
     @Override
     public Value<Vector3d> constructValue(Vector3d defaultValue) {
-        return new SpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, defaultValue);
+        return new SpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, defaultValue);
     }
 
     @Override
@@ -64,10 +64,10 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Vector3d value) {
-        final ImmutableValue<Vector3d> newValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, value);
+        final ImmutableValue<Vector3d> newValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, value);
         if (container instanceof Entity) {
             final Vector3d old = getValueFromContainer(container).get();
-            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, old);
+            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, old);
             try {
                 ((Entity) container).motionX = value.getX();
                 ((Entity) container).motionY = value.getY();

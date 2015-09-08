@@ -52,7 +52,7 @@ public class EyeLocationValueProcessor extends AbstractSpongeValueProcessor<Vect
 
     @Override
     public Value<Vector3d> constructValue(Vector3d defaultValue) {
-        return new SpongeValue<Vector3d>(Keys.EYE_LOCATION, defaultValue);
+        return new SpongeValue<>(Keys.EYE_LOCATION, defaultValue);
     }
 
     @Override
@@ -70,10 +70,10 @@ public class EyeLocationValueProcessor extends AbstractSpongeValueProcessor<Vect
             final Entity entity = (Entity) container;
             final Vector3d oldValue = new Vector3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
             ((IMixinEntity) entity).setEyeHeight(value.getY() - oldValue.getY());
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, value),
-                new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.EYE_LOCATION, value),
+                    new ImmutableSpongeValue<>(Keys.EYE_LOCATION, oldValue));
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Vector3d>(Keys.EYE_LOCATION, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.EYE_LOCATION, value));
     }
 
     @Override

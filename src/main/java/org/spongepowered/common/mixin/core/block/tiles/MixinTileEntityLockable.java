@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.LockCode;
@@ -38,6 +37,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NonnullByDefault
@@ -52,7 +52,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
         if (this.code != null) {
             container.set(of("Lock"), this.code.getLock());
         }
-        List<DataView> items = Lists.newArrayList();
+        List<DataView> items = new ArrayList<>();
         for (int i = 0; i < getSizeInventory(); i++) {
             ItemStack stack = getStackInSlot(i);
             if (stack != null) {

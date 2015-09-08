@@ -28,13 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -53,22 +53,22 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     @Override
 
     public ImmutableSetValue<E> with(Set<E> value) {
-        return new ImmutableSpongeSetValue<E>(getKey(), ImmutableSet.copyOf(value));
+        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.copyOf(value));
     }
 
     @Override
     public ImmutableSetValue<E> transform(Function<Set<E>, Set<E>> function) {
-        return new ImmutableSpongeSetValue<E>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
+        return new ImmutableSpongeSetValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
 
     @Override
     public ImmutableSetValue<E> with(E... elements) {
-        return new ImmutableSpongeSetValue<E>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
+        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
     public ImmutableSetValue<E> withAll(Iterable<E> elements) {
-        return new ImmutableSpongeSetValue<E>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).addAll(elements).build());
+        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
                 builder.add(existing);
             }
         }
-        return new ImmutableSpongeSetValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeSetValue<>(getKey(), builder.build());
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
                 builder.add(existingElement);
             }
         }
-        return new ImmutableSpongeSetValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeSetValue<>(getKey(), builder.build());
     }
 
     @Override
@@ -101,20 +101,20 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
                 builder.add(existingElement);
             }
         }
-        return new ImmutableSpongeSetValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeSetValue<>(getKey(), builder.build());
     }
 
     @Override
     public Set<E> getAll() {
-        final Set<E> set = Sets.newHashSet();
+        final Set<E> set = new HashSet<>();
         set.addAll(this.actualValue);
         return set;
     }
 
     @Override
     public SetValue<E> asMutable() {
-        final Set<E> set = Sets.newHashSet();
+        final Set<E> set = new HashSet<>();
         set.addAll(this.actualValue);
-        return new SpongeSetValue<E>(getKey(), set);
+        return new SpongeSetValue<>(getKey(), set);
     }
 }

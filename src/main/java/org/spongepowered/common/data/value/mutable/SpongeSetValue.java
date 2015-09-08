@@ -27,13 +27,13 @@ package org.spongepowered.common.data.value.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -41,41 +41,41 @@ import java.util.function.Predicate;
 public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, SetValue<E>, ImmutableSetValue<E>> implements SetValue<E> {
 
     public SpongeSetValue(Key<? extends BaseValue<Set<E>>> key) {
-        this(key, Sets.<E>newHashSet());
+        this(key, new HashSet<>());
     }
 
     public SpongeSetValue(Key<? extends BaseValue<Set<E>>> key, Set<E> actualValue) {
-        this(key, Sets.<E>newHashSet(), actualValue);
+        this(key, new HashSet<>(), actualValue);
     }
 
     public SpongeSetValue(Key<? extends BaseValue<Set<E>>> key, Set<E> defaultSet, Set<E> actualValue) {
-        super(key, Sets.newHashSet(defaultSet), Sets.newHashSet(actualValue));
+        super(key, new HashSet<>(defaultSet), new HashSet<>(actualValue));
     }
 
     @Override
     public SetValue<E> transform(Function<Set<E>, Set<E>> function) {
-        this.actualValue = Sets.newHashSet(checkNotNull(checkNotNull(function).apply(this.actualValue)));
+        this.actualValue = new HashSet<>(checkNotNull(checkNotNull(function).apply(this.actualValue)));
         return this;
     }
 
     @Override
     public SetValue<E> filter(Predicate<? super E> predicate) {
-        final Set<E> set = Sets.newHashSet();
+        final Set<E> set = new HashSet<>();
         for (E element : this.actualValue) {
             if (checkNotNull(predicate).test(element)) {
                 set.add(element);
             }
         }
-        return new SpongeSetValue<E>(getKey(), set);
+        return new SpongeSetValue<>(getKey(), set);
     }
 
     @Override
     public Set<E> getAll() {
-        return Sets.newHashSet(this.actualValue);
+        return new HashSet<>(this.actualValue);
     }
 
     @Override
     public ImmutableSetValue<E> asImmutable() {
-        return new ImmutableSpongeSetValue<E>(getKey(), ImmutableSet.copyOf(this.actualValue));
+        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.copyOf(this.actualValue));
     }
 }

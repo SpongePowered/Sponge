@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.collect.Maps;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -60,18 +59,18 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
     private static final String SPONGE_SCORE_UUID_LEAST = "SpongeScoreUUIDLeast";
     private static final String SPONGE_SCORE_UUID_MOST = "SpongeScoreUUIDMost";
 
-    public Map<UUID, SpongeScore> scoreMap = new HashMap<UUID, SpongeScore>();
+    public Map<UUID, SpongeScore> scoreMap = new HashMap<>();
 
     private net.minecraft.scoreboard.Score lastScore = null;
 
     public MixinScoreboardSaveData(String name) {
         super(name);
-        this.scoreMap = new HashMap<UUID, SpongeScore>();
+        this.scoreMap = new HashMap<>();
     }
 
     @Inject(method = "<init>(Ljava/lang/String;)V", at = @At("RETURN"), remap = false)
     public void onInit(String name, CallbackInfo ci) {
-        this.scoreMap = Maps.newHashMap();
+        this.scoreMap = new HashMap<>();
     }
 
     @Override

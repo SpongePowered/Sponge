@@ -88,17 +88,17 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public MutableBoundedValue<Integer> foodLevel() {
-        return new SpongeBoundedValue<Integer>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, this.foodLevel);
+        return new SpongeBoundedValue<>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, this.foodLevel);
     }
 
     @Override
     public MutableBoundedValue<Double> exhaustion() {
-        return new SpongeBoundedValue<Double>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, (double) this.foodExhaustionLevel);
+        return new SpongeBoundedValue<>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, (double) this.foodExhaustionLevel);
     }
 
     @Override
     public MutableBoundedValue<Double> saturation() {
-        return new SpongeBoundedValue<Double>(Keys.SATURATION, 5.0D, doubleComparator(), 0D, Double.MAX_VALUE,
+        return new SpongeBoundedValue<>(Keys.SATURATION, 5.0D, doubleComparator(), 0D, Double.MAX_VALUE,
                 (double) this.foodSaturationLevel);
     }
 

@@ -31,6 +31,7 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -47,7 +48,7 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
+        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
     public java.util.Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<Boolean> optional = getValueFromContainer(container);
         if (optional.isPresent()) {
-            return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
+            return Optional.of(new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
         }
         return Optional.empty();
     }
@@ -81,19 +82,19 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
             try {
                 ((Entity) container).setAlwaysRenderNameTag(value);
                 return DataTransactionBuilder.builder()
-                        .replace(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME,
+                        .replace((ImmutableValue<?>) ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME,
                                 true, old))
-                        .success(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME,
+                        .success((ImmutableValue<?>) ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME,
                                 true, value))
-                        .result(DataTransactionResult.Type.SUCCESS)
-                        .build();
+                                .result(DataTransactionResult.Type.SUCCESS)
+                                .build();
             } catch (Exception e) {
                 return DataTransactionBuilder.errorResult(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class,
                         Keys.SHOWS_DISPLAY_NAME, true, value));
             }
 
         }
-        return DataTransactionBuilder.failResult(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class,
+        return DataTransactionBuilder.failResult((ImmutableValue<?>) ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class,
                 Keys.SHOWS_DISPLAY_NAME, true, value));
     }
 

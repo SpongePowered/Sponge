@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.text.xml;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;

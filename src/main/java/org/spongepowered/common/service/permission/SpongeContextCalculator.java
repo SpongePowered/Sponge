@@ -26,7 +26,6 @@ package org.spongepowered.common.service.permission;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -45,8 +44,6 @@ import java.net.InetAddress;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 /**
  * A context calculator handling world contexts.

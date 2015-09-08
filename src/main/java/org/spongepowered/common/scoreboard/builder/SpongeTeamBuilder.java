@@ -51,7 +51,7 @@ public class SpongeTeamBuilder implements TeamBuilder {
     private boolean showFriendlyInvisibles = false;
     private Visibility nameTagVisibility = Visibilities.ALL;
     private Visibility deathMessageVisibility = Visibilities.ALL;
-    private Set<Text> members = new HashSet<Text>();
+    private Set<Text> members = new HashSet<>();
 
     @Override
     public TeamBuilder name(String name) {
@@ -128,6 +128,6 @@ public class SpongeTeamBuilder implements TeamBuilder {
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
         return new SpongeTeam(this.name, this.displayName, this.color, this.prefix, this.suffix, this.allowFriendlyFire, this.showFriendlyInvisibles,
-                this.nameTagVisibility, this.deathMessageVisibility, new HashSet(this.members));
+                this.nameTagVisibility, this.deathMessageVisibility, new HashSet<>(this.members));
     }
 }

@@ -28,9 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.MinecraftServer;
@@ -38,15 +35,20 @@ import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.profile.ProfileNotFoundException;
+import org.spongepowered.api.util.Functional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SpongeProfileResolver implements GameProfileResolver {
@@ -79,7 +81,7 @@ public class SpongeProfileResolver implements GameProfileResolver {
         }
 
         protected List<GameProfile> fromNames(List<String> names) throws Exception {
-            final List<GameProfile> profiles = Lists.newArrayList();
+            final List<GameProfile> profiles = new ArrayList<>();
             Set<String> cachedNames = Sets.newHashSet(this.cache.getUsernames());
             if (this.useCache) {
                 for (int i = 0; i < names.size(); i++) {
@@ -188,42 +190,42 @@ public class SpongeProfileResolver implements GameProfileResolver {
         }
     }
 
-    private final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     @Override
-    public ListenableFuture<GameProfile> get(UUID uniqueId) {
+    public CompletableFuture<GameProfile> get(UUID uniqueId) {
         return this.get(uniqueId, true);
     }
 
     @Override
-    public ListenableFuture<GameProfile> get(UUID uniqueId, final boolean useCache) {
-        return this.executor.submit(new SingleQuery(checkNotNull(uniqueId, "uniqueId"), useCache));
+    public CompletableFuture<GameProfile> get(UUID uniqueId, final boolean useCache) {
+        return Functional.asyncFailableFuture(new SingleQuery(checkNotNull(uniqueId, "uniqueId"), useCache), this.executor);
     }
 
     @Override
-    public ListenableFuture<GameProfile> get(String name) {
+    public CompletableFuture<GameProfile> get(String name) {
         return this.get(name, true);
     }
 
     @Override
-    public ListenableFuture<GameProfile> get(String name, boolean useCache) {
-        return this.executor.submit(new SingleQuery(checkNotNull(name, "name"), useCache));
+    public CompletableFuture<GameProfile> get(String name, boolean useCache) {
+        return Functional.asyncFailableFuture(new SingleQuery(checkNotNull(name, "name"), useCache), this.executor);
     }
 
     @Override
-    public ListenableFuture<Collection<GameProfile>> getAllByName(Iterable<String> names, boolean useCache) {
-        return this.executor.submit(new MultiQuery(checkNotNull(names, "names"), useCache));
+    public CompletableFuture<Collection<GameProfile>> getAllByName(Iterable<String> names, boolean useCache) {
+        return Functional.asyncFailableFuture(new MultiQuery(checkNotNull(names, "names"), useCache), this.executor);
     }
 
     @Override
-    public ListenableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
-        return this.executor.submit(new MultiQuery(checkNotNull(uniqueIds, "uniqueIds"), useCache));
+    public CompletableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
+        return Functional.asyncFailableFuture(new MultiQuery(checkNotNull(uniqueIds, "uniqueIds"), useCache), this.executor);
     }
 
     @Override
     public Collection<GameProfile> getCachedProfiles() {
         PlayerProfileCache cache = MinecraftServer.getServer().getPlayerProfileCache();
-        Collection<GameProfile> profiles = Lists.newArrayList();
+        Collection<GameProfile> profiles = new ArrayList<>();
         for (String name : cache.getUsernames()) {
             if (name != null) {
                 GameProfile profile = (GameProfile) cache.getGameProfileForUsername(name);
@@ -239,7 +241,7 @@ public class SpongeProfileResolver implements GameProfileResolver {
     public Collection<GameProfile> match(String lastKnownName) {
         lastKnownName = checkNotNull(lastKnownName, "lastKnownName").toLowerCase(Locale.ROOT);
         Collection<GameProfile> allProfiles = this.getCachedProfiles();
-        Collection<org.spongepowered.api.GameProfile> matching = Sets.newHashSet();
+        Collection<org.spongepowered.api.GameProfile> matching = new HashSet<>();
         for (GameProfile profile : allProfiles) {
             if (profile.getName().startsWith(lastKnownName)) {
                 matching.add(profile);

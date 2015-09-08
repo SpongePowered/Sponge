@@ -116,7 +116,7 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public Location<Chunk> getLocation(Vector3i position) {
-        return new Location<Chunk>(this, position);
+        return new Location<>(this, position);
     }
 
     @Override
@@ -126,7 +126,7 @@ public abstract class MixinChunk implements Chunk {
 
     @Override
     public Location<Chunk> getLocation(Vector3d position) {
-        return new Location<Chunk>(this, position);
+        return new Location<>(this, position);
     }
 
     @Override

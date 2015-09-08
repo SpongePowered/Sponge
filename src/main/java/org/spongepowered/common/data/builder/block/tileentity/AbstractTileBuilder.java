@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Maps;
 import net.minecraft.block.BlockJukebox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
@@ -60,6 +59,7 @@ import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -71,7 +71,7 @@ import java.util.Optional;
  */
 public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> implements DataBuilder<T> {
 
-    private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
+    private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = new HashMap<>();
     protected final Game game;
 
     private static final DataQuery TILE_TYPE = of("tileType");

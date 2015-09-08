@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -35,6 +34,8 @@ import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.BlockValueProcessor;
+
+import java.util.Optional;
 
 public class SpongePlantTypeValueProcessor implements BlockValueProcessor<PlantType, Value<PlantType>> {
 
@@ -71,6 +72,6 @@ public class SpongePlantTypeValueProcessor implements BlockValueProcessor<PlantT
         } else if (blockState.getBlock() == Blocks.yellow_flower) {
             return Optional.of((BlockState) blockState);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

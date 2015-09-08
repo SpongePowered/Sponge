@@ -70,6 +70,6 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
 
     @Override
     public ImmutableValue<E> type() {
-        return new ImmutableSpongeValue<E>(this.usedKey, this.value, this.value);
+        return new ImmutableSpongeValue<>(this.usedKey, this.value, this.value);
     }
 }

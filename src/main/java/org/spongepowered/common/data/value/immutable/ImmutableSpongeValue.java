@@ -47,17 +47,17 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
 
     @Override
     public ImmutableValue<E> with(E value) {
-        return new ImmutableSpongeValue<E>(this.getKey(), getDefault(), value);
+        return new ImmutableSpongeValue<>(this.getKey(), getDefault(), value);
     }
 
     @Override
     public ImmutableValue<E> transform(Function<E, E> function) {
         final E value = checkNotNull(function).apply(get());
-        return new ImmutableSpongeValue<E>(this.getKey(), getDefault(), value);
+        return new ImmutableSpongeValue<>(this.getKey(), getDefault(), value);
     }
 
     @Override
     public Value<E> asMutable() {
-        return new SpongeValue<E>(getKey(), getDefault(), get());
+        return new SpongeValue<>(getKey(), getDefault(), get());
     }
 }

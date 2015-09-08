@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -47,6 +46,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NonnullByDefault
@@ -57,7 +57,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     @Shadow private NBTTagList patterns;
 
-    private List<PatternLayer> patternLayers = Lists.newArrayList();
+    private List<PatternLayer> patternLayers = new ArrayList<>();
 
     @Inject(method = "setItemValues(Lnet/minecraft/item/ItemStack;)V", at = @At("RETURN"))
     private void onSetItemValues(ItemStack stack, CallbackInfo ci) {
@@ -98,7 +98,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(of("Patterns"), Lists.newArrayList(this.patternLayers));
+        container.set(of("Patterns"), new ArrayList<>(this.patternLayers));
         container.set(of("Base"), this.baseColor);
         return container;
     }

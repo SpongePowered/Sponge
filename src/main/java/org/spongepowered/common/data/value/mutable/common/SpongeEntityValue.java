@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 
 public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
 
-    private WeakReference<Entity> weakReference = new WeakReference<Entity>(null);
+    private WeakReference<Entity> weakReference = new WeakReference<>(null);
 
     public SpongeEntityValue(Key<? extends BaseValue<Optional<Entity>>> key) {
         super(key);
@@ -53,7 +53,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     public SpongeEntityValue(Key<? extends BaseValue<Optional<Entity>>> key, Optional<Entity> actualValue) {
         super(key, Optional.<Entity>empty());
         if (actualValue.isPresent()) {
-            this.weakReference = new WeakReference<Entity>(actualValue.get());
+            this.weakReference = new WeakReference<>(actualValue.get());
         } else {
             this.weakReference.clear();
         }
@@ -77,7 +77,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     @Override
     public OptionalValue<Entity> set(Optional<Entity> value) {
         if (value.isPresent()) {
-            this.weakReference = new WeakReference<Entity>(value.get());
+            this.weakReference = new WeakReference<>(value.get());
         } else {
             this.weakReference.clear();
         }
@@ -88,7 +88,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     public OptionalValue<Entity> transform(Function<Optional<Entity>, Optional<Entity>> function) {
         final Optional<Entity> optional = checkNotNull(checkNotNull(function).apply(Optional.ofNullable(this.weakReference.get())));
         if (optional.isPresent()) {
-            this.weakReference = new WeakReference<Entity>(optional.get());
+            this.weakReference = new WeakReference<>(optional.get());
         } else {
             this.weakReference.clear();
         }
@@ -102,7 +102,7 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
 
     @Override
     public OptionalValue<Entity> setTo(@Nullable Entity value) {
-        this.weakReference = new WeakReference<Entity>(value);
+        this.weakReference = new WeakReference<>(value);
         return this;
     }
 
@@ -110,6 +110,6 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     @Override
     public Value<Entity> or(Entity defaultValue) {
         final Key<Value<Entity>> key = KeyFactory.makeSingleKey(Entity.class, (Class<Value<Entity>>) (Class) Value.class, this.getKey().getQuery());
-        return exists() ? new SpongeValue<Entity>(key, this.weakReference.get()) : new SpongeValue<Entity>(key, checkNotNull(defaultValue));
+        return exists() ? new SpongeValue<>(key, this.weakReference.get()) : new SpongeValue<>(key, checkNotNull(defaultValue));
     }
 }

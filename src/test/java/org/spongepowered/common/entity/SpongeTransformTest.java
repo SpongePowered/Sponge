@@ -52,11 +52,11 @@ public class SpongeTransformTest {
         final Vector3d position1 = new Vector3d(1, 2, 3);
         final Vector3d position2 = new Vector3d(4, 5, 6);
 
-        Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, position1);
+        Transform<Extent> transform = new SpongeTransform<>(this.mockExtent1, position1);
         Assert.assertEquals(this.mockExtent1, transform.getExtent());
         assertEquals(position1, transform.getPosition());
 
-        transform = transform.setLocation(new Location<Extent>(this.mockExtent2, position2));
+        transform = transform.setLocation(new Location<>(this.mockExtent2, position2));
         Assert.assertEquals(this.mockExtent2, transform.getExtent());
         assertEquals(position2, transform.getPosition());
 
@@ -80,7 +80,7 @@ public class SpongeTransformTest {
         final Vector3d axesAnglesDeg = rotationQuat1Plus2.getAxesAnglesDeg();
         final Vector3d rotation1Plus2 = new Vector3d(axesAnglesDeg.getX(), -axesAnglesDeg.getY(), axesAnglesDeg.getZ());
 
-        Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO, rotation1);
+        Transform<Extent> transform = new SpongeTransform<>(this.mockExtent1, Vector3d.ZERO, rotation1);
         assertEquals(rotation1, transform.getRotation());
         assertEquals(rotationQuat1, transform.getRotationAsQuaternion());
         Assert.assertEquals(rotation1.getX(), transform.getPitch(), EPSILON);
@@ -98,7 +98,7 @@ public class SpongeTransformTest {
         final Vector3d scale1 = new Vector3d(1, 2, 3);
         final Vector3d scale2 = new Vector3d(4, 5, 6);
 
-        Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, Vector3d.ZERO, Vector3d.ZERO, scale1);
+        Transform<Extent> transform = new SpongeTransform<>(this.mockExtent1, Vector3d.ZERO, Vector3d.ZERO, scale1);
         assertEquals(scale1, transform.getScale());
 
         transform = transform.addScale(scale2);
@@ -107,13 +107,13 @@ public class SpongeTransformTest {
 
     @Test
     public void testValid() {
-        Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1);
+        Transform<Extent> transform = new SpongeTransform<>(this.mockExtent1);
         Assert.assertFalse(transform.isValid());
         transform = transform.setExtent(this.mockExtent2);
         Assert.assertTrue(transform.isValid());
 
-        Assert.assertFalse(new SpongeTransform<Extent>(this.mockExtent1).isValid());
-        Assert.assertTrue(new SpongeTransform<Extent>(this.mockExtent2).isValid());
+        Assert.assertFalse(new SpongeTransform<>(this.mockExtent1).isValid());
+        Assert.assertTrue(new SpongeTransform<>(this.mockExtent2).isValid());
     }
 
     @Test
@@ -122,18 +122,18 @@ public class SpongeTransformTest {
         final Quaterniond rotation = Quaterniond.fromAxesAnglesDeg(20, 30, 60);
         final Vector3d scale = new Vector3d(4, 5, 6);
 
-        assertEquals(Matrix4d.createTranslation(position), new SpongeTransform<Extent>(this.mockExtent1, position).toMatrix());
-        assertEquals(Matrix4d.createRotation(rotation), new SpongeTransform.SpongeBuilder<Extent>().extent(this.mockExtent1)
+        assertEquals(Matrix4d.createTranslation(position), new SpongeTransform<>(this.mockExtent1, position).toMatrix());
+        assertEquals(Matrix4d.createRotation(rotation), new SpongeTransform.SpongeBuilder<>().extent(this.mockExtent1)
             .rotation(rotation).build().toMatrix());
         assertEquals(Matrix4d.createScaling(scale.toVector4(1)),
-            new SpongeTransform.SpongeBuilder<Extent>().extent(this.mockExtent1).scale(scale).build().toMatrix());
+                new SpongeTransform.SpongeBuilder<>().extent(this.mockExtent1).scale(scale).build().toMatrix());
         assertEquals(
             new Matrix4d(
                 4, 0, 0, 1,
                 0, 5, 0, 2,
                 0, 0, 6, 3,
                 0, 0, 0, 1
-            ), new SpongeTransform<Extent>(this.mockExtent1, position, Vector3d.ZERO, scale).toMatrix());
+            ), new SpongeTransform<>(this.mockExtent1, position, Vector3d.ZERO, scale).toMatrix());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class SpongeTransformTest {
         final Quaterniond rotation = Quaterniond.fromAngleDegAxis(90, Vector3d.UNIT_Y);
         final Vector3d scale = new Vector3d(4, 5, 6);
 
-        Transform<Extent> transform = new SpongeTransform<Extent>(this.mockExtent1, position);
+        Transform<Extent> transform = new SpongeTransform<>(this.mockExtent1, position);
         assertTransforms(new Vector3d(11, 12, 13), transform, new Vector3d(10, 10, 10));
 
         transform = transform.addScale(scale);

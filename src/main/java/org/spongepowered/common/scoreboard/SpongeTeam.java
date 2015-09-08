@@ -45,8 +45,8 @@ import java.util.Set;
 
 public class SpongeTeam implements Team {
 
-    private Map<net.minecraft.scoreboard.Scoreboard, ScorePlayerTeam> teams = new HashMap<net.minecraft.scoreboard.Scoreboard, ScorePlayerTeam>();
-    private Set<Text> members = new HashSet<Text>();
+    private Map<net.minecraft.scoreboard.Scoreboard, ScorePlayerTeam> teams = new HashMap<>();
+    private Set<Text> members = new HashSet<>();
 
     private String name;
     private Text displayName;
@@ -262,7 +262,7 @@ public class SpongeTeam implements Team {
 
     @Override
     public Set<Text> getMembers() {
-        return new HashSet<Text>(this.members);
+        return new HashSet<>(this.members);
     }
 
     @Override
@@ -291,7 +291,7 @@ public class SpongeTeam implements Team {
 
     @Override
     public Set<Scoreboard> getScoreboards() {
-        HashSet<Scoreboard> scoreboards = new HashSet<Scoreboard>();
+        HashSet<Scoreboard> scoreboards = new HashSet<>();
         for (net.minecraft.scoreboard.Scoreboard scoreboard: this.teams.keySet()) {
             scoreboards.add(((IMixinScoreboard) scoreboard).getSpongeScoreboard());
         }

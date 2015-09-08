@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item.data;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,6 +34,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(Item.class)
@@ -42,7 +42,7 @@ public abstract class MixinItem implements IMixinItem {
 
     @Override
     public List<DataManipulator<?, ?>> getManipulatorsFor(ItemStack itemStack) {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+        final List<DataManipulator<?, ?>> list = new ArrayList<>();
         if (!itemStack.hasTagCompound()) {
             return list;
         }

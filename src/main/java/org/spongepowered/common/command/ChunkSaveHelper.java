@@ -71,10 +71,10 @@ public class ChunkSaveHelper {
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());
 
-                TObjectIntHashMap<ChunkCoordIntPair> chunkEntityCounts = new TObjectIntHashMap<ChunkCoordIntPair>();
-                TObjectIntHashMap<Class> classEntityCounts = new TObjectIntHashMap<Class>();
-                TObjectIntHashMap<Entity> entityCollisionCounts = new TObjectIntHashMap<Entity>();
-                Set<BlockPos> collidingCoords = new HashSet<BlockPos>();
+                TObjectIntHashMap<ChunkCoordIntPair> chunkEntityCounts = new TObjectIntHashMap<>();
+                TObjectIntHashMap<Class> classEntityCounts = new TObjectIntHashMap<>();
+                TObjectIntHashMap<Entity> entityCollisionCounts = new TObjectIntHashMap<>();
+                Set<BlockPos> collidingCoords = new HashSet<>();
                 for (int i = 0; i < world.loadedEntityList.size(); i++) {
                     Entity entity = (Entity) world.loadedEntityList.get(i);
                     ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair((int) entity.posX >> 4, (int) entity.posZ >> 4);
@@ -93,8 +93,8 @@ public class ChunkSaveHelper {
                     }
                 }
 
-                TObjectIntHashMap<ChunkCoordIntPair> chunkTileCounts = new TObjectIntHashMap<ChunkCoordIntPair>();
-                TObjectIntHashMap<Class> classTileCounts = new TObjectIntHashMap<Class>();
+                TObjectIntHashMap<ChunkCoordIntPair> chunkTileCounts = new TObjectIntHashMap<>();
+                TObjectIntHashMap<Class> classTileCounts = new TObjectIntHashMap<>();
                 writer.name("tiles").beginArray();
                 for (int i = 0; i < world.loadedTileEntityList.size(); i++) {
                     TileEntity tile = (TileEntity) world.loadedTileEntityList.get(i);
@@ -140,7 +140,7 @@ public class ChunkSaveHelper {
     }
 
     private static <T> void writeChunkCounts(JsonWriter writer, String name, final TObjectIntHashMap<T> map, int max) throws IOException {
-        List<T> sortedCoords = new ArrayList<T>(map.keySet());
+        List<T> sortedCoords = new ArrayList<>(map.keySet());
         Collections.sort(sortedCoords, new Comparator<T>() {
 
             @Override

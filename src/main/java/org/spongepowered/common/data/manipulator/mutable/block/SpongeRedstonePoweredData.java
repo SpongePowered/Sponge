@@ -44,7 +44,7 @@ public class SpongeRedstonePoweredData extends AbstractBoundedComparableData<Int
 
     @Override
     public MutableBoundedValue<Integer> power() {
-        return new SpongeBoundedValue<Integer>(Keys.POWER, 0, this.comparator, 0, 15, this.getValue());
+        return new SpongeBoundedValue<>(Keys.POWER, 0, this.comparator, 0, 15, this.getValue());
     }
 
     @Override

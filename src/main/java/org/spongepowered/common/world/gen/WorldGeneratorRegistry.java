@@ -29,15 +29,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +59,7 @@ public final class WorldGeneratorRegistry {
     /**
      * Map of id => modifier.
      */
-    private final Map<String, WorldGeneratorModifier> modifiers = Maps.newHashMap();
+    private final Map<String, WorldGeneratorModifier> modifiers = new HashMap<>();
 
     public Map<String, WorldGeneratorModifier> viewModifiersMap() {
         return Collections.unmodifiableMap(this.modifiers);
@@ -108,7 +108,7 @@ public final class WorldGeneratorRegistry {
      * @return The modifiers
      */
     public Collection<WorldGeneratorModifier> toModifiers(Collection<String> ids) {
-        List<WorldGeneratorModifier> modifiers = Lists.newArrayList();
+        List<WorldGeneratorModifier> modifiers = new ArrayList<>();
         for (String id : ids) {
             WorldGeneratorModifier modifier = this.modifiers.get(id);
             if (modifier != null) {
@@ -122,7 +122,7 @@ public final class WorldGeneratorRegistry {
 
     /**
      * Checks that all modifiers are registered.
-     * 
+     *
      * @param modifiers
      *            The modifiers
      * @throws IllegalArgumentException

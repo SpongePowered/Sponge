@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public abstract class MixinPlayerCountData implements ClientPingServerEvent.Resp
     @SuppressWarnings("unchecked")
     public List<org.spongepowered.api.GameProfile> getProfiles() {
         if (this.profiles == null) {
-            this.profiles = Lists.newArrayList();
+            this.profiles = new ArrayList<>();
         }
 
         return (List) this.profiles; // This cast should be always save
@@ -79,7 +80,7 @@ public abstract class MixinPlayerCountData implements ClientPingServerEvent.Resp
     @Overwrite
     public GameProfile[] getPlayers() {
         if (this.profiles == null) {
-            this.profiles = Lists.newArrayList();
+            this.profiles = new ArrayList<>();
         }
 
         // TODO: When serializing, Minecraft calls this method frequently (it doesn't store the result).

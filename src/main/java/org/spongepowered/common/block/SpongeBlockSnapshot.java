@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -55,8 +53,10 @@ import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -73,7 +73,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final NBTTagCompound compound;
 
     public SpongeBlockSnapshot(BlockState blockState, World world, Vector3i pos) {
-        this(blockState, new Location<World>(world, pos), ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+        this(blockState, new Location<>(world, pos), ImmutableList.<ImmutableDataManipulator<?, ?>>of());
     }
 
     public SpongeBlockSnapshot(BlockState blockState, Location<World> location) {
@@ -186,7 +186,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
         world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
         world.markBlockForUpdate(pos);
-        net.minecraft.tileentity.TileEntity te = null;
+        net.minecraft.tileentity.TileEntity te;
         if (this.compound != null) {
             te = world.getTileEntity(pos);
             if (te != null) {
@@ -199,7 +199,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        return Optional.fromNullable(this.location);
+        return Optional.ofNullable(this.location);
     }
 
     @Override
@@ -228,7 +228,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -243,7 +243,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public <E> Optional<BlockSnapshot> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -252,7 +252,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (optional.isPresent()) {
             return Optional.of(withState(optional.get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -285,7 +285,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(newState, this.location, builder.build()));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -294,7 +294,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         for (ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
             final Optional<BlockSnapshot> optional = snapshot.with(manipulator);
             if (!optional.isPresent()) {
-                return Optional.absent();
+                return Optional.empty();
             }
             snapshot = optional.get();
         }
@@ -303,7 +303,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<BlockSnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -316,7 +316,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         BlockSnapshot merged = this;
         merged = merged.withState(function.merge(this.blockState, that.getState()));
         for (ImmutableDataManipulator<?, ?> manipulator : that.getContainers()) {
-            Optional<BlockSnapshot> optional = merged.with(function.merge(this.get(manipulator.getClass()).orNull(), manipulator));
+            Optional<BlockSnapshot> optional = merged.with(function.merge(this.get(manipulator.getClass()).orElse(null), manipulator));
             if (optional.isPresent()) {
                 merged = optional.get();
             }
@@ -334,18 +334,18 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((E) this.keyValueMap.get(key).get());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Nullable
     @Override
     public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orNull();
+        return get(key).orElse(null);
     }
 
     @Override
     public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).or(defaultValue);
+        return get(key).orElse(defaultValue);
     }
 
     @Override
@@ -353,7 +353,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((V) this.keyValueMap.get(key).asMutable());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

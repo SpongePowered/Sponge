@@ -26,14 +26,13 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.plugin.PluginContainer;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -107,9 +106,9 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
         Cache(List<RegisteredListener<?>> listeners) {
             this.listeners = listeners;
 
-            this.listenersByOrder = Maps.newEnumMap(Order.class);
+            this.listenersByOrder = new EnumMap<>(Order.class);
             for (Order order : ORDERS) {
-                this.listenersByOrder.put(order, Lists.<RegisteredListener<?>>newArrayList());
+                this.listenersByOrder.put(order, new ArrayList<>());
             }
             for (RegisteredListener<?> handler : listeners) {
                 this.listenersByOrder.get(handler.getOrder()).add(handler);

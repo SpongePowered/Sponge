@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.service.scheduler;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.common.Sponge;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 abstract class SchedulerBase {
 
     // The simple queue of all pending (and running) ScheduledTasks
-    private final Map<UUID, ScheduledTask> taskMap = Maps.newConcurrentMap();
+    private final Map<UUID, ScheduledTask> taskMap = new ConcurrentHashMap<>();
     private long sequenceNumber = 0L;
     private final String taskNameFmt;
 
@@ -88,7 +88,7 @@ abstract class SchedulerBase {
 
     protected Set<Task> getScheduledTasks() {
         synchronized (this.taskMap) {
-            return Sets.<Task>newHashSet(this.taskMap.values());
+            return new HashSet<>(this.taskMap.values());
         }
     }
 

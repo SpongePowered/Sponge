@@ -59,7 +59,7 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
 
     @Override
     public ListValue<Text> constructValue(List<Text> defaultValue) {
-        return new SpongeListValue<Text>(Keys.SIGN_LINES, defaultValue);
+        return new SpongeListValue<>(Keys.SIGN_LINES, defaultValue);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, List<Text> value) {
-        final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<Text>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
+        final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
         if (container instanceof TileEntitySign) {
             final Optional<SignData> oldData = ((Sign) container).get(SignData.class);
             if (oldData.isPresent()) {
@@ -122,7 +122,8 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
                 final DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 final Optional<List<Text>> oldData = getValueFromContainer(container);
                 if (oldData.isPresent()) {
-                    final ImmutableListValue<Text> immutableListValue = new ImmutableSpongeListValue<Text>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
+                    final ImmutableListValue<Text> immutableListValue =
+                            new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
                     builder.replace(immutableListValue);
                 }
                 final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(((ItemStack) container));
@@ -145,7 +146,7 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
-                final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<Text>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
+                final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
                 builder.replace(immutableTexts);
             }
             try {
@@ -164,7 +165,8 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
                 final DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 final Optional<List<Text>> oldData = getValueFromContainer(container);
                 if (oldData.isPresent()) {
-                    final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<Text>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
+                    final ImmutableListValue<Text> immutableTexts =
+                            new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
                     builder.replace(immutableTexts);
                 }
                 if (!((ItemStack) container).hasTagCompound()) {

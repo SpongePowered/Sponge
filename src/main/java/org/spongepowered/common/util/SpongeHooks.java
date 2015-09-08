@@ -59,7 +59,7 @@ public class SpongeHooks {
     public static int tickingDimension = 0;
     public static ChunkCoordIntPair tickingChunk = null;
 
-    private static TObjectLongHashMap<CollisionWarning> recentWarnings = new TObjectLongHashMap<CollisionWarning>();
+    private static TObjectLongHashMap<CollisionWarning> recentWarnings = new TObjectLongHashMap<>();
 
     public static void logInfo(String msg, Object... args) {
         MinecraftServer.getServer().logInfo(MessageFormat.format(msg, args));

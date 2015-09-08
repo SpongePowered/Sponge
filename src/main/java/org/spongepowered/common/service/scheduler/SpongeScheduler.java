@@ -35,6 +35,7 @@ import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.service.scheduler.TaskBuilder;
 import org.spongepowered.common.Sponge;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class SpongeScheduler implements SchedulerService {
 
     @Override
     public Set<Task> getScheduledTasks() {
-        Set<Task> allTasks = Sets.newHashSet();
+        Set<Task> allTasks = new HashSet<>();
         allTasks.addAll(this.asyncScheduler.getScheduledTasks());
         allTasks.addAll(this.syncScheduler.getScheduledTasks());
         return allTasks;
@@ -125,7 +126,7 @@ public class SpongeScheduler implements SchedulerService {
 
     @Override
     public SpongeExecutorService createSyncExecutor(Object plugin) {
-        return new SchedulerExecutionService(() -> createTaskBuilder(), checkPluginInstance(plugin).getInstance());
+        return new SchedulerExecutionService(this::createTaskBuilder, checkPluginInstance(plugin).getInstance());
     }
 
     @Override

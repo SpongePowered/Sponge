@@ -53,7 +53,7 @@ public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectio
 
     @Override
     public WeightedEntityCollectionValue filter(Predicate<? super WeightedEntity> predicate) {
-        final WeightedCollection<WeightedEntity> collection = new WeightedCollection<WeightedEntity>();
+        final WeightedCollection<WeightedEntity> collection = new WeightedCollection<>();
         for (WeightedEntity entity : this.actualValue) {
             if (checkNotNull(predicate).test(entity)) {
                 collection.add(entity);
@@ -64,7 +64,7 @@ public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectio
 
     @Override
     public WeightedCollection<WeightedEntity> getAll() {
-        final WeightedCollection<WeightedEntity> collection = new WeightedCollection<WeightedEntity>();
+        final WeightedCollection<WeightedEntity> collection = new WeightedCollection<>();
         for (WeightedEntity entity : this.actualValue) {
             collection.add(entity);
         }

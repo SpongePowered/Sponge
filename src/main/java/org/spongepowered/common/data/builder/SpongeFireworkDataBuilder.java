@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.FireworkEffect;
@@ -38,6 +37,7 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,12 +62,12 @@ public class SpongeFireworkDataBuilder implements DataBuilder<FireworkEffect> {
         String type = container.getString(TYPE).get();
         FireworkShape shape = FireworkShapes.BALL; // TODO, need to add getFireworkShape to GameRegistry...
         List<Integer> intColors = container.getIntegerList(COLORS).get();
-        List<Color> colors = Lists.newArrayList();
+        List<Color> colors = new ArrayList<>();
         for (int colorInt : intColors) {
             colors.add(new Color(colorInt));
         }
         List<Integer> intFades = container.getIntegerList(FADES).get();
-        List<Color> fades = Lists.newArrayList();
+        List<Color> fades = new ArrayList<>();
         for (int fadeInt : intFades) {
             fades.add(new Color(fadeInt));
         }

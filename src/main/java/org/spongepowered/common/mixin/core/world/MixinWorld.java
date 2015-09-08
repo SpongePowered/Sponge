@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -150,6 +148,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -184,7 +183,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
-            Predicate<net.minecraft.entity.Entity> filter);
+            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
@@ -205,11 +204,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!client) {
             String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
             this.worldConfig =
-                    new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD,
+                    new SpongeConfig<>(SpongeConfig.Type.WORLD,
                             new File(Sponge.getModConfigDirectory() + File.separator + "worlds" + File.separator
                                     + providerName + File.separator
                                     + (providerIn.getDimensionId() == 0 ? "DIM0" :
-                                            Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
+                                    Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
                                     , "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
 
@@ -252,7 +251,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Location<World> getLocation(Vector3i position) {
-        return new Location<World>(this, position);
+        return new Location<>(this, position);
     }
 
     @Override
@@ -262,7 +261,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Location<World> getLocation(Vector3d position) {
-        return new Location<World>(this, position);
+        return new Location<>(this, position);
     }
 
     @Override
@@ -342,8 +341,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // This already returns a new copy
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class, (Predicate<net.minecraft.entity.Entity>) (Object)
-            filter);
+        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class, ent -> filter.test((Entity) ent));
     }
 
     @Override
@@ -655,7 +653,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Location<World> getSpawnLocation() {
-        return new Location<World>(this, this.worldInfo.getSpawnX(), this.worldInfo.getSpawnY(), this.worldInfo.getSpawnZ());
+        return new Location<>(this, this.worldInfo.getSpawnX(), this.worldInfo.getSpawnY(), this.worldInfo.getSpawnZ());
     }
 
     @Override
@@ -777,7 +775,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @SuppressWarnings("unchecked")
     private List<Player> getPlayers() {
-        return ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, Predicates.alwaysTrue());
+        return ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, input -> true);
     }
 
     @Override
@@ -874,7 +872,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
-        return Lists.newArrayList(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
+        return Lists.newArrayList(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter::test));
     }
 
     @Override
@@ -925,9 +923,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         BlockState state = world.getBlock(x, y, z);
         Optional<TileEntity> te = world.getTileEntity(x, y, z);
         if (te.isPresent()) {
-            return new SpongeBlockSnapshot(state, new Location<World>(this, x, y, z), te.get());
+            return new SpongeBlockSnapshot(state, new Location<>(this, x, y, z), te.get());
         }
-        return new SpongeBlockSnapshot(state, new Location<World>((World) this, x, y, z),
+        return new SpongeBlockSnapshot(state, new Location<>((World) this, x, y, z),
                 ImmutableList.<ImmutableDataManipulator<?, ?>>of());
     }
 
@@ -944,7 +942,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return false;
         }
 
-        snapshot.withLocation(new Location<World>(this, new Vector3i(x, y, z)));
+        snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, notifyNeighbors);
     }
 

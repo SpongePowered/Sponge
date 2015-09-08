@@ -73,7 +73,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
 
     @Override
     public ListValue<Text> lines() {
-        return new SpongeListValue<Text>(Keys.SIGN_LINES, Lists.newArrayList(this.lines));
+        return new SpongeListValue<>(Keys.SIGN_LINES, Lists.newArrayList(this.lines));
     }
 
     @Override

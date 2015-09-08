@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.Predicate;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -67,6 +66,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Used to setup the ecosystem.
@@ -96,13 +96,7 @@ public final class SpongeBootstrap {
         registerService(ConfigService.class, new SpongeConfigService(Sponge.getGame().getPluginManager()));
         registerService(UserStorage.class, new SpongeUserStorage());
         registerService(GameProfileResolver.class, new SpongeProfileResolver());
-        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new Predicate<PermissionService>() {
-            @Override
-            public boolean apply(PermissionService input) {
-                Sponge.getGame().getServer().getConsole().getContainingCollection();
-                return true;
-            }
-        });
+        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(input -> Sponge.getGame().getServer().getConsole().getContainingCollection());
     }
 
     private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {

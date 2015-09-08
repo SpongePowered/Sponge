@@ -30,7 +30,6 @@ import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -60,6 +59,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IMixinEntity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -89,7 +89,7 @@ public class EntityHuman extends EntityCreature {
             });
 
     // A queue of packets waiting to send to players tracking this human
-    private final Map<UUID, List<Packet[]>> playerPacketMap = Maps.newHashMap();
+    private final Map<UUID, List<Packet[]>> playerPacketMap = new HashMap<>();
 
     private GameProfile fakeProfile;
     private UUID skinUuid;
@@ -334,7 +334,7 @@ public class EntityHuman extends EntityCreature {
         if (this.skinUuid == null) {
             return Optional.empty();
         }
-        return Optional.of(manipulator.set(new SpongeValue<UUID>(Keys.SKIN, this.skinUuid)));
+        return Optional.of(manipulator.set(new SpongeValue<>(Keys.SKIN, this.skinUuid)));
     }
 
     private boolean isAliveAndInWorld() {
@@ -425,7 +425,7 @@ public class EntityHuman extends EntityCreature {
     public void pushPackets(EntityPlayerMP player, Packet... packets) {
         List<Packet[]> queue = this.playerPacketMap.get(player);
         if (queue == null) {
-            this.playerPacketMap.put(player == null ? null : player.getUniqueID(), queue = new ArrayList<Packet[]>());
+            this.playerPacketMap.put(player == null ? null : player.getUniqueID(), queue = new ArrayList<>());
         }
         queue.add(packets);
     }

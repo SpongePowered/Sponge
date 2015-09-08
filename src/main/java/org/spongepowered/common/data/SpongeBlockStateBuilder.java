@@ -26,7 +26,6 @@ package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
@@ -37,6 +36,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     @Override
     public BlockStateBuilder from(BlockState holder) {
         this.blockType = holder.getType();
-        this.manipulators = Lists.newArrayList();
+        this.manipulators = new ArrayList<>();
         this.manipulators.addAll(holder.getManipulators());
         return this;
     }
@@ -74,7 +74,7 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     @Override
     public BlockStateBuilder reset() {
         this.blockType = BlockTypes.STONE;
-        this.manipulators = Lists.newArrayList();
+        this.manipulators = new ArrayList<>();
         return this;
     }
 

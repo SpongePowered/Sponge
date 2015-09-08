@@ -47,7 +47,7 @@ public class SpongeDirectionalData extends AbstractSingleEnumData<Direction, Dir
 
     @Override
     public Value<Direction> direction() {
-        return new SpongeValue<Direction>(Keys.DIRECTION, Direction.NONE, this.getValue());
+        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.getValue());
     }
 
     @Override

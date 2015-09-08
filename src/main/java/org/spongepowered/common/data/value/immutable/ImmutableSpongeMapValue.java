@@ -30,13 +30,13 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -63,7 +63,7 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
 
     @Override
     public MapValue<K, V> asMutable() {
-        final Map<K, V> map = Maps.newHashMap();
+        final Map<K, V> map = new HashMap<>();
         map.putAll(this.actualValue);
         return new SpongeMapValue<>(getKey(), map);
     }

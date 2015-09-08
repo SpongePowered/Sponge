@@ -25,9 +25,7 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -45,6 +43,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -54,13 +53,13 @@ import javax.annotation.Nullable;
 
 public class SpongeScoreboard implements Scoreboard {
 
-    private Map<String, Objective> objectives = Maps.newHashMap();
-    private Map<DisplaySlot, Objective> displaySlots = Maps.newHashMap();
+    private Map<String, Objective> objectives = new HashMap<>();
+    private Map<DisplaySlot, Objective> displaySlots = new HashMap<>();
     private Multimap<Criterion, Objective> criteria = HashMultimap.create();
-    private Map<String, Team> teams = Maps.newHashMap();
-    private Map<Text, Team> memberTeams = Maps.newHashMap();
+    private Map<String, Team> teams = new HashMap<>();
+    private Map<Text, Team> memberTeams = new HashMap<>();
 
-    public Set<net.minecraft.scoreboard.Scoreboard> scoreboards = Sets.newHashSet();
+    public Set<net.minecraft.scoreboard.Scoreboard> scoreboards = new HashSet<>();
 
     private net.minecraft.scoreboard.Scoreboard playerScoreboard = new ServerScoreboard(MinecraftServer.getServer());
 
@@ -123,7 +122,7 @@ public class SpongeScoreboard implements Scoreboard {
 
     @Override
     public Set<Objective> getObjectivesByCriteria(Criterion criteria) {
-        return new HashSet<Objective>(this.criteria.get(criteria));
+        return new HashSet<>(this.criteria.get(criteria));
     }
 
     @Override
@@ -149,7 +148,7 @@ public class SpongeScoreboard implements Scoreboard {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<Score> getScores(Text name) {
-        HashSet scores = Sets.newHashSet();
+        HashSet scores = new HashSet<>();
         for (Objective objective: this.objectives.values()) {
             if (objective.getScores().containsKey(name)) {
                 scores.add(objective.getScore(name));
@@ -207,7 +206,7 @@ public class SpongeScoreboard implements Scoreboard {
         this.removeTeamInternal(team);
         this.teams.remove(team.getName());
 
-        Set<Text> keysToRemove = Sets.newHashSet();
+        Set<Text> keysToRemove = new HashSet<>();
 
         for (Map.Entry<Text, Team> userTeam: this.memberTeams.entrySet()) {
             if (team.equals(userTeam.getValue())) {

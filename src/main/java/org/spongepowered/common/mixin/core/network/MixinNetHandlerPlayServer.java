@@ -277,7 +277,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             }
 
             Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-            Location<World> to = new Location<World>(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
+            Location<World> to = new Location<>(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             boolean rotationOnly = !packetIn.isMoving() && packetIn.getRotating();
@@ -353,7 +353,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         Text message = SpongeTexts.toText(this.tmpQuitMessage);
         Text newMessage = Texts.of(message);
         Player player = (Player) this.playerEntity;
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
         sources.add(player);
         MessageSink originalSink = MessageSinks.to(sources);
         ClientConnectionEvent.Disconnect event =

@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import com.google.common.collect.Lists;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -39,8 +37,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinSubject;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntitySign.class)
@@ -56,7 +54,7 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        List<String> lines = Lists.newArrayList();
+        List<String> lines = new ArrayList<>();
         for (IChatComponent line : this.signText) {
             lines.add(IChatComponent.Serializer.componentToJson(line));
         }

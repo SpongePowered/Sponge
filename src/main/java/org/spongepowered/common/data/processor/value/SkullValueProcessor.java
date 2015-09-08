@@ -49,7 +49,7 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
 
     @Override
     public Value<SkullType> constructValue(SkullType defaultValue) {
-        return new SpongeValue<SkullType>(Keys.SKULL_TYPE, SkullTypes.SKELETON, defaultValue);
+        return new SpongeValue<>(Keys.SKULL_TYPE, SkullTypes.SKELETON, defaultValue);
     }
 
     @Override

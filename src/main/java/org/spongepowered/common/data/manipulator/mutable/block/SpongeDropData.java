@@ -40,7 +40,7 @@ public class SpongeDropData extends AbstractBooleanData<DropData, ImmutableDropD
 
     @Override
     public Value<Boolean> willDrop() {
-        return new SpongeValue<Boolean>(Keys.SHOULD_DROP, this.getValue());
+        return new SpongeValue<>(Keys.SHOULD_DROP, this.getValue());
     }
 
     @Override

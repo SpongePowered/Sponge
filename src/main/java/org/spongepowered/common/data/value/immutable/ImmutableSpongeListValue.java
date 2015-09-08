@@ -28,13 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.Function;
@@ -49,29 +49,29 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
 
     @Override
     public ImmutableListValue<E> with(List<E> value) {
-        return new ImmutableSpongeListValue<E>(getKey(), ImmutableList.copyOf(checkNotNull(value)));
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(checkNotNull(value)));
     }
 
     @Override
     public ImmutableListValue<E> transform(Function<List<E>, List<E>> function) {
-        return new ImmutableSpongeListValue<E>(getKey(), ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
     }
 
     @Override
     public ListValue<E> asMutable() {
-        final List<E> list = Lists.newArrayList();
+        final List<E> list = new ArrayList<>();
         list.addAll(this.actualValue);
-        return new SpongeListValue<E>(getKey(), list);
+        return new SpongeListValue<>(getKey(), list);
     }
 
     @Override
-    public ImmutableListValue<E> with(Iterable<E> elements) {
-        return new ImmutableSpongeListValue<E>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).addAll(elements).build());
+    public ImmutableListValue<E> with(E... elements) {
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
     public ImmutableListValue<E> withAll(Iterable<E> elements) {
-        return new ImmutableSpongeListValue<E>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).addAll(elements).build());
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(existingElement);
             }
         }
-        return new ImmutableSpongeListValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(existingElement);
             }
         }
-        return new ImmutableSpongeListValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
     }
 
     @Override
@@ -104,12 +104,12 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(existing);
             }
         }
-        return new ImmutableSpongeListValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
     }
 
     @Override
     public List<E> getAll() {
-        final List<E> list = Lists.newArrayList();
+        final List<E> list = new ArrayList<>();
         list.addAll(this.actualValue);
         return list;
     }
@@ -130,7 +130,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongeListValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
     }
 
     @Override
@@ -142,7 +142,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
             }
             builder.add(iterator.next());
         }
-        return new ImmutableSpongeListValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
     }
 
     @Override
@@ -153,7 +153,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongeListValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
     }
 
     @Override
@@ -167,7 +167,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongeListValue<E>(getKey(), builder.build());
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
     }
 
     @Override

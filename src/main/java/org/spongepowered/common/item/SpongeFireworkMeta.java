@@ -27,13 +27,13 @@ package org.spongepowered.common.item;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SpongeFireworkMeta implements FireworkEffect {
@@ -79,11 +79,11 @@ public class SpongeFireworkMeta implements FireworkEffect {
 
     @Override
     public DataContainer toContainer() {
-        List<Integer> colors = Lists.newArrayList();
+        List<Integer> colors = new ArrayList<>();
         for (Color color : this.colors) {
             colors.add(color.getRGB());
         }
-        List<Integer> fades = Lists.newArrayList();
+        List<Integer> fades = new ArrayList<>();
         for (Color color : this.fades) {
             fades.add(color.getRGB());
         }

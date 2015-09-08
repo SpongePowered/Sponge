@@ -104,26 +104,26 @@ public class HealthDataProcessor extends AbstractSpongeDataProcessor<HealthData,
 
             try {
                 builder.replace(
-                    new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, prevHealth, prevMaxHealth, doubleComparator(), 0D, prevMaxHealth),
-                    new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, prevMaxHealth, prevMaxHealth, doubleComparator(), 1D,
-                                                            (double) Float.MAX_VALUE));
+                        new ImmutableSpongeBoundedValue<>(Keys.HEALTH, prevHealth, prevMaxHealth, doubleComparator(), 0D, prevMaxHealth),
+                        new ImmutableSpongeBoundedValue<>(Keys.MAX_HEALTH, prevMaxHealth, prevMaxHealth, doubleComparator(), 1D,
+                                (double) Float.MAX_VALUE));
                 livingBase.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(newMaxHealth);
                 livingBase.setHealth(newHealth);
                 builder.success(
-                    new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, (double) newMaxHealth, (double) newMaxHealth, doubleComparator(), 1D,
-                                                            (double) Float.MAX_VALUE),
-                    new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, (double) newHealth, (double) newHealth, doubleComparator(), 0D,
-                                                            (double) Float.MAX_VALUE))
+                        new ImmutableSpongeBoundedValue<>(Keys.MAX_HEALTH, (double) newMaxHealth, (double) newMaxHealth, doubleComparator(), 1D,
+                                (double) Float.MAX_VALUE),
+                        new ImmutableSpongeBoundedValue<>(Keys.HEALTH, (double) newHealth, (double) newHealth, doubleComparator(), 0D,
+                                (double) Float.MAX_VALUE))
                     .result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
             } catch (Exception e) {
                 livingBase.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(prevMaxHealth);
                 livingBase.setHealth((float) prevHealth);
                 builder.reject(
-                    new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, (double) newMaxHealth, (double) newMaxHealth, doubleComparator(), 1D,
-                                                            (double) Float.MAX_VALUE),
-                    new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, (double) newHealth, (double) newHealth, doubleComparator(), 0D,
-                                                            (double) Float.MAX_VALUE))
+                        new ImmutableSpongeBoundedValue<>(Keys.MAX_HEALTH, (double) newMaxHealth, (double) newMaxHealth, doubleComparator(), 1D,
+                                (double) Float.MAX_VALUE),
+                        new ImmutableSpongeBoundedValue<>(Keys.HEALTH, (double) newHealth, (double) newHealth, doubleComparator(), 0D,
+                                (double) Float.MAX_VALUE))
                     .result(DataTransactionResult.Type.ERROR);
                 return builder.build();
             }

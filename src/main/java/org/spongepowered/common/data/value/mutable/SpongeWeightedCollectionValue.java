@@ -42,11 +42,11 @@ public abstract class SpongeWeightedCollectionValue<E extends WeightedObject<?>,
     implements WeightedCollectionValue<E, V, I> {
 
     public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<E>>> key) {
-        super(key, new WeightedCollection<E>());
+        super(key, new WeightedCollection<>());
     }
 
     public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<E>>> key, WeightedCollection<E> actualValue) {
-        super(key, new WeightedCollection<E>(), actualValue);
+        super(key, new WeightedCollection<>(), actualValue);
     }
 
     @Nullable

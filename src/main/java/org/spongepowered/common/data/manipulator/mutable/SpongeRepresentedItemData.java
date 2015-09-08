@@ -43,7 +43,7 @@ public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnaps
 
     @Override
     public Value<ItemStackSnapshot> item() {
-        return new SpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, this.getValue());
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, this.getValue());
     }
 
     @Override

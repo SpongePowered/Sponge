@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.key.Key;
@@ -45,6 +44,7 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -98,9 +98,9 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     // The largest issue was implementation. Since most fields are simple to get and
     // set, other values, such as ItemStacks require a bit of finer tuning.
     //
-    private final Map<Key<?>, GetterFunction<Value<?>>> keyValueMap = Maps.newHashMap();
-    private final Map<Key<?>, GetterFunction<?>> keyFieldGetterMap = Maps.newHashMap();
-    private final Map<Key<?>, SetterFunction<Object>> keyFieldSetterMap = Maps.newHashMap();
+    private final Map<Key<?>, GetterFunction<Value<?>>> keyValueMap = new HashMap<>();
+    private final Map<Key<?>, GetterFunction<?>> keyFieldGetterMap = new HashMap<>();
+    private final Map<Key<?>, SetterFunction<Object>> keyFieldSetterMap = new HashMap<>();
 
     protected AbstractData(Class<M> manipulatorClass) {
         this.manipulatorClass = checkNotNull(manipulatorClass);

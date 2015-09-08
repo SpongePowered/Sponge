@@ -62,7 +62,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                 TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;
     protected final ICommand command;
-    private static final ThreadLocal<Throwable> commandErrors = new ThreadLocal<Throwable>();
+    private static final ThreadLocal<Throwable> commandErrors = new ThreadLocal<>();
     // This differs from null in that null means "not active".
     private static final Exception noError = new Exception();
 
@@ -181,7 +181,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             usage = translation.get(Locale.getDefault());
         }
 
-        List<String> parts = new ArrayList<String>(Arrays.asList(usage.split(" ")));
+        List<String> parts = new ArrayList<>(Arrays.asList(usage.split(" ")));
         parts.removeAll(Collections.singleton("/" + command.getCommandName()));
         StringBuilder out = new StringBuilder();
         for (String s : parts) {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.user;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -47,6 +46,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -55,7 +55,7 @@ import java.util.UUID;
 
 class UserDiscoverer {
 
-    private static final Map<UUID, User> userCache = Maps.newHashMap();
+    private static final Map<UUID, User> userCache = new HashMap<>();
 
     static User create(com.mojang.authlib.GameProfile profile) {
         User user = (User) new SpongeUser(profile);
@@ -107,7 +107,7 @@ class UserDiscoverer {
 
     @SuppressWarnings("unchecked")
     static Collection<org.spongepowered.api.GameProfile> getAllProfiles() {
-        Set<org.spongepowered.api.GameProfile> profiles = Sets.newHashSet();
+        Set<org.spongepowered.api.GameProfile> profiles = new HashSet<>();
 
         // Add all cached profiles
         for (User user : userCache.values()) {

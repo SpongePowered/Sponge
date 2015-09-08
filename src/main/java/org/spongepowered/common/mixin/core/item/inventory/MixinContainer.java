@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import com.google.common.collect.Lists;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -32,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NonnullByDefault
@@ -40,7 +40,7 @@ public abstract class MixinContainer {
 
     @SuppressWarnings("rawtypes")
     @Shadow
-    protected List crafters = Lists.newArrayList();
+    protected List crafters = new ArrayList<>();
 
     @SuppressWarnings("rawtypes")
     @Shadow

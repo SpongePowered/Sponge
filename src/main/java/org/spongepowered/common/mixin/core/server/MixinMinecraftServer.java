@@ -271,7 +271,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.convertMapIfNeeded(overworldFolder);
         this.setUserMessage("menu.loadingLevel");
 
-        List<Integer> idList = new LinkedList<Integer>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
+        List<Integer> idList = new LinkedList<>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
         idList.remove(Integer.valueOf(0));
         idList.add(0, 0); // load overworld first
         for (int dim : idList) {
@@ -552,7 +552,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Collection<World> getWorlds() {
-        List<World> worlds = new ArrayList<World>();
+        List<World> worlds = new ArrayList<>();
         for (WorldServer worldServer : DimensionManager.getWorlds()) {
             worlds.add((World) worldServer);
         }

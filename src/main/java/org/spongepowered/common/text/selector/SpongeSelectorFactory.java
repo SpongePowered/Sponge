@@ -26,12 +26,8 @@ package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import net.minecraft.command.PlayerSelector;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.selector.Argument;
@@ -51,9 +47,13 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 @NonnullByDefault
 public class SpongeSelectorFactory implements SelectorFactory {
@@ -75,25 +75,19 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public static <K, V> Function<K, V> methodAsFunction(final Method m,
             boolean isStatic) {
         if (isStatic) {
-            return new Function<K, V>() {
-
-                @SuppressWarnings("unchecked")
-                @Override
-                public V apply(K input) {
-                    try {
-                        return (V) m.invoke(null, input);
-                    } catch (IllegalAccessException e) {
-                        Sponge.getLogger().debug(m + " wasn't public", e);
-                        return null;
-                    } catch (IllegalArgumentException e) {
-                        Sponge.getLogger()
-                                .debug(m + " failed with paramter " + input, e);
-                        return null;
-                    } catch (InvocationTargetException e) {
-                        throw Throwables.propagate(e.getCause());
-                    }
+            return input -> {
+                try {
+                    return (V) m.invoke(null, input);
+                } catch (IllegalAccessException e) {
+                    Sponge.getLogger().debug(m + " wasn't public", e);
+                    return null;
+                } catch (IllegalArgumentException e) {
+                    Sponge.getLogger()
+                            .debug(m + " failed with paramter " + input, e);
+                    return null;
+                } catch (InvocationTargetException e) {
+                    throw Throwables.propagate(e.getCause());
                 }
-
             };
         } else {
             return new Function<K, V>() {
@@ -125,9 +119,8 @@ public class SpongeSelectorFactory implements SelectorFactory {
     }
 
     private final Map<String, ArgumentHolder.Limit<ArgumentType<Integer>>> scoreToTypeMap =
-            Maps.newLinkedHashMap();
-    private final Map<String, ArgumentType<?>> argumentLookupMap = Maps
-            .newLinkedHashMap();
+            new LinkedHashMap<>();
+    private final Map<String, ArgumentType<?>> argumentLookupMap = new LinkedHashMap<>();
 
     @Override
     public SelectorBuilder createBuilder(SelectorType type) {
@@ -182,7 +175,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                     Score.class.getName());
             this.scoreToTypeMap
                     .put(name,
-                            new SpongeArgumentHolder.SpongeLimit<ArgumentType<Integer>>(
+                            new SpongeArgumentHolder.SpongeLimit<>(
                                     min, max));
         }
         return this.scoreToTypeMap.get(name);
@@ -190,7 +183,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
 
     @Override
     public Optional<ArgumentType<?>> getArgumentType(String name) {
-        return recast(Optional.fromNullable(this.argumentLookupMap.get(name)));
+        return recast(Optional.ofNullable(this.argumentLookupMap.get(name)));
     }
 
     @Override
@@ -213,7 +206,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public <T> SpongeArgumentType<T> createArgumentType(String key,
             Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
-            this.argumentLookupMap.put(key, new SpongeArgumentType<T>(key,
+            this.argumentLookupMap.put(key, new SpongeArgumentType<>(key,
                     type, converterKey));
         }
         return (SpongeArgumentType<T>) this.argumentLookupMap.get(key);
@@ -234,7 +227,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
             String key, Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
             this.argumentLookupMap.put(key,
-                    new SpongeArgumentType.Invertible<T>(key, type,
+                    new SpongeArgumentType.Invertible<>(key, type,
                             converterKey));
         }
         return (SpongeArgumentType.Invertible<T>) this.argumentLookupMap
@@ -247,20 +240,20 @@ public class SpongeSelectorFactory implements SelectorFactory {
             return createArgument((ArgumentType.Invertible<T>) type, value,
                     false);
         }
-        return new SpongeArgument<T>(type, value);
+        return new SpongeArgument<>(type, value);
     }
 
     @Override
     public <T> Argument.Invertible<T> createArgument(
             ArgumentType.Invertible<T> type, T value, boolean inverted) {
-        return new SpongeArgument.Invertible<T>(type, value, inverted);
+        return new SpongeArgument.Invertible<>(type, value, inverted);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T, V> Set<Argument<T>> createArguments(
             ArgumentHolder<? extends ArgumentType<T>> type, V value) {
-        Set<Argument<T>> set = Sets.newLinkedHashSet();
+        Set<Argument<T>> set = new LinkedHashSet<>();
         if (type instanceof SpongeArgumentHolder.SpongeVector3) {
             Set<Function<V, T>> extractors =
                     ((SpongeArgumentHolder.SpongeVector3<V, T>) (Object) type)
@@ -289,7 +282,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public Map<ArgumentType<?>, Argument<?>> parseArguments(
             Map<String, String> argumentMap) {
         Map<ArgumentType<?>, Argument<?>> generated =
-                new HashMap<ArgumentType<?>, Argument<?>>(argumentMap.size());
+                new HashMap<>(argumentMap.size());
         for (Entry<String, String> argument : argumentMap.entrySet()) {
             String argKey = argument.getKey();
             SpongeArgumentType<Object> type = getArgumentTypeWithChecks(argKey);

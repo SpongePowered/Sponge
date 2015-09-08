@@ -55,7 +55,7 @@ public abstract class MixinEntityWither extends MixinEntityMob {
     }
 
     public List<Living> getTargets() {
-        List<Living> watchedTargets = new ArrayList<Living>();
+        List<Living> watchedTargets = new ArrayList<>();
         for (int i = 0; i < 2; ++i) {
             int j = this.getWatchedTargetId(i + 1);
             Entity entity = null;

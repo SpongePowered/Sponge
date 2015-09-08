@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.google.common.collect.Lists;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommand;
@@ -46,6 +45,7 @@ import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -54,8 +54,8 @@ import java.util.Optional;
 @Mixin(ServerCommandManager.class)
 public abstract class MixinServerCommandManager extends CommandHandler implements IMixinServerCommandManager {
 
-    private List<MinecraftCommandWrapper> lowPriorityCommands = Lists.newArrayList();
-    private List<MinecraftCommandWrapper> earlyRegisterCommands = Lists.newArrayList();
+    private List<MinecraftCommandWrapper> lowPriorityCommands = new ArrayList<>();
+    private List<MinecraftCommandWrapper> earlyRegisterCommands = new ArrayList<>();
 
     private void updateStat(ICommandSender sender, CommandResultStats.Type type, Optional<Integer> count) {
         if (count.isPresent()) {

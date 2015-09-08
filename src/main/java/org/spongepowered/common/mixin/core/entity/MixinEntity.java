@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.Lists;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -64,6 +63,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -167,7 +167,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<World>((World) this.worldObj, getPosition());
+        return new Location<>((World) this.worldObj, getPosition());
     }
 
     @Override
@@ -218,7 +218,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
         // detach passengers
         net.minecraft.entity.Entity passenger = thisEntity.riddenByEntity;
-        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<net.minecraft.entity.Entity>();
+        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<>();
         while (passenger != null) {
             if (passenger instanceof EntityPlayerMP && !this.worldObj.isRemote) {
                 ((EntityPlayerMP) passenger).mountEntity(null);
@@ -358,7 +358,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Transform<World> getTransform() {
-        return new SpongeTransform<World>(getWorld(), getPosition(), getRotation(), getScale());
+        return new SpongeTransform<>(getWorld(), getPosition(), getRotation(), getScale());
     }
 
     @Override
@@ -375,7 +375,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             if (props.get().isEnabled()) {
                 Optional<World> world = Sponge.getGame().getServer().loadWorld(worldName);
                 if (world.isPresent()) {
-                    Location<World> location = new Location<World>(world.get(), position);
+                    Location<World> location = new Location<>(world.get(), position);
                     return setLocationSafely(location);
                 }
             }
@@ -640,6 +640,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return Lists.newArrayList(); // TODO figure this one out.
+        return new ArrayList<>(); // TODO figure this one out.
     }
 }

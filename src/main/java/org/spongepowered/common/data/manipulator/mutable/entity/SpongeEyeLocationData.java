@@ -62,12 +62,12 @@ public class SpongeEyeLocationData extends AbstractData<EyeLocationData, Immutab
 
     @Override
     public Value<Double> eyeHeight() {
-        return new SpongeValue<Double>(Keys.EYE_HEIGHT, 0d, this.eyeHeight);
+        return new SpongeValue<>(Keys.EYE_HEIGHT, 0d, this.eyeHeight);
     }
 
     @Override
     public Value<Vector3d> eyeLocation() {
-        return new SpongeValue<Vector3d>(Keys.EYE_LOCATION, this.entityLocation, this.eyeLocation);
+        return new SpongeValue<>(Keys.EYE_LOCATION, this.entityLocation, this.eyeLocation);
     }
 
     @Override

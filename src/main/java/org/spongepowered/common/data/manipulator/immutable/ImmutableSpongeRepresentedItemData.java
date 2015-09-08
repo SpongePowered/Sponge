@@ -41,7 +41,7 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableSingleD
 
     @Override
     public ImmutableValue<ItemStackSnapshot> item() {
-        return new ImmutableSpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, this.value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, this.value);
     }
 
     @Override

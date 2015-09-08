@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -45,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinTileEntity;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @NonnullByDefault
@@ -59,7 +59,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<World>((World) this.worldObj, VecHelper.toVector(this.getPos()));
+        return new Location<>((World) this.worldObj, VecHelper.toVector(this.getPos()));
     }
 
     @Override
@@ -139,6 +139,6 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return Lists.newArrayList(); // TODO override this in subclasses
+        return new ArrayList<>(); // TODO override this in subclasses
     }
 }

@@ -55,7 +55,7 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     @Override
     public ImmutableMapValue<Direction, WireAttachmentType> wireAttachments() {
-        return new ImmutableSpongeMapValue<Direction, WireAttachmentType>(Keys.WIRE_ATTACHMENTS, this.wireAttachmentMap);
+        return new ImmutableSpongeMapValue<>(Keys.WIRE_ATTACHMENTS, this.wireAttachmentMap);
     }
 
     @Override

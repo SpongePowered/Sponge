@@ -290,7 +290,7 @@ public abstract class MixinServerConfigurationManager {
             ((IMixinEntityPlayerMP) playerIn).reset();
         }
         playerIn.setSneaking(false);
-        Transform<World> toTransform = new SpongeTransform<World>(location);
+        Transform<World> toTransform = new SpongeTransform<>(location);
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
@@ -384,7 +384,7 @@ public abstract class MixinServerConfigurationManager {
         if (spawnPos == null) {
             spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
         }
-        return new Location<World>((World) targetWorld, spawnPos);
+        return new Location<>((World) targetWorld, spawnPos);
     }
 
     @Overwrite

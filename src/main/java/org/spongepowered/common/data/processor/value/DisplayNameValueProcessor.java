@@ -56,7 +56,7 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
 
     @Override
     public Value<Text> constructValue(Text defaultValue) {
-        return new SpongeValue<Text>(Keys.DISPLAY_NAME, defaultValue);
+        return new SpongeValue<>(Keys.DISPLAY_NAME, defaultValue);
     }
 
     @Override
@@ -101,11 +101,11 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
                 if (optional.isPresent()) {
                     builder.replace(optional.get().asImmutable());
                 }
-                return builder.success(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, value))
+                return builder.success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, value))
                         .result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
                 Sponge.getLogger().error("There was an issue trying to replace the display name of an entity!", e);
-                return DataTransactionBuilder.errorResult(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, value));
+                return DataTransactionBuilder.errorResult(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, value));
             }
         } else if (container instanceof ItemStack) {
             final String legacy = Texts.legacy().to(value);
@@ -116,11 +116,11 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
                 if (optional.isPresent()) {
                     builder.replace(optional.get().asImmutable());
                 }
-                return builder.success(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, value))
+                return builder.success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, value))
                         .result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
                 Sponge.getLogger().error("There was an issue trying to replace the display name of an itemstack!", e);
-                return DataTransactionBuilder.errorResult(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, value));
+                return DataTransactionBuilder.errorResult(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, value));
             }
         } else if (container instanceof IMixinCustomNameable) {
             final String legacy = Texts.legacy().to(value);
@@ -131,14 +131,14 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
                 if (optional.isPresent()) {
                     builder.replace(optional.get().asImmutable());
                 }
-                return builder.success(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, value))
+                return builder.success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, value))
                         .result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
                 Sponge.getLogger().error("There was an issue trying to replace the display name of an itemstack!", e);
-                return DataTransactionBuilder.errorResult(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, value));
+                return DataTransactionBuilder.errorResult(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, value));
             }
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, value));
     }
 
     @Override
@@ -149,7 +149,7 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
             if (optional.isPresent()) {
                 try {
                     ((ItemStack) container).clearCustomName();
-                    return builder.replace(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, optional.get()))
+                    return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get()))
                             .result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
                     Sponge.getLogger().error("There was an issue removing the displayname from an itemstack!", e);
@@ -165,7 +165,7 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
                 try {
                     ((Entity) container).setCustomNameTag("");
                     ((Entity) container).setAlwaysRenderNameTag(false);
-                    return builder.replace(new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, optional.get()))
+                    return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get()))
                             .result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
                     Sponge.getLogger().error("There was an issue resetting the custom name on an entity!", e);

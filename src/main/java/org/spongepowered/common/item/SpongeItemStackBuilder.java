@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.item.ItemsHelper.validateData;
 
-import com.google.common.collect.Sets;
 import net.minecraft.item.Item;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -38,6 +37,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -81,7 +81,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
             throw new IllegalArgumentException("The item data is not compatible with the current item type!");
         } else {
             if (this.itemDataSet == null) {
-                this.itemDataSet = Sets.newHashSet();
+                this.itemDataSet = new HashSet<>();
             }
             this.itemDataSet.add(itemData);
             return this;
@@ -92,7 +92,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     public ItemStackBuilder fromItemStack(ItemStack itemStack) {
         checkNotNull(itemStack, "Item stack cannot be null");
         if (this.itemDataSet == null) {
-            this.itemDataSet = Sets.newHashSet();
+            this.itemDataSet = new HashSet<>();
         }
         // Assumes the item stack's values don't need to be validated
         this.type = itemStack.getItem();
@@ -107,7 +107,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         this.type = null;
         this.quantity = 1;
         this.maxQuantity = 64;
-        this.itemDataSet = Sets.newHashSet();
+        this.itemDataSet = new HashSet<>();
         return this;
     }
 

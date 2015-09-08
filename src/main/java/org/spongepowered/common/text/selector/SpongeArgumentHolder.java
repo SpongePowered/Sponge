@@ -28,18 +28,18 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.flowpowered.math.vector.Vector3l;
-import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
 import org.spongepowered.api.text.selector.ArgumentHolder;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 @NonnullByDefault
 public class SpongeArgumentHolder<T extends ArgumentHolder<?>> implements ArgumentHolder<T> {
@@ -76,7 +76,7 @@ public class SpongeArgumentHolder<T extends ArgumentHolder<?>> implements Argume
         static {
             List<Class<?>> vectors = Arrays.<Class<?>>asList(Vector3i.class, Vector3l.class, Vector3f.class, Vector3d.class);
             for (Class<?> vec : vectors) {
-                Set<Function<?, ?>> set = Sets.newLinkedHashSet();
+                Set<Function<?, ?>> set = new LinkedHashSet<>();
                 try {
                     set.add(SpongeSelectorFactory.methodAsFunction(vec.getDeclaredMethod("getX"), false));
                     set.add(SpongeSelectorFactory.methodAsFunction(vec.getDeclaredMethod("getY"), false));

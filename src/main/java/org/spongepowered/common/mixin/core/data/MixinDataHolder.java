@@ -44,7 +44,6 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 
 import java.util.Optional;
@@ -117,7 +116,7 @@ public abstract class MixinDataHolder implements DataHolder {
         return offer(valueContainer, MergeFunction.IGNORE_ALL);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
         final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(valueContainer.getClass());

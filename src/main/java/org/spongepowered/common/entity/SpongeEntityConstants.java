@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import com.google.common.collect.Maps;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
@@ -32,22 +31,23 @@ import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.SkeletonType;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class SpongeEntityConstants {
 
-    public static final Map<String, SkeletonType> SKELETON_TYPES = Maps.newHashMap();
-    public static final Map<Integer, SkeletonType> SKELETON_IDMAP = Maps.newHashMap();
-    public static final Map<String, OcelotType> OCELOT_TYPES = Maps.newHashMap();
-    public static final Map<Integer, OcelotType> OCELOT_IDMAP = Maps.newHashMap();
-    public static final Map<String, RabbitType> RABBIT_TYPES = Maps.newHashMap();
-    public static final Map<Integer, RabbitType> RABBIT_IDMAP = Maps.newHashMap();
-    public static final Map<String, HorseColor> HORSE_COLORS = Maps.newHashMap();
-    public static final Map<Integer, HorseColor> HORSE_COLOR_IDMAP = Maps.newHashMap();
-    public static final Map<String, HorseStyle> HORSE_STYLES = Maps.newHashMap();
-    public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = Maps.newHashMap();
-    public static final Map<String, HorseVariant> HORSE_VARIANTS = Maps.newHashMap();
-    public static final Map<Integer, HorseVariant> HORSE_VARIANT_IDMAP = Maps.newHashMap();
+    public static final Map<String, SkeletonType> SKELETON_TYPES = new HashMap<>();
+    public static final Map<Integer, SkeletonType> SKELETON_IDMAP = new HashMap<>();
+    public static final Map<String, OcelotType> OCELOT_TYPES = new HashMap<>();
+    public static final Map<Integer, OcelotType> OCELOT_IDMAP = new HashMap<>();
+    public static final Map<String, RabbitType> RABBIT_TYPES = new HashMap<>();
+    public static final Map<Integer, RabbitType> RABBIT_IDMAP = new HashMap<>();
+    public static final Map<String, HorseColor> HORSE_COLORS = new HashMap<>();
+    public static final Map<Integer, HorseColor> HORSE_COLOR_IDMAP = new HashMap<>();
+    public static final Map<String, HorseStyle> HORSE_STYLES = new HashMap<>();
+    public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = new HashMap<>();
+    public static final Map<String, HorseVariant> HORSE_VARIANTS = new HashMap<>();
+    public static final Map<Integer, HorseVariant> HORSE_VARIANT_IDMAP = new HashMap<>();
 
     // skeleton types
     public static final SpongeSkeletonType NORMAL_SKELETON = new SpongeSkeletonType(0, "NORMAL");

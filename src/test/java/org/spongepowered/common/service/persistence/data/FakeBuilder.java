@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.service.persistence.data;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+
+import java.util.Optional;
 
 public class FakeBuilder implements DataBuilder<FakeSerializable> {
 

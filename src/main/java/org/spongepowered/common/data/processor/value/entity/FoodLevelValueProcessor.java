@@ -46,7 +46,7 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Intege
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -72,11 +72,11 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Intege
             if (player.getFoodStats() != null) {
                 final Integer oldValue = player.getFoodStats().getFoodLevel();
                 player.getFoodStats().setFoodLevel(value);
-                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, value),
-                        new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, oldValue));
+                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.FOOD_LEVEL, value),
+                        new ImmutableSpongeValue<>(Keys.FOOD_LEVEL, oldValue));
             }
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.FOOD_LEVEL, value));
     }
 
     @Override

@@ -47,7 +47,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -71,10 +71,10 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
             final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
             final Integer oldValue = entity.getMaxAir();
             entity.setMaxAir(value);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, value),
-                    new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.MAX_AIR, value),
+                    new ImmutableSpongeValue<>(Keys.MAX_AIR, oldValue));
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.MAX_AIR, value));
     }
 
     @Override

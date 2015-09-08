@@ -51,7 +51,7 @@ public class EyeHeightValueProcessor extends AbstractSpongeValueProcessor<Double
 
     @Override
     public Value<Double> constructValue(Double defaultValue) {
-        return new SpongeValue<Double>(Keys.EYE_HEIGHT, defaultValue);
+        return new SpongeValue<>(Keys.EYE_HEIGHT, defaultValue);
     }
 
     @Override
@@ -69,10 +69,10 @@ public class EyeHeightValueProcessor extends AbstractSpongeValueProcessor<Double
             final Entity entity = (Entity) container;
             final Double oldValue = (double) entity.getEyeHeight();
             ((IMixinEntity) entity).setEyeHeight(value);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Double>(Keys.EYE_HEIGHT, value),
-                new ImmutableSpongeValue<Double>(Keys.EYE_HEIGHT, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.EYE_HEIGHT, value),
+                    new ImmutableSpongeValue<>(Keys.EYE_HEIGHT, oldValue));
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Double>(Keys.EYE_HEIGHT, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.EYE_HEIGHT, value));
     }
 
     @Override

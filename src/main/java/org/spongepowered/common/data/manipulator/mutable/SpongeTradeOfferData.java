@@ -27,7 +27,6 @@ package org.spongepowered.common.data.manipulator.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -40,13 +39,14 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SpongeTradeOfferData extends AbstractData<TradeOfferData, ImmutableTradeOfferData> implements TradeOfferData {
 
     public static final DataQuery OFFERS = of("Offers");
 
-    private List<TradeOffer> offers = Lists.newArrayList();
+    private List<TradeOffer> offers = new ArrayList<>();
 
     public SpongeTradeOfferData() {
         super(TradeOfferData.class);
@@ -97,7 +97,7 @@ public class SpongeTradeOfferData extends AbstractData<TradeOfferData, Immutable
 
     @Override
     public ListValue<TradeOffer> tradeOffers() {
-        return new SpongeListValue<TradeOffer>(Keys.TRADE_OFFERS, this.offers);
+        return new SpongeListValue<>(Keys.TRADE_OFFERS, this.offers);
     }
 
     @Override

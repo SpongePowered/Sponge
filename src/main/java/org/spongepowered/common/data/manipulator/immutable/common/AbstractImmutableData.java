@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -42,6 +40,8 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.util.GetterFunction;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,8 +91,8 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     // The largest issue was implementation. Since most fields are simple to get and
     // set, other values, such as ItemStacks require a bit of finer tuning.
     //
-    private final Map<Key<?>, GetterFunction<ImmutableValue<?>>> keyValueMap = Maps.newHashMap();
-    private final Map<Key<?>, GetterFunction<?>> keyFieldGetterMap = Maps.newHashMap();
+    private final Map<Key<?>, GetterFunction<ImmutableValue<?>>> keyValueMap = new HashMap<>();
+    private final Map<Key<?>, GetterFunction<?>> keyFieldGetterMap = new HashMap<>();
 
     protected AbstractImmutableData(Class<I> immutableClass) {
         this.immutableClass = checkNotNull(immutableClass);
@@ -220,7 +220,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
 
     @Override
     public int hashCode() {
-        List<Object> objects = Lists.newArrayList();
+        List<Object> objects = new ArrayList<>();
         for (GetterFunction<?> function : this.keyFieldGetterMap.values()) {
             objects.add(function.get());
         }

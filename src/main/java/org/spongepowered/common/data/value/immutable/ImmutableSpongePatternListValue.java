@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
@@ -39,6 +38,7 @@ import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.Function;
@@ -62,7 +62,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
 
     @Override
     public PatternListValue asMutable() {
-        final List<PatternLayer> list = Lists.newArrayList();
+        final List<PatternLayer> list = new ArrayList<>();
         list.addAll(this.actualValue);
         return new SpongePatternListValue(getKey(), list);
     }

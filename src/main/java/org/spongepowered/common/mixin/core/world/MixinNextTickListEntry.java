@@ -49,7 +49,7 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinBlock
     @Override
     public void setWorld(World world) {
         checkState(this.location == null, "World already known");
-        this.location = new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) world, VecHelper.toVector(this.position));
+        this.location = new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector(this.position));
         this.world = world;
     }
 

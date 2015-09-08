@@ -60,12 +60,12 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
 
     @Override
     public MutableBoundedValue<Double> health() {
-        return new SpongeBoundedValue<Double>(Keys.HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.health);
+        return new SpongeBoundedValue<>(Keys.HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.health);
     }
 
     @Override
     public MutableBoundedValue<Double> maxHealth() {
-        return new SpongeBoundedValue<Double>(Keys.MAX_HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.maxHealth);
+        return new SpongeBoundedValue<>(Keys.MAX_HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.maxHealth);
     }
 
     @Override

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scoreboard;
 
-import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -46,7 +45,7 @@ public class SpongeScore implements Score {
 
     private UUID uuid = UUID.randomUUID();
 
-    private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<ScoreObjective, net.minecraft.scoreboard.Score>();
+    private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
 
     public SpongeScore(Text name) {
         this.name = name;
@@ -76,7 +75,7 @@ public class SpongeScore implements Score {
 
     @Override
     public Set<Objective> getObjectives() {
-        Set<Objective> objectives = new HashSet<Objective>();
+        Set<Objective> objectives = new HashSet<>();
         for (ScoreObjective objective: this.scores.keySet()) {
             objectives.add(((IMixinScoreObjective) objective).getSpongeObjective());
         }
@@ -101,7 +100,7 @@ public class SpongeScore implements Score {
 
         Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = (Map) scoreObjective.theScoreboard.entitiesScoreObjectives.get(name);
         if (scoreMap == null) {
-            scoreMap = Maps.newHashMap();
+            scoreMap = new HashMap<>();
         }
 
         if (scoreMap.containsKey(scoreObjective) && ((IMixinScore) scoreMap.get(scoreObjective)).spongeCreated()) {

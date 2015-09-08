@@ -26,21 +26,21 @@ package org.spongepowered.common.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SpongeFireworkBuilder implements FireworkEffectBuilder {
 
     private boolean trail = false;
     private boolean flicker = false;
-    private List<Color> colors = Lists.newArrayList();
-    private List<Color> fades = Lists.newArrayList();
+    private List<Color> colors = new ArrayList<>();
+    private List<Color> fades = new ArrayList<>();
     private FireworkShape shape = FireworkShapes.BALL;
 
     @Override
@@ -120,8 +120,8 @@ public class SpongeFireworkBuilder implements FireworkEffectBuilder {
     public FireworkEffectBuilder reset() {
         this.trail = false;
         this.flicker = false;
-        this.colors = Lists.newArrayList();
-        this.fades = Lists.newArrayList();
+        this.colors = new ArrayList<>();
+        this.fades = new ArrayList<>();
         this.shape = FireworkShapes.BALL;
         return this;
     }

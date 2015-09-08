@@ -25,7 +25,6 @@
 package org.spongepowered.common.world;
 
 import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Multiset;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -59,12 +58,12 @@ import java.util.concurrent.ConcurrentMap;
 
 public class DimensionManager {
 
-    public static final Hashtable<Integer, Class<? extends WorldProvider>> providers = new Hashtable<Integer, Class<? extends WorldProvider>>();
-    public static final Hashtable<Integer, Boolean> spawnSettings = new Hashtable<Integer, Boolean>();
-    public static final Hashtable<Integer, Integer> dimensions = new Hashtable<Integer, Integer>();
-    public static final Hashtable<Integer, WorldServer> worlds = new Hashtable<Integer, WorldServer>();
+    public static final Hashtable<Integer, Class<? extends WorldProvider>> providers = new Hashtable<>();
+    public static final Hashtable<Integer, Boolean> spawnSettings = new Hashtable<>();
+    public static final Hashtable<Integer, Integer> dimensions = new Hashtable<>();
+    public static final Hashtable<Integer, WorldServer> worlds = new Hashtable<>();
     public static final ConcurrentMap<World, World> weakWorldMap = new MapMaker().weakKeys().weakValues().makeMap();
-    public static final ArrayList<Integer> unloadQueue = Lists.newArrayList();
+    public static final ArrayList<Integer> unloadQueue = new ArrayList<>();
     public static final BitSet dimensionMap = new BitSet(Long.SIZE << 4);
     public static final Multiset<Integer> leakedWorlds = HashMultiset.create();
     public static boolean hasInit = false;
@@ -214,7 +213,7 @@ public class DimensionManager {
             Sponge.getLogger().info("Unloading dimension {}", id);
         }
 
-        ArrayList<WorldServer> tmp = new ArrayList<WorldServer>();
+        ArrayList<WorldServer> tmp = new ArrayList<>();
         if (worlds.get(0) != null) {
             tmp.add(worlds.get(0));
         }

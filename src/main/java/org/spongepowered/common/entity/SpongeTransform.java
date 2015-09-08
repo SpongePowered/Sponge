@@ -77,7 +77,7 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     @Override
     public Location<E> getLocation() {
         if (this.location == null) {
-            this.location = new Location<E>(this.extent, this.position);
+            this.location = new Location<>(this.extent, this.position);
         }
         return this.location;
     }
@@ -129,19 +129,19 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     @Override
     public Transform<E> setLocation(Location<E> location) {
         checkNotNull(location, "location");
-        return new SpongeTransform<E>(location, getRotation(), getScale());
+        return new SpongeTransform<>(location, getRotation(), getScale());
     }
 
     @Override
     public Transform<E> setExtent(E extent) {
         checkNotNull(extent, "extent");
-        return new SpongeTransform<E>(extent, getPosition(), getRotation(), getScale());
+        return new SpongeTransform<>(extent, getPosition(), getRotation(), getScale());
     }
 
     @Override
     public Transform<E> setPosition(Vector3d position) {
         checkNotNull(position, "position");
-        return new SpongeTransform<E>(getExtent(), position, getRotation(), getScale());
+        return new SpongeTransform<>(getExtent(), position, getRotation(), getScale());
     }
 
     @Override
@@ -153,30 +153,30 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     @Override
     public Transform<E> setRotation(Vector3d rotation) {
         checkNotNull(rotation, "rotation");
-        return new SpongeTransform<E>(getExtent(), getPosition(), rotation, getScale());
+        return new SpongeTransform<>(getExtent(), getPosition(), rotation, getScale());
     }
 
     @Override
     public Transform<E> setScale(Vector3d scale) {
         checkNotNull(scale, "scale");
-        return new SpongeTransform<E>(getExtent(), getPosition(), getRotation(), scale);
+        return new SpongeTransform<>(getExtent(), getPosition(), getRotation(), scale);
     }
 
     @Override
     public Transform<E> add(Transform<E> other) {
         checkNotNull(other, "other");
-        return new SpongeTransform<E>(
-            getExtent(),
-            getPosition().add(other.getPosition()),
-            toAxesAngles(other.getRotationAsQuaternion().mul(getRotationAsQuaternion())),
-            getScale().mul(other.getScale())
+        return new SpongeTransform<>(
+                getExtent(),
+                getPosition().add(other.getPosition()),
+                toAxesAngles(other.getRotationAsQuaternion().mul(getRotationAsQuaternion())),
+                getScale().mul(other.getScale())
         );
     }
 
     @Override
     public Transform<E> addTranslation(Vector3d translation) {
         checkNotNull(translation, "translation");
-        return new SpongeTransform<E>(getExtent(), getPosition().add(translation));
+        return new SpongeTransform<>(getExtent(), getPosition().add(translation));
     }
 
     @Override
@@ -188,13 +188,13 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
     @Override
     public Transform<E> addRotation(Quaterniond rotation) {
         checkNotNull(rotation, "rotation");
-        return new SpongeTransform<E>(getExtent(), getPosition(), toAxesAngles(rotation.mul(getRotationAsQuaternion())), getScale());
+        return new SpongeTransform<>(getExtent(), getPosition(), toAxesAngles(rotation.mul(getRotationAsQuaternion())), getScale());
     }
 
     @Override
     public Transform<E> addScale(Vector3d scale) {
         checkNotNull(scale, "scale");
-        return new SpongeTransform<E>(getExtent(), getPosition(), getRotation(), getScale().mul(scale));
+        return new SpongeTransform<>(getExtent(), getPosition(), getRotation(), getScale().mul(scale));
     }
 
     @Override
@@ -273,7 +273,7 @@ public class SpongeTransform<E extends Extent> implements Transform<E> {
         @Override
         public Transform<E> build() {
             checkState(extent != null, "Extent hasn't been set");
-            return new SpongeTransform<E>(extent, position, rotation, scale);
+            return new SpongeTransform<>(extent, position, rotation, scale);
         }
 
     }

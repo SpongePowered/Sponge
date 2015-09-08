@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.text;
 
-import com.google.common.collect.Lists;
 import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
@@ -36,6 +35,7 @@ import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -105,7 +105,7 @@ public class LegacyTextRepresentation implements TextRepresentation {
             return Texts.of(input);
         }
 
-        List<Text> parts = Lists.newArrayList();
+        List<Text> parts = new ArrayList<>();
 
         TextBuilder.Literal current = null;
         boolean reset = false;

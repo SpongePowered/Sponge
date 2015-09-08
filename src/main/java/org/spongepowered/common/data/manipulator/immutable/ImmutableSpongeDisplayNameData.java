@@ -52,7 +52,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
 
     @Override
     public ImmutableValue<Text> displayName() {
-        return new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, this.displayName);
+        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, this.displayName);
     }
 
     @Override

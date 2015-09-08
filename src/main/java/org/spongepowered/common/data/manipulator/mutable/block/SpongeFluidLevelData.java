@@ -43,7 +43,7 @@ public class SpongeFluidLevelData extends AbstractBoundedComparableData<Integer,
 
     @Override
     public MutableBoundedValue<Integer> level() {
-        return new SpongeBoundedValue<Integer>(Keys.FLUID_LEVEL, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
+        return new SpongeBoundedValue<>(Keys.FLUID_LEVEL, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
     }
 
     @Override

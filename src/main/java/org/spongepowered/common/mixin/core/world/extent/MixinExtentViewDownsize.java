@@ -27,10 +27,6 @@ package org.spongepowered.common.mixin.core.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -67,7 +63,10 @@ import org.spongepowered.common.world.extent.ExtentViewTransform;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Mixin(ExtentViewDownsize.class)
 public abstract class MixinExtentViewDownsize implements Extent {
@@ -292,7 +291,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
-    public ImmutableSet<ImmutableValue<?>> getValues(int x, int y, int z) {
+    public Set<ImmutableValue<?>> getValues(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.getValues(x, y, z);
     }
@@ -346,7 +345,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
-    public ImmutableSet<Key<?>> getKeys(int x, int y, int z) {
+    public Set<Key<?>> getKeys(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.getKeys(x, y, z);
     }
@@ -471,7 +470,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getTileEntities(Predicates.<TileEntity>and(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getTileEntities(new TileEntityInBounds(this.blockMin, this.blockMax).and(filter));
     }
 
     @Override
@@ -509,7 +508,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getEntities(Predicates.<Entity>and(new EntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getEntities(new EntityInBounds(this.blockMin, this.blockMax).and(filter));
     }
 
     @Override
@@ -559,7 +558,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
         }
 
         @Override
-        public boolean apply(Entity input) {
+        public boolean test(Entity input) {
             final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }
@@ -577,7 +576,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
         }
 
         @Override
-        public boolean apply(TileEntity input) {
+        public boolean test(TileEntity input) {
             final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }
