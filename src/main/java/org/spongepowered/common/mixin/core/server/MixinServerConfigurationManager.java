@@ -264,11 +264,14 @@ public abstract class MixinServerConfigurationManager {
         if (!conqueredEnd && targetDimension == 0) {
             targetDimension = playerIn.dimension;
         }
-        Transform<World> fromTransform = ((Player) playerIn).getTransform();
-        Location<World> location = this.getPlayerRespawnLocation(playerIn, targetDimension);
+
+        Player player = (Player) playerIn;
+        Transform<World> fromTransform = player.getTransform();
+        Transform<World> toTransform = this.getPlayerRespawnLocation(playerIn, targetDimension);
+        Location<World> location = toTransform.getLocation();
 
         // Keep players out of blocks
-        Vector3d tempPos = ((Player) playerIn).getLocation().getPosition();
+        Vector3d tempPos = player.getLocation().getPosition();
         playerIn.setPosition(location.getX(), location.getY(), location.getZ());
         while (!((WorldServer) location.getExtent()).getCollidingBoundingBoxes(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
             playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
@@ -290,13 +293,14 @@ public abstract class MixinServerConfigurationManager {
             ((IMixinEntityPlayerMP) playerIn).reset();
         }
         playerIn.setSneaking(false);
-        Transform<World> toTransform = new SpongeTransform<World>(location);
+        toTransform = toTransform.setLocation(location); // update to safe location
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
                 SpongeImplEventFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);
+        player.setTransform(event.getToTransform());
         location = event.getToTransform().getLocation();
 
         if (!(location.getExtent() instanceof WorldServer)) {
@@ -340,12 +344,15 @@ public abstract class MixinServerConfigurationManager {
     }
 
     // Internal. Note: Has side-effects
-    private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
+    private Transform<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
+        Location<World> location = ((World) playerIn.worldObj).getSpawnLocation();
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
-            return ((World) this.mcServer.getEntityWorld()).getSpawnLocation();
+            return new SpongeTransform<World>(location, Vector3d.ZERO, Vector3d.ZERO);
         }
+
+        Vector3d spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
         Dimension targetDim = (Dimension) targetWorld.provider;
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
@@ -359,9 +366,9 @@ public abstract class MixinServerConfigurationManager {
         if (optRespawn.isPresent()) {
             // API TODO: Make this support multiple world spawn points
             // TODO Make RespawnLocationData 'shadow' the bed location from below
-            return null;
+            return new SpongeTransform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
         }
-        Vector3d spawnPos = null;
+
         BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
         if (bedLoc != null) { // Player has a bed
             boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimension);
@@ -381,10 +388,8 @@ public abstract class MixinServerConfigurationManager {
             playerIn.setSpawnPoint(bedLoc, forceBedSpawn);
             playerIn.dimension = prevDim;
         }
-        if (spawnPos == null) {
-            spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
-        }
-        return new Location<World>((World) targetWorld, spawnPos);
+
+        return new SpongeTransform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
     }
 
     @Overwrite
