@@ -135,6 +135,8 @@ javadocJar {
 }
 
 task sdkZip(type: Zip) {
+    enabled = project.file("sdk").exists()
+
     from fileTree("sdk");
     rename ".*\\.gitignore", ".gitignore"
     def apiVersion = "";
@@ -151,10 +153,11 @@ task sdkZip(type: Zip) {
            ])
         }
     }
-    onlyIf { project.file("sdk").exists() }
 }
 
 artifacts {
     archives deobfJar
-    archives sdkZip
+    if (sdkZip.enabled) {
+        archives sdkZip
+    }
 }
