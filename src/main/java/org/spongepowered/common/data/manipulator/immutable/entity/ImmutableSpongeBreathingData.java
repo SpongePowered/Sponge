@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
+import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.util.GetterFunction;
 
@@ -77,12 +78,12 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
 
     @Override
     public ImmutableBoundedValue<Integer> remainingAir() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.REMAINING_AIR, this.remainingAir, this.remainingAir);
+        return new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, this.remainingAir, this.maxAir, ComparatorUtil.intComparator(), -20, this.maxAir);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> maxAir() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.MAX_AIR, this.maxAir, this.maxAir);
+        return new ImmutableSpongeBoundedValue<Integer>(Keys.MAX_AIR, this.maxAir, 300, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
     }
 
     public int getMaxAir() {

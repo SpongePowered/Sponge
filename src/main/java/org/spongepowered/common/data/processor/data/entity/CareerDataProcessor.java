@@ -26,99 +26,51 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityVillager;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
-import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.living.Villager;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
-import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
-public class CareerDataProcessor extends AbstractSpongeDataProcessor<CareerData, ImmutableCareerData> {
+public class CareerDataProcessor extends AbstractEntitySingleDataProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
 
-    @Override
-    public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof EntityVillager;
+    public CareerDataProcessor() {
+        super(EntityVillager.class, Keys.CAREER);
     }
 
     @Override
-    public Optional<CareerData> from(DataHolder dataHolder) {
-        if (dataHolder instanceof IMixinVillager) {
-            return Optional.<CareerData>of(new SpongeCareerData(((IMixinVillager) dataHolder).getCareer()));
-        }
-        return Optional.absent();
+    protected CareerData createManipulator() {
+        return new SpongeCareerData();
     }
 
     @Override
-    public Optional<CareerData> fill(DataHolder dataHolder, CareerData manipulator, MergeFunction overlap) {
-        if (dataHolder instanceof IMixinVillager) {
-            final CareerData original = from(dataHolder).get();
-            return Optional.of(manipulator.set(Keys.CAREER, overlap.merge(manipulator, original).type().get()));
-        }
-        return Optional.absent();
+    protected boolean set(EntityVillager entity, Career value) {
+        ((IMixinVillager) entity).setCareer(value);
+        return true;
     }
 
     @Override
-    public Optional<CareerData> fill(DataContainer container, CareerData careerData) {
-        final String careerId = DataUtil.getData(container, Keys.CAREER, String.class);
-        final Optional<Career> optional = Sponge.getSpongeRegistry().getType(Career.class, careerId);
-        if (optional.isPresent()) {
-            careerData.set(Keys.CAREER, optional.get());
-        }
-        return Optional.absent();
+    protected Optional<Career> getVal(EntityVillager entity) {
+        return Optional.of(((IMixinVillager) entity).getCareer());
     }
 
     @Override
-    public DataTransactionResult set(DataHolder dataHolder, CareerData manipulator, MergeFunction function) {
-        if (dataHolder instanceof IMixinVillager) {
-            final Career oldCareer = ((IMixinVillager) dataHolder).getCareer();
-            final CareerData oldData = from(dataHolder).get();
-            final ImmutableValue<Career> newCareer = function.merge(oldData, manipulator).type().asImmutable();
-            try {
-                ((IMixinVillager) dataHolder).setCareer(newCareer.get());
-                return DataTransactionBuilder.builder()
-                    .replace(ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, Keys.CAREER, oldCareer, oldCareer))
-                    .success(newCareer)
-                    .result(DataTransactionResult.Type.SUCCESS)
-                    .build();
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newCareer);
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
-    }
-
-    @Override
-    public Optional<ImmutableCareerData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableCareerData immutable) {
-        return null;
+    protected ImmutableValue<Career> constructImmutableValue(Career value) {
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, value, Careers.FARMER);
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public Optional<CareerData> createFrom(DataHolder dataHolder) {
-        return from(dataHolder);
-    }
-
-    @Override
-    public boolean supports(EntityType entityType) {
-        return Villager.class.isAssignableFrom(entityType.getEntityClass());
     }
 }

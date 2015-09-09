@@ -88,7 +88,7 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
 
     @Override
     public MutableBoundedValue<Integer> maxAir() {
-        return new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, this.remainingAir);
+        return new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, this.maxAir, intComparator(), -20, this.maxAir, this.remainingAir);
     }
 
     private int getMaxAir() {

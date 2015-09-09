@@ -22,5 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.data.processor.common;
+package org.spongepowered.common.data.property;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.world.Location;
+
+public class PropertyStoreDelegate<T extends Property<?, ?>> implements PropertyStore<T> {
+
+    private final ImmutableList<PropertyStore<T>> propertyStores;
+
+    public PropertyStoreDelegate(ImmutableList<PropertyStore<T>> propertyStores) {
+        this.propertyStores = propertyStores;
+    }
+
+    @Override
+    public Optional<T> getFor(DataHolder dataHolder) {
+        for (PropertyStore<T> propertyStore : this.propertyStores) {
+
+        }
+        return null;
+    }
+
+    @Override
+    public Optional<T> getFor(Location<?> location) {
+        return null;
+    }
+}

@@ -24,103 +24,63 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataTransactionResult.Type;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
-import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
-public class BreathingDataProcessor extends AbstractSpongeDataProcessor<BreathingData, ImmutableBreathingData> {
+import java.util.Map;
 
+public class BreathingDataProcessor extends AbstractEntityDataProcessor<EntityLivingBase, BreathingData, ImmutableBreathingData> {
 
-    @Override
-    public Optional<BreathingData> createFrom(DataHolder dataHolder) {
-        if (supports(dataHolder)) {
-            EntityLivingBase entity = (EntityLivingBase) dataHolder;
-            return Optional.<BreathingData>of(new SpongeBreathingData(((IMixinEntityLivingBase) dataHolder).getMaxAir(), entity.getAir()));
-        }
-        return Optional.absent();
+    public BreathingDataProcessor() {
+        super(EntityLivingBase.class);
     }
 
     @Override
-    public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof EntityLivingBase;
+    protected BreathingData createManipulator() {
+        return new SpongeBreathingData(300, 300);
     }
 
     @Override
-    public Optional<BreathingData> from(DataHolder dataHolder) {
-        return createFrom(dataHolder);
+    protected boolean doesDataExist(EntityLivingBase entity) {
+        return entity.isInWater();
     }
 
     @Override
-    public Optional<BreathingData> fill(DataHolder dataHolder, BreathingData manipulator, MergeFunction overlap) {
-        if (supports(dataHolder)) {
-            final BreathingData merged = overlap.merge(checkNotNull(manipulator).copy(), from(dataHolder).get());
-            manipulator.set(Keys.MAX_AIR, merged.maxAir().get())
-                    .set(Keys.REMAINING_AIR, merged.remainingAir().get());
-            return Optional.of(manipulator);
-        }
-        return Optional.absent();
+    protected boolean set(EntityLivingBase entity, Map<Key<?>, Object> keyValues) {
+        final int maxAir = (Integer) keyValues.get(Keys.MAX_AIR);
+        final int air = (Integer) keyValues.get(Keys.REMAINING_AIR);
+        entity.setAir(air);
+        return true;
     }
 
     @Override
-    public Optional<BreathingData> fill(DataContainer container, BreathingData BreathingData) {
-        BreathingData.set(Keys.MAX_AIR, getData(container, Keys.MAX_AIR));
-        BreathingData.set(Keys.REMAINING_AIR, getData(container, Keys.REMAINING_AIR));
-        return Optional.of(BreathingData);
+    protected Map<Key<?>, ?> getValues(EntityLivingBase entity) {
+        return ImmutableMap.<Key<?>, Object>of(Keys.MAX_AIR, ((IMixinEntityLivingBase) entity).getMaxAir(), Keys.REMAINING_AIR, entity.getAir());
     }
 
     @Override
-    public DataTransactionResult set(DataHolder dataHolder, BreathingData manipulator, MergeFunction function) {
-        if (!supports(dataHolder)) {
-            return DataTransactionBuilder.failResult(manipulator.getValues());
-        }
-
-        try {
-            EntityLivingBase entity = (EntityLivingBase) dataHolder;
-            Optional<BreathingData> oldData = from(dataHolder);
-            final BreathingData breathingData = checkNotNull(function).merge(oldData.orNull(), manipulator);
-
-            ((IMixinEntityLivingBase) entity).setMaxAir(breathingData.maxAir().get());
-            entity.setAir(breathingData.remainingAir().get());
-            if (oldData.isPresent()) {
-                return DataTransactionBuilder.successReplaceResult(breathingData.getValues(), oldData.get().getValues());
-            } else {
-                return DataTransactionBuilder.builder().success(breathingData.getValues()).build();
-            }
-        } catch (Exception e) {
-            return DataTransactionBuilder.builder().reject(manipulator.getValues()).result(Type.ERROR).build();
-        }
-    }
-
-    @Override
-    public Optional<ImmutableBreathingData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableBreathingData immutable) {
-        return Optional.absent();
+    public Optional<BreathingData> fill(DataContainer container, BreathingData breathingData) {
+        breathingData.set(Keys.MAX_AIR, getData(container, Keys.MAX_AIR));
+        breathingData.set(Keys.REMAINING_AIR, getData(container, Keys.REMAINING_AIR));
+        return Optional.of(breathingData);
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
-    }
-
-    @Override
-    public boolean supports(EntityType entityType) {
-        return Living.class.isAssignableFrom(entityType.getEntityClass());
+        return DataTransactionBuilder.failNoData();
     }
 }

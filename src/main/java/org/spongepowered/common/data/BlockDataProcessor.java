@@ -42,10 +42,6 @@ public interface BlockDataProcessor<T extends ImmutableDataManipulator<T, ?>> {
 
     Optional<BlockState> withData(IBlockState blockState, T manipulator);
 
-    DataTransactionResult setData(World world, BlockPos blockPos, T manipulator);
-
-    Optional<BlockState> removeFrom(IBlockState blockState);
-
     boolean remove(World world, BlockPos blockPos);
 
 }

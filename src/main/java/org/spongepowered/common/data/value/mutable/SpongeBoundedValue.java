@@ -86,6 +86,6 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
 
     @Override
     public ImmutableBoundedValue<E> asImmutable() {
-        return new ImmutableSpongeBoundedValue<E>(getKey(), getDefault(), this.actualValue, this.comparator, this.minimum, this.maximum);
+        return new ImmutableSpongeBoundedValue<E>(getKey(), this.actualValue, getDefault(), this.comparator, this.minimum, this.maximum);
     }
 }
