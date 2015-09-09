@@ -151,10 +151,11 @@ task sdkZip(type: Zip) {
            ])
         }
     }
-    onlyIf { project.file("sdk").exists() }
 }
 
 artifacts {
     archives deobfJar
-    archives sdkZip
+    if (project.file("sdk").exists()) {
+        archives sdkZip
+    }
 }
