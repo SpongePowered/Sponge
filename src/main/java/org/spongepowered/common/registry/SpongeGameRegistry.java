@@ -1608,8 +1608,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(Visibilities.class, SpongeGameRegistry.visibilityMappings);
     }
 
-
-
     private void setupProperties() {
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
