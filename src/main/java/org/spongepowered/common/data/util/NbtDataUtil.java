@@ -70,6 +70,9 @@ public class NbtDataUtil {
     public static final String ITEM_BOOK_TITLE = "title";
     public static final String ITEM_BOOK_AUTHOR = "author";
     public static final String ITEM_BOOK_RESOLVED = "resolved";
+    
+    public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";
+    public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;

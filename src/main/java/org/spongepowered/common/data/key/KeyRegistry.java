@@ -31,6 +31,7 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.MapMaker;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -143,6 +144,8 @@ public class KeyRegistry {
         keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceSinceLevel")));
         keyMap.put("experience_from_start_of_level", makeSingleKey(Integer.TYPE, ImmutableBoundedValue.class, of("ExperienceFromStartOfLevel")));
         keyMap.put("book_author", makeSingleKey(Text.class, Value.class, of("BookAuthor")));
+        keyMap.put("breakable_block_types", makeSetKey(BlockType.class, of("CanDestroy")));
+        keyMap.put("placeable_blocks", makeSetKey(BlockType.class, of("CanPlaceOn")));
 
     }
 
