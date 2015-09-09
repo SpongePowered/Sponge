@@ -385,4 +385,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return ((NBTTagCompound) this.compound.copy());
     }
 
+    @Override public String toString() {
+        return "SpongeBlockSnapshot{" +
+                "blockState=" + blockState +
+                ", worldUniqueId=" + worldUniqueId +
+                ", pos=" + pos +
+                '}';
+    }
 }
