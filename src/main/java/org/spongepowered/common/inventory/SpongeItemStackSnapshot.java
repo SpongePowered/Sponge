@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -280,5 +281,13 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public Set<ImmutableValue<?>> getValues() {
         return this.values;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("itemType", itemType)
+                .add("count", count)
+                .toString();
     }
 }

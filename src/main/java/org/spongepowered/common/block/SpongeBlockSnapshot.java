@@ -29,6 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -385,11 +386,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return ((NBTTagCompound) this.compound.copy());
     }
 
-    @Override public String toString() {
-        return "SpongeBlockSnapshot{" +
-                "blockState=" + blockState +
-                ", worldUniqueId=" + worldUniqueId +
-                ", pos=" + pos +
-                '}';
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("worldUniqueId", worldUniqueId)
+                .add("position", pos)
+                .add("blockState", blockState)
+                .toString();
     }
 }
