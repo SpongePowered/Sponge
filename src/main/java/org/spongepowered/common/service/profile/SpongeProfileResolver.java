@@ -33,11 +33,13 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.profile.ProfileNotFoundException;
+import org.spongepowered.common.Sponge;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -68,6 +70,12 @@ public class SpongeProfileResolver implements GameProfileResolver {
                     return profile;
                 }
             }
+            if (Sponge.getGame().getPlatform().getType().isClient()) {
+                com.mojang.authlib.GameProfile sessionProfile = Minecraft.getMinecraft().getSession().getProfile();
+                if (sessionProfile.getId().equals(id)) {
+                    return (GameProfile) sessionProfile;
+                }
+            }
             // TODO Possibly use UUID -> Name History
             // (http://wiki.vg/Mojang_API#UUID_-.3E_Name_history)
             com.mojang.authlib.GameProfile profile =
@@ -75,6 +83,7 @@ public class SpongeProfileResolver implements GameProfileResolver {
             if (profile == null || !profile.isComplete()) {
                 throw new ProfileNotFoundException("Profile: " + profile);
             }
+            this.cache.addEntry(profile);
             return (GameProfile) profile;
         }
 
@@ -253,6 +262,7 @@ public class SpongeProfileResolver implements GameProfileResolver {
         try {
             return new SingleQuery(uniqueId, useCache).call();
         } catch (Exception e) {
+            Sponge.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
             return null;
         }
     }

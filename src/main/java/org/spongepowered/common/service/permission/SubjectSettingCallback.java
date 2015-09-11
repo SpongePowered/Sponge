@@ -25,6 +25,8 @@
 package org.spongepowered.common.service.permission;
 
 import com.google.common.base.Predicate;
+import com.mojang.authlib.GameProfile;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -34,9 +36,11 @@ import org.spongepowered.common.mixin.core.command.MixinSubject;
 import javax.annotation.Nullable;
 
 /**
- * {@link MixinSubject} helper class to apply the appropriate subject to the mixin.
+ * {@link MixinSubject} helper class to apply the appropriate subject to the
+ * mixin.
  */
 public class SubjectSettingCallback implements Predicate<PermissionService> {
+
     private final IMixinSubject ref;
 
     public SubjectSettingCallback(IMixinSubject ref) {
@@ -50,7 +54,14 @@ public class SubjectSettingCallback implements Predicate<PermissionService> {
         }
         SubjectCollection userSubjects = input.getSubjects(this.ref.getSubjectCollectionIdentifier());
         if (userSubjects != null) {
-            this.ref.setSubject(userSubjects.get(((Subject) this.ref).getIdentifier()));
+            Subject subject;
+            if (this.ref instanceof User && userSubjects instanceof UserCollection) {
+                // GameProfile is already resolved, use it directly
+                subject = ((UserCollection) userSubjects).get((GameProfile) ((User) this.ref).getProfile());
+            } else {
+                subject = userSubjects.get(((Subject) this.ref).getIdentifier());
+            }
+            this.ref.setSubject(subject);
         }
         return true;
     }
