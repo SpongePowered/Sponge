@@ -117,7 +117,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             builder.add(manipulator.asImmutable());
         }
         this.blockState = checkNotNull(blockState);
-        this.location = entity.getLocation();
+        this.location = location;
         this.pos = location.getBlockPosition();
         this.worldUniqueId = location.getExtent().getUniqueId();
         this.extraData = builder.build();
