@@ -82,28 +82,6 @@ public final class BlockDataProcessorDelegate<I extends ImmutableDataManipulator
     }
 
     @Override
-    public DataTransactionResult setData(World world, BlockPos blockPos, I manipulator) {
-        for (BlockDataProcessor<I> processor : this.processors) {
-            final DataTransactionResult result = processor.setData(world, blockPos, manipulator);
-            if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                return result;
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
-    }
-
-    @Override
-    public Optional<BlockState> removeFrom(IBlockState blockState) {
-        for (BlockDataProcessor<I> processor : this.processors) {
-            final Optional<BlockState> optional = processor.removeFrom(blockState);
-            if (optional.isPresent()) {
-                return optional;
-            }
-        }
-        return Optional.absent();
-    }
-
-    @Override
     public boolean remove(World world, BlockPos blockPos) {
         for (BlockDataProcessor<I> processor : this.processors) {
             final boolean optional = processor.remove(world, blockPos);
