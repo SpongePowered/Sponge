@@ -56,7 +56,7 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
 
     @Override
     protected boolean doesDataExist(EntityLivingBase entity) {
-        return entity.isEntityAlive();
+        return true;
     }
 
     @Override
