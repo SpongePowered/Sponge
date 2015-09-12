@@ -49,69 +49,69 @@ import net.minecraft.item.ItemStack;
 
 public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, ImmutableWetData> {
 
-	@Override
-	public boolean supports(DataHolder dataHolder) {
-		return dataHolder instanceof EntityWolf || dataHolder instanceof ItemStack;
-	}
+    @Override
+    public boolean supports(DataHolder dataHolder) {
+        return dataHolder instanceof EntityWolf || dataHolder instanceof ItemStack;
+    }
 
-	@Override
-	public Optional<WetData> from(DataHolder dataHolder) {
-		if (this.supports(dataHolder)) {
-			SpongeWetData wetData = new SpongeWetData(dataHolder.get(Keys.IS_WET).get());
-			
-			return Optional.<WetData>of(wetData);
-		}
-		return Optional.absent();
-	}
+    @Override
+    public Optional<WetData> from(DataHolder dataHolder) {
+        if (this.supports(dataHolder)) {
+            SpongeWetData wetData = new SpongeWetData(dataHolder.get(Keys.IS_WET).get());
 
-	@Override
-	public Optional<WetData> createFrom(DataHolder dataHolder) {
-		if (this.supports(dataHolder)) {
-			return this.from(dataHolder);
-		}
-		return Optional.absent();
-	}
+            return Optional.<WetData>of(wetData);
+        }
+        return Optional.absent();
+    }
 
-	@Override
-	public Optional<WetData> fill(DataHolder dataHolder, WetData manipulator, MergeFunction overlap) {
-		if (this.supports(dataHolder)) {
-			WetData merged = overlap.merge(checkNotNull(manipulator.copy()), this.from(dataHolder).get());
+    @Override
+    public Optional<WetData> createFrom(DataHolder dataHolder) {
+        if (this.supports(dataHolder)) {
+            return this.from(dataHolder);
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<WetData> fill(DataHolder dataHolder, WetData manipulator, MergeFunction overlap) {
+        if (this.supports(dataHolder)) {
+            WetData merged = overlap.merge(checkNotNull(manipulator.copy()), this.from(dataHolder).get());
             return Optional.of(manipulator.set(Keys.IS_WET, merged.wet().get()));
         }
         return Optional.absent();
-	}
+    }
 
-	@Override
-	public Optional<WetData> fill(DataContainer container, WetData wetData) {
-		Boolean isWet = DataUtil.getData(container, Keys.IS_WET);
-		
-		return Optional.of(wetData.set(Keys.IS_WET, isWet));
-	}
+    @Override
+    public Optional<WetData> fill(DataContainer container, WetData wetData) {
+        Boolean isWet = DataUtil.getData(container, Keys.IS_WET);
 
-	@Override
-	public DataTransactionResult set(DataHolder dataHolder, WetData manipulator, MergeFunction function) {
-		if (this.supports(dataHolder)) {
-			return dataHolder.offer(Keys.IS_WET, manipulator.wet().get());
-		}
-		return DataTransactionBuilder.failResult(manipulator.getValues());
-	}
+        return Optional.of(wetData.set(Keys.IS_WET, isWet));
+    }
 
-	@Override
-	public Optional<ImmutableWetData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableWetData immutable) {
-		if (key == Keys.IS_WET) {
-			return Optional.<ImmutableWetData>of(new ImmutableSpongeWetData((Boolean) value));
-		}
-		return Optional.absent();
-	}
+    @Override
+    public DataTransactionResult set(DataHolder dataHolder, WetData manipulator, MergeFunction function) {
+        if (this.supports(dataHolder)) {
+            return dataHolder.offer(Keys.IS_WET, manipulator.wet().get());
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
+    }
 
-	@Override
-	public DataTransactionResult remove(DataHolder dataHolder) {
-		return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
-	}
+    @Override
+    public Optional<ImmutableWetData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableWetData immutable) {
+        if (key == Keys.IS_WET) {
+            return Optional.<ImmutableWetData>of(new ImmutableSpongeWetData((Boolean) value));
+        }
+        return Optional.absent();
+    }
 
-	@Override
-	public boolean supports(EntityType entityType) {
-		return EntityWolf.class.isAssignableFrom(entityType.getEntityClass());
-	}
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return EntityWolf.class.isAssignableFrom(entityType.getEntityClass());
+    }
 
 }
