@@ -25,23 +25,39 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.animal.Wolf;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
+
+import java.util.Random;
 
 @NonnullByDefault
 @Mixin(EntityWolf.class)
 @Implements(value = {@Interface(iface = Wolf.class, prefix = "wolf$"), @Interface(iface = IMixinAggressive.class, prefix="soft$")})
-public abstract class MixinEntityWolf extends MixinEntityAnimal{
+public abstract class MixinEntityWolf extends MixinEntityAnimal {
+
     @Shadow(prefix = "shadow$")
     public abstract boolean shadow$isAngry();
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setAngry(boolean angry);
+
+    private ItemStack currentItemStack;
 
     @Intrinsic
     public boolean soft$isAngry() {
@@ -51,5 +67,21 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal{
     @Intrinsic
     public void soft$setAngry(boolean angry) {
         this.shadow$setAngry(angry);
+    }
+
+    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityWolf;isTamed()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
+    public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
+        this.currentItemStack = currentItemStack.copy();
+    }
+
+    @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0))
+    public int onTame(Random rand, int bound, EntityPlayer player) {
+        int random = rand.nextInt(bound);
+        if (random == 0 && !Sponge.getGame().getEventManager().post(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(), Cause.of(player, this.currentItemStack), this))) {
+            this.currentItemStack = null;
+            return random;
+        }
+        this.currentItemStack = null;
+        return 1;
     }
 }
