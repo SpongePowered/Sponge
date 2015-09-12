@@ -34,7 +34,11 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeWetData extends AbstractBooleanData<WetData, ImmutableWetData> implements WetData {
 
-    public SpongeWetData(Boolean value) {
+    public SpongeWetData() {
+        this(false);
+    }
+
+    public SpongeWetData(boolean value) {
         super(WetData.class, value, Keys.IS_WET, ImmutableSpongeWetData.class);
     }
 

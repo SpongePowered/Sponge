@@ -150,6 +150,7 @@ public class KeyRegistry {
         keyMap.put("is_sheared", makeSingleKey(Boolean.class, Value.class, of("IsSheared")));
         keyMap.put("pig_saddle", makeSingleKey(Boolean.class, Value.class, of("IsPigSaddled")));
         keyMap.put("tamed_owner", makeSingleKey(UUID.class, OptionalValue.class, of("TamerUUID")));
+        keyMap.put("is_wet", makeSingleKey(Boolean.class, Value.class, of("IsWet")));
 
     }
 
