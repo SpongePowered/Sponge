@@ -25,8 +25,17 @@
 package org.spongepowered.common.data.util;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.common.interfaces.text.IMixinText;
+
+import java.util.List;
+import java.util.Locale;
 
 /**
  * A standard utility class for interacting and manipulating {@link ItemStack}s
@@ -41,8 +50,12 @@ public class NbtDataUtil {
     public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
     public static final String BLOCK_ENTITY_ID = "id";
     public static final String SIGN = "Sign";
+    public static final String DISPLAY = "display";
+    public static final String LORE = "Lore";
+    public static final String PAGES = "pages";
 
-    // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
+    // These are the NBT Tag byte id's that can be used in various places while
+    // manipulating compound tags
     public static final byte TAG_END = 0;
     public static final byte TAG_BYTE = 1;
     public static final byte TAG_SHORT = 2;
@@ -56,7 +69,8 @@ public class NbtDataUtil {
     public static final byte TAG_COMPOUND = 10;
     public static final byte TAG_INT_ARRAY = 11;
 
-    // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
+    // These methods are provided as API like getters since the internal
+    // ItemStack does return nullable NBTTagCompounds.
 
     /**
      * Gets the main {@link NBTTagCompound} as an {@link Optional}. The issue
@@ -82,8 +96,8 @@ public class NbtDataUtil {
     /**
      * Gets or creates a new {@link NBTTagCompound} as the main compound of the
      * provided {@link ItemStack}. If there is one already created, this simply
-     * returns the already created main compound. If there is no compound,
-     * one is created and set back onto the {@link ItemStack}.
+     * returns the already created main compound. If there is no compound, one
+     * is created and set back onto the {@link ItemStack}.
      *
      * @param itemStack The itemstack to get the main compound from
      * @return The pre-existing or already generated compound
@@ -99,8 +113,8 @@ public class NbtDataUtil {
      * Similar to {@link #getOrCreateCompound(ItemStack)}, this will check the
      * provided {@link NBTTagCompound} whether an internal compound is already
      * set and created by the provided {@link String} key. If there is no
-     * {@link NBTTagCompound} already created, a new one is made and set for
-     * the key.
+     * {@link NBTTagCompound} already created, a new one is made and set for the
+     * key.
      *
      * @param mainCompound The main compound to query for
      * @param key The key
@@ -111,5 +125,67 @@ public class NbtDataUtil {
             mainCompound.setTag(key, new NBTTagCompound());
         }
         return mainCompound.getCompoundTag(key);
+    }
+
+    public static List<Text> getLoreFromNBT(NBTTagCompound subCompound) {
+        final List<Text> lore = Lists.newArrayList();
+        final NBTTagList list = subCompound.getTagList(NbtDataUtil.LORE, NbtDataUtil.TAG_STRING);
+        for (int i = 0; i < list.tagCount(); i++) {
+            lore.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
+        }
+        return lore;
+    }
+
+    public static void removeLoreFromNBT(ItemStack itemStack) {
+        final NBTTagList list = new NBTTagList();
+        if (itemStack.getSubCompound(NbtDataUtil.DISPLAY, false) == null) {
+            return;
+        }
+        itemStack.getSubCompound(NbtDataUtil.DISPLAY, false).setTag(NbtDataUtil.LORE, list);
+    }
+
+    public static void setLoreToNBT(ItemStack itemStack, List<Text> lore) {
+        final NBTTagList list = new NBTTagList();
+        for (Text text : lore) {
+            list.appendTag(new NBTTagString(((IMixinText) text).toLegacy('\247', Locale.ENGLISH)));
+        }
+        itemStack.getSubCompound(NbtDataUtil.DISPLAY, true).setTag(NbtDataUtil.LORE, list);
+    }
+
+    public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
+        final NBTTagList pageList = compound.getTagList(NbtDataUtil.PAGES, NbtDataUtil.TAG_STRING);
+        final List<Text> pages = Lists.newArrayList();
+        for (int i = 0; i < pageList.tagCount(); i++) {
+            pages.add(Texts.legacy().fromUnchecked(pageList.getStringTagAt(i)));
+        }
+        return pages;
+    }
+
+    public static void removePagesFromNBT(ItemStack itemStack) {
+        final NBTTagList list = new NBTTagList();
+        if (itemStack.getTagCompound() == null) {
+            return;
+        }
+        final NBTTagCompound compound = itemStack.getTagCompound();
+        compound.setTag(NbtDataUtil.PAGES, list);
+    }
+
+    public static void setPagesToNBT(ItemStack itemStack, List<Text> pages) {
+        final NBTTagList list = new NBTTagList();
+        for (Text text : pages) {
+            list.appendTag(new NBTTagString(((IMixinText) text).toLegacy('\247', Locale.ENGLISH)));
+        }
+        if (itemStack.getTagCompound() == null) {
+            itemStack.setTagCompound(new NBTTagCompound());
+        }
+        final NBTTagCompound compound = itemStack.getTagCompound();
+        compound.setTag(NbtDataUtil.PAGES, list);
+        if (!compound.hasKey("title")) {
+            compound.setString("title", "invalid");
+        }
+        if (!compound.hasKey("author")) {
+            compound.setString("author", "invalid");
+        }
+        compound.setBoolean("resolved", true);
     }
 }
