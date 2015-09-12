@@ -73,7 +73,7 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
 
     @Override
     public MutableBoundedValue<E> set(E value) {
-        if (this.comparator.compare(value, this.minimum) <= 0 && this.comparator.compare(value, this.maximum) >= 0) {
+        if (this.comparator.compare(value, this.minimum) >= 0 && this.comparator.compare(value, this.maximum) <= 0) {
             this.actualValue = checkNotNull(value);
         }
         return this;
