@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,28 +38,30 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import com.google.common.base.Optional;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
+
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.item.ItemStack;
 
 public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, ImmutableWetData> {
 
 	@Override
 	public boolean supports(DataHolder dataHolder) {
-		return dataHolder instanceof ItemStack && ((ItemStack) dataHolder).getItem().equals(Item.getItemFromBlock(Blocks.sponge));
+		return dataHolder instanceof EntityWolf || dataHolder instanceof ItemStack;
 	}
 
 	@Override
 	public Optional<WetData> from(DataHolder dataHolder) {
-		if (dataHolder instanceof ItemStack && ((ItemStack) dataHolder).hasTagCompound()) {
-			SpongeWetData wetData = new SpongeWetData(false);
+		if (this.supports(dataHolder)) {
+			// incomplete
+			SpongeWetData wetData = new SpongeWetData(dataHolder.get(Keys.IS_WET).get());
+			
+			return Optional.<WetData>of(wetData);
 		}
 		return Optional.absent();
 	}
 
 	@Override
 	public Optional<WetData> createFrom(DataHolder dataHolder) {
-		// TODO Auto-generated method stub
 		return Optional.absent();
 	}
 
@@ -66,7 +69,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
 	public Optional<WetData> fill(DataHolder dataHolder, WetData manipulator, MergeFunction overlap) {
 		if (this.supports(dataHolder)) {
 			WetData merged = overlap.merge(checkNotNull(manipulator.copy()), this.from(dataHolder).get());
-            return Optional.of(manipulator.set(Keys.IS_WET, merged.get(Keys.IS_WET).get()));
+            return Optional.of(manipulator.set(Keys.IS_WET, merged.wet().get()));
         }
         return Optional.absent();
 	}
