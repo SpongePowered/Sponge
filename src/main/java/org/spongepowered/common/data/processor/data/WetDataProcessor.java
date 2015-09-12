@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -35,8 +36,12 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.data.util.DataUtil;
+
 import com.google.common.base.Optional;
 
 import net.minecraft.entity.passive.EntityWolf;
@@ -52,7 +57,6 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
 	@Override
 	public Optional<WetData> from(DataHolder dataHolder) {
 		if (this.supports(dataHolder)) {
-			// incomplete
 			SpongeWetData wetData = new SpongeWetData(dataHolder.get(Keys.IS_WET).get());
 			
 			return Optional.<WetData>of(wetData);
@@ -62,6 +66,9 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
 
 	@Override
 	public Optional<WetData> createFrom(DataHolder dataHolder) {
+		if (this.supports(dataHolder)) {
+			return this.from(dataHolder);
+		}
 		return Optional.absent();
 	}
 
@@ -75,23 +82,36 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
 	}
 
 	@Override
-	public Optional<WetData> fill(DataContainer container, WetData m) {
-		return Optional.absent();
+	public Optional<WetData> fill(DataContainer container, WetData wetData) {
+		Boolean isWet = DataUtil.getData(container, Keys.IS_WET);
+		
+		return Optional.of(wetData.set(Keys.IS_WET, isWet));
 	}
 
 	@Override
 	public DataTransactionResult set(DataHolder dataHolder, WetData manipulator, MergeFunction function) {
-		return null;
+		if (this.supports(dataHolder)) {
+			return dataHolder.offer(Keys.IS_WET, manipulator.wet().get());
+		}
+		return DataTransactionBuilder.failResult(manipulator.getValues());
 	}
 
 	@Override
 	public Optional<ImmutableWetData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableWetData immutable) {
+		if (key == Keys.IS_WET) {
+			return Optional.<ImmutableWetData>of(new ImmutableSpongeWetData((Boolean) value));
+		}
 		return Optional.absent();
 	}
 
 	@Override
 	public DataTransactionResult remove(DataHolder dataHolder) {
-		return null;
+		return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+	}
+
+	@Override
+	public boolean supports(EntityType entityType) {
+		return EntityWolf.class.isAssignableFrom(entityType.getEntityClass());
 	}
 
 }
