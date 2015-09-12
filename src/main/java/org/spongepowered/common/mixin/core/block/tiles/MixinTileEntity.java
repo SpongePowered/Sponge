@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -42,7 +41,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.IMixinTileEntity;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
@@ -56,6 +57,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Shadow public abstract void markDirty();
     @Shadow public abstract BlockPos getPos();
+    @Shadow public abstract void writeToNBT(NBTTagCompound compound);
 
     @Override
     public Location<World> getLocation() {
@@ -65,17 +67,27 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(of("world"), ((World) this.worldObj).getUniqueId().toString());
-        container.set(of("x"), this.getPos().getX());
-        container.set(of("y"), this.getPos().getY());
-        container.set(of("z"), this.getPos().getZ());
-        container.set(of("tileType"), this.getClass().getSimpleName());
+        container.set(DataQueries.BLOCK_ENTITY_WORLD, ((World) this.worldObj).getUniqueId().toString());
+        container.set(DataQueries.POSITION_X, this.getPos().getX());
+        container.set(DataQueries.POSITION_Y, this.getPos().getY());
+        container.set(DataQueries.POSITION_Z, this.getPos().getZ());
+        container.set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.getClass().getSimpleName());
+        final NBTTagCompound compound = new NBTTagCompound();
+        this.writeToNBT(compound);
+        container.set(DataQueries.BLOCK_ENTITY_NBT, NbtTranslator.getInstance().translateFrom(compound));
+        final DataView dataView = container.createView(DataQueries.BLOCK_ENTITY_DATA);
+        container.set(DataQueries.BLOCK_ENTITY_DATA, dataView);
         return container;
     }
 
     @Override
     public boolean validateRawData(DataContainer container) {
-        return false;
+        return container.contains(DataQueries.BLOCK_ENTITY_WORLD)
+            && container.contains(DataQueries.POSITION_X)
+            && container.contains(DataQueries.POSITION_Y)
+            && container.contains(DataQueries.POSITION_Z)
+            && container.contains(DataQueries.BLOCK_ENTITY_TILE_TYPE)
+            && container.contains(DataQueries.BLOCK_ENTITY_NBT);
     }
 
     @Override

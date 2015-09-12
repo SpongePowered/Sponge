@@ -37,6 +37,7 @@ import net.minecraft.block.state.BlockStateBase;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
@@ -53,7 +54,9 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.BlockDataProcessor;
 import org.spongepowered.common.data.BlockValueProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.interfaces.block.IMixinBlockState;
 
 import java.util.List;
 import java.util.Set;
@@ -61,7 +64,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)
-public abstract class MixinBlockState extends BlockStateBase implements BlockState {
+public abstract class MixinBlockState extends BlockStateBase implements BlockState, IMixinBlockState {
 
     @Shadow
     @SuppressWarnings("rawtypes")
@@ -316,7 +319,13 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("BlockType"), this.getType().getId())
-                .set(of("Data"), this.getManipulators());
+            .set(DataQueries.BLOCK_STATE_TYPE, this.getType().getId())
+            .set(DataQueries.BLOCK_STATE_DATA, this.getManipulators())
+            .set(DataQueries.BLOCK_STATE_UNSAFE_META, this.getStateMeta());
+    }
+
+    @Override
+    public int getStateMeta() {
+        return this.block.getMetaFromState(this);
     }
 }

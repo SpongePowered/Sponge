@@ -25,9 +25,11 @@
 package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
@@ -37,6 +39,8 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
 
@@ -89,6 +93,16 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
     @Override
     public Optional<BlockState> build(DataView container) throws InvalidDataException {
-        return Optional.absent();
+        checkDataExists(container, DataQueries.BLOCK_STATE_TYPE);
+        checkDataExists(container, DataQueries.BLOCK_STATE_DATA);
+        checkDataExists(container, DataQueries.BLOCK_STATE_UNSAFE_META);
+        final String blockid = container.getString(DataQueries.BLOCK_STATE_TYPE).get();
+        final BlockType blockType = Sponge.getGame().getRegistry().getType(BlockType.class, blockid).get();
+        final int meta = container.getInt(DataQueries.BLOCK_STATE_UNSAFE_META).get();
+        try {
+            return Optional.of((BlockState) ((Block) blockType).getStateFromMeta(meta));
+        } catch (Exception e) {
+            throw new InvalidDataException("Could not retrieve a blockstate!", e);
+        }
     }
 }

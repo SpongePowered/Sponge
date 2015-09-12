@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -37,6 +35,7 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
 
@@ -50,19 +49,19 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         if (this.code != null) {
-            container.set(of("Lock"), this.code.getLock());
+            container.set(DataQueries.BLOCK_ENTITY_LOCK_CODE, this.code.getLock());
         }
         List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < getSizeInventory(); i++) {
             ItemStack stack = getStackInSlot(i);
             if (stack != null) {
                 DataContainer stackView = new MemoryDataContainer();
-                stackView.set(of("Slot"), i);
-                stackView.set(of("Item"), ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
+                stackView.set(DataQueries.BLOCK_ENTITY_SLOT, i);
+                stackView.set(DataQueries.BLOCK_ENTITY_SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
                 items.add(stackView);
             }
         }
-        container.set(of("Contents"), items);
+        container.set(DataQueries.BLOCK_ENTITY_ITEM_CONTENTS, items);
         return container;
     }
 }

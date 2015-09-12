@@ -22,31 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
-
-import net.minecraft.nbt.NBTTagCompound;
-
-public interface IMixinTileEntity {
-
-    /**
-     * Gets the included {@link NBTTagCompound} for a tile entity. With Vanilla, this is
-     * created by vanilla. With Forge, this is included.
-     *
-     * @return Gets the tag compound containing various tile data
-     */
-    NBTTagCompound getSpongeData();
-
-    /**
-     * Read extra data (SpongeData) from the tile entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to read from
-     */
-    void readFromNbt(NBTTagCompound compound);
-
-    /**
-     * Write extra data (SpongeData) to the tile entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to write to
-     */
-    void writeToNbt(NBTTagCompound compound);
-}
+/**
+ * A majority of these interfaces are to aid in manipulating block states and blocks
+ * for a specific {@link org.spongepowered.api.data.manipulator.DataManipulator}. The one
+ * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
+ * for the benefit of being able to "reset" the block to a "default state".
+ */
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.interfaces.block.tile;

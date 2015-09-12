@@ -364,6 +364,7 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -2040,7 +2041,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public BlockDamageSourceBuilder createBlockDamageSourceBuilder() {
-        throw new UnsupportedOperationException(); 
+        return new SpongeBlockDamageSourceBuilder();
     }
 
     @Override

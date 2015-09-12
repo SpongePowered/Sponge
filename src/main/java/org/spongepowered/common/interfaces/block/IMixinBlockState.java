@@ -22,25 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.interfaces.block;
 
-import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+public interface IMixinBlockState {
 
-public interface BlockDataProcessor<T extends ImmutableDataManipulator<T, ?>> {
-
-    int getPriority();
-
-    Optional<T> fromBlockPos(World world, BlockPos blockPos);
-
-    Optional<T> createFrom(IBlockState blockState);
-
-    Optional<BlockState> withData(IBlockState blockState, T manipulator);
-
-    boolean remove(World world, BlockPos blockPos);
+    int getStateMeta();
 
 }
