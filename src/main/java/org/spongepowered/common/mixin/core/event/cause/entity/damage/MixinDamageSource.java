@@ -57,11 +57,6 @@ public abstract class MixinDamageSource implements DamageSource {
     }
 
     @Override
-    public boolean isStarvationBased() {
-        return this.damageType.equals("starve");
-    }
-
-    @Override
     public boolean isMagic() {
         return this.isMagicDamage();
     }
