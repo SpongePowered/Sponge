@@ -29,6 +29,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -52,7 +53,7 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
 
     @Override
     public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityWolf || container instanceof ItemStack;
+        return container instanceof EntityWolf || (container instanceof ItemStack && ((ItemStack) container).getItem().equals(ItemTypes.SPONGE));
     }
 
     @Override
