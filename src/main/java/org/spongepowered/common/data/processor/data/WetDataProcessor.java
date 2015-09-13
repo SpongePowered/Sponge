@@ -38,6 +38,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
@@ -100,7 +101,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
     @Override
     public Optional<ImmutableWetData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableWetData immutable) {
         if (key == Keys.IS_WET) {
-            return Optional.<ImmutableWetData>of(new ImmutableSpongeWetData((Boolean) value));
+            return Optional.<ImmutableWetData>of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWetData.class, (Boolean) value)); // TODO is this how to cache?
         }
         return Optional.absent();
     }
