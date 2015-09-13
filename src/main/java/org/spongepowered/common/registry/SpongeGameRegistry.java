@@ -106,6 +106,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableEyeLocat
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
@@ -116,6 +117,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -300,6 +302,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.EyeLocat
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.FoodDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.GameModeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.HealthDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.ScreamingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.tileentity.SignDataBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
@@ -311,6 +314,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
@@ -321,6 +325,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocatio
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
@@ -331,6 +336,7 @@ import org.spongepowered.common.data.processor.data.entity.EyeLocationDataProces
 import org.spongepowered.common.data.processor.data.entity.FoodDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.GameModeDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameValueProcessor;
@@ -347,6 +353,7 @@ import org.spongepowered.common.data.processor.value.entity.HealthValueProcessor
 import org.spongepowered.common.data.processor.value.entity.MaxAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.ScreamingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
@@ -1696,6 +1703,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
                 ImmutableSpongeGameModeData.class, gameModeDataProcessor, gameModeDataBuilder);
 
+        final ScreamingDataProcessor screamingDataProcessor = new ScreamingDataProcessor();
+        final ScreamingDataBuilder screamingDataBuilder = new ScreamingDataBuilder();
+        service.registerBuilder(ScreamingData.class, screamingDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(ScreamingData.class, SpongeScreamingData.class, ImmutableScreamingData.class,
+                ImmutableSpongeScreamingData.class, screamingDataProcessor, screamingDataBuilder);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1713,6 +1726,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.MAX_AIR, new MaxAirValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REMAINING_AIR, new RemainingAirValueProcessor());
         dataRegistry.registerValueProcessor(Keys.GAME_MODE, new GameModeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.IS_SCREAMING, new ScreamingValueProcessor());
     }
 
     private void setNotePitches() {

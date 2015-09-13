@@ -68,6 +68,7 @@ public class KeyRegistry {
         keyMap.put("max_air", makeSingleKey(Integer.class, Value.class, of("MaxAir")));
         keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
         keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
+        keyMap.put("is_screaming", makeSingleKey(Boolean.class, Value.class, of("IsScreaming")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
