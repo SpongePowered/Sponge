@@ -37,29 +37,29 @@ import com.google.common.base.Optional;
 
 public class WetDataBuilder implements DataManipulatorBuilder<WetData, ImmutableWetData> {
 
-	@Override
-	public Optional<WetData> build(DataView container) throws InvalidDataException {
-		if (container.contains(Keys.IS_WET.getQuery())) {
-			Optional<Boolean> isWet = container.getBoolean(Keys.IS_WET.getQuery());
-			if (isWet.isPresent()) {
-				return Optional.<WetData>of(new SpongeWetData(isWet.get()));
-			}
-		}
-		return Optional.absent();
-	}
+    @Override
+    public Optional<WetData> build(DataView container) throws InvalidDataException {
+        if (container.contains(Keys.IS_WET.getQuery())) {
+            Optional<Boolean> isWet = container.getBoolean(Keys.IS_WET.getQuery());
+            if (isWet.isPresent()) {
+                return Optional.<WetData>of(new SpongeWetData(isWet.get()));
+            }
+        }
+        return Optional.absent();
+    }
 
-	@Override
-	public WetData create() {
-		return new SpongeWetData(false);
-	}
+    @Override
+    public WetData create() {
+        return new SpongeWetData(false);
+    }
 
-	@Override
-	public Optional<WetData> createFrom(DataHolder dataHolder) {
-		if (dataHolder.supports(Keys.IS_WET)) {
-			return Optional.<WetData>of(new SpongeWetData(dataHolder.get(Keys.IS_WET).get()));
-		}
-		
-		return Optional.absent();
-	}
+    @Override
+    public Optional<WetData> createFrom(DataHolder dataHolder) {
+        if (dataHolder.supports(Keys.IS_WET)) {
+            return Optional.<WetData>of(new SpongeWetData(dataHolder.get(Keys.IS_WET).get()));
+        }
+
+        return Optional.absent();
+    }
 
 }
