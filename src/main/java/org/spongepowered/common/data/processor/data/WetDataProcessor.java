@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
@@ -51,7 +52,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
 
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof EntityWolf || dataHolder instanceof ItemStack;
+        return dataHolder instanceof EntityWolf || ((dataHolder instanceof ItemStack) && ((ItemStack) dataHolder).getItem().equals(ItemTypes.SPONGE));
     }
 
     @Override
