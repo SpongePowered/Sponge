@@ -157,6 +157,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
+    public List<ImmutableValue<?>> getValues(IBlockState blockState) {
+        // TODO
+        return ImmutableList.of();
+    }
+
+    @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.of();
     }
