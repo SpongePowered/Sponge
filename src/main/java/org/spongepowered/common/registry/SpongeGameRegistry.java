@@ -75,7 +75,9 @@ import org.spongepowered.api.attribute.AttributeBuilder;
 import org.spongepowered.api.attribute.AttributeCalculator;
 import org.spongepowered.api.attribute.AttributeModifierBuilder;
 import org.spongepowered.api.attribute.Operation;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockSnapshotBuilder;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.Banner;
@@ -272,6 +274,8 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.SpongeDataRegistry;
@@ -1643,6 +1647,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(Note.class, new SpongeNoteBuilder(game));
         service.registerBuilder(Sign.class, new SpongeSignBuilder(game));
         service.registerBuilder(Skull.class, new SpongeSkullBuilder(game));
+
+        // Block stuff
+        service.registerBuilder(BlockSnapshot.class, new SpongeBlockSnapshotBuilder());
+        service.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
+
+        // Data Manipulators
 
         final HealthDataProcessor healthProcessor = new HealthDataProcessor();
         final HealthDataBuilder healthDataBuilder = new HealthDataBuilder();

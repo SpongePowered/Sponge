@@ -62,7 +62,6 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     private BlockState blockState;
     private UUID worldUuid;
     private Vector3i coords;
-    @Nullable private Location<World> location;
     @Nullable private List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable private NBTTagCompound compound;
 
@@ -87,7 +86,6 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
 
     @Override
     public BlockSnapshotBuilder from(Location<World> location) {
-        this.location = checkNotNull(location);
         this.blockState = location.getBlock();
         this.worldUuid = location.getExtent().getUniqueId();
         this.coords = location.getBlockPosition();
@@ -117,7 +115,8 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public BlockSnapshotBuilder from(BlockSnapshot holder) {
         this.blockState = holder.getState();
-        this.location = holder.getLocation().get();
+        this.worldUuid = holder.getWorldUniqueId();
+        this.coords = holder.getPosition();
         this.manipulators = Lists.newArrayList(holder.getManipulators());
         if (holder instanceof SpongeBlockSnapshot) {
             if (((SpongeBlockSnapshot) holder).compound != null) {
@@ -132,7 +131,6 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
         this.blockState = BlockTypes.AIR.getDefaultState();
         this.worldUuid = null;
         this.coords = null;
-        this.location = null;
         this.manipulators = null;
         this.compound = null;
         return this;
@@ -141,15 +139,18 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public BlockSnapshot build() {
         checkState(this.blockState != null);
-        checkState(this.location != null);
         if (this.manipulators == null) {
             if (this.compound == null) {
-                return new SpongeBlockSnapshot(this.blockState, this.location);
+                return new SpongeBlockSnapshot(this.blockState, this.worldUuid, this.coords, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
             } else {
-                return new SpongeBlockSnapshot(this.blockState, this.location, this.compound);
+                return new SpongeBlockSnapshot(this.blockState,
+                                               this.worldUuid,
+                                               this.coords,
+                                               ImmutableList.<ImmutableDataManipulator<?, ?>>of(),
+                                               this.compound);
             }
         } else {
-            return new SpongeBlockSnapshot(this.blockState, this.location, ImmutableList.copyOf(this.manipulators));
+            return new SpongeBlockSnapshot(this.blockState, this.worldUuid, this.coords, ImmutableList.copyOf(this.manipulators));
         }
     }
 

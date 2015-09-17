@@ -22,15 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
@@ -42,53 +40,45 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 
-import java.util.List;
-
 public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
-    private BlockType blockType;
-    private List<ImmutableDataManipulator<?, ?>> manipulators;
+    private BlockState blockState;
 
     @Override
     public BlockStateBuilder blockType(BlockType blockType) {
-        this.blockType = checkNotNull(blockType);
+        this.blockState = checkNotNull(blockType).getDefaultState();
         return this;
     }
 
     @Override
     public <M extends DataManipulator<M, ?>> BlockStateBuilder add(M manipulator) {
-        this.manipulators.add(manipulator.asImmutable());
-        return this;
+        return add((ImmutableDataManipulator) manipulator.asImmutable());
     }
 
     @Override
     public <I extends ImmutableDataManipulator<I, ?>> BlockStateBuilder add(I manipulator) {
-        this.manipulators.add(manipulator);
+        final Optional<BlockState> optional = this.blockState.with(manipulator);
+        if (optional.isPresent()) {
+            this.blockState = optional.get();
+        }
         return this;
     }
 
     @Override
     public BlockStateBuilder from(BlockState holder) {
-        this.blockType = holder.getType();
-        this.manipulators = Lists.newArrayList();
-        this.manipulators.addAll(holder.getManipulators());
+        this.blockState = holder;
         return this;
     }
 
     @Override
     public BlockStateBuilder reset() {
-        this.blockType = BlockTypes.STONE;
-        this.manipulators = Lists.newArrayList();
+        this.blockState = BlockTypes.STONE.getDefaultState();
         return this;
     }
 
     @Override
     public BlockState build() {
-        IBlockState blockState = ((IBlockState) this.blockType.getDefaultState());
-        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-            blockState = (IBlockState) ((BlockState) blockState).with( manipulator);
-        }
-        return (BlockState) blockState;
+        return this.blockState;
     }
 
     @Override

@@ -58,6 +58,10 @@ public final class DataQueries {
     public static final DataQuery LOCATION_Y = of("y");
     public static final DataQuery LOCATION_Z = of("z");
 
+    public static final DataQuery ENTITY_SNAPSHOT_DATA = of("Data");
+    public static final DataQuery ENTITY_TYPE = of("EntityType");
+    public static final DataQuery ENTITY_SNAPSHOT_UNASFE_DATA = of("UnsafeData");
+
     public static final DataQuery DATA_CLASS = of("DataClass");
     public static final DataQuery INTERNAL_DATA = of("Data");
 
