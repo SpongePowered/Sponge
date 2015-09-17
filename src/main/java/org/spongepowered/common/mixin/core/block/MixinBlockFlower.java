@@ -63,10 +63,11 @@ public abstract class MixinBlockFlower extends MixinBlock {
 
     @Override
     public List<ImmutableValue<?>> getValues(IBlockState blockState) {
-        Optional<Value<PlantType>> value = ((BlockState) blockState).getValue(Keys.PLANT_TYPE);
+        // TODO - implement rest of plant data
+        /*Optional<Value<PlantType>> value = ((BlockState) blockState).getValue(Keys.PLANT_TYPE);
         if (value.isPresent()) {
             return ImmutableList.<ImmutableValue<?>>of(((BlockState) blockState).getValue(Keys.PLANT_TYPE).get().asImmutable());
-        }
+        }*/
         return ImmutableList.of();
     }
 
