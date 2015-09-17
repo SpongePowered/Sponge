@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -58,6 +57,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -328,4 +328,44 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     public int getStateMeta() {
         return this.block.getMetaFromState(this);
     }
+
+    @Override
+    public Optional<BlockTrait<?>> getTrait(String blockTrait) {
+        for (Object obj : this.properties.keySet()) {
+            BlockTrait<?> trait = (BlockTrait<?>) obj;
+            if (trait.getName().equalsIgnoreCase(blockTrait)) {
+                return Optional.<BlockTrait<?>>of(trait);
+            }
+        }
+
+        return Optional.absent();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends Comparable<T>> Optional<T> getTraitValue(BlockTrait<T> property) {
+        if (!this.properties.containsKey(property)) {
+            return Optional.absent();
+        } else {
+            return Optional.of((T) (Comparable<T>) property.getValueClass().cast(this.properties.get(property)));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ImmutableMap<BlockTrait<?>, ?> getTraitMap() {
+        return getProperties();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<BlockTrait<?>> getTraits() {
+        return getProperties().keySet();
+    }
+
+    @Override
+    public Collection<?> getTraitValues() {
+        return getProperties().values();
+    }
+
 }

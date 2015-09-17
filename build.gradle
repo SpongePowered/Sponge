@@ -33,7 +33,7 @@ apply from: 'gradle/minecraft.gradle'
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.4.4-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.4.6-SNAPSHOT') {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
