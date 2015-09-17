@@ -24,11 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,6 +45,9 @@ import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 @NonnullByDefault
@@ -56,6 +65,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     @Shadow public net.minecraft.scoreboard.Team.EnumVisible field_178778_i; // nameTagVisibility
     @Shadow public net.minecraft.scoreboard.Team.EnumVisible field_178776_j; // deathMessageVisiblity
     @Shadow public Set<String> membershipSet;
+    @Shadow public abstract Collection getMembershipCollection();
 
     private SpongeTeam spongeTeam;
 
@@ -169,5 +179,52 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     private boolean shouldEcho() {
         return (((IMixinScoreboard) this.theScoreboard).echoToSponge() || this.spongeTeam.getScoreboards().size() == 1)
                 && this.spongeTeam.allowRecursion;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public MessageSink getSink() {
+        Set<CommandSource> sources = new HashSet<CommandSource>();
+
+        Collection collection = getMembershipCollection();
+        Iterator iterator = collection.iterator();
+
+        while (iterator.hasNext()) {
+            String s = (String)iterator.next();
+            EntityPlayerMP teamPlayer = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(s);
+            if (teamPlayer != null) {
+                sources.add((Player) teamPlayer);
+            }
+        }
+        return MessageSinks.to(sources);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public MessageSink getSinkForPlayer(EntityPlayerMP player) {
+        Set<CommandSource> sources = new HashSet<CommandSource>();
+
+        Collection collection = getMembershipCollection();
+        Iterator iterator = collection.iterator();
+
+        while (iterator.hasNext()) {
+            String s = (String)iterator.next();
+            EntityPlayerMP teamPlayer = player.mcServer.getConfigurationManager().getPlayerByUsername(s);
+            if (teamPlayer != null && player != teamPlayer) {
+                sources.add((Player) teamPlayer);
+            }
+        }
+        return MessageSinks.to(sources);
+    }
+
+    public MessageSink getNonTeamSink() {
+        Set<CommandSource> sources = new HashSet<CommandSource>();
+
+        for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i) {
+            EntityPlayerMP player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);
+
+            if (player.getTeam() != (net.minecraft.scoreboard.Team)(Object)this) {
+                sources.add((Player) player);
+            }
+        }
+        return MessageSinks.to(sources);
     }
 }

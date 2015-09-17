@@ -22,19 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.block.properties;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.common.scoreboard.SpongeTeam;
+import net.minecraft.block.properties.PropertyInteger;
+import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IMixinTeam {
+import java.util.Collection;
 
-    void setSpongeTeam(SpongeTeam team);
+@Mixin(value = PropertyInteger.class)
+public abstract class MixinPropertyInteger extends MixinPropertyHelper<Integer> implements IntegerTrait {
 
-    SpongeTeam getSpongeTeam();
+    @SuppressWarnings("rawtypes")
+    @Shadow public abstract Collection getAllowedValues();
 
-    MessageSink getSinkForPlayer(EntityPlayerMP player);
+    @SuppressWarnings("unchecked")
+    public Collection<Integer> getPossibleValues() {
+        return getAllowedValues();
+    }
 
-    MessageSink getNonTeamSink();
 }

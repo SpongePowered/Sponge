@@ -26,6 +26,7 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
@@ -38,8 +39,13 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
+
+import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class DataUtil {
@@ -77,6 +83,30 @@ public class DataUtil {
             throw new InvalidDataException("Data does not match!");
         }
     }
+
+
+    public static Location<World> getLocation(DataView view, boolean castToInt) {
+        final UUID worldUuid = UUID.fromString(view.getString(DataQueries.LOCATION_WORLD_UUID).get());
+        final double x = view.getDouble(DataQueries.LOCATION_X).get();
+        final double y = view.getDouble(DataQueries.LOCATION_Y).get();
+        final double z = view.getDouble(DataQueries.LOCATION_Z).get();
+        if (castToInt) {
+            return new Location<World>(Sponge.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
+        } else {
+            return new Location<World>(Sponge.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
+        }
+
+    }
+
+    public static Vector3i getPosition3i(DataView view) {
+        checkDataExists(view, DataQueries.SNAPSHOT_WORLD_POSITION);
+        final DataView internal = view.getView(DataQueries.SNAPSHOT_WORLD_POSITION).get();
+        final int x = internal.getInt(DataQueries.POSITION_X).get();
+        final int y = internal.getInt(DataQueries.POSITION_Y).get();
+        final int z = internal.getInt(DataQueries.POSITION_Z).get();
+        return new Vector3i(x, y, z);
+    }
+
 
     // These two methods are provided because Eclipse can't handle the generic capture bounds in MixinDataHolder#offer(DataManipulator<?, ?>) and MixinDataHolder#offer(DataManipulator<?, ?>, MergeFunction)
 

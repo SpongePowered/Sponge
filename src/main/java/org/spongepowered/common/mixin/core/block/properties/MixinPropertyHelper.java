@@ -22,19 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.block.properties;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.common.scoreboard.SpongeTeam;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import net.minecraft.block.properties.PropertyHelper;
+import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IMixinTeam {
+@Mixin(value = PropertyHelper.class)
+public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>  {
 
-    void setSpongeTeam(SpongeTeam team);
+    protected String propertyName;
 
-    SpongeTeam getSpongeTeam();
+    @Shadow private String name;
+    @SuppressWarnings("rawtypes")
+    @Shadow private Class valueClass;
 
-    MessageSink getSinkForPlayer(EntityPlayerMP player);
+    public String getName() {
+        return this.name;
+    }
 
-    MessageSink getNonTeamSink();
+    @SuppressWarnings("unchecked")
+    public Class<T> getTraitValueClass() {
+        return this.valueClass;
+    }
+
+    public Predicate<T> getPredicate() {
+        return Predicates.in(getPossibleValues());
+    }
+
 }

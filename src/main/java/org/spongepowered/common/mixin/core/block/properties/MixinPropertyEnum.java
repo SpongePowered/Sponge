@@ -22,19 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.block.properties;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.common.scoreboard.SpongeTeam;
+import net.minecraft.block.properties.PropertyEnum;
+import org.spongepowered.api.block.trait.EnumTrait;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-public interface IMixinTeam {
+import java.util.Collection;
 
-    void setSpongeTeam(SpongeTeam team);
+@Mixin(value = PropertyEnum.class)
+public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {
 
-    SpongeTeam getSpongeTeam();
+    @SuppressWarnings("rawtypes")
+    @Shadow 
+    public abstract Collection getAllowedValues();
 
-    MessageSink getSinkForPlayer(EntityPlayerMP player);
+    @SuppressWarnings("rawtypes")
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String name, Class valueClass, Collection allowedValues, CallbackInfo ci) {
+        this.propertyName = name;
+    }
 
-    MessageSink getNonTeamSink();
+    @SuppressWarnings("unchecked")
+    public Collection<E> getPossibleValues() {
+        return getAllowedValues();
+    }
+
 }

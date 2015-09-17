@@ -37,7 +37,9 @@ import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -57,6 +59,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -157,6 +160,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
+    public List<ImmutableValue<?>> getValues(IBlockState blockState) {
+        // TODO
+        return ImmutableList.of();
+    }
+
+    @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.of();
     }
@@ -164,5 +173,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public BlockState getDefaultBlockState() {
         return getDefaultState();
+    }
+
+    @Override
+    public Collection<BlockTrait<?>> getTraits() {
+        return getDefaultBlockState().getTraits();
+    }
+
+    @Override
+    public Optional<BlockTrait<?>> getTrait(String blockTrait) {
+        return getDefaultBlockState().getTrait(blockTrait);
     }
 }

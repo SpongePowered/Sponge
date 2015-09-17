@@ -32,13 +32,18 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -46,6 +51,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
 import java.util.Set;
@@ -61,6 +67,26 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
+    @Nullable private final NBTTagCompound compound;
+
+    public SpongeEntitySnapshot(net.minecraft.entity.Entity entity) {
+        this.entityType = ((Entity) entity).getType();
+        this.entityUuid = ((Entity) entity).getUniqueId();
+        ImmutableList.Builder<ImmutableDataManipulator<?, ?>> manipulatorBuilder = ImmutableList.builder();
+        ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+        for (DataManipulator<?, ?> manipulator : ((Entity) entity).getContainers()) {
+            manipulatorBuilder.add(manipulator.asImmutable());
+            keyBuilder.addAll(manipulator.getKeys());
+            valueBuilder.addAll(manipulator.getValues());
+        }
+        this.manipulators = manipulatorBuilder.build();
+        this.keys = keyBuilder.build();
+        this.values = valueBuilder.build();
+        this.compound = new NBTTagCompound();
+        entity.writeToNBT(this.compound);
+        this.transform = ((Entity) entity).getTransform();
+    }
 
     public SpongeEntitySnapshot(@Nullable UUID entityUuid, @Nullable Transform<World> transform, EntityType entityType,
                                 ImmutableList<ImmutableDataManipulator<?, ?>> manipulators) {
@@ -76,6 +102,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         }
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
+        this.compound = null;
     }
 
     @Override
@@ -105,10 +132,18 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public DataContainer toContainer() {
+        final List<DataView> dataList = Lists.newArrayList();
+        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+            final DataContainer internal = new MemoryDataContainer();
+            internal.set(DataQueries.DATA_CLASS, manipulator.getClass().toString());
+            internal.set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
+            dataList.add(internal);
+
+        }
         return new MemoryDataContainer()
-            .set(of("EntityType"), this.entityType.getId())
+            .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
             .set(of("Location"), this.transform == null ? "null" : this.transform.getLocation())
-            .set(of("Data"), this.manipulators);
+            .set(DataQueries.ENTITY_SNAPSHOT_DATA, dataList);
     }
 
     @SuppressWarnings("unchecked")

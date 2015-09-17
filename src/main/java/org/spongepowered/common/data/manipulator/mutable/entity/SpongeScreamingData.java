@@ -22,19 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.common.scoreboard.SpongeTeam;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public interface IMixinTeam {
+public class SpongeScreamingData extends AbstractBooleanData<ScreamingData, ImmutableScreamingData> implements ScreamingData {
 
-    void setSpongeTeam(SpongeTeam team);
+    public SpongeScreamingData(Boolean value) {
+        super(ScreamingData.class, value, Keys.IS_SCREAMING, ImmutableSpongeScreamingData.class);
+    }
 
-    SpongeTeam getSpongeTeam();
+    @Override
+    public Value<Boolean> screaming() {
+        return new SpongeValue<Boolean>(Keys.IS_SCREAMING, this.getValue());
+    }
 
-    MessageSink getSinkForPlayer(EntityPlayerMP player);
-
-    MessageSink getNonTeamSink();
+    @Override
+    protected Value<?> getValueGetter() {
+        return screaming();
+    }
 }

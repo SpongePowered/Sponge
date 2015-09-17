@@ -22,19 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.interfaces.block;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.common.scoreboard.SpongeTeam;
+public interface IMixinBlockState {
 
-public interface IMixinTeam {
+    int getStateMeta();
 
-    void setSpongeTeam(SpongeTeam team);
-
-    SpongeTeam getSpongeTeam();
-
-    MessageSink getSinkForPlayer(EntityPlayerMP player);
-
-    MessageSink getNonTeamSink();
 }

@@ -22,31 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.block.properties;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.block.properties.PropertyBool;
+import org.spongepowered.api.block.trait.BooleanTrait;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-public interface IMixinTileEntity {
+import java.util.Collection;
 
-    /**
-     * Gets the included {@link NBTTagCompound} for a tile entity. With Vanilla, this is
-     * created by vanilla. With Forge, this is included.
-     *
-     * @return Gets the tag compound containing various tile data
-     */
-    NBTTagCompound getSpongeData();
+@Mixin(value = PropertyBool.class)
+public abstract class MixinPropertyBoolean extends MixinPropertyHelper<Boolean> implements BooleanTrait {
 
-    /**
-     * Read extra data (SpongeData) from the tile entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to read from
-     */
-    void readFromNbt(NBTTagCompound compound);
+    @SuppressWarnings("rawtypes")
+    @Shadow 
+    public abstract Collection getAllowedValues();
 
-    /**
-     * Write extra data (SpongeData) to the tile entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to write to
-     */
-    void writeToNbt(NBTTagCompound compound);
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String name, CallbackInfo ci) {
+        this.propertyName = name;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Boolean> getPossibleValues() {
+        return getAllowedValues();
+    }
+
 }

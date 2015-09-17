@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntityBrewingStand.class)
@@ -46,12 +45,10 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("BrewTime"), this.getField(0));
+    public void sendDataToContainer(DataView dataView) {
+        dataView.set(DataQueries.BLOCK_ENTITY_BREWING_TIME, this.getField(0));
         if (this.customName != null) {
-            container.set(of("CustomName"), this.customName);
+            dataView.set(DataQueries.BLOCK_ENTITY_CUSTOM_NAME, this.customName);
         }
-        return container;
     }
 }

@@ -90,11 +90,6 @@ public class SpongeBlockDamageSource implements BlockDamageSource {
     }
 
     @Override
-    public boolean isStarvationBased() {
-        return false;
-    }
-
-    @Override
     public boolean isMagic() {
         return this.magical;
     }

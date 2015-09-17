@@ -26,43 +26,54 @@ package org.spongepowered.common.data.value.mutable.common;
 
 import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.KeyFactory;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.lang.ref.WeakReference;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
+/**
+ * This class provides a safe reference for an {@link Entity} such that
+ * references aren't maintained and therefor leaked. Provided that
+ */
+public class SpongeEntityValue implements Value<Entity> {
 
+    private final Key<? extends BaseValue<Entity>> key;
+    private UUID entityid;
     private WeakReference<Entity> weakReference = new WeakReference<Entity>(null);
 
-    public SpongeEntityValue(Key<? extends BaseValue<Optional<Entity>>> key) {
-        super(key);
-    }
+    public SpongeEntityValue(Key<? extends BaseValue<Entity>> key, Entity actualValue) {
+        this.key = checkNotNull(key);
+        this.entityid = checkNotNull(actualValue).getUniqueId();
+        this.weakReference = new WeakReference<Entity>(actualValue);
 
-    public SpongeEntityValue(Key<? extends BaseValue<Optional<Entity>>> key, Optional<Entity> actualValue) {
-        super(key, Optional.<Entity>absent());
-        if (actualValue.isPresent()) {
-            this.weakReference = new WeakReference<Entity>(actualValue.get());
-        } else {
-            this.weakReference.clear();
-        }
     }
 
     @Override
-    public Optional<Entity> get() {
-        return fromNullable(this.weakReference.get());
+    public Entity get() {
+        @Nullable Entity entity = this.weakReference.get();
+        if (entity == null) {
+            for (World world : Sponge.getGame().getServer().getWorlds()) {
+                final Optional<Entity> optional = world.getEntity(this.entityid);
+                if (optional.isPresent()) {
+                    return optional.get();
+                }
+            }
+        }
+        throw new IllegalStateException("The entity has expired or has been permanently removed! The entity's id was: " + this.entityid.toString());
     }
 
     @Override
@@ -71,46 +82,66 @@ public class SpongeEntityValue extends SpongeOptionalValue<Entity> {
     }
 
     @Override
-    public Optional<Optional<Entity>> getDirect() {
-        return super.getDirect();
+    public Entity getDefault() {
+        checkState(!exists(), "The entity reference expired!");
+        return this.weakReference.get();
     }
 
     @Override
-    public OptionalValue<Entity> set(Optional<Entity> value) {
-        if (value.isPresent()) {
-            this.weakReference = new WeakReference<Entity>(value.get());
-        } else {
-            this.weakReference.clear();
-        }
-        return this;
+    public Optional<Entity> getDirect() {
+        return fromNullable(this.weakReference.get());
     }
 
     @Override
-    public OptionalValue<Entity> transform(Function<Optional<Entity>, Optional<Entity>> function) {
-        final Optional<Entity> optional = checkNotNull(checkNotNull(function).apply(fromNullable(this.weakReference.get())));
-        if (optional.isPresent()) {
-            this.weakReference = new WeakReference<Entity>(optional.get());
-        } else {
-            this.weakReference.clear();
-        }
-        return this;
+    public Key<? extends BaseValue<Entity>> getKey() {
+        return this.key;
     }
 
     @Override
-    public ImmutableOptionalValue<Entity> asImmutable() {
-        return super.asImmutable();
-    }
-
-    @Override
-    public OptionalValue<Entity> setTo(@Nullable Entity value) {
+    public Value<Entity> set(Entity value) {
+        this.entityid = checkNotNull(value).getUniqueId();
         this.weakReference = new WeakReference<Entity>(value);
         return this;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Value<Entity> or(Entity defaultValue) {
-        final Key<Value<Entity>> key = KeyFactory.makeSingleKey(Entity.class, (Class<Value<Entity>>) (Class) Value.class, this.getKey().getQuery());
-        return exists() ? new SpongeValue<Entity>(key, this.weakReference.get()) : new SpongeValue<Entity>(key, checkNotNull(defaultValue));
+    public Value<Entity> transform(Function<Entity, Entity> function) {
+        final Entity entity = checkNotNull(checkNotNull(function).apply(this.weakReference.get()));
+        this.weakReference = new WeakReference<Entity>(entity);
+        this.entityid = checkNotNull(entity).getUniqueId();
+        return this;
+    }
+
+    @Override
+    public ImmutableValue<Entity> asImmutable() {
+        return new ImmutableSpongeValue<Entity>(getKey(), this.weakReference.get());
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+            .add("key", this.key)
+            .add("entityid", this.entityid)
+            .add("weakReference", this.weakReference)
+            .toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.key, this.entityid, this.weakReference);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeEntityValue other = (SpongeEntityValue) obj;
+        return Objects.equal(this.key, other.key)
+               && Objects.equal(this.entityid, other.entityid)
+               && Objects.equal(this.weakReference, other.weakReference);
     }
 }

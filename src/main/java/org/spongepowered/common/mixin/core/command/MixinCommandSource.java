@@ -29,15 +29,18 @@ import com.google.common.base.Preconditions;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 
@@ -68,6 +71,24 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
 
     @Override
     public MessageSink getMessageSink() {
+        CommandSource source = this;
+        if (source instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP)(Object) this;
+            if (player.worldObj.getGameRules().getGameRuleBooleanValue("showDeathMessages")) {
+                Team team = player.getTeam();
+    
+                if (team != null && team.func_178771_j() != Team.EnumVisible.ALWAYS) {
+                    if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+                        this.sink = ((IMixinTeam)team).getSinkForPlayer((EntityPlayerMP) player);
+                    } else if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                        this.sink = ((IMixinTeam)team).getNonTeamSink();
+                    }
+                }
+            } else {
+                this.sink = MessageSinks.toNone();
+            }
+        }
+
         return this.sink;
     }
 

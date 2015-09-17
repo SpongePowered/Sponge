@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.state.IBlockState;
@@ -35,7 +36,9 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
+import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;
@@ -60,7 +63,12 @@ public abstract class MixinBlockFlower extends MixinBlock {
 
     @Override
     public List<ImmutableValue<?>> getValues(IBlockState blockState) {
-        return ImmutableList.<ImmutableValue<?>>of(((BlockState) blockState).getValue(Keys.PLANT_TYPE).get().asImmutable());
+        // TODO - implement rest of plant data
+        /*Optional<Value<PlantType>> value = ((BlockState) blockState).getValue(Keys.PLANT_TYPE);
+        if (value.isPresent()) {
+            return ImmutableList.<ImmutableValue<?>>of(((BlockState) blockState).getValue(Keys.PLANT_TYPE).get().asImmutable());
+        }*/
+        return ImmutableList.of();
     }
 
     @Override
