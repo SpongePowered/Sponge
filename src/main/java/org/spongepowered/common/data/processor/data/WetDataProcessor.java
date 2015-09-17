@@ -59,9 +59,11 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
     @Override
     public Optional<WetData> from(DataHolder dataHolder) {
         if (this.supports(dataHolder)) {
-            SpongeWetData wetData = new SpongeWetData(dataHolder.get(Keys.IS_WET).get());
-
-            return Optional.<WetData>of(wetData);
+            if (dataHolder instanceof EntityWolf) {
+                return Optional.<WetData>of(new SpongeWetData(((EntityWolf) dataHolder).isWet() || ((EntityWolf) dataHolder).isWolfWet()));
+            } else if ((dataHolder instanceof ItemStack) && ((ItemStack) dataHolder).getItem().equals(ItemTypes.SPONGE)) {
+            	return Optional.<WetData>of(new SpongeWetData(((ItemStack) dataHolder).getTagCompound().getBoolean("wet")));
+            }
         }
         return Optional.absent();
     }

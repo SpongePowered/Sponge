@@ -46,6 +46,11 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
     @Override
     public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
         if (container.supports(Keys.IS_WET)) {
+            if ((container instanceof ItemStack) && ((ItemStack) container).getItem().equals(ItemTypes.SPONGE)) {
+                return Optional.of(((ItemStack) container).getTagCompound().getBoolean("wet"));
+        	} else if (container instanceof EntityWolf) {
+                return Optional.of(((EntityWolf) container).isWet() || ((EntityWolf) container).isWolfWet());
+            }
             return Optional.of(container.get(Keys.IS_WET).get());
         }
         return Optional.absent();
