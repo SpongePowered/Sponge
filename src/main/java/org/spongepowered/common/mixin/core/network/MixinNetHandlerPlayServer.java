@@ -303,8 +303,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                DisplaceEntityEvent.TargetPlayer event =
-                        SpongeEventFactory.createDisplaceEntityEventTargetPlayer(Sponge.getGame(), fromTransform, toTransform, player);
+                DisplaceEntityEvent.Move.TargetPlayer event =
+                        SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(Sponge.getGame(), fromTransform, toTransform, player);
                 Sponge.getGame().getEventManager().post(event);
                 if (event.isCancelled()) {
                     player.setTransform(fromTransform);
