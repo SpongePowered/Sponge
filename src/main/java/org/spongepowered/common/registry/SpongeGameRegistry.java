@@ -2045,12 +2045,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public BlockStateBuilder createBlockStateBuilder() {
-        throw new UnsupportedOperationException();
+        return new SpongeBlockStateBuilder();
     }
 
     @Override
     public BlockSnapshotBuilder createBlockSnapshotBuilder() {
-        throw new UnsupportedOperationException(); 
+        return new SpongeBlockSnapshotBuilder();
     }
 
     @Override

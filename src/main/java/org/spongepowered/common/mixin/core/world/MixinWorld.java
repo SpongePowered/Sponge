@@ -938,13 +938,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
-        Optional<Location<World>> location = snapshot.getLocation();
-        if (!location.isPresent()) {
-            Sponge.getLogger().error("Unable to restore snapshot @ " + location.get() + ". World does not exist.");
-            return false;
-        }
-
-        snapshot.withLocation(new Location<World>(this, new Vector3i(x, y, z)));
+        snapshot = snapshot.withLocation(new Location<World>(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, notifyNeighbors);
     }
 

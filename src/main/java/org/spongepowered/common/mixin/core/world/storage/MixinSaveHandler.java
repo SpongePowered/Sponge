@@ -129,7 +129,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         }
     }
 
-    private void loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
+    @Override
+    public void loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
         // Preserve dimension data from Sponge
         final NBTTagCompound customWorldDataCompound = compound.getCompoundTag("Forge");
         if (customWorldDataCompound.hasKey("DimensionData")) {

@@ -26,7 +26,6 @@ package org.spongepowered.common.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.flowpowered.math.vector.Vector3i;
