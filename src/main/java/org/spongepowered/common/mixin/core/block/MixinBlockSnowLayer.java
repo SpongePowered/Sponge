@@ -24,27 +24,44 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.block.IMixinBlockLayerable;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
+
+import java.util.List;
 
 @Mixin(BlockSnow.class)
-public abstract class MixinBlockSnowLayer extends MixinBlock implements IMixinBlockLayerable {
+public abstract class MixinBlockSnowLayer extends MixinBlock {
 
     private static final int LAYER_OFFSET = 1;
 
-    @Override
-    public LayeredData getLayerData(IBlockState blockState) {
+    public ImmutableLayeredData getLayerData(IBlockState blockState) {
         final int layer = (Integer) blockState.getValue(BlockSnow.LAYERS);
-        return null;
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, layer, 1, 8);
     }
 
     @Override
-    public BlockState setLayerData(IBlockState blockState, LayeredData data) {
-        return null;
+    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+
+        return super.getStateWithData(blockState, manipulator);
     }
 
+    @Override
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        return super.getStateWithValue(blockState, key, value);
+    }
+
+    @Override
+    public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getLayerData(blockState));
+    }
 }

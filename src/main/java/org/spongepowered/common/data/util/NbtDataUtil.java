@@ -42,6 +42,9 @@ public class NbtDataUtil {
     public static final String BLOCK_ENTITY_ID = "id";
     public static final String SIGN = "Sign";
 
+    public static final String TILE_ENTITY_POSITION_X = "x";
+    public static final String TILE_ENTITY_POSITION_Y = "y";
+    public static final String TILE_ENTITY_POSITION_Z = "z";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;

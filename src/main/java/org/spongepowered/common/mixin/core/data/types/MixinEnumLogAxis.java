@@ -22,10 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * A majority of these interfaces are to aid in manipulating block states and blocks
- * for a specific {@link org.spongepowered.api.data.manipulator.DataManipulator}. The one
- * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
- * for the benefit of being able to "reset" the block to a "default state".
- */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.block.types;
+package org.spongepowered.common.mixin.core.data.types;
+
+import net.minecraft.block.BlockLog;
+import org.spongepowered.api.data.type.LogAxis;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
+@Mixin(BlockLog.EnumAxis.class)
+@Implements(@Interface(iface = LogAxis.class, prefix = "log$"))
+public abstract class MixinEnumLogAxis {
+
+    @Shadow public abstract String getName();
+
+    public String log$getId() {
+        return getName();
+    }
+
+    @Intrinsic
+    public String log$getName() {
+        return getName();
+    }
+
+    /* TODO when generic mixin methods work.
+    public LogAxis log$cycleNext() {
+        return (LogAxis) (Object) BlockLog.EnumAxis.values()[((BlockLog.EnumAxis) (Object) this).ordinal() + 1 % BlockLog.EnumAxis.values().length];
+    }
+    */
+}

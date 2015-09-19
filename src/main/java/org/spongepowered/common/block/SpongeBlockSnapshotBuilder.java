@@ -157,33 +157,20 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public Optional<BlockSnapshot> build(DataView container) throws InvalidDataException {
         checkDataExists(container, DataQueries.BLOCK_STATE);
-        checkDataExists(container, DataQueries.BLOCK_SNAPSHOT_EXTRA_DATA);
-        checkDataExists(container, DataQueries.SNAPSHOT_WORLD_UUID);
+        checkDataExists(container, DataQueries.DATA_MANIPULATORS);
+        checkDataExists(container, Location.WORLD_ID);
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
         // this is unused for now
-        final UUID worldUuid = UUID.fromString(container.getString(DataQueries.SNAPSHOT_WORLD_UUID).get());
+        final UUID worldUuid = UUID.fromString(container.getString(Location.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
-        final List<DataView> dataViews = container.getViewList(DataQueries.BLOCK_SNAPSHOT_EXTRA_DATA).get();
-        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> extraDataBuilder = ImmutableList.builder();
-        if (!dataViews.isEmpty()) {
-            for (DataView dataView : dataViews) {
-                try {
-                    Class<ImmutableDataManipulator<?, ?>> clazz = (Class<ImmutableDataManipulator<?, ?>>) Class.
-                        forName(dataView.getString(DataQueries.DATA_CLASS).get());
-                    ImmutableDataManipulator<?, ?> manipulator = dataView
-                        .getSerializable(DataQueries.INTERNAL_DATA, clazz, serializationService).get();
-                    extraDataBuilder.add(manipulator);
-                } catch (Exception e) {
-                    throw new InvalidDataException("Could not deserialize a data manipulator!", e);
-                }
-            }
-        }
+        final List<DataView> dataViews = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
+        final ImmutableList<ImmutableDataManipulator<?, ?>> extraData = DataUtil.deserializeImmutableManipulatorList(dataViews);
         // And now to get the block state...
         final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationService).get();
-        Optional<DataView> unsafeCompound = container.getView(DataQueries.BLOCK_SNAPSHOT_UNSAFE_DATA);
+        Optional<DataView> unsafeCompound = container.getView(DataQueries.UNSAFE_NBT);
         final NBTTagCompound compound = unsafeCompound.isPresent() ? NbtTranslator.getInstance().translateData(unsafeCompound.get()) : null;
         // todo actually use the nbt compound
-        return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(blockState, worldUuid, coordinate, extraDataBuilder.build(), compound));
+        return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(blockState, worldUuid, coordinate, extraData, compound));
     }
 }

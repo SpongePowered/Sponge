@@ -22,30 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.util.Direction;
+import net.minecraft.block.BlockFlower;
+import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IMixinBlockDirectional extends IMixinBlock {
+@Mixin(BlockFlower.EnumFlowerType.class)
+@Implements(@Interface(iface = PlantType.class, prefix = "shadow$"))
+public abstract class MixinEnumFlowerType {
 
-    ImmutableDirectionalData getDirectionalData(IBlockState blockState);
+    @Shadow public abstract String getName();
 
-    Value<Direction> getDirectionFor(IBlockState blockState);
+    public String getId() {
+        return shadow$getName();
+    }
 
-    boolean validateDirection(Direction direction);
-
-    DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos);
-
-    BlockState setDirectionalData(IBlockState blockState, DirectionalData manipulator);
-
-    BlockState resetDirectionData(BlockState blockState);
-
+    @Intrinsic
+    public String shadow$getName() {
+        return getName();
+    }
 }

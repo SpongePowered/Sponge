@@ -22,30 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
-
-import net.minecraft.block.BlockCake;
-import net.minecraft.block.BlockSnow;
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
-
-/**
- * This interface provides the necessary information for {@link LayeredData} to be
- * retrieved from the various blocks that have "layered" information, such as
- * {@link BlockSnow}, {@link BlockCake}.
- */
-public interface IMixinBlockLayerable extends IMixinBlock {
-
-    /**
-     * Gets the {@link LayeredData} from the given block state that
-     * is guaranteed to be of the desired "type".
-     *
-     * @param blockState The block state to retrieve the layered data from
-     * @return The layered data
-     */
-    LayeredData getLayerData(IBlockState blockState);
-
-    BlockState setLayerData(IBlockState blockState, LayeredData data);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.block.properties;

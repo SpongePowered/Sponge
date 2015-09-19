@@ -50,9 +50,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.data.BlockDataProcessor;
-import org.spongepowered.common.data.BlockValueProcessor;
-import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
@@ -71,10 +68,10 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     private ImmutableMap properties;
     @Shadow private Block block;
 
-    @Nullable private ImmutableSet<ImmutableValue<?>> values;
-    @Nullable private ImmutableSet<Key<?>> keys;
-    @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
-    @Nullable private ImmutableMap<Key<?>, Object> keyMap;
+    private ImmutableSet<ImmutableValue<?>> values;
+    private ImmutableSet<Key<?>> keys;
+    private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
+    private ImmutableMap<Key<?>, Object> keyMap;
 
     @Override
     public BlockType getType() {
@@ -104,6 +101,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     public List<ImmutableDataManipulator<?, ?>> getManipulators() {
         if (this.manipulators == null) {
             this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.block).getManipulators(this));
+            populateKeyValues();
         }
         return this.manipulators;
     }
@@ -142,12 +140,8 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         } else {
             E current = this.get(key).get();
             final E newVal = checkNotNull(function.apply(current));
-            Optional<BlockValueProcessor<E, ?>> optional = SpongeDataRegistry.getInstance().getBaseBlockValueProcessor(key);
-            if (optional.isPresent()) {
-                return optional.get().offerValue(this, newVal);
-            }
+            return this.with(key, newVal);
         }
-        return Optional.absent();
     }
 
     @Override
@@ -155,11 +149,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         if (!supports(key)) {
             return Optional.absent();
         }
-        final Optional<BlockValueProcessor<E, ?>> optional = SpongeDataRegistry.getInstance().getBaseBlockValueProcessor(key);
-        if (optional.isPresent()) {
-            return optional.get().offerValue(this, value);
-        }
-        return Optional.absent();
+        return ((IMixinBlock) this.block).getStateWithValue(this, key, value);
     }
 
     @Override
@@ -170,11 +160,10 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        final Optional<BlockDataProcessor> optional = SpongeDataRegistry.getInstance().getWildBlockDataProcessor(valueContainer.getClass());
-        if (!optional.isPresent()) {
-            return Optional.absent();
+        if (supports((Class<ImmutableDataManipulator<?, ?>>) (Class) valueContainer.getClass())) {
+            return ((IMixinBlock) this.block).getStateWithData(this, valueContainer);
         } else {
-            return optional.get().withData(this, valueContainer);
+            return Optional.absent();
         }
     }
 
@@ -194,7 +183,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public Optional<BlockState> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
-        return Optional.absent();
+        return Optional.absent(); // By default, all manipulators have to have the manipulator if it exists, we can't remove data.
     }
 
     @Override
@@ -243,22 +232,25 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        if (this.keyMap == null) {
-            generateKeyMap();
-        }
         if (this.keyMap.containsKey(checkNotNull(key))) {
             return Optional.of((E) this.keyMap.get(key));
         }
         return Optional.absent();
     }
 
-    private void generateKeyMap() {
+    private void populateKeyValues() {
         ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
+        ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
             for (ImmutableValue<?> value : manipulator.getValues()) {
                 builder.put(value.getKey(), value.get());
+                valueBuilder.add(value);
+                keyBuilder.add(value.getKey());
             }
         }
+        this.values = valueBuilder.build();
+        this.keys = keyBuilder.build();
         this.keyMap = builder.build();
     }
 
@@ -303,7 +295,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public Set<Key<?>> getKeys() {
         if (this.keys == null) {
-            this.keys = ImmutableSet.copyOf(((IMixinBlock) this.block).getApplicableKeys());
+            populateKeyValues();
         }
         return this.keys;
     }
@@ -311,7 +303,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public Set<ImmutableValue<?>> getValues() {
         if (this.values == null) {
-            this.values = ImmutableSet.copyOf(((IMixinBlock) this.block).getValues(this));
+            populateKeyValues();
         }
         return this.values;
     }
@@ -319,8 +311,8 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-            .set(DataQueries.BLOCK_STATE_TYPE, this.getType().getId())
-            .set(DataQueries.BLOCK_STATE_DATA, this.getManipulators())
+            .set(DataQueries.BLOCK_TYPE, this.getType().getId())
+            .set(DataQueries.DATA_MANIPULATORS, this.getManipulators())
             .set(DataQueries.BLOCK_STATE_UNSAFE_META, this.getStateMeta());
     }
 

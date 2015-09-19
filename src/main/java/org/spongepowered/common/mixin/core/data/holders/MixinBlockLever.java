@@ -24,85 +24,68 @@
  */
 package org.spongepowered.common.mixin.core.data.holders;
 
-import static org.spongepowered.common.data.ImmutableDataCachingUtil.getManipulator;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
-import org.spongepowered.api.data.manipulator.mutable.block.AxisData;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.manipulator.mutable.block.PoweredData;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.interfaces.block.IMixinBlockAxisOriented;
-import org.spongepowered.common.interfaces.block.IMixinBlockDirectional;
-import org.spongepowered.common.interfaces.block.IMixinPoweredHolder;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
 
 @Mixin(BlockLever.class)
-public abstract class MixinBlockLever extends MixinBlock implements IMixinBlockDirectional, IMixinBlockAxisOriented, IMixinPoweredHolder {
+public abstract class MixinBlockLever extends MixinBlock {
 
-    @Override
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         final BlockLever.EnumOrientation intDir = (BlockLever.EnumOrientation) (Object) blockState.getValue(BlockLever.FACING);
-        final ImmutableDirectionalData directionalData = getManipulator(ImmutableSpongeDirectionalData.class,
-                Direction.values()[((intDir.ordinal() - 1) + 8) % 16]);
+        final ImmutableDirectionalData directionalData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
+                                                                                                 Direction.values()[((intDir.ordinal() - 1) + 8)
+                                                                                                                    % 16]);
         return directionalData;
     }
 
-    @Override
-    public DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos) {
-        return null;
+    protected ImmutablePoweredData getPoweredData(IBlockState blockState) {
+        final ImmutablePoweredData poweredData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class,
+                                                                                         (Boolean) blockState.getValue(BlockLever.POWERED));
+        return poweredData;
     }
 
-    @Override
-    public void resetAxis(World world, BlockPos blockPos) {
-
-    }
-
-    @Override
     public ImmutableAxisData getAxisData(IBlockState blockState) {
         return null;
     }
 
     @Override
-    public DataTransactionResult setAxisData(AxisData axisData, World world, BlockPos blockPos) {
-        return null;
+    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return super.supports(immutable);
+    }
+
+    @Override
+    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+        final ImmutableDataManipulator rawManipulator = manipulator;
+        if (rawManipulator instanceof ImmutableDirectionalData) {
+            final BlockLever.EnumOrientation orientatio = null;
+        }
+        return super.getStateWithData(blockState, manipulator);
+    }
+
+    @Override
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        return super.getStateWithValue(blockState, key, value);
     }
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getAxisData(blockState), getDirectionalData(blockState), getPoweredData(blockState));
-    }
-
-    @Override
-    public BlockState resetDirectionData(BlockState blockState) {
-        return null;
-    }
-
-    @Override
-    public ImmutablePoweredData getPoweredData(IBlockState blockState) {
-        return null;
-    }
-
-    @Override
-    public DataTransactionResult setPoweredData(PoweredData poweredData, World world, BlockPos blockPos) {
-        final ImmutablePoweredData data = getPoweredData(world.getBlockState(blockPos));
-        return null;
-    }
-
-    @Override
-    public BlockState resetPoweredData(BlockState blockState) {
-        return (BlockState) ((IBlockState)blockState).withProperty(BlockLever.POWERED, false);
     }
 
 }

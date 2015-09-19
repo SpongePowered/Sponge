@@ -27,31 +27,34 @@ package org.spongepowered.common.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.List;
 import java.util.Set;
@@ -62,47 +65,44 @@ import javax.annotation.Nullable;
 public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Nullable private final UUID entityUuid;
-    @Nullable private final Transform<World> transform;
+    private final UUID worldUuid;
     private final EntityType entityType;
+    private final Vector3d position;
+    private final Vector3d rotation;
+    private final Vector3d scale;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
 
-    public SpongeEntitySnapshot(net.minecraft.entity.Entity entity) {
-        this.entityType = ((Entity) entity).getType();
-        this.entityUuid = ((Entity) entity).getUniqueId();
-        ImmutableList.Builder<ImmutableDataManipulator<?, ?>> manipulatorBuilder = ImmutableList.builder();
-        ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (DataManipulator<?, ?> manipulator : ((Entity) entity).getContainers()) {
-            manipulatorBuilder.add(manipulator.asImmutable());
-            keyBuilder.addAll(manipulator.getKeys());
-            valueBuilder.addAll(manipulator.getValues());
+    SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
+        this.entityType = builder.entityType;
+        this.entityUuid = builder.entityId;
+        if (builder.manipulators == null) {
+            this.manipulators = ImmutableList.of();
+        } else {
+            this.manipulators = ImmutableList.copyOf(builder.manipulators);
         }
-        this.manipulators = manipulatorBuilder.build();
-        this.keys = keyBuilder.build();
-        this.values = valueBuilder.build();
-        this.compound = new NBTTagCompound();
-        entity.writeToNBT(this.compound);
-        this.transform = ((Entity) entity).getTransform();
-    }
-
-    public SpongeEntitySnapshot(@Nullable UUID entityUuid, @Nullable Transform<World> transform, EntityType entityType,
-                                ImmutableList<ImmutableDataManipulator<?, ?>> manipulators) {
-        this.entityUuid = entityUuid;
-        this.transform = transform;
-        this.entityType = checkNotNull(entityType);
-        this.manipulators = checkNotNull(manipulators);
-        ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (ImmutableDataManipulator<?, ?> manipulator : manipulators) {
-            keyBuilder.addAll(manipulator.getKeys());
-            valueBuilder.addAll(manipulator.getValues());
+        if (this.manipulators.isEmpty()) {
+            this.keys = ImmutableSet.of();
+            this.values = ImmutableSet.of();
+        } else {
+            final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
+            final ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+            for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+                for (ImmutableValue<?> value : manipulator.getValues()) {
+                    keyBuilder.add(value.getKey());
+                    valueBuilder.add(value);
+                }
+            }
+            this.keys = keyBuilder.build();
+            this.values = valueBuilder.build();
         }
-        this.keys = keyBuilder.build();
-        this.values = valueBuilder.build();
-        this.compound = null;
+        this.compound = builder.compound == null ? null : (NBTTagCompound) builder.compound.copy();
+        this.worldUuid = builder.worldId;
+        this.position = builder.position;
+        this.rotation = builder.rotation;
+        this.scale = builder.scale;
     }
 
     @Override
@@ -112,7 +112,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Transform<World>> getTransform() {
-        return Optional.fromNullable(this.transform);
+        Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
+        if (optional.isPresent()) {
+            final Transform<World> transform = new SpongeTransform<World>(optional.get(), this.position, this.rotation);
+            return Optional.of(transform);
+        }
+        return Optional.absent();
     }
 
     @Override
@@ -122,7 +127,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        return Optional.fromNullable(this.transform == null ? null : this.transform.getLocation());
+        Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
+        if (optional.isPresent()) {
+            final Location<World> location = new Location<World>(optional.get(), this.position);
+            return Optional.of(location);
+        }
+        return Optional.absent();
     }
 
     @Override
@@ -132,18 +142,35 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public DataContainer toContainer() {
-        final List<DataView> dataList = Lists.newArrayList();
-        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-            final DataContainer internal = new MemoryDataContainer();
-            internal.set(DataQueries.DATA_CLASS, manipulator.getClass().toString());
-            internal.set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
-            dataList.add(internal);
-
-        }
-        return new MemoryDataContainer()
+        final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.manipulators);
+        final DataContainer container = new MemoryDataContainer()
+            .set(Location.WORLD_ID, this.worldUuid.toString())
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
-            .set(of("Location"), this.transform == null ? "null" : this.transform.getLocation())
-            .set(DataQueries.ENTITY_SNAPSHOT_DATA, dataList);
+            .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
+                .set(Location.POSITION_X, this.position.getX())
+                .set(Location.POSITION_Y, this.position.getY())
+                .set(Location.POSITION_Z, this.position.getZ())
+            .getContainer()
+            .createView(DataQueries.ENTITY_ROTATION)
+                .set(Location.POSITION_X, this.rotation.getX())
+                .set(Location.POSITION_Y, this.rotation.getY())
+                .set(Location.POSITION_Z, this.rotation.getZ())
+            .getContainer()
+            .createView(DataQueries.ENTITY_SCALE)
+                .set(Location.POSITION_X, this.scale.getX())
+                .set(Location.POSITION_Y, this.scale.getY())
+                .set(Location.POSITION_Z, this.scale.getZ())
+            .getContainer()
+            .set(DataQueries.DATA_MANIPULATORS, dataList);
+
+        if (this.entityUuid != null) {
+            container.set(DataQueries.ENTITY_ID, this.entityUuid.toString());
+        }
+        if (this.compound != null) {
+            container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+        }
+
+        return container;
     }
 
     @SuppressWarnings("unchecked")
@@ -167,7 +194,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
             if (processorOptional.isPresent()) {
                 if (processorOptional.get().supports(this.entityType)) {
-                    return Optional.of((T) (Object) SpongeDataRegistry.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
+                    return Optional.of((T) SpongeDataRegistry.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
                 }
             }
         }
@@ -195,21 +222,23 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 createNew = true;
-                manipulator.with(key, checkNotNull(function.apply(manipulator.get(key).orNull())));
+                builder.add(manipulator.with(key, checkNotNull(function.apply(manipulator.get(key).orNull()))).get());
+            } else {
+                builder.add(manipulator);
             }
         }
         if (createNew) {
-            return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.transform, this.entityType, builder.build()));
+            final SpongeEntitySnapshotBuilder snapshotBuilder = createBuilder();
+            snapshotBuilder.manipulators = builder.build();
+            return Optional.of(snapshotBuilder.build());
         }
         return Optional.absent();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<EntitySnapshot> with(Key<? extends BaseValue<E>> key, E value) {
-        if (!supports(key)) {
-            return Optional.absent();
-        }
-        return Optional.absent();
+        return transform(key, (Function) Functions.constant(value));
     }
 
     @Override
@@ -220,35 +249,16 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @SuppressWarnings("unchecked")
     @Override
     public Optional<EntitySnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        if (!supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
-            return Optional.absent();
-        }
-        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
-        boolean createNew = false;
-        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-            if (manipulator.getClass().isAssignableFrom(valueContainer.getClass())) {
-                builder.add(valueContainer);
-                createNew = true;
-            } else {
-                builder.add(manipulator);
-            }
-        }
-        if (createNew) {
-            return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.transform, this.entityType, builder.build()));
-        }
-        return Optional.<EntitySnapshot>of(this);
+        return Optional.of(createBuilder().add((ImmutableDataManipulator) valueContainer).build());
     }
 
     @Override
     public Optional<EntitySnapshot> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
-        EntitySnapshot snapshot = this;
-        for (ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
-            final Optional<EntitySnapshot> optional = with(manipulator);
-            if (optional.isPresent()) {
-                snapshot = optional.get();
-            }
+        final EntitySnapshotBuilder builder = createBuilder();
+        for (ImmutableDataManipulator manipulator : valueContainers) {
+            builder.add(manipulator);
         }
-        return snapshot == this ? Optional.<EntitySnapshot>absent() : Optional.of(snapshot);
+        return Optional.of(builder.build());
     }
 
     @Override
@@ -258,11 +268,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         }
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-            if (!containerClass.isInstance(manipulator)) {
+            if (!containerClass.isAssignableFrom(manipulator.getClass())) {
                 builder.add(manipulator);
             }
         }
-        return Optional.<EntitySnapshot>of(new SpongeEntitySnapshot(this.entityUuid, this.transform, this.entityType, builder.build()));
+        final SpongeEntitySnapshotBuilder snapshotBuilder = createBuilder();
+        snapshotBuilder.manipulators = builder.build();
+        return Optional.of(snapshotBuilder.build());
     }
 
     @Override
@@ -342,16 +354,34 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public UUID getWorldUniqueId() {
-        return this.transform.getExtent().getUniqueId();
+        return this.worldUuid;
     }
 
     @Override
     public Vector3i getPosition() {
-        return this.transform.getLocation().getBlockPosition();
+        return this.position.toInt();
     }
 
     @Override
     public EntitySnapshot withLocation(Location<World> location) {
-        return new SpongeEntitySnapshot(this.entityUuid, this.transform.setLocation(location), this.entityType, this.manipulators);
+        final SpongeEntitySnapshotBuilder builder = createBuilder();
+        builder.position = checkNotNull(location).getPosition();
+        return builder.build();
+    }
+
+    private SpongeEntitySnapshotBuilder createBuilder() {
+        return new SpongeEntitySnapshotBuilder()
+            .type(this.getType())
+            .position(this.position)
+            .rotation(this.rotation)
+            .scale(this.scale);
+    }
+
+    public Optional<NBTTagCompound> getCompound() {
+        if (this.compound == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of((NBTTagCompound) this.compound.copy());
+        }
     }
 }

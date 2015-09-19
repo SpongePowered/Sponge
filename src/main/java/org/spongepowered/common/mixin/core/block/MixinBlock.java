@@ -38,8 +38,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -160,9 +161,18 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public List<ImmutableValue<?>> getValues(IBlockState blockState) {
-        // TODO
-        return ImmutableList.of();
+    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return false;
+    }
+
+    @Override
+    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+        return Optional.absent();
+    }
+
+    @Override
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        return Optional.absent(); // By default, all blocks just have a single state unless otherwise dictated.
     }
 
     @Override

@@ -22,16 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
+import org.spongepowered.api.data.type.LogAxis;
 
-public interface IMixinBlockTree extends IMixinBlock {
+public class SpongeLogAxis implements LogAxis {
 
-    TreeData getTreeData(IBlockState blockState);
+    private final int value;
+    private final String nameId;
+    private final LogAxis next;
 
-    BlockState resetTreeData(BlockState blockState);
+    public SpongeLogAxis(int value, String nameId, LogAxis next) {
+        this.value = value;
+        this.nameId = nameId;
+        this.next = next;
+    }
 
+    @Override
+    public String getId() {
+        return "LogAxis." + this.nameId;
+    }
+
+    @Override
+    public String getName() {
+        return getName();
+    }
+
+    @Override
+    public LogAxis cycleNext() {
+        return this.next;
+    }
 }

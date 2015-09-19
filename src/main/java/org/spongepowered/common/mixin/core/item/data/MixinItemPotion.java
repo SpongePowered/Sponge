@@ -38,7 +38,7 @@ public abstract class MixinItemPotion extends MixinItem {
     @Override
     public List<DataManipulator<?, ?>> getManipulatorsFor(ItemStack itemStack) {
         final List<DataManipulator<?, ?>> manipulators = super.getManipulatorsFor(itemStack);
-        manipulators.add(getData(itemStack, PotionEffectData.class));
+        // manipulators.add(getData(itemStack, PotionEffectData.class));
         return manipulators;
     }
 }

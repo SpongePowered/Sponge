@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.data.holders;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataTransactionBuilder.builder;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.state.IBlockState;
@@ -35,19 +36,20 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.interfaces.block.IMixinBlockDirectional;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
 
 @Mixin(BlockStandingSign.class)
-public abstract class MixinBlockStandingSign extends MixinBlock implements IMixinBlockDirectional {
+public abstract class MixinBlockStandingSign extends MixinBlock {
 
-    @Override
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         final int intDir = (Integer) (Object) blockState.getValue(BlockStandingSign.ROTATION);
         final SpongeDirectionalData directionalData = new SpongeDirectionalData();
@@ -56,28 +58,33 @@ public abstract class MixinBlockStandingSign extends MixinBlock implements IMixi
     }
 
     @Override
-    public DataTransactionResult setDirectionalData(DirectionalData directionalData, World world, BlockPos blockPos) {
-        final Direction direction = checkNotNull(directionalData).direction().get();
-        if (!direction.isSecondaryOrdinal() || !direction.isCardinal() || !direction.isOrdinal()) {
-            return DataTransactionBuilder.failResult(directionalData.direction().asImmutable());
-        }
-        // TODO actually manipulate according to priority
-        final IBlockState blockState = world.getBlockState(blockPos);
-        final ImmutableDirectionalData oldData = getDirectionalData(blockState);
-        final int directionint = (direction.ordinal() + 8) % 16;
-        final IBlockState newState = blockState.withProperty(BlockStandingSign.ROTATION, directionint);
-        world.setBlockState(blockPos, newState);
-        return builder().replace(oldData.direction()).result(DataTransactionResult.Type.SUCCESS).build();
+    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return super.supports(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
-    public BlockState resetDirectionData(BlockState blockState) {
-        return ((BlockState) ((IBlockState) blockState).withProperty(BlockStandingSign.ROTATION, 0));
+    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
+            final int intDirection = (direction.ordinal() + 8) % 16;
+            return Optional.of((BlockState) blockState.withProperty(BlockStandingSign.ROTATION, intDirection));
+        }
+        return super.getStateWithData(blockState, manipulator);
+    }
+
+    @Override
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction direction = (Direction) value;
+            final int intDirection = (direction.ordinal() + 8) % 16;
+            return Optional.of((BlockState) blockState.withProperty(BlockStandingSign.ROTATION, intDirection));
+        }
+        return super.getStateWithValue(blockState, key, value);
     }
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState)); // TODO for now.
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState));
     }
 
 }

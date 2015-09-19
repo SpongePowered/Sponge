@@ -83,10 +83,10 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
     @Override
     public Optional<BlockState> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, DataQueries.BLOCK_STATE_TYPE);
-        checkDataExists(container, DataQueries.BLOCK_STATE_DATA);
+        checkDataExists(container, DataQueries.BLOCK_TYPE);
+        checkDataExists(container, DataQueries.DATA_MANIPULATORS);
         checkDataExists(container, DataQueries.BLOCK_STATE_UNSAFE_META);
-        final String blockid = container.getString(DataQueries.BLOCK_STATE_TYPE).get();
+        final String blockid = container.getString(DataQueries.BLOCK_TYPE).get();
         final BlockType blockType = Sponge.getGame().getRegistry().getType(BlockType.class, blockid).get();
         final int meta = container.getInt(DataQueries.BLOCK_STATE_UNSAFE_META).get();
         try {

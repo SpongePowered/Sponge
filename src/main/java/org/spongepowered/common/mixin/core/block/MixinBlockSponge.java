@@ -24,13 +24,55 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockSponge;
+import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.entity.IMixinWetHolder;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
+
+import java.util.List;
 
 @Mixin(BlockSponge.class)
-public abstract class MixinBlockSponge extends MixinBlock implements IMixinWetHolder {
+public abstract class MixinBlockSponge extends MixinBlock {
 
+    private ImmutableWetData getWetData(IBlockState blockState) {
+        final boolean isWet = (Boolean) blockState.getValue(BlockSponge.WET);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWetData.class, isWet);
+    }
 
+    @Override
+    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return super.supports(immutable) || ImmutableWetData.class.isAssignableFrom(immutable);
+    }
 
+    @Override
+    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+        if (manipulator instanceof ImmutableWetData) {
+            final boolean isWet = ((ImmutableWetData) manipulator).wet().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockSponge.WET, isWet));
+        }
+        return super.getStateWithData(blockState, manipulator);
+    }
+
+    @Override
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        if (key.equals(Keys.IS_WET)) {
+            final boolean isWet = (Boolean) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockSponge.WET, isWet));
+        }
+        return super.getStateWithValue(blockState, key, value);
+    }
+
+    @Override
+    public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getWetData(blockState));
+    }
 }

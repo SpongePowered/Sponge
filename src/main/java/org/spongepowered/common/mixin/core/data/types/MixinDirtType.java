@@ -22,12 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockDirt;
+import org.spongepowered.api.data.type.DirtType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IMixinBlockWettable extends IMixinBlock {
+@Mixin(BlockDirt.DirtType.class)
+@Implements(@Interface(iface = DirtType.class, prefix = "shadow$"))
+public abstract class MixinDirtType {
 
-    boolean isStateWet(IBlockState blockState);
+    @Shadow public abstract String getName();
 
+    public String shadow$getId() {
+        return getName();
+    }
+
+    @Intrinsic
+    public String shadow$getName() {
+        return getName();
+    }
 }

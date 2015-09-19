@@ -33,10 +33,15 @@ import com.google.common.collect.MapMaker;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.LogAxis;
+import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -69,6 +74,14 @@ public class KeyRegistry {
         keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
         keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
         keyMap.put("is_screaming", makeSingleKey(Boolean.class, Value.class, of("IsScreaming")));
+        keyMap.put("shrub_type", makeSingleKey(ShrubType.class, Value.class, of("ShrubType")));
+        keyMap.put("plant_type", makeSingleKey(PlantType.class, Value.class, of("PlantType")));
+        keyMap.put("tree_type", makeSingleKey(TreeType.class, Value.class, of("TreeType")));
+        keyMap.put("log_axis", makeSingleKey(LogAxis.class, Value.class, of("LogAxis")));
+        keyMap.put("axis", makeSingleKey(Axis.class, Value.class, of("Axis")));
+        keyMap.put("powered", makeSingleKey(Boolean.class, Value.class, of("Powered")));
+        keyMap.put("layer", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Layer")));
+        keyMap.put("represented_item", makeSingleKey(ItemStackSnapshot.class, Value.class, of("ItemStackSnapshot")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

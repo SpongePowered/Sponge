@@ -67,27 +67,27 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(DataQueries.BLOCK_ENTITY_WORLD, ((World) this.worldObj).getUniqueId().toString());
-        container.set(DataQueries.POSITION_X, this.getPos().getX());
-        container.set(DataQueries.POSITION_Y, this.getPos().getY());
-        container.set(DataQueries.POSITION_Z, this.getPos().getZ());
+        container.set(Location.WORLD_ID, ((World) this.worldObj).getUniqueId().toString());
+        container.set(Location.POSITION_X, this.getPos().getX());
+        container.set(Location.POSITION_Y, this.getPos().getY());
+        container.set(Location.POSITION_Z, this.getPos().getZ());
         container.set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.getClass().getSimpleName());
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
-        container.set(DataQueries.BLOCK_ENTITY_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final DataView dataView = container.createView(DataQueries.BLOCK_ENTITY_DATA);
-        container.set(DataQueries.BLOCK_ENTITY_DATA, dataView);
+        container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
+        final DataView dataView = container.createView(DataQueries.DATA_MANIPULATORS);
+        container.set(DataQueries.DATA_MANIPULATORS, dataView);
         return container;
     }
 
     @Override
     public boolean validateRawData(DataContainer container) {
-        return container.contains(DataQueries.BLOCK_ENTITY_WORLD)
-            && container.contains(DataQueries.POSITION_X)
-            && container.contains(DataQueries.POSITION_Y)
-            && container.contains(DataQueries.POSITION_Z)
+        return container.contains(Location.WORLD_ID)
+            && container.contains(Location.POSITION_X)
+            && container.contains(Location.POSITION_Y)
+            && container.contains(Location.POSITION_Z)
             && container.contains(DataQueries.BLOCK_ENTITY_TILE_TYPE)
-            && container.contains(DataQueries.BLOCK_ENTITY_NBT);
+            && container.contains(DataQueries.UNSAFE_NBT);
     }
 
     @Override

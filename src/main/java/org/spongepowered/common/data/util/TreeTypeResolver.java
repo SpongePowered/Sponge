@@ -22,22 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
+package org.spongepowered.common.data.util;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.mutable.block.AttachedData;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface IMixinBlockAttachable {
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+import net.minecraft.block.BlockPlanks;
+import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.data.type.TreeTypes;
 
-    AttachedData getAttachedData(IBlockState blockState);
+import java.util.Map;
 
-    DataTransactionResult setAttachedData(AttachedData attachedData, World world, BlockPos blockPos);
+public class TreeTypeResolver {
 
-    IBlockState setAttachedData(IBlockState blockState, AttachedData attachedData);
+    private static final TreeTypeResolver instance = new TreeTypeResolver();
 
-    void resetAttached(World world, BlockPos blockPos);
+    private final BiMap<TreeType, BlockPlanks.EnumType> biMap = ImmutableBiMap.<TreeType, BlockPlanks.EnumType>builder()
+        .put(TreeTypes.OAK, BlockPlanks.EnumType.OAK)
+        .put(TreeTypes.BIRCH, BlockPlanks.EnumType.BIRCH)
+        .put(TreeTypes.SPRUCE, BlockPlanks.EnumType.SPRUCE)
+        .put(TreeTypes.JUNGLE, BlockPlanks.EnumType.JUNGLE)
+        .put(TreeTypes.ACACIA, BlockPlanks.EnumType.ACACIA)
+        .put(TreeTypes.DARK_OAK, BlockPlanks.EnumType.DARK_OAK).build();
+
+    public static BlockPlanks.EnumType getFor(TreeType treeType) {
+        return instance.biMap.get(checkNotNull(treeType));
+    }
+
+    public static TreeType getFor(BlockPlanks.EnumType planks) {
+        return instance.biMap.inverse().get(checkNotNull(planks));
+    }
 
 }

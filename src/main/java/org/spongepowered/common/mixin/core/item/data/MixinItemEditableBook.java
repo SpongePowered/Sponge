@@ -41,10 +41,10 @@ public class MixinItemEditableBook extends MixinItem {
     @Override
     public List<DataManipulator<?, ?>> getManipulatorsFor(ItemStack itemStack) {
         final List<DataManipulator<?, ?>> manipulators = super.getManipulatorsFor(itemStack);
-        manipulators.add(getData(itemStack, AuthorData.class));
+        // manipulators.add(getData(itemStack, AuthorData.class));
         manipulators.add(getData(itemStack, DisplayNameData.class));
-        manipulators.add(getData(itemStack, PagedData.class));
-        manipulators.add(getData(itemStack, GenerationData.class));
+        // manipulators.add(getData(itemStack, PagedData.class));
+        // manipulators.add(getData(itemStack, GenerationData.class));
         return manipulators;
     }
 }

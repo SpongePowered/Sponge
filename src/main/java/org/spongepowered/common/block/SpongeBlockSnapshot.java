@@ -53,6 +53,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.util.VecHelper;
@@ -153,18 +155,25 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public BlockSnapshot withLocation(Location<World> location) {
+        final NBTTagCompound cloned;
+        if (this.compound != null) {
+            cloned = (NBTTagCompound) this.compound.copy();
+            cloned.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_X, location.getBlockPosition().getX());
+            cloned.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Y, location.getBlockPosition().getY());
+            cloned.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Z, location.getBlockPosition().getZ());
+        } else {
+            cloned = null;
+        }
         return new SpongeBlockSnapshot(this.blockState,
-                                       location,
-                                       ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+                                       location.getExtent().getUniqueId(),
+                                       location.getBlockPosition(),
+                                       this.extraData,
+                                       cloned);
     }
 
     @Override
     public BlockSnapshot withContainer(DataContainer container) {
-        return new SpongeBlockSnapshot(this.blockState,
-                                       this.worldUniqueId,
-                                       this.pos,
-                                       ImmutableList.<ImmutableDataManipulator<?, ?>>of(),
-                                       NbtTranslator.getInstance().translateData(container));
+        return new SpongeBlockSnapshotBuilder().build(container).get();
     }
 
     @Override
@@ -202,6 +211,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             final net.minecraft.tileentity.TileEntity te = world.getTileEntity(pos);
             if (te != null) {
                 te.readFromNBT(this.compound);
+                te.markDirty();
             }
         }
 
@@ -224,25 +234,18 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public DataContainer toContainer() {
-        final List<DataView> dataList = Lists.newArrayList();
-        for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-            final DataContainer internal = new MemoryDataContainer();
-            internal.set(DataQueries.DATA_CLASS, manipulator.getClass().toString());
-            internal.set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
-            dataList.add(internal);
-
-        }
+        final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.extraData);
         final DataContainer container = new MemoryDataContainer()
-            .set(DataQueries.SNAPSHOT_WORLD_UUID, this.worldUniqueId.toString())
+            .set(Location.WORLD_ID, this.worldUniqueId.toString())
             .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
-                .set(DataQueries.POSITION_X, this.pos.getX())
-                .set(DataQueries.POSITION_Y, this.pos.getY())
-                .set(DataQueries.POSITION_Z, this.pos.getZ())
+                .set(Location.POSITION_X, this.pos.getX())
+                .set(Location.POSITION_Y, this.pos.getY())
+                .set(Location.POSITION_Z, this.pos.getZ())
             .getContainer()
             .set(DataQueries.BLOCK_STATE, this.blockState)
-            .set(DataQueries.BLOCK_SNAPSHOT_EXTRA_DATA, dataList);
+            .set(DataQueries.DATA_MANIPULATORS, dataList);
         if (this.compound != null) {
-            container.set(DataQueries.BLOCK_SNAPSHOT_UNSAFE_DATA, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
         return container;
     }

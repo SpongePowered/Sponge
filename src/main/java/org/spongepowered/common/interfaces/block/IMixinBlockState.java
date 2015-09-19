@@ -26,6 +26,8 @@ package org.spongepowered.common.interfaces.block;
 
 public interface IMixinBlockState {
 
+    boolean initialize();
+
     int getStateMeta();
 
 }

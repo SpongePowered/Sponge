@@ -25,52 +25,41 @@
 package org.spongepowered.common.data.processor.value;
 
 import com.google.common.base.Optional;
-import net.minecraft.block.BlockFlower;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.PlantType;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.BlockValueProcessor;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 
-public class SpongePlantTypeValueProcessor implements BlockValueProcessor<PlantType, Value<PlantType>> {
+public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<ItemStackSnapshot, Value<ItemStackSnapshot>> {
 
-    @Override
-    public Key<? extends BaseValue<PlantType>> getKey() {
-        return Keys.PLANT_TYPE;
+    public RepresentedItemValueProcessor() {
+        super(Keys.REPRESENTED_ITEM);
     }
 
     @Override
-    public int getPriority() {
-        return 100;
+    protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot defaultValue) {
+        return null;
     }
 
     @Override
-    public boolean supports(IBlockState blockState) {
+    public Optional<ItemStackSnapshot> getValueFromContainer(ValueContainer<?> container) {
+        return null;
+    }
+
+    @Override
+    public boolean supports(ValueContainer<?> container) {
         return false;
     }
 
     @Override
-    public Optional<PlantType> getValueForBlockState(IBlockState blockState) {
+    public DataTransactionResult offerToStore(ValueContainer<?> container, ItemStackSnapshot value) {
         return null;
     }
 
     @Override
-    public Optional<Value<PlantType>> getApiValueForBlockState(IBlockState blockState) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return null;
-    }
-
-    @Override
-    public Optional<BlockState> offerValue(IBlockState blockState, PlantType baseValue) {
-        if (blockState.getBlock() == Blocks.red_flower) {
-            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) baseValue;
-            return Optional.of((BlockState) blockState.withProperty(Blocks.red_flower.getTypeProperty(), flowerType));
-        } else if (blockState.getBlock() == Blocks.yellow_flower) {
-            return Optional.of((BlockState) blockState);
-        }
-        return Optional.absent();
     }
 }

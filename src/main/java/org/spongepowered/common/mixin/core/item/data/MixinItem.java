@@ -47,7 +47,7 @@ public abstract class MixinItem implements IMixinItem {
             return list;
         }
         if (itemStack.isItemEnchanted()) {
-            list.add(getData(itemStack, EnchantmentData.class));
+            // list.add(getData(itemStack, EnchantmentData.class)); // TODO implement
         }
         if (itemStack.getTagCompound().hasKey("display")) {
             final NBTTagCompound displayCompound = itemStack.getTagCompound().getCompoundTag("display");
@@ -55,7 +55,7 @@ public abstract class MixinItem implements IMixinItem {
                 list.add(getData(itemStack, DisplayNameData.class));
             }
             if (displayCompound.hasKey("Lore")) {
-                list.add(getData(itemStack, LoreData.class));
+                // list.add(getData(itemStack, LoreData.class)); // TODO implement
             }
         }
         return list;

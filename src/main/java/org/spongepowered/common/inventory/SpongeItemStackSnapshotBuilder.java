@@ -22,25 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.inventory;
 
 import com.google.common.base.Optional;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.service.persistence.DataBuilder;
+import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
 
-public interface BlockDataProcessor<T extends ImmutableDataManipulator<T, ?>> {
+public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnapshot> {
 
-    int getPriority();
-
-    Optional<T> fromBlockPos(World world, BlockPos blockPos);
-
-    Optional<T> createFrom(IBlockState blockState);
-
-    Optional<BlockState> withData(IBlockState blockState, T manipulator);
-
-    boolean remove(World world, BlockPos blockPos);
-
+    @Override
+    public Optional<ItemStackSnapshot> build(DataView container) throws InvalidDataException {
+        final String itemString = DataUtil.getData(container, DataQueries.ITEM_TYPE, String.class);
+        final ItemType itemType = Sponge.getSpongeRegistry().getType(ItemType.class, itemString).get();
+        final int count = DataUtil.getData(container, DataQueries.ITEM_COUNT, Integer.TYPE);
+        final ImmutableList<ImmutableDataManipulator<?, ?>>
+            manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+        return Optional.<ItemStackSnapshot>of(new SpongeItemStackSnapshot(itemType, count, manipulators));
+    }
 }
