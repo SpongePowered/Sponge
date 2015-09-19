@@ -111,14 +111,14 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
     @Override
     public Optional<ImmutableWetData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableWetData immutable) {
         if (key == Keys.IS_WET) {
-            return Optional.<ImmutableWetData>of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWetData.class, (Boolean) value)); // TODO is this how to cache?
+            return Optional.<ImmutableWetData>of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWetData.class, (Boolean) value));
         }
         return Optional.absent();
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+        return DataTransactionBuilder.failNoData();
     }
 
     @Override

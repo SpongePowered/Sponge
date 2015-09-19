@@ -28,6 +28,7 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -39,6 +40,7 @@ import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.item.ItemStack;
 
 public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
+
     protected WetValueProcessor() {
         super(Keys.IS_WET);
     }
@@ -47,13 +49,13 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
     public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
         if (container.supports(Keys.IS_WET)) {
             if (container instanceof ItemStack) {
-            	ItemStack stack = (ItemStack) container;
-            	
+                ItemStack stack = (ItemStack) container;
+                
             	if (stack.getItem().equals(ItemTypes.SPONGE)) {
-            		return Optional.of(stack.getItemDamage() == 1);
-            	}
+            	    return Optional.of(stack.getItemDamage() == 1);
+                }
         	} else if (container instanceof EntityWolf) {
-        		EntityWolf wolf = (EntityWolf) container;
+                EntityWolf wolf = (EntityWolf) container;
                 return Optional.of(wolf.isWet() || wolf.isWolfWet());
             }
         }
@@ -67,7 +69,24 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        return DataTransactionBuilder.failNoData();
+        ImmutableValue<Boolean> proposed = constructValue(value).asImmutable();
+        ImmutableValue<Boolean> previous;
+        
+        if (this.supports(container)) {
+            previous = getApiValueFromContainer(container).get().asImmutable();
+            
+            if (container instanceof ItemStack) {
+                ItemStack stack = (ItemStack) container;
+                
+                if (stack.getItem().equals(ItemTypes.SPONGE)) {
+                    stack.setItemDamage(value ? 1 : 0);
+                    
+                    return DataTransactionBuilder.successReplaceResult(proposed, previous);
+                }
+            }
+    	}
+        
+        return DataTransactionBuilder.failResult(proposed);
     }
 
     @Override
