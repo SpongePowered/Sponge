@@ -51,10 +51,10 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
             if (container instanceof ItemStack) {
                 ItemStack stack = (ItemStack) container;
                 
-            	if (stack.getItem().equals(ItemTypes.SPONGE)) {
-            	    return Optional.of(stack.getItemDamage() == 1);
+                if (stack.getItem().equals(ItemTypes.SPONGE)) {
+                    return Optional.of(stack.getItemDamage() == 1);
                 }
-        	} else if (container instanceof EntityWolf) {
+            } else if (container instanceof EntityWolf) {
                 EntityWolf wolf = (EntityWolf) container;
                 return Optional.of(wolf.isWet() || wolf.isWolfWet());
             }

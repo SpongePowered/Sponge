@@ -60,17 +60,17 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
     public Optional<WetData> from(DataHolder dataHolder) {
         if (this.supports(dataHolder)) {
             if (dataHolder instanceof EntityWolf) {
-            	EntityWolf wolf = (EntityWolf) dataHolder;
-            	SpongeWetData data = new SpongeWetData(wolf.isWet() || wolf.isWolfWet());
+                EntityWolf wolf = (EntityWolf) dataHolder;
+                SpongeWetData data = new SpongeWetData(wolf.isWet() || wolf.isWolfWet());
             	
                 return Optional.<WetData>of(data);
             } else if ((dataHolder instanceof ItemStack)) {
-            	ItemStack stack = (ItemStack) dataHolder;
-            	
-            	if (stack.getItem().equals(ItemTypes.SPONGE)) {
-            		SpongeWetData data = new SpongeWetData(stack.getItemDamage() == 1);
-            		return Optional.<WetData>of(data);
-            	}
+                ItemStack stack = (ItemStack) dataHolder;
+                
+                if (stack.getItem().equals(ItemTypes.SPONGE)) {
+                    SpongeWetData data = new SpongeWetData(stack.getItemDamage() == 1);
+                    return Optional.<WetData>of(data);
+                }
             }
         }
         return Optional.absent();
