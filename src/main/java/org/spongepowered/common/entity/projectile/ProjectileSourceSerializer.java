@@ -63,9 +63,12 @@ public class ProjectileSourceSerializer {
             }
         }
         if (tag instanceof NBTTagLong) {
-            TileEntity tileEntity = worldObj.getTileEntity(BlockPos.fromLong(((NBTTagLong) tag).getLong()));
-            if (tileEntity instanceof ProjectileSource) {
-                return (ProjectileSource) tileEntity;
+            BlockPos pos = BlockPos.fromLong(((NBTTagLong) tag).getLong());
+            if (worldObj.isBlockLoaded(pos)) {
+                TileEntity tileEntity = worldObj.getTileEntity(pos);
+                if (tileEntity instanceof ProjectileSource) {
+                    return (ProjectileSource) tileEntity;
+                }
             }
         }
         return ProjectileSource.UNKNOWN;
