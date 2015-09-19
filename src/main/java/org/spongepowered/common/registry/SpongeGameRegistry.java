@@ -1854,7 +1854,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setEntityTypes() {
         // internal mapping of our EntityTypes to actual MC names
-        this.entityTypeMappings.put("dropped_item", newEntityTypeFromName("Item"));
+        this.entityTypeMappings.put("item", newEntityTypeFromName("Item"));
         this.entityTypeMappings.put("experience_orb", newEntityTypeFromName("XPOrb"));
         this.entityTypeMappings.put("leash_hitch", newEntityTypeFromName("LeashKnot"));
         this.entityTypeMappings.put("painting", newEntityTypeFromName("Painting"));
