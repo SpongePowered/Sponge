@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.command;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
@@ -44,7 +45,7 @@ import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 
-@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
+@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, CommandBlockLogic.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
         targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinCommandSource implements IMixinCommandSource, CommandSource {
 

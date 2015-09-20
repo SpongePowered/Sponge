@@ -22,36 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.command;
+package org.spongepowered.common.mixin.core.block.tiles;
 
 import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.EntityMinecartCommandBlock;
-import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.source.CommandBlockSource;
+import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
-@Mixin(value = {TileEntityCommandBlock.class, CommandBlockLogic.class, EntityMinecartCommandBlock.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinCommandBlockSource implements IMixinCommandSource, CommandBlockSource, IMixinSubject {
+@Mixin(CommandBlockLogic.class)
+public abstract class MixinTileEntityCommandBlockLogic implements CommandBlock {
 
-    @Override
-    public String getIdentifier() {
-        return getName();
-    }
+    @Shadow
+    public abstract String getCommandSenderName();
 
     @Override
-    public String getSubjectCollectionIdentifier() {
-        return PermissionService.SUBJECTS_COMMAND_BLOCK;
-    }
-
-    @Override
-    public Tristate permDefault(String permission) {
-        return Tristate.TRUE;
+    public String getName() {
+        return getCommandSenderName();
     }
 }

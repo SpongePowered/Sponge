@@ -28,6 +28,7 @@
         "block.tiles.MixinTileEntityBrewingStand",
         "block.tiles.MixinTileEntityChest",
         "block.tiles.MixinTileEntityCommandBlock",
+        "block.tiles.MixinTileEntityCommandBlockLogic",
         "block.tiles.MixinTileEntityComparator",
         "block.tiles.MixinTileEntityDaylightDetector",
         "block.tiles.MixinTileEntityDispenser",

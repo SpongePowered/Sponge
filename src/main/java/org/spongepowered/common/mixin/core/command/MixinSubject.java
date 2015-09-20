@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.command;
 
 import com.google.common.base.Optional;
+import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
@@ -59,7 +60,7 @@ import javax.annotation.Nullable;
  * installed permissions service for a subject.
  */
 @NonnullByDefault
-@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
+@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, CommandBlockLogic.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
         SpongeUser.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinSubject implements Subject, IMixinCommandSource, IMixinSubject {
 
