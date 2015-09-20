@@ -40,6 +40,7 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
     @SuppressWarnings("rawtypes")
     @Shadow private Class valueClass;
 
+    @Override
     public String getName() {
         return this.name;
     }
@@ -49,6 +50,7 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
         return this.valueClass;
     }
 
+    @Override
     public Predicate<T> getPredicate() {
         return Predicates.in(getPossibleValues());
     }

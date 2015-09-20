@@ -38,6 +38,7 @@ public abstract class MixinPropertyInteger extends MixinPropertyHelper<Integer> 
     @Shadow public abstract Collection getAllowedValues();
 
     @SuppressWarnings("unchecked")
+    @Override
     public Collection<Integer> getPossibleValues() {
         return getAllowedValues();
     }

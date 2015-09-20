@@ -25,13 +25,21 @@
 package org.spongepowered.common.mixin.core.event.cause.entity.damage;
 
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 
 @Mixin(net.minecraft.util.DamageSource.class)
-public abstract class MixinDamageSource implements DamageSource {
+@Implements(@Interface(iface = DamageSource.class, prefix = "damage$"))
+public abstract class MixinDamageSource {
 
     @Shadow public String damageType;
 
@@ -43,42 +51,43 @@ public abstract class MixinDamageSource implements DamageSource {
     @Shadow public abstract float getHungerDamage();
     @Shadow public abstract net.minecraft.util.DamageSource setExplosion();
     @Shadow public abstract net.minecraft.util.DamageSource setProjectile();
-    @Shadow(prefix = "damage$")
-    public abstract boolean damage$isDifficultyScaled();
-    @Shadow(prefix = "damage$")
-    public abstract boolean damage$isExplosion();
+    @Shadow public abstract boolean isDifficultyScaled();
+    @Shadow public abstract boolean isExplosion();
 
     private DamageType apiDamageType;
 
-    @Intrinsic
-    @Override
-    public boolean isExplosion() {
-        return this.damage$isExplosion();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String damageTypeIn, CallbackInfo ci) {
+        if (!SpongeGameRegistry.damageSourceToTypeMappings.containsKey(damageTypeIn)) {
+            SpongeGameRegistry.damageSourceToTypeMappings.put(damageTypeIn, DamageTypes.CUSTOM);
+        }
+
+        this.apiDamageType = SpongeGameRegistry.damageSourceToTypeMappings.get(damageTypeIn);
     }
 
-    @Override
+    @Intrinsic
+    public boolean damage$isExplosion() {
+        return isExplosion();
+    }
+
     public boolean isMagic() {
-        return this.isMagicDamage();
+        return isMagicDamage();
     }
 
-    @Override
     public boolean isAbsolute() {
-        return this.isDamageAbsolute();
+        return isDamageAbsolute();
     }
 
-    @Override
     public boolean isBypassingArmor() {
-        return this.isUnblockable();
+        return isUnblockable();
     }
 
     @Intrinsic
-    @Override
-    public boolean isDifficultyScaled() {
-        return this.damage$isDifficultyScaled();
+    public boolean damage$isDifficultyScaled() {
+        return isDifficultyScaled();
     }
 
-    @Override
-    public DamageType getDamageType() {
+    public DamageType damage$getDamageType() {
         return this.apiDamageType;
     }
 

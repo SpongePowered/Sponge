@@ -189,8 +189,12 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSourceBuilder;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSourceBuilder;
 import org.spongepowered.api.event.cause.entity.damage.source.ProjectileDamageSourceBuilder;
@@ -376,6 +380,7 @@ import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -429,6 +434,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
 
+    public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;
+    public static net.minecraft.util.DamageSource DAMAGESOURCE_MELTING;
+
     private final Map<String, BiomeType> biomeTypeMappings = Maps.newHashMap();
 
     public static final Map<Class<? extends WorldProvider>, SpongeConfig<SpongeConfig.DimensionConfig>> dimensionConfigs = Maps.newHashMap();
@@ -438,8 +446,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
     public static final Map<Team.EnumVisible, SpongeVisibility> enumVisible = Maps.newEnumMap(Team.EnumVisible.class);
+    public static final Map<String, DamageType> damageSourceToTypeMappings = Maps.newHashMap();
 
     public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
+            .put("none", SpongeTextStyle.of(EnumChatFormatting.RESET))
             .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
             .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
             .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
@@ -489,6 +499,21 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put("integer", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.INTEGER)
                     .put("hearts", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.HEARTS)
                     .build();
+    private final ImmutableMap<String, DamageType> damageTypeMappings = new ImmutableMap.Builder<String, DamageType>()
+            .put("attack", new SpongeDamageType("attack"))
+            .put("contact", new SpongeDamageType("contact"))
+            .put("custom", new SpongeDamageType("custom"))
+            .put("drown", new SpongeDamageType("drown"))
+            .put("explosive", new SpongeDamageType("explosive"))
+            .put("fall", new SpongeDamageType("fall"))
+            .put("fire", new SpongeDamageType("fire"))
+            .put("generic", new SpongeDamageType("generic"))
+            .put("hunger", new SpongeDamageType("hunger"))
+            .put("magic", new SpongeDamageType("magic"))
+            .put("projectile", new SpongeDamageType("projectile"))
+            .put("suffocate", new SpongeDamageType("suffocate"))
+            .put("void", new SpongeDamageType("void"))
+            .build();
 
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
     public final Map<String, Enchantment> enchantmentMappings = Maps.newHashMap();
@@ -625,12 +650,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put(GeneratorType.class, this.generatorTypeMappings)
                     .build();
     private final Map<Class<?>, Class<?>> builderMap = ImmutableMap.of(); // TODO
-                                                                          // FIGURE
-                                                                          // OUT
-                                                                          // HOW
-                                                                          // TO
-                                                                          // DO
-                                                                          // THIS!!?!
 
     public com.google.common.base.Optional<PotionEffectType> getPotion(String id) {
         return com.google.common.base.Optional.fromNullable((PotionEffectType) Potion.getPotionFromResourceLocation(id));
@@ -1194,6 +1213,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         addTextColor(EnumChatFormatting.YELLOW, new Color(0xFFFF55));
         addTextColor(EnumChatFormatting.WHITE, Color.WHITE);
         addTextColor(EnumChatFormatting.RESET, Color.WHITE);
+        textColorMappings.put("none", new SpongeTextColor(EnumChatFormatting.RESET, Color.WHITE));
 
         RegistryHelper.mapFields(TextColors.class, textColorMappings);
         RegistryHelper.mapFields(ChatTypes.class, chatTypeMappings);
@@ -1976,6 +1996,50 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(GeneratorTypes.class, this.generatorTypeMappings);
     }
 
+    public void setDamageTypes() {
+        RegistryHelper.mapFields(DamageTypes.class, damageTypeMappings);
+        damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
+        damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("drown", DamageTypes.DROWN);
+        damageSourceToTypeMappings.put("fall", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("fallingblock", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
+        damageSourceToTypeMappings.put("indirectmagic", DamageTypes.MAGIC);
+        damageSourceToTypeMappings.put("infire", DamageTypes.FIRE);
+        damageSourceToTypeMappings.put("inwall", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("lava", DamageTypes.FIRE);
+        damageSourceToTypeMappings.put("lightningbolt", DamageTypes.PROJECTILE);
+        damageSourceToTypeMappings.put("magic", DamageTypes.MAGIC);
+        damageSourceToTypeMappings.put("mob", DamageTypes.ATTACK);
+        damageSourceToTypeMappings.put("onfire", DamageTypes.FIRE);
+        damageSourceToTypeMappings.put("outofworld", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("player", DamageTypes.ATTACK);
+        damageSourceToTypeMappings.put("starve", DamageTypes.HUNGER);
+        damageSourceToTypeMappings.put("thorns", DamageTypes.MAGIC);
+        damageSourceToTypeMappings.put("thrown", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("wither", DamageTypes.MAGIC);
+    }
+
+    public void setDamageSources() {
+        try {
+            DAMAGESOURCE_POISON = (new net.minecraft.util.DamageSource("poison")).setDamageBypassesArmor().setMagicDamage();
+            DAMAGESOURCE_MELTING = (new net.minecraft.util.DamageSource("melting")).setDamageBypassesArmor().setFireDamage();
+            DamageSources.class.getDeclaredField("DROWNING").set(null, (DamageSource) net.minecraft.util.DamageSource.drown);
+            DamageSources.class.getDeclaredField("FALLING").set(null, (DamageSource) net.minecraft.util.DamageSource.fall);
+            DamageSources.class.getDeclaredField("FIRE_TICK").set(null, (DamageSource) net.minecraft.util.DamageSource.onFire);
+            DamageSources.class.getDeclaredField("GENERIC").set(null, (DamageSource) net.minecraft.util.DamageSource.generic);
+            DamageSources.class.getDeclaredField("IN_FIRE").set(null, (DamageSource) net.minecraft.util.DamageSource.inFire);
+            DamageSources.class.getDeclaredField("MAGIC").set(null, (DamageSource) net.minecraft.util.DamageSource.magic);
+            DamageSources.class.getDeclaredField("MELTING").set(null, DAMAGESOURCE_MELTING);
+            DamageSources.class.getDeclaredField("POISON").set(null, DAMAGESOURCE_POISON);
+            DamageSources.class.getDeclaredField("STARVATION").set(null, (DamageSource) net.minecraft.util.DamageSource.starve);
+            DamageSources.class.getDeclaredField("WITHER").set(null, (DamageSource) net.minecraft.util.DamageSource.wither);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void setDoublePlantMappings() {
         RegistryHelper.mapFields(DoublePlantTypes.class, this.doublePlantMappings);
     }
@@ -2151,6 +2215,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setCriteria();
         setObjectiveDisplayModes();
         setGeneratorTypes();
+        setDamageTypes();
+        setDamageSources();
     }
 
     public void postInit() {

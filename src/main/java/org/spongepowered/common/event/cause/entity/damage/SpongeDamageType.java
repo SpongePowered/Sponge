@@ -22,35 +22,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.properties;
+package org.spongepowered.common.event.cause.entity.damage;
 
-import net.minecraft.block.properties.PropertyEnum;
-import org.spongepowered.api.block.trait.EnumTrait;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.google.common.base.Objects;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
-import java.util.Collection;
+public class SpongeDamageType implements DamageType {
 
-@Mixin(value = PropertyEnum.class)
-public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {
+    private String id; // TODO: figure out how to handle mods
+    private String name;
 
-    @SuppressWarnings("rawtypes")
-    @Shadow 
-    public abstract Collection getAllowedValues();
-
-    @SuppressWarnings("rawtypes")
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String name, Class valueClass, Collection allowedValues, CallbackInfo ci) {
-        this.propertyName = name;
+    public SpongeDamageType(String name) {
+        this.name = name;
+        this.id = name.toLowerCase();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Collection<E> getPossibleValues() {
-        return getAllowedValues();
+    public String getId() {
+        return this.id;
     }
 
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeDamageType other = (SpongeDamageType) obj;
+        if (!this.id.equals(other.id)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
 }
