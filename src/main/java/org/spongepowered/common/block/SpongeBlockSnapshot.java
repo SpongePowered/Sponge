@@ -242,10 +242,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 .set(Location.POSITION_Y, this.pos.getY())
                 .set(Location.POSITION_Z, this.pos.getZ())
             .getContainer()
-            .set(DataQueries.BLOCK_STATE, this.blockState)
-            .set(DataQueries.DATA_MANIPULATORS, dataList);
+            .set(DataQueries.BLOCK_STATE, this.blockState);
         if (this.compound != null) {
             container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+        }
+        if (!dataList.isEmpty()) {
+            container.set(DataQueries.DATA_MANIPULATORS, dataList);
         }
         return container;
     }

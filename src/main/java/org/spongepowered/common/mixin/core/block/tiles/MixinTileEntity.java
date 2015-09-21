@@ -24,14 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
@@ -42,11 +48,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
@@ -75,8 +88,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
         container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final DataView dataView = container.createView(DataQueries.DATA_MANIPULATORS);
-        container.set(DataQueries.DATA_MANIPULATORS, dataView);
+        final ImmutableList<DataManipulator<?, ?>> manipulators = ImmutableList.copyOf(getContainers());
+        if (!manipulators.isEmpty()) {
+            List<DataView> manipulatorview = DataUtil.getSerializedManipulatorList(manipulators);
+            container.set(DataQueries.DATA_MANIPULATORS, manipulatorview);
+        }
         return container;
     }
 
@@ -147,6 +163,14 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Override
     public void writeToNbt(NBTTagCompound compound) {
+        if (this instanceof IMixinCustomDataHolder) {
+            final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(((IMixinCustomDataHolder) this).getCustomManipulators());
+            final NBTTagList manipulatorTagList = new NBTTagList();
+            for (DataView dataView : manipulatorViews) {
+                manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+            }
+            compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG, manipulatorTagList);
+        }
     }
 
     @Override

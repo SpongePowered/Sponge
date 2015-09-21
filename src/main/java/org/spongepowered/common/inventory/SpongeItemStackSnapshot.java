@@ -90,7 +90,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.compound = compound == null ? null : (NBTTagCompound) compound.copy();
     }
 
-    public SpongeItemStackSnapshot(ItemType itemType, int count, ImmutableList<ImmutableDataManipulator<?, ?>> manipulators) {
+    public SpongeItemStackSnapshot(ItemType itemType,
+                                   int count,
+                                   ImmutableList<ImmutableDataManipulator<?, ?>> manipulators,
+                                   @Nullable NBTTagCompound compound) {
         this.itemType = checkNotNull(itemType);
         this.count = count;
         this.manipulators = checkNotNull(manipulators);
@@ -104,7 +107,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
-        @Nullable NBTTagCompound compound = ((net.minecraft.item.ItemStack) this.privateStack).getTagCompound();
         this.compound = compound == null ? null : (NBTTagCompound) compound.copy();
     }
 

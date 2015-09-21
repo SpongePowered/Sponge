@@ -157,20 +157,22 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public Optional<BlockSnapshot> build(DataView container) throws InvalidDataException {
         checkDataExists(container, DataQueries.BLOCK_STATE);
-        checkDataExists(container, DataQueries.DATA_MANIPULATORS);
         checkDataExists(container, Location.WORLD_ID);
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
         // this is unused for now
         final UUID worldUuid = UUID.fromString(container.getString(Location.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
-        final List<DataView> dataViews = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
-        final ImmutableList<ImmutableDataManipulator<?, ?>> extraData = DataUtil.deserializeImmutableManipulatorList(dataViews);
-        // And now to get the block state...
         final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationService).get();
         Optional<DataView> unsafeCompound = container.getView(DataQueries.UNSAFE_NBT);
         final NBTTagCompound compound = unsafeCompound.isPresent() ? NbtTranslator.getInstance().translateData(unsafeCompound.get()) : null;
-        // todo actually use the nbt compound
+        final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
+        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
+            final List<DataView> dataViews = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
+            extraData = DataUtil.deserializeImmutableManipulatorList(dataViews);
+        } else {
+            extraData = ImmutableList.of();
+        }
         return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(blockState, worldUuid, coordinate, extraData, compound));
     }
 }

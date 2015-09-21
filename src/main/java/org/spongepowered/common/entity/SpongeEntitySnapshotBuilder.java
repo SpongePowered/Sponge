@@ -30,6 +30,7 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
@@ -237,7 +238,11 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
             this.rotation = DataUtil.getPosition3d(container, DataQueries.ENTITY_ROTATION);
             this.scale = DataUtil.getPosition3d(container, DataQueries.ENTITY_SCALE);
 
-            this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+            if (container.contains(DataQueries.DATA_MANIPULATORS)) {
+                this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+            } else {
+                this.manipulators = ImmutableList.of();
+            }
             if (container.contains(DataQueries.UNSAFE_NBT)) {
                 this.compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
             }
@@ -246,9 +251,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
             }
             return Optional.of(build());
         } catch (Exception e) {
-            new InvalidDataException("Could not deserialize the snapshot due to exception! Skipping!", e).printStackTrace();
+            throw new InvalidDataException("Could not deserialize the snapshot due to exception!", e);
         }
-
-        return Optional.absent();
     }
 }

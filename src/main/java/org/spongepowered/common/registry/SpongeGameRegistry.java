@@ -2046,7 +2046,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     public void setDamageTypes() {
-        RegistryHelper.mapFields(DamageTypes.class, damageTypeMappings);
+        RegistryHelper.mapFields(DamageTypes.class, this.damageTypeMappings);
         damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
         damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
         damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);

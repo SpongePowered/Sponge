@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.item.ItemType;
@@ -35,6 +36,9 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.service.persistence.NbtTranslator;
+
+import javax.annotation.Nullable;
 
 public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnapshot> {
 
@@ -43,8 +47,18 @@ public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnap
         final String itemString = DataUtil.getData(container, DataQueries.ITEM_TYPE, String.class);
         final ItemType itemType = Sponge.getSpongeRegistry().getType(ItemType.class, itemString).get();
         final int count = DataUtil.getData(container, DataQueries.ITEM_COUNT, Integer.TYPE);
-        final ImmutableList<ImmutableDataManipulator<?, ?>>
+        final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
+        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
-        return Optional.<ItemStackSnapshot>of(new SpongeItemStackSnapshot(itemType, count, manipulators));
+        } else {
+            manipulators = ImmutableList.of();
+        }
+        @Nullable final NBTTagCompound compound;
+        if (container.contains(DataQueries.UNSAFE_NBT)) {
+            compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
+        } else {
+            compound = null;
+        }
+        return Optional.<ItemStackSnapshot>of(new SpongeItemStackSnapshot(itemType, count, manipulators, compound));
     }
 }

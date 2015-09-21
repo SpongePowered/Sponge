@@ -60,6 +60,9 @@ public class NbtDataUtil {
     public static final byte TAG_COMPOUND = 10;
     public static final byte TAG_INT_ARRAY = 11;
 
+    // These are Sponge's NBT tag keys
+    public static final String CUSTOM_MANIPULATOR_TAG = "CustomManipulators";
+
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 
     /**

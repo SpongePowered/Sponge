@@ -38,6 +38,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -51,6 +52,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 
@@ -310,10 +312,14 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        final DataContainer container = new MemoryDataContainer()
             .set(DataQueries.BLOCK_TYPE, this.getType().getId())
-            .set(DataQueries.DATA_MANIPULATORS, this.getManipulators())
             .set(DataQueries.BLOCK_STATE_UNSAFE_META, this.getStateMeta());
+        final List<DataView> manipulators = DataUtil.getSerializedImmutableManipulatorList(getContainers());
+        if (!manipulators.isEmpty()) {
+            container.set(DataQueries.DATA_MANIPULATORS, manipulators);
+        }
+        return container;
     }
 
     @Override
