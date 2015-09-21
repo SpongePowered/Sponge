@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.data;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
@@ -36,7 +37,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 

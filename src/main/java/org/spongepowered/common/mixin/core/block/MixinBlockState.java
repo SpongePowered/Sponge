@@ -33,14 +33,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockStateBase;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
@@ -51,6 +54,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -93,10 +97,20 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public BlockSnapshot snapshotFor(Location<World> location) {
+        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
+            .blockState(this)
+            .position(location.getBlockPosition())
+            .worldId(location.getExtent().getUniqueId());
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
-            return new SpongeBlockSnapshot(this, location, location.getTileEntity().get());
+            final TileEntity tileEntity = location.getTileEntity().get();
+            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
+                builder.add(manipulator);
+            }
+            final NBTTagCompound compound = new NBTTagCompound();
+            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
+            builder.unsafeNbt(compound);
         }
-        return new SpongeBlockSnapshot(this, location);
+        return builder.build();
     }
 
     @Override

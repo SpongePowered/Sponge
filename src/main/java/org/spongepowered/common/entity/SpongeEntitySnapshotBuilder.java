@@ -128,14 +128,14 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M, ?>> SpongeEntitySnapshotBuilder add(M manipulator) {
+    public SpongeEntitySnapshotBuilder add(DataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         return add((ImmutableDataManipulator) manipulator.asImmutable());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <I extends ImmutableDataManipulator<I, ?>> SpongeEntitySnapshotBuilder add(I manipulator) {
+    public SpongeEntitySnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getImmutableProcessor(
             (Class<ImmutableDataManipulator>) (Class) manipulator.getClass());

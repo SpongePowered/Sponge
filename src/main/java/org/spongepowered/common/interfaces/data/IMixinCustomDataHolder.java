@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.interfaces.data;
 
+import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IMixinCustomDataHolder {
 

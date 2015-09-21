@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.core.data.holders;
 
 
+import static org.spongepowered.common.data.util.DirectionResolver.getFor;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLever;
@@ -36,9 +38,11 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
@@ -48,9 +52,7 @@ public abstract class MixinBlockLever extends MixinBlock {
 
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         final BlockLever.EnumOrientation intDir = (BlockLever.EnumOrientation) (Object) blockState.getValue(BlockLever.FACING);
-        final ImmutableDirectionalData directionalData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                                                                                                 Direction.values()[((intDir.ordinal() - 1) + 8)
-                                                                                                                    % 16]);
+        final ImmutableDirectionalData directionalData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, getFor(intDir));
         return directionalData;
     }
 
@@ -61,7 +63,22 @@ public abstract class MixinBlockLever extends MixinBlock {
     }
 
     public ImmutableAxisData getAxisData(IBlockState blockState) {
-        return null;
+        final BlockLever.EnumOrientation orientation = (BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING);
+        final Axis axis;
+        switch (orientation) {
+            case UP_X:
+            case DOWN_X:
+                axis = Axis.X;
+                break;
+            case UP_Z:
+            case DOWN_Z:
+                axis = Axis.Z;
+                break;
+            default:
+                axis = Axis.Y;
+                break;
+        }
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, axis);
     }
 
     @Override

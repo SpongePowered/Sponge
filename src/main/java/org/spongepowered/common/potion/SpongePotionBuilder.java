@@ -50,13 +50,13 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M, ?>> PotionEffectBuilder add(M manipulator) {
+    public PotionEffectBuilder add(DataManipulator<?, ?> manipulator) {
         return this; // TODO
     }
 
     @Override
-    public <I extends ImmutableDataManipulator<I, ?>> PotionEffectBuilder add(I manipulator) {
-        return null;
+    public PotionEffectBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
+        return this;
     }
 
     @Override

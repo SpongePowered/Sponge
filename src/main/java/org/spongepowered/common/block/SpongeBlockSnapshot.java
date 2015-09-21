@@ -76,68 +76,24 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableSet<ImmutableValue<?>> valueSet;
     @Nullable final NBTTagCompound compound;
 
-    public SpongeBlockSnapshot(BlockState blockState, World world, Vector3i pos) {
-        this(blockState, world.getUniqueId(), pos, ImmutableList.<ImmutableDataManipulator<?, ?>>of());
-    }
-
-    public SpongeBlockSnapshot(BlockState blockState, UUID worldUniqueId, Vector3i pos, ImmutableList<ImmutableDataManipulator<?, ?>> list) {
-        this(blockState, worldUniqueId, pos, list, null);
-    }
-
-    public SpongeBlockSnapshot(BlockState blockState, UUID worldUniqueId, Vector3i pos, ImmutableList<ImmutableDataManipulator<?, ?>> extraData,
-                               @Nullable NBTTagCompound compound) {
-        this.blockState = checkNotNull(blockState);
-        this.worldUniqueId = checkNotNull(worldUniqueId);
-        this.pos = checkNotNull(pos);
-        this.extraData = checkNotNull(extraData);
-        ImmutableMap.Builder<Key<?>, ImmutableValue<?>> builder = ImmutableMap.builder();
+    SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
+        this.blockState = checkNotNull(builder.blockState, "The block state was null!");
+        this.worldUniqueId = checkNotNull(builder.worldUuid);
+        this.pos = checkNotNull(builder.coords);
+        this.extraData = builder.manipulators == null ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
+        ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
         for (ImmutableValue<?> value : this.blockState.getValues()) {
-            builder.put(value.getKey(), value);
+            mapBuilder.put(value.getKey(), value);
         }
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
             for (ImmutableValue<?> value : manipulator.getValues()) {
-                builder.put(value.getKey(), value);
+                mapBuilder.put(value.getKey(), value);
             }
         }
-        this.keyValueMap = builder.build();
+        this.keyValueMap = mapBuilder.build();
         this.valueSet = ImmutableSet.copyOf(this.keyValueMap.values());
-        this.compound = compound == null ? null : (NBTTagCompound) compound.copy();
-    }
+        this.compound = builder.compound == null ? null : (NBTTagCompound) builder.compound.copy();
 
-    public SpongeBlockSnapshot(BlockState blockState, Location<World> location) {
-        this(blockState, location.getExtent(), location.getBlockPosition());
-    }
-
-    public SpongeBlockSnapshot(BlockState blockState, Location<World> location, NBTTagCompound nbt) {
-        this(blockState, location.getExtent().getUniqueId(), location.getBlockPosition(), ImmutableList.<ImmutableDataManipulator<?, ?>>of(), nbt);
-    }
-
-    public SpongeBlockSnapshot(BlockState blockState, Location<World> location, ImmutableList<ImmutableDataManipulator<?, ?>> extraData) {
-        this(blockState, location.getExtent().getUniqueId(), location.getBlockPosition(), extraData);
-    }
-
-    public SpongeBlockSnapshot(BlockState blockState, Location<World> location, TileEntity entity) {
-        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
-        for (DataManipulator<?, ?> manipulator : entity.getContainers()) {
-            builder.add(manipulator.asImmutable());
-        }
-        this.blockState = checkNotNull(blockState);
-        this.pos = location.getBlockPosition();
-        this.worldUniqueId = location.getExtent().getUniqueId();
-        this.extraData = builder.build();
-        ImmutableMap.Builder<Key<?>, ImmutableValue<?>> keyValueBuilder = ImmutableMap.builder();
-        for (ImmutableValue<?> value : this.blockState.getValues()) {
-            keyValueBuilder.put(value.getKey(), value);
-        }
-        for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-            for (ImmutableValue<?> value : manipulator.getValues()) {
-                keyValueBuilder.put(value.getKey(), value);
-            }
-        }
-        this.keyValueMap = keyValueBuilder.build();
-        this.valueSet = ImmutableSet.copyOf(this.keyValueMap.values());
-        this.compound = new NBTTagCompound();
-        ((net.minecraft.tileentity.TileEntity) entity).writeToNBT(this.compound);
     }
 
     @Override
@@ -147,28 +103,15 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public BlockSnapshot withState(BlockState blockState) {
-        return new SpongeBlockSnapshot(checkNotNull(blockState),
-                                       this.worldUniqueId,
-                                       this.pos,
-                                       ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+        return createBuilder().blockState(blockState).build();
     }
 
     @Override
     public BlockSnapshot withLocation(Location<World> location) {
-        final NBTTagCompound cloned;
-        if (this.compound != null) {
-            cloned = (NBTTagCompound) this.compound.copy();
-            cloned.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_X, location.getBlockPosition().getX());
-            cloned.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Y, location.getBlockPosition().getY());
-            cloned.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Z, location.getBlockPosition().getZ());
-        } else {
-            cloned = null;
-        }
-        return new SpongeBlockSnapshot(this.blockState,
-                                       location.getExtent().getUniqueId(),
-                                       location.getBlockPosition(),
-                                       this.extraData,
-                                       cloned);
+        return createBuilder()
+            .position(location.getBlockPosition())
+            .worldId(location.getExtent().getUniqueId())
+            .build();
     }
 
     @Override
@@ -308,20 +251,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 newState = this.blockState;
             }
             if (changeState) {
-                return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(newState, this.worldUniqueId, this.pos, this.extraData));
+                return Optional.of(createBuilder().blockState(newState).build());
             } else {
-                final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
-                for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-                    if (manipulator.getClass().isAssignableFrom(valueContainer.getClass())) {
-                        builder.add(valueContainer);
-                    } else {
-                        builder.add(manipulator);
-                    }
-                }
-                return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(newState, this.worldUniqueId, this.pos, builder.build()));
+                final SpongeBlockSnapshotBuilder builder = createBuilder();
+                builder.add(valueContainer);
+                return Optional.of(builder.build());
             }
         }
-        return Optional.absent();
+        return Optional.of(createBuilder().add(valueContainer).build());
     }
 
     @Override
@@ -419,6 +356,21 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     public Optional<NBTTagCompound> getCompound() {
         return this.compound == null ? Optional.<NBTTagCompound>absent() : Optional.of((NBTTagCompound) this.compound.copy());
+    }
+
+
+    public SpongeBlockSnapshotBuilder createBuilder() {
+        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        builder.blockState((BlockState) this.blockState)
+            .position(this.pos)
+            .worldId(this.worldUniqueId);
+        for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
+            builder.add((ImmutableDataManipulator) manipulator);
+        }
+        if (this.compound != null) {
+            builder.unsafeNbt(this.compound);
+        }
+        return builder;
     }
 
     @Override

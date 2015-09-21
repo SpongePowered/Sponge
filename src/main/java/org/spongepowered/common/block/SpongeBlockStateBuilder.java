@@ -53,12 +53,12 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M, ?>> BlockStateBuilder add(M manipulator) {
+    public BlockStateBuilder add(DataManipulator<?, ?> manipulator) {
         return add((ImmutableDataManipulator) manipulator.asImmutable());
     }
 
     @Override
-    public <I extends ImmutableDataManipulator<I, ?>> BlockStateBuilder add(I manipulator) {
+    public BlockStateBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         final Optional<BlockState> optional = this.blockState.with(manipulator);
         if (optional.isPresent()) {
             this.blockState = optional.get();
@@ -88,21 +88,25 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
         checkDataExists(container, DataQueries.BLOCK_TYPE);
         checkDataExists(container, DataQueries.BLOCK_STATE_UNSAFE_META);
         final ImmutableList<ImmutableDataManipulator<?, ?>> list;
+        /* todo write the deserializers for immutable data....
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             list = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
         } else {
             list = ImmutableList.of();
         }
+        */
         final String blockid = container.getString(DataQueries.BLOCK_TYPE).get();
         final BlockType blockType = Sponge.getGame().getRegistry().getType(BlockType.class, blockid).get();
         final int meta = container.getInt(DataQueries.BLOCK_STATE_UNSAFE_META).get();
         BlockState blockState = (BlockState) ((Block) blockType).getStateFromMeta(meta);
         try {
-            if (!list.isEmpty() && false) { // TODO are manipulators really required?
+            /*
+            if (!list.isEmpty() && false) {
                 for (ImmutableDataManipulator<?, ?> manipulator : list) {
                     blockState = blockState.with(manipulator).get();
                 }
             }
+            */
             return Optional.of(blockState);
         } catch (Exception e) {
             throw new InvalidDataException("Could not retrieve a blockstate!", e);

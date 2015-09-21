@@ -58,4 +58,19 @@ public class DirectionResolver {
         }
     }
 
+    public static Direction getFor(BlockLever.EnumOrientation orientation) {
+        switch (orientation) {
+            case DOWN_X : return Direction.DOWN;
+            case EAST : return Direction.EAST;
+            case WEST : return Direction.WEST;
+            case SOUTH : return Direction.SOUTH;
+            case NORTH : return Direction.NORTH;
+            case UP_Z : return Direction.UP;
+            case UP_X : return Direction.UP;
+            case DOWN_Z : return Direction.DOWN;
+            default:
+                return Direction.NORTH;
+        }
+    }
+
 }
