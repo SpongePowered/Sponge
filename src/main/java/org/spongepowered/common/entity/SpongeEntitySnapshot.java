@@ -25,7 +25,6 @@
 package org.spongepowered.common.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -34,7 +33,10 @@ import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagDouble;
+import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -43,10 +45,12 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
@@ -54,6 +58,7 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.List;
@@ -364,15 +369,20 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public EntitySnapshot withLocation(Location<World> location) {
+        checkNotNull(location, "location");
         final SpongeEntitySnapshotBuilder builder = createBuilder();
-        builder.position = checkNotNull(location).getPosition();
+        builder.position = location.getPosition();
+        builder.worldId = location.getExtent().getUniqueId();
+        NBTTagCompound newCompound = (NBTTagCompound) this.compound.copy();
+        newCompound.setTag("Pos", newDoubleNBTList(new double[] {location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ()}));
+        newCompound.setInteger("Dimension", ((IMixinWorldInfo)location.getExtent().getProperties()).getDimensionId());
+        builder.compound = newCompound;
         return builder.build();
     }
 
     private SpongeEntitySnapshotBuilder createBuilder() {
         return new SpongeEntitySnapshotBuilder()
             .type(this.getType())
-            .position(this.position)
             .rotation(this.rotation)
             .scale(this.scale);
     }
@@ -383,5 +393,38 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         } else {
             return Optional.of((NBTTagCompound) this.compound.copy());
         }
+    }
+
+    @Override
+    public Optional<Entity> restore() {
+        Optional<World> world = Sponge.getGame().getServer().getWorld(this.worldUuid);
+        if (!world.isPresent()) {
+            return Optional.absent();
+        }
+
+        Optional<Entity> entity = world.get().createEntity(getType(), this.position);
+        if (entity.isPresent()) {
+            net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity.get();
+            nmsEntity.readFromNBT(this.compound);
+
+            boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of());
+            if (spawnResult) {
+                return Optional.of((Entity) nmsEntity);
+            }
+        }
+        return Optional.absent();
+    }
+
+    public NBTTagList newDoubleNBTList(double ... numbers) {
+        NBTTagList nbttaglist = new NBTTagList();
+        double[] adouble = numbers;
+        int i = numbers.length;
+
+        for (int j = 0; j < i; ++j) {
+            double d1 = adouble[j];
+            nbttaglist.appendTag(new NBTTagDouble(d1));
+        }
+
+        return nbttaglist;
     }
 }
