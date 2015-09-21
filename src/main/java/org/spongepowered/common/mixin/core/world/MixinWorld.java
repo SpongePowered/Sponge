@@ -82,6 +82,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
@@ -432,6 +433,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.absent();
     }
 
+    @Override
+    public Optional<Entity> restoreSnapshot(EntitySnapshot snapshot, Vector3d position) {
+        EntitySnapshot entitySnapshot = snapshot.withLocation(new Location<World>(this, position));
+        return entitySnapshot.restore();
+    }
+    
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         checkNotNull(entity, "Entity cannot be null!");
