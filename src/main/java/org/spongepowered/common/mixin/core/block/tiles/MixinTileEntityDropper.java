@@ -35,8 +35,4 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(net.minecraft.tileentity.TileEntityDropper.class)
 public abstract class MixinTileEntityDropper extends MixinTileEntityLockable implements Dropper {
 
-    @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.DROPPER;
-    }
 }

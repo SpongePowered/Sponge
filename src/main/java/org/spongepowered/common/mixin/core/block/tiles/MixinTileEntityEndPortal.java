@@ -34,8 +34,4 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(net.minecraft.tileentity.TileEntityEndPortal.class)
 public abstract class MixinTileEntityEndPortal extends MixinTileEntity implements EndPortal {
 
-    @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.END_PORTAL;
-    }
 }

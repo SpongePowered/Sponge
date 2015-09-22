@@ -34,8 +34,4 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(net.minecraft.tileentity.TileEntityComparator.class)
 public abstract class MixinTileEntityComparator extends MixinTileEntity implements Comparator {
 
-    @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.COMPARATOR;
-    }
 }

@@ -43,11 +43,6 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     @Shadow private int secondaryEffect;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.BEACON;
-    }
-
-    @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         container.set(of("effect1"), getField(1));

@@ -55,6 +55,7 @@ import net.minecraft.item.ItemFishFood;
 import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
@@ -548,6 +549,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .build();
 
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
+    public final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newHashMap();
     public final Map<String, Enchantment> enchantmentMappings = Maps.newHashMap();
     private final Map<String, Career> careerMappings = Maps.newHashMap();
     private final Map<String, Profession> professionMappings = Maps.newHashMap();
@@ -581,6 +583,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
     private final Map<String, Art> artMappings = Maps.newHashMap();
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
+    public final Map<String, TileEntityType> tileEntityTypeMappings = Maps.newHashMap();
     private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
             .put("dead_bush", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
             .put("tall_grass", (ShrubType) (Object) BlockTallGrass.EnumType.GRASS)
@@ -692,7 +695,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(TextColor.class, textColorMappings)
                 .put(TextStyle.Base.class, textStyleMappings)
-                .put(TileEntityType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                .put(TileEntityType.class, this.tileEntityTypeMappings)
                 .put(TreeType.class, this.treeTypeMappings)
                 .put(Visibility.class, visibilityMappings)
                 .put(WallType.class, this.wallTypeMappings)

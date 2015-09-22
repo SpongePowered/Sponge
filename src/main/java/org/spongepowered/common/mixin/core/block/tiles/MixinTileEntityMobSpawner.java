@@ -39,11 +39,6 @@ public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implemen
     @Shadow public abstract MobSpawnerBaseLogic getSpawnerBaseLogic();
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.MOB_SPAWNER;
-    }
-
-    @Override
     public void spawnEntityBatchImmediately(boolean force) {
         if (force) {
             final short oldMaxNearby = (short) getSpawnerBaseLogic().maxNearbyEntities;

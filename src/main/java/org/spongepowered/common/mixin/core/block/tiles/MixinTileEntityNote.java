@@ -41,11 +41,6 @@ public abstract class MixinTileEntityNote extends MixinTileEntity implements Not
     @Shadow public byte note;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.NOTE;
-    }
-
-    @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         container.set(of("Note"), this.note);

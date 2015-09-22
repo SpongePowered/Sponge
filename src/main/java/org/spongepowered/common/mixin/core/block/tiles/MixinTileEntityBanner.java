@@ -97,9 +97,4 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         this.markDirtyAndUpdate();
     }
 
-    @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.BANNER;
-    }
-
 }

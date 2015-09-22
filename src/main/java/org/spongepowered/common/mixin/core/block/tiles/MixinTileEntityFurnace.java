@@ -41,11 +41,6 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     @Shadow private String furnaceCustomName;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.FURNACE;
-    }
-
-    @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         container.set(of("BurnTime"), this.getField(0));

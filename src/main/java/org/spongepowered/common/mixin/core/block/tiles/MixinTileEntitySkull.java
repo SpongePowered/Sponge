@@ -43,12 +43,6 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
     @Shadow public abstract int getSkullType();
     @Shadow public abstract void setType(int type);
 
-
-    @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.SKULL;
-    }
-
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();

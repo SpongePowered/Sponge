@@ -30,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -43,6 +44,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -58,12 +62,23 @@ import java.util.List;
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
+    private final TileEntityType tileType = Sponge.getSpongeRegistry().tileClassToTypeMappings.get(this.getClass());
+
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
 
     @Shadow public abstract void markDirty();
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
+
+    @SuppressWarnings("unchecked")
+    @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
+    private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
+        final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name);
+        Sponge.getSpongeRegistry().tileClassToTypeMappings.put(clazz, tileEntityType);
+        Sponge.getSpongeRegistry().tileEntityTypeMappings.put(name.toLowerCase(), tileEntityType);
+        System.err.println("Registering the class:" + clazz.getName() + " with registration id :" + name);
+    }
 
     @Override
     public Location<World> getLocation() {
@@ -112,6 +127,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public void setValid(boolean valid) {
         this.tileEntityInvalid = valid;
+    }
+
+    @Override
+    public final TileEntityType getType() {
+        return this.tileType;
     }
 
     /**

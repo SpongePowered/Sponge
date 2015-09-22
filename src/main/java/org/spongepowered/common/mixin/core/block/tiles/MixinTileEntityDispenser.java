@@ -34,9 +34,5 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(net.minecraft.tileentity.TileEntityDispenser.class)
 public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser {
 
-    @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.DISPENSER;
-    }
 }
 

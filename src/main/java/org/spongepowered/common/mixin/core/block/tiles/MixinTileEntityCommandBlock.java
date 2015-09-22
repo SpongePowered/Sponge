@@ -54,11 +54,6 @@ public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implem
     }
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.COMMAND_BLOCK;
-    }
-
-    @Override
     @SuppressWarnings("deprecated")
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
