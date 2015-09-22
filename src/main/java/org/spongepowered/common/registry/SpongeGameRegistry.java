@@ -1796,7 +1796,19 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(GameModeData.class, gameModeDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
                 ImmutableSpongeGameModeData.class, gameModeDataProcessor, gameModeDataBuilder);
-
+        
+        final LoreDataProcessor loreDataProcessor = new LoreDataProcessor();
+        final LoreDataBuilder loreDataBuilder = new LoreDataBuilder();
+        service.registerBuilder(LoreData.class, loreDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(LoreData.class, SpongeLoreData.class, ImmutableLoreData.class,
+                ImmutableSpongeLoreData.class, loreDataProcessor, loreDataBuilder);
+        
+        final PagedDataProcessor pagedDataProcessor = new PagedDataProcessor();
+        final PagedDataBuilder pagedDataBuilder = new PagedDataBuilder();
+        service.registerBuilder(PagedData.class, pagedDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(PagedData.class, SpongePagedData.class, ImmutablePagedData.class, ImmutableSpongePagedData.class,
+                pagedDataProcessor, pagedDataBuilder);
+                
         final ScreamingDataProcessor screamingDataProcessor = new ScreamingDataProcessor();
         final ScreamingDataBuilder screamingDataBuilder = new ScreamingDataBuilder();
         service.registerBuilder(ScreamingData.class, screamingDataBuilder);
@@ -1834,6 +1846,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.GAME_MODE, new GameModeValueProcessor());
         dataRegistry.registerValueProcessor(Keys.IS_SCREAMING, new ScreamingValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ITEM_ENCHANTMENTS, new ItemEnchantmentValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.ITEM_LORE, new ItemLoreValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.BOOK_PAGES, new BookPagesValueProcessor());  
     }
 
     private void setNotePitches() {
