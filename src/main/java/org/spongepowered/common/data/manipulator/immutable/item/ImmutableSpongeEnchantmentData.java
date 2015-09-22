@@ -1,5 +1,5 @@
 /*
- * This file is part of SpongeAPI, licensed under the MIT License (MIT).
+ * This file is part of Sponge, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableList;
@@ -48,6 +47,7 @@ public class ImmutableSpongeEnchantmentData extends AbstractImmutableData<Immuta
     public ImmutableSpongeEnchantmentData(List<ItemEnchantment> enchantments) {
         super(ImmutableEnchantmentData.class);
         this.enchantments = ImmutableList.copyOf(enchantments);
+        registerGetters();
     }
 
     @Override

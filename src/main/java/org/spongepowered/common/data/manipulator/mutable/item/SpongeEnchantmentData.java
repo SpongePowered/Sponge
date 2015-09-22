@@ -1,5 +1,5 @@
 /*
- * This file is part of SpongeAPI, licensed under the MIT License (MIT).
+ * This file is part of Sponge, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,13 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package org.spongepowered.common.data.manipulator.mutable.item;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
@@ -49,6 +47,7 @@ public class SpongeEnchantmentData extends AbstractData<EnchantmentData, Immutab
 
     public SpongeEnchantmentData() {
         super(EnchantmentData.class);
+        registerGettersAndSetters();
     }
 
     public SpongeEnchantmentData(List<ItemEnchantment> enchantments) {
