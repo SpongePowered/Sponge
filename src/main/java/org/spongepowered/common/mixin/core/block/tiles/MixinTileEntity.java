@@ -77,7 +77,6 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name);
         Sponge.getSpongeRegistry().tileClassToTypeMappings.put(clazz, tileEntityType);
         Sponge.getSpongeRegistry().tileEntityTypeMappings.put(name.toLowerCase(), tileEntityType);
-        System.err.println("Registering the class:" + clazz.getName() + " with registration id :" + name);
     }
 
     @Override
