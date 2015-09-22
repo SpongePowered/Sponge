@@ -46,6 +46,10 @@ public class NbtDataUtil {
     public static final String TILE_ENTITY_POSITION_Y = "y";
     public static final String TILE_ENTITY_POSITION_Z = "z";
 
+    public static final String ITEM_ENCHANTMENT_LIST = "ench";
+    public static final String ITEM_ENCHANTMENT_ID = "id";
+    public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
+
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
     public static final byte TAG_BYTE = 1;

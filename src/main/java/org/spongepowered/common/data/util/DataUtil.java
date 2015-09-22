@@ -95,7 +95,7 @@ public class DataUtil {
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (DataManipulator<?, ?> manipulator : manipulators) {
             final DataContainer container = new MemoryDataContainer();
-            container.set(DataQueries.DATA_CLASS, manipulator.getClass())
+            container.set(DataQueries.DATA_CLASS, manipulator.getClass().toString())
                 .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }
@@ -107,7 +107,7 @@ public class DataUtil {
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : manipulators) {
             final DataContainer container = new MemoryDataContainer();
-            container.set(DataQueries.DATA_CLASS, manipulator.getClass())
+            container.set(DataQueries.DATA_CLASS, manipulator.getClass().toString())
                 .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }
