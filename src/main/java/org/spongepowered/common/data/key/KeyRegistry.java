@@ -109,6 +109,8 @@ public class KeyRegistry {
         keyMap.put("disguised_block_type", makeSingleKey(DisguisedBlockType.class, Value.class, of("DisguisedBlockType")));
         keyMap.put("disarmed", makeSingleKey(Boolean.TYPE, Value.class, of("Disarmed")));
         keyMap.put("item_enchantments", makeListKey(ItemEnchantment.class, of("ItemEnchantments")));
+        keyMap.put("item_lore", makeListKey(Text.class, of("ItemLore")));
+        keyMap.put("book_pages", makeListKey(Text.class, of("BookPages")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

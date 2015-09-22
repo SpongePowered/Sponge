@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.data.util;
 
+import net.minecraft.nbt.NBTTagString;
+import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.api.text.Texts;
+import com.google.common.collect.Lists;
+import net.minecraft.nbt.NBTTagList;
+import org.spongepowered.api.text.Text;
+
+import java.util.List;
+import java.util.Locale;
+
 import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -41,6 +51,9 @@ public class NbtDataUtil {
     public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
     public static final String BLOCK_ENTITY_ID = "id";
     public static final String SIGN = "Sign";
+    public static final String DISPLAY = "display";
+    public static final String LORE = "Lore";
+    public static final String PAGES = "pages";
 
     public static final String TILE_ENTITY_POSITION_X = "x";
     public static final String TILE_ENTITY_POSITION_Y = "y";
@@ -122,5 +135,66 @@ public class NbtDataUtil {
             mainCompound.setTag(key, new NBTTagCompound());
         }
         return mainCompound.getCompoundTag(key);
+    }
+    
+    public static List<Text> getLoreFromNBT(NBTTagCompound subCompound){
+        final List<Text> lore = Lists.newArrayList();
+        final NBTTagList list = subCompound.getTagList(NbtDataUtil.LORE, NbtDataUtil.TAG_STRING);
+        for(int i = 0; i < list.tagCount(); i++){
+            lore.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
+        }
+        return lore;
+    }
+    
+    public static void removeLoreFromNBT(ItemStack itemStack){
+        final NBTTagList list = new NBTTagList();
+        if(itemStack.getSubCompound(NbtDataUtil.DISPLAY, false) == null){
+            return;
+        }
+        itemStack.getSubCompound(NbtDataUtil.DISPLAY, false).setTag(NbtDataUtil.LORE, list);
+    }
+    
+    public static void setLoreToNBT(ItemStack itemStack, List<Text> lore){
+        final NBTTagList list = new NBTTagList();
+        for(Text text : lore){
+            list.appendTag(new NBTTagString(((IMixinText) text).toLegacy('\247', Locale.ENGLISH)));
+        }
+        itemStack.getSubCompound(NbtDataUtil.DISPLAY, true).setTag(NbtDataUtil.LORE, list);
+    }
+    
+    public static List<Text> getPagesFromNBT(NBTTagCompound compound){
+        final List<Text> pages = Lists.newArrayList();
+        final NBTTagList list = compound.getTagList(NbtDataUtil.PAGES, NbtDataUtil.TAG_STRING);
+        for(int i = 0; i < list.tagCount(); i++){
+            pages.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
+        }
+        return pages;
+    }
+    
+    public static void removePagesFromNBT(ItemStack itemStack){
+        final NBTTagList list = new NBTTagList();
+        if(itemStack.getTagCompound() == null){
+            return;
+        }
+        itemStack.getTagCompound().setTag(NbtDataUtil.PAGES, list);
+    }
+    
+    public static void setPagesToNBT(ItemStack itemStack, List<Text> pages){
+        final NBTTagList list = new NBTTagList();
+        for(Text text : pages){
+            list.appendTag(new NBTTagString(((IMixinText)text).toLegacy('\247', Locale.ENGLISH)));
+        }
+        if(itemStack.getTagCompound() == null){
+            itemStack.setTagCompound(new NBTTagCompound());
+        }
+        final NBTTagCompound compound= itemStack.getTagCompound();
+        compound.setTag(NbtDataUtil.PAGES, list);
+        if(!compound.hasKey("title")){
+            compound.setString("title", "invalid");
+        }
+        if(!compound.hasKey("author")){
+            compound.setString("author", "invalid");
+        }
+        compound.setBoolean("resolved", true);
     }
 }
