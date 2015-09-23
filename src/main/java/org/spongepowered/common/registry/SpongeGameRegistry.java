@@ -489,7 +489,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static final Map<String, DamageType> damageSourceToTypeMappings = Maps.newHashMap();
 
     public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
-            .put("none", SpongeTextStyle.of(EnumChatFormatting.RESET))
             .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
             .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
             .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
