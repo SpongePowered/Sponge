@@ -118,6 +118,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseDat
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
@@ -132,6 +134,8 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
+import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
+import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -320,6 +324,7 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeNoteBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
 import org.spongepowered.common.data.builder.item.SpongeItemStackDataBuilder;
+import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.DisplayNameDataBuilder;
@@ -335,6 +340,8 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.HorseDat
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.ScreamingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemEnchantmentDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemLoreDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemPagedDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.tileentity.SignDataBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
@@ -351,6 +358,8 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
@@ -365,6 +374,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
 import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor;
@@ -379,6 +390,8 @@ import org.spongepowered.common.data.processor.data.entity.HorseDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemEnchantmentDataProcessor;
+import org.spongepowered.common.data.processor.data.item.ItemLoreDataProcessor;
+import org.spongepowered.common.data.processor.data.item.ItemPagedDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
@@ -400,6 +413,8 @@ import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProces
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ScreamingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
+import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
@@ -419,7 +434,6 @@ import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
-import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -1821,6 +1835,18 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilderAndImpl(EnchantmentData.class, SpongeEnchantmentData.class, itemEnchantmentDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(EnchantmentData.class, SpongeEnchantmentData.class, ImmutableEnchantmentData.class,
                 ImmutableSpongeEnchantmentData.class, itemEnchantmentDataProcessor, itemEnchantmentDataBuilder);
+        
+        final ItemLoreDataProcessor itemLoreDataProcessor = new ItemLoreDataProcessor();
+        final ItemLoreDataBuilder itemLoreDataBuilder = new ItemLoreDataBuilder();
+        service.registerBuilderAndImpl(LoreData.class, SpongeLoreData.class, itemLoreDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(LoreData.class, SpongeLoreData.class, ImmutableLoreData.class, ImmutableSpongeLoreData.class,
+                itemLoreDataProcessor, itemLoreDataBuilder);
+        
+        final ItemPagedDataProcessor itemPagedDataProcessor = new ItemPagedDataProcessor();
+        final ItemPagedDataBuilder itemPagedDataBuilder = new ItemPagedDataBuilder();
+        service.registerBuilderAndImpl(PagedData.class, SpongePagedData.class, itemPagedDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(PagedData.class, SpongePagedData.class, ImmutablePagedData.class, ImmutableSpongePagedData.class,
+                itemPagedDataProcessor, itemPagedDataBuilder);
 
         final HorseDataProcessor horseDataProcessor = new HorseDataProcessor();
         final HorseDataBuilder horseDataBuilder = new HorseDataBuilder(horseDataProcessor);
@@ -1850,6 +1876,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.HORSE_COLOR, new HorseColorValueProcessor());
         dataRegistry.registerValueProcessor(Keys.HORSE_STYLE, new HorseStyleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.HORSE_VARIANT, new HorseVariantValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.ITEM_LORE, new ItemLoreValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.BOOK_PAGES, new BookPagesValueProcessor());
     }
 
     private void setNotePitches() {
