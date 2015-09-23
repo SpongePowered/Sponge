@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.text;
 
+import com.google.common.collect.Lists;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
@@ -31,6 +34,7 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
 
+import java.util.List;
 import java.util.Locale;
 
 public final class SpongeTexts {
@@ -87,4 +91,36 @@ public final class SpongeTexts {
         return Texts.builder(getLegacyFormatting(text)).append(result).build();
     }
 
+    public static List<String> asJson(List<Text> list) {
+        List<String> json = Lists.newArrayList();
+        for (Text line : list) {
+            json.add(Texts.json().to(line));
+        }
+        return json;
+    }
+
+    public static List<Text> fromJson(List<String> json) {
+        List<Text> list = Lists.newArrayList();
+        for (String line : json) {
+           list.add(Texts.json().fromUnchecked(line));
+        }
+        return list;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static List<Text> fromLegacy(NBTTagList legacy) {
+        List<Text> list = Lists.newArrayList();
+        for (int i = 0; i < legacy.tagCount(); i++) {
+            list.add(Texts.legacy().fromUnchecked(legacy.getStringTagAt(i)));
+        }
+        return list;
+    }
+
+    public static NBTTagList asLegacy(List<Text> list) {
+        final NBTTagList legacy = new NBTTagList();
+        for (Text line : list) {
+            legacy.appendTag(new NBTTagString(((IMixinText) line).toLegacy('\247', Locale.ENGLISH)));
+        }
+        return legacy;
+    }
 }
