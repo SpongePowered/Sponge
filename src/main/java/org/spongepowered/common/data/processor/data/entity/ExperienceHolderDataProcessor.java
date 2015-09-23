@@ -70,8 +70,8 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
     protected Map<Key<?>, ?> getValues(EntityPlayer entity) {
         final int level = entity.experienceLevel;
         final int totalExp = entity.experienceTotal;
-        final int expSinceLevel = (int) entity.experience;
-        final int expBetweenLevels = level >= 30 ? 112 + (level - 30) * 9 : (level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2);
+        final int expSinceLevel = (int) entity.experience * entity.xpBarCap();
+        final int expBetweenLevels = entity.xpBarCap();
         return ImmutableMap.<Key<?>, Object>of(Keys.EXPERIENCE_LEVEL, level,
                 Keys.TOTAL_EXPERIENCE, totalExp,
                 Keys.EXPERIENCE_SINCE_LEVEL, expSinceLevel,

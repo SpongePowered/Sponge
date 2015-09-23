@@ -39,8 +39,8 @@ public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<Exper
             EntityPlayer player = (EntityPlayer) dataHolder;
             final int level = player.experienceLevel;
             final int totalExp = player.experienceTotal;
-            final int expSinceLevel = (int) player.experience;
-            final int expBetweenLevels = level >= 30 ? 112 + (level - 30) * 9 : (level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2);
+            final int expSinceLevel = (int) player.experience * player.xpBarCap();
+            final int expBetweenLevels = player.xpBarCap();
             return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel, expBetweenLevels));
         }
         return Optional.absent();

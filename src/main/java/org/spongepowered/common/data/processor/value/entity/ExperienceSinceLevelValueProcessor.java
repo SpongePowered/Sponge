@@ -47,7 +47,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
-            return Optional.of((int) player.experience);
+            return Optional.of((int) player.experience * player.xpBarCap());
         }
         return Optional.absent();
     }
@@ -61,8 +61,8 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
-            final Integer oldValue = (int) player.experience;
-            player.experience = value;
+            final Integer oldValue = (int) player.experience * player.xpBarCap();
+            player.experience = value / player.xpBarCap();
             return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, value),
                     new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, oldValue));
         }

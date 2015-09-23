@@ -47,8 +47,7 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
     public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
-            final int level = player.experienceLevel;
-            return Optional.of(level >= 30 ? 112 + (level - 30) * 9 : (level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2));
+            return Optional.of(player.xpBarCap());
         }
         return Optional.absent();
     }
