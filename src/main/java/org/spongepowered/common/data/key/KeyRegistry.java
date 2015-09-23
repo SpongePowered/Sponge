@@ -49,6 +49,7 @@ import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -129,6 +130,10 @@ public class KeyRegistry {
         keyMap.put("book_pages", makeListKey(Text.class, of("BookPages")));
         keyMap.put("golden_apple_type", makeSingleKey(GoldenApple.class, Value.class, of("GoldenAppleType")));
         keyMap.put("is_flying", makeSingleKey(Boolean.class, Value.class, of("IsFlying")));
+        keyMap.put("experience_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceLevel")));
+        keyMap.put("total_experience", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("TotalExperience")));
+        keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceSinceLevel")));
+        keyMap.put("experience_from_start_of_level", makeSingleKey(Integer.TYPE, ImmutableBoundedValue.class, of("ExperienceFromStartOfLevel")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
