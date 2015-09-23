@@ -55,6 +55,7 @@ public final class DataQueries {
     public static final DataQuery BLOCK_ENTITY_SLOT_ITEM = of("Item");
 
     // Entities
+    public static final DataQuery ENTITY_CLASS = of("EntityClass");
     public static final DataQuery ENTITY_ID = of("EntityUniqueId");
     public static final DataQuery ENTITY_TYPE = of("EntityType");
     public static final DataQuery ENTITY_ROTATION = of("Rotation");
@@ -63,5 +64,6 @@ public final class DataQueries {
     // ItemStacks
     public static final DataQuery ITEM_COUNT = of("Count");
     public static final DataQuery ITEM_TYPE = of("ItemType");
+    public static final DataQuery ITEM_DAMAGE_VALUE = of("UnsafeDamage");
 
 }

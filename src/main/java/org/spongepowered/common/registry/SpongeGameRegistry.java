@@ -221,6 +221,7 @@ import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -291,7 +292,6 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
@@ -317,6 +317,7 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeMobSpawnerBu
 import org.spongepowered.common.data.builder.block.tileentity.SpongeNoteBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
+import org.spongepowered.common.data.builder.item.SpongeItemStackDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.DisplayNameDataBuilder;
@@ -376,7 +377,6 @@ import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor
 import org.spongepowered.common.data.processor.value.DisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
 import org.spongepowered.common.data.processor.value.ItemEnchantmentValueProcessor;
-import org.spongepowered.common.data.processor.value.RepresentedItemValueProcessor;
 import org.spongepowered.common.data.processor.value.SkullValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EyeHeightValueProcessor;
@@ -403,7 +403,6 @@ import org.spongepowered.common.effect.sound.SpongeSound;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityMeta;
-import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
@@ -411,8 +410,7 @@ import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
-import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.inventory.SpongeItemStackSnapshotBuilder;
+import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -1732,6 +1730,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
 
         // ItemStack stuff
+        service.registerBuilder(ItemStack.class, new SpongeItemStackDataBuilder());
         service.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotBuilder());
         service.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
         service.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class, new ImmutableItemEnchantmentDataBuilder());

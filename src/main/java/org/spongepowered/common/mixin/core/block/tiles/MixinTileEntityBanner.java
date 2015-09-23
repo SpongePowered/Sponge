@@ -36,6 +36,7 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -73,8 +74,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     @Override
     public void sendDataToContainer(DataView dataView) {
-        dataView.set(of("Patterns"), Lists.newArrayList(this.patternLayers));
-        dataView.set(of("Base"), this.baseColor);
+        dataView.set(Keys.BANNER_PATTERNS.getQuery(), Lists.newArrayList(this.patternLayers));
+        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor);
     }
 
     public void markDirtyAndUpdate() {

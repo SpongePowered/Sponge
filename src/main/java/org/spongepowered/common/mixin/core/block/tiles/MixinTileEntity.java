@@ -44,7 +44,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
@@ -86,19 +85,19 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(Location.WORLD_ID, ((World) this.worldObj).getUniqueId().toString());
-        container.set(Location.POSITION_X, this.getPos().getX());
-        container.set(Location.POSITION_Y, this.getPos().getY());
-        container.set(Location.POSITION_Z, this.getPos().getZ());
-        container.set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.getClass().getSimpleName());
+        final DataContainer container = new MemoryDataContainer()
+            .set(Location.WORLD_ID, ((World) this.worldObj).getUniqueId().toString())
+            .set(Location.POSITION_X, this.getPos().getX())
+            .set(Location.POSITION_Y, this.getPos().getY())
+            .set(Location.POSITION_Z, this.getPos().getZ())
+            .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getId());
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
+        NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final ImmutableList<DataManipulator<?, ?>> manipulators = ImmutableList.copyOf(getContainers());
+        final Collection<DataManipulator<?, ?>> manipulators = getContainers();
         if (!manipulators.isEmpty()) {
-            List<DataView> manipulatorview = DataUtil.getSerializedManipulatorList(manipulators);
-            container.set(DataQueries.DATA_MANIPULATORS, manipulatorview);
+            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
         return container;
     }
@@ -166,6 +165,26 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Override
     public void readFromNbt(NBTTagCompound compound) {
+        if (this instanceof IMixinCustomDataHolder) {
+            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+                final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
+                if (list != null && list.tagCount() != 0) {
+                    for (int i = 0; i < list.tagCount(); i++) {
+                        final NBTTagCompound internal = list.getCompoundTagAt(i);
+                        builder.add(NbtTranslator.getInstance().translateFrom(internal));
+                    }
+                }
+                try {
+                    final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
+                    for (DataManipulator<?, ?> manipulator : manipulators) {
+                        offer(manipulator);
+                    }
+                } catch (InvalidDataException e) {
+                    Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
+                }
+            }
+        }
     }
 
     /**
@@ -181,12 +200,21 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             for (DataView dataView : manipulatorViews) {
                 manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG, manipulatorTagList);
+            compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
         }
+    }
+
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return Lists.newArrayList(); // TODO override this in subclasses
+        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+        this.supplyVanillaManipulators(list);
+        if (this instanceof IMixinCustomDataHolder) {
+            list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
+        }
+        return list;
     }
 }

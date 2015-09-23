@@ -34,6 +34,7 @@ import com.google.common.collect.MapMaker;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
@@ -109,6 +110,8 @@ public class KeyRegistry {
         keyMap.put("disguised_block_type", makeSingleKey(DisguisedBlockType.class, Value.class, of("DisguisedBlockType")));
         keyMap.put("disarmed", makeSingleKey(Boolean.TYPE, Value.class, of("Disarmed")));
         keyMap.put("item_enchantments", makeListKey(ItemEnchantment.class, of("ItemEnchantments")));
+        keyMap.put("banner_patterns", makeListKey(PatternLayer.class, of("BannerPatterns")));
+        keyMap.put("banner_base_color", makeListKey(DyeColor.class, of("BannerBaseColor")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

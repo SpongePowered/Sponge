@@ -31,6 +31,6 @@ import java.util.List;
 
 public interface IMixinItem {
 
-    List<DataManipulator<?, ?>> getManipulatorsFor(ItemStack itemStack);
+    void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list);
 
 }

@@ -117,10 +117,4 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("AiEnabled"), !this.isAIDisabled());
-        return container;
-    }
 }

@@ -22,10 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.interfaces.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+
+import java.util.List;
 
 public interface IMixinEntity {
 
@@ -50,6 +53,8 @@ public interface IMixinEntity {
     void setEyeHeight(Double value);
 
     NBTTagCompound getSpongeData();
+
+    void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators);
 
     /**
      * Read extra data (SpongeData) from the entity's NBT tag.

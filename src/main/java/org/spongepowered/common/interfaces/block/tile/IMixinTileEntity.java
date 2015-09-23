@@ -59,7 +59,7 @@ public interface IMixinTileEntity {
      * Due to the nature of how {@link TileEntity} instances serialize their
      * data with {@link TileEntity#toContainer()}, all {@link DataManipulator}s
      * are serialized under a {@link DataQuery} specified query from
-     * {@link NbtDataUtil#BLOCK_ENTITY_DATA}. This is to help separate the real
+     * {@link NbtDataUtil#}. This is to help separate the real
      * required data such as position, tile type, etc. from data api manipulators.
      *
      * @param dataView The data view to set all data api related data

@@ -49,6 +49,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.List;
 import java.util.UUID;
@@ -95,7 +96,7 @@ public class DataUtil {
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (DataManipulator<?, ?> manipulator : manipulators) {
             final DataContainer container = new MemoryDataContainer();
-            container.set(DataQueries.DATA_CLASS, manipulator.getClass().toString())
+            container.set(DataQueries.DATA_CLASS, manipulator.getClass().getName())
                 .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }
@@ -107,7 +108,7 @@ public class DataUtil {
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : manipulators) {
             final DataContainer container = new MemoryDataContainer();
-            container.set(DataQueries.DATA_CLASS, manipulator.getClass().toString())
+            container.set(DataQueries.DATA_CLASS, manipulator.getClass().getName())
                 .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }
@@ -130,7 +131,8 @@ public class DataUtil {
                     }
                 }
             } catch (Exception e) {
-                new InvalidDataException("Could not deserialize " + clazzName + "!", e).printStackTrace();
+                new InvalidDataException("Could not deserialize " + clazzName
+                                         + "! Don't worry though, we'll try to deserialize the rest of the data.", e).printStackTrace();
             }
         }
         return builder.build();
@@ -222,11 +224,7 @@ public class DataUtil {
 
     @SuppressWarnings("rawtypes")
     public static DataTransactionResult offerPlain(DataManipulator manipulator, DataHolder dataHolder) {
-        final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(manipulator.getClass());
-        if (optional.isPresent()) {
-            return optional.get().set(dataHolder, manipulator, MergeFunction.IGNORE_ALL);
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return offerPlain(manipulator, dataHolder, MergeFunction.IGNORE_ALL);
     }
 
     @SuppressWarnings("rawtypes")
@@ -234,6 +232,8 @@ public class DataUtil {
         final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(manipulator.getClass());
         if (optional.isPresent()) {
             return optional.get().set(dataHolder, manipulator, checkNotNull(function));
+        } else if (dataHolder instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) dataHolder).offerCustom(manipulator, function);
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }

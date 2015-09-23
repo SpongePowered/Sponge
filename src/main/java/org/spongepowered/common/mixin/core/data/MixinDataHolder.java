@@ -48,6 +48,7 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import javax.annotation.Nullable;
 
@@ -79,6 +80,8 @@ public abstract class MixinDataHolder implements DataHolder {
         final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildProcessor(containerClass);
         if (optional.isPresent()) {
             return (Optional<T>) optional.get().createFrom(this);
+        } else if (this instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) this).getCustom(containerClass);
         }
         return Optional.absent();
     }
@@ -102,6 +105,8 @@ public abstract class MixinDataHolder implements DataHolder {
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = SpongeDataRegistry.getInstance().getBaseValueProcessor(key);
         if (optional.isPresent()) {
             return optional.get().offerToStore(this, value);
+        } else if (this instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) this).offerCustom(key, value);
         }
         return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
@@ -165,6 +170,8 @@ public abstract class MixinDataHolder implements DataHolder {
         final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildProcessor(containerClass);
         if (optional.isPresent()) {
             return optional.get().remove(this);
+        } else if (this instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) this).removeCustom(containerClass);
         }
         return DataTransactionBuilder.failNoData();
     }
@@ -174,6 +181,8 @@ public abstract class MixinDataHolder implements DataHolder {
         final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(value).getKey());
         if (optional.isPresent()) {
             return optional.get().removeFrom(this);
+        } else if (this instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) this).removeCustom(value.getKey());
         }
         return DataTransactionBuilder.failNoData();
     }
@@ -183,6 +192,8 @@ public abstract class MixinDataHolder implements DataHolder {
         final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
             return optional.get().removeFrom(this);
+        } else if (this instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) this).removeCustom(key);
         }
         return DataTransactionBuilder.failNoData();
     }
@@ -204,7 +215,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult copyFrom(DataHolder that) {
-        return offer(that.getContainers());
+        return copyFrom(that, MergeFunction.IGNORE_ALL);
     }
 
     @Override

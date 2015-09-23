@@ -22,30 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living;
+package org.spongepowered.common.interfaces.item;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import net.minecraft.nbt.NBTTagCompound;
 
-import net.minecraft.entity.passive.EntityBat;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.entity.living.Bat;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+public interface IMixinItemStack {
 
-@NonnullByDefault
-@Mixin(EntityBat.class)
-public abstract class MixinEntityBat extends MixinEntityLiving implements Bat {
+    /**
+     * Read extra data (SpongeData) from the entity's NBT tag.
+     *
+     * @param compound The SpongeData compound to read from
+     */
+    void readFromNbt(NBTTagCompound compound);
 
-    @Shadow public abstract boolean getIsBatHanging();
-    @Shadow public abstract void setIsBatHanging(boolean hanging);
-
-    public boolean isAwake() {
-        return !getIsBatHanging();
-    }
-
-    public void setAwake(boolean awake) {
-        setIsBatHanging(!awake);
-    }
+    /**
+     * Write extra data (SpongeData) to the entity's NBT tag.
+     *
+     * @param compound The SpongeData compound to write to
+     */
+    void writeToNbt(NBTTagCompound compound);
 
 }

@@ -65,7 +65,13 @@ public class NbtDataUtil {
     public static final byte TAG_INT_ARRAY = 11;
 
     // These are Sponge's NBT tag keys
-    public static final String CUSTOM_MANIPULATOR_TAG = "CustomManipulators";
+    public static final String SPONGE_TAG = "SpongeData";
+    public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
+
+    // Compatibility tags for Forge
+    public static final String FORGE_DATA_TAG = "ForgeData";
+    public static final String UUID_MOST = "UUIDMost";
+    public static final String UUID_LEAST = "UUIDLeast";
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 
@@ -122,5 +128,25 @@ public class NbtDataUtil {
             mainCompound.setTag(key, new NBTTagCompound());
         }
         return mainCompound.getCompoundTag(key);
+    }
+
+    public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
+        if (rootCompound.hasKey(FORGE_DATA_TAG, TAG_COMPOUND)) {
+            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA_TAG);
+            if (forgeCompound.hasKey(SPONGE_TAG, TAG_COMPOUND)) {
+                final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(SPONGE_TAG);
+                spongeCompound.removeTag(CUSTOM_MANIPULATOR_TAG_LIST);
+                if (spongeCompound.hasNoTags()) {
+                    forgeCompound.removeTag(SPONGE_TAG);
+                }
+            }
+        } else if (rootCompound.hasKey(SPONGE_TAG, TAG_COMPOUND)) {
+            final NBTTagCompound spongeCompound = rootCompound.getCompoundTag(SPONGE_TAG);
+            spongeCompound.removeTag(CUSTOM_MANIPULATOR_TAG_LIST);
+            if (spongeCompound.hasNoTags()) {
+                rootCompound.removeTag(SPONGE_TAG);
+            }
+        }
+        return rootCompound;
     }
 }

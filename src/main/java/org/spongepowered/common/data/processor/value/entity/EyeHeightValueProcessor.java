@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 @SuppressWarnings("ConstantConditions")
 public class EyeHeightValueProcessor extends AbstractSpongeValueProcessor<Double, Value<Double>> {

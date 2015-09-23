@@ -63,10 +63,4 @@ public abstract class MixinEntitySheep extends MixinEntityAnimal implements Shee
         return get(DyeableData.class).get();
     }
 
-    @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-                .set(of("Sheared"), getSheared())
-                .set(of("Dye"), getDyeData());
-    }
 }

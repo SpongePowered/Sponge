@@ -26,9 +26,11 @@ package org.spongepowered.common.interfaces.data;
 
 import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.value.BaseValue;
 
 import java.util.List;
 
@@ -36,10 +38,16 @@ public interface IMixinCustomDataHolder {
 
     DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function);
 
-    <T extends DataManipulator<T,I>, I extends ImmutableDataManipulator<I, T>> Optional<T> getCustom(Class<T> customClass);
+    <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass);
 
     DataTransactionResult removeCustom(Class<? extends DataManipulator<?, ?>> customClass);
 
+    boolean hasManipulators();
+
     List<DataManipulator<?, ?>> getCustomManipulators();
+
+    <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value);
+
+    DataTransactionResult removeCustom(Key<?> key);
 
 }

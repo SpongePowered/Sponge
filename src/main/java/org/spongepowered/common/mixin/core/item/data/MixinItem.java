@@ -41,13 +41,12 @@ import java.util.List;
 public abstract class MixinItem implements IMixinItem {
 
     @Override
-    public List<DataManipulator<?, ?>> getManipulatorsFor(ItemStack itemStack) {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+    public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
         if (!itemStack.hasTagCompound()) {
-            return list;
+            return;
         }
         if (itemStack.isItemEnchanted()) {
-            // list.add(getData(itemStack, EnchantmentData.class)); // TODO implement
+            list.add(getData(itemStack, EnchantmentData.class));
         }
         if (itemStack.getTagCompound().hasKey("display")) {
             final NBTTagCompound displayCompound = itemStack.getTagCompound().getCompoundTag("display");
@@ -58,7 +57,6 @@ public abstract class MixinItem implements IMixinItem {
                 // list.add(getData(itemStack, LoreData.class)); // TODO implement
             }
         }
-        return list;
     }
 
     protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {

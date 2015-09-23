@@ -40,8 +40,4 @@ public abstract class MixinEntityHorse extends MixinEntityAnimal implements Hors
         return get(HorseData.class).get();
     }
 
-    @Override
-    public DataContainer toContainer() {
-        return super.toContainer();
-    }
 }

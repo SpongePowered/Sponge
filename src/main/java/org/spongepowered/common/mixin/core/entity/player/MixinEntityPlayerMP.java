@@ -336,16 +336,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        DataContainer userData = this.user.toContainer();
-        for (Entry<DataQuery, Object> entry : userData.getValues(true).entrySet()) {
-            container.set(entry.getKey(), entry.getValue());
-        }
-        return container.set(of("JoinData"), getJoinData());
-    }
-
-    @Override
     public boolean isViewingInventory() {
         return this.openContainer != null;
     }
