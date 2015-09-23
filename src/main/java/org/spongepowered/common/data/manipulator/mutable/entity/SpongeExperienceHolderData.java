@@ -45,7 +45,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     private int level;
     private int totalExp;
     private int expSinceLevel;
-    private int expBetweenLevels;
+    private final int expBetweenLevels;
 
     public SpongeExperienceHolderData(int level, int totalExp, int expSinceLevel, int expBetweenLevels) {
         super(ExperienceHolderData.class);
@@ -76,7 +76,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
                 .compare(o.level().get().intValue(), this.level)
                 .compare(o.totalExperience().get().intValue(), this.totalExp)
                 .compare(o.experienceSinceLevel().get().intValue(), this.expSinceLevel)
-                .compare(o.experienceBetweenLevels().get().intValue(), this.expBetweenLevels)
+                .compare(o.getExperienceBetweenLevels().get().intValue(), this.expBetweenLevels)
                 .result();
     }
 
@@ -106,7 +106,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     }
 
     @Override
-    public MutableBoundedValue<Integer> experienceBetweenLevels() {
+    public MutableBoundedValue<Integer> getExperienceBetweenLevels() {
         return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expBetweenLevels);
     }
 
@@ -136,10 +136,6 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     public int getExpBetweenLevels() {
         return expBetweenLevels;
-    }
-
-    public void setExpBetweenLevels(int expBetweenLevels) {
-        this.expBetweenLevels = expBetweenLevels;
     }
 
     @Override
@@ -217,18 +213,11 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
                 return getExpBetweenLevels();
             }
         });
-        registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setExpBetweenLevels(((Number) value).intValue());
-            }
-        });
         registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new GetterFunction<Value<?>>() {
 
             @Override
             public Value<?> get() {
-                return experienceBetweenLevels();
+                return getExperienceBetweenLevels();
             }
         });
     }
