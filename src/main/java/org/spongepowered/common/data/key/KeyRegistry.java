@@ -118,6 +118,12 @@ public class KeyRegistry {
         keyMap.put("horse_color", makeSingleKey(HorseColor.class, Value.class, of("HorseColor")));
         keyMap.put("horse_style", makeSingleKey(HorseStyle.class, Value.class, of("HorseStyle")));
         keyMap.put("horse_variant", makeSingleKey(HorseVariant.class, Value.class, of("HorseVariant")));
+        keyMap.put("food_level", makeSingleKey(Integer.class, Value.class, of("FoodLevel")));
+        keyMap.put("saturation", makeSingleKey(Double.class, Value.class, of("FoodSaturationLevel")));
+        keyMap.put("exhaustion", makeSingleKey(Double.class, Value.class, of("FoodExhaustionLevel")));
+        keyMap.put("is_flying", makeSingleKey(Boolean.class, Value.class, of("IsFlying")));
+        keyMap.put("max_air", makeSingleKey(Integer.class, Value.class, of("MaxAir")));
+        keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
