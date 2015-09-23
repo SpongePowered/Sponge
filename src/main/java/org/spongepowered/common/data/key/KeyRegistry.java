@@ -39,6 +39,9 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.ShrubType;
@@ -112,6 +115,9 @@ public class KeyRegistry {
         keyMap.put("item_enchantments", makeListKey(ItemEnchantment.class, of("ItemEnchantments")));
         keyMap.put("banner_patterns", makeListKey(PatternLayer.class, of("BannerPatterns")));
         keyMap.put("banner_base_color", makeListKey(DyeColor.class, of("BannerBaseColor")));
+        keyMap.put("horse_color", makeSingleKey(HorseColor.class, Value.class, of("HorseColor")));
+        keyMap.put("horse_style", makeSingleKey(HorseStyle.class, Value.class, of("HorseStyle")));
+        keyMap.put("horse_variant", makeSingleKey(HorseVariant.class, Value.class, of("HorseVariant")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
