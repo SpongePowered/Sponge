@@ -47,7 +47,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
-            return Optional.of((int) player.experience * player.xpBarCap());
+            return Optional.of((int) (player.experience * player.xpBarCap()));
         }
         return Optional.absent();
     }
