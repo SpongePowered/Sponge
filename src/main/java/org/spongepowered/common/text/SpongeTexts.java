@@ -26,6 +26,7 @@ package org.spongepowered.common.text;
 
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
@@ -113,6 +114,12 @@ public final class SpongeTexts {
         }
         return list;
     }
-
-
+    
+    public static NBTTagList asLegacy(List<Text> list){
+        final NBTTagList legacy = new NBTTagList();
+        for(Text line : list){
+            legacy.appendTag(new NBTTagString(((IMixinText) line).toLegacy('\247', Locale.ENGLISH)));
+        }
+        return legacy;
+    }
 }

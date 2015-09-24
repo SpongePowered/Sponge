@@ -28,13 +28,10 @@ import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * A standard utility class for interacting and manipulating {@link ItemStack}s
@@ -180,10 +177,7 @@ public class NbtDataUtil {
     }
     
     public static void setLoreToNBT(ItemStack stack, List<Text> lore){
-        final NBTTagList list = new NBTTagList();
-        for(Text text : lore){
-            list.appendTag(new NBTTagString(((IMixinText) text).toLegacy('\247', Locale.ENGLISH)));
-        }
+        final NBTTagList list =  SpongeTexts.asLegacy(lore);
         stack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, true).setTag(NbtDataUtil.ITEM_LORE, list);
     }
     
@@ -201,10 +195,7 @@ public class NbtDataUtil {
     }
     
     public static void setPagesToNBT(ItemStack stack, List<Text> pages){
-        final NBTTagList list = new NBTTagList();
-        for(Text text : pages){
-            list.appendTag(new NBTTagString(((IMixinText) text).toLegacy('\247', Locale.ENGLISH)));
-        }
+        final NBTTagList list = SpongeTexts.asLegacy(pages);
         if(stack.getTagCompound() == null){
             stack.setTagCompound(new NBTTagCompound());
         }
