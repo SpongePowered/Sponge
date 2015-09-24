@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.common.text.SpongeTexts;
 
+import org.spongepowered.api.data.key.Key;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
@@ -71,11 +72,7 @@ public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List
     @Override
     public Optional<PagedData> fill(DataContainer container, PagedData pagedData) {
         final List<String> json = DataUtil.getData(container, Keys.BOOK_PAGES, List.class);
-        final List<Text> pages = Lists.newArrayList();
-        for (String str : json) {
-            pages.add(Texts.json().fromUnchecked(str));
-        }
-        return Optional.of(pagedData.set(Keys.BOOK_PAGES, pages));
+        return Optional.of(pagedData.set(Keys.BOOK_PAGES, SpongeTexts.asText(json)));
     }
 
     @Override

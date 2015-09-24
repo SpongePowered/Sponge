@@ -89,12 +89,20 @@ public final class SpongeTexts {
         return Texts.builder(getLegacyFormatting(text)).append(result).build();
     }
     
-    public static List<String> asJson(List<Text> lore) {
-        List<String> jsonLines = Lists.newArrayList();
-        for (Text line : lore) {
-            jsonLines.add(Texts.json().to(line));
+    public static List<String> asJson(List<Text> list) {
+        List<String> json = Lists.newArrayList();
+        for (Text line : list) {
+            json.add(Texts.json().to(line));
         }
-        return jsonLines;
+        return json;
+    }
+    
+    public static List<Text> asText(List<String> json){
+        List<Text> list = Lists.newArrayList();
+        for(String line : json){
+           list.add(Texts.json().fromUnchecked(line));
+        }
+        return list;
     }
 
 }

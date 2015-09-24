@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.common.text.SpongeTexts;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
@@ -61,11 +62,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     @Override
     public Optional<LoreData> fill(DataContainer container, LoreData loreData) {
         final List<String> json = DataUtil.getData(container, Keys.ITEM_LORE, List.class);
-        final List<Text> lore = Lists.newArrayList();
-        for (String str : json) {
-            lore.add(Texts.json().fromUnchecked(str));
-        }
-        return Optional.of(loreData.set(Keys.ITEM_LORE, lore));
+        return Optional.of(loreData.set(Keys.ITEM_LORE, SpongeTexts.asText(json)));
     }
 
     @Override
