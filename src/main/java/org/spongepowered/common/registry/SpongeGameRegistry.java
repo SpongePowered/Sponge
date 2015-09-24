@@ -469,6 +469,7 @@ import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProces
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ScreamingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.TotalExperienceValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
