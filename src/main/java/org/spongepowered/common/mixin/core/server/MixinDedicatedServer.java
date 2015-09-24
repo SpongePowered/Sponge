@@ -37,8 +37,6 @@ import java.net.InetSocketAddress;
 public abstract class MixinDedicatedServer extends MinecraftServer {
 
     @Shadow private boolean guiIsEnabled;
-    @Shadow public abstract String getServerHostname();
-    @Shadow public abstract int getPort();
 
     public MixinDedicatedServer() {
         super(null, null, null);
