@@ -24,15 +24,11 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import org.spongepowered.common.text.SpongeTexts;
-
-import org.spongepowered.api.data.key.Key;
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
@@ -46,13 +42,13 @@ import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
@@ -72,7 +68,7 @@ public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List
     @Override
     public Optional<PagedData> fill(DataContainer container, PagedData pagedData) {
         final List<String> json = DataUtil.getData(container, Keys.BOOK_PAGES, List.class);
-        return Optional.of(pagedData.set(Keys.BOOK_PAGES, SpongeTexts.asText(json)));
+        return Optional.of(pagedData.set(Keys.BOOK_PAGES, SpongeTexts.fromJson(json)));
     }
 
     @Override

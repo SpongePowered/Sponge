@@ -59,7 +59,7 @@ public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Te
             final ItemStack itemStack = (ItemStack) container;
             final NBTTagCompound subCompound = itemStack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
             if (subCompound == null) {
-                return Optional.absent();
+                return Optional.absent();   
             }
             if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_LIST)) {
                 return Optional.absent();

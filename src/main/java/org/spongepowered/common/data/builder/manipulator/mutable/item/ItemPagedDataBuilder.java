@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.manipulator.mutable.item;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
@@ -36,11 +35,10 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
@@ -57,12 +55,8 @@ public class ItemPagedDataBuilder implements DataManipulatorBuilder<PagedData, I
             if (((ItemStack) dataHolder).getItem() != Items.writable_book || ((ItemStack) dataHolder).getItem() != Items.written_book) {
                 return Optional.absent();
             }
-            final NBTTagList pageList = ((ItemStack) dataHolder).getTagCompound().getTagList(NbtDataUtil.ITEM_BOOK_PAGES, NbtDataUtil.TAG_STRING);
-            final List<Text> pages = Lists.newArrayList();
-            for (int i = 0; i < pageList.tagCount(); i++) {
-                pages.add(Texts.legacy().fromUnchecked(pageList.getStringTagAt(i)));
-            }
-            return Optional.<PagedData>of(new SpongePagedData(pages));
+            final NBTTagList list = ((ItemStack) dataHolder).getTagCompound().getTagList(NbtDataUtil.ITEM_BOOK_PAGES, NbtDataUtil.TAG_STRING);
+            return Optional.<PagedData>of(new SpongePagedData(SpongeTexts.fromLegacy(list)));
         } else {
             return Optional.absent();
         }
@@ -71,16 +65,8 @@ public class ItemPagedDataBuilder implements DataManipulatorBuilder<PagedData, I
     @Override
     public Optional<PagedData> build(DataView container) throws InvalidDataException {
         DataUtil.checkDataExists(container, Keys.ITEM_LORE.getQuery());
-        final List<String> lines = container.getStringList(Keys.BOOK_PAGES.getQuery()).get();
-        final List<Text> textLines = Lists.newArrayList();
-        try {
-            for (int i = 0; i < lines.size(); i++) {
-                textLines.set(i, Texts.json().fromUnchecked(lines.get(i)));
-            }
-        } catch (Exception e) {
-            throw new InvalidDataException("Could not deserialize text json lines", e);
-        }
-        return Optional.<PagedData>of(new SpongePagedData(textLines));
+        final List<String> json = container.getStringList(Keys.BOOK_PAGES.getQuery()).get();
+        return Optional.<PagedData>of(new SpongePagedData(SpongeTexts.fromJson(json)));
     }
 
 }

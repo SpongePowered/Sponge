@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.manipulator.mutable.item;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -36,11 +35,10 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
@@ -61,13 +59,9 @@ public class ItemLoreDataBuilder implements DataManipulatorBuilder<LoreData, Imm
             }
             if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_LIST)) {
                 return Optional.absent();
-            }
-            final List<Text> lore = Lists.newArrayList();
+            }          
             final NBTTagList list = subCompound.getTagList(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_STRING);
-            for (int i = 0; i < list.tagCount(); i++) {
-                lore.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
-            }
-            return Optional.<LoreData>of(new SpongeLoreData(lore));
+            return Optional.<LoreData>of(new SpongeLoreData(SpongeTexts.fromLegacy(list)));
         } else {
             return Optional.absent();
         }
@@ -76,15 +70,7 @@ public class ItemLoreDataBuilder implements DataManipulatorBuilder<LoreData, Imm
     @Override
     public Optional<LoreData> build(DataView container) throws InvalidDataException {
         DataUtil.checkDataExists(container, Keys.ITEM_LORE.getQuery());
-        final List<String> lines = container.getStringList(Keys.ITEM_LORE.getQuery()).get();
-        final List<Text> textLines = Lists.newArrayList();
-        try {
-            for (int i = 0; i < lines.size(); i++) {
-                textLines.set(i, Texts.json().fromUnchecked(lines.get(i)));
-            }
-        } catch (Exception e) {
-            throw new InvalidDataException("Could not deserialize text json lines", e);
-        }
-        return Optional.<LoreData>of(new SpongeLoreData(textLines));
+        final List<String> json = container.getStringList(Keys.ITEM_LORE.getQuery()).get();
+        return Optional.<LoreData>of(new SpongeLoreData(SpongeTexts.fromJson(json)));
     }
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.text;
 
 import com.google.common.collect.Lists;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
@@ -97,12 +98,21 @@ public final class SpongeTexts {
         return json;
     }
     
-    public static List<Text> asText(List<String> json){
+    public static List<Text> fromJson(List<String> json){
         List<Text> list = Lists.newArrayList();
         for(String line : json){
            list.add(Texts.json().fromUnchecked(line));
         }
         return list;
     }
+    
+    public static List<Text> fromLegacy(NBTTagList legacy){
+        List<Text> list = Lists.newArrayList();
+        for (int i = 0; i < legacy.tagCount(); i++) {
+            list.add(Texts.legacy().fromUnchecked(legacy.getStringTagAt(i)));
+        }
+        return list;
+    }
+
 
 }

@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import org.spongepowered.common.text.SpongeTexts;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
@@ -43,13 +40,13 @@ import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
@@ -62,7 +59,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     @Override
     public Optional<LoreData> fill(DataContainer container, LoreData loreData) {
         final List<String> json = DataUtil.getData(container, Keys.ITEM_LORE, List.class);
-        return Optional.of(loreData.set(Keys.ITEM_LORE, SpongeTexts.asText(json)));
+        return Optional.of(loreData.set(Keys.ITEM_LORE, SpongeTexts.fromJson(json)));
     }
 
     @Override

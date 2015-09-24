@@ -25,14 +25,13 @@
 package org.spongepowered.common.data.util;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 import java.util.Locale;
@@ -167,13 +166,9 @@ public class NbtDataUtil {
         return rootCompound;
     }
     
-    public static List<Text> getLoreFromNBT(NBTTagCompound subCompound){
-        final List<Text> lore = Lists.newArrayList();
+    public static List<Text> getLoreFromNBT(NBTTagCompound subCompound){       
         final NBTTagList list = subCompound.getTagList(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_STRING);
-        for(int i = 0; i < list.tagCount(); i++){
-            lore.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
-        }
-        return lore;
+        return SpongeTexts.fromLegacy(list);
     }
     
     public static void removeLoreFromNBT(ItemStack stack){
@@ -193,12 +188,8 @@ public class NbtDataUtil {
     }
     
     public static List<Text> getPagesFromNBT(NBTTagCompound compound){
-        final List<Text> pages = Lists.newArrayList();
         final NBTTagList list = compound.getTagList(NbtDataUtil.ITEM_BOOK_PAGES, NbtDataUtil.TAG_STRING);
-        for(int i = 0; i < list.tagCount(); i++){
-            pages.add(Texts.legacy().fromUnchecked(list.getStringTagAt(i)));
-        }
-        return pages;
+        return SpongeTexts.fromLegacy(list);
     }
     
     public static void removePagesFromNBT(ItemStack stack){
