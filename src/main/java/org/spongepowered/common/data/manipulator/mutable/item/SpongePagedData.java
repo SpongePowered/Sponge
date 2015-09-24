@@ -34,10 +34,10 @@ import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
 
@@ -54,7 +54,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
 
     public SpongePagedData(List<Text> pages) {
         super(PagedData.class);
-        this.pages = pages;
+        this.pages = Lists.newArrayList(pages);
         registerGettersAndSetters();
     }
 
@@ -81,15 +81,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.BOOK_PAGES.getQuery(), this.asJson(this.pages));
-    }
-
-    private List<String> asJson(List<Text> pages) {
-        List<String> jsonLines = Lists.newArrayList();
-        for (Text line : pages) {
-            jsonLines.add(Texts.json().to(line));
-        }
-        return jsonLines;
+        return new MemoryDataContainer().set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.pages));
     }
 
     public List<Text> getPages() {
@@ -97,7 +89,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
     }
 
     public void setPages(List<Text> pages) {
-        this.pages = pages;
+        this.pages = Lists.newArrayList(pages);
     }
 
     @Override

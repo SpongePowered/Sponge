@@ -34,10 +34,10 @@ import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
 
@@ -54,7 +54,7 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
 
     public SpongeLoreData(List<Text> lore) {
         super(LoreData.class);
-        this.lore = lore;
+        this.lore = Lists.newArrayList(lore);
         registerGettersAndSetters();
     }
 
@@ -81,15 +81,7 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.ITEM_LORE.getQuery(), this.asJson(this.lore));
-    }
-
-    private List<String> asJson(List<Text> lore) {
-        List<String> jsonLines = Lists.newArrayList();
-        for (Text line : lore) {
-            jsonLines.add(Texts.json().to(line));
-        }
-        return jsonLines;
+        return new MemoryDataContainer().set(Keys.ITEM_LORE.getQuery(), SpongeTexts.asJson(this.lore));
     }
 
     public List<Text> getLore() {
@@ -97,7 +89,7 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
     }
 
     public void setLore(List<Text> lore) {
-        this.lore = lore;
+        this.lore = Lists.newArrayList(lore);
     }
 
     @Override

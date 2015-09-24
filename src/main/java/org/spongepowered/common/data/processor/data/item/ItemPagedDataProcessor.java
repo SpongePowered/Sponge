@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
+import org.spongepowered.api.data.key.Key;
 
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -116,7 +119,7 @@ public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List
 
     @Override
     protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
-      return new ImmutableSpongeValue<List<Text>>(Keys.BOOK_PAGES, value);
+        return new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
     }
 
 }

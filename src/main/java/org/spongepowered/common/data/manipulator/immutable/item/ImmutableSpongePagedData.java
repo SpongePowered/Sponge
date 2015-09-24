@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.primitives.Booleans;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -39,6 +38,7 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.GetterFunction;
 
 import java.util.List;
@@ -80,15 +80,7 @@ public class ImmutableSpongePagedData extends AbstractImmutableData<ImmutablePag
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.BOOK_PAGES.getQuery(), this.asJson(this.pages));
-    }
-
-    private List<String> asJson(List<Text> pages) {
-        List<String> jsonLines = Lists.newArrayList();
-        for (Text line : pages) {
-            jsonLines.add(Texts.json().to(line));
-        }
-        return jsonLines;
+        return new MemoryDataContainer().set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.pages));
     }
 
     public List<Text> getPages() {

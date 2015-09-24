@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
+import com.google.common.collect.ImmutableList;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
@@ -46,7 +48,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
 
@@ -111,7 +113,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
-       return new ImmutableSpongeValue<List<Text>>(Keys.ITEM_LORE, value);
+       return new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
     }
 
 }

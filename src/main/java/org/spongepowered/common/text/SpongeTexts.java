@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.text;
 
+import com.google.common.collect.Lists;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
@@ -31,6 +32,7 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
 
+import java.util.List;
 import java.util.Locale;
 
 public final class SpongeTexts {
@@ -85,6 +87,14 @@ public final class SpongeTexts {
         }
 
         return Texts.builder(getLegacyFormatting(text)).append(result).build();
+    }
+    
+    public static List<String> asJson(List<Text> lore) {
+        List<String> jsonLines = Lists.newArrayList();
+        for (Text line : lore) {
+            jsonLines.add(Texts.json().to(line));
+        }
+        return jsonLines;
     }
 
 }
