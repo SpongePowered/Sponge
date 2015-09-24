@@ -126,7 +126,6 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
         this.foodExhaustionLevel = (float) foodExhaustionLevel;
     }
 
-    @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.FOOD_LEVEL, new GetterFunction<Object>() {
 
