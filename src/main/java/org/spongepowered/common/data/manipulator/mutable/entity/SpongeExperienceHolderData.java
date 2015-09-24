@@ -213,6 +213,13 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
                 return getExpBetweenLevels();
             }
         });
+        registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new SetterFunction<Object>() {
+
+            @Override
+            public void set(Object value) {
+                //do nothing because expBetweenLevels is immutable?
+            }
+        });
         registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new GetterFunction<Value<?>>() {
 
             @Override
