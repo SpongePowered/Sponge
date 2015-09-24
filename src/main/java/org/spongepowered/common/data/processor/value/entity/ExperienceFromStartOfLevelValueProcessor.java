@@ -26,16 +26,15 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-
+import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
@@ -67,9 +66,10 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
         return DataTransactionBuilder.failNoData();
     }
 
+    //maybe Immutable??
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue); 
     }
 
 }

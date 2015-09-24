@@ -1,17 +1,16 @@
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import org.spongepowered.common.data.util.DataUtil;
-
-import org.spongepowered.api.data.key.Keys;
 import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
+import org.spongepowered.common.data.util.DataUtil;
 
 public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<ExperienceHolderData, ImmutableExperienceHolderData> {
 

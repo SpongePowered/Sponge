@@ -28,6 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
+
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.data.key.Key;

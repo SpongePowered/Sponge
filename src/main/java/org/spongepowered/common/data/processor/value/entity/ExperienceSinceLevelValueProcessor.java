@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+
+import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
@@ -61,8 +61,8 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
-            final Integer oldValue = (int) player.experience * player.xpBarCap();
-            player.experience = value / player.xpBarCap();
+            final Integer oldValue = (int) (player.experience * player.xpBarCap());
+            player.experience = (float) value / player.xpBarCap();
             return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, value),
                     new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, oldValue));
         }

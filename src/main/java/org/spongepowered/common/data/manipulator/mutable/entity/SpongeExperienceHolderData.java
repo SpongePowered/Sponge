@@ -76,7 +76,6 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
                 .compare(o.level().get().intValue(), this.level)
                 .compare(o.totalExperience().get().intValue(), this.totalExp)
                 .compare(o.experienceSinceLevel().get().intValue(), this.expSinceLevel)
-                .compare(o.getExperienceBetweenLevels().get().intValue(), this.expBetweenLevels)
                 .result();
     }
 
@@ -91,7 +90,6 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     @Override
     public MutableBoundedValue<Integer> level() {
-        // not sure if the max value should be Integer.MAX_VALUE
         return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expSinceLevel);
     }
 
@@ -105,6 +103,8 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
         return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expSinceLevel);
     }
 
+    // i am not sure about this, doesnt this have to be immutable??? you cannot
+    // set it
     @Override
     public MutableBoundedValue<Integer> getExperienceBetweenLevels() {
         return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expBetweenLevels);
