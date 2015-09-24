@@ -118,6 +118,8 @@ public class KeyRegistry {
         keyMap.put("horse_color", makeSingleKey(HorseColor.class, Value.class, of("HorseColor")));
         keyMap.put("horse_style", makeSingleKey(HorseStyle.class, Value.class, of("HorseStyle")));
         keyMap.put("horse_variant", makeSingleKey(HorseVariant.class, Value.class, of("HorseVariant")));
+        keyMap.put("item_lore", makeListKey(Text.class, of("ItemLore")));
+        keyMap.put("book_pages", makeListKey(Text.class, of("BookPages")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

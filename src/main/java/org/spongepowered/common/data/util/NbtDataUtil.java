@@ -27,6 +27,11 @@ package org.spongepowered.common.data.util;
 import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.text.SpongeTexts;
+
+import java.util.List;
 
 /**
  * A standard utility class for interacting and manipulating {@link ItemStack}s
@@ -49,6 +54,14 @@ public class NbtDataUtil {
     public static final String ITEM_ENCHANTMENT_LIST = "ench";
     public static final String ITEM_ENCHANTMENT_ID = "id";
     public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
+    
+    public static final String ITEM_DISPLAY = "display";
+    public static final String ITEM_LORE = "Lore";
+    
+    public static final String ITEM_BOOK_PAGES = "pages";
+    public static final String ITEM_BOOK_TITLE = "title";
+    public static final String ITEM_BOOK_AUTHOR = "author";
+    public static final String ITEM_BOOK_RESOLVED = "resolved";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
@@ -148,5 +161,52 @@ public class NbtDataUtil {
             }
         }
         return rootCompound;
+    }
+    
+    public static List<Text> getLoreFromNBT(NBTTagCompound subCompound){       
+        final NBTTagList list = subCompound.getTagList(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_STRING);
+        return SpongeTexts.fromLegacy(list);
+    }
+    
+    public static void removeLoreFromNBT(ItemStack stack){
+        final NBTTagList list = new NBTTagList();
+        if(stack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false) == null){
+            return;
+        }
+        stack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false).setTag(NbtDataUtil.ITEM_LORE, list);
+    }
+    
+    public static void setLoreToNBT(ItemStack stack, List<Text> lore){
+        final NBTTagList list =  SpongeTexts.asLegacy(lore);
+        stack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, true).setTag(NbtDataUtil.ITEM_LORE, list);
+    }
+    
+    public static List<Text> getPagesFromNBT(NBTTagCompound compound){
+        final NBTTagList list = compound.getTagList(NbtDataUtil.ITEM_BOOK_PAGES, NbtDataUtil.TAG_STRING);
+        return SpongeTexts.fromLegacy(list);
+    }
+    
+    public static void removePagesFromNBT(ItemStack stack){
+        final NBTTagList list = new NBTTagList();
+        if(stack.getTagCompound() == null){
+            return;
+        }
+        stack.getTagCompound().setTag(NbtDataUtil.ITEM_BOOK_PAGES, list);
+    }
+    
+    public static void setPagesToNBT(ItemStack stack, List<Text> pages){
+        final NBTTagList list = SpongeTexts.asLegacy(pages);
+        if(stack.getTagCompound() == null){
+            stack.setTagCompound(new NBTTagCompound());
+        }
+        final NBTTagCompound compound = stack.getTagCompound();
+        compound.setTag(NbtDataUtil.ITEM_BOOK_PAGES, list);
+        if(!compound.hasKey(NbtDataUtil.ITEM_BOOK_TITLE)){
+            compound.setString(NbtDataUtil.ITEM_BOOK_TITLE, "invalid");
+        }
+        if(!compound.hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)){
+            compound.setString(NbtDataUtil.ITEM_BOOK_AUTHOR, "invalid");
+        }
+        compound.setBoolean(NbtDataUtil.ITEM_BOOK_RESOLVED, true);
     }
 }
