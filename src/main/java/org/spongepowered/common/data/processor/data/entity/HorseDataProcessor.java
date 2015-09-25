@@ -29,6 +29,7 @@ import static org.spongepowered.common.data.util.DataUtil.getData;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.passive.EntityHorse;
+import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -40,6 +41,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.processor.common.HorseUtils;
@@ -91,9 +93,11 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
 
     @Override
     public Optional<HorseData> fill(DataContainer container, HorseData horseData) {
-        horseData.set(Keys.HORSE_COLOR, getData(container, Keys.HORSE_COLOR));
-        horseData.set(Keys.HORSE_STYLE, getData(container, Keys.HORSE_STYLE));
-        horseData.set(Keys.HORSE_VARIANT, getData(container, Keys.HORSE_VARIANT));
+        GameRegistry registry = Sponge.getSpongeRegistry();
+
+        horseData.set(Keys.HORSE_COLOR, HorseUtils.getHorseColor(container));
+        horseData.set(Keys.HORSE_STYLE, HorseUtils.getHorseStyle(container));
+        horseData.set(Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(container));
 
         return Optional.of(horseData);
     }

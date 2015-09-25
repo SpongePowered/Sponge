@@ -45,9 +45,9 @@ import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHorseData, HorseData> implements ImmutableHorseData {
 
-    private HorseColor horseColor;
-    private HorseStyle horseStyle;
-    private HorseVariant horseVariant;
+    private final HorseColor horseColor;
+    private final HorseStyle horseStyle;
+    private final HorseVariant horseVariant;
 
     public ImmutableSpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, HorseVariant horseVariant) {
         super(ImmutableHorseData.class);
@@ -123,9 +123,9 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(Keys.HORSE_COLOR.getQuery(), this.horseColor)
-                .set(Keys.HORSE_STYLE.getQuery(), this.horseStyle)
-                .set(Keys.HORSE_VARIANT.getQuery(), this.horseVariant);
+                .set(Keys.HORSE_COLOR.getQuery(), this.horseColor.getId())
+                .set(Keys.HORSE_STYLE.getQuery(), this.horseStyle.getId())
+                .set(Keys.HORSE_VARIANT.getQuery(), this.horseVariant.getId());
     }
 
     @Override

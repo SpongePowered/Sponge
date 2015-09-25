@@ -27,6 +27,7 @@ package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.base.Optional;
+import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -37,7 +38,9 @@ import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
+import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.processor.data.entity.HorseDataProcessor;
 
 public class HorseDataBuilder implements DataManipulatorBuilder<HorseData, ImmutableHorseData> {
@@ -61,11 +64,7 @@ public class HorseDataBuilder implements DataManipulatorBuilder<HorseData, Immut
     @Override
     public Optional<HorseData> build(DataView container) throws InvalidDataException {
         if (container.contains(Keys.HORSE_COLOR.getQuery()) && container.contains(Keys.HORSE_STYLE.getQuery()) && container.contains(Keys.HORSE_VARIANT.getQuery())) {
-            HorseColor color = getData(container, Keys.HORSE_COLOR);
-            HorseStyle style = getData(container, Keys.HORSE_STYLE);
-            HorseVariant variant = getData(container, Keys.HORSE_VARIANT);
-
-            return Optional.<HorseData>of(new SpongeHorseData(color, style, variant));
+            return Optional.<HorseData>of(new SpongeHorseData(HorseUtils.getHorseColor(container), HorseUtils.getHorseStyle(container), HorseUtils.getHorseVariant(container)));
         }
         return Optional.absent();
     }
