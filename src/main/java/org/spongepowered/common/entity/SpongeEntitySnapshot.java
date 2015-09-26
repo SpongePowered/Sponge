@@ -33,7 +33,6 @@ import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
@@ -119,7 +118,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public Optional<Transform<World>> getTransform() {
         Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Transform<World> transform = new SpongeTransform<World>(optional.get(), this.position, this.rotation);
+            final Transform<World> transform = new Transform<World>(optional.get(), this.position, this.rotation);
             return Optional.of(transform);
         }
         return Optional.absent();

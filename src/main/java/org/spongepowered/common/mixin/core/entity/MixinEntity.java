@@ -63,7 +63,6 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -372,7 +371,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Transform<World> getTransform() {
-        return new SpongeTransform<World>(getWorld(), getPosition(), getRotation(), getScale());
+        return new Transform<World>(getWorld(), getPosition(), getRotation(), getScale());
     }
 
     @Override
