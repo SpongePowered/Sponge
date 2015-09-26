@@ -90,12 +90,12 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     @Override
     public MutableBoundedValue<Integer> level() {
-        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expSinceLevel);
+        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.level);
     }
 
     @Override
     public MutableBoundedValue<Integer> totalExperience() {
-        return new SpongeBoundedValue<Integer>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, this.expSinceLevel);
+        return new SpongeBoundedValue<Integer>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, this.totalExp);
     }
 
     @Override

@@ -62,7 +62,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
     protected boolean set(EntityPlayer entity, Map<Key<?>, Object> keyValues) {
         entity.experienceLevel = (Integer) keyValues.get(Keys.EXPERIENCE_LEVEL);
         entity.experienceTotal = (Integer) keyValues.get(Keys.TOTAL_EXPERIENCE);
-        entity.experience = (Float) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.xpBarCap();
+        entity.experience = (float) (Integer) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.xpBarCap();
         return true;
     }
 
