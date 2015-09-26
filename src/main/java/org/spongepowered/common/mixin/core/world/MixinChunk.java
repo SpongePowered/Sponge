@@ -90,16 +90,18 @@ public abstract class MixinChunk implements Chunk {
         this.chunkCoordIntPair = new ChunkCoordIntPair(x, z);
     }
 
-    //@SideOnly(Side.SERVER)
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
     public void onChunkLoadInject(CallbackInfo ci) {
-        SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
+        if (!worldObj.isRemote) {
+            SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
+        }
     }
 
-    //@SideOnly(Side.SERVER)
     @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
     public void onChunkUnloadInject(CallbackInfo ci) {
-        SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
+        if (!worldObj.isRemote) {
+            SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
+        }
     }
 
     @Override

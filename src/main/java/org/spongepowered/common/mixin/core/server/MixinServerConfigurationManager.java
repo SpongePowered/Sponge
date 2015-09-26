@@ -68,10 +68,10 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -80,7 +80,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.entity.SpongeTransform;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -354,7 +353,7 @@ public abstract class MixinServerConfigurationManager {
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
-            return new SpongeTransform<World>(location, Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<World>(location, Vector3d.ZERO, Vector3d.ZERO);
         }
 
         Vector3d spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
@@ -371,7 +370,7 @@ public abstract class MixinServerConfigurationManager {
         if (optRespawn.isPresent()) {
             // API TODO: Make this support multiple world spawn points
             // TODO Make RespawnLocationData 'shadow' the bed location from below
-            return new SpongeTransform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
         }
 
         BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
@@ -394,7 +393,7 @@ public abstract class MixinServerConfigurationManager {
             playerIn.dimension = prevDim;
         }
 
-        return new SpongeTransform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+        return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
     }
 
     @Overwrite
