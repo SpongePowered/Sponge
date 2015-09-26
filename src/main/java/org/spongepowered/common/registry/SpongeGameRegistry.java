@@ -107,6 +107,7 @@ import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
@@ -126,6 +127,7 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSign
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
+import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
@@ -333,6 +335,7 @@ import org.spongepowered.common.data.builder.manipulator.immutable.item.Immutabl
 import org.spongepowered.common.data.builder.manipulator.mutable.DisplayNameDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.RepresentedItemDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.SkullDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.WetDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.BreathingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.CareerDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.EyeLocationDataBuilder;
@@ -352,6 +355,7 @@ import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
@@ -371,6 +375,7 @@ import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableS
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
@@ -389,6 +394,7 @@ import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignDa
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
 import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor;
 import org.spongepowered.common.data.processor.data.SkullDataProcessor;
+import org.spongepowered.common.data.processor.data.WetDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.BreathingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.EyeLocationDataProcessor;
@@ -408,6 +414,7 @@ import org.spongepowered.common.data.processor.value.DisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
 import org.spongepowered.common.data.processor.value.ItemEnchantmentValueProcessor;
 import org.spongepowered.common.data.processor.value.SkullValueProcessor;
+import org.spongepowered.common.data.processor.value.WetValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EyeHeightValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EyeLocationValueProcessor;
@@ -1885,6 +1892,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(SneakingData.class, sneakingDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(SneakingData.class, SpongeSneakingData.class, ImmutableSneakingData.class,
             ImmutableSpongeSneakingData.class, sneakingDataProcessor, sneakingDataBuilder);
+        
+        final WetDataProcessor wetDataProcessor = new WetDataProcessor();
+        final WetDataBuilder wetDataBuilder = new WetDataBuilder();
+        service.registerBuilder(WetData.class, wetDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(WetData.class, SpongeWetData.class, ImmutableWetData.class,
+            ImmutableSpongeWetData.class, wetDataProcessor, wetDataBuilder);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -1913,6 +1926,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.ITEM_LORE, new ItemLoreValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BOOK_PAGES, new BookPagesValueProcessor());
         dataRegistry.registerValueProcessor(Keys.IS_SNEAKING, new SneakingValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.IS_WET, new WetValueProcessor());
 
     }
 

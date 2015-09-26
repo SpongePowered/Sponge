@@ -41,13 +41,13 @@ import net.minecraft.item.ItemStack;
 
 public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
-    protected WetValueProcessor() {
+    public WetValueProcessor() {
         super(Keys.IS_WET);
     }
 
     @Override
     public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
-        if (container.supports(Keys.IS_WET)) {
+        if (this.supports(container)) {
             if (container instanceof ItemStack) {
                 ItemStack stack = (ItemStack) container;
                 
@@ -56,7 +56,7 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
                 }
             } else if (container instanceof EntityWolf) {
                 EntityWolf wolf = (EntityWolf) container;
-                return Optional.of(wolf.isWet() || wolf.isWolfWet());
+                return Optional.of(wolf.isWet());
             }
         }
         return Optional.absent();
