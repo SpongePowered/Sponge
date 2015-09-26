@@ -31,6 +31,8 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.MapMaker;
+
+import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -158,6 +160,7 @@ public class KeyRegistry {
         keyMap.put("coal_type", makeSingleKey(CoalType.class, Value.class, of("CoalType")));
         keyMap.put("cooked_fish", makeSingleKey(CookedFish.class, Value.class, of("CookedFishType")));
         keyMap.put("fish_type", makeSingleKey(Fish.class, Value.class, of("RawFishType")));
+        keyMap.put("represented_player", makeSingleKey(GameProfile.class, Value.class, of("RepresentedPlayer")));
 
     }
 

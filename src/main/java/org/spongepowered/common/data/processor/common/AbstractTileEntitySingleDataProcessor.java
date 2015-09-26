@@ -26,7 +26,8 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -38,35 +39,34 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> {
+public abstract class AbstractTileEntitySingleDataProcessor<E extends TileEntity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> {
 
-    private final Class<E> entityClass;
+    private final Class<E> tileEntityClass;
 
-    public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<V> key) {
+    public AbstractTileEntitySingleDataProcessor(Class<E> tileEntityClass, Key<V> key) {
         super(key);
-        this.entityClass = checkNotNull(entityClass);
+        this.tileEntityClass = checkNotNull(tileEntityClass);
     }
 
-    protected boolean supports(E entity) {
+    protected boolean supports(E tileEntity) {
         return true;
     }
 
-    protected abstract boolean set(E entity, T value);
+    protected abstract boolean set(E tileEntity, T value);
 
-    protected abstract Optional<T> getVal(E entity);
+    protected abstract Optional<T> getVal(E tileEntity);
 
     protected abstract ImmutableValue<T> constructImmutableValue(T value);
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return this.entityClass.isInstance(dataHolder) && supports((E) dataHolder);
+        return this.tileEntityClass.isInstance(dataHolder) && supports((E) dataHolder);
     }
 
     @SuppressWarnings("unchecked")
@@ -134,9 +134,4 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
         return Optional.empty();
     }
 
-    @Override
-    public boolean supports(EntityType entityType) {
-        return this.entityClass.isAssignableFrom(entityType.getEntityClass());
-    }
-    
 }
