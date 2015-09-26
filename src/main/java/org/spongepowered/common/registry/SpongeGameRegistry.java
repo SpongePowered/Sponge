@@ -1945,11 +1945,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.ITEM_LORE, new ItemLoreValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BOOK_PAGES, new BookPagesValueProcessor());
         dataRegistry.registerValueProcessor(Keys.IS_SNEAKING, new SneakingValueProcessor());
-<<<<<<< HEAD
         dataRegistry.registerValueProcessor(Keys.IS_WET, new WetValueProcessor());
-=======
         dataRegistry.registerValueProcessor(Keys.GOLDEN_APPLE_TYPE, new GoldenAppleValueProcessor());
->>>>>>> SpongePowered/master
 
     }
 
