@@ -28,27 +28,23 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
 import org.spongepowered.api.data.type.PlantType;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
-
-import java.util.List;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePlantData;
 
 @Mixin(BlockFlower.class)
 public abstract class MixinBlockFlower extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.of();
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getFlowerTypeFor(blockState));
     }
 
     @Override
@@ -57,22 +53,25 @@ public abstract class MixinBlockFlower extends MixinBlock {
     }
 
     @Override
-    public List<Key<?>> getApplicableKeys() {
-        return ImmutableList.<Key<?>>of(Keys.PLANT_TYPE);
+    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+        if (manipulator instanceof ImmutablePlantData) {
+            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) ((ImmutablePlantData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        }
+        return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public List<ImmutableValue<?>> getValues(IBlockState blockState) {
-        // TODO - implement rest of plant data
-        /*Optional<Value<PlantType>> value = ((BlockState) blockState).getValue(Keys.PLANT_TYPE);
-        if (value.isPresent()) {
-            return ImmutableList.<ImmutableValue<?>>of(((BlockState) blockState).getValue(Keys.PLANT_TYPE).get().asImmutable());
-        }*/
-        return ImmutableList.of();
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        if (key.equals(Keys.PLANT_TYPE)) {
+            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) value;
+            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        }
+        return super.getStateWithValue(blockState, key, value);
     }
 
-    @Override
-    public boolean isFlammable(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing) {
-        return false;
+    private ImmutablePlantData getFlowerTypeFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePlantData.class,
+                                                       (PlantType) blockState.getValue(((BlockFlower) blockState.getBlock()).getTypeProperty()));
     }
 }

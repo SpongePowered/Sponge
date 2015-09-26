@@ -28,6 +28,7 @@ import net.minecraft.block.BlockTallGrass;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -41,6 +42,7 @@ public abstract class MixinEnumShrubType implements ShrubType {
         return this.name; // todo maybe prefix with "minecraft"?
     }
 
+    @Intrinsic
     public String shrub$getName() {
         return this.name;
     }

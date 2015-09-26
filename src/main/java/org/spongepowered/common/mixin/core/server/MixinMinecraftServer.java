@@ -41,14 +41,13 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
@@ -66,6 +65,9 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
@@ -75,6 +77,7 @@ import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
+import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -82,6 +85,7 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -120,13 +124,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
 
-    @Shadow
-    @SideOnly(Side.SERVER)
-    public abstract String getServerHostname();
-
-    @Shadow
-    @SideOnly(Side.SERVER)
-    public abstract int getPort();
+    private ResourcePack resourcePack;
 
     @Override
     public Optional<World> getWorld(String worldName) {
@@ -160,7 +158,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<InetSocketAddress> getBoundAddress() {
-        return Optional.fromNullable(new InetSocketAddress(getServerHostname(), getPort()));
+        return Optional.absent();
     }
 
     @Override
@@ -595,5 +593,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             ret = DimensionManager.getWorldFromDimId(dim);
         }
         return ret;
+    }
+
+    @Override
+    public Optional<ResourcePack> getDefaultResourcePack() {
+        return Optional.fromNullable(this.resourcePack);
+    }
+
+    @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
+    public void onSetResourcePack(String url, String hash, CallbackInfo ci) {
+        if (url.length() == 0) {
+            this.resourcePack = null;
+        } else {
+            try {
+                this.resourcePack = SpongeResourcePack.create(url, hash);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

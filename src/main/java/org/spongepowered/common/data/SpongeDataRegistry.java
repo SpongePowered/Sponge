@@ -38,8 +38,6 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.common.data.util.BlockDataProcessorDelegate;
-import org.spongepowered.common.data.util.BlockValueProcessorDelegate;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
@@ -73,12 +71,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     private final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<BlockDataProcessor<?>>> blockDataMap = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-    private final Map<Key<? extends BaseValue<?>>, List<BlockValueProcessor<?, ?>>> blockValueMap = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
+
 
     // Processor delegates
 
@@ -89,12 +82,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         .concurrencyLevel(4)
         .makeMap();
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, BlockDataProcessorDelegate<?>> blockDataProcessorDelegates = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-    private final Map<Key<? extends BaseValue<?>>, BlockValueProcessorDelegate<?, ?>> blockValueProcessorDelegates = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
 
@@ -135,22 +122,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
             registry.immutableDataProcessorDelegates.put(entry.getKey(), delegate);
         }
         registry.immutableProcessorMap.clear();
-        for (Map.Entry<Class<? extends ImmutableDataManipulator<?, ?>>, List<BlockDataProcessor<?>>> entry : registry.blockDataMap.entrySet()) {
-            ImmutableList.Builder<BlockDataProcessor<?>> dataListBuilder = ImmutableList.builder();
-            Collections.sort(entry.getValue(), ComparatorUtil.BLOCK_DATA_PROCESSOR_COMPARATOR);
-            dataListBuilder.addAll(entry.getValue());
-            final BlockDataProcessorDelegate<?> delegate = new BlockDataProcessorDelegate(dataListBuilder.build());
-            registry.blockDataProcessorDelegates.put(entry.getKey(), delegate);
-        }
-        registry.blockDataMap.clear();
-        for (Map.Entry<Key<? extends BaseValue<?>>, List<BlockValueProcessor<?, ?>>> entry : registry.blockValueMap.entrySet()) {
-            ImmutableList.Builder<BlockValueProcessor<?, ?>> valueListBuilder = ImmutableList.builder();
-            Collections.sort(entry.getValue(), ComparatorUtil.BLOCK_VALUE_PROCESSOR_COMPARATOR);
-            valueListBuilder.addAll(entry.getValue());
-            final BlockValueProcessorDelegate<?, ?> delegate = new BlockValueProcessorDelegate(entry.getKey(), valueListBuilder.build());
-            registry.blockValueProcessorDelegates.put(entry.getKey(), delegate);
-        }
-        registry.blockValueMap.clear();
 
     }
 
@@ -217,25 +188,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         immutableProcessorList.add(processor);
     }
 
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerBlockProcessorAndImpl(Class<I> manipulatorClass,
-                                                                                                                          Class<? extends I> implClass,
-                                                                                                                          BlockDataProcessor<I> processor) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        checkState(!this.blockDataMap.containsKey(checkNotNull(manipulatorClass)), "Already registered a DataProcessor for the given "
-                                                                                   + "ImmutableDataManipulator: "
-                                                                                   + manipulatorClass.getCanonicalName());
-        checkState(!this.blockDataMap.containsKey(checkNotNull(implClass)), "Already registered a DataProcessor for the given "
-                                                                            + "DataManipulator: " + implClass.getCanonicalName());
-        List<BlockDataProcessor<?>> processorList = this.blockDataMap.get(manipulatorClass);
-        if (processorList == null) {
-            processorList = Collections.synchronizedList(Lists.<BlockDataProcessor<?>>newArrayList());
-            this.blockDataMap.put(manipulatorClass, processorList);
-            this.blockDataMap.put(implClass, processorList);
-        }
-        checkArgument(!processorList.contains(processor), "Duplicate DataProcessor Registration!");
-        processorList.add(processor);
-    }
-
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
         Class<T> mutableClass) {
@@ -259,15 +211,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     @SuppressWarnings("rawtypes")
     public Optional<DataProcessor> getWildImmutableProcessor(Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
         return Optional.<DataProcessor>fromNullable(this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
-    }
-
-    public <I extends ImmutableDataManipulator<I, ?>> Optional<BlockDataProcessor<I>> getBlockDataFor(Class<I> manipulatorClass) {
-        return Optional.fromNullable((BlockDataProcessor<I>) (Object) this.blockDataProcessorDelegates.get(checkNotNull(manipulatorClass)));
-    }
-
-    @SuppressWarnings("rawtypes")
-    public Optional<BlockDataProcessor> getWildBlockDataProcessor(Class<? extends ImmutableDataManipulator> immutableClass) {
-        return Optional.<BlockDataProcessor>fromNullable(this.blockDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 
 
@@ -299,16 +242,4 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
                 (key));
     }
 
-    public <E, V extends BaseValue<E>> Optional<BlockValueProcessor<E, V>> getBlockValueProcessor(Key<V> key) {
-        return Optional.fromNullable((BlockValueProcessor<E, V>) (Object) this.blockValueProcessorDelegates.get(key));
-    }
-
-    public Optional<BlockValueProcessor<?, ?>> getWildBlockValueProcessor(Key<?> key) {
-        return Optional.<BlockValueProcessor<?, ?>>fromNullable(this.blockValueProcessorDelegates.get(key));
-    }
-
-    public <E> Optional<BlockValueProcessor<E, ?>> getBaseBlockValueProcessor(Key<? extends BaseValue<E>> key) {
-        return Optional.<BlockValueProcessor<E, ?>>fromNullable(
-                (BlockValueProcessor<E, ? extends BaseValue<E>>) (Object) this.blockValueProcessorDelegates.get(key));
-    }
 }

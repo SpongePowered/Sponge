@@ -47,6 +47,7 @@ public abstract class MixinPropertyBoolean extends MixinPropertyHelper<Boolean> 
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public Collection<Boolean> getPossibleValues() {
         return getAllowedValues();
     }

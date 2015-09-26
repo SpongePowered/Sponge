@@ -51,6 +51,7 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
@@ -78,10 +79,12 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
@@ -121,6 +124,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -432,6 +436,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.absent();
     }
 
+    @Override
+    public Optional<Entity> restoreSnapshot(EntitySnapshot snapshot, Vector3d position) {
+        EntitySnapshot entitySnapshot = snapshot.withLocation(new Location<World>(this, position));
+        return entitySnapshot.restore();
+    }
+    
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         checkNotNull(entity, "Entity cannot be null!");
@@ -924,11 +934,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
         World world = ((World) this);
         BlockState state = world.getBlock(x, y, z);
         Optional<TileEntity> te = world.getTileEntity(x, y, z);
+        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
+            .blockState(state)
+            .worldId(world.getUniqueId())
+            .position(new Vector3i(x, y, z));
         if (te.isPresent()) {
-            return new SpongeBlockSnapshot(state, new Location<World>(this, x, y, z), te.get());
+            final TileEntity tileEntity = te.get();
+            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
+                builder.add(manipulator);
+            }
+            final NBTTagCompound compound = new NBTTagCompound();
+            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
+            builder.unsafeNbt(compound);
         }
-        return new SpongeBlockSnapshot(state, new Location<World>((World) this, x, y, z),
-                ImmutableList.<ImmutableDataManipulator<?, ?>>of());
+        return builder.build();
     }
 
     @Override

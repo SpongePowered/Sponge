@@ -31,42 +31,39 @@ import org.spongepowered.api.data.DataQuery;
 public final class DataQueries {
     private DataQueries() {}
 
-    public static final DataQuery BLOCK_ENTITY_TILE_TYPE = of("TileType");
-    public static final DataQuery POSITION_X = of("X");
-    public static final DataQuery POSITION_Y = of("Y");
-    public static final DataQuery POSITION_Z = of("Z");
-    public static final DataQuery BLOCK_ENTITY_WORLD = of("WorldId");
-    public static final DataQuery BLOCK_ENTITY_NBT = of("UnsafeData");
-    public static final DataQuery BLOCK_ENTITY_DATA = of("Data");
+    // General DataQueries
+    public static final DataQuery UNSAFE_NBT = of("UnsafeData");
+    public static final DataQuery DATA_MANIPULATORS = of("Data");
+    public static final DataQuery DATA_CLASS = of("DataClass");
+    public static final DataQuery INTERNAL_DATA = of("ManipulatorData");
 
+    // Snapshots
+    public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
+
+    // Blocks
+    public static final DataQuery BLOCK_STATE = of("BlockState");
+    public static final DataQuery BLOCK_TYPE = of("BlockType");
+    public static final DataQuery BLOCK_STATE_UNSAFE_META = of("UnsafeMeta");
+
+    // TileEntities
+    public static final DataQuery BLOCK_ENTITY_TILE_TYPE = of("TileType");
     public static final DataQuery BLOCK_ENTITY_CUSTOM_NAME = of("CustomName");
     public static final DataQuery BLOCK_ENTITY_BREWING_TIME = of("BrewTime");
     public static final DataQuery BLOCK_ENTITY_LOCK_CODE = of("Lock");
+    public static final DataQuery BLOCK_ENTITY_ITEM_CONTENTS = of("Contents");
     public static final DataQuery BLOCK_ENTITY_SLOT = of("SlotId");
     public static final DataQuery BLOCK_ENTITY_SLOT_ITEM = of("Item");
-    public static final DataQuery BLOCK_ENTITY_ITEM_CONTENTS = of("Contents");
 
-    public static final DataQuery SNAPSHOT_WORLD_UUID = of("WorldUuid");
-    public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
-
-    public static final DataQuery BLOCK_STATE = of("BlockState");
-    public static final DataQuery BLOCK_SNAPSHOT_EXTRA_DATA = of("ExtraData");
-    public static final DataQuery BLOCK_SNAPSHOT_UNSAFE_DATA = of("UnsafeData");
-
-    public static final DataQuery LOCATION_WORLD_UUID = of("WorldUuid");
-    public static final DataQuery LOCATION_X = of("x");
-    public static final DataQuery LOCATION_Y = of("y");
-    public static final DataQuery LOCATION_Z = of("z");
-
-    public static final DataQuery ENTITY_SNAPSHOT_DATA = of("Data");
+    // Entities
+    public static final DataQuery ENTITY_CLASS = of("EntityClass");
+    public static final DataQuery ENTITY_ID = of("EntityUniqueId");
     public static final DataQuery ENTITY_TYPE = of("EntityType");
-    public static final DataQuery ENTITY_SNAPSHOT_UNSAFE_DATA = of("UnsafeData");
+    public static final DataQuery ENTITY_ROTATION = of("Rotation");
+    public static final DataQuery ENTITY_SCALE = of("Scale");
 
-    public static final DataQuery DATA_CLASS = of("DataClass");
-    public static final DataQuery INTERNAL_DATA = of("Data");
-
-    public static final DataQuery BLOCK_STATE_TYPE = of("BlockType");
-    public static final DataQuery BLOCK_STATE_DATA = of("Data");
-    public static final DataQuery BLOCK_STATE_UNSAFE_META = of("UnsafeMeta");
+    // ItemStacks
+    public static final DataQuery ITEM_COUNT = of("Count");
+    public static final DataQuery ITEM_TYPE = of("ItemType");
+    public static final DataQuery ITEM_DAMAGE_VALUE = of("UnsafeDamage");
 
 }

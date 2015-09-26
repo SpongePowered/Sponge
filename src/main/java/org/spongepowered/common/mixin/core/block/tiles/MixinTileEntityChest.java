@@ -41,11 +41,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
     @Shadow public String customName;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.CHEST;
-    }
-
-    @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         if (this.customName != null) {

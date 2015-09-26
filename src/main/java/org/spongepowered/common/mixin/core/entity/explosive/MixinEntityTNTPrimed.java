@@ -69,12 +69,6 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     }
 
     @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-                .set(of("FuseData"), getFuseData());
-    }
-
-    @Override
     public void detonate() {
         this.setDead();
         this.explode();

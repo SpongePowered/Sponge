@@ -39,7 +39,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.interfaces.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Map;

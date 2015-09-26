@@ -42,11 +42,6 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     @Shadow private String customName;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.HOPPER;
-    }
-
-    @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         container.set(of("TransferCooldown"), this.transferCooldown);

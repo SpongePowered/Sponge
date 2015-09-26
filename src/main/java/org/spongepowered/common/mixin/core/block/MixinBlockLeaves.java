@@ -24,24 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
-
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLeaves;
-import net.minecraft.block.BlockNewLeaf;
-import net.minecraft.block.BlockOldLeaf;
-import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTransaction;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.DecayBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -53,15 +42,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
-import org.spongepowered.common.interfaces.block.IMixinBlockTree;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Random;
 
 @NonnullByDefault
 @Mixin(BlockLeaves.class)
-public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlockTree {
+public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockLeaves;destroy(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), cancellable = true)
@@ -78,55 +65,7 @@ public abstract class MixinBlockLeaves extends MixinBlock implements IMixinBlock
         }
     }
 
-    @Override
-    public TreeData getTreeData(IBlockState blockState) {
-        BlockPlanks.EnumType type = null;
-        if (blockState.getBlock() instanceof BlockOldLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLeaf.VARIANT);
-        } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockNewLeaf.VARIANT);
-        }
+    // TODO implement for tree type, decayable etc.
 
-        TreeType treeType = null;
-
-        // TODO Sponge defaults to TreeTypes.OAK if type isn't found.
-        switch (type) {
-            case SPRUCE:
-                treeType = TreeTypes.SPRUCE;
-                break;
-            case BIRCH:
-                treeType = TreeTypes.BIRCH;
-                break;
-            case JUNGLE:
-                treeType = TreeTypes.JUNGLE;
-                break;
-            case ACACIA:
-                treeType = TreeTypes.ACACIA;
-                break;
-            case DARK_OAK:
-                treeType = TreeTypes.DARK_OAK;
-                break;
-            default:
-                treeType = TreeTypes.OAK;
-        }
-
-        return new SpongeTreeData(treeType);
-    }
-
-    public DataTransactionResult setTreeData(TreeData treeData, net.minecraft.world.World world, BlockPos blockPos) {
-        final TreeData data = getTreeData(checkNotNull(world).getBlockState(checkNotNull(blockPos)));
-        return failResult(treeData.type().asImmutable());
-    }
-
-    @Override
-    public BlockState resetTreeData(BlockState blockState) {
-        if (blockState.getType() == BlockTypes.LEAVES) {
-            return ((BlockState) ((IBlockState) blockState).withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK));
-        } else if (blockState.getType() == BlockTypes.LEAVES2) {
-            return ((BlockState) ((IBlockState) blockState).withProperty(BlockNewLeaf.VARIANT, BlockPlanks.EnumType.ACACIA));
-        } else {
-            return blockState;
-        }
-    }
 
 }

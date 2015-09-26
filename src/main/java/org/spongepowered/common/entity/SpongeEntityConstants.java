@@ -69,16 +69,17 @@ public class SpongeEntityConstants {
     public static final RabbitType KILLER_RABBIT = new SpongeRabbitType(99, "KILLER");
 
     // horse colors
-    public static final SpongeHorseColor CREAMY = new SpongeHorseColor(0, "CREAMY");
-    public static final SpongeHorseColor CHESTNUT = new SpongeHorseColor(1, "CHESTNUT");
-    public static final SpongeHorseColor BROWN = new SpongeHorseColor(2, "BROWN");
-    public static final SpongeHorseColor BLACK = new SpongeHorseColor(3, "BLACK");
-    public static final SpongeHorseColor GRAY = new SpongeHorseColor(4, "GRAY");
-    public static final SpongeHorseColor DARK_BROWN = new SpongeHorseColor(5, "DARK_BROWN");
+    public static final SpongeHorseColor WHITE = new SpongeHorseColor(0, "WHITE");
+    public static final SpongeHorseColor CREAMY = new SpongeHorseColor(1, "CREAMY");
+    public static final SpongeHorseColor CHESTNUT = new SpongeHorseColor(2, "CHESTNUT");
+    public static final SpongeHorseColor BROWN = new SpongeHorseColor(3, "BROWN");
+    public static final SpongeHorseColor BLACK = new SpongeHorseColor(4, "BLACK");
+    public static final SpongeHorseColor GRAY = new SpongeHorseColor(5, "GRAY");
+    public static final SpongeHorseColor DARK_BROWN = new SpongeHorseColor(6, "DARK_BROWN");
 
     // horse styles
     public static final SpongeHorseStyle NONE = new SpongeHorseStyle(0, "NONE");
-    public static final SpongeHorseStyle WHITE = new SpongeHorseStyle(1, "WHITE");
+    public static final SpongeHorseStyle WHITE_STYLE = new SpongeHorseStyle(1, "WHITE");
     public static final SpongeHorseStyle WHITEFIELD = new SpongeHorseStyle(2, "WHITEFIELD");
     public static final SpongeHorseStyle WHITE_DOTS = new SpongeHorseStyle(3, "WHITE_DOTS");
     public static final SpongeHorseStyle BLACK_DOTS = new SpongeHorseStyle(4, "BLACK_DOTS");
@@ -123,6 +124,7 @@ public class SpongeEntityConstants {
         RABBIT_IDMAP.put(5, SALT_AND_PEPPER_RABBIT);
         RABBIT_IDMAP.put(99, KILLER_RABBIT);
 
+        HORSE_COLORS.put("white", WHITE);
         HORSE_COLORS.put("creamy", CREAMY);
         HORSE_COLORS.put("chestnut", CHESTNUT);
         HORSE_COLORS.put("brown", BROWN);
@@ -130,21 +132,22 @@ public class SpongeEntityConstants {
         HORSE_COLORS.put("gray", GRAY);
         HORSE_COLORS.put("dark_brown", DARK_BROWN);
 
-        HORSE_COLOR_IDMAP.put(0, CREAMY);
-        HORSE_COLOR_IDMAP.put(1, CHESTNUT);
-        HORSE_COLOR_IDMAP.put(2, BROWN);
-        HORSE_COLOR_IDMAP.put(3, BLACK);
-        HORSE_COLOR_IDMAP.put(4, GRAY);
-        HORSE_COLOR_IDMAP.put(5, DARK_BROWN);
+        HORSE_COLOR_IDMAP.put(0, WHITE);
+        HORSE_COLOR_IDMAP.put(1, CREAMY);
+        HORSE_COLOR_IDMAP.put(2, CHESTNUT);
+        HORSE_COLOR_IDMAP.put(3, BROWN);
+        HORSE_COLOR_IDMAP.put(4, BLACK);
+        HORSE_COLOR_IDMAP.put(5, GRAY);
+        HORSE_COLOR_IDMAP.put(6, DARK_BROWN);
 
         HORSE_STYLES.put("none", NONE);
-        HORSE_STYLES.put("white", WHITE);
+        HORSE_STYLES.put("white", WHITE_STYLE);
         HORSE_STYLES.put("whitefield", WHITEFIELD);
         HORSE_STYLES.put("white_dots", WHITE_DOTS);
         HORSE_STYLES.put("black_dots", BLACK_DOTS);
 
         HORSE_STYLE_IDMAP.put(0, NONE);
-        HORSE_STYLE_IDMAP.put(1, WHITE);
+        HORSE_STYLE_IDMAP.put(1, WHITE_STYLE);
         HORSE_STYLE_IDMAP.put(2, WHITEFIELD);
         HORSE_STYLE_IDMAP.put(3, WHITE_DOTS);
         HORSE_STYLE_IDMAP.put(4, BLACK_DOTS);

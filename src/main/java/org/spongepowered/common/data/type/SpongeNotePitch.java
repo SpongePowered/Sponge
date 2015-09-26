@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.type;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
-@NonnullByDefault
 public class SpongeNotePitch implements NotePitch {
 
     private final byte id;
@@ -55,5 +55,23 @@ public class SpongeNotePitch implements NotePitch {
     @Override
     public NotePitch cycleNext() {
         return null;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeNotePitch other = (SpongeNotePitch) obj;
+        return Objects.equal(this.id, other.id)
+               && Objects.equal(this.name, other.name);
     }
 }

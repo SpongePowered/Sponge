@@ -58,7 +58,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.ArrayList;
 import java.util.List;

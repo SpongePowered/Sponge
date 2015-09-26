@@ -26,15 +26,20 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
@@ -44,7 +49,9 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("unchecked")
@@ -84,12 +91,80 @@ public class DataUtil {
         }
     }
 
+    public static List<DataView> getSerializedManipulatorList(Iterable<DataManipulator<?, ?>> manipulators) {
+        checkNotNull(manipulators);
+        final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
+        for (DataManipulator<?, ?> manipulator : manipulators) {
+            final DataContainer container = new MemoryDataContainer();
+            container.set(DataQueries.DATA_CLASS, manipulator.getClass().getName())
+                .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
+            builder.add(container);
+        }
+        return builder.build();
+    }
+
+    public static List<DataView> getSerializedImmutableManipulatorList(Iterable<ImmutableDataManipulator<?, ?>> manipulators) {
+        checkNotNull(manipulators);
+        final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
+        for (ImmutableDataManipulator<?, ?> manipulator : manipulators) {
+            final DataContainer container = new MemoryDataContainer();
+            container.set(DataQueries.DATA_CLASS, manipulator.getClass().getName())
+                .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
+            builder.add(container);
+        }
+        return builder.build();
+    }
+
+    public static ImmutableList<DataManipulator<?, ?>> deserializeManipulatorList(List<DataView> containers) {
+        checkNotNull(containers);
+        final ImmutableList.Builder<DataManipulator<?, ?>> builder = ImmutableList.builder();
+        for (DataView view : containers) {
+            final String clazzName = view.getString(DataQueries.DATA_CLASS).get();
+            final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
+            try {
+                final Class<DataManipulator> clazz = (Class<DataManipulator>) Class.forName(clazzName);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilder(clazz);
+                if (optional.isPresent()) {
+                    final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
+                    if (manipulatorOptional.isPresent()) {
+                        builder.add(manipulatorOptional.get());
+                    }
+                }
+            } catch (Exception e) {
+                new InvalidDataException("Could not deserialize " + clazzName
+                                         + "! Don't worry though, we'll try to deserialize the rest of the data.", e).printStackTrace();
+            }
+        }
+        return builder.build();
+    }
+
+    public static ImmutableList<ImmutableDataManipulator<?, ?>> deserializeImmutableManipulatorList(List<DataView> containers) {
+        checkNotNull(containers);
+        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        for (DataView view : containers) {
+            final String clazzName = view.getString(DataQueries.DATA_CLASS).get();
+            final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
+            try {
+                final Class<ImmutableDataManipulator> clazz = (Class<ImmutableDataManipulator>) Class.forName(clazzName);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilderForImmutable(clazz);
+                if (optional.isPresent()) {
+                    final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
+                    if (manipulatorOptional.isPresent()) {
+                        builder.add(manipulatorOptional.get().asImmutable());
+                    }
+                }
+            } catch (Exception e) {
+                new InvalidDataException("Could not deserialize " + clazzName + "!", e).printStackTrace();
+            }
+        }
+        return builder.build();
+    }
 
     public static Location<World> getLocation(DataView view, boolean castToInt) {
-        final UUID worldUuid = UUID.fromString(view.getString(DataQueries.LOCATION_WORLD_UUID).get());
-        final double x = view.getDouble(DataQueries.LOCATION_X).get();
-        final double y = view.getDouble(DataQueries.LOCATION_Y).get();
-        final double z = view.getDouble(DataQueries.LOCATION_Z).get();
+        final UUID worldUuid = UUID.fromString(view.getString(Location.WORLD_ID).get());
+        final double x = view.getDouble(Location.POSITION_X).get();
+        final double y = view.getDouble(Location.POSITION_Y).get();
+        final double z = view.getDouble(Location.POSITION_Z).get();
         if (castToInt) {
             return new Location<World>(Sponge.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
         } else {
@@ -99,12 +174,29 @@ public class DataUtil {
     }
 
     public static Vector3i getPosition3i(DataView view) {
-        checkDataExists(view, DataQueries.SNAPSHOT_WORLD_POSITION);
-        final DataView internal = view.getView(DataQueries.SNAPSHOT_WORLD_POSITION).get();
-        final int x = internal.getInt(DataQueries.POSITION_X).get();
-        final int y = internal.getInt(DataQueries.POSITION_Y).get();
-        final int z = internal.getInt(DataQueries.POSITION_Z).get();
+        return getPosition3i(view, DataQueries.SNAPSHOT_WORLD_POSITION);
+    }
+
+    public static Vector3i getPosition3i(DataView view, DataQuery query) {
+        checkDataExists(view, query);
+        final DataView internal = view.getView(query).get();
+        final int x = internal.getInt(Location.POSITION_X).get();
+        final int y = internal.getInt(Location.POSITION_Y).get();
+        final int z = internal.getInt(Location.POSITION_Z).get();
         return new Vector3i(x, y, z);
+    }
+
+    public static Vector3d getPosition3d(DataView view) {
+        return getPosition3d(view, DataQueries.SNAPSHOT_WORLD_POSITION);
+    }
+
+    public static Vector3d getPosition3d(DataView view, DataQuery query) {
+        checkDataExists(view, query);
+        final DataView internal = view.getView(query).get();
+        final double x = internal.getDouble(Location.POSITION_X).get();
+        final double y = internal.getDouble(Location.POSITION_Y).get();
+        final double z = internal.getDouble(Location.POSITION_Z).get();
+        return new Vector3d(x, y, z);
     }
 
 
@@ -132,11 +224,7 @@ public class DataUtil {
 
     @SuppressWarnings("rawtypes")
     public static DataTransactionResult offerPlain(DataManipulator manipulator, DataHolder dataHolder) {
-        final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(manipulator.getClass());
-        if (optional.isPresent()) {
-            return optional.get().set(dataHolder, manipulator, MergeFunction.IGNORE_ALL);
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return offerPlain(manipulator, dataHolder, MergeFunction.IGNORE_ALL);
     }
 
     @SuppressWarnings("rawtypes")
@@ -144,6 +232,8 @@ public class DataUtil {
         final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(manipulator.getClass());
         if (optional.isPresent()) {
             return optional.get().set(dataHolder, manipulator, checkNotNull(function));
+        } else if (dataHolder instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) dataHolder).offerCustom(manipulator, function);
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }

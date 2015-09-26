@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.base.Optional;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
@@ -73,9 +72,10 @@ public class GameModeDataProcessor extends AbstractEntitySingleDataProcessor<Ent
             return Optional.of((GameMode) (Object) ((EntityPlayerMP) entity).theItemInWorldManager.getGameType());
         }
         if (Sponge.getGame().getPlatform().getType().isClient()) {
+            /* TODO: This will only compile on the client (in SpongeForge)
             if (entity instanceof AbstractClientPlayer) {
                 return Optional.of((GameMode) (Object) ((AbstractClientPlayer) entity).getPlayerInfo().getGameType());
-            }
+            }*/
         }
         return Optional.absent();
     }

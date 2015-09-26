@@ -25,7 +25,7 @@ dependencies {
 
 // Eclipse is too stupid to order the classpath correctly unfortunately...
 // Put Common last
-eclipse {
+/*eclipse {
     classpath {
         file {
             whenMerged { classpath ->
@@ -35,7 +35,7 @@ eclipse {
             }
         }
     }
-}
+}*/
 
 jar {
     classifier = 'release'
@@ -50,7 +50,7 @@ jar {
 evaluationDependsOn common.path
 
 shadowJar {
-    dependsOn common.tasks.reobf
+    dependsOn common.tasks.reobfJar
 
     classifier = ''
 
@@ -97,12 +97,10 @@ shadowJar {
     exclude 'LICENSE', 'NOTICE'
 }
 
-// Run shadowJar on build
-assemble.dependsOn shadowJar
-
-reobf {
-    reobf(shadowJar) { spec ->
-        spec.classpath = configurations.compile
+afterEvaluate {
+    reobfJar {
+        dependsOn shadowJar
+        jar = shadowJar.archivePath
     }
 }
 
@@ -110,8 +108,7 @@ reobf {
 common.sourceSets.main.resources.files.each {
     if (it.name.endsWith('_at.cfg')) {
         logger.lifecycle("Found AccessTransformer in dependency resources: $it.name")
-        tasks.deobfBinJar.addTransformer(it)
-        tasks.deobfuscateJar.addTransformer(it)
+        minecraft.at it
     }
 }
 

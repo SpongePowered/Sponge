@@ -24,25 +24,28 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.DataWatcher;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -57,16 +60,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.SpongeTransform;
-import org.spongepowered.common.interfaces.IMixinEntity;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -77,7 +85,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntity implements Entity, IMixinEntity {
 
     // @formatter:off
-    private EntityType entityType = ((SpongeGameRegistry) Sponge.getGame().getRegistry()).entityClassToTypeMappings.get(this.getClass());
+    private EntityType entityType = Sponge.getSpongeRegistry().entityClassToTypeMappings.get(this.getClass());
     private boolean teleporting;
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
@@ -123,6 +131,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract UUID getUniqueID();
     @Shadow protected abstract boolean getAlwaysRenderNameTag();
     @Shadow protected abstract void setAlwaysRenderNameTag(boolean visible);
+    @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
 
@@ -154,6 +163,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setEyeHeight(Double value) {
         this.modifiedEyeHeight = value;
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+
     }
 
     @Override
@@ -616,6 +630,26 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      */
     @Override
     public void readFromNbt(NBTTagCompound compound) {
+        if (this instanceof IMixinCustomDataHolder) {
+            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+                final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
+                if (list != null && list.tagCount() != 0) {
+                    for (int i = 0; i < list.tagCount(); i++) {
+                        final NBTTagCompound internal = list.getCompoundTagAt(i);
+                        builder.add(NbtTranslator.getInstance().translateFrom(internal));
+                    }
+                }
+                try {
+                    final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
+                    for (DataManipulator<?, ?> manipulator : manipulators) {
+                        offer(manipulator);
+                    }
+                } catch (InvalidDataException e) {
+                    Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
+                }
+            }
+        }
     }
 
     /**
@@ -625,21 +659,78 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      */
     @Override
     public void writeToNbt(NBTTagCompound compound) {
+        if (this instanceof IMixinCustomDataHolder) {
+            final List<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
+            if (!manipulators.isEmpty()) {
+                final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(manipulators);
+                final NBTTagList manipulatorTagList = new NBTTagList();
+                for (DataView dataView : manipulatorViews) {
+                    manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+                }
+                compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+            }
+        }
     }
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(of("world"), ((World) this.worldObj).getUniqueId().toString());
-        container.set(of("x"), this.getLocation().getX());
-        container.set(of("y"), this.getLocation().getY());
-        container.set(of("z"), this.getLocation().getZ());
-        container.set(of("entityType"), this.getClass().getSimpleName());
+        final Transform<World> transform = getTransform();
+        final NBTTagCompound compound = new NBTTagCompound();
+        writeToNBT(compound);
+        NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
+        final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
+        final DataContainer container = new MemoryDataContainer()
+            .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
+            .set(Location.WORLD_ID, transform.getExtent().getUniqueId().toString())
+            .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
+                .set(Location.POSITION_X, transform.getPosition().getX())
+                .set(Location.POSITION_Y, transform.getPosition().getY())
+                .set(Location.POSITION_Z, transform.getPosition().getZ())
+            .getContainer()
+            .createView(DataQueries.ENTITY_ROTATION)
+                .set(Location.POSITION_X, transform.getRotation().getX())
+                .set(Location.POSITION_Y, transform.getRotation().getY())
+                .set(Location.POSITION_Z, transform.getRotation().getZ())
+            .getContainer()
+            .createView(DataQueries.ENTITY_SCALE)
+                .set(Location.POSITION_X, transform.getScale().getX())
+                .set(Location.POSITION_Y, transform.getScale().getY())
+                .set(Location.POSITION_Z, transform.getScale().getZ())
+            .getContainer()
+            .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
+            .set(DataQueries.UNSAFE_NBT, unsafeNbt);
+        final Collection<DataManipulator<?, ?>> manipulators = getContainers();
+        if (!manipulators.isEmpty()) {
+            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+        }
         return container;
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return Lists.newArrayList(); // TODO figure this one out.
+        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+        this.supplyVanillaManipulators(list);
+        if (this instanceof IMixinCustomDataHolder && ((IMixinCustomDataHolder) this).hasManipulators()) {
+            list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
+        }
+        return list;
+    }
+
+    @Override
+    public Entity copy() {
+        if ((Object) this instanceof Player) {
+            throw new IllegalArgumentException("Cannot copy player entities!");
+        }
+        try {
+            final NBTTagCompound compound = new NBTTagCompound();
+            writeToNBT(compound);
+            net.minecraft.entity.Entity entity = EntityList.createEntityByName(this.entityType.getId(), this.worldObj);
+            compound.setLong(NbtDataUtil.UUID_MOST, entity.getUniqueID().getMostSignificantBits());
+            compound.setLong(NbtDataUtil.UUID_LEAST, entity.getUniqueID().getLeastSignificantBits());
+            entity.readFromNBT(compound);
+            return (Entity) entity;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not copy the entity:", e);
+        }
     }
 }

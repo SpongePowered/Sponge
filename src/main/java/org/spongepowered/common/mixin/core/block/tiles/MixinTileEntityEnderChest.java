@@ -34,8 +34,4 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(net.minecraft.tileentity.TileEntityEnderChest.class)
 public abstract class MixinTileEntityEnderChest extends MixinTileEntity implements EnderChest {
 
-    @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.ENDER_CHEST;
-    }
 }

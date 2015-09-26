@@ -146,6 +146,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                     ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(texts.get(i));
                 }
                 ((TileEntitySign) dataHolder).markDirty();
+                ((TileEntitySign) dataHolder).getWorld().markBlockForUpdate(((TileEntitySign) dataHolder).getPos());
                 builder.success(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
             }

@@ -41,11 +41,6 @@ public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity im
     @Shadow private String customName;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.ENCHANTMENT_TABLE;
-    }
-
-    @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         container.set(of("CustomName"), this.customName);

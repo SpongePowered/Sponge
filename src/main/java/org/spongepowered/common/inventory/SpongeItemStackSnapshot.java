@@ -33,8 +33,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -47,6 +49,11 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.mixin.core.item.inventory.MixinItemStack;
+import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.List;
 import java.util.Set;
@@ -58,10 +65,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     private final ItemType itemType;
     private final int count;
+    private final int damageValue;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
+    @Nullable private final NBTTagCompound compound;
 
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
@@ -70,23 +79,42 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        // TODO
-        /*for (DataManipulator<?, ?> manipulator : itemStack.getContainers()) {
+        for (DataManipulator<?, ?> manipulator : itemStack.getContainers()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
-        }*/
+        }
+        this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getItemDamage();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
+        @Nullable NBTTagCompound compound = ((net.minecraft.item.ItemStack) this.privateStack).getTagCompound();
+        if (compound != null) {
+            compound = (NBTTagCompound) compound.copy();
+        }
+        if (compound != null) {
+            NbtDataUtil.filterSpongeCustomData(compound);
+            if (!compound.hasNoTags()) {
+                this.compound = compound;
+            } else {
+                this.compound = null;
+            }
+        } else {
+            this.compound = null;
+        }
     }
 
-    public SpongeItemStackSnapshot(ItemType itemType, int count, ImmutableList<ImmutableDataManipulator<?, ?>> manipulators) {
+    public SpongeItemStackSnapshot(ItemType itemType,
+                                   int count,
+                                   int damageValue,
+                                   ImmutableList<ImmutableDataManipulator<?, ?>> manipulators,
+                                   @Nullable NBTTagCompound compound) {
         this.itemType = checkNotNull(itemType);
         this.count = count;
         this.manipulators = checkNotNull(manipulators);
-        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.count);
+        this.damageValue = damageValue;
+        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.count, this.damageValue);
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
@@ -96,6 +124,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
+        this.compound = compound == null ? null : (NBTTagCompound) compound.copy();
     }
 
     @Override
@@ -120,10 +149,17 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
-            .set(of("ItemType"), this.itemType.getId())
-            .set(of("Quantity"), this.count)
-            .set(of("Data"), this.manipulators);
+        final DataContainer container = new MemoryDataContainer()
+            .set(DataQueries.ITEM_TYPE, this.itemType.getId())
+            .set(DataQueries.ITEM_COUNT, this.count)
+            .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
+        if (!this.manipulators.isEmpty()) {
+            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
+        }
+        if (this.compound != null) {
+            container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+        }
+        return container;
     }
 
     @Override
@@ -213,7 +249,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (processorOptional.isPresent()) {
             processorOptional.get().remove(copiedStack);
             return Optional.of(copiedStack.createSnapshot());
-        }
+        } // todo custom data
         return Optional.absent();
     }
 
@@ -286,8 +322,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("itemType", itemType)
-                .add("count", count)
+                .add("itemType", this.itemType)
+                .add("count", this.count)
                 .toString();
     }
 }

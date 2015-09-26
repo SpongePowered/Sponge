@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.util;
 
-import org.spongepowered.common.data.BlockDataProcessor;
-import org.spongepowered.common.data.BlockValueProcessor;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 
@@ -48,20 +46,6 @@ public class ComparatorUtil {
         @Override
         public int compare(DataProcessor<?, ?> o1, DataProcessor<?, ?> o2) {
             return intComparator().compare(o2.getPriority(), o1.getPriority());
-        }
-    };
-
-    public static final Comparator<BlockDataProcessor<?>> BLOCK_DATA_PROCESSOR_COMPARATOR = new Comparator<BlockDataProcessor<?>>() {
-        @Override
-        public int compare(BlockDataProcessor<?> o1, BlockDataProcessor<?> o2) {
-            return intComparator().compare(o2.getPriority(), o1.getPriority());
-        }
-    };
-
-    public static final Comparator<BlockValueProcessor<?, ?>> BLOCK_VALUE_PROCESSOR_COMPARATOR = new Comparator<BlockValueProcessor<?, ?>>() {
-        @Override
-        public int compare(BlockValueProcessor<?, ?> o1, BlockValueProcessor<?, ?> o2) {
-            return intComparator().compare(o2.getPriority(), o1.getPriority()); // We want the higher number to be higher priority
         }
     };
 

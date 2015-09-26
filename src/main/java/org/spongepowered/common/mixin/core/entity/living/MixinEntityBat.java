@@ -48,10 +48,4 @@ public abstract class MixinEntityBat extends MixinEntityLiving implements Bat {
         setIsBatHanging(!awake);
     }
 
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("Awake"), this.isAwake());
-        return container;
-    }
 }

@@ -291,12 +291,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return get(HealthData.class).get(); // possibly perform a failsafe?
     }
 
-    @Override
-    public DataContainer toContainer() {
-        // todo actually store more data.
-        return super.toContainer().set(of("HealthData"), getHealthData()).set(of("DamageableData"), getMortalData());
-    }
-
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"))
     public void onDeathSendEntityState(World world, Entity self, byte state) {

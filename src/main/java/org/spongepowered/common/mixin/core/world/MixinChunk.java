@@ -35,8 +35,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -92,13 +90,13 @@ public abstract class MixinChunk implements Chunk {
         this.chunkCoordIntPair = new ChunkCoordIntPair(x, z);
     }
 
-    @SideOnly(Side.SERVER)
+    //@SideOnly(Side.SERVER)
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
     public void onChunkLoadInject(CallbackInfo ci) {
         SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
     }
 
-    @SideOnly(Side.SERVER)
+    //@SideOnly(Side.SERVER)
     @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
     public void onChunkUnloadInject(CallbackInfo ci) {
         SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);

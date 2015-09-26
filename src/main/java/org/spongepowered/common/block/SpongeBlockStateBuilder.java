@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateBuilder;
@@ -39,6 +40,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
 
 public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
@@ -51,12 +53,12 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     }
 
     @Override
-    public <M extends DataManipulator<M, ?>> BlockStateBuilder add(M manipulator) {
+    public BlockStateBuilder add(DataManipulator<?, ?> manipulator) {
         return add((ImmutableDataManipulator) manipulator.asImmutable());
     }
 
     @Override
-    public <I extends ImmutableDataManipulator<I, ?>> BlockStateBuilder add(I manipulator) {
+    public BlockStateBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         final Optional<BlockState> optional = this.blockState.with(manipulator);
         if (optional.isPresent()) {
             this.blockState = optional.get();
@@ -83,14 +85,29 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
 
     @Override
     public Optional<BlockState> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, DataQueries.BLOCK_STATE_TYPE);
-        checkDataExists(container, DataQueries.BLOCK_STATE_DATA);
+        checkDataExists(container, DataQueries.BLOCK_TYPE);
         checkDataExists(container, DataQueries.BLOCK_STATE_UNSAFE_META);
-        final String blockid = container.getString(DataQueries.BLOCK_STATE_TYPE).get();
+        final ImmutableList<ImmutableDataManipulator<?, ?>> list;
+        /* todo write the deserializers for immutable data....
+        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
+            list = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+        } else {
+            list = ImmutableList.of();
+        }
+        */
+        final String blockid = container.getString(DataQueries.BLOCK_TYPE).get();
         final BlockType blockType = Sponge.getGame().getRegistry().getType(BlockType.class, blockid).get();
         final int meta = container.getInt(DataQueries.BLOCK_STATE_UNSAFE_META).get();
+        BlockState blockState = (BlockState) ((Block) blockType).getStateFromMeta(meta);
         try {
-            return Optional.of((BlockState) ((Block) blockType).getStateFromMeta(meta));
+            /*
+            if (!list.isEmpty() && false) {
+                for (ImmutableDataManipulator<?, ?> manipulator : list) {
+                    blockState = blockState.with(manipulator).get();
+                }
+            }
+            */
+            return Optional.of(blockState);
         } catch (Exception e) {
             throw new InvalidDataException("Could not retrieve a blockstate!", e);
         }

@@ -33,27 +33,15 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.PoweredData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.block.IMixinPoweredHolder;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
 
 @Mixin(BlockButton.class)
-public abstract class MixinBlockButton extends MixinBlock implements IMixinPoweredHolder {
+public abstract class MixinBlockButton extends MixinBlock {
 
-    @Override
     public ImmutablePoweredData getPoweredData(IBlockState blockState) {
         final boolean powered = (Boolean) blockState.getValue(BlockButton.POWERED);
-        return null;
-    }
-
-    @Override
-    public DataTransactionResult setPoweredData(PoweredData poweredData, World world, BlockPos blockPos) {
-        final ImmutablePoweredData data = getPoweredData(world.getBlockState(blockPos));
-        return null;
-    }
-
-    @Override
-    public BlockState resetPoweredData(BlockState blockState) {
-        return (BlockState) ((IBlockState) blockState).withProperty(BlockButton.POWERED, false);
+        return ImmutableDataCachingUtil.getManipulator(ImmutablePoweredData.class, powered);
     }
 
 }

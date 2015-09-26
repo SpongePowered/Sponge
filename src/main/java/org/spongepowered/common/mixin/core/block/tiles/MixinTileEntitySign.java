@@ -47,11 +47,6 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
     @Shadow public IChatComponent[] signText;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.SIGN;
-    }
-
-    @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         List<String> lines = Lists.newArrayList();

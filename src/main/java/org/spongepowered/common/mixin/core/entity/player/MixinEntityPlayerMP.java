@@ -38,6 +38,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
+import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.FoodStats;
@@ -57,6 +58,7 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
@@ -82,6 +84,7 @@ import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
@@ -336,16 +339,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        DataContainer userData = this.user.toContainer();
-        for (Entry<DataQuery, Object> entry : userData.getValues(true).entrySet()) {
-            container.set(entry.getKey(), entry.getValue());
-        }
-        return container.set(of("JoinData"), getJoinData());
-    }
-
-    @Override
     public boolean isViewingInventory() {
         return this.openContainer != null;
     }
@@ -401,6 +394,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void playSound(SoundType sound, Vector3d position, double volume, double pitch, double minVolume) {
         this.playerNetServerHandler.sendPacket(new S29PacketSoundEffect(sound.getName(), position.getX(), position.getY(), position.getZ(),
                 (float) Math.max(minVolume, volume), (float) pitch));
+    }
+
+    @Override
+    public void sendResourcePack(ResourcePack pack) {
+        S48PacketResourcePackSend packet = new S48PacketResourcePackSend();
+        ((IMixinPacketResourcePackSend) packet).setResourcePack(pack);
+        this.playerNetServerHandler.sendPacket(packet);
     }
 
     @Override

@@ -32,4 +32,8 @@ public class SpongeHorseColor extends SpongeEntityMeta implements HorseColor {
         super(color, name);
     }
 
+    public int getBitMask() {
+        return this.type;
+    }
+
 }

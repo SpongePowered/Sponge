@@ -33,7 +33,6 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.GameProfile;
@@ -71,10 +70,11 @@ public class SpongeProfileResolver implements GameProfileResolver {
                 }
             }
             if (Sponge.getGame().getPlatform().getType().isClient()) {
+                /* TODO: This will only compile on the client (in SpongeForge)
                 com.mojang.authlib.GameProfile sessionProfile = Minecraft.getMinecraft().getSession().getProfile();
                 if (sessionProfile.getId().equals(id)) {
                     return (GameProfile) sessionProfile;
-                }
+                }*/
             }
             // TODO Possibly use UUID -> Name History
             // (http://wiki.vg/Mojang_API#UUID_-.3E_Name_history)

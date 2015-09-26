@@ -24,18 +24,25 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
+import net.minecraft.init.Items;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnapshot, RepresentedItemData, ImmutableRepresentedItemData> implements RepresentedItemData {
+
+    public SpongeRepresentedItemData() {
+        this(((ItemStack) new net.minecraft.item.ItemStack(Items.stick, 1)).createSnapshot());
+    }
 
     public SpongeRepresentedItemData(ItemStackSnapshot itemStack) {
         super(RepresentedItemData.class, itemStack, Keys.REPRESENTED_ITEM);
@@ -58,7 +65,7 @@ public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnaps
 
     @Override
     public int compareTo(RepresentedItemData o) {
-        return 0; // TODO
+        return ItemStackComparators.ALL.compare(o.item().get().createStack(), this.getValue().createStack());
     }
 
     @Override

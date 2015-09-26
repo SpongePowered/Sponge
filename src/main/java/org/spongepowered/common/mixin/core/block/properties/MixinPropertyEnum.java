@@ -48,6 +48,7 @@ public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinProperty
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public Collection<E> getPossibleValues() {
         return getAllowedValues();
     }

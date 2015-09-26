@@ -62,6 +62,12 @@ public class SpongeSerializationService implements SerializationService {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public <T extends DataSerializable> void registerBuilderAndImpl(Class<T> clazz, Class<? extends T> implClass, DataBuilder<T> builder) {
+        registerBuilder(clazz, builder);
+        registerBuilder((Class<T>) (Class) implClass, builder);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends DataSerializable> Optional<DataBuilder<T>> getBuilder(Class<T> clazz) {

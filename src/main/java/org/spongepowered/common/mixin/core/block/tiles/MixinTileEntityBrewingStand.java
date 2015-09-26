@@ -40,11 +40,6 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
     @Shadow private String customName;
 
     @Override
-    public TileEntityType getType() {
-        return TileEntityTypes.BREWING_STAND;
-    }
-
-    @Override
     public void sendDataToContainer(DataView dataView) {
         dataView.set(DataQueries.BLOCK_ENTITY_BREWING_TIME, this.getField(0));
         if (this.customName != null) {

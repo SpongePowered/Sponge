@@ -40,7 +40,9 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
@@ -60,9 +62,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
+import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
+import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent.ResourcePackStatus;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
@@ -81,10 +86,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)
@@ -99,6 +107,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     private boolean justTeleported = false;
     private Location<World> lastMoveLocation = null;
+
+    private final Map<String, ResourcePack> sentResourcePacks = new HashMap<String, ResourcePack>();
 
     @Override
     public Player getPlayer() {
@@ -362,6 +372,42 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         this.tmpQuitMessage = null;
         Sponge.getGame().getEventManager().post(event);
         event.getSink().sendMessage(event.getMessage());
+    }
+        
+    @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
+    public void onResourcePackStatus(C19PacketResourcePackStatus packet, CallbackInfo ci) {
+        String hash = packet.hash;
+        ResourcePackStatus status;
+        ResourcePack pack = this.sentResourcePacks.get(hash);
+        switch (packet.status) {
+            case ACCEPTED:
+                status = ResourcePackStatus.ACCEPTED;
+                break;
+            case DECLINED:
+                status = ResourcePackStatus.DECLINED;
+                break;
+            case SUCCESSFULLY_LOADED:
+                status = ResourcePackStatus.SUCCESSFULLY_LOADED;
+                break;
+            case FAILED_DOWNLOAD:
+                status = ResourcePackStatus.FAILED;
+                break;
+            default:
+                throw new AssertionError();
+        }
+        if (status.wasSuccessful().isPresent()) {
+            this.sentResourcePacks.remove(hash);
+        }
+        Sponge.getGame().getEventManager()
+                .post(SpongeEventFactory.createResourcePackStatusEvent(Sponge.getGame(), pack, (Player)this.playerEntity, status));
+    }
+
+    @Inject(method = "sendPacket", at = @At("HEAD"))
+    public void onResourcePackSend(Packet packet, CallbackInfo ci) {
+        if (packet instanceof IMixinPacketResourcePackSend) {
+            IMixinPacketResourcePackSend p = (IMixinPacketResourcePackSend) packet;
+            this.sentResourcePacks.put(p.setFakeHash(), p.getResourcePack());
+        }
     }
 
 }

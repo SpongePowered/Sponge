@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -41,16 +44,24 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
+import java.util.List;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
+
+    private final TileEntityType tileType = Sponge.getSpongeRegistry().tileClassToTypeMappings.get(this.getClass());
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -59,6 +70,14 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
 
+    @SuppressWarnings("unchecked")
+    @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
+    private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
+        final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name);
+        Sponge.getSpongeRegistry().tileClassToTypeMappings.put(clazz, tileEntityType);
+        Sponge.getSpongeRegistry().tileEntityTypeMappings.put(name.toLowerCase(), tileEntityType);
+    }
+
     @Override
     public Location<World> getLocation() {
         return new Location<World>((World) this.worldObj, VecHelper.toVector(this.getPos()));
@@ -66,28 +85,31 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
-        container.set(DataQueries.BLOCK_ENTITY_WORLD, ((World) this.worldObj).getUniqueId().toString());
-        container.set(DataQueries.POSITION_X, this.getPos().getX());
-        container.set(DataQueries.POSITION_Y, this.getPos().getY());
-        container.set(DataQueries.POSITION_Z, this.getPos().getZ());
-        container.set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.getClass().getSimpleName());
+        final DataContainer container = new MemoryDataContainer()
+            .set(Location.WORLD_ID, ((World) this.worldObj).getUniqueId().toString())
+            .set(Location.POSITION_X, this.getPos().getX())
+            .set(Location.POSITION_Y, this.getPos().getY())
+            .set(Location.POSITION_Z, this.getPos().getZ())
+            .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getId());
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
-        container.set(DataQueries.BLOCK_ENTITY_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final DataView dataView = container.createView(DataQueries.BLOCK_ENTITY_DATA);
-        container.set(DataQueries.BLOCK_ENTITY_DATA, dataView);
+        NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
+        container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
+        final Collection<DataManipulator<?, ?>> manipulators = getContainers();
+        if (!manipulators.isEmpty()) {
+            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+        }
         return container;
     }
 
     @Override
     public boolean validateRawData(DataContainer container) {
-        return container.contains(DataQueries.BLOCK_ENTITY_WORLD)
-            && container.contains(DataQueries.POSITION_X)
-            && container.contains(DataQueries.POSITION_Y)
-            && container.contains(DataQueries.POSITION_Z)
+        return container.contains(Location.WORLD_ID)
+            && container.contains(Location.POSITION_X)
+            && container.contains(Location.POSITION_Y)
+            && container.contains(Location.POSITION_Z)
             && container.contains(DataQueries.BLOCK_ENTITY_TILE_TYPE)
-            && container.contains(DataQueries.BLOCK_ENTITY_NBT);
+            && container.contains(DataQueries.UNSAFE_NBT);
     }
 
     @Override
@@ -103,6 +125,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public void setValid(boolean valid) {
         this.tileEntityInvalid = valid;
+    }
+
+    @Override
+    public final TileEntityType getType() {
+        return this.tileType;
     }
 
     /**
@@ -138,6 +165,26 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Override
     public void readFromNbt(NBTTagCompound compound) {
+        if (this instanceof IMixinCustomDataHolder) {
+            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+                final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
+                if (list != null && list.tagCount() != 0) {
+                    for (int i = 0; i < list.tagCount(); i++) {
+                        final NBTTagCompound internal = list.getCompoundTagAt(i);
+                        builder.add(NbtTranslator.getInstance().translateFrom(internal));
+                    }
+                }
+                try {
+                    final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
+                    for (DataManipulator<?, ?> manipulator : manipulators) {
+                        offer(manipulator);
+                    }
+                } catch (InvalidDataException e) {
+                    Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
+                }
+            }
+        }
     }
 
     /**
@@ -147,10 +194,27 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Override
     public void writeToNbt(NBTTagCompound compound) {
+        if (this instanceof IMixinCustomDataHolder) {
+            final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(((IMixinCustomDataHolder) this).getCustomManipulators());
+            final NBTTagList manipulatorTagList = new NBTTagList();
+            for (DataView dataView : manipulatorViews) {
+                manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+            }
+            compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+        }
+    }
+
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return Lists.newArrayList(); // TODO override this in subclasses
+        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+        this.supplyVanillaManipulators(list);
+        if (this instanceof IMixinCustomDataHolder) {
+            list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
+        }
+        return list;
     }
 }
