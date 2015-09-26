@@ -39,6 +39,7 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
@@ -128,7 +129,11 @@ public class KeyRegistry {
         keyMap.put("horse_variant", makeSingleKey(HorseVariant.class, Value.class, of("HorseVariant")));
         keyMap.put("item_lore", makeListKey(Text.class, of("ItemLore")));
         keyMap.put("book_pages", makeListKey(Text.class, of("BookPages")));
+<<<<<<< HEAD
         keyMap.put("is_wet", makeSingleKey(Boolean.class, Value.class, of("IsWet")));
+=======
+        keyMap.put("golden_apple_type", makeSingleKey(GoldenApple.class, Value.class, of("GoldenAppleType")));
+>>>>>>> SpongePowered/master
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 

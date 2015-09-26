@@ -39,6 +39,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.Sponge;
 
 import java.util.Map;
 import java.util.Set;
@@ -137,6 +138,7 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
                     return builder.result(DataTransactionResult.Type.FAILURE).reject(newVals).build();
                 }
             } catch (Exception e) {
+                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject().build();
             }
         }
