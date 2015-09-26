@@ -175,13 +175,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return (World) this.worldObj;
     }
 
-    public Vector3d getPosition() {
-        return new Vector3d(this.posX, this.posY, this.posZ);
-    }
-
     @Override
     public Location<World> getLocation() {
-        return new Location<World>((World) this.worldObj, getPosition());
+        return new Location<World>(getWorld(), getPosition());
     }
 
     @Override
@@ -195,6 +191,55 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
+    public Vector3d getPosition() {
+        return new Vector3d(this.posX, this.posY, this.posZ);
+    }
+
+    private Location<World> createLocation(Vector3d position) {
+        return new Location<World>(getWorld(), position);
+    }
+
+    @Override
+    public void setPosition(Vector3d position) {
+        setLocation(createLocation(position));
+    }
+
+    @Override
+    public boolean setPositionSafely(Vector3d position) {
+        return setLocationSafely(createLocation(position));
+    }
+
+    @Override
+    public Vector3d getRotation() {
+        return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
+    }
+
+    @Override
+    public void setRotation(Vector3d rotation) {
+        if (((Entity) this) instanceof EntityPlayerMP) {
+            // Force an update, this also set the rotation in this entity
+            ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
+                    getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(RelativePositions.class));
+        } else {
+            // Let the entity tracker do its job, this just updates the variables
+            shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
+        }
+    }
+
+    @Override
+    public void setPositionAndRotation(Vector3d position, Vector3d rotation) {
+        setPosition(position);
+        setRotation(rotation);
+    }
+
+    @Override
+    public boolean setPositionAndRotationSafely(Vector3d position, Vector3d rotation) {
+        boolean relocated = setPositionSafely(position);
+        setRotation(rotation);
+        return relocated;
+    }
+
+    @Override
     public void setLocationAndRotation(Location<World> location, Vector3d rotation) {
         setLocation(location);
         setRotation(rotation);
@@ -202,9 +247,24 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation) {
-        boolean relocated = setLocation(location, false);
+        boolean relocated = setLocationSafely(location);
         setRotation(rotation);
         return relocated;
+    }
+
+    @Override
+    public void setPositionAndRotation(Vector3d position, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+        setLocationAndRotation(createLocation(position), rotation, relativePositions);
+    }
+
+    @Override
+    public boolean setPositionAndRotationSafely(Vector3d position, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+        return setLocationAndRotationSafely(createLocation(position), rotation, relativePositions);
+    }
+
+    @Override
+    public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+        setLocationAndRotation(location, rotation, relativePositions, false);
     }
 
     @Override
@@ -259,8 +319,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
-                    .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
-                        thisEntity.rotationYaw, thisEntity.rotationPitch);
+                        .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
+                                thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
@@ -285,11 +345,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         return true;
-    }
-
-    @Override
-    public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
-        setLocationAndRotation(location, rotation, relativePositions, false);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -326,7 +381,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
 
                 ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                    .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
+                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
                 Location<World> resultantLocation = getLocation();
                 Vector3d resultantRotation = getRotation();
@@ -403,20 +458,21 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public Vector3d getRotation() {
-        return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
+    public boolean transferToWorld(String worldName, Vector3d position, Vector3d rotation) {
+        boolean relocated = transferToWorld(worldName, position);
+        if (relocated) {
+            setRotation(rotation);
+        }
+        return relocated;
     }
 
     @Override
-    public void setRotation(Vector3d rotation) {
-        if (((Entity) this) instanceof EntityPlayerMP) {
-            // Force an update, this also set the rotation in this entity
-            ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
-                getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(RelativePositions.class));
-        } else {
-            // Let the entity tracker do its job, this just updates the variables
-            shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
+    public boolean transferToWorld(UUID uuid, Vector3d position, Vector3d rotation) {
+        boolean relocated = transferToWorld(uuid, position);
+        if (relocated) {
+            setRotation(rotation);
         }
+        return relocated;
     }
 
     @Override
