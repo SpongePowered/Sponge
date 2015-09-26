@@ -24,20 +24,32 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import com.google.common.collect.Iterables;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntitySkull;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
+import javax.annotation.Nullable;
+
+import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
+import org.spongepowered.common.data.util.NbtDataUtil;
+
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.tileentity.TileEntitySkull;
 
 public class SkullUtils {
 
     /**
-     * There's not really a meaningful default value for this, since it's a CatalogType.
-     * However, the Vanilla give command defaults the skeleton type (index 0), so it's used as
-     * the default here.
+     * There's not really a meaningful default value for this, since it's a CatalogType. However, the Vanilla give command defaults the skeleton type (index 0), so it's used as the default here.
      */
     public static final SkullType DEFAULT_TYPE = SkullTypes.SKELETON;
 
@@ -65,6 +77,74 @@ public class SkullUtils {
 
     public static SkullType getSkullType(ItemStack itemStack) {
         return SkullUtils.getSkullType(itemStack.getMetadata());
+    }
+
+    public static Optional<GameProfile> getProfile(TileEntitySkull entity) {
+        return Optional.ofNullable((GameProfile) (Object) entity.getPlayerProfile());
+    }
+
+    public static boolean setProfile(TileEntitySkull skull, @Nullable GameProfile profile) {
+        if (getSkullType(skull).equals(SkullTypes.PLAYER)) {
+            final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
+            skull.setPlayerProfile((com.mojang.authlib.GameProfile) (Object) newProfile);
+            skull.markDirty();
+            skull.getWorld().markBlockForUpdate(skull.getPos());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static Optional<GameProfile> getProfile(ItemStack skull) {
+        if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
+            final NBTTagCompound nbt = skull.getSubCompound(NbtDataUtil.ITEM_SKULL_OWNER, false);
+            final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfileFromNBT(nbt);
+            return Optional.ofNullable((GameProfile) (Object) mcProfile);
+        }
+        return Optional.empty();
+    }
+
+    public static boolean setProfile(ItemStack skull, @Nullable GameProfile profile) {
+        if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
+            if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
+                if (skull.getTagCompound() != null) {
+                    skull.getTagCompound().removeTag(NbtDataUtil.ITEM_SKULL_OWNER);
+                }
+            } else {
+                final NBTTagCompound nbt = new NBTTagCompound();
+                NBTUtil.writeGameProfile(nbt, (com.mojang.authlib.GameProfile) (Object) resolveProfileIfNecessary(profile));
+                skull.setTagInfo(NbtDataUtil.ITEM_SKULL_OWNER, nbt);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static @Nullable GameProfile resolveProfileIfNecessary(@Nullable GameProfile profile) {
+        if (profile == null) {
+            return null;
+        }
+        // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
+        final GameProfileResolver resolver = Sponge.getGame().getServiceManager().provide(GameProfileResolver.class).get();
+        if (profile.getName() == null || profile.getName().isEmpty()) {
+            final ListenableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                Sponge.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
+                return null;
+            }
+        } else if (profile.getUniqueId() == null) {
+            final ListenableFuture<GameProfile> future = resolver.get(profile.getName());
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                Sponge.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
+                return null;
+            }
+        } else {
+            return profile;
+        }
     }
 
 }

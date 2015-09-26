@@ -26,8 +26,9 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.DataContainer;
+import com.google.common.collect.Maps;
+import net.minecraft.tileentity.TileEntity;
+
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,106 +38,91 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.util.DataUtil;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> {
+public abstract class AbstractTileEntityDataProcessor<E extends TileEntity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractMultiDataProcessor<M, I> {
 
-    private final Class<E> entityClass;
+    private final Class<E> tileEntityClass;
 
-    public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<V> key) {
-        super(key);
-        this.entityClass = checkNotNull(entityClass);
+    protected AbstractTileEntityDataProcessor(Class<E> tileEntityClass) {
+        this.tileEntityClass = checkNotNull(tileEntityClass);
     }
 
-    protected boolean supports(E entity) {
+    protected boolean supports(E tileEntity) {
         return true;
     }
 
-    protected abstract boolean set(E entity, T value);
+    protected abstract boolean doesDataExist(E tileEntity);
 
-    protected abstract Optional<T> getVal(E entity);
+    protected abstract boolean set(E tileEntity, Map<Key<?>, Object> keyValues);
 
-    protected abstract ImmutableValue<T> constructImmutableValue(T value);
+    protected abstract Map<Key<?>, ?> getValues(E tileEntity);
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return this.entityClass.isInstance(dataHolder) && supports((E) dataHolder);
+        return this.tileEntityClass.isInstance(dataHolder) && supports((E) dataHolder);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<M> from(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
             return Optional.empty();
         } else {
-            final Optional<T> optional = getVal((E) dataHolder);
-            if (optional.isPresent()) {
-                return Optional.of(createManipulator().set(this.key, optional.get()));
+            if (doesDataExist((E) dataHolder)) {
+                final M manipulator = createManipulator();
+                final Map<Key<?>, ?> keyValues = getValues((E) dataHolder);
+                for (Map.Entry<Key<?>, ?> entry : keyValues.entrySet()) {
+                    manipulator.set((Key) entry.getKey(), entry.getValue());
+                }
+                return Optional.of(manipulator);
             }
         }
         return Optional.empty();
     }
 
-    @Override
-    public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
-            return Optional.of(manipulator.set(this.key, merged.get(this.key).get()));
-        }
-    }
-
-    @Override
-    public Optional<M> fill(DataContainer container, M m) {
-        m.set(this.key, DataUtil.getData(container, this.key));
-        return Optional.of(m);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
         if (supports(dataHolder)) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<M> old = from(dataHolder);
             final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
-            final T newValue = merged.get(this.key).get();
-            final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
+            final Map<Key<?>, Object> map = Maps.newHashMap();
+            final Set<ImmutableValue<?>> newValues = merged.getValues();
+            for (ImmutableValue<?> value : newValues) {
+                map.put(value.getKey(), value.get());
+            }
             try {
-                if (set((E) dataHolder, newValue)) {
+                if (set((E) dataHolder, map)) {
                     if (old.isPresent()) {
                         builder.replace(old.get().getValues());
                     }
-                    return builder.result(DataTransactionResult.Type.SUCCESS).success((ImmutableValue<?>) immutableValue).build();
+
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success(newValues).build();
                 } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
+                    return builder.result(DataTransactionResult.Type.FAILURE).reject(newValues).build();
                 }
             } catch (Exception e) {
                 Sponge.getLogger().debug("An exception occurred when setting data: ", e);
-                return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) immutableValue).build();
+                return builder.result(DataTransactionResult.Type.ERROR).reject(newValues).build();
             }
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
         if (immutable.supports(key)) {
-            return Optional.of(immutable.asMutable().set(this.key, (T) value).asImmutable());
+            return Optional.of((I) immutable.asMutable().set((Key) key, value).asImmutable());
         }
         return Optional.empty();
     }
 
-    @Override
-    public boolean supports(EntityType entityType) {
-        return this.entityClass.isAssignableFrom(entityType.getEntityClass());
-    }
-    
 }
