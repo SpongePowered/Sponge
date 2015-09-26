@@ -35,10 +35,10 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.config.ConfigDir;
 import org.spongepowered.api.service.config.DefaultConfig;
-import org.spongepowered.api.service.scheduler.Asynchronous;
+import org.spongepowered.api.service.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.scheduler.SpongeExecutorService;
-import org.spongepowered.api.service.scheduler.Synchronous;
+import org.spongepowered.api.service.scheduler.SynchronousExecutor;
 import org.spongepowered.common.plugin.SpongePluginContainer;
 import org.spongepowered.common.service.config.SpongeConfigService;
 
@@ -82,8 +82,8 @@ public class SpongePluginGuiceModule extends AbstractModule {
                 .toProvider(PrivateHoconConfigProvider.class); // Loader for plugin-private directory config file
 
         // SpongeExecutorServices
-        bind(SpongeExecutorService.class).annotatedWith(Synchronous.class).toProvider(SynchronousExecutorProvider.class);
-        bind(SpongeExecutorService.class).annotatedWith(Asynchronous.class).toProvider(AsynchronousExecutorProvider.class);
+        bind(SpongeExecutorService.class).annotatedWith(SynchronousExecutor.class).toProvider(SynchronousExecutorProvider.class);
+        bind(SpongeExecutorService.class).annotatedWith(AsynchronousExecutor.class).toProvider(AsynchronousExecutorProvider.class);
     }
 
     private static class PrivateConfigDirProvider implements Provider<File> {
