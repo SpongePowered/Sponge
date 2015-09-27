@@ -128,11 +128,10 @@ public class KeyRegistry {
         keyMap.put("item_lore", makeListKey(Text.class, of("ItemLore")));
         keyMap.put("book_pages", makeListKey(Text.class, of("BookPages")));
         keyMap.put("golden_apple_type", makeSingleKey(GoldenApple.class, Value.class, of("GoldenAppleType")));
-        keyMap.put("is_flying", makeSingleKey(Boolean.class, Value.class, of("IsFlying")));
-        keyMap.put("experience_level", makeSingleKey(Integer.TYPE, Value.class, of("ExperienceLevel")));
-        keyMap.put("total_experience", makeSingleKey(Integer.TYPE, Value.class, of("TotalExperience")));
-        keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, Value.class, of("ExperienceSinceLevel")));
-        keyMap.put("experience_from_start_of_level", makeSingleKey(Integer.TYPE, Value.class, of("ExperienceFromStartOfLevel")));
+        keyMap.put("experience_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceLevel")));
+        keyMap.put("total_experience", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("TotalExperience")));
+        keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceSinceLevel")));
+        keyMap.put("experience_from_start_of_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceFromStartOfLevel")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
