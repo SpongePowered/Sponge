@@ -129,6 +129,7 @@ public class KeyRegistry {
         keyMap.put("item_lore", makeListKey(Text.class, of("ItemLore")));
         keyMap.put("book_pages", makeListKey(Text.class, of("BookPages")));
         keyMap.put("golden_apple_type", makeSingleKey(GoldenApple.class, Value.class, of("GoldenAppleType")));
+        keyMap.put("is_flying", makeSingleKey(Boolean.class, Value.class, of("IsFlying")));
         keyMap.put("experience_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceLevel")));
         keyMap.put("total_experience", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("TotalExperience")));
         keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceSinceLevel")));
