@@ -112,6 +112,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableEyeLocationData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
@@ -132,6 +133,7 @@ import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
@@ -342,6 +344,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.WetDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.BreathingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.CareerDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.EyeLocationDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.FlyingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.FoodDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.GameModeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.HealthDataBuilder;
@@ -364,6 +367,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeEyeLocationData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
@@ -384,6 +388,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
@@ -404,6 +409,7 @@ import org.spongepowered.common.data.processor.data.WetDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.BreathingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.EyeLocationDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.FlyingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FoodDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.GameModeDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
@@ -435,6 +441,7 @@ import org.spongepowered.common.data.processor.value.entity.HealthValueProcessor
 import org.spongepowered.common.data.processor.value.entity.HorseColorValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HorseStyleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HorseVariantValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.IsFlyingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
@@ -1828,6 +1835,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class,
                 ImmutableSignData.class, ImmutableSpongeSignData.class, signDataProcessor, signDataBuilder);
 
+        final FlyingDataProcessor flyingDataProcessor = new FlyingDataProcessor();
+        final FlyingDataBuilder flyingDataBuilder = new FlyingDataBuilder();
+        service.registerBuilder(FlyingData.class, flyingDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(FlyingData.class, SpongeFlyingData.class, ImmutableFlyingData.class,
+                ImmutableSpongeFlyingData.class, flyingDataProcessor, flyingDataBuilder);
+
         final SkullDataProcessor skullDataProcessor = new SkullDataProcessor();
         final SkullDataBuilder skullDataBuilder = new SkullDataBuilder();
         service.registerBuilder(SkullData.class, skullDataBuilder);
@@ -1934,6 +1947,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataRegistry.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.IS_FLYING, new IsFlyingValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_AIR, new MaxAirValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REMAINING_AIR, new RemainingAirValueProcessor());
         dataRegistry.registerValueProcessor(Keys.GAME_MODE, new GameModeValueProcessor());

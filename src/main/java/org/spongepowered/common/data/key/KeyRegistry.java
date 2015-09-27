@@ -131,6 +131,7 @@ public class KeyRegistry {
         keyMap.put("book_pages", makeListKey(Text.class, of("BookPages")));
         keyMap.put("is_wet", makeSingleKey(Boolean.class, Value.class, of("IsWet")));
         keyMap.put("golden_apple_type", makeSingleKey(GoldenApple.class, Value.class, of("GoldenAppleType")));
+        keyMap.put("is_flying", makeSingleKey(Boolean.class, Value.class, of("IsFlying")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
