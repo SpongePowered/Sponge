@@ -32,10 +32,12 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
@@ -103,11 +105,9 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
         return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expSinceLevel);
     }
 
-    // i am not sure about this, doesnt this have to be immutable??? you cannot
-    // set it
     @Override
-    public MutableBoundedValue<Integer> getExperienceBetweenLevels() {
-        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expBetweenLevels);
+    public ImmutableBoundedValue<Integer> getExperienceBetweenLevels() {
+        return new ImmutableSpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, this.expBetweenLevels, intComparator(), 0, Integer.MAX_VALUE);
     }
 
     public int getLevel() {
@@ -224,7 +224,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
             @Override
             public Value<?> get() {
-                return getExperienceBetweenLevels();
+                return getExperienceBetweenLevels().asMutable();
             }
         });
     }
