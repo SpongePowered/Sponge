@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 public class SpongeCommandDisambiguator implements Disambiguator {
     private final Game game;
 
@@ -56,7 +58,7 @@ public class SpongeCommandDisambiguator implements Disambiguator {
 
     @Override
     @NonnullByDefault
-    public Optional<CommandMapping> disambiguate(CommandSource source, String aliasUsed, List<CommandMapping> availableOptions) {
+    public Optional<CommandMapping> disambiguate(@Nullable CommandSource source, String aliasUsed, List<CommandMapping> availableOptions) {
         if (availableOptions.size() > 1) {
             final String chosenPlugin = SpongeImpl.getGlobalConfig().getConfig().getCommands().getAliases().get(aliasUsed.toLowerCase());
             if (chosenPlugin != null) {
