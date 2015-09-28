@@ -30,22 +30,22 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
+import org.spongepowered.common.data.util.DataUtil;
 
 import com.google.common.base.Optional;
+
+import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.item.ItemStack;
 
 public class WetDataBuilder implements DataManipulatorBuilder<WetData, ImmutableWetData> {
 
     @Override
     public Optional<WetData> build(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.IS_WET.getQuery())) {
-            Optional<Boolean> isWet = container.getBoolean(Keys.IS_WET.getQuery());
-            if (isWet.isPresent()) {
-                return Optional.<WetData>of(new SpongeWetData(isWet.get()));
-            }
-        }
-        return Optional.absent();
+    	Boolean isWet = DataUtil.getData(container, Keys.IS_WET);
+        return Optional.<WetData>of(new SpongeWetData(isWet));
     }
 
     @Override
@@ -55,9 +55,19 @@ public class WetDataBuilder implements DataManipulatorBuilder<WetData, Immutable
 
     @Override
     public Optional<WetData> createFrom(DataHolder dataHolder) {
-        if (dataHolder.supports(Keys.IS_WET)) {
-            return Optional.<WetData>of(new SpongeWetData(dataHolder.get(Keys.IS_WET).get()));
-        }
+    	if (dataHolder instanceof ItemStack) {
+    		ItemStack stack = (ItemStack) dataHolder;
+    		
+    		if (stack.getItem().equals(ItemTypes.SPONGE)) {
+    			SpongeWetData data = new SpongeWetData(stack.getItemDamage() == 1);
+    			return Optional.<WetData>of(data);
+    		}
+    	} else if (dataHolder instanceof EntityWolf) {
+    		EntityWolf wolf = (EntityWolf) dataHolder;
+    		
+    		SpongeWetData data = new SpongeWetData(wolf.isWet());
+    		return Optional.<WetData>of(data);
+    	}
 
         return Optional.absent();
     }
