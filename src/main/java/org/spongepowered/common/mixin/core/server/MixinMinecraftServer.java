@@ -325,12 +325,26 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     if (dim != 0) {
                         ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
                     }
-                    Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
                 }
             } else {
+                if (((WorldProperties) worldInfo).getUniqueId() == null) {
+                    ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
+
+                    if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
+                        ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
+                        ((WorldProperties) worldInfo).setLoadOnStartup(true);
+                        ((WorldProperties) worldInfo).setEnabled(true);
+                        if (dim != 0) {
+                            ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
+                        }
+                    }
+                }
                 worldInfo.setWorldName(worldFolder);
                 newWorldSettings = new WorldSettings(worldInfo);
             }
+
+            Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+
             if (dim == 0) {
                 this.setResourcePackFromWorld(this.getFolderName(), worldsavehandler);
             }
