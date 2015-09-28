@@ -84,7 +84,7 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
                     return DataTransactionBuilder.successReplaceResult(proposed, previous);
                 }
             }
-    	}
+        }
         
         return DataTransactionBuilder.failResult(proposed);
     }
