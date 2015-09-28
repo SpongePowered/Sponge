@@ -26,7 +26,6 @@ package org.spongepowered.common.data.type;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 public class SpongeNotePitch implements NotePitch {
 

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import static org.spongepowered.common.data.util.DataUtil.getData;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.passive.EntityHorse;
@@ -38,9 +36,6 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
-import org.spongepowered.api.data.type.HorseColor;
-import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;

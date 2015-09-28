@@ -43,7 +43,6 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleD
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.GoldenAppleUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.item.SpongeGoldenApple;
 
 public class GoldenAppleDataProcessor extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
 

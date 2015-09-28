@@ -110,7 +110,6 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableEyeLocationData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
@@ -130,7 +129,6 @@ import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
-import org.spongepowered.api.data.manipulator.mutable.entity.EyeLocationData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
@@ -147,6 +145,33 @@ import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.property.PropertyRegistry;
+import org.spongepowered.api.data.property.block.BlastResistanceProperty;
+import org.spongepowered.api.data.property.block.GravityAffectedProperty;
+import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
+import org.spongepowered.api.data.property.block.HardnessProperty;
+import org.spongepowered.api.data.property.block.HeldItemProperty;
+import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
+import org.spongepowered.api.data.property.block.LightEmissionProperty;
+import org.spongepowered.api.data.property.block.MatterProperty;
+import org.spongepowered.api.data.property.block.PassableProperty;
+import org.spongepowered.api.data.property.block.PoweredProperty;
+import org.spongepowered.api.data.property.block.ReplaceableProperty;
+import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
+import org.spongepowered.api.data.property.block.StatisticsTrackedProperty;
+import org.spongepowered.api.data.property.block.TemperatureProperty;
+import org.spongepowered.api.data.property.block.UnbreakableProperty;
+import org.spongepowered.api.data.property.entity.EyeHeightProperty;
+import org.spongepowered.api.data.property.entity.EyeLocationProperty;
+import org.spongepowered.api.data.property.item.ApplicableEffectProperty;
+import org.spongepowered.api.data.property.item.BurningFuelProperty;
+import org.spongepowered.api.data.property.item.DamageAbsorptionProperty;
+import org.spongepowered.api.data.property.item.EfficiencyProperty;
+import org.spongepowered.api.data.property.item.EquipmentProperty;
+import org.spongepowered.api.data.property.item.FoodRestorationProperty;
+import org.spongepowered.api.data.property.item.HarvestingProperty;
+import org.spongepowered.api.data.property.item.SaturationProperty;
+import org.spongepowered.api.data.property.item.UseLimitProperty;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.api.data.type.BannerPatternShape;
@@ -340,7 +365,6 @@ import org.spongepowered.common.data.builder.manipulator.mutable.RepresentedItem
 import org.spongepowered.common.data.builder.manipulator.mutable.SkullDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.BreathingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.CareerDataBuilder;
-import org.spongepowered.common.data.builder.manipulator.mutable.entity.EyeLocationDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.FlyingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.FoodDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.GameModeDataBuilder;
@@ -362,7 +386,6 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullD
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
@@ -382,7 +405,6 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeEyeLocationData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
@@ -402,7 +424,6 @@ import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor
 import org.spongepowered.common.data.processor.data.SkullDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.BreathingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
-import org.spongepowered.common.data.processor.data.entity.EyeLocationDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FlyingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FoodDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.GameModeDataProcessor;
@@ -422,8 +443,6 @@ import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProc
 import org.spongepowered.common.data.processor.value.ItemEnchantmentValueProcessor;
 import org.spongepowered.common.data.processor.value.SkullValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
-import org.spongepowered.common.data.processor.value.entity.EyeHeightValueProcessor;
-import org.spongepowered.common.data.processor.value.entity.EyeLocationValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.FireDamageDelayValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.FireTicksValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.FoodExhaustionValueProcessor;
@@ -445,6 +464,33 @@ import org.spongepowered.common.data.processor.value.item.BookPagesValueProcesso
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.data.property.store.block.BlastResistancePropertyStore;
+import org.spongepowered.common.data.property.store.block.GravityAffectedPropertyStore;
+import org.spongepowered.common.data.property.store.block.GroundLuminancePropertyStore;
+import org.spongepowered.common.data.property.store.block.HardnessPropertyStore;
+import org.spongepowered.common.data.property.store.block.HeldItemPropertyStore;
+import org.spongepowered.common.data.property.store.block.IndirectlyPoweredPropertyStore;
+import org.spongepowered.common.data.property.store.block.LightEmissionPropertyStore;
+import org.spongepowered.common.data.property.store.block.MatterPropertyStore;
+import org.spongepowered.common.data.property.store.block.PassablePropertyStore;
+import org.spongepowered.common.data.property.store.block.PoweredPropertyStore;
+import org.spongepowered.common.data.property.store.block.ReplaceablePropertyStore;
+import org.spongepowered.common.data.property.store.block.SkyLuminancePropertyStore;
+import org.spongepowered.common.data.property.store.block.StatisticsTrackedPropertyStore;
+import org.spongepowered.common.data.property.store.block.TemperaturePropertyStore;
+import org.spongepowered.common.data.property.store.block.UnbreakablePropertyStore;
+import org.spongepowered.common.data.property.store.entity.EyeHeightPropertyStore;
+import org.spongepowered.common.data.property.store.entity.EyeLocationPropertyStore;
+import org.spongepowered.common.data.property.store.item.ApplicableEffectPropertyStore;
+import org.spongepowered.common.data.property.store.item.BurningFuelPropertyStore;
+import org.spongepowered.common.data.property.store.item.DamageAbsorptionPropertyStore;
+import org.spongepowered.common.data.property.store.item.EfficiencyPropertyStore;
+import org.spongepowered.common.data.property.store.item.EquipmentPropertyStore;
+import org.spongepowered.common.data.property.store.item.FoodRestorationPropertyStore;
+import org.spongepowered.common.data.property.store.item.HarvestingPropertyStore;
+import org.spongepowered.common.data.property.store.item.SaturationPropertyStore;
+import org.spongepowered.common.data.property.store.item.UseLimitPropertyStore;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.type.SpongeSkullType;
@@ -1846,12 +1892,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerDataProcessorAndImpl(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
                 ImmutableSpongeVelocityData.class, velocityDataProcessor, velocityDataBuilder);
 
-        final EyeLocationDataProcessor eyeLocationDataProcessor = new EyeLocationDataProcessor();
-        final EyeLocationDataBuilder eyeLocationDataBuilder = new EyeLocationDataBuilder();
-        service.registerBuilder(EyeLocationData.class, eyeLocationDataBuilder);
-        dataRegistry.registerDataProcessorAndImpl(EyeLocationData.class, SpongeEyeLocationData.class, ImmutableEyeLocationData.class,
-                ImmutableSpongeEyeLocationData.class, eyeLocationDataProcessor, eyeLocationDataBuilder);
-
         final FoodDataProcessor foodDataProcessor = new FoodDataProcessor();
         final FoodDataBuilder foodDataBuilder = new FoodDataBuilder();
         service.registerBuilder(FoodData.class, foodDataBuilder);
@@ -1929,8 +1969,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SKULL_TYPE, new SkullValueProcessor());
         dataRegistry.registerValueProcessor(Keys.VELOCITY, new VelocityValueProcessor());
-        dataRegistry.registerValueProcessor(Keys.EYE_HEIGHT, new EyeHeightValueProcessor());
-        dataRegistry.registerValueProcessor(Keys.EYE_LOCATION, new EyeLocationValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataRegistry.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
@@ -1948,6 +1986,42 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.IS_SNEAKING, new SneakingValueProcessor());
         dataRegistry.registerValueProcessor(Keys.GOLDEN_APPLE_TYPE, new GoldenAppleValueProcessor());
 
+    }
+
+    private void setupProperties() {
+        final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
+
+        // Blocks
+        propertyRegistry.register(BlastResistanceProperty.class, new BlastResistancePropertyStore());
+        propertyRegistry.register(GravityAffectedProperty.class, new GravityAffectedPropertyStore());
+        propertyRegistry.register(GroundLuminanceProperty.class, new GroundLuminancePropertyStore());
+        propertyRegistry.register(HardnessProperty.class, new HardnessPropertyStore());
+        propertyRegistry.register(HeldItemProperty.class, new HeldItemPropertyStore());
+        propertyRegistry.register(IndirectlyPoweredProperty.class, new IndirectlyPoweredPropertyStore());
+        propertyRegistry.register(LightEmissionProperty.class, new LightEmissionPropertyStore());
+        propertyRegistry.register(MatterProperty.class, new MatterPropertyStore());
+        propertyRegistry.register(PassableProperty.class, new PassablePropertyStore());
+        propertyRegistry.register(PoweredProperty.class, new PoweredPropertyStore());
+        propertyRegistry.register(ReplaceableProperty.class, new ReplaceablePropertyStore());
+        propertyRegistry.register(SkyLuminanceProperty.class, new SkyLuminancePropertyStore());
+        propertyRegistry.register(StatisticsTrackedProperty.class, new StatisticsTrackedPropertyStore());
+        propertyRegistry.register(TemperatureProperty.class, new TemperaturePropertyStore());
+        propertyRegistry.register(UnbreakableProperty.class, new UnbreakablePropertyStore());
+
+        // Items
+        propertyRegistry.register(ApplicableEffectProperty.class, new ApplicableEffectPropertyStore());
+        propertyRegistry.register(BurningFuelProperty.class, new BurningFuelPropertyStore());
+        propertyRegistry.register(DamageAbsorptionProperty.class, new DamageAbsorptionPropertyStore());
+        propertyRegistry.register(EfficiencyProperty.class, new EfficiencyPropertyStore());
+        propertyRegistry.register(EquipmentProperty.class, new EquipmentPropertyStore());
+        propertyRegistry.register(FoodRestorationProperty.class, new FoodRestorationPropertyStore());
+        propertyRegistry.register(HarvestingProperty.class, new HarvestingPropertyStore());
+        propertyRegistry.register(SaturationProperty.class, new SaturationPropertyStore());
+        propertyRegistry.register(UseLimitProperty.class, new UseLimitPropertyStore());
+
+        // Entities
+        propertyRegistry.register(EyeLocationProperty.class, new EyeLocationPropertyStore());
+        propertyRegistry.register(EyeHeightProperty.class, new EyeHeightPropertyStore());
     }
 
     private void setNotePitches() {
@@ -2374,6 +2448,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     public void preInit() {
         setupSerialization();
+        setupProperties();
     }
 
     public void init() {
@@ -2417,6 +2492,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setCoal();
         setFishes();
         setEntityTypes();
+        SpongePropertyRegistry.completeRegistration();
         SpongeDataRegistry.finalizeRegistration();
     }
 }

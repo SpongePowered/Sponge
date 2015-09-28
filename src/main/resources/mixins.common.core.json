@@ -44,6 +44,7 @@
         "block.tiles.MixinTileEntitySkull",
         "data.MixinCustomDataHolder",
         "data.MixinDataHolder",
+        "data.MixinPropertyHolder",
         "data.holders.MixinBlockButton",
         "data.holders.MixinBlockLever",
         "data.holders.MixinBlockStandingSign",

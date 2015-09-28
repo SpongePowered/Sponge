@@ -46,17 +46,6 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
     private boolean showParticles;
 
     public SpongePotionBuilder() {
-        reset();
-    }
-
-    @Override
-    public PotionEffectBuilder add(DataManipulator<?, ?> manipulator) {
-        return this; // TODO
-    }
-
-    @Override
-    public PotionEffectBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
-        return this;
     }
 
     @Override
@@ -104,16 +93,6 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
     @Override
     public PotionEffectBuilder particles(boolean showsParticles) {
         this.showParticles = showsParticles;
-        return this;
-    }
-
-    @Override
-    public PotionEffectBuilder reset() {
-        this.potionType = null;
-        this.duration = 0;
-        this.amplifier = 0;
-        this.isAmbient = false;
-        this.showParticles = true;
         return this;
     }
 

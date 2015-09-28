@@ -27,7 +27,6 @@ package org.spongepowered.common.data.type;
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 public class SpongeSkullType implements SkullType {
 

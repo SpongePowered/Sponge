@@ -26,10 +26,11 @@ package org.spongepowered.common.data.property;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 public class PropertyStoreDelegate<T extends Property<?, ?>> implements PropertyStore<T> {
 
@@ -40,15 +41,17 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
     }
 
     @Override
-    public Optional<T> getFor(DataHolder dataHolder) {
-        for (PropertyStore<T> propertyStore : this.propertyStores) {
-
-        }
-        return null;
+    public Optional<T> getFor(PropertyHolder propertyHolder) {
+        return Optional.absent();
     }
 
     @Override
-    public Optional<T> getFor(Location<?> location) {
-        return null;
+    public Optional<T> getFor(Location<World> location) {
+        return Optional.absent();
+    }
+
+    @Override
+    public int getPriority() {
+        return Integer.MAX_VALUE;
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
@@ -36,8 +35,8 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -52,9 +51,9 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.mixin.core.item.inventory.MixinItemStack;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -325,5 +324,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                 .add("itemType", this.itemType)
                 .add("count", this.count)
                 .toString();
+    }
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+        return this.privateStack.getProperty(propertyClass);
+    }
+
+    @Override
+    public Collection<Property<?, ?>> getApplicableProperties() {
+        return this.privateStack.getApplicableProperties();
     }
 }
