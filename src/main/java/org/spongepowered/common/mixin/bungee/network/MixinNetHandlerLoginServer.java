@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.bungee.network;
 import com.google.common.base.Charsets;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerLoginServer;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,26 +43,28 @@ import java.util.UUID;
 @Mixin(NetHandlerLoginServer.class)
 public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLoginServer {
 
+    @Shadow private MinecraftServer server;
     @Shadow public NetworkManager networkManager;
     @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
 
     @Inject(method = "processLoginStart", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/NetHandlerLoginServer;"
-            + "currentLoginState:Lnet/minecraft/server/network/NetHandlerLoginServer$LoginState;",
-            opcode = Opcodes.PUTFIELD, ordinal = 1))
+            + "loginGameProfile:Lcom/mojang/authlib/GameProfile;",
+            opcode = Opcodes.PUTFIELD, ordinal = 0, shift = At.Shift.AFTER))
     public void initUuid(CallbackInfo ci) {
-        UUID uuid;
-        if (((IMixinNetworkManager) this.networkManager).getSpoofedUUID() != null) {
-            uuid = ((IMixinNetworkManager) this.networkManager).getSpoofedUUID();
-        } else {
-            uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.loginGameProfile.getName()).getBytes(Charsets.UTF_8));
-        }
+        if (!this.server.isServerInOnlineMode()) {
+            UUID uuid;
+            if (((IMixinNetworkManager) this.networkManager).getSpoofedUUID() != null) {
+                uuid = ((IMixinNetworkManager) this.networkManager).getSpoofedUUID();
+            } else {
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.loginGameProfile.getName()).getBytes(Charsets.UTF_8));
+            }
 
-        this.loginGameProfile = new com.mojang.authlib.GameProfile(uuid, this.loginGameProfile.getName());
+            this.loginGameProfile = new com.mojang.authlib.GameProfile(uuid, this.loginGameProfile.getName());
 
-        if (((IMixinNetworkManager) this.networkManager).getSpoofedProfile() != null) {
-            for (Property property : ((IMixinNetworkManager) this.networkManager).getSpoofedProfile())
-            {
-                this.loginGameProfile.getProperties().put(property.getName(), property);
+            if (((IMixinNetworkManager) this.networkManager).getSpoofedProfile() != null) {
+                for (Property property : ((IMixinNetworkManager) this.networkManager).getSpoofedProfile()) {
+                    this.loginGameProfile.getProperties().put(property.getName(), property);
+                }
             }
         }
     }
