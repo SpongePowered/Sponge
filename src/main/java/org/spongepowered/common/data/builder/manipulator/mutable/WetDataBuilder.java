@@ -44,7 +44,7 @@ public class WetDataBuilder implements DataManipulatorBuilder<WetData, Immutable
 
     @Override
     public Optional<WetData> build(DataView container) throws InvalidDataException {
-    	Boolean isWet = DataUtil.getData(container, Keys.IS_WET);
+        Boolean isWet = DataUtil.getData(container, Keys.IS_WET);
         return Optional.<WetData>of(new SpongeWetData(isWet));
     }
 
@@ -55,19 +55,19 @@ public class WetDataBuilder implements DataManipulatorBuilder<WetData, Immutable
 
     @Override
     public Optional<WetData> createFrom(DataHolder dataHolder) {
-    	if (dataHolder instanceof ItemStack) {
-    		ItemStack stack = (ItemStack) dataHolder;
-    		
-    		if (stack.getItem().equals(ItemTypes.SPONGE)) {
-    			SpongeWetData data = new SpongeWetData(stack.getItemDamage() == 1);
-    			return Optional.<WetData>of(data);
-    		}
-    	} else if (dataHolder instanceof EntityWolf) {
-    		EntityWolf wolf = (EntityWolf) dataHolder;
-    		
-    		SpongeWetData data = new SpongeWetData(wolf.isWet());
-    		return Optional.<WetData>of(data);
-    	}
+        if (dataHolder instanceof ItemStack) {
+            ItemStack stack = (ItemStack) dataHolder;
+
+            if (stack.getItem().equals(ItemTypes.SPONGE)) {
+                SpongeWetData data = new SpongeWetData(stack.getItemDamage() == 1);
+                return Optional.<WetData>of(data);
+            }
+        } else if (dataHolder instanceof EntityWolf) {
+            EntityWolf wolf = (EntityWolf) dataHolder;
+            
+            SpongeWetData data = new SpongeWetData(wolf.isWet());
+            return Optional.<WetData>of(data);
+        }
 
         return Optional.absent();
     }
