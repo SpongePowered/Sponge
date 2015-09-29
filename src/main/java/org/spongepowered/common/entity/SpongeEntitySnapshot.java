@@ -39,6 +39,7 @@ import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
@@ -60,6 +61,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -425,5 +427,15 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         }
 
         return nbttaglist;
+    }
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Collection<Property<?, ?>> getApplicableProperties() {
+        return ImmutableList.of();
     }
 }

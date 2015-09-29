@@ -55,15 +55,6 @@ import javax.annotation.Nullable;
 @Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 999)
 public abstract class MixinDataHolder implements DataHolder {
 
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
-        if (optional.isPresent()) {
-            return optional.get().getFor(this);
-        }
-        return Optional.absent();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {

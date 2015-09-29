@@ -24,14 +24,32 @@
  */
 package org.spongepowered.common.data.property;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.common.data.util.ComparatorUtil;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class SpongePropertyRegistry implements PropertyRegistry {
 
     private static final SpongePropertyRegistry INSTANCE = new SpongePropertyRegistry();
+
+    private final Map<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> propertyStoreMap = Maps.newConcurrentMap();
+    private final Map<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> delegateMap = Maps.newConcurrentMap();
+    private static boolean allowRegistrations = true;
 
     private SpongePropertyRegistry() {
     }
@@ -40,13 +58,50 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         return INSTANCE;
     }
 
-    @Override
-    public <T extends Property<?, ?>> void register(Class<T> propertyClass, PropertyStore<T> propertyStore) {
-
+    @SuppressWarnings("unchecked")
+    public static void completeRegistration() {
+        allowRegistrations = false;
+        final SpongePropertyRegistry registry = getInstance();
+        for (Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : registry.propertyStoreMap.entrySet()) {
+            ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.PROPERTY_STORE_COMPARATOR);
+            propertyStoreBuilder.addAll(entry.getValue());
+            final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
+            registry.delegateMap.put(entry.getKey(), delegate);
+        }
+        registry.propertyStoreMap.clear();
     }
 
     @Override
+    public <T extends Property<?, ?>> void register(Class<T> propertyClass, PropertyStore<T> propertyStore) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
+        checkArgument(propertyClass != null, "The property class can not be null!");
+        if (!this.propertyStoreMap.containsKey(propertyClass)) {
+            this.propertyStoreMap.put(propertyClass, Collections.synchronizedList(Lists.<PropertyStore<?>>newArrayList()));
+        }
+        final List<PropertyStore<?>> propertyStores = this.propertyStoreMap.get(propertyClass);
+        propertyStores.add(checkNotNull(propertyStore));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public <T extends Property<?, ?>> Optional<PropertyStore<T>> getStore(Class<T> propertyClass) {
-        return Optional.absent();
+        checkArgument(propertyClass != null, "The property class can not be null!");
+        if (!this.delegateMap.containsKey(propertyClass)) {
+            return Optional.absent();
+        } else {
+            return Optional.of((PropertyStore<T>) this.delegateMap.get(propertyClass));
+        }
+    }
+
+    public Collection<Property<?, ?>> getPropertiesFor(PropertyHolder holder) {
+        final ImmutableList.Builder<Property<?, ?>> builder = ImmutableList.builder();
+        for (Map.Entry<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> entry : this.delegateMap.entrySet()) {
+            final Optional<? extends Property<?, ?>> optional = entry.getValue().getFor(holder);
+            if (optional.isPresent()) {
+                builder.add(optional.get());
+            }
+        }
+        return builder.build();
     }
 }

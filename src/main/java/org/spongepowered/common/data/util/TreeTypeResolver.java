@@ -32,8 +32,6 @@ import net.minecraft.block.BlockPlanks;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 
-import java.util.Map;
-
 public class TreeTypeResolver {
 
     private static final TreeTypeResolver instance = new TreeTypeResolver();

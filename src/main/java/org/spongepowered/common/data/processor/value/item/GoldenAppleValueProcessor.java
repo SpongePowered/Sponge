@@ -25,27 +25,21 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemAppleGold;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.GoldenAppleUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.item.SpongeGoldenApple;
 
 public class GoldenAppleValueProcessor extends AbstractSpongeValueProcessor<GoldenApple, Value<GoldenApple>> {
 

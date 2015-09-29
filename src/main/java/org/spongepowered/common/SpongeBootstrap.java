@@ -32,6 +32,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import org.apache.logging.log4j.spi.AbstractLogger;
 import org.slf4j.impl.SLF4JLogger;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.command.SimpleCommandService;
@@ -50,6 +51,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeHelpCommand;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
@@ -89,6 +91,7 @@ public final class SpongeBootstrap {
             throw new ExceptionInInitializerError("Cannot continue with a Non-Sponge Scheduler!");
         }
         registerService(SerializationService.class, new SpongeSerializationService());
+        registerService(PropertyRegistry.class, SpongePropertyRegistry.getInstance());
         registerService(PaginationService.class, new SpongePaginationService());
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));

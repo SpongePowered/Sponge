@@ -81,8 +81,6 @@ public class KeyRegistry {
         keyMap.put("skull_type", makeSingleKey(SkullType.class, Value.class, of("SkullType")));
         keyMap.put("is_sneaking", makeSingleKey(Boolean.TYPE, Value.class, of("IsSneaking")));
         keyMap.put("velocity", makeSingleKey(Vector3d.class, Value.class, of("Velocity")));
-        keyMap.put("eye_height", makeSingleKey(Double.TYPE, Value.class, of("EyeHeight")));
-        keyMap.put("eye_location", makeSingleKey(Vector3d.class, Value.class, of("EyeLocation")));
         keyMap.put("food_level", makeSingleKey(Integer.TYPE, Value.class, of("FoodLevel")));
         keyMap.put("saturation", makeSingleKey(Double.TYPE, Value.class, of("FoodSaturationLevel")));
         keyMap.put("exhaustion", makeSingleKey(Double.TYPE, Value.class, of("FoodExhaustionLevel")));

@@ -100,31 +100,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public boolean isLiquid() {
-        return BlockLiquid.class.isAssignableFrom(this.getClass());
-    }
-
-    @Override
-    public boolean isSolidCube() {
-        return isBlockNormalCube();
-    }
-
-    @Override
-    public boolean isAffectedByGravity() {
-        return BlockFalling.class.isAssignableFrom(this.getClass());
-    }
-
-    @Override
-    public boolean areStatisticsEnabled() {
-        return getEnableStats();
-    }
-
-    @Override
-    public float getEmittedLight() {
-        return 15F / getLightValue();
-    }
-
-    @Override
     @Overwrite
     public boolean getTickRandomly() {
         return this.needsRandomTick;
@@ -143,21 +118,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         if(event.isCancelled()) {
             ci.cancel();
         }
-    }
-
-    @Override
-    public boolean isReplaceable() {
-        return getMaterial().isReplaceable();
-    }
-
-    @Override
-    public Optional<ItemBlock> getHeldItem() {
-        return Optional.fromNullable((ItemBlock) Item.getItemFromBlock((Block) (Object) this));
-    }
-
-    @Override
-    public boolean isGaseous() {
-        return this.getMaterial() == Material.air;
     }
 
     @Override

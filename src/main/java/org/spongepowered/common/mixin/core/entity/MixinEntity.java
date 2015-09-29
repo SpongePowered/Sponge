@@ -43,6 +43,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -63,6 +64,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -172,6 +174,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public World getWorld() {
         return (World) this.worldObj;
+    }
+
+    @Override
+    public EntitySnapshot createSnapshot() {
+        return new SpongeEntitySnapshotBuilder().from(this).build();
     }
 
     public Vector3d getPosition() {

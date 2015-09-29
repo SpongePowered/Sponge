@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.util;
 
+import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 
@@ -45,6 +46,13 @@ public class ComparatorUtil {
     public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR = new Comparator<DataProcessor<?, ?>>() {
         @Override
         public int compare(DataProcessor<?, ?> o1, DataProcessor<?, ?> o2) {
+            return intComparator().compare(o2.getPriority(), o1.getPriority());
+        }
+    };
+
+    public static final Comparator<PropertyStore<?>> PROPERTY_STORE_COMPARATOR = new Comparator<PropertyStore<?>>() {
+        @Override
+        public int compare(PropertyStore<?> o1, PropertyStore<?> o2) {
             return intComparator().compare(o2.getPriority(), o1.getPriority());
         }
     };
