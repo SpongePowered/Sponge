@@ -62,6 +62,9 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
             final Integer oldValue = (int) (player.experience * player.xpBarCap());
+            while (value >= player.xpBarCap()) {
+                value -= player.xpBarCap();
+            }
             player.experience = (float) value / player.xpBarCap();
             return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, value),
                     new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, oldValue));

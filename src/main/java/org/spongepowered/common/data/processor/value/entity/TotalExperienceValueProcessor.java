@@ -34,6 +34,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
@@ -62,6 +63,16 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
             final Integer oldValue = player.experienceTotal;
+            int level = 0;
+            for (int i = value; i > 0; i -= ExperienceHolderUtils.getExpBetweenLevels(i)) {
+                level += 1;
+                ExperienceHolderUtils.getExpBetweenLevels(level);
+                if (i - ExperienceHolderUtils.getExpBetweenLevels(i) <= 0) {
+                    player.experience = (float) i / player.xpBarCap();
+                    player.experienceLevel = level;
+                    break;
+                }
+            }
             player.experienceTotal = value;
             return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, value),
                     new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, oldValue));
