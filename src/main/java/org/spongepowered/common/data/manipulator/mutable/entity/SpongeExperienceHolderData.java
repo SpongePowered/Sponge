@@ -52,7 +52,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     public SpongeExperienceHolderData(int level, int totalExp, int expSinceLevel) {
         super(ExperienceHolderData.class);
         this.level = level;
-        this.updateExpBetweenLevels();
+        this.expBetweenLevels = this.getExpBetweenLevels(level);
         this.totalExp = totalExp;
         this.expSinceLevel = expSinceLevel;
         registerGettersAndSetters();
@@ -116,11 +116,15 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     public void setLevel(int level) {
         this.level = level;
-        this.updateExpBetweenLevels();
+        for (int i = 1; i < level; i++) {
+            this.totalExp += this.getExpBetweenLevels(i);
+        }
+        this.expSinceLevel = 0;
+        this.expBetweenLevels = this.getExpBetweenLevels(level);
     }
 
-    private void updateExpBetweenLevels() {
-        this.expBetweenLevels = this.level >= 30 ? 112 + (this.level - 30) * 9 : (this.level >= 15 ? 37 + (this.level - 15) * 5 : 7 + this.level * 2);
+    private int getExpBetweenLevels(int level) {
+        return level >= 30 ? 112 + (level - 30) * 9 : (level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2);
     }
 
     public int getTotalExp() {
@@ -129,6 +133,17 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     public void setTotalExp(int totalExp) {
         this.totalExp = totalExp;
+        int level = 0;
+        for (int i = totalExp; i > 0; i -= this.expBetweenLevels) {
+            level += 1;
+            this.getExpBetweenLevels(level);
+            if (i - this.expBetweenLevels <= 0) {
+                this.expSinceLevel = i;
+                this.expBetweenLevels = this.getExpBetweenLevels(level);
+                this.level = level;
+                break;
+            }
+        }
     }
 
     public int getExpSinceLevel() {
@@ -136,11 +151,10 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     }
 
     public void setExpSinceLevel(int expSinceLevel) {
+        while (expSinceLevel >= this.expBetweenLevels) {
+            expSinceLevel -= this.expBetweenLevels;
+        }
         this.expSinceLevel = expSinceLevel;
-    }
-
-    public int getExpBetweenLevels() {
-        return expBetweenLevels;
     }
 
     @Override
@@ -215,7 +229,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
             @Override
             public Object get() {
-                return getExpBetweenLevels();
+                return getExpBetweenLevels(getLevel());
             }
         });
         registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new SetterFunction<Object>() {
