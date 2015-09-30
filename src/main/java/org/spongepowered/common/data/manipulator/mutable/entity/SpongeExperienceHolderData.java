@@ -47,29 +47,29 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     private int level;
     private int totalExp;
     private int expSinceLevel;
-    private final int expBetweenLevels;
+    private int expBetweenLevels;
 
-    public SpongeExperienceHolderData(int level, int totalExp, int expSinceLevel, int expBetweenLevels) {
+    public SpongeExperienceHolderData(int level, int totalExp, int expSinceLevel) {
         super(ExperienceHolderData.class);
         this.level = level;
+        this.updateExpBetweenLevels();
         this.totalExp = totalExp;
         this.expSinceLevel = expSinceLevel;
-        this.expBetweenLevels = expBetweenLevels;
         registerGettersAndSetters();
     }
 
     public SpongeExperienceHolderData() {
-        this(0, 0, 0, 0);
+        this(0, 0, 0);
     }
 
     @Override
     public ExperienceHolderData copy() {
-        return new SpongeExperienceHolderData(this.level, this.totalExp, this.expSinceLevel, this.expBetweenLevels);
+        return new SpongeExperienceHolderData(this.level, this.totalExp, this.expSinceLevel);
     }
 
     @Override
     public ImmutableExperienceHolderData asImmutable() {
-        return new ImmutableSpongeExperienceHolderData(this.level, this.totalExp, this.expSinceLevel, this.expBetweenLevels);
+        return new ImmutableSpongeExperienceHolderData(this.level, this.totalExp, this.expSinceLevel);
     }
 
     @Override
@@ -86,8 +86,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
         return new MemoryDataContainer()
                 .set(Keys.EXPERIENCE_LEVEL.getQuery(), this.level)
                 .set(Keys.TOTAL_EXPERIENCE.getQuery(), this.totalExp)
-                .set(Keys.EXPERIENCE_SINCE_LEVEL.getQuery(), this.expSinceLevel)
-                .set(Keys.EXPERIENCE_FROM_START_OF_LEVEL.getQuery(), this.expBetweenLevels);
+                .set(Keys.EXPERIENCE_SINCE_LEVEL.getQuery(), this.expSinceLevel);
     }
 
     @Override
@@ -107,7 +106,8 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     @Override
     public ImmutableBoundedValue<Integer> getExperienceBetweenLevels() {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, this.expBetweenLevels, intComparator(), 0, Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, this.expBetweenLevels, intComparator(), 0,
+                Integer.MAX_VALUE);
     }
 
     public int getLevel() {
@@ -116,6 +116,11 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     public void setLevel(int level) {
         this.level = level;
+        this.updateExpBetweenLevels();
+    }
+
+    private void updateExpBetweenLevels() {
+        this.expBetweenLevels = this.level >= 30 ? 112 + (this.level - 30) * 9 : (this.level >= 15 ? 37 + (this.level - 15) * 5 : 7 + this.level * 2);
     }
 
     public int getTotalExp() {
@@ -217,7 +222,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
             @Override
             public void set(Object value) {
-                //do nothing 
+                // do nothing
             }
         });
         registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new GetterFunction<Value<?>>() {

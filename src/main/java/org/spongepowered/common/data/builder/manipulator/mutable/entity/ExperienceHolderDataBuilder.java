@@ -45,8 +45,7 @@ public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<Exper
             final int level = DataUtil.getData(container, Keys.EXPERIENCE_LEVEL, Integer.class);
             final int totalExp = DataUtil.getData(container, Keys.TOTAL_EXPERIENCE, Integer.class);
             final int expSinceLevel = DataUtil.getData(container, Keys.EXPERIENCE_SINCE_LEVEL, Integer.class);
-            final int expBetweenLevels = DataUtil.getData(container, Keys.EXPERIENCE_FROM_START_OF_LEVEL, Integer.class);
-            return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel, expBetweenLevels));
+            return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
         }
         return Optional.absent();
     }
@@ -63,8 +62,7 @@ public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<Exper
             final int level = player.experienceLevel;
             final int totalExp = player.experienceTotal;
             final int expSinceLevel = (int) (player.experience * player.xpBarCap());
-            final int expBetweenLevels = player.xpBarCap();
-            return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel, expBetweenLevels));
+            return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
         }
         return Optional.absent();
     }

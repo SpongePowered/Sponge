@@ -46,12 +46,12 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
     private final int expSinceLevel;
     private final int expBetweenLevels;
 
-    public ImmutableSpongeExperienceHolderData(int level, int totalExp, int expSinceLevel, int expBetweenLevels) {
+    public ImmutableSpongeExperienceHolderData(int level, int totalExp, int expSinceLevel) {
         super(ImmutableExperienceHolderData.class);
         this.level = level;
+        this.expBetweenLevels = this.level >= 30 ? 112 + (this.level - 30) * 9 : (this.level >= 15 ? 37 + (this.level - 15) * 5 : 7 + this.level * 2);
         this.totalExp = totalExp;
         this.expSinceLevel = expSinceLevel;
-        this.expBetweenLevels = expBetweenLevels;
         registerGetters();
     }
 
@@ -62,7 +62,7 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
 
     @Override
     public ExperienceHolderData asMutable() {
-        return new SpongeExperienceHolderData(this.level, this.totalExp, this.expSinceLevel, this.expBetweenLevels);
+        return new SpongeExperienceHolderData(this.level, this.totalExp, this.expSinceLevel);
     }
 
     @Override
@@ -71,7 +71,6 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
                 .compare(o.level().get().intValue(), this.level)
                 .compare(o.totalExperience().get().intValue(), this.totalExp)
                 .compare(o.experienceSinceLevel().get().intValue(), this.expSinceLevel)
-                .compare(o.experienceBetweenLevels().get().intValue(), this.expBetweenLevels)
                 .result();
     }
 
@@ -80,8 +79,7 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
         return new MemoryDataContainer()
                 .set(Keys.EXPERIENCE_LEVEL.getQuery(), this.level)
                 .set(Keys.TOTAL_EXPERIENCE.getQuery(), this.totalExp)
-                .set(Keys.EXPERIENCE_SINCE_LEVEL.getQuery(), this.expSinceLevel)
-                .set(Keys.EXPERIENCE_FROM_START_OF_LEVEL.getQuery(), this.expBetweenLevels);
+                .set(Keys.EXPERIENCE_SINCE_LEVEL.getQuery(), this.expSinceLevel);
     }
 
     @Override
