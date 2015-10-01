@@ -72,7 +72,10 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocity
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCoalData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCookedFishData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableFishData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppleData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
@@ -104,7 +107,10 @@ import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
+import org.spongepowered.api.data.manipulator.mutable.item.CoalData;
+import org.spongepowered.api.data.manipulator.mutable.item.CookedFishData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
+import org.spongepowered.api.data.manipulator.mutable.item.FishData;
 import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
@@ -115,7 +121,6 @@ import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.SpongeItemEnchantmentBuilder;
@@ -169,7 +174,10 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCoalData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCookedFishData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeFishData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGoldenAppleData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
@@ -201,7 +209,10 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityDa
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeCoalData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeCookedFishData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeFishData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
@@ -232,6 +243,9 @@ import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor
 import org.spongepowered.common.data.processor.data.entity.VillagerZombieProcessor;
 import org.spongepowered.common.data.processor.data.entity.WolfWetDataProcessor;
 import org.spongepowered.common.data.processor.data.item.BreakableDataProcessor;
+import org.spongepowered.common.data.processor.data.item.CoalDataProcessor;
+import org.spongepowered.common.data.processor.data.item.CookedFishDataProcessor;
+import org.spongepowered.common.data.processor.data.item.FishDataProcessor;
 import org.spongepowered.common.data.processor.data.item.GoldenAppleDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemAuthorDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemEnchantmentDataProcessor;
@@ -279,6 +293,9 @@ import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValuePro
 import org.spongepowered.common.data.processor.value.item.BookAuthorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BreakableValueProcessor;
+import org.spongepowered.common.data.processor.value.item.CoalValueProcessor;
+import org.spongepowered.common.data.processor.value.item.CookedFishValueProcessor;
+import org.spongepowered.common.data.processor.value.item.FishValueProcessor;
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
@@ -461,6 +478,22 @@ public class SpongeSerializationRegistry {
         final ItemWetDataProcessor itemWetDataProcessor = new ItemWetDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class, wolfWetDataProcessor);
         dataRegistry.registerDataProcessorAndImpl(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class, itemWetDataProcessor);
+
+        final CoalDataProcessor coalDataProcessor = new CoalDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(CoalData.class, SpongeCoalData.class, ImmutableCoalData.class,
+                ImmutableSpongeCoalData.class, coalDataProcessor);
+
+        final CookedFishDataProcessor cookedFishDataProcessor = new CookedFishDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(CookedFishData.class, SpongeCookedFishData.class, ImmutableCookedFishData.class,
+                ImmutableSpongeCookedFishData.class, cookedFishDataProcessor);
+
+        final FishDataProcessor fishDataProcessor = new FishDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(FishData.class, SpongeFishData.class, ImmutableFishData.class,
+                ImmutableSpongeFishData.class, fishDataProcessor);
+
+        dataRegistry.registerValueProcessor(Keys.COAL_TYPE, new CoalValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.COOKED_FISH, new CookedFishValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.FISH_TYPE, new FishValueProcessor());
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());

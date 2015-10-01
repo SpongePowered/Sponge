@@ -37,9 +37,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.CoalType;
+import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -151,6 +154,9 @@ public class KeyRegistry {
         keyMap.put("pig_saddle", makeSingleKey(Boolean.class, Value.class, of("IsPigSaddled")));
         keyMap.put("tamed_owner", makeSingleKey(UUID.class, OptionalValue.class, of("TamerUUID")));
         keyMap.put("is_wet", makeSingleKey(Boolean.class, Value.class, of("IsWet")));
+        keyMap.put("coal_type", makeSingleKey(CoalType.class, Value.class, of("CoalType")));
+        keyMap.put("cooked_fish", makeSingleKey(CookedFish.class, Value.class, of("CookedFishType")));
+        keyMap.put("fish_type", makeSingleKey(Fish.class, Value.class, of("RawFishType")));
 
     }
 

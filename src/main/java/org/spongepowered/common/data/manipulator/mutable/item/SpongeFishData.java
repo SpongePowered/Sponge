@@ -22,38 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.data.manipulator.mutable.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import net.minecraft.item.ItemFishFood;
-import org.spongepowered.api.data.type.CookedFish;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableFishData;
+import org.spongepowered.api.data.manipulator.mutable.item.FishData;
 import org.spongepowered.api.data.type.Fish;
+import org.spongepowered.api.data.type.Fishes;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeFishData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
-public class SpongeCookedFish implements CookedFish {
+public class SpongeFishData extends AbstractSingleCatalogData<Fish, FishData, ImmutableFishData> implements FishData {
 
-    private final String id;
-    private final String name;
-    public final ItemFishFood.FishType fish;
-
-    public SpongeCookedFish(String id, String name, ItemFishFood.FishType fish) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
-        this.fish = checkNotNull(fish);
+    public SpongeFishData() {
+        this(Fishes.COD);
     }
 
-    @Override
-    public String getId() {
-        return "cooked." + this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Fish getRawFish() {
-        return (Fish) (Object) this.fish;
+    public SpongeFishData(Fish value) {
+        super(FishData.class, value, Keys.FISH_TYPE, ImmutableSpongeFishData.class);
     }
 }
