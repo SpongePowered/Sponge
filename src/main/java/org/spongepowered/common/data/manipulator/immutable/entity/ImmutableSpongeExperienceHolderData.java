@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
+import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.util.GetterFunction;
 
@@ -49,7 +50,7 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
     public ImmutableSpongeExperienceHolderData(int level, int totalExp, int expSinceLevel) {
         super(ImmutableExperienceHolderData.class);
         this.level = level;
-        this.expBetweenLevels = this.level >= 30 ? 112 + (this.level - 30) * 9 : (this.level >= 15 ? 37 + (this.level - 15) * 5 : 7 + this.level * 2);
+        this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(level);
         this.totalExp = totalExp;
         this.expSinceLevel = expSinceLevel;
         registerGetters();

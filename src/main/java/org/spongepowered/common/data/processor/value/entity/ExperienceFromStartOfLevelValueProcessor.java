@@ -66,7 +66,6 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
         return DataTransactionBuilder.failNoData();
     }
 
-    // maybe Immutable??
     @Override
     public ImmutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return new ImmutableSpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, defaultValue, intComparator(), 0, Integer.MAX_VALUE);
