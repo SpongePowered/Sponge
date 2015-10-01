@@ -22,38 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.data.manipulator.immutable.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCoalData;
+import org.spongepowered.api.data.manipulator.mutable.item.CoalData;
+import org.spongepowered.api.data.type.CoalType;
+import org.spongepowered.api.data.type.CoalTypes;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeCoalData;
 
-import net.minecraft.item.ItemFishFood;
-import org.spongepowered.api.data.type.CookedFish;
-import org.spongepowered.api.data.type.Fish;
+public class ImmutableSpongeCoalData extends AbstractImmutableSingleCatalogData<CoalType, ImmutableCoalData, CoalData> implements ImmutableCoalData {
 
-public class SpongeCookedFish implements CookedFish {
-
-    private final String id;
-    private final String name;
-    public final ItemFishFood.FishType fish;
-
-    public SpongeCookedFish(String id, String name, ItemFishFood.FishType fish) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
-        this.fish = checkNotNull(fish);
+    public ImmutableSpongeCoalData() {
+        this(CoalTypes.COAL);
     }
 
-    @Override
-    public String getId() {
-        return "cooked." + this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Fish getRawFish() {
-        return (Fish) (Object) this.fish;
+    public ImmutableSpongeCoalData(CoalType value) {
+        super(ImmutableCoalData.class, value, CoalTypes.COAL, Keys.COAL_TYPE, SpongeCoalData.class);
     }
 }
