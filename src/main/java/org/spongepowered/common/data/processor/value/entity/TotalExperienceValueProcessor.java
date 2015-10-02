@@ -64,14 +64,13 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
             final EntityPlayer player = (EntityPlayer) container;
             final Integer oldValue = player.experienceTotal;
             int level = 0;
-            for (int i = value; i > 0; i -= ExperienceHolderUtils.getExpBetweenLevels(i)) {
-                level += 1;
-                ExperienceHolderUtils.getExpBetweenLevels(level);
-                if (i - ExperienceHolderUtils.getExpBetweenLevels(i) <= 0) {
-                    player.experience = (float) i / player.xpBarCap();
+            for (int i = value; true; i -= ExperienceHolderUtils.getExpBetweenLevels(level)) {
+                if (i - ExperienceHolderUtils.getExpBetweenLevels(level) <= 0) {
+                    player.experience = (float) i / ExperienceHolderUtils.getExpBetweenLevels(level);
                     player.experienceLevel = level;
                     break;
                 }
+                level++;
             }
             player.experienceTotal = value;
             return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, value),
