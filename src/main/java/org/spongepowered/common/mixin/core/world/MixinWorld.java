@@ -63,7 +63,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -137,7 +136,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
@@ -146,7 +144,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
@@ -841,7 +838,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    @Override
     public Collection<Direction> getPoweredBlockFaces(int x, int y, int z) {
         // Similar to World.getStrongPower(BlockPos)
         BlockPos pos = new BlockPos(x, y, z);
@@ -854,7 +850,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return faces.build();
     }
 
-    @Override
     public Collection<Direction> getIndirectlyPoweredBlockFaces(int x, int y, int z) {
         // Similar to World.isBlockIndirectlyGettingPowered
         BlockPos pos = new BlockPos(x, y, z);

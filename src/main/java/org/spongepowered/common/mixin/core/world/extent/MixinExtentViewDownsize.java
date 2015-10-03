@@ -49,7 +49,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -162,7 +161,8 @@ public abstract class MixinExtentViewDownsize implements Extent {
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
-        return getBlock(x, y, z).getType();
+        checkRange(x, y, z);
+        return this.extent.getBlockType(x, y, z);
     }
 
     @Override
@@ -178,57 +178,54 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
+    public Location<? extends Extent> getLocation(Vector3i position) {
+        return new Location<Extent>(this, position);
+    }
+
+    @Override
+    public Location<? extends Extent> getLocation(int x, int y, int z) {
+        return getLocation(new Vector3i(x, y, z));
+    }
+
+    @Override
+    public Location<? extends Extent> getLocation(Vector3d position) {
+        return new Location<Extent>(this, position);
+    }
+
+    @Override
+    public Location<? extends Extent> getLocation(double x, double y, double z) {
+        return getLocation(new Vector3d(x, y, z));
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
+        checkRange(x, y, z);
+        this.extent.setBlock(x, y, z, block, notifyNeighbors);
+    }
+
+    @Override
+    public void setBlockType(int x, int y, int z, BlockType type, boolean notifyNeighbors) {
+        checkRange(x, y, z);
+        this.extent.setBlockType(x, y, z, type, notifyNeighbors);
+    }
+
+    @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.createSnapshot(x, y, z);
     }
 
     @Override
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        final Vector3i position = snapshot.getPosition();
+        checkRange(position.getX(), position.getY(), position.getZ());
+        return this.extent.restoreSnapshot(snapshot, force, notifyNeighbors);
+    }
+
+    @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
         checkRange(x, y, z);
         return this.extent.restoreSnapshot(x, y, z, snapshot, force, notifyNeighbors);
-    }
-
-    @Override
-    public void interactBlock(int x, int y, int z, Direction side) {
-        checkRange(x, y, z);
-        this.extent.interactBlock(x, y, z, side);
-    }
-
-    @Override
-    public void interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side) {
-        checkRange(x, y, z);
-        this.extent.interactBlockWith(x, y, z, itemStack, side);
-    }
-
-    @Override
-    public boolean digBlock(int x, int y, int z) {
-        checkRange(x, y, z);
-        return this.extent.digBlock(x, y, z);
-    }
-
-    @Override
-    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack) {
-        checkRange(x, y, z);
-        return this.extent.digBlockWith(x, y, z, itemStack);
-    }
-
-    @Override
-    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack) {
-        checkRange(x, y, z);
-        return this.extent.getBlockDigTimeWith(x, y, z, itemStack);
-    }
-
-    @Override
-    public Collection<Direction> getPoweredBlockFaces(int x, int y, int z) {
-        checkRange(x, y, z);
-        return this.extent.getPoweredBlockFaces(x, y, z);
-    }
-
-    @Override
-    public Collection<Direction> getIndirectlyPoweredBlockFaces(int x, int y, int z) {
-        checkRange(x, y, z);
-        return this.extent.getIndirectlyPoweredBlockFaces(x, y, z);
     }
 
     @Override
@@ -253,6 +250,12 @@ public abstract class MixinExtentViewDownsize implements Extent {
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
         checkRange(x, y, z);
         return this.extent.getProperty(x, y, z, propertyClass);
+    }
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
+        checkRange(x, y, z);
+        return this.extent.getProperty(x, y, z, direction, propertyClass);
     }
 
     @Override
