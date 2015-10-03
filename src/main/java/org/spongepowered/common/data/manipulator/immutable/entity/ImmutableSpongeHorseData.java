@@ -37,7 +37,6 @@ import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -107,17 +106,17 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
 
     @Override
     public ImmutableValue<HorseColor> color() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
     }
 
     @Override
     public ImmutableValue<HorseStyle> style() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
     }
 
     @Override
     public ImmutableValue<HorseVariant> variant() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_VARIANT, HorseVariants.HORSE, this.horseVariant);
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, this.horseVariant);
     }
 
     @Override

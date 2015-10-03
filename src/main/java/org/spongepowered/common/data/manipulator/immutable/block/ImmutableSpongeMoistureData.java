@@ -30,7 +30,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeMoistureData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -43,7 +42,6 @@ public class ImmutableSpongeMoistureData extends AbstractImmutableBoundedCompara
 
     @Override
     public ImmutableBoundedValue<Integer> moisture() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.MOISTURE, 0, this.value,
-                                                 this.comparator, this.lowerBound, this.upperBound);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.MOISTURE, this.value, 0, this.comparator, this.lowerBound, this.upperBound);
     }
 }

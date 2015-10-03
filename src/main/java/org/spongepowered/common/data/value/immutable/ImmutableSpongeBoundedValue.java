@@ -32,11 +32,18 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Comparator;
 
 public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> implements ImmutableBoundedValue<E> {
+
+    public static <T> ImmutableBoundedValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue, Comparator<T>
+            comparator, T minimum, T maximum) {
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, key, actualValue, defaultValue, comparator, minimum, maximum);
+    }
+
     private final Comparator<E> comparator;
     private final E minimum;
     private final E maximum;

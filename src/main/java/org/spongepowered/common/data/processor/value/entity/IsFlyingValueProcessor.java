@@ -33,7 +33,6 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -65,7 +64,7 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> proposedValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_FLYING, value, false);
+        final ImmutableValue<Boolean> proposedValue = ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, value, false);
         if (supports(container)) {
             final ImmutableValue<Boolean> oldFlyingData = getApiValueFromContainer(container).get().asImmutable();
             try {

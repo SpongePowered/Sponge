@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
+import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -32,7 +35,6 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -81,19 +83,19 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
 
     @Override
     public ImmutableBoundedValue<Integer> foodLevel() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.FOOD_LEVEL, this.foodLevel, this.foodLevel);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.FOOD_LEVEL, 20, this.foodLevel, intComparator(), 0, 20);
     }
 
     @Override
     public ImmutableBoundedValue<Double> exhaustion() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.EXHAUSTION, (double) this.foodExhaustionLevel,
-                (double) this.foodExhaustionLevel);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.EXHAUSTION, (double) this.foodExhaustionLevel,
+                (double) this.foodExhaustionLevel, doubleComparator(), 0D, 20D);
     }
 
     @Override
     public ImmutableBoundedValue<Double> saturation() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.SATURATION, (double) this.foodSaturationLevel,
-                                                 (double) this.foodSaturationLevel);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.SATURATION, (double) this.foodSaturationLevel,
+                                                 (double) this.foodSaturationLevel, doubleComparator(), 0D, 20D);
     }
 
     public int getFood() {

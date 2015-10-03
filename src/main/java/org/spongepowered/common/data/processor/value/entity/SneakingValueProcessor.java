@@ -31,7 +31,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -68,10 +67,10 @@ public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_SNEAKING, value, false);
+        final ImmutableValue<Boolean> newValue = ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, value);
         if (container instanceof Entity) {
             final boolean old = getValueFromContainer(container).get();
-            final ImmutableValue<Boolean> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_SNEAKING, old, false);
+            final ImmutableValue<Boolean> oldValue = ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, old);
             try {
                 ((Entity)container).setSneaking(value.booleanValue());
                 return DataTransactionBuilder.successReplaceResult(newValue, oldValue);

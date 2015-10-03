@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSnowedData;
 import org.spongepowered.api.data.manipulator.mutable.block.SnowedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSnowedData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -42,6 +41,6 @@ public class ImmutableSpongeSnowedData extends AbstractImmutableBooleanData<Immu
 
     @Override
     public ImmutableValue<Boolean> hasSnow() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SNOWED, this.value, false);
+        return ImmutableSpongeValue.cachedOf(Keys.SNOWED, false, this.value);
     }
 }

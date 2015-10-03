@@ -37,8 +37,17 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements ImmutableValue<E> {
 
-    public static <T> ImmutableValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actual) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actual);
+    /**
+     * Gets a cached {@link ImmutableValue} of the default value and the actual value.
+     *
+     * @param key The key for the value
+     * @param defaultValue The default value
+     * @param actualValue The actual value
+     * @param <T> The type of value
+     * @return The cached immutable value
+     */
+    public static <T> ImmutableValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue) {
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actualValue);
     }
 
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {

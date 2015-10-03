@@ -30,7 +30,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
 import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeLayeredData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -43,7 +42,6 @@ public class ImmutableSpongeLayeredData extends AbstractImmutableBoundedComparab
 
     @Override
     public ImmutableBoundedValue<Integer> layer() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.LAYER, 0, this.value,
-                                                 this.comparator, this.lowerBound, this.upperBound);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.LAYER, 0, this.value, this.comparator, this.lowerBound, this.upperBound);
     }
 }

@@ -32,7 +32,6 @@ import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -63,10 +62,10 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, V
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Career value) {
-        final ImmutableValue<Career> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, value, Careers.ARMORER);
+        final ImmutableValue<Career> newValue = ImmutableSpongeValue.cachedOf(Keys.CAREER, value, Careers.ARMORER);
         if (container instanceof IMixinVillager) {
             final Career old = ((IMixinVillager) container).getCareer();
-            final ImmutableValue<Career> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, old, Careers.ARMORER);
+            final ImmutableValue<Career> oldValue = ImmutableSpongeValue.cachedOf(Keys.CAREER, old, Careers.ARMORER);
             try {
                 ((IMixinVillager) container).setCareer(value);
                 return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
@@ -74,7 +73,7 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, V
                 return DataTransactionBuilder.errorResult(newValue);
             }
         }
-        return DataTransactionBuilder.failResult(ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.ARMORER, value));
+        return DataTransactionBuilder.failResult(newValue);
     }
 
     @Override

@@ -36,7 +36,6 @@ import org.spongepowered.api.data.type.WireAttachmentTypes;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWireAttachementData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
@@ -60,24 +59,23 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentNorth() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.WIRE_ATTACHMENT_NORTH, this.wireAttachmentMap.get(Direction.NORTH),
-                                                 WireAttachmentTypes.NONE);
+        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_NORTH, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.NORTH));
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentSouth() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.WIRE_ATTACHMENT_SOUTH, this.wireAttachmentMap.get(Direction.SOUTH),
-                                                 WireAttachmentTypes.NONE);    }
+        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_SOUTH, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.SOUTH));
+    }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentEast() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.WIRE_ATTACHMENT_EAST, this.wireAttachmentMap.get(Direction.EAST),
-                                                 WireAttachmentTypes.NONE);    }
+        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_EAST, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.EAST));
+    }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentWest() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.WIRE_ATTACHMENT_WEST, this.wireAttachmentMap.get(Direction.WEST),
-                                                 WireAttachmentTypes.NONE);    }
+        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_WEST, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.WEST));
+    }
 
     @Override
     public ImmutableWireAttachmentData copy() {

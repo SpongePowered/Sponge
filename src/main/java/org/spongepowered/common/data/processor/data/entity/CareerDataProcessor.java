@@ -35,7 +35,6 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -67,7 +66,7 @@ public class CareerDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected ImmutableValue<Career> constructImmutableValue(Career value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, value, Careers.FARMER);
+        return ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.FARMER, value);
     }
 
     @Override

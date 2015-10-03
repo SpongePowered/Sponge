@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableExtendedData;
 import org.spongepowered.api.data.manipulator.mutable.block.ExtendedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeExtendedData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,6 +40,6 @@ public class ImmutableSpongeExtendedData extends AbstractImmutableBooleanData<Im
 
     @Override
     public ImmutableValue<Boolean> extended() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.EXTENDED, this.value, true);
+        return ImmutableSpongeValue.cachedOf(Keys.EXTENDED, false, this.value);
     }
 }

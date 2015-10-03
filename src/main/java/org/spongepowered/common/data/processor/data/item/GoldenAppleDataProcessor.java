@@ -37,7 +37,6 @@ import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.GoldenAppleUtils;
@@ -75,7 +74,7 @@ public class GoldenAppleDataProcessor extends AbstractItemSingleDataProcessor<Go
 
     @Override
     protected ImmutableValue<GoldenApple> constructImmutableValue(GoldenApple value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, value);
+        return ImmutableSpongeValue.cachedOf(Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, value);
     }
 
     @Override

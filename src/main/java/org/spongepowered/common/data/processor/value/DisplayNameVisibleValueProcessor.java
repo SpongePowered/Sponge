@@ -33,7 +33,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -77,24 +76,23 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> newVal = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME, true, value);
+        final ImmutableValue<Boolean> proposed = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, true, value);
         if (container instanceof Entity) {
             final boolean old = ((Entity) container).getAlwaysRenderNameTag();
+            final ImmutableValue<Boolean> oldValue = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, true, old);
             try {
                 ((Entity) container).setAlwaysRenderNameTag(value);
-                final ImmutableValue<Boolean> oldVal = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME,
-                                                                                      true, old);
                 return DataTransactionBuilder.builder()
-                        .replace(oldVal)
-                        .success(newVal)
+                        .replace(oldValue)
+                        .success(proposed)
                         .result(DataTransactionResult.Type.SUCCESS)
                         .build();
             } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newVal);
+                return DataTransactionBuilder.errorResult(proposed);
             }
 
         }
-        return DataTransactionBuilder.failResult(newVal);
+        return DataTransactionBuilder.failResult(proposed);
     }
 
     @Override

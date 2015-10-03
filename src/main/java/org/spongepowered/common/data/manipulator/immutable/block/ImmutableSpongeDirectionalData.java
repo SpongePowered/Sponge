@@ -29,7 +29,6 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirection
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleEnumData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -43,7 +42,7 @@ public class ImmutableSpongeDirectionalData extends AbstractImmutableSingleEnumD
 
     @Override
     public ImmutableValue<Direction> direction() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DIRECTION, this.value, Direction.NONE);
+        return ImmutableSpongeValue.cachedOf(Keys.DIRECTION, Direction.NONE, this.value);
     }
 
 }
