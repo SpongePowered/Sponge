@@ -40,6 +40,9 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.text.IMixinText;
+
+import java.util.Locale;
 
 public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text, Value<Text>> {
 
@@ -84,7 +87,7 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
             if (((ItemStack) container).getTagCompound() == null) {
                 ((ItemStack) container).setTagCompound(new NBTTagCompound());
             }
-            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, Texts.json().to(value));
+            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, ((IMixinText) value).toLegacy('\247', Locale.ENGLISH));
             builder.success(author);
             return builder.result(DataTransactionResult.Type.SUCCESS).build();
 

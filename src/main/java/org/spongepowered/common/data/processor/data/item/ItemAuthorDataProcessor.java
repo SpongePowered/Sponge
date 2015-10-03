@@ -45,6 +45,9 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.interfaces.text.IMixinText;
+
+import java.util.Locale;
 
 public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
 
@@ -91,7 +94,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
         if (itemStack.getTagCompound() == null) {
             itemStack.setTagCompound(new NBTTagCompound());
         }
-        itemStack.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, Texts.json().to(value));
+        itemStack.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, ((IMixinText) value).toLegacy('\247', Locale.ENGLISH));
         return true;
     }
 
