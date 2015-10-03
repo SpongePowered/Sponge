@@ -28,6 +28,9 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.property.entity.EyeLocationProperty;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -39,5 +42,11 @@ public class EyeLocationPropertyStore extends AbstractEntityPropertyStore<EyeLoc
         final Vector3d position = VecHelper.toVector(entity.getPositionVector());
         final Vector3d eyeLocation = position.add(0, eyeHeight, 0);
         return Optional.of(new EyeLocationProperty(eyeLocation));
+    }
+
+    @Override
+    public Optional<EyeLocationProperty> getFor(Location<World> location, Direction direction) {
+        // TODO gabziou fix this
+        return Optional.absent();
     }
 }

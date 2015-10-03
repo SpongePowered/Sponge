@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.PoweredProperty;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
@@ -54,5 +55,11 @@ public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredPro
         final BlockPos pos = VecHelper.toBlockPos(location.getBlockPosition());
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         return Optional.of(new PoweredProperty(world.isBlockPowered(pos)));
+    }
+
+    @Override
+    public Optional<PoweredProperty> getFor(Location<World> location, Direction direction) {
+        // TODO gabziou fix this...
+        return Optional.absent();
     }
 }

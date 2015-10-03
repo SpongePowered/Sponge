@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -45,6 +46,11 @@ public abstract class AbstractItemStackPropertyStore<T extends Property<?, ?>> e
 
     @Override
     public Optional<T> getFor(Location<World> location) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<T> getFor(Location<World> location, Direction direction) {
         return Optional.absent();
     }
 }

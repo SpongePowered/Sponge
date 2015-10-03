@@ -32,6 +32,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -69,5 +70,10 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     @Override
     public Optional<T> getFor(Location<World> location) {
         return getForBlock((Block) location.getBlockType());
+    }
+
+    @Override
+    public Optional<T> getFor(Location<World> location, Direction direction) {
+        return Optional.absent();
     }
 }

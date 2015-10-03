@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -59,6 +60,12 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
                 return optional;
             }
         }
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<T> getFor(Location<World> location, Direction direction) {
+        // TODO gabizou you forgot this...
         return Optional.absent();
     }
 

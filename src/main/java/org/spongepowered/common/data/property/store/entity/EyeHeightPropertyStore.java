@@ -27,6 +27,9 @@ package org.spongepowered.common.data.property.store.entity;
 import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.property.entity.EyeHeightProperty;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
 
 public class EyeHeightPropertyStore extends AbstractEntityPropertyStore<EyeHeightProperty> {
@@ -35,5 +38,11 @@ public class EyeHeightPropertyStore extends AbstractEntityPropertyStore<EyeHeigh
     protected Optional<EyeHeightProperty> getForEntity(Entity entity) {
         final double eyeHeight = entity.getEyeHeight();
         return Optional.of(new EyeHeightProperty(eyeHeight));
+    }
+
+    @Override
+    public Optional<EyeHeightProperty> getFor(Location<World> location, Direction direction) {
+        // TODO gabziou fix this as this is odd
+        return Optional.absent();
     }
 }

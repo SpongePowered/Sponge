@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import net.minecraft.world.EnumSkyBlock;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -58,5 +59,11 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location.getBlockPosition()));
         return Optional.of(new GroundLuminanceProperty(light));
+    }
+
+    @Override
+    public Optional<GroundLuminanceProperty> getFor(Location<World> location, Direction direction) {
+        // TODO gabziou fix this
+        return Optional.absent();
     }
 }
