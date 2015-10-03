@@ -31,7 +31,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -67,6 +66,7 @@ import org.spongepowered.common.world.extent.ExtentViewTransform;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
 
 @Mixin(ExtentViewDownsize.class)
@@ -220,18 +220,6 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
-    public boolean isBlockFacePowered(int x, int y, int z, Direction direction) {
-        checkRange(x, y, z);
-        return this.extent.isBlockFacePowered(x, y, z, direction);
-    }
-
-    @Override
-    public boolean isBlockFaceIndirectlyPowered(int x, int y, int z, Direction direction) {
-        checkRange(x, y, z);
-        return this.extent.isBlockFaceIndirectlyPowered(x, y, z, direction);
-    }
-
-    @Override
     public Collection<Direction> getPoweredBlockFaces(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.getPoweredBlockFaces(x, y, z);
@@ -241,12 +229,6 @@ public abstract class MixinExtentViewDownsize implements Extent {
     public Collection<Direction> getIndirectlyPoweredBlockFaces(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.getIndirectlyPoweredBlockFaces(x, y, z);
-    }
-
-    @Override
-    public boolean isBlockFlammable(int x, int y, int z, Direction faceDirection) {
-        checkRange(x, y, z);
-        return this.extent.isBlockFlammable(x, y, z, faceDirection);
     }
 
     @Override
@@ -292,7 +274,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
-    public ImmutableSet<ImmutableValue<?>> getValues(int x, int y, int z) {
+    public Set<ImmutableValue<?>> getValues(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.getValues(x, y, z);
     }
@@ -346,7 +328,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     }
 
     @Override
-    public ImmutableSet<Key<?>> getKeys(int x, int y, int z) {
+    public Set<Key<?>> getKeys(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.getKeys(x, y, z);
     }

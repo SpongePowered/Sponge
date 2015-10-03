@@ -76,6 +76,7 @@ import org.spongepowered.common.world.extent.UnmodifiableBiomeAreaWrapper;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Mixin({World.class, Chunk.class, ExtentViewDownsize.class, ExtentViewTransform.class})
 public abstract class MixinExtent implements Extent {
@@ -163,21 +164,6 @@ public abstract class MixinExtent implements Extent {
     @Override
     public boolean digBlockWith(Vector3i position, ItemStack itemStack) {
         return digBlockWith(position.getX(), position.getY(), position.getZ(), itemStack);
-    }
-
-    @Override
-    public boolean isBlockFlammable(Vector3i position, Direction faceDirection) {
-        return isBlockFlammable(position.getX(), position.getY(), position.getZ(), faceDirection);
-    }
-
-    @Override
-    public boolean isBlockFacePowered(Vector3i position, Direction direction) {
-        return isBlockFacePowered(position.getX(), position.getY(), position.getZ(), direction);
-    }
-
-    @Override
-    public boolean isBlockFaceIndirectlyPowered(Vector3i position, Direction direction) {
-        return isBlockFaceIndirectlyPowered(position.getX(), position.getY(), position.getZ(), direction);
     }
 
     @Override
@@ -364,12 +350,12 @@ public abstract class MixinExtent implements Extent {
     }
 
     @Override
-    public ImmutableSet<Key<?>> getKeys(Vector3i coordinates) {
+    public Set<Key<?>> getKeys(Vector3i coordinates) {
         return getKeys(coordinates.getX(), coordinates.getY(), coordinates.getZ());
     }
 
     @Override
-    public ImmutableSet<ImmutableValue<?>> getValues(Vector3i coordinates) {
+    public Set<ImmutableValue<?>> getValues(Vector3i coordinates) {
         return getValues(coordinates.getX(), coordinates.getY(), coordinates.getZ());
     }
 
