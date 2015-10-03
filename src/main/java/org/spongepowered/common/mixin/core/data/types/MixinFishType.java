@@ -24,16 +24,34 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
+import com.google.common.base.Optional;
 import net.minecraft.item.ItemFishFood;
+import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.type.SpongeCookedFish;
 
 @Mixin(ItemFishFood.FishType.class)
 public abstract class MixinFishType implements Fish {
 
     @Shadow
     private String unlocalizedName;
+    
+    private Optional<CookedFish> cooked;
+    
+    @Inject(method = "<init>(Ljava/lang/String;IILjava/lang/String;IFIF", at=@At("RETURN"))
+    private void onConstructedCookable(String name, int ordinal, int meta, String unlocalizedName, int uncookedHeal, float uncookedSaturation, int cookedHeal, float cookedSaturation, CallbackInfo ci) {
+        this.cooked = Optional.<CookedFish>of(new SpongeCookedFish((ItemFishFood.FishType) (Object) this));
+    }
+    
+    @Inject(method = "<init>(Ljava/lang/String;IILjava/lang/String;IF", at=@At("RETURN"))
+    private void onConstructedNotCookable(String name, int ordinal, int meta, String unlocalizedName, int uncookedHeal, float uncookedSaturation, CallbackInfo ci) {
+        this.cooked = Optional.absent();
+    }
 
     @Override
     public String getId() {
@@ -43,5 +61,10 @@ public abstract class MixinFishType implements Fish {
     @Override
     public String getName() {
         return this.unlocalizedName;
+    }
+    
+    @Override
+    public Optional<CookedFish> getCookedFish() {
+        return this.cooked;
     }
 }
