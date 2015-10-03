@@ -65,7 +65,12 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
 
     @Override
     public Optional<T> getFor(Location<World> location, Direction direction) {
-        // TODO gabizou you forgot this...
+        for (PropertyStore<T> propertyStore : this.propertyStores) {
+            final Optional<T> optional = propertyStore.getFor(location, direction);
+            if (optional.isPresent()) {
+                return optional;
+            }
+        }
         return Optional.absent();
     }
 

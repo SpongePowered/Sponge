@@ -30,11 +30,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 
 public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> extends AbstractSpongePropertyStore<T> {
 
@@ -44,7 +47,28 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
         this.checksItemStack = checksItemStack;
     }
 
+    /**
+     * Gets the property for the block, if the block is actually containing a property in the first place.
+     *
+     * @param block The block
+     * @return The property, if available
+     */
     protected abstract Optional<T> getForBlock(Block block);
+
+    /**
+     * This is intended for properties that are intentionally for directional orientations.
+     * Typically, this is always absent, only a few properties can be retrieved for specific directions.
+     *
+     * @param world The world
+     * @param x The x coordinate
+     * @param y The y coordinate
+     * @param z The z coordinate
+     * @param facing The facing direction
+     * @return The property, if available
+     */
+    protected Optional<T> getForDirection(net.minecraft.world.World world, int x, int y, int z, EnumFacing facing) {
+        return Optional.absent();
+    }
 
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
@@ -74,6 +98,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
 
     @Override
     public Optional<T> getFor(Location<World> location, Direction direction) {
-        return Optional.absent();
+        return getForDirection(((net.minecraft.world.World) location.getExtent()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                               SpongeGameRegistry.directionMap.get(direction));
     }
 }

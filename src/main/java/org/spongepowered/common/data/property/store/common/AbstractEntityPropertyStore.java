@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -44,7 +45,12 @@ public abstract class AbstractEntityPropertyStore<T extends Property<?, ?>> exte
     }
 
     @Override
-    public Optional<T> getFor(Location<World> location) {
+    public final Optional<T> getFor(Location<World> location) {
+        return Optional.absent();
+    }
+
+    @Override
+    public final Optional<T> getFor(Location<World> location, Direction direction) {
         return Optional.absent();
     }
 }
