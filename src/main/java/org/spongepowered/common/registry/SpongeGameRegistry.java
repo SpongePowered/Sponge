@@ -2096,10 +2096,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
             @Override
             public CookedFish apply(String input) {
-                CookedFish fish = new SpongeCookedFish(input, input); // TODO
-                if (fish != null) {
-                    SpongeGameRegistry.this.cookedFishMappings.put(fish.getId().toLowerCase(), fish);
-                    return fish;
+                Fish fish = (Fish) (Object) ItemFishFood.FishType.valueOf(input);
+                if (fish != null && fish.getCookedFish().isPresent()) {
+                    CookedFish cooked = fish.getCookedFish().get();
+                    SpongeGameRegistry.this.cookedFishMappings.put(cooked.getId().toLowerCase(), cooked);
+                    return cooked;
                 } else {
                     return null;
                 }

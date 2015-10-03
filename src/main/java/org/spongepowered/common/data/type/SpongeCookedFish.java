@@ -26,25 +26,30 @@ package org.spongepowered.common.data.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.CookedFish;
+import org.spongepowered.api.data.type.Fish;
 
 public class SpongeCookedFish implements CookedFish {
 
-    private final String id;
-    private final String name;
+    private final ItemFishFood.FishType raw;
 
-    public SpongeCookedFish(String id, String name) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
+    public SpongeCookedFish(ItemFishFood.FishType raw) {
+        this.raw = checkNotNull(raw);
     }
 
     @Override
     public String getId() {
-        return "cooked." + this.id;
+        return "cooked." + this.raw.getUnlocalizedName();
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return this.raw.getUnlocalizedName();
+    }
+
+    @Override
+    public Fish getRawFish() {
+        return (Fish) (Object) this.raw;
     }
 }
