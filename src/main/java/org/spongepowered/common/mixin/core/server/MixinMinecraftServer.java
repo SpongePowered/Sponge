@@ -310,7 +310,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             if (worldInfo == null) {
                 newWorldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-                newWorldSettings.setWorldName(generator);
+                newWorldSettings.setWorldName(worldFolder);
 
                 if (this.enableBonusChest) {
                     newWorldSettings.enableBonusChest();
@@ -327,7 +327,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     }
                 }
             } else {
-                if (((WorldProperties) worldInfo).getUniqueId() == null) {
+                if (((WorldProperties) worldInfo).getUniqueId() == null || ((WorldProperties) worldInfo).getUniqueId().equals
+                        (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
 
                     if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data;
 
 import com.google.common.base.Optional;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
@@ -37,7 +38,7 @@ import org.spongepowered.common.data.property.SpongePropertyRegistry;
 
 import java.util.Collection;
 
-@Mixin({BlockState.class, Entity.class, TileEntity.class, ItemStack.class})
+@Mixin({BlockState.class, Block.class, Entity.class, TileEntity.class, ItemStack.class})
 public abstract class MixinPropertyHolder implements PropertyHolder {
 
     @Override
