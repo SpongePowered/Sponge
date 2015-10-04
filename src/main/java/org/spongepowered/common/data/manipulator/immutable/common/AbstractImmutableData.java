@@ -171,19 +171,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        checkArgument(supports(key));
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        checkArgument(supports(key));
-        return get(key).orElse(checkNotNull(defaultValue, "Provided a null default value for 'getOrElse(Key, null)'!"));
-    }
-
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (!this.keyValueMap.containsKey(key)) {
@@ -195,11 +182,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public boolean supports(Key<?> key) {
         return this.keyFieldGetterMap.containsKey(checkNotNull(key));
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return this.keyFieldGetterMap.containsKey(checkNotNull(baseValue).getKey());
     }
 
     @Override

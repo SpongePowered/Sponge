@@ -271,17 +271,6 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         this.keyMap = builder.build();
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(checkNotNull(defaultValue));
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
@@ -297,11 +286,6 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public boolean supports(Key<?> key) {
         return this.getKeys().contains(checkNotNull(key));
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override

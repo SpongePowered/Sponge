@@ -274,11 +274,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     }
 
     @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return this.keyFieldSetterMap.containsKey(checkNotNull(baseValue.getKey()));
-    }
-
-    @Override
     public Set<Key<?>> getKeys() {
         return ImmutableSet.copyOf(this.keyFieldSetterMap.keySet());
     }

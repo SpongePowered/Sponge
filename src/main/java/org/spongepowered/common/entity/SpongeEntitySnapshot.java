@@ -242,7 +242,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> Optional<EntitySnapshot> with(Key<? extends BaseValue<E>> key, E value) {
         return transform(key, (Function) Functions.constant(value));
@@ -253,12 +253,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<EntitySnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
         return Optional.of(createBuilder().add((ImmutableDataManipulator) valueContainer).build());
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<EntitySnapshot> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
         final EntitySnapshotBuilder builder = createBuilder();
@@ -311,17 +312,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return Optional.empty();
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(defaultValue);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
@@ -337,11 +327,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public boolean supports(Key<?> key) {
         return this.keys.contains(key);
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override

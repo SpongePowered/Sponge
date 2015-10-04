@@ -98,11 +98,6 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
         return checkNotNull(key) == this.usedKey;
     }
 
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return checkNotNull(baseValue).getKey() == this.usedKey;
-    }
-
     // We have to have this abstract to properly override for generics.
     @Override
     public abstract I asImmutable();

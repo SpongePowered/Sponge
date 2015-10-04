@@ -100,11 +100,6 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
     }
 
     @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return checkNotNull(baseValue.getKey()) == this.usedKey;
-    }
-
-    @Override
     public Set<Key<?>> getKeys() {
         return ImmutableSet.<Key<?>>of(this.usedKey);
     }

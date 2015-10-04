@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -42,13 +41,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 999)
 public abstract class MixinDataHolder implements DataHolder {
@@ -82,14 +78,6 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public <E> DataTransactionResult transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
-        if (supports(key)) {
-            return offer(key, checkNotNull(function.apply(get(key).orElse(null))));
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
     public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = SpongeDataRegistry.getInstance().getBaseValueProcessor(key);
         if (optional.isPresent()) {
@@ -100,21 +88,16 @@ public abstract class MixinDataHolder implements DataHolder {
         return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
 
-    @Override
-    public <E> DataTransactionResult offer(BaseValue<E> value) {
-        return offer(value.getKey(), value.get());
-    }
-
-    @Override
-    public DataTransactionResult offer(DataManipulator<?, ?> valueContainer) {
-        // This has to use offerWildCard because of eclipse and OpenJDK6
-        return DataUtil.offerPlain((DataManipulator<?, ?>) (Object) valueContainer, this);
-    }
-
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        // This has to use offerWildCard because of eclipse and OpenJDK6
-        return DataUtil.offerPlain((DataManipulator<?, ?>) (Object) valueContainer, this, function);
+        final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(valueContainer.getClass());
+        if (optional.isPresent()) {
+            return optional.get().set(this, valueContainer, checkNotNull(function));
+        } else if (this instanceof IMixinCustomDataHolder) {
+            return ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
+        }
+        return DataTransactionBuilder.failResult(valueContainer.getValues());
     }
 
     @Override
@@ -146,32 +129,12 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> values, MergeFunction function) {
-        final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-        for (DataManipulator<?, ?> manipulator : values) {
-            builder.absorbResult(offer(manipulator));
-        }
-        return builder.build();
-    }
-
-    @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
         final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildProcessor(containerClass);
         if (optional.isPresent()) {
             return optional.get().remove(this);
         } else if (this instanceof IMixinCustomDataHolder) {
             return ((IMixinCustomDataHolder) this).removeCustom(containerClass);
-        }
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult remove(BaseValue<?> value) {
-        final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(value).getKey());
-        if (optional.isPresent()) {
-            return optional.get().removeFrom(this);
-        } else if (this instanceof IMixinCustomDataHolder) {
-            return ((IMixinCustomDataHolder) this).removeCustom(value.getKey());
         }
         return DataTransactionBuilder.failNoData();
     }
@@ -203,11 +166,6 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
-    public DataTransactionResult copyFrom(DataHolder that) {
-        return copyFrom(that, MergeFunction.IGNORE_ALL);
-    }
-
-    @Override
     public DataTransactionResult copyFrom(DataHolder that, MergeFunction function) {
         return offer(that.getContainers(), function);
     }
@@ -223,17 +181,6 @@ public abstract class MixinDataHolder implements DataHolder {
         return Optional.empty();
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(checkNotNull(defaultValue));
-    }
-
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         final Optional<ValueProcessor<E, V>> optional = SpongeDataRegistry.getInstance().getValueProcessor(checkNotNull(key));
@@ -246,12 +193,6 @@ public abstract class MixinDataHolder implements DataHolder {
     @Override
     public boolean supports(Key<?> key) {
         final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(key));
-        return optional.isPresent() && optional.get().supports(this);
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(baseValue).getKey());
         return optional.isPresent() && optional.get().supports(this);
     }
 

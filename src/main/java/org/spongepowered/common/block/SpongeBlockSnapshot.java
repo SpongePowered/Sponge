@@ -309,17 +309,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return Optional.empty();
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(defaultValue);
-    }
-
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (this.keyValueMap.containsKey(key)) {
@@ -331,11 +320,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public boolean supports(Key<?> key) {
         return this.keyValueMap.containsKey(key);
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override
