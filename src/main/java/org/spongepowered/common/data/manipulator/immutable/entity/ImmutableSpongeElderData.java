@@ -22,32 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.monster;
+package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import net.minecraft.entity.monster.EntityGuardian;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
-import org.spongepowered.api.entity.living.monster.Guardian;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
+public class ImmutableSpongeElderData extends AbstractImmutableBooleanData<ImmutableElderData, ElderData> implements ImmutableElderData {
 
-import java.util.List;
+    private final ImmutableValue<Boolean> elderValue = ImmutableSpongeValue.cachedOf(Keys.ELDER_GUARDIAN, false, this.getValue());
 
-@NonnullByDefault
-@Mixin(EntityGuardian.class)
-@Implements(@Interface(iface = Guardian.class, prefix = "guardian$"))
-public abstract class MixinEntityGuardian extends MixinEntityMob {
-
-    @Shadow public abstract boolean isElder();
-    @Shadow public abstract void setElder(boolean elder);
+    public ImmutableSpongeElderData(boolean value) {
+        super(ImmutableElderData.class, value, Keys.ELDER_GUARDIAN, SpongeElderData.class);
+    }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ElderData.class).get());
+    public ImmutableValue<Boolean> elder() {
+        return this.elderValue;
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return elder();
     }
 }

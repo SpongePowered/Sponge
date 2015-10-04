@@ -22,32 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.monster;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import net.minecraft.entity.monster.EntityGuardian;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
-import org.spongepowered.api.entity.living.monster.Guardian;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElderData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+public class SpongeElderData extends AbstractBooleanData<ElderData, ImmutableElderData> implements ElderData {
 
-import java.util.List;
+    public SpongeElderData() {
+        this(false);
+    }
 
-@NonnullByDefault
-@Mixin(EntityGuardian.class)
-@Implements(@Interface(iface = Guardian.class, prefix = "guardian$"))
-public abstract class MixinEntityGuardian extends MixinEntityMob {
-
-    @Shadow public abstract boolean isElder();
-    @Shadow public abstract void setElder(boolean elder);
+    public SpongeElderData(boolean value) {
+        super(ElderData.class, value, Keys.ELDER_GUARDIAN, ImmutableSpongeElderData.class);
+    }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ElderData.class).get());
+    public Value<Boolean> elder() {
+        return new SpongeValue<>(Keys.ELDER_GUARDIAN, this.getValue());
+    }
+
+    @Override
+    protected Value<?> getValueGetter() {
+        return elder();
     }
 }
