@@ -22,32 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.monster;
+package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
 import net.minecraft.entity.monster.EntityGuardian;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
-import org.spongepowered.api.entity.living.monster.Guardian;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
+import org.spongepowered.common.data.util.DataUtil;
 
+import java.util.Optional;
 
-import java.util.List;
-
-@NonnullByDefault
-@Mixin(EntityGuardian.class)
-@Implements(@Interface(iface = Guardian.class, prefix = "guardian$"))
-public abstract class MixinEntityGuardian extends MixinEntityMob {
-
-    @Shadow public abstract boolean isElder();
-    @Shadow public abstract void setElder(boolean elder);
+public class ElderDataBuilder implements DataManipulatorBuilder<ElderData, ImmutableElderData> {
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ElderData.class).get());
+    public Optional<ElderData> build(DataView container) throws InvalidDataException {
+        Boolean elder = DataUtil.getData(container, Keys.ELDER_GUARDIAN);
+        return Optional.of(new SpongeElderData(elder));
+    }
+
+    @Override
+    public ElderData create() {
+        return new SpongeElderData(false);
+    }
+
+    @Override
+    public Optional<ElderData> createFrom(DataHolder dataHolder) {
+        if (dataHolder instanceof EntityGuardian) {
+            return Optional.of(new SpongeElderData(((EntityGuardian) dataHolder).isElder()));
+        }
+
+        return Optional.empty();
     }
 }
