@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import com.google.common.base.Predicate;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -52,13 +51,8 @@ import java.util.Optional;
 public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
 
     public ItemAuthorDataProcessor() {
-        super(new Predicate<ItemStack>() {
-
-            @Override
-            public boolean apply(ItemStack input) {
-                return input.getItem() == Items.writable_book || input.getItem() == Items.written_book;
-            }
-
+        super(input -> {
+            return input.getItem() == Items.writable_book || input.getItem() == Items.written_book;
         }, Keys.BOOK_AUTHOR);
     }
 
