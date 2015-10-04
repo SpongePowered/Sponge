@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.flowpowered.math.vector.Vector3l;
-import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
@@ -40,6 +39,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 @NonnullByDefault
 public class SpongeArgumentHolder<T extends ArgumentHolder<?>> implements ArgumentHolder<T> {

@@ -27,7 +27,6 @@ package org.spongepowered.common.data.value.mutable.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -41,6 +40,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 

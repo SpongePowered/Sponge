@@ -26,8 +26,6 @@ package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.entity.EntityType;
@@ -37,6 +35,7 @@ import org.spongepowered.common.Sponge;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.function.Function;
 
 @NonnullByDefault
 public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>> implements ArgumentType<T> {
@@ -44,15 +43,9 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
     private static final Map<String, Function<String, ?>> converters = Maps.newHashMap();
 
     static {
-        converters.put(String.class.getName(), Functions.<String>identity());
-        converters.put(EntityType.class.getName(), new Function<String, EntityType>() {
-
-            @Override
-            public EntityType apply(String input) {
-                return Sponge.getSpongeRegistry().getEntity(input.toLowerCase()).orElse(null);
-            }
-
-        });
+        converters.put(String.class.getName(), Function.<String>identity());
+        converters.put(EntityType.class.getName(),
+                       (Function<String, EntityType>) input -> Sponge.getSpongeRegistry().getEntity(input.toLowerCase()).orElse(null));
     }
 
     @SuppressWarnings("unchecked")

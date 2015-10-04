@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -39,6 +38,7 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Function;
 
 public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<E, List<E>, ImmutableListValue<E>, ListValue<E>>
     implements ImmutableListValue<E> {

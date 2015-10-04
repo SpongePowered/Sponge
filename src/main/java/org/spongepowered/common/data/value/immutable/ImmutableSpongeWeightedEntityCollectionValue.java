@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -42,6 +41,7 @@ import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectio
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 

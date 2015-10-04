@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -67,6 +66,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Mixin(ExtentViewDownsize.class)
 public abstract class MixinExtentViewDownsize implements Extent {

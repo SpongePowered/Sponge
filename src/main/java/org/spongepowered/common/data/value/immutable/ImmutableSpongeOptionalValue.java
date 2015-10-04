@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
@@ -35,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.value.mutable;
 
-import com.google.common.base.Function;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.value.AbstractBaseValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+
+import java.util.function.Function;
 
 public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
 

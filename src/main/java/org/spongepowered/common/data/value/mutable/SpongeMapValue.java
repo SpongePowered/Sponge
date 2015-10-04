@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
@@ -40,6 +39,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
 
 public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapValue<K, V> {
 

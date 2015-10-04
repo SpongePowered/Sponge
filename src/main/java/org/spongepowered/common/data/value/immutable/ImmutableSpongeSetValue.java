@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -38,6 +37,7 @@ import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Set;
+import java.util.function.Function;
 
 public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E, Set<E>, ImmutableSetValue<E>, SetValue<E>>
     implements ImmutableSetValue<E> {

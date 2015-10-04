@@ -27,9 +27,7 @@ package org.spongepowered.common.service.pagination;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.util.command.CommandMessageFormatting.error;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.service.pagination.PaginationBuilder;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
@@ -40,8 +38,8 @@ import org.spongepowered.api.util.command.source.ProxySource;
 
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 class SpongePaginationBuilder implements PaginationBuilder {
     private final SpongePaginationService service;
@@ -91,6 +89,7 @@ class SpongePaginationBuilder implements PaginationBuilder {
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void sendTo(final CommandSource source) {
         checkNotNull(this.contents, "contents");
@@ -107,14 +106,10 @@ class SpongePaginationBuilder implements PaginationBuilder {
             calculator = this.service.getUnpaginatedCalculator(); // TODO: or like 50 lines?
         }
         final PaginationCalculator<CommandSource> finalCalculator = calculator;
-        Iterable<Map.Entry<Text, Integer>> counts = Iterables.transform(this.contents, new Function<Text, Map.Entry<Text, Integer>>() {
-            @Nullable
-            @Override
-            public Map.Entry<Text, Integer> apply(@Nullable Text input) {
-                int lines = finalCalculator.getLines(source, input);
-                return Maps.immutableEntry(input, lines);
-            }
-        });
+        Iterable<Map.Entry<Text, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
+            int lines = finalCalculator.getLines(source, input);
+            return Maps.immutableEntry(input, lines);
+        }).collect(Collectors.toList());
 
         Text title = this.title;
         if (title != null) {
