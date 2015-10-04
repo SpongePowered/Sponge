@@ -68,7 +68,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
      * @return The property, if available
      */
     protected Optional<T> getForDirection(net.minecraft.world.World world, int x, int y, int z, EnumFacing facing) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

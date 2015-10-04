@@ -72,7 +72,7 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

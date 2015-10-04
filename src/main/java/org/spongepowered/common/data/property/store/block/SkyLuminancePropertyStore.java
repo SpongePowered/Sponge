@@ -64,6 +64,6 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLu
 
     @Override public Optional<SkyLuminanceProperty> getFor(Location<World> location, Direction direction) {
         // TODO gabziou fix this
-        return Optional.absent();
+        return Optional.empty();
     }
 }
