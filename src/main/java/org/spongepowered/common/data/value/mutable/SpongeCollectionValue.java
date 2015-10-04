@@ -27,7 +27,6 @@ package org.spongepowered.common.data.value.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -36,6 +35,7 @@ import org.spongepowered.api.data.value.mutable.CollectionValue;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 public abstract class SpongeCollectionValue<E, V extends Collection<E>, I extends CollectionValue<E, V, I, L>,

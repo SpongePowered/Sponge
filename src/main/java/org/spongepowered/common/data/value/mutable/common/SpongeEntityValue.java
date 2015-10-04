@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.data.value.mutable.common;
 
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -41,6 +39,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -89,7 +88,7 @@ public class SpongeEntityValue implements Value<Entity> {
 
     @Override
     public Optional<Entity> getDirect() {
-        return fromNullable(this.weakReference.get());
+        return Optional.ofNullable(this.weakReference.get());
     }
 
     @Override

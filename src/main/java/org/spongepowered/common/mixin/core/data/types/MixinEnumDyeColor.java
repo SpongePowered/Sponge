@@ -31,9 +31,9 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.awt.Color;
+import java.awt.*;
 
-@Mixin(net.minecraft.item.EnumDyeColor.class)
+@Mixin(EnumDyeColor.class)
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
 public abstract class MixinEnumDyeColor {
 

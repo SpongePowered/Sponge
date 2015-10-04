@@ -57,7 +57,7 @@ class UserDiscoverer {
 
     private static final Map<UUID, User> userCache = Maps.newHashMap();
 
-    static User create(com.mojang.authlib.GameProfile profile) {
+    static User create(GameProfile profile) {
         User user = (User) new SpongeUser(profile);
         userCache.put(profile.getId(), user);
         return user;

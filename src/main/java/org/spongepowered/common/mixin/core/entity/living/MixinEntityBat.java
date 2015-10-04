@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.living;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.entity.passive.EntityBat;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.living.Bat;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;

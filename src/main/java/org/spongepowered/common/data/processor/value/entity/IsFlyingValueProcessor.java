@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -38,6 +37,8 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
@@ -54,7 +55,7 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean
                 return Optional.of(((Entity) container).isAirBorne);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

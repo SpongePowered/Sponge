@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.block.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -37,6 +36,8 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
+
+import java.util.Optional;
 
 /**
  * The de-facto builder for a {@link PatternLayer}.

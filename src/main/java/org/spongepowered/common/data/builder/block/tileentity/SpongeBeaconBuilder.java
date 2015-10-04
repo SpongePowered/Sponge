@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.Game;
@@ -37,6 +36,8 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+
+import java.util.Optional;
 
 public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
 

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.property.store.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.property.entity.EyeHeightProperty;
 import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
+
+import java.util.Optional;
 
 public class EyeHeightPropertyStore extends AbstractEntityPropertyStore<EyeHeightProperty> {
 

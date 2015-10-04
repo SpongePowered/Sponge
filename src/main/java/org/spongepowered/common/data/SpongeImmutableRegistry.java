@@ -26,13 +26,13 @@ package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.data.ImmutableDataBuilder;
 import org.spongepowered.api.data.ImmutableDataHolder;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class SpongeImmutableRegistry implements ImmutableDataRegistry {
 
@@ -60,6 +60,6 @@ public class SpongeImmutableRegistry implements ImmutableDataRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> Optional<B> getBuilder(Class<T> manipulatorClass) {
-        return Optional.fromNullable((B) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
+        return Optional.ofNullable((B) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 }

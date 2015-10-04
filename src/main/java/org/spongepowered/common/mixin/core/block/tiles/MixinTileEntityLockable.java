@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.block.tiles;
 import com.google.common.collect.Lists;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
@@ -40,7 +41,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityLockable.class)
+@Mixin(TileEntityLockable.class)
 public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory {
 
     @Shadow private LockCode code;

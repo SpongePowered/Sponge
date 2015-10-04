@@ -25,10 +25,9 @@
 package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.util.OptionalUtils.asSet;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
@@ -67,7 +66,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * A resolver that acts like Vanilla Minecraft in many regards.
@@ -147,14 +148,14 @@ public class SelectorResolver {
     }
 
     public SelectorResolver(CommandSource origin, Selector selector, boolean force) {
-        this(Optional.fromNullable(extentFromSource(origin)).asSet(), positionFromSource(origin), origin, selector, force);
+        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), origin, selector, force);
     }
 
     private SelectorResolver(Collection<? extends Extent> extents, Vector3d position,
         CommandSource original, Selector selector, boolean force) {
         this.extents = ImmutableSet.copyOf(extents);
         this.position = position == null ? ORIGIN : position;
-        this.original = Optional.fromNullable(original);
+        this.original = Optional.ofNullable(original);
         this.selector = checkNotNull(selector);
         this.selectorFilter = makeFilter();
         this.alwaysUsePosition = force;
@@ -175,7 +176,7 @@ public class SelectorResolver {
         addTeamFilters(filters);
         addScoreFilters(filters);
         SelectorType selectorType = sel.getType();
-        Optional<Argument.Invertible<EntityType>> type = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
+        Optional<Invertible<EntityType>> type = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
         // isn't an ALL_ENTITIES selector or it is a RANDOM selector for only players
         boolean isPlayerOnlySelector =
             selectorType == SelectorTypes.ALL_PLAYERS || selectorType == SelectorTypes.NEAREST_PLAYER
@@ -402,7 +403,7 @@ public class SelectorResolver {
             final boolean inverted = teamArg.isInverted();
             ImmutableSet.Builder<Team> teamBuilder = ImmutableSet.builder();
             for (World w : worlds) {
-                teamBuilder.addAll(w.getScoreboard().getTeam(teamArg.getValue()).asSet());
+                teamBuilder.addAll(asSet(w.getScoreboard().getTeam(teamArg.getValue())));
             }
             final Collection<Team> teams = teamBuilder.build();
             filters.add(new Predicate<Entity>() {
@@ -446,14 +447,14 @@ public class SelectorResolver {
     }
 
     private Vector3d getPositionOrDefault(Vector3d pos, ArgumentHolder.Vector3<?, ? extends Number> vecTypes) {
-        Optional<Double> x = this.selector.get(vecTypes.x()).transform(TO_DOUBLE);
-        Optional<Double> y = this.selector.get(vecTypes.y()).transform(TO_DOUBLE);
-        Optional<Double> z = this.selector.get(vecTypes.z()).transform(TO_DOUBLE);
-        return new Vector3d(x.or(Double.valueOf(pos.getX())), y.or(Double.valueOf(pos.getY())), z.or(Double.valueOf(pos.getZ())));
+        Optional<Double> x = this.selector.get(vecTypes.x()).map(TO_DOUBLE);
+        Optional<Double> y = this.selector.get(vecTypes.y()).map(TO_DOUBLE);
+        Optional<Double> z = this.selector.get(vecTypes.z()).map(TO_DOUBLE);
+        return new Vector3d(x.orElse(Double.valueOf(pos.getX())), y.orElse(Double.valueOf(pos.getY())), z.orElse(Double.valueOf(pos.getZ())));
     }
 
     public String getName() {
-        return this.original.transform(GET_NAME).or("SelectorResolver");
+        return this.original.map(GET_NAME).orElse("SelectorResolver");
     }
 
     public Set<Entity> resolve() {
@@ -462,7 +463,7 @@ public class SelectorResolver {
         if (INFINITE_TYPES.contains(selectorType)) {
             defaultCount = 0;
         }
-        int maxToSelect = this.selector.get(ArgumentTypes.COUNT).or(defaultCount);
+        int maxToSelect = this.selector.get(ArgumentTypes.COUNT).orElse(defaultCount);
         Set<? extends Extent> extents = getExtentSet();
         int count = 0;
         ImmutableSet.Builder<Entity> entities = ImmutableSet.builder();

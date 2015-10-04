@@ -27,7 +27,6 @@ package org.spongepowered.common.data.manipulator.mutable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -44,6 +43,8 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -85,7 +86,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
                 .setStoredCommand(this.getStoredCommand())
                 .setSuccessCount(this.getSuccessCount())
                 .shouldTrackOutput(this.tracks)
-                .setLastOutput(this.getLastOutput().or(Texts.of()));
+                .setLastOutput(this.getLastOutput().orElse(Texts.of()));
     }
 
     @Override
@@ -143,7 +144,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     public Optional<Text> getLastOutput() {
-        return Optional.fromNullable(this.lastOutput);
+        return Optional.ofNullable(this.lastOutput);
     }
 
     public CommandData setLastOutput(Text message) {

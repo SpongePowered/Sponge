@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.FoodRestorationProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+
+import java.util.Optional;
 
 public class FoodRestorationPropertyStore extends AbstractItemStackPropertyStore<FoodRestorationProperty> {
 
@@ -38,6 +39,6 @@ public class FoodRestorationPropertyStore extends AbstractItemStackPropertyStore
             final int food = ((ItemFood) itemStack.getItem()).getHealAmount(itemStack);
             return Optional.of(new FoodRestorationProperty(food));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

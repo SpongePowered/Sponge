@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.item.ItemStack;
@@ -37,6 +36,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<ItemStackSnapshot, Value<ItemStackSnapshot>> {
 
@@ -59,7 +60,7 @@ public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<
         } else if (container instanceof EntityItem) {
             return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((EntityItem) container).getEntityItem()).createSnapshot());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

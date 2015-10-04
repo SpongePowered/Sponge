@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.monster.EntityEnderman;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -35,6 +34,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
@@ -52,7 +53,7 @@ public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolea
         if (container.supports(Keys.IS_SCREAMING)) {
             return Optional.of(((EntityEnderman) container).isScreaming());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
@@ -53,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
@@ -165,7 +165,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     public Optional<Text> getHelp(CommandSource source) {
         String translation = command.getCommandUsage(WrapperICommandSender.of(source));
         if (translation == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of((Text) Texts.of(new SpongeTranslation(translation)));
     }

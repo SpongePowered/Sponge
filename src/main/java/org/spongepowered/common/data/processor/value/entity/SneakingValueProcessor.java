@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Optional;
+
 public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
     public SneakingValueProcessor() {
@@ -48,7 +49,7 @@ public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean
         if (container instanceof Entity) {
             return Optional.of(((Entity) container).isSneaking());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -57,7 +58,7 @@ public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean
             final boolean sneaking = ((Entity) container).isSneaking();
             return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, sneaking));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

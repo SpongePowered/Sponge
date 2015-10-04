@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -55,6 +54,7 @@ import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(Scoreboard.class)

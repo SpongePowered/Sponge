@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -38,6 +37,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+
+import java.util.Optional;
 
 public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableCommandData, CommandData> implements ImmutableCommandData {
 
@@ -72,7 +73,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
 
     @Override
     public ImmutableOptionalValue<Text> lastOutput() {
-        return new ImmutableSpongeOptionalValue<Text>(Keys.LAST_COMMAND_OUTPUT, Optional.fromNullable(this.lastOutput));
+        return new ImmutableSpongeOptionalValue<Text>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
     }
 
     @Override

@@ -22,30 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.util;
 
-import net.minecraft.tileentity.TileEntityDaylightDetector;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.block.tileentity.DaylightDetector;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
-public class SpongeDaylightBuilder extends AbstractTileBuilder<DaylightDetector> {
+public class OptionalUtils {
 
-    public SpongeDaylightBuilder(Game game) {
-        super(game);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Optional<DaylightDetector> build(DataView container) throws InvalidDataException {
-        Optional<DaylightDetector> daylightdetectorOptional = super.build(container);
-        if (!daylightdetectorOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a DaylightDetector tile entity!");
+    public static <E> Collection<E> asSet(Optional<E> opt) {
+        if (opt.isPresent()) {
+            return Collections.singleton(opt.get());
         }
-        ((TileEntityDaylightDetector) daylightdetectorOptional.get()).validate();
-        return Optional.of(daylightdetectorOptional.get());
+        return Collections.emptySet();
     }
+
 }

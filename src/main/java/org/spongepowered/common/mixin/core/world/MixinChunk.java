@@ -67,7 +67,7 @@ public abstract class MixinChunk implements Chunk {
     private Vector2i biomeMax;
     private ChunkCoordIntPair chunkCoordIntPair;
 
-    @Shadow private net.minecraft.world.World worldObj;
+    @Shadow private World worldObj;
     @Shadow public int xPosition;
     @Shadow public int zPosition;
     @Shadow private boolean isChunkLoaded;

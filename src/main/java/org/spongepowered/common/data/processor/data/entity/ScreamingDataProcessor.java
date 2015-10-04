@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.monster.EntityEnderman;
 import org.spongepowered.api.data.DataContainer;
@@ -40,6 +39,7 @@ import org.spongepowered.common.data.processor.common.AbstractEntityDataProcesso
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class ScreamingDataProcessor extends AbstractEntityDataProcessor<EntityEnderman, ScreamingData, ImmutableScreamingData> {
 

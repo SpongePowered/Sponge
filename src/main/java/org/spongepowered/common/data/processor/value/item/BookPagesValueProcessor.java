@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.item;
 
 import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -43,6 +42,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
+import java.util.Optional;
 
 public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<Text>, ListValue<Text>> {
 
@@ -61,11 +61,11 @@ public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<T
         if (this.supports(container)) {
             final ItemStack itemStack = (ItemStack) container;
             if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_PAGES)) {
-                return Optional.absent();
+                return Optional.empty();
             }
             return Optional.of(NbtDataUtil.getPagesFromNBT(getTagCompound(itemStack)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

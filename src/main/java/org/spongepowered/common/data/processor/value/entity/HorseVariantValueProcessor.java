@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -40,6 +39,8 @@ import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeHorseVariant;
+
+import java.util.Optional;
 
 public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<HorseVariant, Value<HorseVariant>> {
 
@@ -57,7 +58,7 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Hor
         if (this.supports(container)) {
             return Optional.of(HorseUtils.getHorseVariant(((EntityHorse) container).getHorseType()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

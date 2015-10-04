@@ -27,9 +27,10 @@ package org.spongepowered.common.data.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+
+import java.util.Optional;
 
 public abstract class AbstractBaseValue<E> implements BaseValue<E> {
 
@@ -66,7 +67,7 @@ public abstract class AbstractBaseValue<E> implements BaseValue<E> {
 
     @Override
     public Optional<E> getDirect() {
-        return Optional.fromNullable(this.actualValue);
+        return Optional.ofNullable(this.actualValue);
     }
 
     @Override

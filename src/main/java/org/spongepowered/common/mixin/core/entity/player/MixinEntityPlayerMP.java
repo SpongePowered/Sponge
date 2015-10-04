@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -45,8 +43,6 @@ import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.api.GameProfile;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AchievementData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
@@ -59,6 +55,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
@@ -95,7 +92,7 @@ import org.spongepowered.common.text.chat.SpongeChatType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)
@@ -115,7 +112,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow public MinecraftServer mcServer;
 
-    private org.spongepowered.api.scoreboard.Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
+    private Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
 
     private net.minecraft.scoreboard.Scoreboard mcScoreboard = this.worldObj.getScoreboard();
 
@@ -344,7 +341,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void setScoreboard(org.spongepowered.api.scoreboard.Scoreboard scoreboard) {
+    public void setScoreboard(Scoreboard scoreboard) {
         if (scoreboard == null) {
             scoreboard = ((World) this.worldObj).getScoreboard();
         }
@@ -365,7 +362,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public org.spongepowered.api.scoreboard.Scoreboard getScoreboard() {
+    public Scoreboard getScoreboard() {
         return this.spongeScoreboard;
     }
 

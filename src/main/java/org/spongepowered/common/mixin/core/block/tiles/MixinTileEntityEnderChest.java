@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
+import net.minecraft.tileentity.TileEntityEnderChest;
 import org.spongepowered.api.block.tileentity.EnderChest;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityEnderChest.class)
+@Mixin(TileEntityEnderChest.class)
 public abstract class MixinTileEntityEnderChest extends MixinTileEntity implements EnderChest {
 
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockNewLog;
@@ -49,6 +48,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.util.TreeTypeResolver;
 
 import java.util.List;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(BlockLog.class)
@@ -97,7 +97,7 @@ public abstract class MixinBlockLog extends MixinBlock {
                     return Optional.of((BlockState) blockState.withProperty(BlockNewLog.VARIANT, type));
                 }
             }
-            return Optional.absent();
+            return Optional.empty();
         } else if (manipulator instanceof ImmutableLogAxisData) {
             final LogAxis logAxis = ((ImmutableLogAxisData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) (Object) logAxis));
@@ -122,7 +122,7 @@ public abstract class MixinBlockLog extends MixinBlock {
                     return Optional.of((BlockState) blockState.withProperty(BlockNewLog.VARIANT, type));
                 }
             }
-            return Optional.absent();
+            return Optional.empty();
         } else if (key.equals(Keys.LOG_AXIS)) {
             return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) (Object) value));
         }

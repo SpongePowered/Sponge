@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataHolder;
@@ -37,6 +36,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingDa
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
+
+import java.util.Optional;
 
 public class FlyingDataBuilder implements DataManipulatorBuilder<FlyingData, ImmutableFlyingData> {
 
@@ -60,7 +61,7 @@ public class FlyingDataBuilder implements DataManipulatorBuilder<FlyingData, Imm
             }
             return Optional.<FlyingData>of(new SpongeFlyingData(isFlying));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

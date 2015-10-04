@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -34,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.projectile.EntitySnowball.class)
+@Mixin(EntitySnowball.class)
 @Implements(@Interface(iface = Snowball.class, prefix = "snowball$"))
 public abstract class MixinEntitySnowball extends MixinEntityThrowable {
 

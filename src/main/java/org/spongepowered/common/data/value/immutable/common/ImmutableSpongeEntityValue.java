@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -38,6 +37,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 
 public class ImmutableSpongeEntityValue implements ImmutableValue<Entity> {
 
@@ -84,7 +84,7 @@ public class ImmutableSpongeEntityValue implements ImmutableValue<Entity> {
 
     @Override
     public Optional<Entity> getDirect() {
-        return Optional.fromNullable(this.weakReference.get());
+        return Optional.ofNullable(this.weakReference.get());
     }
 
     @Override

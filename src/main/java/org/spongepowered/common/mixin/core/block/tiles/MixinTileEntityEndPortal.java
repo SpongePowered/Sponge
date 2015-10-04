@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
+import net.minecraft.tileentity.TileEntityEndPortal;
 import org.spongepowered.api.block.tileentity.EndPortal;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityEndPortal.class)
+@Mixin(TileEntityEndPortal.class)
 public abstract class MixinTileEntityEndPortal extends MixinTileEntity implements EndPortal {
 
 }

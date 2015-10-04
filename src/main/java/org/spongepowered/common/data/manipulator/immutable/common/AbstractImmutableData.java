@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -45,6 +44,7 @@ import org.spongepowered.common.util.GetterFunction;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -166,7 +166,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
         if (!supports(key)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
     }
@@ -175,19 +175,19 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
         checkArgument(supports(key));
-        return get(key).orNull();
+        return get(key).orElse(null);
     }
 
     @Override
     public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
         checkArgument(supports(key));
-        return get(key).or(checkNotNull(defaultValue, "Provided a null default value for 'getOrElse(Key, null)'!"));
+        return get(key).orElse(checkNotNull(defaultValue, "Provided a null default value for 'getOrElse(Key, null)'!"));
     }
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (!this.keyValueMap.containsKey(key)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of((V) checkNotNull(this.keyValueMap.get(key).get()));
     }

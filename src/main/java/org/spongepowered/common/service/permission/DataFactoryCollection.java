@@ -27,7 +27,6 @@ package org.spongepowered.common.service.permission;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -37,6 +36,7 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -91,7 +91,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
 
         @Override
         public Optional<CommandSource> getCommandSource() {
-            return Optional.fromNullable(DataFactoryCollection.this.commandSourceFunction.apply(getIdentifier()));
+            return Optional.ofNullable(DataFactoryCollection.this.commandSourceFunction.apply(getIdentifier()));
         }
 
         @Override

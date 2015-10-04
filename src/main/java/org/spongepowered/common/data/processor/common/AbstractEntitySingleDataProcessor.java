@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -41,6 +40,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
 
@@ -74,20 +75,20 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
     @Override
     public Optional<M> from(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             final Optional<T> optional = getVal((E) dataHolder);
             if (optional.isPresent()) {
                 return Optional.of(createManipulator().set(this.key, optional.get()));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<M> createFrom(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             Optional<M> optional = from(dataHolder);
             if (!optional.isPresent()) {
@@ -101,9 +102,9 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
     @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
         if (!supports(dataHolder)) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
-            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orNull());
+            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
             return Optional.of(manipulator.set(this.key, merged.get(this.key).get()));
         }
     }
@@ -120,7 +121,7 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
         if (supports(dataHolder)) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<M> old = from(dataHolder);
-            final M merged = checkNotNull(function).merge(old.orNull(), manipulator);
+            final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final T newValue = merged.get(this.key).get();
             final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
             try {
@@ -134,7 +135,7 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
                 }
             } catch (Exception e) {
                 Sponge.getLogger().debug("An exception occurred when setting data: ", e);
-                return builder.result(DataTransactionResult.Type.ERROR).reject().build();
+                return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) immutableValue).build();
             }
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
@@ -146,7 +147,7 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
         if (immutable.supports(key)) {
             return Optional.of(immutable.asMutable().set(this.key, (T) value).asImmutable());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

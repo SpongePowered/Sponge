@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
@@ -37,6 +36,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneaking
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
+
+import java.util.Optional;
 
 public class SneakingDataBuilder implements DataManipulatorBuilder<SneakingData, ImmutableSneakingData> {
 
@@ -58,7 +59,7 @@ public class SneakingDataBuilder implements DataManipulatorBuilder<SneakingData,
             final boolean sneaking = ((Entity) dataHolder).isSneaking();
             return Optional.<SneakingData>of(new SpongeSneakingData(sneaking));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

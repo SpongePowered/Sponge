@@ -27,10 +27,12 @@ package org.spongepowered.common.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.common.mixin.core.world.extent.MixinExtent;
+import org.spongepowered.common.mixin.core.world.extent.MixinExtentViewDownsize;
 
 /**
- * Code for this class is mixed in from {@link org.spongepowered.common.mixin.core.world.extent.MixinExtent}
- * and {@link org.spongepowered.common.mixin.core.world.extent.MixinExtentViewDownsize}.
+ * Code for this class is mixed in from {@link MixinExtent}
+ * and {@link MixinExtentViewDownsize}.
  * This prevents duplicate code.
  */
 public class ExtentViewDownsize {

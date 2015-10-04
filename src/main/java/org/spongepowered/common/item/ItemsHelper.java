@@ -26,7 +26,6 @@ package org.spongepowered.common.item;
 
 import static org.spongepowered.api.data.DataTransactionBuilder.successNoData;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.item.Item;
@@ -38,6 +37,7 @@ import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -57,7 +57,7 @@ public final class ItemsHelper {
 
     public static <T extends DataManipulator<T,?>> Optional<T> getClone(T DataManipulator, Class<T> clazz) {
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static Optional<Integer> getDamageValue(final ItemType type, final Set<DataManipulator<?, ?>> DataManipulatorSet) {
@@ -66,7 +66,8 @@ public final class ItemsHelper {
             for (DataManipulator<?, ?> data : DataManipulatorSet) {
                 if (data instanceof BlockItemData) {
                     BlockItemData blockData = (BlockItemData) data;
-                    return Optional.of(Block.getBlockFromItem((Item) type).damageDropped((BlockState.StateImplementation) blockData.state()));
+                    return Optional
+                            .of(Block.getBlockFromItem((Item) type).damageDropped((BlockState.StateImplementation) blockData.state()));
                 }
             }
         } else if (((Item) type).getHasSubtypes()) {
@@ -75,7 +76,7 @@ public final class ItemsHelper {
         } else {
 
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static DataTransactionResult validateData(ItemType type, DataManipulator<?, ?> data) {

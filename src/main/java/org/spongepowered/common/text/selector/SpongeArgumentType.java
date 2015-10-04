@@ -49,7 +49,7 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
 
             @Override
             public EntityType apply(String input) {
-                return Sponge.getSpongeRegistry().getEntity(input.toLowerCase()).orNull();
+                return Sponge.getSpongeRegistry().getEntity(input.toLowerCase()).orElse(null);
             }
 
         });

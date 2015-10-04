@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.scheduler;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -32,6 +31,7 @@ import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.common.Sponge;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -83,7 +83,7 @@ abstract class SchedulerBase {
     }
 
     protected Optional<Task> getTask(UUID id) {
-        return Optional.<Task>fromNullable(this.taskMap.get(id));
+        return Optional.<Task>ofNullable(this.taskMap.get(id));
     }
 
     protected Set<Task> getScheduledTasks() {

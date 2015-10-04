@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.GameRegistry;
@@ -45,6 +44,7 @@ import org.spongepowered.common.entity.SpongeHorseStyle;
 import org.spongepowered.common.entity.SpongeHorseVariant;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse, HorseData, ImmutableHorseData> {
 

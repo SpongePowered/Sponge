@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -33,6 +32,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamin
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
+
+import java.util.Optional;
 
 public class ScreamingDataBuilder implements DataManipulatorBuilder<ScreamingData, ImmutableScreamingData> {
 
@@ -44,7 +45,7 @@ public class ScreamingDataBuilder implements DataManipulatorBuilder<ScreamingDat
                 return Optional.<ScreamingData>of(new SpongeScreamingData(isScreaming.get()));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -58,6 +59,6 @@ public class ScreamingDataBuilder implements DataManipulatorBuilder<ScreamingDat
             return Optional.<ScreamingData>of(new SpongeScreamingData(dataHolder.get(Keys.IS_SCREAMING).get()));
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 }

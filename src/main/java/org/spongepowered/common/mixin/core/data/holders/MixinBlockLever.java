@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.data.holders;
 
-
 import static org.spongepowered.common.data.util.DirectionResolver.getFor;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
@@ -39,13 +37,14 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirection
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Axis;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
+
+import java.util.Optional;
 
 @Mixin(BlockLever.class)
 public abstract class MixinBlockLever extends MixinBlock {

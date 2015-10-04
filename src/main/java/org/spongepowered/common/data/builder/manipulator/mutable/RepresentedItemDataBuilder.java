@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import org.spongepowered.api.data.DataHolder;
@@ -40,6 +39,8 @@ import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class RepresentedItemDataBuilder implements DataManipulatorBuilder<RepresentedItemData, ImmutableRepresentedItemData> {
 
@@ -70,6 +71,6 @@ public class RepresentedItemDataBuilder implements DataManipulatorBuilder<Repres
             final net.minecraft.item.ItemStack itemStack = ((EntityItem) dataHolder).getEntityItem();
             return Optional.<RepresentedItemData>of(new SpongeRepresentedItemData(((ItemStack) itemStack).createSnapshot()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

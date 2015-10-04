@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import org.spongepowered.api.data.property.item.EfficiencyProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+
+import java.util.Optional;
 
 public class EfficiencyPropertyStore extends AbstractItemStackPropertyStore<EfficiencyProperty> {
 
@@ -39,6 +40,6 @@ public class EfficiencyPropertyStore extends AbstractItemStackPropertyStore<Effi
             final double efficiency = tool.efficiencyOnProperMaterial;
             return Optional.of(new EfficiencyProperty(efficiency));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

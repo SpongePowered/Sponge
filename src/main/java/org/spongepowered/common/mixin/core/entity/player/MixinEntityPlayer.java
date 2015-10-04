@@ -28,6 +28,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
@@ -52,7 +53,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract IChatComponent getDisplayName();
     @Shadow public abstract void addExperience(int amount);
-    @Shadow public abstract net.minecraft.scoreboard.Scoreboard getWorldScoreboard();
+    @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow private BlockPos spawnChunk;
     @Shadow protected FoodStats foodStats;
 

@@ -30,7 +30,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.nbt.NBTTagCompound;
@@ -63,6 +62,7 @@ import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -113,7 +113,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<UUID> getUniqueId() {
-        return Optional.fromNullable(this.entityUuid);
+        return Optional.ofNullable(this.entityUuid);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             final Transform<World> transform = new Transform<World>(optional.get(), this.position, this.rotation);
             return Optional.of(transform);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -138,7 +138,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             final Location<World> location = new Location<World>(optional.get(), this.position);
             return Optional.of(location);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -187,7 +187,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of((T) manipulator);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -200,11 +200,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
             if (processorOptional.isPresent()) {
                 if (processorOptional.get().supports(this.entityType)) {
-                    return Optional.of((T) SpongeDataRegistry.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
+                    return Optional
+                            .of((T) SpongeDataRegistry.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("rawtypes")
@@ -228,7 +229,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 createNew = true;
-                builder.add(manipulator.with(key, checkNotNull(function.apply(manipulator.get(key).orNull()))).get());
+                builder.add(manipulator.with(key, checkNotNull(function.apply(manipulator.get(key).orElse(null)))).get());
             } else {
                 builder.add(manipulator);
             }
@@ -238,7 +239,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             snapshotBuilder.manipulators = builder.build();
             return Optional.of(snapshotBuilder.build());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -270,7 +271,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public Optional<EntitySnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         if (!supports(containerClass)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
@@ -307,18 +308,18 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of((E) value.get());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Nullable
     @Override
     public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orNull();
+        return get(key).orElse(null);
     }
 
     @Override
     public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).or(defaultValue);
+        return get(key).orElse(defaultValue);
     }
 
     @SuppressWarnings("unchecked")
@@ -330,7 +331,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of((V) value.asMutable());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -390,7 +391,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     public Optional<NBTTagCompound> getCompound() {
         if (this.compound == null) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             return Optional.of((NBTTagCompound) this.compound.copy());
         }
@@ -400,7 +401,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public Optional<Entity> restore() {
         Optional<World> world = Sponge.getGame().getServer().getWorld(this.worldUuid);
         if (!world.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         Optional<Entity> entity = world.get().createEntity(getType(), this.position);
@@ -413,7 +414,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of((Entity) nmsEntity);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public NBTTagList newDoubleNBTList(double ... numbers) {
@@ -431,7 +432,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

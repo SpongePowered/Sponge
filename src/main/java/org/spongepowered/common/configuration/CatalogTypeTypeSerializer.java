@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.configuration;
 
-import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 /**
  * A {@link TypeSerializer} implementation that allows CatalogType values to be used in object-mapped classes.

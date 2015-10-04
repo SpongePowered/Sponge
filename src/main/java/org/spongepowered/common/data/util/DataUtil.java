@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -52,6 +51,7 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("unchecked")
@@ -122,8 +122,8 @@ public class DataUtil {
             final String clazzName = view.getString(DataQueries.DATA_CLASS).get();
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
-                final Class<DataManipulator> clazz = (Class<DataManipulator>) Class.forName(clazzName);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilder(clazz);
+                final Class<?> clazz = Class.forName(clazzName);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilder((Class) clazz);
                 if (optional.isPresent()) {
                     final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
                     if (manipulatorOptional.isPresent()) {
@@ -145,8 +145,8 @@ public class DataUtil {
             final String clazzName = view.getString(DataQueries.DATA_CLASS).get();
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
-                final Class<ImmutableDataManipulator> clazz = (Class<ImmutableDataManipulator>) Class.forName(clazzName);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilderForImmutable(clazz);
+                final Class<?> clazz = Class.forName(clazzName);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilderForImmutable((Class) clazz);
                 if (optional.isPresent()) {
                     final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
                     if (manipulatorOptional.isPresent()) {

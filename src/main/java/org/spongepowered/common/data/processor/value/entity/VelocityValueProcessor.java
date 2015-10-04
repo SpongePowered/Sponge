@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -36,6 +35,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3d, Value<Vector3d>> {
 
@@ -53,7 +54,7 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
         if (container instanceof Entity) {
             return Optional.of(new Vector3d(((Entity) container).motionX, ((Entity) container).motionY, ((Entity) container).motionZ));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

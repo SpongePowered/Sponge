@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.property.store.common;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+
+import java.util.Optional;
 
 public abstract class AbstractItemStackPropertyStore<T extends Property<?, ?>> extends AbstractSpongePropertyStore<T> {
 
@@ -41,16 +42,16 @@ public abstract class AbstractItemStackPropertyStore<T extends Property<?, ?>> e
         if (propertyHolder instanceof ItemStack) {
             return getFor((ItemStack) propertyHolder);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public final Optional<T> getFor(Location<World> location) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public final Optional<T> getFor(Location<World> location, Direction direction) {
-        return Optional.absent();
+        return Optional.empty();
     }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -41,6 +40,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Text>, ListValue<Text>> {
 
@@ -59,14 +59,14 @@ public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Te
             final ItemStack itemStack = (ItemStack) container;
             final NBTTagCompound subCompound = itemStack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
             if (subCompound == null) {
-                return Optional.absent();   
+                return Optional.empty();
             }
             if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_LIST)) {
-                return Optional.absent();
+                return Optional.empty();
             }
             return Optional.of(NbtDataUtil.getLoreFromNBT(subCompound));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

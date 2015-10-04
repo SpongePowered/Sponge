@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
@@ -35,6 +34,8 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<IndirectlyPoweredProperty> {
 
@@ -48,7 +49,7 @@ public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<
                 return Optional.of(new IndirectlyPoweredProperty(powered));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

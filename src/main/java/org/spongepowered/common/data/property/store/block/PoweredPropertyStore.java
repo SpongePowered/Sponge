@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.property.PropertyHolder;
@@ -36,6 +35,8 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredProperty> {
 
@@ -49,7 +50,7 @@ public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredPro
                 return Optional.of(new PoweredProperty(world.isBlockPowered(pos)));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

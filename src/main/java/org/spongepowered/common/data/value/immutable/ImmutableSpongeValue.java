@@ -31,10 +31,15 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.AbstractBaseValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements ImmutableValue<E> {
+
+    public static <T> ImmutableValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actual) {
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actual);
+    }
 
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {
         super(key, defaultValue, defaultValue);

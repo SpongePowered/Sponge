@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemFirework;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -39,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @NonnullByDefault
-@Mixin(net.minecraft.item.ItemFirework.class)
+@Mixin(ItemFirework.class)
 public class MixinItemFirework extends Item {
 
     @Redirect(method = "onItemUse", at = @At(value = "INVOKE",

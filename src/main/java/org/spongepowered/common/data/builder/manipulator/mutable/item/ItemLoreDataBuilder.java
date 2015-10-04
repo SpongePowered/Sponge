@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -41,6 +40,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ItemLoreDataBuilder implements DataManipulatorBuilder<LoreData, ImmutableLoreData> {
 
@@ -55,15 +55,15 @@ public class ItemLoreDataBuilder implements DataManipulatorBuilder<LoreData, Imm
             final ItemStack itemStack = (ItemStack) dataHolder;
             final NBTTagCompound subCompound = itemStack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
             if (subCompound == null) {
-                return Optional.absent();
+                return Optional.empty();
             }
             if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_LIST)) {
-                return Optional.absent();
-            }          
+                return Optional.empty();
+            }
             final NBTTagList list = subCompound.getTagList(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_STRING);
             return Optional.<LoreData>of(new SpongeLoreData(SpongeTexts.fromLegacy(list)));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

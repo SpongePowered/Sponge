@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -43,6 +42,8 @@ import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
+
+import java.util.Optional;
 
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
         targets = IMixinCommandSender.SIGN_CLICK_SENDER)
@@ -76,7 +77,7 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
             EntityPlayerMP player = (EntityPlayerMP)(Object) this;
             if (player.worldObj.getGameRules().getGameRuleBooleanValue("showDeathMessages")) {
                 Team team = player.getTeam();
-    
+
                 if (team != null && team.func_178771_j() != Team.EnumVisible.ALWAYS) {
                     if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
                         this.sink = ((IMixinTeam)team).getSinkForPlayer((EntityPlayerMP) player);
@@ -101,7 +102,7 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
     @Override
     public Optional<CommandSource> getCommandSource() {
         if (this instanceof User && !((User) this).isOnline()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.<CommandSource>of(this);
     }

@@ -24,17 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.block.tileentity.Banner;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -52,7 +48,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityBanner.class)
+@Mixin(TileEntityBanner.class)
 public abstract class MixinTileEntityBanner extends MixinTileEntity implements Banner {
 
     @Shadow private int baseColor;

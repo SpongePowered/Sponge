@@ -61,7 +61,7 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.RegistryHelper;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Map;
 
 @SuppressWarnings({"unchecked"})

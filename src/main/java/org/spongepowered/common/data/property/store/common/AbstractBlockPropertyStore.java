@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.common;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
@@ -38,6 +37,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+
+import java.util.Optional;
 
 public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> extends AbstractSpongePropertyStore<T> {
 
@@ -88,7 +89,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
         } else if (propertyHolder instanceof Block) {
             return getForBlock((Block) propertyHolder);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

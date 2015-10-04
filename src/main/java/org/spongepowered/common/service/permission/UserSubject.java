@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.permission;
 
-import com.google.common.base.Optional;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListOpsEntry;
@@ -37,6 +36,7 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.common.service.permission.base.SingleParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -85,7 +85,8 @@ public class UserSubject extends SpongeSubject {
 
     @Override
     public Optional<CommandSource> getCommandSource() {
-        return Optional.fromNullable((CommandSource) MinecraftServer.getServer().getConfigurationManager().getPlayerByUUID(this.player.getId()));
+        return Optional
+                .ofNullable((CommandSource) MinecraftServer.getServer().getConfigurationManager().getPlayerByUUID(this.player.getId()));
     }
 
     int getOpLevel() {

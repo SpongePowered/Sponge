@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.item;
 
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -54,6 +53,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
 
@@ -103,7 +103,7 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
     @Override
     protected Optional<List<ItemEnchantment>> getVal(ItemStack itemStack) {
         if (!itemStack.isItemEnchanted()) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             final List<ItemEnchantment> enchantments = Lists.newArrayList();
             final NBTTagList list = itemStack.getEnchantmentTagList();

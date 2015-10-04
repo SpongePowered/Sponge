@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.ApplicableEffectProperty;
@@ -32,6 +31,7 @@ import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 import org.spongepowered.common.interfaces.item.IMixinItemPotionProvider;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class ApplicableEffectPropertyStore extends AbstractItemStackPropertyStore<ApplicableEffectProperty> {
@@ -43,7 +43,7 @@ public class ApplicableEffectPropertyStore extends AbstractItemStackPropertyStor
             final Set<PotionEffect> potionEffects = ((IMixinItemPotionProvider) item).getApplicablePotions(propertyHolder);
             return Optional.of(new ApplicableEffectProperty(potionEffects));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

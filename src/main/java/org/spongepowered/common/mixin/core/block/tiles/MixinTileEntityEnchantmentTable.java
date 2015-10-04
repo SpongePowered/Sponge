@@ -26,16 +26,15 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import net.minecraft.tileentity.TileEntityEnchantmentTable;
 import org.spongepowered.api.block.tileentity.EnchantmentTable;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityEnchantmentTable.class)
+@Mixin(TileEntityEnchantmentTable.class)
 public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity implements EnchantmentTable {
 
     @Shadow private String customName;

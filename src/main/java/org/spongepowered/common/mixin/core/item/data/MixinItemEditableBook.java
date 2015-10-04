@@ -28,9 +28,6 @@ import net.minecraft.item.ItemEditableBook;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
-import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;

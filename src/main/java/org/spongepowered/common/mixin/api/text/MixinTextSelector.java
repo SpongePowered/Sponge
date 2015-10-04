@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.text;
 import net.minecraft.util.ChatComponentSelector;
 import net.minecraft.util.ChatComponentStyle;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -35,7 +36,7 @@ import java.util.Locale;
 @Mixin(value = Text.Selector.class, remap = false)
 public abstract class MixinTextSelector extends MixinText {
 
-    @Shadow protected org.spongepowered.api.text.selector.Selector selector;
+    @Shadow protected Selector selector;
 
     @Override
     protected ChatComponentStyle createComponent(Locale locale) {

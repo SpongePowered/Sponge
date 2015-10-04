@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile.fireball;
 
+import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -32,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.projectile.EntitySmallFireball.class)
+@Mixin(EntitySmallFireball.class)
 public abstract class MixinEntitySmallFireball extends MixinEntityFireball implements SmallFireball {
 
     private float damage = 5.0f;

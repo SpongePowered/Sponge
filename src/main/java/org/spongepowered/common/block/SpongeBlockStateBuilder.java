@@ -27,7 +27,6 @@ package org.spongepowered.common.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
@@ -40,7 +39,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class SpongeBlockStateBuilder implements BlockStateBuilder {
 

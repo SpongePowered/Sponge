@@ -24,22 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.entity.living;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.entity.living.Human;
@@ -60,6 +58,7 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -80,7 +79,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
     @Shadow public abstract void removePotionEffect(int id);
-    @Shadow public abstract void setCurrentItemOrArmor(int slotIn, net.minecraft.item.ItemStack stack);
+    @Shadow public abstract void setCurrentItemOrArmor(int slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
     @Shadow public abstract void setLastAttacker(Entity entity);
     @Shadow public abstract boolean isPotionActive(Potion potion);
@@ -90,7 +89,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract Collection getActivePotionEffects();
     @Shadow public abstract EntityLivingBase getLastAttacker();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
-    @Shadow public abstract net.minecraft.item.ItemStack getEquipmentInSlot(int slotIn);
+    @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
 
     private int maxAir = 300;
 
@@ -99,7 +98,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     public void setMaxHealth(double maxHealth) {
-        getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth);
+        getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth);
 
         if (getHealth() > maxHealth) {
             setHealth((float) maxHealth);
@@ -110,12 +109,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         Living thisEntity = (Living) this;
         DamageSource source = DamageSource.generic;
         if (thisEntity instanceof Human) {
-            source = net.minecraft.util.DamageSource.causePlayerDamage((EntityPlayer) thisEntity);
+            source = DamageSource.causePlayerDamage((EntityPlayer) thisEntity);
         } else {
-            source = net.minecraft.util.DamageSource.causeMobDamage((EntityLivingBase) thisEntity);
+            source = DamageSource.causeMobDamage((EntityLivingBase) thisEntity);
         }
 
-        if (thisEntity instanceof net.minecraft.entity.boss.EntityDragon) {
+        if (thisEntity instanceof EntityDragon) {
             ((EntityDragon) thisEntity).attackEntityFrom(source, (float) amount);
         } else {
             attackEntityFrom(source, (float) amount);
@@ -173,7 +172,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     public Optional<Living> getLastAttackerAPI() {
-        return Optional.fromNullable((Living) getLastAttacker());
+        return Optional.ofNullable((Living) getLastAttacker());
     }
 
     public double getEyeHeightD() {

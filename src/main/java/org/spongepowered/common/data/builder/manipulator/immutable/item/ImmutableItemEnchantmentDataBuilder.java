@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.manipulator.immutable.item;
 
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
@@ -48,6 +47,7 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeE
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipulatorBuilder<ImmutableEnchantmentData, EnchantmentData> {
 
@@ -60,7 +60,7 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
     public Optional<ImmutableEnchantmentData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).isItemEnchanted()) {
-                return Optional.absent();
+                return Optional.empty();
             } else {
                 final List<ItemEnchantment> enchantments = Lists.newArrayList();
                 final NBTTagList list = ((ItemStack) dataHolder).getEnchantmentTagList();
@@ -75,12 +75,12 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
                 return Optional.<ImmutableEnchantmentData>of(new ImmutableSpongeEnchantmentData(enchantments));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<ImmutableEnchantmentData> createFrom(ImmutableDataHolder<?> dataHolder) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

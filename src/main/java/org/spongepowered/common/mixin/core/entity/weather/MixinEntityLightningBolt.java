@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.weather;
 
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
 import org.spongepowered.api.entity.weather.Lightning;
@@ -34,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.effect.EntityLightningBolt.class)
+@Mixin(EntityLightningBolt.class)
 public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements Lightning {
 
     private boolean effect = false;

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+
+import java.util.Optional;
 
 public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
@@ -55,7 +56,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
             final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
             return Optional.of(entity.getMaxAir());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 

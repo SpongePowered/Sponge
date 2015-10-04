@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.entity.living.player.Player;
@@ -62,8 +63,8 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     @Shadow public String colorSuffix;
     @Shadow public boolean allowFriendlyFire;
     @Shadow public boolean canSeeFriendlyInvisibles;
-    @Shadow public net.minecraft.scoreboard.Team.EnumVisible field_178778_i; // nameTagVisibility
-    @Shadow public net.minecraft.scoreboard.Team.EnumVisible field_178776_j; // deathMessageVisiblity
+    @Shadow public Team.EnumVisible field_178778_i; // nameTagVisibility
+    @Shadow public Team.EnumVisible field_178776_j; // deathMessageVisiblity
     @Shadow public Set<String> membershipSet;
     @Shadow public abstract Collection getMembershipCollection();
 
@@ -133,7 +134,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     }
 
     @Inject(method = "func_178772_a", at = @At("HEAD"), cancellable = true)
-    public void setNametagVisibility(net.minecraft.scoreboard.Team.EnumVisible visibility, CallbackInfo ci) {
+    public void setNametagVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
             this.spongeTeam.setNameTagVisibility(SpongeGameRegistry.enumVisible.get(visibility));
@@ -143,7 +144,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     }
 
     @Inject(method = "func_178773_b", at = @At("HEAD"), cancellable = true)
-    public void setDeathMessageVisibility(net.minecraft.scoreboard.Team.EnumVisible visibility, CallbackInfo ci) {
+    public void setDeathMessageVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
             this.spongeTeam.setDeathTextVisibility(SpongeGameRegistry.enumVisible.get(visibility));
@@ -172,7 +173,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     }
 
     @Override
-    public boolean isSameTeam(net.minecraft.scoreboard.Team other) {
+    public boolean isSameTeam(Team other) {
         return ((IMixinTeam) other).getSpongeTeam() == this.spongeTeam;
     }
 
@@ -221,7 +222,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i) {
             EntityPlayerMP player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);
 
-            if (player.getTeam() != (net.minecraft.scoreboard.Team)(Object)this) {
+            if (player.getTeam() != (Team)(Object)this) {
                 sources.add((Player) player);
             }
         }

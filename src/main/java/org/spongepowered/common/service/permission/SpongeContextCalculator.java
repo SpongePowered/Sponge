@@ -27,7 +27,6 @@ package org.spongepowered.common.service.permission;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -44,6 +43,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
 
 import java.net.InetAddress;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;

@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -100,7 +101,7 @@ public class SpongeExplosionBuilder implements ExplosionBuilder {
         checkState(this.origin != null, "Origin is null!");
 
         return (Explosion) new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
-                (net.minecraft.entity.Entity) this.sourceExplosive, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
+                (Entity) this.sourceExplosive, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
                 this.canCauseFire, this.shouldBreakBlocks);
     }
 }

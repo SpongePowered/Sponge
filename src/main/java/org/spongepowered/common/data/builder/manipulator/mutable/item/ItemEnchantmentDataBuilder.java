@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.manipulator.mutable.item;
 
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -46,6 +45,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentD
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ItemEnchantmentDataBuilder implements DataManipulatorBuilder<EnchantmentData, ImmutableEnchantmentData> {
 
@@ -58,7 +58,7 @@ public class ItemEnchantmentDataBuilder implements DataManipulatorBuilder<Enchan
     public Optional<EnchantmentData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).isItemEnchanted()) {
-                return Optional.absent();
+                return Optional.empty();
             } else {
                 final List<ItemEnchantment> enchantments = Lists.newArrayList();
                 final NBTTagList list = ((ItemStack) dataHolder).getEnchantmentTagList();
@@ -73,7 +73,7 @@ public class ItemEnchantmentDataBuilder implements DataManipulatorBuilder<Enchan
                 return Optional.<EnchantmentData>of(new SpongeEnchantmentData(enchantments));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

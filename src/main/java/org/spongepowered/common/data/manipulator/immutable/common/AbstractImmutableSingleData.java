@@ -26,7 +26,6 @@ package org.spongepowered.common.data.manipulator.immutable.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -37,6 +36,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.util.GetterFunction;
 
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
@@ -91,7 +91,7 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
     @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        return checkNotNull(key).equals(this.usedKey) ? Optional.of((E) this.value) : Optional.<E>absent();
+        return checkNotNull(key).equals(this.usedKey) ? Optional.of((E) this.value) : Optional.<E>empty();
     }
 
     @Override

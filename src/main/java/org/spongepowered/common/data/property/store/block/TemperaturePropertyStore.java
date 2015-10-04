@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.TemperatureProperty;
@@ -34,6 +33,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 public class TemperaturePropertyStore extends AbstractSpongePropertyStore<TemperatureProperty> {
 
@@ -47,7 +48,7 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
                 return Optional.of(new TemperatureProperty(biome.temperature));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

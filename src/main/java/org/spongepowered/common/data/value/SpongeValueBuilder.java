@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueBuilder;
@@ -46,6 +45,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -108,11 +108,11 @@ public class SpongeValueBuilder implements ValueBuilder {
 
     @Override
     public <E> OptionalValue<E> createOptionalValue(Key<OptionalValue<E>> key, @Nullable E element) {
-        return new SpongeOptionalValue<E>(checkNotNull(key, "key"), Optional.<E>absent(), Optional.fromNullable(element));
+        return new SpongeOptionalValue<E>(checkNotNull(key, "key"), Optional.<E>empty(), Optional.ofNullable(element));
     }
 
     @Override
     public <E> OptionalValue<E> createOptionalValue(Key<OptionalValue<E>> key, @Nullable E element, E defaultElement) {
-        return new SpongeOptionalValue<E>(checkNotNull(key, "key"), Optional.of(defaultElement), Optional.fromNullable(element));
+        return new SpongeOptionalValue<E>(checkNotNull(key, "key"), Optional.of(defaultElement), Optional.ofNullable(element));
     }
 }

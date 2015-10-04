@@ -26,6 +26,7 @@ package org.spongepowered.common.text.action;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.event.HoverEvent;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.ChatComponentText;
@@ -79,7 +80,7 @@ public class SpongeHoverAction {
                 break;
             }
             case SHOW_ITEM: {
-                net.minecraft.item.ItemStack item = (net.minecraft.item.ItemStack) action.getResult();
+                ItemStack item = (ItemStack) action.getResult();
                 NBTTagCompound nbt = new NBTTagCompound();
                 item.writeToNBT(nbt);
                 component = new ChatComponentText(nbt.toString());

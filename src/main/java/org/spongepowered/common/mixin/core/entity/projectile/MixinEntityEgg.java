@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -35,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @NonnullByDefault
 @Mixin(EntityEgg.class)
-@Implements(@Interface(iface = org.spongepowered.api.entity.projectile.Egg.class, prefix = "egg$"))
+@Implements(@Interface(iface = Egg.class, prefix = "egg$"))
 public abstract class MixinEntityEgg extends MixinEntityThrowable {
 
     public double damageAmount;

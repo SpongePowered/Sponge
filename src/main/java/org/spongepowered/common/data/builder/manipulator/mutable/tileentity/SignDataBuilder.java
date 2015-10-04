@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.tileentity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
@@ -39,6 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignDa
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SignDataBuilder implements DataManipulatorBuilder<SignData, ImmutableSignData> {
 

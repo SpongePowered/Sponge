@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.item.ItemsHelper.validateData;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import net.minecraft.item.Item;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -39,6 +38,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class SpongeItemStackBuilder implements ItemStackBuilder {

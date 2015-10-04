@@ -24,14 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.living;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -47,6 +43,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -77,7 +75,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     public Optional<Entity> getLeashHolder() {
-        return Optional.fromNullable((Entity) getLeashedToEntity());
+        return Optional.ofNullable((Entity) getLeashedToEntity());
     }
 
     public void setLeashHolder(@Nullable Entity entity) {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.data.holders;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
@@ -41,6 +40,8 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.mixin.core.block.MixinBlock;
+
+import java.util.Optional;
 
 @Mixin(BlockWallSign.class)
 public abstract class MixinBlockWallSign extends MixinBlock {

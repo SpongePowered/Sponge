@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataContainer;
@@ -41,6 +40,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteable
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity, IgniteableData, ImmutableIgniteableData> {
 

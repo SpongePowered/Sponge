@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.item.data;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
-import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 

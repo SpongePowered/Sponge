@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.DamageAbsorptionProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+
+import java.util.Optional;
 
 public class DamageAbsorptionPropertyStore extends AbstractItemStackPropertyStore<DamageAbsorptionProperty> {
 
@@ -39,6 +40,6 @@ public class DamageAbsorptionPropertyStore extends AbstractItemStackPropertyStor
             final int reduction = armor.damageReduceAmount;
             return Optional.of(new DamageAbsorptionProperty(reduction));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

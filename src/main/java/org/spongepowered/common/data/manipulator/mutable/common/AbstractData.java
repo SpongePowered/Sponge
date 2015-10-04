@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
@@ -48,6 +47,7 @@ import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -161,7 +161,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
         // Basic stuff, getting the processor....
         final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
         if (!processor.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         // .... and delegate to the processor!
         return processor.get().fill(dataHolder, copy(), MergeFunction.IGNORE_ALL);
@@ -172,7 +172,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
         // Basic stuff, getting the processor....
         final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
         if (!processor.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         // .... and delegate to the processor!
         return processor.get().fill(dataHolder, copy(), overlap);
@@ -185,7 +185,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
         // Basic stuff, getting the processor....
         final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
         if (!processor.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return processor.get().fill(container, (M) (Object) this);
     }
@@ -244,7 +244,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
         if (!supports(key)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
     }
@@ -252,18 +252,18 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     @Nullable
     @Override
     public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orNull(); // Just use the provided optional
+        return get(key).orElse(null); // Just use the provided optional
     }
 
     @Override
     public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).or(checkNotNull(defaultValue)); // Or use the optional with a default value
+        return get(key).orElse(checkNotNull(defaultValue)); // Or use the optional with a default value
     }
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (!this.keyValueMap.containsKey(key)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of((V) checkNotNull(this.keyValueMap.get(key).get()));
     }

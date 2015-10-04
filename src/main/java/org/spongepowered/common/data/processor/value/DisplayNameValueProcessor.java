@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -45,6 +44,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
+
+import java.util.Optional;
 
 @SuppressWarnings("deprecation")
 public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text, Value<Text>> {
@@ -75,12 +76,12 @@ public class DisplayNameValueProcessor extends AbstractSpongeValueProcessor<Text
                 final String displayString = mainCompound.getString("Name");
                 return Optional.of(Texts.legacy().fromUnchecked(displayString));
             } else {
-                return Optional.absent();
+                return Optional.empty();
             }
         } else if (container instanceof IWorldNameable && ((IWorldNameable) container).hasCustomName()) {
             return Optional.of(Texts.legacy().fromUnchecked(((IWorldNameable) container).getCommandSenderName()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

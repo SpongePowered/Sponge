@@ -25,10 +25,9 @@
 package org.spongepowered.common.mixin.core.block.tiles;
 
 import com.google.common.collect.Lists;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.block.tileentity.Sign;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -41,7 +40,7 @@ import org.spongepowered.common.interfaces.IMixinSubject;
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntitySign.class)
+@Mixin(TileEntitySign.class)
 public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
 
     @Shadow public IChatComponent[] signText;

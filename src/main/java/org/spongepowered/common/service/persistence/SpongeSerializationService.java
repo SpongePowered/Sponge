@@ -27,7 +27,6 @@ package org.spongepowered.common.service.persistence;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
@@ -38,6 +37,7 @@ import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.configuration.DataSerializableTypeSerializer;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class SpongeSerializationService implements SerializationService {
     static {
@@ -75,7 +75,7 @@ public class SpongeSerializationService implements SerializationService {
         if (this.builders.containsKey(clazz)) {
             return Optional.of((DataBuilder<T>) this.builders.get(clazz));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -85,7 +85,7 @@ public class SpongeSerializationService implements SerializationService {
         if (optional.isPresent()) {
             return optional.get().build(dataView);
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

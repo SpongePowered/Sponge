@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
@@ -55,6 +54,8 @@ import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
 import org.spongepowered.common.world.gen.SpongeGeneratorPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
@@ -137,10 +138,10 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         if ((Object) this == WorldType.FLAT) {
             final FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(world.getWorldInfo().getGeneratorOptions());
             return new WorldChunkManagerHell(
-                    BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), net.minecraft.world.biome.BiomeGenBase.field_180279_ad), 0.5F);
+                    BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), BiomeGenBase.field_180279_ad), 0.5F);
         }
         else if ((Object) this == WorldType.DEBUG_WORLD) {
-            return new WorldChunkManagerHell(net.minecraft.world.biome.BiomeGenBase.plains, 0.0F);
+            return new WorldChunkManagerHell(BiomeGenBase.plains, 0.0F);
         }
         else {
             return new WorldChunkManager(world);

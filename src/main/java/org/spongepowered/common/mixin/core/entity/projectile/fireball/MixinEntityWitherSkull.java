@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile.fireball;
 
+import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -32,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.projectile.EntityWitherSkull.class)
+@Mixin(EntityWitherSkull.class)
 public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements WitherSkull {
 
     private float damage = 0.0f;

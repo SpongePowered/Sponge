@@ -26,7 +26,6 @@ package org.spongepowered.common.world;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldSettings;
@@ -50,6 +49,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
+import java.util.Optional;
 import java.util.Random;
 
 public class SpongeWorldBuilder implements WorldBuilder {

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.SaturationProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+
+import java.util.Optional;
 
 public class SaturationPropertyStore extends AbstractItemStackPropertyStore<SaturationProperty> {
 
@@ -38,6 +39,6 @@ public class SaturationPropertyStore extends AbstractItemStackPropertyStore<Satu
             final double saturationModifier = ((ItemFood) itemStack.getItem()).getSaturationModifier(itemStack);
             return Optional.of(new SaturationProperty(saturationModifier));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

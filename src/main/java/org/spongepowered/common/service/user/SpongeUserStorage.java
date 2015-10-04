@@ -27,7 +27,6 @@ package org.spongepowered.common.service.user;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.entity.living.player.User;
@@ -35,25 +34,26 @@ import org.spongepowered.api.service.user.UserStorage;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 public class SpongeUserStorage implements UserStorage {
 
     @Override
     public Optional<User> get(UUID uniqueId) {
-        return Optional.fromNullable(UserDiscoverer.findByUuid(checkNotNull(uniqueId, "uniqueId")));
+        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(uniqueId, "uniqueId")));
     }
 
     @Override
     public Optional<User> get(String lastKnownName) {
         checkNotNull(lastKnownName, "lastKnownName");
         checkArgument(lastKnownName.length() >= 3 && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
-        return Optional.fromNullable(UserDiscoverer.findByUsername(lastKnownName));
+        return Optional.ofNullable(UserDiscoverer.findByUsername(lastKnownName));
     }
 
     @Override
     public Optional<User> get(GameProfile profile) {
-        return Optional.fromNullable(UserDiscoverer.findByUuid(checkNotNull(profile, "profile").getUniqueId()));
+        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(profile, "profile").getUniqueId()));
     }
 
     @Override
@@ -83,9 +83,9 @@ public class SpongeUserStorage implements UserStorage {
     @Override
     public Collection<GameProfile> match(String lastKnownName) {
         lastKnownName = checkNotNull(lastKnownName, "lastKnownName").toLowerCase(Locale.ROOT);
-        Collection<org.spongepowered.api.GameProfile> allProfiles = UserDiscoverer.getAllProfiles();
-        Collection<org.spongepowered.api.GameProfile> matching = Sets.newHashSet();
-        for (org.spongepowered.api.GameProfile profile : allProfiles) {
+        Collection<GameProfile> allProfiles = UserDiscoverer.getAllProfiles();
+        Collection<GameProfile> matching = Sets.newHashSet();
+        for (GameProfile profile : allProfiles) {
             if (profile.getName().startsWith(lastKnownName)) {
                 matching.add(profile);
             }

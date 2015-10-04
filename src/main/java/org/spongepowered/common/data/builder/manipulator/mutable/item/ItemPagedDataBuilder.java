@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
@@ -41,6 +40,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ItemPagedDataBuilder implements DataManipulatorBuilder<PagedData, ImmutablePagedData> {
 
@@ -53,12 +53,12 @@ public class ItemPagedDataBuilder implements DataManipulatorBuilder<PagedData, I
     public Optional<PagedData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
             if (((ItemStack) dataHolder).getItem() != Items.writable_book || ((ItemStack) dataHolder).getItem() != Items.written_book) {
-                return Optional.absent();
+                return Optional.empty();
             }
             final NBTTagList list = ((ItemStack) dataHolder).getTagCompound().getTagList(NbtDataUtil.ITEM_BOOK_PAGES, NbtDataUtil.TAG_STRING);
             return Optional.<PagedData>of(new SpongePagedData(SpongeTexts.fromLegacy(list)));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

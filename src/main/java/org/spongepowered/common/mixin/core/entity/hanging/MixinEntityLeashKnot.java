@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.hanging;
 
+import net.minecraft.entity.EntityLeashKnot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.LeashHitch;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.EntityLeashKnot.class)
+@Mixin(EntityLeashKnot.class)
 public abstract class MixinEntityLeashKnot extends MixinEntityHanging implements LeashHitch {
 
     @Override

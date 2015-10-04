@@ -33,7 +33,7 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
 
 public class SpongeFireworkMeta implements FireworkEffect {

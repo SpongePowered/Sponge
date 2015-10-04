@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -40,6 +39,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Optional;
+
 public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMode, Value<GameMode>> {
 
     public GameModeValueProcessor() {
@@ -51,7 +52,7 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
         if (container instanceof EntityPlayerMP) {
             return Optional.of((GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

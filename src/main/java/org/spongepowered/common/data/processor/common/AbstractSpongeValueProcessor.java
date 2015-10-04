@@ -26,12 +26,13 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
+
+import java.util.Optional;
 
 public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
 
@@ -66,7 +67,7 @@ public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> im
         if(optionalValue.isPresent()) {
             return Optional.of(constructValue(optionalValue.get()));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,6 +35,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
+
+import java.util.Optional;
 
 @Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockLogic.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinICommandSender implements ICommandSender, IMixinCommandSender {

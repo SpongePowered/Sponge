@@ -25,12 +25,7 @@
 package org.spongepowered.common.mixin.core.item.data;
 
 import net.minecraft.item.ItemPotion;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.asm.mixin.Mixin;
-
-import java.util.List;
 
 @Mixin(ItemPotion.class)
 public abstract class MixinItemPotion extends MixinItem {

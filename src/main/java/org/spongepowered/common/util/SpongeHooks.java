@@ -48,6 +48,7 @@ import org.spongepowered.common.interfaces.IMixinWorldProvider;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
@@ -280,7 +281,7 @@ public class SpongeHooks {
         if (!Sponge.getGlobalConfig().getConfig().getDebug().isEnableThreadContentionMonitoring()) {
             return;
         }
-        java.lang.management.ThreadMXBean mbean = java.lang.management.ManagementFactory.getThreadMXBean();
+        ThreadMXBean mbean = ManagementFactory.getThreadMXBean();
         mbean.setThreadContentionMonitoringEnabled(true);
     }
 

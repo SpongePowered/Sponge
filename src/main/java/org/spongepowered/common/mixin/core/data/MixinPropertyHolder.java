@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.data;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.entity.Entity;
@@ -37,6 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Mixin({BlockState.class, Block.class, Entity.class, TileEntity.class, ItemStack.class})
 public abstract class MixinPropertyHolder implements PropertyHolder {
@@ -47,7 +47,7 @@ public abstract class MixinPropertyHolder implements PropertyHolder {
         if (optional.isPresent()) {
             return optional.get().getFor(this);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

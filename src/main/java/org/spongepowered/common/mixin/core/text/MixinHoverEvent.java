@@ -76,7 +76,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         String name = nbt.getString("name");
                         EntityType type = null;
                         if (nbt.hasKey("type", 8)) {
-                            type = Sponge.getGame().getRegistry().getType(EntityType.class, name).orNull();
+                            type = Sponge.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));

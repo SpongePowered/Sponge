@@ -77,7 +77,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
                                 @Nullable
                                 @Override
                                 public CommandSource apply(@Nullable Subject input) {
-                                    return input.getCommandSource().orNull();
+                                    return input.getCommandSource().orElse(null);
                                 }
                             }), Predicates.notNull());
                 }

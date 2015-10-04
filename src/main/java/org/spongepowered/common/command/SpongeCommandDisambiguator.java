@@ -26,7 +26,6 @@ package org.spongepowered.common.command;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -40,6 +39,7 @@ import org.spongepowered.api.util.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.common.Sponge;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class SpongeCommandDisambiguator implements Disambiguator {

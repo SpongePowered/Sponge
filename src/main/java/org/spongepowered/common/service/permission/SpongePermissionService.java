@@ -27,7 +27,6 @@ package org.spongepowered.common.service.permission;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.MinecraftServer;
@@ -49,6 +48,7 @@ import org.spongepowered.common.service.permission.base.GlobalMemorySubjectData;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -180,7 +180,7 @@ public class SpongePermissionService implements PermissionService {
 
     @Override
     public Optional<PermissionDescription> getDescription(String permissionId) {
-        return Optional.fromNullable(this.descriptionMap.get(checkNotNull(permissionId, "permissionId").toLowerCase()));
+        return Optional.ofNullable(this.descriptionMap.get(checkNotNull(permissionId, "permissionId").toLowerCase()));
     }
 
     @Override

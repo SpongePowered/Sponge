@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.profiler.Profiler;
@@ -91,6 +90,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @NonnullByDefault
@@ -133,7 +133,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 return Optional.of(world);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -158,7 +158,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<InetSocketAddress> getBoundAddress() {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -188,17 +188,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public Optional<Player> getPlayer(UUID uniqueId) {
         if (getConfigurationManager() == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
-        return Optional.fromNullable((Player) getConfigurationManager().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((Player) getConfigurationManager().getPlayerByUUID(uniqueId));
     }
 
     @Override
     public Optional<Player> getPlayer(String name) {
         if (getConfigurationManager() == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
-        return Optional.fromNullable((Player) getConfigurationManager().getPlayerByUsername(name));
+        return Optional.ofNullable((Player) getConfigurationManager().getPlayerByUsername(name));
     }
 
     @SuppressWarnings("deprecation")
@@ -364,7 +364,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 world.getWorldInfo().setGameType(this.getGameType());
             }
             Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
-            Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (org.spongepowered.api.world.World)
+            Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (World)
                     world));
         }
 
@@ -415,13 +415,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (worldFolder != null) {
             return loadWorld(worldFolder);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<World> loadWorld(WorldProperties properties) {
         if (properties == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return loadWorld(properties.getWorldName());
     }
@@ -453,7 +453,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             // check if enabled
             if (!((WorldProperties) worldInfo).isEnabled()) {
                 Sponge.getLogger().error("Unable to load world " + worldName + ". World is disabled!");
-                return Optional.absent();
+                return Optional.empty();
             }
 
             dim = ((IMixinWorldInfo) worldInfo).getDimensionId();
@@ -468,7 +468,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
             }
         } else {
-            return Optional.absent(); // no world data found
+            return Optional.empty(); // no world data found
         }
 
         WorldSettings settings = new WorldSettings(worldInfo);
@@ -579,7 +579,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 return Optional.of((World) worldserver);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -587,7 +587,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (DimensionManager.getWorldFromDimId(0) != null) {
             return Optional.of(((World) DimensionManager.getWorldFromDimId(0)).getProperties());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -612,7 +612,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<ResourcePack> getDefaultResourcePack() {
-        return Optional.fromNullable(this.resourcePack);
+        return Optional.ofNullable(this.resourcePack);
     }
 
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )

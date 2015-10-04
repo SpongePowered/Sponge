@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.item;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
@@ -43,6 +42,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SpongeItemStackDataBuilder implements DataBuilder<ItemStack> {
 

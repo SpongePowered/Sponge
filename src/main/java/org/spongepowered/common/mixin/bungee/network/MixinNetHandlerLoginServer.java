@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.bungee.network;
 
 import com.google.common.base.Charsets;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
@@ -45,7 +46,7 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
 
     @Shadow private MinecraftServer server;
     @Shadow public NetworkManager networkManager;
-    @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
+    @Shadow private GameProfile loginGameProfile;
 
     @Inject(method = "processLoginStart", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/NetHandlerLoginServer;"
             + "loginGameProfile:Lcom/mojang/authlib/GameProfile;",
@@ -59,7 +60,7 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
                 uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.loginGameProfile.getName()).getBytes(Charsets.UTF_8));
             }
 
-            this.loginGameProfile = new com.mojang.authlib.GameProfile(uuid, this.loginGameProfile.getName());
+            this.loginGameProfile = new GameProfile(uuid, this.loginGameProfile.getName());
 
             if (((IMixinNetworkManager) this.networkManager).getSpoofedProfile() != null) {
                 for (Property property : ((IMixinNetworkManager) this.networkManager).getSpoofedProfile()) {

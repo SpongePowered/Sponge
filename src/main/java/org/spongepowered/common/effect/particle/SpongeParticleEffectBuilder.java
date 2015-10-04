@@ -33,7 +33,7 @@ import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class SpongeParticleEffectBuilder implements ParticleEffectBuilder {
 

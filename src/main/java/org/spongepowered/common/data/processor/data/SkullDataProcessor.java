@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataContainer;
@@ -49,6 +48,8 @@ import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
+import java.util.Optional;
+
 public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, ImmutableSkullData> {
 
     @Override
@@ -63,7 +64,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
         } else if (SkullUtils.isValidItemStack(dataHolder)) {
             return Optional.<SkullData>of(new SpongeSkullData(SkullUtils.getSkullType((ItemStack) dataHolder)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -72,7 +73,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
             SkullData merged = overlap.merge(checkNotNull(manipulator.copy()), this.from(dataHolder).get());
             return Optional.of(manipulator.set(Keys.SKULL_TYPE, merged.type().get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -120,7 +121,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
         if (key.equals(Keys.SKULL_TYPE)) {
             return Optional.<ImmutableSkullData>of(new ImmutableSpongeSkullData((SkullType) value));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

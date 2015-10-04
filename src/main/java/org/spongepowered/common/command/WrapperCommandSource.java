@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command;
 
-import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -44,6 +43,8 @@ import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 public class WrapperCommandSource extends SpongeSubject implements CommandSource {
 

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
+import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityBanner.EnumBannerPattern.class)
+@Mixin(TileEntityBanner.EnumBannerPattern.class)
 public class MixinEnumBannerPattern implements BannerPatternShape {
 
     @Shadow

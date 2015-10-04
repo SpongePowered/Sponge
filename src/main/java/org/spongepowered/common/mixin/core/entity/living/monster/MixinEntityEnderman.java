@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.monster.EntityEnderman;
@@ -35,13 +34,15 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Optional;
+
 @NonnullByDefault
 @Mixin(EntityEnderman.class)
 @Implements(@Interface(iface = Enderman.class, prefix = "enderman$"))
 public abstract class MixinEntityEnderman extends MixinEntityMob {
 
     public Optional<BlockState> getCarriedBlock() {
-        return Optional.fromNullable((BlockState) Block.getStateById(this.dataWatcher.getWatchableObjectShort(16) & 65535));
+        return Optional.ofNullable((BlockState) Block.getStateById(this.dataWatcher.getWatchableObjectShort(16) & 65535));
     }
 
     public void setCarriedBlock(BlockState carriedBlock) {

@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -65,6 +64,7 @@ import org.spongepowered.common.world.extent.ExtentViewTransform;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(ExtentViewTransform.class)
@@ -509,7 +509,7 @@ public abstract class MixinExtentViewTransform implements Extent {
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer) {
         // TODO once entity containers are implemented
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

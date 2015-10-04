@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -39,6 +38,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType, Value<SkullType>> {
 
@@ -58,7 +59,7 @@ public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType,
         } else if (SkullUtils.isValidItemStack(container)) {
             return Optional.of(SkullUtils.getSkullType((ItemStack) container));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
