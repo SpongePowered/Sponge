@@ -1,3 +1,4 @@
+// Gradle plugins
 buildscript {
     repositories {
         jcenter()
@@ -5,26 +6,38 @@ buildscript {
             name = 'forge'
             url = 'http://files.minecraftforge.net/maven'
         }
+        maven {
+            name = 'minecrell'
+            url = 'http://repo.minecrell.net/snapshots'
+        }
     }
 
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.0-SNAPSHOT'
+        // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
+        classpath 'net.minecrell:VanillaGradle:4.0-SNAPSHOT'
         classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
-            exclude module: 'guava'
+            exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
     }
 }
 
-version = '0.1-SNAPSHOT' // TODO: ???
-ext.common = project
-apply plugin: 'net.minecraftforge.gradle.tweaker-server'
-ext.minecraftPlugin = plugins.getPlugin('net.minecraftforge.gradle.tweaker-server')
+// Apply our custom ForgeGradle extension for SpongeCommon
+// Compared to the regular tweaker-server plugin, SpongeCommon has all run tasks disabled
+// and the Minecraft workspace defined as "provided" so they won't conflict with the implementation
+apply plugin: 'net.minecrell.vanilla.server.library'
+ext.minecraftPlugin = plugins.getPlugin('net.minecrell.vanilla.server.library')
 ext.DIR_MCP_MAPPINGS = net.minecraftforge.gradle.common.Constants.DIR_MCP_MAPPINGS
 
-minecraft {
-    tweakClass = 'null'
-}
+// Apply shared ForgeGradle configuration
+ext.common = project
 apply from: 'gradle/minecraft.gradle'
+
+// Inherit SpongeCommon version from SpongeAPI
+version = api.version
+
+minecraft {
+    version = '1.8'
+}
 
 dependencies {
     compile api
@@ -33,14 +46,11 @@ dependencies {
         exclude module: 'guava'
     }
 
-    compile 'com.zaxxer:HikariCP-java6:2.3.9'
-
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
-    testCompile 'org.powermock:powermock-module-junit4:1.6.3'
-    testCompile 'org.powermock:powermock-api-easymock:1.6.3'
-    testCompile 'org.powermock:powermock-api-mockito:1.6.3'
-    testCompile 'org.easymock:easymock:3.2'
-    runtime 'org.mariadb.jdbc:mariadb-java-client:1.1.9'
-    runtime 'com.h2database:h2:1.4.189'
-    runtime 'org.xerial:sqlite-jdbc:3.8.11.1'
+
+    compile 'com.zaxxer:HikariCP:2.4.1'
+
+    runtime 'org.mariadb.jdbc:mariadb-java-client:1.2.3'
+    runtime 'com.h2database:h2:1.4.190'
+    runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
 }

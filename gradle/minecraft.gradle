@@ -1,9 +1,14 @@
+// Shared Gradle configuration for the Sponge ForgeGradle projects
+
 ext.api = common.project('SpongeAPI')
 
-apply from: api.file('gradle/java.gradle')
+// Apply shared Gradle configuration in SpongeAPI
+apply from: api.file('gradle/sponge.gradle')
 
+// Finish configuring SpongeAPI first
 evaluationDependsOn api.path
 
+// ForgeGradle 2 doesn't provide {SRG_DIR} anymore, we still need it frequently so we'll add it on our own for now
 minecraftPlugin.replacer.putReplacement('SRG_DIR', "$DIR_MCP_MAPPINGS/srgs")
 
 // Mixins
@@ -13,10 +18,6 @@ ext {
 }
 
 minecraft {
-    if (!project.ext.has('forgeBuild')) {
-        version = '1.8'
-    }
-
     mappings = 'snapshot_20150301'
     runDir = 'run'
 }
@@ -27,7 +28,8 @@ compileJava {
             '-Xlint:-processing',
             "-AoutSrgFile=${project.mixinSrg.canonicalPath}",
             "-AoutRefMapFile=${project.mixinRefMap.canonicalPath}",
-            "-AreobfSrgFile=${project.file('build/srgs/mcp-srg.srg').canonicalPath}"
+            "-AreobfSrgFile=${project.file('build/srgs/mcp-srg.srg').canonicalPath}",
+            '-AdisableTargetValidator=true'
     ]
 }
 
@@ -39,20 +41,19 @@ task copySrgs(type: Copy, dependsOn: 'genSrgs') {
     into 'build/srgs'
 }
 
+// Run copySrgs when setting up the workspace
 setupDecompWorkspace.dependsOn copySrgs
 setupDevWorkspace.dependsOn copySrgs
 compileJava.dependsOn copySrgs
 
+// ForgeGradle 2 fails to apply transformer rules for classes it doesn't know of by default
+// We use the access transformer to make the catalogs in the API accessible
 deobfMcMCP { failOnAtError = false }
 deobfMcSRG { failOnAtError = false }
 
-plugins.withId('net.minecraftforge.gradle.tweaker-server') {
-    // Scan for access transformers
-    sourceSets.main.resources.files.each {
-        if (it.name.endsWith('_at.cfg')) {
-            logger.lifecycle("Found AccessTransformer in main resources: $it.name")
-            minecraft.at it
-        }
+if (!plugins.hasPlugin('net.minecraftforge.forge')) {
+    minecraft {
+        atSource sourceSets.main
     }
 
     afterEvaluate {

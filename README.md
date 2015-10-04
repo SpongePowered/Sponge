@@ -41,6 +41,7 @@ __For [Eclipse]__
 __For [IntelliJ]__
   1. Make sure you have the Gradle plugin enabled (File > Settings > Plugins).  
   2. Click File > New > Project from Existing Sources > Gradle and select the root folder for SpongeCommon.
+  3. Select _Use customizable gradle wrapper_ if you do not have Gradle installed.
 
 ## Building
 __Note:__ If you do not have [Gradle] installed then use ./gradlew for Unix systems or Git Bash and gradlew.bat for Windows systems in place of any 'gradle' command.
@@ -52,9 +53,9 @@ In order to build SpongeCommon you simply need to run the `gradle` command. You 
 ## Updating your Clone
 The following steps will update your clone with the official repo.
 
-1. `git remote add upstream git@github.com:SpongePowered/SpongeCommon.git`
-2. `git pull --rebase upstream master`
-3. `git submodule update --recursive`
+1. `git pull`
+2. `git submodule update --recursive`
+3. `gradle setupDecompWorkspace --refresh-dependencies`
 
 ## Contributing
 Are you a talented programmer looking to contribute some code? We'd love the help!

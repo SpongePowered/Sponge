@@ -1,45 +1,22 @@
+// Shared Gradle configuration for the Sponge implementation projects
+
 ext.common = project(':SpongeCommon')
 
-ext {
-    buildNumber = System.getenv().BUILD_NUMBER != null ? System.getenv().BUILD_NUMBER : '0'
-    ciSystem = System.getenv().ciSystem != null ? System.getenv().ciSystem : 'unknown'
-    commit = System.getenv().commit != null ? System.getenv().commit : 'unknown'
-
-    apiVersion = '2.1DEV'
-}
-
-if (project.ext.has('forgeBuild')) {
-    version = "1.8-$forgeBuild-$apiVersion-$buildNumber"
-} else {
-    version = "1.8-$apiVersion-$buildNumber"
-}
-
+// Apply shared ForgeGradle configuration
 apply from: common.file('gradle/minecraft.gradle')
 
-// Apply shadow plugin
-apply plugin: 'com.github.johnrengelman.shadow'
+ext.apiVersion = (api.version - '-SNAPSHOT') + '-DEV'
 
 dependencies {
     compile common
 }
 
-// Eclipse is too stupid to order the classpath correctly unfortunately...
-// Put Common last
-/*eclipse {
-    classpath {
-        file {
-            whenMerged { classpath ->
-                def lib = classpath.entries.find { it.path == '/SpongeCommon' }
-                def others = classpath.entries.findAll { it != lib }
-                classpath.entries = others + lib
-            }
-        }
-    }
-}*/
-
 jar {
     classifier = 'release'
+}
 
+// The version can change until we're done configuring the project, so delay setting the manifest entries until that is final
+afterEvaluate {
     manifest {
         attributes(
                 'Implementation-Version': "$version+$ciSystem-b${buildNumber}.git-$commit"
@@ -47,27 +24,34 @@ jar {
     }
 }
 
+// Finish configuring SpongeCommon first
 evaluationDependsOn common.path
 
+// Apply shadow plugin to include the dependencies in the JAR
+apply plugin: 'com.github.johnrengelman.shadow'
+
 shadowJar {
+    // Make sure SpongeCommon was actually reobfuscated before shading it
     dependsOn common.tasks.reobfJar
 
     classifier = ''
 
+    // Exclude ForgeGradle classes from shaded JAR
     exclude 'GradleStart**'
     exclude 'net/minecraftforge/**'
 
     from project.mixinRefMap
 
     dependencies {
-        // Common
+        // SpongeCommon and Mixin
         include project(common.path)
         include dependency('org.spongepowered:mixin')
+
+        // SpongeAPI and event generation
+        include project(api.path)
         include dependency('org.spongepowered:event-gen-core')
 
-        // SpongeAPI
-        include project(api.path)
-
+        // Include all other dependencies
         include dependency('org.slf4j:slf4j-api')
         include dependency('org.apache.logging.log4j:log4j-slf4j-impl')
 
@@ -85,7 +69,7 @@ shadowJar {
 
         include dependency('org.yaml:snakeyaml')
 
-        include dependency('com.zaxxer:HikariCP-java6')
+        include dependency('com.zaxxer:HikariCP')
         include dependency('org.javassist:javassist')
 
         include dependency('org.mariadb.jdbc:mariadb-java-client')
@@ -93,23 +77,24 @@ shadowJar {
         include dependency('org.xerial:sqlite-jdbc')
     }
 
+    // We include multiple JDBC drivers, so we need to merge the service file to enable them all
     mergeServiceFiles()
+
+    // Prevent other dependencies replacing our license file
     exclude 'LICENSE', 'NOTICE'
 }
 
 afterEvaluate {
+    // Reobfuscate the shaded JAR directly
     reobfJar {
         dependsOn shadowJar
         jar = shadowJar.archivePath
     }
 }
 
-// Add Common access transformer
-common.sourceSets.main.resources.files.each {
-    if (it.name.endsWith('_at.cfg')) {
-        logger.lifecycle("Found AccessTransformer in dependency resources: $it.name")
-        minecraft.at it
-    }
+// Add Common access transformers
+minecraft {
+    atSource common.sourceSets.main
 }
 
 // Deployment stuff
@@ -154,6 +139,7 @@ task sdkZip(type: Zip) {
 
 artifacts {
     archives deobfJar
+    // Include sdk ZIP only if it's actually supported for the implementation
     if (sdkZip.enabled) {
         archives sdkZip
     }

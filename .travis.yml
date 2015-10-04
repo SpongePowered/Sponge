@@ -4,7 +4,6 @@ language: java
 jdk:
   - oraclejdk8
 
-env: GRADLE_OPTS="-Xms1g -Xmx3g"
 install: ./gradlew setupCIWorkspace
 script: ./gradlew build
 
