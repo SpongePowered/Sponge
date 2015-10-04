@@ -38,8 +38,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
-import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.potion.PotionEffect;
@@ -278,16 +276,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public Text getTeamRepresentation() {
         return Texts.of(this.getUniqueID().toString());
-    }
-
-    @Override
-    public DamageableData getMortalData() {
-        return get(DamageableData.class).get(); // possibly perform a failsafe?
-    }
-
-    @Override
-    public HealthData getHealthData() {
-        return get(HealthData.class).get(); // possibly perform a failsafe?
     }
 
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =

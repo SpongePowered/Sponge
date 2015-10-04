@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.nbt.NBTTagCompound;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -124,11 +123,6 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
         this.age = MAGIC_INFINITE_DESPAWN_TIME;
         this.pluginDespawnSet = true;
         this.infiniteDespawnDelay = true;
-    }
-
-    @Override
-    public RepresentedItemData getItemData() {
-        return get(RepresentedItemData.class).get();
     }
 
     @Override

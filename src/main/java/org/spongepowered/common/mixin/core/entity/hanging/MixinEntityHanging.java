@@ -28,7 +28,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,11 +64,6 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging 
                 this.onBroken((Entity) null);
             }
         }
-    }
-
-    @Override
-    public DirectionalData getDirectionalData() {
-        return get(DirectionalData.class).get();
     }
 
     @Override

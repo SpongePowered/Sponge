@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityRabbit;
-import org.spongepowered.api.data.manipulator.mutable.entity.RabbitData;
 import org.spongepowered.api.entity.living.animal.Rabbit;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,8 +33,4 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(EntityRabbit.class)
 public abstract class MixinEntityRabbit extends MixinEntityAnimal implements Rabbit {
 
-    @Override
-    public RabbitData getRabbitData() {
-        return get(RabbitData.class).get();
-    }
 }

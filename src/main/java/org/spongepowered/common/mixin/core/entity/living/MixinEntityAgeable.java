@@ -25,16 +25,10 @@
 package org.spongepowered.common.mixin.core.entity.living;
 
 import net.minecraft.entity.EntityAgeable;
-import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EntityAgeable.class)
 public abstract class MixinEntityAgeable extends MixinEntityLiving implements Ageable {
-
-    @Override
-    public AgeableData getAgeData() {
-        return get(AgeableData.class).get();
-    }
 
 }
