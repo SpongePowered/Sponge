@@ -27,10 +27,12 @@ package org.spongepowered.common.mixin.core.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -349,6 +351,15 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
             }
         }
 
+        return Optional.empty();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Optional<BlockState> withTrait(BlockTrait<?> trait, Comparable<?> value) {
+        if (this.properties.containsKey(trait) && ((Predicate<Comparable>) trait.getPredicate()).apply(value)) {
+            return Optional.of((BlockState) this.withProperty((IProperty) trait, value));
+        }
         return Optional.empty();
     }
 
