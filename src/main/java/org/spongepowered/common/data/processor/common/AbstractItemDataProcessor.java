@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
@@ -43,6 +42,7 @@ import org.spongepowered.api.entity.EntityType;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
 
@@ -62,7 +62,7 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
 
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof ItemStack && this.predicate.apply((ItemStack) dataHolder);
+        return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
     }
 
     @SuppressWarnings("unchecked")

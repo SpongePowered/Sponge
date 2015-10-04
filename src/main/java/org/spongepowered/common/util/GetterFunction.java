@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util;
 
+@FunctionalInterface
 public interface GetterFunction<V> {
 
     V get();

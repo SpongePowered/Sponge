@@ -30,9 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -108,6 +106,7 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
@@ -168,6 +167,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -202,7 +203,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
-            Predicate<net.minecraft.entity.Entity> filter);
+            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
@@ -340,8 +341,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // This already returns a new copy
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class, (Predicate<net.minecraft.entity.Entity>) (Object)
-            filter);
+        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
+                                                              Functional.java8ToGuava((Predicate<net.minecraft.entity.Entity>) (Object) filter));
     }
 
     @Override
@@ -852,7 +853,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
-        return Lists.newArrayList(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
+        return ((List<TileEntity>) (Object) this.loadedTileEntityList).stream()
+            .filter(filter)
+            .collect(Collectors.toList());
     }
 
     @Override

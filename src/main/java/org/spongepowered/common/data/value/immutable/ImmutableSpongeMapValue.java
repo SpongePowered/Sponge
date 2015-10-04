@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -40,6 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V>> implements ImmutableMapValue<K, V> {
 
@@ -109,12 +109,10 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
     @Override
     public ImmutableMapValue<K, V> withoutAll(Predicate<Map.Entry<K, V>> predicate) {
         final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
-        for (Map.Entry<K, V> entry : this.actualValue.entrySet()) {
-            if (checkNotNull(predicate).apply(entry)) {
-                builder.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return new ImmutableSpongeMapValue<K, V>(getKey(), builder.build());
+        this.actualValue.entrySet().stream().filter(entry -> checkNotNull(predicate).test(entry)).forEach(entry -> {
+            builder.put(entry.getKey(), entry.getValue());
+        });
+        return new ImmutableSpongeMapValue<>(getKey(), builder.build());
     }
 
     @Override

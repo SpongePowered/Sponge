@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.item;
 
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -58,7 +57,7 @@ import java.util.Optional;
 public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
 
     public ItemEnchantmentDataProcessor() {
-        super(Predicates.<ItemStack>alwaysTrue(), Keys.ITEM_ENCHANTMENTS);
+        super(input -> true, Keys.ITEM_ENCHANTMENTS);
     }
 
     @Override

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableCollectionValue;
@@ -36,6 +35,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 public abstract class SpongeCollectionValue<E, V extends Collection<E>, I extends CollectionValue<E, V, I, L>,
@@ -103,7 +103,7 @@ public abstract class SpongeCollectionValue<E, V extends Collection<E>, I extend
     @Override
     public I removeAll(Predicate<E> predicate) {
         for (Iterator<E> iterator = this.actualValue.iterator(); iterator.hasNext(); ) {
-            if (checkNotNull(predicate).apply(iterator.next())) {
+            if (checkNotNull(predicate).test(iterator.next())) {
                 iterator.remove();
             }
         }

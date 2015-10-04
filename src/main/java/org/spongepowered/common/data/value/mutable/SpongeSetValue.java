@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.key.Key;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, SetValue<E>, ImmutableSetValue<E>> implements SetValue<E> {
 
@@ -61,12 +62,8 @@ public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, SetValue
     @Override
     public SetValue<E> filter(Predicate<? super E> predicate) {
         final Set<E> set = Sets.newHashSet();
-        for (E element : this.actualValue) {
-            if (checkNotNull(predicate).apply(element)) {
-                set.add(element);
-            }
-        }
-        return new SpongeSetValue<E>(getKey(), set);
+        set.addAll(this.actualValue.stream().filter(element -> checkNotNull(predicate).test(element)).collect(Collectors.toList()));
+        return new SpongeSetValue<>(getKey(), set);
     }
 
     @Override

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.item;
 
 import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -55,14 +54,7 @@ import java.util.Optional;
 public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, ListValue<Text>, PagedData, ImmutablePagedData>  {
 
     public ItemPagedDataProcessor() {
-        super(new Predicate<ItemStack>(){
-
-            @Override
-            public boolean apply(ItemStack input) {
-                return input.getItem() == Items.writable_book || input.getItem() == Items.written_book;
-            }
-
-        }, Keys.BOOK_PAGES);
+        super(input -> input.getItem() == Items.writable_book || input.getItem() == Items.written_book, Keys.BOOK_PAGES);
     }
 
     @SuppressWarnings("unchecked")

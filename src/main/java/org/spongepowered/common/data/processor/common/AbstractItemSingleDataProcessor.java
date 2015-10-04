@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -41,6 +40,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 
 public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
@@ -64,7 +64,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof ItemStack && this.predicate.apply((ItemStack) dataHolder);
+        return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
     }
 
     @SuppressWarnings("unchecked")

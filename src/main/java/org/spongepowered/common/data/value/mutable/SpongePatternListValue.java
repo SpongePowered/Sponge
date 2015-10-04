@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.value.mutable;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -38,6 +37,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListV
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SpongePatternListValue extends SpongeListValue<PatternLayer> implements PatternListValue {
 

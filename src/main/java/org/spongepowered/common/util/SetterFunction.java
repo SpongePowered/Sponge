@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util;
 
+@FunctionalInterface
 public interface SetterFunction<V> {
 
     void set(V value);

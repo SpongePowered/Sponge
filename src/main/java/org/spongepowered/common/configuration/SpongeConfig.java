@@ -172,9 +172,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         try {
             this.configMapper.serialize(this.root.getNode(this.modId));
             this.loader.save(this.root);
-        } catch (IOException e) {
-            LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
-        } catch (ObjectMappingException e) {
+        } catch (IOException | ObjectMappingException e) {
             LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
         }
     }
@@ -186,9 +184,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                             TypeSerializers.getDefaultSerializers().newChild().registerType(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer()))
                     .setHeader(HEADER));
             this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
-        } catch (IOException e) {
-            LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
-        } catch (ObjectMappingException e) {
+        } catch (IOException | ObjectMappingException e) {
             LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
         }
     }
@@ -261,7 +257,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
 
         public Predicate<InetAddress> getIpSet(String name) {
-            return this.ipSets.containsKey(name) ? Predicates.<InetAddress>and(this.ipSets.get(name)) : null;
+            return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
         }
     }
 

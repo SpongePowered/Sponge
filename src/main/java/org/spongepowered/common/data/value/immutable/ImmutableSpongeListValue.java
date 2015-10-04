@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -39,6 +38,7 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<E, List<E>, ImmutableListValue<E>, ListValue<E>>
     implements ImmutableListValue<E> {
@@ -100,7 +100,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
     public ImmutableListValue<E> withoutAll(Predicate<E> predicate) {
         final ImmutableList.Builder<E> builder = ImmutableList.builder();
         for (E existing : this.actualValue) {
-            if (checkNotNull(predicate).apply(existing)) {
+            if (checkNotNull(predicate).test(existing)) {
                 builder.add(existing);
             }
         }
