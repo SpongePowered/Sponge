@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+
+import java.util.Optional;
 
 public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
@@ -50,7 +51,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
             final EntityPlayer player = (EntityPlayer) container;
             return Optional.of(player.experienceLevel);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

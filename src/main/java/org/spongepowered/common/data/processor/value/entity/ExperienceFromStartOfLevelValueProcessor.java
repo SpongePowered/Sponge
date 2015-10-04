@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -35,6 +34,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+
+import java.util.Optional;
 
 public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, ImmutableBoundedValue<Integer>> {
 
@@ -48,7 +49,7 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
             final EntityPlayer player = (EntityPlayer) container;
             return Optional.of(player.xpBarCap());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

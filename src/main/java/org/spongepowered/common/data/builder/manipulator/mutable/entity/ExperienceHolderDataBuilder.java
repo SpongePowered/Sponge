@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
@@ -35,6 +34,8 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderDat
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<ExperienceHolderData, ImmutableExperienceHolderData> {
 
@@ -47,7 +48,7 @@ public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<Exper
             final int expSinceLevel = DataUtil.getData(container, Keys.EXPERIENCE_SINCE_LEVEL, Integer.class);
             return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -64,6 +65,6 @@ public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<Exper
             final int expSinceLevel = (int) (player.experience * player.xpBarCap());
             return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }
