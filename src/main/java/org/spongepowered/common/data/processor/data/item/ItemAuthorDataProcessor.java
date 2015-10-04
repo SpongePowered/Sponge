@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -48,6 +47,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.text.IMixinText;
 
 import java.util.Locale;
+import java.util.Optional;
 
 public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
 
@@ -101,7 +101,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     @Override
     protected Optional<Text> getVal(ItemStack itemStack) {
         if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
         final Text author = Texts.json().fromUnchecked(json);

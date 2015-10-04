@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -43,6 +42,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.text.IMixinText;
 
 import java.util.Locale;
+import java.util.Optional;
 
 public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text, Value<Text>> {
 
@@ -55,13 +55,13 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
         if (this.supports(container)) {
             final ItemStack itemStack = (ItemStack) container;
             if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
-                return Optional.absent();
+                return Optional.empty();
             }
             final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
             final Text author = Texts.json().fromUnchecked(json);
             return Optional.<Text>of(author);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
@@ -39,6 +38,8 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+
+import java.util.Optional;
 
 public class ItemAuthorDataBuilder implements DataManipulatorBuilder<AuthorData, ImmutableAuthorData> {
 
@@ -59,7 +60,7 @@ public class ItemAuthorDataBuilder implements DataManipulatorBuilder<AuthorData,
     public Optional<AuthorData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
             if (((ItemStack) dataHolder).getItem() != Items.writable_book || ((ItemStack) dataHolder).getItem() != Items.written_book) {
-                return Optional.absent();
+                return Optional.empty();
             }
             if (((ItemStack) dataHolder).getTagCompound() == null || ((ItemStack) dataHolder).getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
                 return Optional.<AuthorData>of(new SpongeAuthorData());
@@ -68,7 +69,7 @@ public class ItemAuthorDataBuilder implements DataManipulatorBuilder<AuthorData,
             final Text author = Texts.json().fromUnchecked(json);
             return Optional.<AuthorData>of(new SpongeAuthorData(author));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
