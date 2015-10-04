@@ -42,4 +42,9 @@ public class ImmutableSpongeExtendedData extends AbstractImmutableBooleanData<Im
     public ImmutableValue<Boolean> extended() {
         return ImmutableSpongeValue.cachedOf(Keys.EXTENDED, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return extended();
+    }
 }

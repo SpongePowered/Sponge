@@ -42,4 +42,9 @@ public class ImmutableSpongeDisarmedData extends AbstractImmutableBooleanData<Im
     public ImmutableValue<Boolean> disarmed() {
         return ImmutableSpongeValue.cachedOf(Keys.DISARMED, true, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return disarmed();
+    }
 }

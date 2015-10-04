@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePrismarineData;
 import org.spongepowered.api.data.manipulator.mutable.block.PrismarineData;
 import org.spongepowered.api.data.type.PrismarineType;
+import org.spongepowered.api.data.type.PrismarineTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePrismarineData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongePrismarineData extends AbstractImmutableSingleCatalo
     implements ImmutablePrismarineData {
 
     public ImmutableSpongePrismarineData(PrismarineType value) {
-        super(ImmutablePrismarineData.class, value, Keys.PRISMARINE_TYPE, SpongePrismarineData.class);
+        super(ImmutablePrismarineData.class, value, PrismarineTypes.BRICKS, Keys.PRISMARINE_TYPE, SpongePrismarineData.class);
     }
 
 }

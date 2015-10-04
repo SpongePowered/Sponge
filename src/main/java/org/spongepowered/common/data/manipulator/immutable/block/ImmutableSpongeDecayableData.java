@@ -42,4 +42,9 @@ public class ImmutableSpongeDecayableData extends AbstractImmutableBooleanData<I
     public ImmutableValue<Boolean> decayable() {
         return ImmutableSpongeValue.cachedOf(Keys.DECAYABLE, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return decayable();
+    }
 }

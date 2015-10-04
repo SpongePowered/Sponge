@@ -58,17 +58,12 @@ import java.util.function.Function;
  * <p>Really doesn't do much else. Don't use this guys.
  */
 public class SpongePermissionService implements PermissionService {
-    private static final Function<String, CommandSource> NO_COMMAND_SOURCE = new Function<String, CommandSource>() {
-        @Override
-        public CommandSource apply(String s) {
-            return null;
-        }
-    };
+    private static final Function<String, CommandSource> NO_COMMAND_SOURCE = s -> null;
 
     private final Game game;
-    private final Map<String, PermissionDescription> descriptionMap = new LinkedHashMap<String, PermissionDescription>();
+    private final Map<String, PermissionDescription> descriptionMap = new LinkedHashMap<>();
     private Collection<PermissionDescription> descriptions;
-    private final ConcurrentMap<String, SubjectCollection> subjects = new ConcurrentHashMap<String, SubjectCollection>();
+    private final ConcurrentMap<String, SubjectCollection> subjects = new ConcurrentHashMap<>();
     private final MemorySubjectData defaultData;
 
     public SpongePermissionService(Game game) {
@@ -76,29 +71,19 @@ public class SpongePermissionService implements PermissionService {
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
-        this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this, new Function<String, MemorySubjectData>() {
-            @Override
-            public MemorySubjectData apply(String s) {
-                return new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2));
-            }
-        }, NO_COMMAND_SOURCE));
+        this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
+                                                                            s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
 
-        this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this, new Function<String, MemorySubjectData>() {
-            @Override
-            public MemorySubjectData apply(String s) {
-                return new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4));
-            }
-        }, new Function<String, CommandSource>() {
-            @Override
-            public CommandSource apply(String s) {
-                if (s.equals("Server")) {
-                    return Sponge.getGame().getServer().getConsole();
-                } else if (s.equals("RCON")) {
-                    // TODO: Implement RCON API?
-                }
-                return null;
-            }
-        }));
+        this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
+                                                                     s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)),
+                                                                     s -> {
+                                                                         if (s.equals("Server")) {
+                                                                             return Sponge.getGame().getServer().getConsole();
+                                                                         } else if (s.equals("RCON")) {
+                                                                             // TODO: Implement RCON API?
+                                                                         }
+                                                                         return null;
+                                                                     }));
 
         this.defaultData = new FixedParentMemorySubjectData(this, getGroupForOpLevel(0));
     }
@@ -147,12 +132,7 @@ public class SpongePermissionService implements PermissionService {
     }
 
     private SubjectCollection newCollection(String identifier) {
-        return new DataFactoryCollection(identifier, this, new Function<String, MemorySubjectData>() {
-            @Override
-            public MemorySubjectData apply(String s) {
-                return new GlobalMemorySubjectData(SpongePermissionService.this);
-            }
-        }, NO_COMMAND_SOURCE);
+        return new DataFactoryCollection(identifier, this, s -> new GlobalMemorySubjectData(SpongePermissionService.this), NO_COMMAND_SOURCE);
     }
 
     @Override

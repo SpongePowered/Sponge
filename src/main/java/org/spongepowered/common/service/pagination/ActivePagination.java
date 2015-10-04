@@ -62,7 +62,7 @@ abstract class ActivePagination {
 
     public ActivePagination(CommandSource src, PaginationCalculator<CommandSource> calc, Text title,
             Text header, Text footer, String padding) {
-        this.src = new WeakReference<CommandSource>(src);
+        this.src = new WeakReference<>(src);
         this.calc = calc;
         this.title = title;
         this.header = header;
@@ -129,7 +129,7 @@ abstract class ActivePagination {
         }
         this.currentPage = page;
 
-        List<Text> toSend = new ArrayList<Text>();
+        List<Text> toSend = new ArrayList<>();
         Text title = this.title;
         if (title != null) {
             toSend.add(title);

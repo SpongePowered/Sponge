@@ -98,9 +98,7 @@ abstract class SchedulerBase {
     protected final void runTick() {
         this.preTick();
         try {
-            for (ScheduledTask task : this.taskMap.values()) {
-                this.processTask(task);
-            }
+            this.taskMap.values().forEach(this::processTask);
             this.postTick();
         } finally {
             this.finallyPostTick();
@@ -170,17 +168,13 @@ abstract class SchedulerBase {
      * @param task The task to start
      */
     protected void startTask(final ScheduledTask task) {
-        this.executeTaskRunnable(new Runnable() {
-
-            @Override
-            public void run() {
-                task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
-                try {
-                    task.getRunnable().run();
-                } catch (Throwable t) {
-                    Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
-                            task.getOwner(), t);
-                }
+        this.executeTaskRunnable(() -> {
+            task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+            try {
+                task.getRunnable().run();
+            } catch (Throwable t) {
+                Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
+                        task.getOwner(), t);
             }
         });
     }

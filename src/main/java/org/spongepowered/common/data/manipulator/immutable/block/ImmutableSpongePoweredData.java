@@ -42,4 +42,9 @@ public class ImmutableSpongePoweredData extends AbstractImmutableBooleanData<Imm
     public ImmutableValue<Boolean> powered() {
         return ImmutableSpongeValue.cachedOf(Keys.POWERED, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return powered();
+    }
 }

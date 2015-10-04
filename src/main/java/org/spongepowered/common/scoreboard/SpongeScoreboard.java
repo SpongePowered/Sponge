@@ -123,7 +123,7 @@ public class SpongeScoreboard implements Scoreboard {
 
     @Override
     public Set<Objective> getObjectivesByCriteria(Criterion criteria) {
-        return new HashSet<Objective>(this.criteria.get(criteria));
+        return new HashSet<>(this.criteria.get(criteria));
     }
 
     @Override

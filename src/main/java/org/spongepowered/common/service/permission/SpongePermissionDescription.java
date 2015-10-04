@@ -128,7 +128,7 @@ class SpongePermissionDescription implements PermissionDescription {
         private String id;
         private Text description;
         private Optional<String> suggestedRank = Optional.empty();
-        private final Map<String, Tristate> roleAssignments = new LinkedHashMap<String, Tristate>();
+        private final Map<String, Tristate> roleAssignments = new LinkedHashMap<>();
 
         Builder(SpongePermissionService permissionService, PluginContainer owner) {
             super();

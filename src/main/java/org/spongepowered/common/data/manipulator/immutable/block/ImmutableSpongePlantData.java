@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
 import org.spongepowered.api.data.manipulator.mutable.block.PlantData;
 import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePlantData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongePlantData extends AbstractImmutableSingleCatalogData
         ImmutablePlantData {
 
     public ImmutableSpongePlantData(PlantType value) {
-        super(ImmutablePlantData.class, value, Keys.PLANT_TYPE, SpongePlantData.class);
+        super(ImmutablePlantData.class, value, PlantTypes.POPPY, Keys.PLANT_TYPE, SpongePlantData.class);
     }
 
 }

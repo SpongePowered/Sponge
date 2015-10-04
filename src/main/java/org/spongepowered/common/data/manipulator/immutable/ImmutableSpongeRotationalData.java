@@ -28,12 +28,13 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.RotationalData;
 import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRotationalData;
 
 public class ImmutableSpongeRotationalData extends AbstractImmutableSingleCatalogData<Rotation, ImmutableRotationalData, RotationalData> implements ImmutableRotationalData {
 
     public ImmutableSpongeRotationalData(Rotation value) {
-        super(ImmutableRotationalData.class, value, Keys.ROTATION, SpongeRotationalData.class);
+        super(ImmutableRotationalData.class, value, Rotations.BOTTOM, Keys.ROTATION, SpongeRotationalData.class);
     }
 }

@@ -43,4 +43,9 @@ public class ImmutableSpongeSuspendedData extends AbstractImmutableBooleanData<I
     public ImmutableValue<Boolean> suspended() {
         return ImmutableSpongeValue.cachedOf(Keys.SUSPENDED, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return suspended();
+    }
 }

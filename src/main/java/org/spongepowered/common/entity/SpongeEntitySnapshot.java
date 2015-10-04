@@ -119,7 +119,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public Optional<Transform<World>> getTransform() {
         Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Transform<World> transform = new Transform<World>(optional.get(), this.position, this.rotation);
+            final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
             return Optional.of(transform);
         }
         return Optional.empty();
@@ -134,7 +134,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public Optional<Location<World>> getLocation() {
         Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Location<World> location = new Location<World>(optional.get(), this.position);
+            final Location<World> location = new Location<>(optional.get(), this.position);
             return Optional.of(location);
         }
         return Optional.empty();

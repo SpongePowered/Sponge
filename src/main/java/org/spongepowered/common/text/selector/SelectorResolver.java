@@ -69,6 +69,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A resolver that acts like Vanilla Minecraft in many regards.
@@ -393,9 +394,7 @@ public class SelectorResolver {
 
     private Collection<ArgumentType<?>> getArgumentTypes(Collection<Argument<?>> arguments) {
         Collection<ArgumentType<?>> types = Sets.newHashSet();
-        for (Argument<?> argument : arguments) {
-            types.add(argument.getType());
-        }
+        types.addAll(arguments.stream().map(Argument::getType).collect(Collectors.toList()));
         return types;
     }
 

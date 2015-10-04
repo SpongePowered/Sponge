@@ -42,4 +42,9 @@ public class ImmutableSpongeWetData extends AbstractImmutableBooleanData<Immutab
     public ImmutableValue<Boolean> wet() {
         return ImmutableSpongeValue.cachedOf(Keys.IS_WET, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return wet();
+    }
 }

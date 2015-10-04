@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandData;
 import org.spongepowered.api.data.manipulator.mutable.block.SandData;
 import org.spongepowered.api.data.type.SandType;
+import org.spongepowered.api.data.type.SandTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSandData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeSandData extends AbstractImmutableSingleCatalogData<
     implements ImmutableSandData {
 
     public ImmutableSpongeSandData(SandType value) {
-        super(ImmutableSandData.class, value, Keys.SAND_TYPE, SpongeSandData.class);
+        super(ImmutableSandData.class, value, SandTypes.NORMAL, Keys.SAND_TYPE, SpongeSandData.class);
     }
 
 }

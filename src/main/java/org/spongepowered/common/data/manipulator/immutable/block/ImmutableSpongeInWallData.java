@@ -42,4 +42,9 @@ public class ImmutableSpongeInWallData extends AbstractImmutableBooleanData<Immu
     public ImmutableValue<Boolean> inWall() {
         return ImmutableSpongeValue.cachedOf(Keys.IN_WALL, true, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return inWall();
+    }
 }

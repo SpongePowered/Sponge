@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
 import org.spongepowered.api.data.manipulator.mutable.block.SlabData;
 import org.spongepowered.api.data.type.SlabType;
+import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSlabData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeSlabData extends AbstractImmutableSingleCatalogData<
     implements ImmutableSlabData {
 
     public ImmutableSpongeSlabData(SlabType value) {
-        super(ImmutableSlabData.class, value, Keys.SLAB_TYPE, SpongeSlabData.class);
+        super(ImmutableSlabData.class, value, SlabTypes.STONE, Keys.SLAB_TYPE, SpongeSlabData.class);
     }
 
 }

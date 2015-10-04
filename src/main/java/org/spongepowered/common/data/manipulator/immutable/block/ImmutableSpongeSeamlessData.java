@@ -42,4 +42,9 @@ public class ImmutableSpongeSeamlessData extends AbstractImmutableBooleanData<Im
     public ImmutableValue<Boolean> seamless() {
         return ImmutableSpongeValue.cachedOf(Keys.SEAMLESS, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return seamless();
+    }
 }

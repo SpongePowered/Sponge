@@ -225,7 +225,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private ModuleCategory mixins = new ModuleCategory();
 
         @Setting("ip-sets")
-        private Map<String, List<IpSet>> ipSets = new HashMap<String, List<IpSet>>();
+        private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
         @Setting(value = MODULE_BUNGEECORD)
         private BungeeCordCategory bungeeCord = new BungeeCordCategory();
@@ -344,7 +344,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class SqlCategory extends Category {
         @Setting(comment = "Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
-        private Map<String, String> aliases = new HashMap<String, String>();
+        private Map<String, String> aliases = new HashMap<>();
 
         public Map<String, String> getAliases() {
             return this.aliases;
@@ -354,7 +354,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class CommandsCategory extends Category {
         @Setting(comment = "A mapping from unqualified command alias to plugin id of the plugin that should handle a certain command")
-        private Map<String, String> aliases = new HashMap<String, String>();
+        private Map<String, String> aliases = new HashMap<>();
 
         public Map<String, String> getAliases() {
             return this.aliases;

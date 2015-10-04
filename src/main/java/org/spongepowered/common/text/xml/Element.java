@@ -80,7 +80,7 @@ public abstract class Element {
 
     @XmlElementRef(type = Element.class)
     @XmlMixed
-    protected List<Object> mixedContent = new ArrayList<Object>();
+    protected List<Object> mixedContent = new ArrayList<>();
 
     protected abstract void modifyBuilder(TextBuilder builder);
 
@@ -178,7 +178,7 @@ public abstract class Element {
     }
 
     public static Element fromText(Text text, Locale locale) {
-        final AtomicReference<Element> fixedRoot = new AtomicReference<Element>();
+        final AtomicReference<Element> fixedRoot = new AtomicReference<>();
         Element currentElement = null;
         if (text.getColor() != TextColors.NONE) {
             currentElement = update(fixedRoot, currentElement, new Color.C(text.getColor()));

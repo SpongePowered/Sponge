@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDisguisedBlockData;
 import org.spongepowered.api.data.manipulator.mutable.block.DisguisedBlockData;
 import org.spongepowered.api.data.type.DisguisedBlockType;
+import org.spongepowered.api.data.type.DisguisedBlockTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDisguisedBlockData;
 
@@ -35,6 +36,6 @@ public class ImmutableSpongeDisguisedBlockData extends AbstractImmutableSingleCa
         DisguisedBlockData> implements ImmutableDisguisedBlockData {
 
     public ImmutableSpongeDisguisedBlockData(DisguisedBlockType value) {
-        super(ImmutableDisguisedBlockData.class, value, Keys.DISGUISED_BLOCK_TYPE, SpongeDisguisedBlockData.class);
+        super(ImmutableDisguisedBlockData.class, value, DisguisedBlockTypes.STONE, Keys.DISGUISED_BLOCK_TYPE, SpongeDisguisedBlockData.class);
     }
 }

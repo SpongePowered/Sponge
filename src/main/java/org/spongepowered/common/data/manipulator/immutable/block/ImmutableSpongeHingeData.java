@@ -28,13 +28,14 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableHingeData;
 import org.spongepowered.api.data.manipulator.mutable.block.HingeData;
 import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeHingeData;
 
 public class ImmutableSpongeHingeData extends AbstractImmutableSingleCatalogData<Hinge, ImmutableHingeData, HingeData> implements ImmutableHingeData {
 
     public ImmutableSpongeHingeData(Hinge value) {
-        super(ImmutableHingeData.class, value, Keys.HINGE_POSITION, SpongeHingeData.class);
+        super(ImmutableHingeData.class, value, Hinges.LEFT, Keys.HINGE_POSITION, SpongeHingeData.class);
     }
 
 }

@@ -51,7 +51,7 @@ public class SpongeTeamBuilder implements TeamBuilder {
     private boolean showFriendlyInvisibles = false;
     private Visibility nameTagVisibility = Visibilities.ALL;
     private Visibility deathMessageVisibility = Visibilities.ALL;
-    private Set<Text> members = new HashSet<Text>();
+    private Set<Text> members = new HashSet<>();
 
     @Override
     public TeamBuilder name(String name) {

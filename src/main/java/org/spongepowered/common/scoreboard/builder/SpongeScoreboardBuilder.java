@@ -37,8 +37,8 @@ import java.util.List;
 
 public class SpongeScoreboardBuilder implements ScoreboardBuilder {
 
-    private List<Objective> objectives = new ArrayList<Objective>();
-    private List<Team> teams = new ArrayList<Team>();
+    private List<Objective> objectives = new ArrayList<>();
+    private List<Team> teams = new ArrayList<>();
 
     @Override
     public ScoreboardBuilder objectives(List<Objective> objectives) {
@@ -54,8 +54,8 @@ public class SpongeScoreboardBuilder implements ScoreboardBuilder {
 
     @Override
     public ScoreboardBuilder reset() {
-        this.objectives = new ArrayList<Objective>();
-        this.teams = new ArrayList<Team>();
+        this.objectives = new ArrayList<>();
+        this.teams = new ArrayList<>();
         return this;
     }
 

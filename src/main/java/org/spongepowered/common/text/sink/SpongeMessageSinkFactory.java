@@ -118,7 +118,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
     public static final MessageSink TO_NONE = new MessageSink() {
         @Override
         public Iterable<CommandSource> getRecipients() {
-            return new HashSet<CommandSource>();
+            return new HashSet<>();
         }
     };
 
@@ -167,7 +167,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         private final Set<CommandSource> contents;
 
         private FixedSink(Set<CommandSource> provided) {
-            Set<CommandSource> contents = Collections.newSetFromMap(new WeakHashMap<CommandSource, Boolean>());
+            Set<CommandSource> contents = Collections.newSetFromMap(new WeakHashMap<>());
             contents.addAll(provided);
             this.contents = Collections.unmodifiableSet(contents);
         }
