@@ -43,17 +43,14 @@ import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
+public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> {
 
     private final Class<E> entityClass;
-    private final Key<V> key;
 
     public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<V> key) {
+        super(key);
         this.entityClass = checkNotNull(entityClass);
-        this.key = checkNotNull(key);
     }
-
-    protected abstract M createManipulator();
 
     protected boolean supports(E entity) {
         return true;
@@ -86,20 +83,6 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
     }
 
     @Override
-    public Optional<M> createFrom(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            Optional<M> optional = from(dataHolder);
-            if (!optional.isPresent()) {
-                return Optional.of(createManipulator());
-            } else {
-                return optional;
-            }
-        }
-    }
-
-    @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
         if (!supports(dataHolder)) {
             return Optional.empty();
@@ -115,7 +98,7 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
         return Optional.of(m);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
         if (supports(dataHolder)) {

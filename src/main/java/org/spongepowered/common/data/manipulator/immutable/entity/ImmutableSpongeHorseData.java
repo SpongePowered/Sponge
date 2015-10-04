@@ -58,50 +58,14 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.HORSE_COLOR, new GetterFunction<Object>() {
+        registerFieldGetter(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::getHorseColor);
+        registerKeyValue(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::color);
 
-            @Override
-            public Object get() {
-                return getHorseColor();
-            }
-        });
-        registerKeyValue(Keys.HORSE_COLOR, new GetterFunction<ImmutableValue<?>>() {
+        registerFieldGetter(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::getHorseStyle);
+        registerKeyValue(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::style);
 
-            @Override
-            public ImmutableValue<?> get() {
-                return color();
-            }
-        });
-
-        registerFieldGetter(Keys.HORSE_STYLE, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getHorseStyle();
-            }
-        });
-        registerKeyValue(Keys.HORSE_STYLE, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return style();
-            }
-        });
-
-        registerFieldGetter(Keys.HORSE_VARIANT, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getHorseVariant();
-            }
-        });
-        registerKeyValue(Keys.HORSE_VARIANT, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return variant();
-            }
-        });
+        registerFieldGetter(Keys.HORSE_VARIANT, ImmutableSpongeHorseData.this::getHorseVariant);
+        registerKeyValue(Keys.HORSE_VARIANT, ImmutableSpongeHorseData.this::variant);
     }
 
     @Override
@@ -147,14 +111,14 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     }
 
     private HorseColor getHorseColor() {
-        return horseColor;
+        return this.horseColor;
     }
 
     private HorseStyle getHorseStyle() {
-        return horseStyle;
+        return this.horseStyle;
     }
 
     private HorseVariant getHorseVariant() {
-        return horseVariant;
+        return this.horseVariant;
     }
 }

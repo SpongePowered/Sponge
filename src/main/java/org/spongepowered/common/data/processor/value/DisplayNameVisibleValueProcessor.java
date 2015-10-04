@@ -47,7 +47,7 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
+        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
     public Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<Boolean> optional = getValueFromContainer(container);
         if (optional.isPresent()) {
-            return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
+            return Optional.<Value<Boolean>>of(new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
         }
         return Optional.empty();
     }

@@ -64,24 +64,9 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(this.usedKey, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getValue();
-            }
-        });
-        registerFieldSetter(this.usedKey, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setValue((T) value);
-            }
-        });
-        registerKeyValue(this.usedKey, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return getValueGetter();
-            }
-        });
+        registerFieldGetter(this.usedKey, AbstractSingleData.this::getValue);
+        registerFieldSetter(this.usedKey, value1 -> setValue((T) value1));
+        registerKeyValue(this.usedKey, AbstractSingleData.this::getValueGetter);
     }
 
     protected abstract Value<?> getValueGetter();

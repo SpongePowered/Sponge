@@ -67,7 +67,7 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
 
     @Override
     protected ImmutableValue<?> getValueGetter() {
-        return new ImmutableSpongeBoundedValue<T>(this.usedKey, this.lowerBound, this.value, this.comparator, this.lowerBound, this.upperBound);
+        return new ImmutableSpongeBoundedValue<>(this.usedKey, this.lowerBound, this.value, this.comparator, this.lowerBound, this.upperBound);
     }
 
     @Override

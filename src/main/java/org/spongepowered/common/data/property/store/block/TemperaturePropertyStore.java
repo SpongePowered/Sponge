@@ -38,6 +38,7 @@ import java.util.Optional;
 
 public class TemperaturePropertyStore extends AbstractSpongePropertyStore<TemperatureProperty> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<TemperatureProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {

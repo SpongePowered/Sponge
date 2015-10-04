@@ -66,7 +66,7 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
 
     @Override
     public ImmutableOptionalValue<E> asImmutable() {
-        return new ImmutableSpongeOptionalValue<E>(getKey(), this.actualValue);
+        return new ImmutableSpongeOptionalValue<>(getKey(), this.actualValue);
     }
 
     @Override
@@ -76,6 +76,6 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
 
     @Override
     public Value<E> or(E defaultValue) { // TODO actually construct the keys
-        return new SpongeValue<E>(null, null, get().isPresent() ? get().get() : checkNotNull(defaultValue));
+        return new SpongeValue<>(null, null, get().isPresent() ? get().get() : checkNotNull(defaultValue));
     }
 }

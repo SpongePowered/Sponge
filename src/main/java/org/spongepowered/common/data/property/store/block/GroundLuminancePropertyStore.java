@@ -39,6 +39,7 @@ import java.util.Optional;
 
 public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<GroundLuminanceProperty> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<GroundLuminanceProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {

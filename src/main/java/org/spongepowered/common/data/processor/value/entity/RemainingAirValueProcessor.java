@@ -46,7 +46,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -69,10 +69,10 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
             final EntityLivingBase entity = (EntityLivingBase) container;
             final Integer oldValue = entity.getAir();
             entity.setAir(value);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, value),
-                    new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.REMAINING_AIR, value),
+                                                               new ImmutableSpongeValue<>(Keys.REMAINING_AIR, oldValue));
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.REMAINING_AIR, value));
     }
 
     @Override

@@ -73,6 +73,6 @@ public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, Im
 
     @Override
     public Value<Color> color() {
-        return new SpongeValue<Color>(Keys.COLOR, Color.BLACK, getValue());
+        return new SpongeValue<>(Keys.COLOR, Color.BLACK, getValue());
     }
 }

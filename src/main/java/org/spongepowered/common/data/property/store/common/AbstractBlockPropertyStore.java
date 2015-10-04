@@ -71,6 +71,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
         return Optional.empty();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {

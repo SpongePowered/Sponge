@@ -120,7 +120,7 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
 
     @Override
     protected ImmutableValue<List<ItemEnchantment>> constructImmutableValue(List<ItemEnchantment> value) {
-        return new ImmutableSpongeListValue<ItemEnchantment>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
+        return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
 
 

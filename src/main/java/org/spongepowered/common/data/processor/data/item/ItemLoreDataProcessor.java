@@ -107,7 +107,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
-       return new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
+       return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
     }
 
 }

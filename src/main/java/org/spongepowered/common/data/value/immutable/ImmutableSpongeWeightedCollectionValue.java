@@ -36,16 +36,16 @@ public abstract class ImmutableSpongeWeightedCollectionValue<E extends WeightedO
 ImmutableWeightedCollectionValue<E, I, M> {
 
     public ImmutableSpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<E>>> key) {
-        super(key, new WeightedCollection<E>());
+        super(key, new WeightedCollection<>());
     }
 
     public ImmutableSpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<E>>> key, WeightedCollection<E> actualValue) {
-        super(key, new WeightedCollection<E>(), actualValue);
+        super(key, new WeightedCollection<>(), actualValue);
     }
 
     @Override
     public WeightedCollection<E> getAll() {
-        final WeightedCollection<E> weightedCollection = new WeightedCollection<E>();
+        final WeightedCollection<E> weightedCollection = new WeightedCollection<>();
         weightedCollection.addAll(this.actualValue);
         return weightedCollection;
     }

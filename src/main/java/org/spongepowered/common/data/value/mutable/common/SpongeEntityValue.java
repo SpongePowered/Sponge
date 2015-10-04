@@ -52,12 +52,12 @@ public class SpongeEntityValue implements Value<Entity> {
 
     private final Key<? extends BaseValue<Entity>> key;
     private UUID entityid;
-    private WeakReference<Entity> weakReference = new WeakReference<Entity>(null);
+    private WeakReference<Entity> weakReference = new WeakReference<>(null);
 
     public SpongeEntityValue(Key<? extends BaseValue<Entity>> key, Entity actualValue) {
         this.key = checkNotNull(key);
         this.entityid = checkNotNull(actualValue).getUniqueId();
-        this.weakReference = new WeakReference<Entity>(actualValue);
+        this.weakReference = new WeakReference<>(actualValue);
 
     }
 
@@ -99,21 +99,21 @@ public class SpongeEntityValue implements Value<Entity> {
     @Override
     public Value<Entity> set(Entity value) {
         this.entityid = checkNotNull(value).getUniqueId();
-        this.weakReference = new WeakReference<Entity>(value);
+        this.weakReference = new WeakReference<>(value);
         return this;
     }
 
     @Override
     public Value<Entity> transform(Function<Entity, Entity> function) {
         final Entity entity = checkNotNull(checkNotNull(function).apply(this.weakReference.get()));
-        this.weakReference = new WeakReference<Entity>(entity);
+        this.weakReference = new WeakReference<>(entity);
         this.entityid = checkNotNull(entity).getUniqueId();
         return this;
     }
 
     @Override
     public ImmutableValue<Entity> asImmutable() {
-        return new ImmutableSpongeValue<Entity>(getKey(), this.weakReference.get());
+        return new ImmutableSpongeValue<>(getKey(), this.weakReference.get());
     }
 
     @Override

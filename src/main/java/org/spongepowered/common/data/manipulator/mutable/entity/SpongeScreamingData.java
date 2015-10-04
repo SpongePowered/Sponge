@@ -40,7 +40,7 @@ public class SpongeScreamingData extends AbstractBooleanData<ScreamingData, Immu
 
     @Override
     public Value<Boolean> screaming() {
-        return new SpongeValue<Boolean>(Keys.IS_SCREAMING, this.getValue());
+        return new SpongeValue<>(Keys.IS_SCREAMING, this.getValue());
     }
 
     @Override

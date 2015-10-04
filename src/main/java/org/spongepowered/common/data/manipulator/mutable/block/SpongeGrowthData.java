@@ -43,7 +43,7 @@ public class SpongeGrowthData extends AbstractBoundedComparableData<Integer, Gro
 
     @Override
     public MutableBoundedValue<Integer> growthStage() {
-        return new SpongeBoundedValue<Integer>(Keys.FLUID_LEVEL, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
+        return new SpongeBoundedValue<>(Keys.FLUID_LEVEL, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
     }
 
     @Override

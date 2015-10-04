@@ -44,15 +44,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
+public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
+                                                                                                                           AbstractMultiDataProcessor<M, I> {
 
     private final Predicate<ItemStack> predicate;
 
     protected AbstractItemDataProcessor(Predicate<ItemStack> predicate) {
         this.predicate = checkNotNull(predicate);
     }
-
-    protected abstract M createManipulator();
 
     protected abstract boolean doesDataExist(ItemStack itemStack);
 
@@ -65,7 +64,7 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
         return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<M> from(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
@@ -81,33 +80,6 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public Optional<M> createFrom(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            Optional<M> optional = from(dataHolder);
-            if (!optional.isPresent()) {
-                return Optional.of(createManipulator());
-            } else {
-                return optional;
-            }
-        }
-    }
-
-    @Override
-    public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
-            for (ImmutableValue<?> value : merged.getValues()) {
-                manipulator.set(value);
-            }
-            return Optional.of(manipulator);
-        }
     }
 
     @Override
@@ -138,6 +110,7 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
         if (immutable.supports(key)) {

@@ -22,34 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
-
-import org.spongepowered.api.data.type.LogAxis;
-
-public class SpongeLogAxis implements LogAxis {
-
-    private final int value;
-    private final String nameId;
-    private final LogAxis next;
-
-    public SpongeLogAxis(int value, String nameId, LogAxis next) {
-        this.value = value;
-        this.nameId = nameId;
-        this.next = next;
-    }
-
-    @Override
-    public String getId() {
-        return "LogAxis." + this.nameId;
-    }
-
-    @Override
-    public String getName() {
-        return getName();
-    }
-
-    @Override
-    public LogAxis cycleNext() {
-        return this.next;
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.manipulator.mutable.item;

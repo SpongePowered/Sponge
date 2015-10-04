@@ -53,7 +53,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
 
     @Override
     public ImmutableSetValue<Direction> connectedDirections() {
-        return new ImmutableSpongeSetValue<Direction>(Keys.CONNECTED_DIRECTIONS, this.directions);
+        return new ImmutableSpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.directions);
     }
 
     @Override

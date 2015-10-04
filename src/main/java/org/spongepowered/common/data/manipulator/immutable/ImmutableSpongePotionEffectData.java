@@ -50,7 +50,7 @@ public class ImmutableSpongePotionEffectData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableListValue<PotionEffect> effects() {
-        return new ImmutableSpongeListValue<PotionEffect>(Keys.POTION_EFFECTS, this.effects);
+        return new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, this.effects);
     }
 
     @Override

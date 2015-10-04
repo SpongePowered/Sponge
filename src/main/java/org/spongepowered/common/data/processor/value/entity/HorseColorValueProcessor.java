@@ -50,7 +50,7 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Horse
 
     @Override
     protected Value<HorseColor> constructValue(HorseColor defaultValue) {
-        return new SpongeValue<HorseColor>(Keys.HORSE_COLOR, defaultValue);
+        return new SpongeValue<>(Keys.HORSE_COLOR, defaultValue);
     }
 
     @Override

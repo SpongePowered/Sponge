@@ -112,44 +112,14 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.FOOD_LEVEL, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getFood();
-            }
-        });
-        registerKeyValue(Keys.FOOD_LEVEL, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return foodLevel();
-            }
-        });
+        registerFieldGetter(Keys.FOOD_LEVEL, ImmutableSpongeFoodData.this::getFood);
+        registerKeyValue(Keys.FOOD_LEVEL, ImmutableSpongeFoodData.this::foodLevel);
 
-        registerFieldGetter(Keys.EXHAUSTION, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getExhaustion();
-            }
-        });
-        registerKeyValue(Keys.EXHAUSTION, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return exhaustion();
-            }
-        });
+        registerFieldGetter(Keys.EXHAUSTION, ImmutableSpongeFoodData.this::getExhaustion);
+        registerKeyValue(Keys.EXHAUSTION, ImmutableSpongeFoodData.this::exhaustion);
 
-        registerFieldGetter(Keys.SATURATION, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getSaturation();
-            }
-        });
-        registerKeyValue(Keys.SATURATION, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return saturation();
-            }
-        });
+        registerFieldGetter(Keys.SATURATION, ImmutableSpongeFoodData.this::getSaturation);
+        registerKeyValue(Keys.SATURATION, ImmutableSpongeFoodData.this::saturation);
 
     }
 }

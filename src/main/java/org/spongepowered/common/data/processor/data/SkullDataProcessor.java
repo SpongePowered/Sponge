@@ -103,8 +103,8 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
             itemStack.setItemDamage(newType.getByteId());
         }
 
-        return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<SkullType>(Keys.SKULL_TYPE, newType),
-                                                           new ImmutableSpongeValue<SkullType>(Keys.SKULL_TYPE, oldType));
+        return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.SKULL_TYPE, newType),
+                                                           new ImmutableSpongeValue<>(Keys.SKULL_TYPE, oldType));
     }
 
     @Override

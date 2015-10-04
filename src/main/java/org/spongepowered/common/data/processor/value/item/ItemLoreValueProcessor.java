@@ -50,7 +50,7 @@ public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Te
 
     @Override
     protected ListValue<Text> constructValue(List<Text> defaultValue) {
-        return new SpongeListValue<Text>(Keys.ITEM_LORE, defaultValue);
+        return new SpongeListValue<>(Keys.ITEM_LORE, defaultValue);
     }
 
     @Override
@@ -76,13 +76,13 @@ public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Te
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, List<Text> value) {
-        final ImmutableListValue<Text> lore = new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
+        final ImmutableListValue<Text> lore = new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
         if (this.supports(container)) {
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             if (oldData.isPresent()) {
                 final ImmutableListValue<Text> oldLore =
-                        new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, ImmutableList.copyOf(oldData.get()));
+                    new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(oldData.get()));
                 builder.replace(oldLore);
             }
             NbtDataUtil.setLoreToNBT((ItemStack) container, lore.get());
@@ -99,7 +99,7 @@ public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Te
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
-                final ImmutableListValue<Text> lore = new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, ImmutableList.copyOf(oldData.get()));
+                final ImmutableListValue<Text> lore = new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(oldData.get()));
                 builder.replace(lore);
             }
             NbtDataUtil.removeLoreFromNBT((ItemStack) container);

@@ -74,18 +74,8 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(this.usedKey, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getValue();
-            }
-        });
-        registerKeyValue(this.usedKey, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return getValueGetter();
-            }
-        });
+        registerFieldGetter(this.usedKey, AbstractImmutableSingleData.this::getValue);
+        registerKeyValue(this.usedKey, AbstractImmutableSingleData.this::getValueGetter);
     }
 
     @SuppressWarnings("unchecked")

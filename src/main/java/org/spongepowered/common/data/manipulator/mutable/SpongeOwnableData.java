@@ -50,7 +50,7 @@ public class SpongeOwnableData extends AbstractData<OwnableData, ImmutableOwnabl
 
     @Override
     public Value<GameProfile> profile() {
-        return new SpongeValue<GameProfile>(Keys.OWNED_BY_PROFILE, this.profile);
+        return new SpongeValue<>(Keys.OWNED_BY_PROFILE, this.profile);
     }
 
     @Override

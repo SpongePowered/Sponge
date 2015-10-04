@@ -45,7 +45,7 @@ public class ImmutableSpongeEntityValue implements ImmutableValue<Entity> {
     private final Key<? extends BaseValue<Entity>> key;
 
     public ImmutableSpongeEntityValue(Key<? extends BaseValue<Entity>> key, Entity entity) {
-        this.weakReference = new WeakReference<Entity>(checkNotNull(entity));
+        this.weakReference = new WeakReference<>(checkNotNull(entity));
         this.key = checkNotNull(key);
     }
 

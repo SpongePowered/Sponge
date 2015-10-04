@@ -81,7 +81,7 @@ public class RepresentedItemDataProcessor extends AbstractEntitySingleDataProces
 
     @Override
     protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
-        return new ImmutableSpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, value);
     }
 
     @Override

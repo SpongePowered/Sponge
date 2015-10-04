@@ -48,7 +48,7 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Double
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<Double>(Keys.MAX_HEALTH, 20D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.MAX_HEALTH, 20D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -66,9 +66,9 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Double
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
-        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<Double>(Keys.MAX_HEALTH, value, 20D,
-                                                                                                    doubleComparator(), 1D,
-                                                                                                    (double) Float.MAX_VALUE);
+        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<>(Keys.MAX_HEALTH, value, 20D,
+                                                                                              doubleComparator(), 1D,
+                                                                                              (double) Float.MAX_VALUE);
         if (container instanceof EntityLivingBase) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final ImmutableBoundedValue<Double> oldHealthValue = getApiValueFromContainer(container).get().asImmutable();

@@ -80,11 +80,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     @Override
     public ImmutablePatternListValue without(PatternLayer element) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
-        for (PatternLayer existingElement : this.actualValue) {
-            if (!existingElement.equals(element)) {
-                builder.add(existingElement);
-            }
-        }
+        this.actualValue.stream().filter(existingElement -> !existingElement.equals(element)).forEach(builder::add);
         return new ImmutableSpongePatternListValue(getKey(), builder.build());
 
     }
@@ -92,11 +88,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     @Override
     public ImmutablePatternListValue withoutAll(Iterable<PatternLayer> elements) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
-        for (PatternLayer existingElement : this.actualValue) {
-            if (!Iterables.contains(elements, existingElement)) {
-                builder.add(existingElement);
-            }
-        }
+        this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
         return new ImmutableSpongePatternListValue(getKey(), builder.build());
     }
 

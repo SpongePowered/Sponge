@@ -105,7 +105,7 @@ public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List
 
     @Override
     protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
-        return new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
+        return new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
     }
 
 }

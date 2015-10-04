@@ -49,7 +49,7 @@ public class GoldenAppleValueProcessor extends AbstractSpongeValueProcessor<Gold
 
     @Override
     protected Value<GoldenApple> constructValue(GoldenApple defaultValue) {
-        return new SpongeValue<GoldenApple>(Keys.GOLDEN_APPLE_TYPE, defaultValue);
+        return new SpongeValue<>(Keys.GOLDEN_APPLE_TYPE, defaultValue);
     }
 
     @Override

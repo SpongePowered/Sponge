@@ -88,31 +88,11 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.HEALTH, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getHealth();
-            }
-        });
-        registerKeyValue(Keys.HEALTH, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return health();
-            }
-        });
+        registerFieldGetter(Keys.HEALTH, ImmutableSpongeHealthData.this::getHealth);
+        registerKeyValue(Keys.HEALTH, ImmutableSpongeHealthData.this::health);
 
-        registerFieldGetter(Keys.MAX_HEALTH, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getMaxHealth();
-            }
-        });
-        registerKeyValue(Keys.MAX_HEALTH, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return maxHealth();
-            }
-        });
+        registerFieldGetter(Keys.MAX_HEALTH, ImmutableSpongeHealthData.this::getMaxHealth);
+        registerKeyValue(Keys.MAX_HEALTH, ImmutableSpongeHealthData.this::maxHealth);
     }
 
     public double getHealth() {

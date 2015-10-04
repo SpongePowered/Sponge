@@ -63,7 +63,7 @@ public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapV
 
     @Override
     public ImmutableMapValue<K, V> asImmutable() {
-        return new ImmutableSpongeMapValue<K, V>(getKey(), ImmutableMap.copyOf(this.actualValue));
+        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.copyOf(this.actualValue));
     }
 
     @Override

@@ -89,7 +89,7 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean
 
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.IS_FLYING, false, defaultValue);
+        return new SpongeValue<>(Keys.IS_FLYING, false, defaultValue);
     }
 
 }

@@ -71,7 +71,7 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
 
     @Override
     public Value<T> type() {
-        return new SpongeValue<T>(this.usedKey, this.getValue(), this.getValue());
+        return new SpongeValue<>(this.usedKey, this.getValue(), this.getValue());
     }
 
     @Override

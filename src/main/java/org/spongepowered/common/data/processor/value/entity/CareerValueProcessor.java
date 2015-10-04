@@ -47,7 +47,7 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, V
 
     @Override
     public Value<Career> constructValue(Career defaultValue) {
-        return new SpongeValue<Career>(Keys.CAREER, defaultValue);
+        return new SpongeValue<>(Keys.CAREER, defaultValue);
     }
 
     @Override

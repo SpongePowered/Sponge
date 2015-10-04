@@ -73,6 +73,6 @@ public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, SetValue
 
     @Override
     public ImmutableSetValue<E> asImmutable() {
-        return new ImmutableSpongeSetValue<E>(getKey(), ImmutableSet.copyOf(this.actualValue));
+        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.copyOf(this.actualValue));
     }
 }

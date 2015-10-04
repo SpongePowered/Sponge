@@ -77,12 +77,12 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
 
     @Override
     public ImmutableBoundedValue<Integer> remainingAir() {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, this.remainingAir, this.maxAir, ComparatorUtil.intComparator(), -20, this.maxAir);
+        return new ImmutableSpongeBoundedValue<>(Keys.REMAINING_AIR, this.remainingAir, this.maxAir, ComparatorUtil.intComparator(), -20, this.maxAir);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> maxAir() {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.MAX_AIR, this.maxAir, 300, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<>(Keys.MAX_AIR, this.maxAir, 300, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
     }
 
     public int getMaxAir() {
@@ -95,34 +95,10 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.MAX_AIR, new GetterFunction<Object>() {
+        registerFieldGetter(Keys.MAX_AIR, ImmutableSpongeBreathingData.this::getMaxAir);
+        registerKeyValue(Keys.MAX_AIR, ImmutableSpongeBreathingData.this::maxAir);
 
-            @Override
-            public Object get() {
-                return getMaxAir();
-            }
-        });
-        registerKeyValue(Keys.MAX_AIR, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return maxAir();
-            }
-        });
-
-        registerFieldGetter(Keys.REMAINING_AIR, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getRemainingAir();
-            }
-        });
-        registerKeyValue(Keys.REMAINING_AIR, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return remainingAir();
-            }
-        });
+        registerFieldGetter(Keys.REMAINING_AIR, ImmutableSpongeBreathingData.this::getRemainingAir);
+        registerKeyValue(Keys.REMAINING_AIR, ImmutableSpongeBreathingData.this::remainingAir);
     }
 }

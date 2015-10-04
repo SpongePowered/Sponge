@@ -22,36 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleEnumData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.merge.MergeFunction;
 
-public class SpongeDirectionalData extends AbstractSingleEnumData<Direction, DirectionalData, ImmutableDirectionalData> implements DirectionalData {
+import java.util.Optional;
 
-    public SpongeDirectionalData(Direction direction) {
-        super(DirectionalData.class, checkNotNull(direction), Keys.DIRECTION, ImmutableSpongeDirectionalData.class);
-    }
+public abstract class AbstractMultiDataProcessor<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> extends AbstractSpongeDataProcessor<T, I> {
 
-    public SpongeDirectionalData() {
-        this(Direction.NORTH);
+    protected abstract T createManipulator();
+
+    @Override
+    public Optional<T> createFrom(DataHolder dataHolder) {
+        if (!supports(dataHolder)) {
+            return Optional.empty();
+        } else {
+            Optional<T> optional = from(dataHolder);
+            if (!optional.isPresent()) {
+                return Optional.of(createManipulator());
+            } else {
+                return optional;
+            }
+        }
     }
 
     @Override
-    public Value<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.getValue());
+    public Optional<T> fill(DataHolder dataHolder, T manipulator, MergeFunction overlap) {
+        if (!supports(dataHolder)) {
+            return Optional.empty();
+        } else {
+            final T merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
+            merged.getValues().forEach(manipulator::set);
+            return Optional.of(manipulator);
+        }
     }
 
-    @Override
-    protected Value<?> getValueGetter() {
-        return direction();
-    }
 }

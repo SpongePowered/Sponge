@@ -40,7 +40,7 @@ public class SpongeWetData extends AbstractBooleanData<WetData, ImmutableWetData
 
     @Override
     public Value<Boolean> wet() {
-        return new SpongeValue<Boolean>(Keys.IS_WET, this.getValue());
+        return new SpongeValue<>(Keys.IS_WET, this.getValue());
     }
 
     @Override

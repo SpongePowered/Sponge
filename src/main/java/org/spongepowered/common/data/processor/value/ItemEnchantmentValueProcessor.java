@@ -52,7 +52,7 @@ public class ItemEnchantmentValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected ListValue<ItemEnchantment> constructValue(List<ItemEnchantment> defaultValue) {
-        return new SpongeListValue<ItemEnchantment>(Keys.ITEM_ENCHANTMENTS, defaultValue);
+        return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, defaultValue);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Hor
 
     @Override
     protected Value<HorseVariant> constructValue(HorseVariant defaultValue) {
-        return new SpongeValue<HorseVariant>(Keys.HORSE_VARIANT, defaultValue);
+        return new SpongeValue<>(Keys.HORSE_VARIANT, defaultValue);
     }
 
     @Override

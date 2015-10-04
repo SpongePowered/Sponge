@@ -45,7 +45,7 @@ public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolea
 
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.IS_SCREAMING, false, defaultValue);
+        return new SpongeValue<>(Keys.IS_SCREAMING, false, defaultValue);
     }
 
     @Override
@@ -61,6 +61,7 @@ public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolea
         return container instanceof EntityEnderman;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
         final ImmutableValue proposedValue = new ImmutableSpongeValue(Keys.IS_SCREAMING, value);

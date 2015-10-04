@@ -47,7 +47,7 @@ public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot defaultValue) {
-        return new SpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, defaultValue);
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, defaultValue);
     }
 
     @Override

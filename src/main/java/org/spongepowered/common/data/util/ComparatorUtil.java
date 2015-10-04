@@ -36,79 +36,37 @@ public class ComparatorUtil {
      * This will compare two {@link ValueProcessor}s where the higher priority
      * will compare opposite to the lower prioirty.
      */
-    public static final Comparator<ValueProcessor<?, ?>> VALUE_PROCESSOR_COMPARATOR = new Comparator<ValueProcessor<?, ?>>() {
-        @Override
-        public int compare(ValueProcessor<?, ?> o1, ValueProcessor<?, ?> o2) {
-            return intComparator().compare(o2.getPriority(), o1.getPriority()); // We want the higher number to be higher priority
-        }
-    };
+    public static final Comparator<ValueProcessor<?, ?>> VALUE_PROCESSOR_COMPARATOR =
+        (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
 
-    public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR = new Comparator<DataProcessor<?, ?>>() {
-        @Override
-        public int compare(DataProcessor<?, ?> o1, DataProcessor<?, ?> o2) {
-            return intComparator().compare(o2.getPriority(), o1.getPriority());
-        }
-    };
+    public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR =
+        (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
 
-    public static final Comparator<PropertyStore<?>> PROPERTY_STORE_COMPARATOR = new Comparator<PropertyStore<?>>() {
-        @Override
-        public int compare(PropertyStore<?> o1, PropertyStore<?> o2) {
-            return intComparator().compare(o2.getPriority(), o1.getPriority());
-        }
-    };
+    public static final Comparator<PropertyStore<?>> PROPERTY_STORE_COMPARATOR =
+        (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
 
     public static Comparator<Integer> intComparator() {
-        return new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Integer::compareTo;
     }
 
     public static Comparator<Long> longComparator() {
-        return new Comparator<Long>() {
-            @Override
-            public int compare(Long o1, Long o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Long::compareTo;
     }
 
     public static Comparator<Short> shortComparator() {
-        return new Comparator<Short>() {
-            @Override
-            public int compare(Short o1, Short o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Short::compareTo;
     }
 
     public static Comparator<Byte> byteComparator() {
-        return new Comparator<Byte>() {
-            @Override
-            public int compare(Byte o1, Byte o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Byte::compareTo;
     }
 
     public static Comparator<Double> doubleComparator() {
-        return new Comparator<Double>() {
-            @Override
-            public int compare(Double o1, Double o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Double::compareTo;
     }
 
     public static Comparator<Float> floatComparator() {
-        return new Comparator<Float>() {
-            @Override
-            public int compare(Float o1, Float o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Float::compareTo;
     }
 
 }

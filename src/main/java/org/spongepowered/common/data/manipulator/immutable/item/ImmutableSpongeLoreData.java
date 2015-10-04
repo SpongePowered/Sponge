@@ -59,7 +59,7 @@ public class ImmutableSpongeLoreData extends AbstractImmutableData<ImmutableLore
 
     @Override
     public ImmutableListValue<Text> lore() {
-        return new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, this.lore);
+        return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, this.lore);
     }
 
     @Override
@@ -89,19 +89,7 @@ public class ImmutableSpongeLoreData extends AbstractImmutableData<ImmutableLore
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_LORE, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getLore();
-            }
-        });
-        registerKeyValue(Keys.ITEM_LORE, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return lore();
-            }
-        });
+        registerFieldGetter(Keys.ITEM_LORE, ImmutableSpongeLoreData.this::getLore);
+        registerKeyValue(Keys.ITEM_LORE, ImmutableSpongeLoreData.this::lore);
     }
 }

@@ -56,12 +56,12 @@ public class ImmutableSpongeFireworkData extends AbstractImmutableData<Immutable
 
     @Override
     public ImmutableListValue<FireworkEffect> effects() {
-        return new ImmutableSpongeListValue<FireworkEffect>(Keys.FIREWORK_EFFECTS, this.fireworkEffects);
+        return new ImmutableSpongeListValue<>(Keys.FIREWORK_EFFECTS, this.fireworkEffects);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> flightModifier() {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, 0, intComparator(), Integer.MAX_VALUE, this.modifier);
+        return new ImmutableSpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, 0, intComparator(), Integer.MAX_VALUE, this.modifier);
     }
 
     @Override

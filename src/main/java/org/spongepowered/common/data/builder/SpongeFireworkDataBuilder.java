@@ -40,6 +40,7 @@ import org.spongepowered.common.Sponge;
 import java.awt.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class SpongeFireworkDataBuilder implements DataBuilder<FireworkEffect> {
 
@@ -63,14 +64,10 @@ public class SpongeFireworkDataBuilder implements DataBuilder<FireworkEffect> {
         FireworkShape shape = FireworkShapes.BALL; // TODO, need to add getFireworkShape to GameRegistry...
         List<Integer> intColors = container.getIntegerList(COLORS).get();
         List<Color> colors = Lists.newArrayList();
-        for (int colorInt : intColors) {
-            colors.add(new Color(colorInt));
-        }
+        colors.addAll(intColors.stream().map(Color::new).collect(Collectors.toList()));
         List<Integer> intFades = container.getIntegerList(FADES).get();
         List<Color> fades = Lists.newArrayList();
-        for (int fadeInt : intFades) {
-            fades.add(new Color(fadeInt));
-        }
+        fades.addAll(intFades.stream().map(Color::new).collect(Collectors.toList()));
         boolean trails = container.getBoolean(TRAILS).get();
         boolean flickers = container.getBoolean(FLICKERS).get();
         FireworkEffectBuilder builder = Sponge.getGame().getRegistry().createBuilderOfType(FireworkEffectBuilder.class).get();

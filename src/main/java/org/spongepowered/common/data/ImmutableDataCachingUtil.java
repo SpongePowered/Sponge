@@ -69,22 +69,17 @@ public final class ImmutableDataCachingUtil {
         try {
             // Let's get the key
             return (T) (Object) ImmutableDataCachingUtil.manipulatorCache.get(key,
-                    new Callable<ImmutableDataManipulator<?, ?>>() {
-                        @Override
-                        public ImmutableDataManipulator<?, ?> call() throws Exception {
-                            try {
-                                return createUnsafeInstance(immutableClass, args);
-                            } catch (InvocationTargetException e) {
-                                System.err.println("Something went gravely wrong in constructing " + immutableClass.getCanonicalName());
-                                e.printStackTrace();
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                            throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName());
-                        }
-                    });
+                                                                              (Callable<ImmutableDataManipulator<?, ?>>) () -> {
+                                                                                  try {
+                                                                                      return createUnsafeInstance(immutableClass, args);
+                                                                                  } catch (InvocationTargetException e) {
+                                                                                      System.err.println("Something went gravely wrong in constructing " + immutableClass.getCanonicalName());
+                                                                                      e.printStackTrace();
+                                                                                  } catch (InstantiationException | IllegalAccessException e) {
+                                                                                      e.printStackTrace();
+                                                                                  }
+                                                                                  throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName());
+                                                                              });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName(), e);
         }
@@ -96,22 +91,17 @@ public final class ImmutableDataCachingUtil {
         final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
         try {
             return (T) (Object) ImmutableDataCachingUtil.valueCache.get(key,
-                    new Callable<ImmutableValue<?>>() {
-                        @Override
-                        public ImmutableValue<?> call() throws Exception {
-                            try {
-                                return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
-                            } catch (InvocationTargetException e) {
-                                System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
-                                e.printStackTrace();
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
-                        }
-                    });
+                                                                        (Callable<ImmutableValue<?>>) () -> {
+                                                                            try {
+                                                                                return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
+                                                                            } catch (InvocationTargetException e) {
+                                                                                System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
+                                                                                e.printStackTrace();
+                                                                            } catch (InstantiationException | IllegalAccessException e) {
+                                                                                e.printStackTrace();
+                                                                            }
+                                                                            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
+                                                                        });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);
         }
@@ -123,22 +113,17 @@ public final class ImmutableDataCachingUtil {
         final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
         try {
             return (T) (Object) ImmutableDataCachingUtil.valueCache.get(key,
-                    new Callable<ImmutableValue<?>>() {
-                        @Override
-                        public ImmutableValue<?> call() throws Exception {
-                            try {
-                                return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
-                            } catch (InvocationTargetException e) {
-                                System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
-                                e.printStackTrace();
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
-                        }
-                    });
+                                                                        (Callable<ImmutableValue<?>>) () -> {
+                                                                            try {
+                                                                                return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
+                                                                            } catch (InvocationTargetException e) {
+                                                                                System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
+                                                                                e.printStackTrace();
+                                                                            } catch (InstantiationException | IllegalAccessException e) {
+                                                                                e.printStackTrace();
+                                                                            }
+                                                                            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
+                                                                        });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);
         }
@@ -148,22 +133,17 @@ public final class ImmutableDataCachingUtil {
         final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
         try {
             return ImmutableDataCachingUtil.valueCache.get(key,
-                new Callable<ImmutableValue<?>>() {
-                    @Override
-                    public ImmutableValue<?> call() throws Exception {
-                        try {
-                            return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
-                        } catch (InvocationTargetException e) {
-                            System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
-                            e.printStackTrace();
-                        } catch (InstantiationException e) {
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                        throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
-                    }
-                });
+                                                           (Callable<ImmutableValue<?>>) () -> {
+                                                               try {
+                                                                   return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
+                                                               } catch (InvocationTargetException e) {
+                                                                   System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
+                                                                   e.printStackTrace();
+                                                               } catch (InstantiationException | IllegalAccessException e) {
+                                                                   e.printStackTrace();
+                                                               }
+                                                               throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
+                                                           });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);
         }

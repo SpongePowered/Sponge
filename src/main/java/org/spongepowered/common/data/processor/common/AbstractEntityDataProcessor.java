@@ -44,15 +44,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class AbstractEntityDataProcessor<E extends Entity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
+public abstract class AbstractEntityDataProcessor<E extends Entity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractMultiDataProcessor<M, I> {
 
     private final Class<E> entityClass;
 
     protected AbstractEntityDataProcessor(Class<E> entityClass) {
         this.entityClass = checkNotNull(entityClass);
     }
-
-    protected abstract M createManipulator();
 
     protected boolean supports(E entity) {
         return true;
@@ -70,7 +68,7 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
         return this.entityClass.isInstance(dataHolder) && supports((E) dataHolder);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<M> from(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
@@ -86,33 +84,6 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public Optional<M> createFrom(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            Optional<M> optional = from(dataHolder);
-            if (!optional.isPresent()) {
-                return Optional.of(createManipulator());
-            } else {
-                return optional;
-            }
-        }
-    }
-
-    @Override
-    public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
-            for (ImmutableValue<?> value : merged.getValues()) {
-                manipulator.set(value);
-            }
-            return Optional.of(manipulator);
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -145,7 +116,7 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
         if (immutable.supports(key)) {

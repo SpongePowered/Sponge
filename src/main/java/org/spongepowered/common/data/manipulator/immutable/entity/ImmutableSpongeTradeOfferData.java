@@ -52,7 +52,7 @@ public class ImmutableSpongeTradeOfferData extends AbstractImmutableData<Immutab
 
     @Override
     public ImmutableListValue<TradeOffer> tradeOffers() {
-        return new ImmutableSpongeListValue<TradeOffer>(Keys.TRADE_OFFERS, offers);
+        return new ImmutableSpongeListValue<>(Keys.TRADE_OFFERS, this.offers);
     }
 
     @Override

@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -203,9 +204,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public int hashCode() {
         List<Object> objects = Lists.newArrayList();
-        for (GetterFunction<?> function : this.keyFieldGetterMap.values()) {
-            objects.add(function.get());
-        }
+        objects.addAll(this.keyFieldGetterMap.values().stream().map(GetterFunction::get).collect(Collectors.toList()));
         return Objects.hashCode(this.immutableClass, objects);
     }
 

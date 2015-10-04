@@ -65,7 +65,7 @@ public class SpongeTargetedLocationData extends AbstractSingleData<Location<Worl
 
     @Override
     public Value<Location<World>> target() {
-        return new SpongeValue<Location<World>>(Keys.TARGETED_LOCATION, this.getValue());
+        return new SpongeValue<>(Keys.TARGETED_LOCATION, this.getValue());
     }
 
     @Override

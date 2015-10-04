@@ -162,9 +162,9 @@ public class DataUtil {
         final double y = view.getDouble(Location.POSITION_Y).get();
         final double z = view.getDouble(Location.POSITION_Z).get();
         if (castToInt) {
-            return new Location<World>(Sponge.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
+            return new Location<>(Sponge.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
         } else {
-            return new Location<World>(Sponge.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
+            return new Location<>(Sponge.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
         }
 
     }
@@ -174,8 +174,8 @@ public class DataUtil {
     }
 
     public static Vector3i getPosition3i(DataView view, DataQuery query) {
-        checkDataExists(view, query);
-        final DataView internal = view.getView(query).get();
+        checkDataExists(view, DataQueries.SNAPSHOT_WORLD_POSITION);
+        final DataView internal = view.getView(DataQueries.SNAPSHOT_WORLD_POSITION).get();
         final int x = internal.getInt(Location.POSITION_X).get();
         final int y = internal.getInt(Location.POSITION_Y).get();
         final int z = internal.getInt(Location.POSITION_Z).get();

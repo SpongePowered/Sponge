@@ -53,7 +53,7 @@ public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<T
 
     @Override
     protected ListValue<Text> constructValue(List<Text> defaultValue) {
-        return new SpongeListValue<Text>(Keys.BOOK_PAGES, defaultValue);
+        return new SpongeListValue<>(Keys.BOOK_PAGES, defaultValue);
     }
 
     @Override
@@ -70,22 +70,20 @@ public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<T
 
     @Override
     public boolean supports(ValueContainer<?> container) {
-        if (container instanceof ItemStack) {
-            return ((ItemStack) container).getItem() == Items.writable_book || ((ItemStack) container).getItem() == Items.written_book;
-        } else {
-            return false;
-        }
+        return container instanceof ItemStack
+               && (((ItemStack) container).getItem() == Items.writable_book
+                   || ((ItemStack) container).getItem() == Items.written_book);
     }
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, List<Text> value) {
-        final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
+        final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
         if (this.supports(container)) {
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             if (oldData.isPresent()) {
                 final ImmutableListValue<Text> oldPages =
-                        new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
+                    new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
                 builder.replace(oldPages);
             }
             NbtDataUtil.setPagesToNBT((ItemStack) container, value);
@@ -102,7 +100,7 @@ public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<T
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
-                final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
+                final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
                 builder.replace(pages);
             }
             NbtDataUtil.removePagesFromNBT((ItemStack) container);

@@ -55,31 +55,17 @@ public class SpongeEnchantmentData extends AbstractData<EnchantmentData, Immutab
         this.enchantments = Lists.newArrayList(enchantments);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.ITEM_ENCHANTMENTS, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getEnchantments();
-            }
-        });
-        registerFieldSetter(Keys.ITEM_ENCHANTMENTS, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setEnchantments((List<ItemEnchantment>) value);
-            }
-        });
-        registerKeyValue(Keys.ITEM_ENCHANTMENTS, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return enchantments();
-            }
-        });
+        registerFieldGetter(Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.this::getEnchantments);
+        registerFieldSetter(Keys.ITEM_ENCHANTMENTS, value -> setEnchantments((List<ItemEnchantment>) value));
+        registerKeyValue(Keys.ITEM_ENCHANTMENTS, this::enchantments);
     }
 
     @Override
     public ListValue<ItemEnchantment> enchantments() {
-        return new SpongeListValue<ItemEnchantment>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
+        return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
     }
 
     @Override

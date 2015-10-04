@@ -60,9 +60,9 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Intege
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        final ImmutableValue<Integer> proposedValue = new ImmutableSpongeValue<Integer>(Keys.FIRE_TICKS, value);
+        final ImmutableValue<Integer> proposedValue = new ImmutableSpongeValue<>(Keys.FIRE_TICKS, value);
         if (supports(container)) {
-            final ImmutableValue<Integer> newFireTicksData = new ImmutableSpongeValue<Integer>(Keys.FIRE_TICKS, value);
+            final ImmutableValue<Integer> newFireTicksData = new ImmutableSpongeValue<>(Keys.FIRE_TICKS, value);
             final ImmutableValue<Integer> oldFireTicksValue = getApiValueFromContainer(container).get().asImmutable();
             ((Entity) (container)).fire = value;
             return DataTransactionBuilder.successReplaceResult(oldFireTicksValue, newFireTicksData);
@@ -86,7 +86,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Intege
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(this.getKey(), 1, intComparator(), 1, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(this.getKey(), 1, intComparator(), 1, Integer.MAX_VALUE, defaultValue);
     }
 
 }

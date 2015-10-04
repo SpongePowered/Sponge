@@ -74,7 +74,7 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
 
     @Override
     public ImmutableListValue<E> asImmutable() {
-        return new ImmutableSpongeListValue<E>(getKey(), ImmutableList.copyOf(this.actualValue));
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(this.actualValue));
     }
 
     @Override

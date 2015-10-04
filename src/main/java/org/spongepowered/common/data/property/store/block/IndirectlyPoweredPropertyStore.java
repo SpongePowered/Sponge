@@ -39,6 +39,7 @@ import java.util.Optional;
 
 public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<IndirectlyPoweredProperty> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<IndirectlyPoweredProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {

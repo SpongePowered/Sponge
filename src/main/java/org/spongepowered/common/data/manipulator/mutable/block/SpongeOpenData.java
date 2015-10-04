@@ -40,7 +40,7 @@ public class SpongeOpenData extends AbstractBooleanData<OpenData, ImmutableOpenD
 
     @Override
     public Value<Boolean> open() {
-        return new SpongeValue<Boolean>(Keys.OPEN, this.getValue());
+        return new SpongeValue<>(Keys.OPEN, this.getValue());
     }
 
     @Override

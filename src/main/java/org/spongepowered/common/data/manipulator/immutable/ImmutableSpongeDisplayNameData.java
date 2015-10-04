@@ -51,7 +51,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
 
     @Override
     public ImmutableValue<Text> displayName() {
-        return new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, this.displayName);
+        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, this.displayName);
     }
 
     @Override
@@ -91,31 +91,10 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.DISPLAY_NAME, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getDisplayName();
-            }
-        });
-        registerKeyValue(Keys.DISPLAY_NAME, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return displayName();
-            }
-        });
+        registerFieldGetter(Keys.DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::getDisplayName);
+        registerKeyValue(Keys.DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::displayName);
 
-        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return isDisplays();
-            }
-        });
-
-        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return customNameVisible();
-            }
-        });
+        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::isDisplays);
+        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::customNameVisible);
     }
 }
