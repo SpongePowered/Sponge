@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.IWorldNameable;
@@ -32,11 +31,13 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
@@ -46,7 +47,7 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
+        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
     }
 
     @Override
@@ -56,16 +57,16 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
         } else if (container instanceof ItemStack || container instanceof IWorldNameable) {
             return Optional.of(true);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<Boolean> optional = getValueFromContainer(container);
         if (optional.isPresent()) {
-            return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
+            return Optional.<Value<Boolean>>of(new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -75,25 +76,23 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
+        final ImmutableValue<Boolean> proposed = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, true, value);
         if (container instanceof Entity) {
             final boolean old = ((Entity) container).getAlwaysRenderNameTag();
+            final ImmutableValue<Boolean> oldValue = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, true, old);
             try {
                 ((Entity) container).setAlwaysRenderNameTag(value);
                 return DataTransactionBuilder.builder()
-                        .replace(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME,
-                                true, old))
-                        .success(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME,
-                                true, value))
+                        .replace(oldValue)
+                        .success(proposed)
                         .result(DataTransactionResult.Type.SUCCESS)
                         .build();
             } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class,
-                        Keys.SHOWS_DISPLAY_NAME, true, value));
+                return DataTransactionBuilder.errorResult(proposed);
             }
 
         }
-        return DataTransactionBuilder.failResult(ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class,
-                Keys.SHOWS_DISPLAY_NAME, true, value));
+        return DataTransactionBuilder.failResult(proposed);
     }
 
     @Override

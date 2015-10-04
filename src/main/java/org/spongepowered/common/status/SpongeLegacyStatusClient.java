@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.status;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.status.StatusClient;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 
 public class SpongeLegacyStatusClient implements StatusClient {
 
@@ -43,7 +43,7 @@ public class SpongeLegacyStatusClient implements StatusClient {
         } else {
             this.version = version;
         }
-        this.virtualHost = Optional.fromNullable(virtualHost);
+        this.virtualHost = Optional.ofNullable(virtualHost);
     }
 
     @Override

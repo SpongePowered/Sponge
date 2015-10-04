@@ -26,8 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -40,6 +38,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapValue<K, V> {
 
@@ -63,7 +63,7 @@ public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapV
 
     @Override
     public ImmutableMapValue<K, V> asImmutable() {
-        return new ImmutableSpongeMapValue<K, V>(getKey(), ImmutableMap.copyOf(this.actualValue));
+        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.copyOf(this.actualValue));
     }
 
     @Override
@@ -101,7 +101,7 @@ public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapV
     public MapValue<K, V> removeAll(Predicate<Map.Entry<K, V>> predicate) {
         for (Iterator<Map.Entry<K, V>> iterator = this.actualValue.entrySet().iterator(); iterator.hasNext(); ) {
             final Map.Entry<K, V> entry = iterator.next();
-            if (!checkNotNull(predicate).apply(entry)) {
+            if (!checkNotNull(predicate).test(entry)) {
                 iterator.remove();
             }
         }

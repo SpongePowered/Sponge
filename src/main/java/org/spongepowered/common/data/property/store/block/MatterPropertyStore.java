@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
+
+import java.util.Optional;
 
 // This is just for basic matter properties. Forge compatibles are provided by the
 // sponge implementation.

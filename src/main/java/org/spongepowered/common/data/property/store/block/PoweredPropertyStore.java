@@ -24,18 +24,23 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.PoweredProperty;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredProperty> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<PoweredProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
@@ -46,7 +51,7 @@ public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredPro
                 return Optional.of(new PoweredProperty(world.isBlockPowered(pos)));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -54,5 +59,13 @@ public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredPro
         final BlockPos pos = VecHelper.toBlockPos(location.getBlockPosition());
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         return Optional.of(new PoweredProperty(world.isBlockPowered(pos)));
+    }
+
+    @Override
+    public Optional<PoweredProperty> getFor(Location<World> location, Direction direction) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+        final EnumFacing facing = SpongeGameRegistry.directionMap.get(direction);
+        final boolean powered = world.getStrongPower(VecHelper.toBlockPos(location.getBlockPosition()), facing) > 0;
+        return Optional.of(new PoweredProperty(powered));
     }
 }

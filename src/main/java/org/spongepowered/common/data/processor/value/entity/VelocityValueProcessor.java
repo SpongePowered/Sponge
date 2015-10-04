@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Optional;
+
 public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3d, Value<Vector3d>> {
 
     public VelocityValueProcessor() {
@@ -45,7 +46,7 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
 
     @Override
     public Value<Vector3d> constructValue(Vector3d defaultValue) {
-        return new SpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, defaultValue);
+        return new SpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, defaultValue);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
         if (container instanceof Entity) {
             return Optional.of(new Vector3d(((Entity) container).motionX, ((Entity) container).motionY, ((Entity) container).motionZ));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -63,10 +64,10 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Vector3d value) {
-        final ImmutableValue<Vector3d> newValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, value);
+        final ImmutableValue<Vector3d> newValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, value);
         if (container instanceof Entity) {
             final Vector3d old = getValueFromContainer(container).get();
-            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<Vector3d>(Keys.VELOCITY, Vector3d.ZERO, old);
+            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, old);
             try {
                 ((Entity) container).motionX = value.getX();
                 ((Entity) container).motionY = value.getY();

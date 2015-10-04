@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.manipulator.immutable.block;
 
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataHolder;
@@ -42,6 +41,8 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
+import java.util.Optional;
+
 public class ImmutableSpongeTreeDataBuilder implements ImmutableDataManipulatorBuilder<ImmutableTreeData, TreeData> {
 
     @Override
@@ -51,12 +52,12 @@ public class ImmutableSpongeTreeDataBuilder implements ImmutableDataManipulatorB
 
     @Override
     public Optional<ImmutableTreeData> createFrom(DataHolder dataHolder) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<ImmutableTreeData> createFrom(ImmutableDataHolder<?> dataHolder) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

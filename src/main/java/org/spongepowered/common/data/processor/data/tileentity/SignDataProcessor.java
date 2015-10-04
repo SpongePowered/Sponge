@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -50,6 +49,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("deprecation")
 public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, ImmutableSignData> {
@@ -71,16 +71,16 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             return Optional.of(signData.set(Keys.SIGN_LINES, signLines));
         } else if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).hasTagCompound()) {
-                return Optional.absent();
+                return Optional.empty();
             } else {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
                 if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND) || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
                 final String id = tileCompound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
                 if (!id.equalsIgnoreCase(NbtDataUtil.SIGN)) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 final List<Text> texts = Lists.newArrayListWithCapacity(4);
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text1")));
@@ -90,7 +90,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 return Optional.<SignData>of(new SpongeSignData(texts));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             } else {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
                 if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND) || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
                 final String id = tileCompound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
@@ -126,12 +126,12 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<SignData> fill(DataContainer container, SignData signData) {
-        return Optional.absent(); // TODO
+        return Optional.empty(); // TODO
     }
 
     @Override
@@ -161,7 +161,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
 
             }
             try {
-                final SignData newData = function.merge(oldData.orNull(), manipulator);
+                final SignData newData = function.merge(oldData.orElse(null), manipulator);
                 final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(((ItemStack) dataHolder));
                 final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
                 tileCompound.setString(NbtDataUtil.BLOCK_ENTITY_ID, NbtDataUtil.SIGN);
@@ -182,10 +182,10 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
     @Override
     public Optional<ImmutableSignData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableSignData immutable) {
         if (!key.equals(Keys.SIGN_LINES)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         // TODO
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -238,7 +238,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
         } else if (dataHolder instanceof ItemStack) {
             final ItemStack itemStack = ((ItemStack) dataHolder);
             if (!itemStack.getItem().equals(Items.sign)) {
-                return Optional.absent();
+                return Optional.empty();
             }
             if (itemStack.hasTagCompound()) {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
@@ -248,7 +248,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
                 final String id = tileCompound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
                 if (!id.equalsIgnoreCase(NbtDataUtil.SIGN)) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 final List<Text> texts = Lists.newArrayListWithCapacity(4);
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text1")));
@@ -258,6 +258,6 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 return Optional.<SignData>of(new SpongeSignData(texts));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

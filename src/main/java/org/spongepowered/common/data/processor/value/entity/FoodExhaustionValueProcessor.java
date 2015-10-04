@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
+import java.util.Optional;
+
 public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<Double, MutableBoundedValue<Double>> {
 
     public FoodExhaustionValueProcessor() {
@@ -45,7 +46,7 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<D
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<Double>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<D
                 return Optional.of((double) player.getFoodStats().foodExhaustionLevel);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -71,11 +72,11 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<D
             if (player.getFoodStats() != null) {
                 final Double oldValue = (double) player.getFoodStats().foodExhaustionLevel;
                 player.getFoodStats().foodExhaustionLevel = value.floatValue();
-                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Double>(Keys.EXHAUSTION, value),
-                        new ImmutableSpongeValue<Double>(Keys.EXHAUSTION, oldValue));
+                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.EXHAUSTION, value),
+                                                                   new ImmutableSpongeValue<>(Keys.EXHAUSTION, oldValue));
             }
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Double>(Keys.EXHAUSTION, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.EXHAUSTION, value));
     }
 
     @Override

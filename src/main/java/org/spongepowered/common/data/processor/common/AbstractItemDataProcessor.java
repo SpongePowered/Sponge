@@ -26,8 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
@@ -42,9 +40,12 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.EntityType;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
-public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
+public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
+                                                                                                                           AbstractMultiDataProcessor<M, I> {
 
     private final Predicate<ItemStack> predicate;
 
@@ -52,24 +53,22 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
         this.predicate = checkNotNull(predicate);
     }
 
-    protected abstract M createManipulator();
-    
     protected abstract boolean doesDataExist(ItemStack itemStack);
 
     protected abstract boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues);
 
     protected abstract Map<Key<?>, ?> getValues(ItemStack itemStack);
-    
+
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof ItemStack && this.predicate.apply((ItemStack) dataHolder);
+        return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<M> from(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             if (doesDataExist((ItemStack) dataHolder)) {
                 final M manipulator = createManipulator();
@@ -80,34 +79,7 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
                 return Optional.of(manipulator);
             }
         }
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<M> createFrom(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.absent();
-        } else {
-            Optional<M> optional = from(dataHolder);
-            if (!optional.isPresent()) {
-                return Optional.of(createManipulator());
-            } else {
-                return optional;
-            }
-        }
-    }
-
-    @Override
-    public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
-            return Optional.absent();
-        } else {
-            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orNull());
-            for (ImmutableValue<?> value : merged.getValues()) {
-                manipulator.set(value);
-            }
-            return Optional.of(manipulator);
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -115,7 +87,7 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
         if (supports(dataHolder)) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<M> old = from(dataHolder);
-            final M merged = checkNotNull(function).merge(old.orNull(), manipulator);
+            final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final Map<Key<?>, Object> map = Maps.newHashMap();
             final Set<ImmutableValue<?>> newVals = merged.getValues();
             for (ImmutableValue<?> value : newVals) {
@@ -132,18 +104,19 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
                     return builder.result(DataTransactionResult.Type.FAILURE).reject(newVals).build();
                 }
             } catch (Exception e) {
-                return builder.result(DataTransactionResult.Type.ERROR).reject().build();
+                return builder.result(DataTransactionResult.Type.ERROR).reject(newVals).build();
             }
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
         if (immutable.supports(key)) {
             return Optional.of((I) immutable.asMutable().set((Key) key, value).asImmutable());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

@@ -30,11 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -59,11 +55,11 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -110,6 +106,7 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
@@ -137,7 +134,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
@@ -146,7 +142,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
@@ -167,9 +162,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -204,7 +203,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
-            Predicate<net.minecraft.entity.Entity> filter);
+            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
@@ -247,7 +246,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"))
-    public void onGetCollidingBoundingBoxes(net.minecraft.entity.Entity entity, net.minecraft.util.AxisAlignedBB axis,
+    public void onGetCollidingBoundingBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
             CallbackInfoReturnable<List> cir) {
         if (!entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
@@ -266,26 +265,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Location<World> getLocation(int x, int y, int z) {
-        return getLocation(new Vector3i(x, y, z));
-    }
-
-    @Override
-    public Location<World> getLocation(Vector3i position) {
-        return new Location<World>(this, position);
-    }
-
-    @Override
-    public Location<World> getLocation(double x, double y, double z) {
-        return getLocation(new Vector3d(x, y, z));
-    }
-
-    @Override
-    public Location<World> getLocation(Vector3d position) {
-        return new Location<World>(this, position);
-    }
-
-    @Override
     public Optional<Chunk> getChunk(Vector3i position) {
         return getChunk(position.getX(), position.getY(), position.getZ());
     }
@@ -293,14 +272,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Optional<Chunk> getChunk(int x, int y, int z) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.theChunkProviderServer.chunkExists(x, z)) {
             chunk = worldserver.theChunkProviderServer.provideChunk(x, z);
         }
-        return Optional.fromNullable((Chunk) chunk);
+        return Optional.ofNullable((Chunk) chunk);
     }
 
     @Override
@@ -311,14 +290,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Optional<Chunk> loadChunk(int x, int y, int z, boolean shouldGenerate) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.theChunkProviderServer.chunkExists(x, z) || shouldGenerate) {
             chunk = worldserver.theChunkProviderServer.loadChunk(x, z);
         }
-        return Optional.fromNullable((Chunk) chunk);
+        return Optional.ofNullable((Chunk) chunk);
     }
 
     @Override
@@ -362,8 +341,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // This already returns a new copy
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class, (Predicate<net.minecraft.entity.Entity>) (Object)
-            filter);
+        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
+                                                              Functional.java8ToGuava((Predicate<net.minecraft.entity.Entity>) (Object) filter));
     }
 
     @Override
@@ -380,7 +359,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(EntityDragonPart.class)) {
             // Unable to construct these
-            return Optional.absent();
+            return Optional.empty();
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
@@ -418,7 +397,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
             }
             if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
 
@@ -432,7 +411,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             ((EntityPainting) entity).art = EnumArt.KEBAB;
         }
 
-        return Optional.fromNullable(entity);
+        return Optional.ofNullable(entity);
     }
 
     @Override
@@ -443,13 +422,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer) {
         // TODO once entity containers are implemented
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer, Vector3d position) {
         // TODO once entity containers are implemented
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -457,7 +436,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         EntitySnapshot entitySnapshot = snapshot.withLocation(new Location<World>(this, position));
         return entitySnapshot.restore();
     }
-    
+
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         checkNotNull(entity, "Entity cannot be null!");
@@ -595,14 +574,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Optional<Entity> getEntity(UUID uuid) {
         World spongeWorld = this;
         if (spongeWorld instanceof WorldServer) {
-            return Optional.fromNullable((Entity) ((WorldServer) (Object) this).getEntityFromUuid(uuid));
+            return Optional.ofNullable((Entity) ((WorldServer) (Object) this).getEntityFromUuid(uuid));
         }
         for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
             if (entity.getUniqueID().equals(uuid)) {
                 return Optional.of((Entity) entity);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -696,7 +675,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Optional<TileEntity> getTileEntity(int x, int y, int z) {
         net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
         if (tileEntity == null) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             return Optional.of((TileEntity) tileEntity);
         }
@@ -841,7 +820,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    @Override
     public Collection<Direction> getPoweredBlockFaces(int x, int y, int z) {
         // Similar to World.getStrongPower(BlockPos)
         BlockPos pos = new BlockPos(x, y, z);
@@ -854,7 +832,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return faces.build();
     }
 
-    @Override
     public Collection<Direction> getIndirectlyPoweredBlockFaces(int x, int y, int z) {
         // Similar to World.isBlockIndirectlyGettingPowered
         BlockPos pos = new BlockPos(x, y, z);
@@ -876,7 +853,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
-        return Lists.newArrayList(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
+        return ((List<TileEntity>) (Object) this.loadedTileEntityList).stream()
+            .filter(filter)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -899,7 +878,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(explosion, "explosion");
         checkNotNull(explosion.getOrigin(), "origin");
 
-        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orNull(), explosion
+        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orElse(null), explosion
                 .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks());
     }
@@ -959,7 +938,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (optional.isPresent()) {
             return optional.get().getFor(new Location<World>(this, x, y, z));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -968,7 +947,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (optional.isPresent()) {
             return optional.get().getFor(new Location<World>(this, x, y, z), direction);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -987,7 +966,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return tileEntityOptional.get().get(key);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -999,7 +978,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return Optional.of((T) manipulator);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -1013,17 +992,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return tileEntity.get().getOrCreate(manipulatorClass);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public <E> E getOrNull(int x, int y, int z, Key<? extends BaseValue<E>> key) {
-        return get(x, y, z, key).orNull();
+        return get(x, y, z, key).orElse(null);
     }
 
     @Override
     public <E> E getOrElse(int x, int y, int z, Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(x, y, z, key).or(defaultValue);
+        return get(x, y, z, key).orElse(defaultValue);
     }
 
     @Override
@@ -1037,7 +1016,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return tileEntity.get().getValue(key);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

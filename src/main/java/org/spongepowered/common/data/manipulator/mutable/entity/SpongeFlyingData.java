@@ -44,7 +44,7 @@ public class SpongeFlyingData extends AbstractBooleanData<FlyingData, ImmutableF
 
     @Override
     public Value<Boolean> flying() {
-        return new SpongeValue<Boolean>(Keys.IS_FLYING, false, this.getValue());
+        return new SpongeValue<>(Keys.IS_FLYING, false, this.getValue());
     }
 
     @Override

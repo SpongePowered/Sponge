@@ -27,7 +27,6 @@ package org.spongepowered.common.service.scheduler;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
@@ -36,6 +35,7 @@ import org.spongepowered.api.service.scheduler.TaskBuilder;
 import org.spongepowered.common.Sponge;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -64,7 +64,11 @@ public class SpongeScheduler implements SchedulerService {
 
     @Override
     public Optional<Task> getTaskById(UUID id) {
-        return this.syncScheduler.getTask(id).or(this.asyncScheduler.getTask(id));
+        Optional<Task> optTask = this.syncScheduler.getTask(id);
+        if (optTask.isPresent()) {
+            return optTask;
+        }
+        return this.asyncScheduler.getTask(id);
     }
 
     @Override

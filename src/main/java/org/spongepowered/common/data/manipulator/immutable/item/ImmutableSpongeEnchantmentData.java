@@ -52,23 +52,13 @@ public class ImmutableSpongeEnchantmentData extends AbstractImmutableData<Immuta
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_ENCHANTMENTS, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getEnchantments();
-            }
-        });
-        registerKeyValue(Keys.ITEM_ENCHANTMENTS, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return enchantments();
-            }
-        });
+        registerFieldGetter(Keys.ITEM_ENCHANTMENTS, ImmutableSpongeEnchantmentData.this::getEnchantments);
+        registerKeyValue(Keys.ITEM_ENCHANTMENTS, ImmutableSpongeEnchantmentData.this::enchantments);
     }
 
     @Override
     public ImmutableListValue<ItemEnchantment> enchantments() {
-        return new ImmutableSpongeListValue<ItemEnchantment>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
+        return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
     }
 
     @Override

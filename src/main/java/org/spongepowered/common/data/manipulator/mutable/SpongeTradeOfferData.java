@@ -97,7 +97,7 @@ public class SpongeTradeOfferData extends AbstractData<TradeOfferData, Immutable
 
     @Override
     public ListValue<TradeOffer> tradeOffers() {
-        return new SpongeListValue<TradeOffer>(Keys.TRADE_OFFERS, this.offers);
+        return new SpongeListValue<>(Keys.TRADE_OFFERS, this.offers);
     }
 
     @Override

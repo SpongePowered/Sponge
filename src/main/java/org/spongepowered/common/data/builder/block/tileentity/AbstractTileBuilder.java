@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import net.minecraft.block.BlockJukebox;
 import net.minecraft.tileentity.TileEntity;
@@ -62,6 +61,7 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This is the base abstract {@link DataBuilder} for all vanilla
@@ -132,12 +132,12 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.nameToClassMap.get(container.getString(TILE_TYPE).get());
         if (clazz == null) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?
-            return Optional.absent(); // basically we didn't manage to find the class and the class isn't even registered with MC
+            return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC
         }
 
         BlockType type = classToTypeMap.get(clazz);
         if (type == null) {
-            return Optional.absent(); // TODO throw exception maybe?
+            return Optional.empty(); // TODO throw exception maybe?
         }
         // Now we should be ready to actually deserialize the TileEntity with the right block.
 
@@ -149,7 +149,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         BlockPos pos = new BlockPos(x, y, z);
         TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).getTileEntity(pos);
         if (tileEntity == null) {
-            return Optional.absent(); // TODO throw exception maybe?
+            return Optional.empty(); // TODO throw exception maybe?
         } else {
             // We really need to validate only after the implementing class deems it ready...
             tileEntity.invalidate();

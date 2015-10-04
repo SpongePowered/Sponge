@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.living.animal;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -48,11 +47,6 @@ import java.util.Random;
 public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Ocelot {
 
     private ItemStack currentItemStack;
-
-    @Override
-    public OcelotData getOcelotData() {
-        return get(OcelotData.class).get();
-    }
 
     @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityOcelot;isTamed()Z", shift = At.Shift.BEFORE, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {

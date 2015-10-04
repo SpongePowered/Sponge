@@ -28,12 +28,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class ImmutableSpongeColorData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
 
@@ -53,7 +52,7 @@ public class ImmutableSpongeColorData extends AbstractImmutableSingleData<Color,
 
     @Override
     public ImmutableValue<Color> color() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.COLOR, this.value, Color.BLACK);
+        return ImmutableSpongeValue.cachedOf(Keys.COLOR, Color.BLACK, this.value);
     }
 
     @Override

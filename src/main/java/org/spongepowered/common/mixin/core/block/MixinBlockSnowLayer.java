@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
@@ -38,6 +37,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(BlockSnow.class)
 public abstract class MixinBlockSnowLayer extends MixinBlock {

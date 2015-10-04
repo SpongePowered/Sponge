@@ -27,15 +27,18 @@ package org.spongepowered.common.data.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.type.CookedFish;
+import org.spongepowered.api.data.type.Fish;
 
 public class SpongeCookedFish implements CookedFish {
 
     private final String id;
     private final String name;
+    private final Fish fish;
 
-    public SpongeCookedFish(String id, String name) {
+    public SpongeCookedFish(String id, String name, Fish fish) {
         this.id = checkNotNull(id);
         this.name = checkNotNull(name);
+        this.fish = checkNotNull(fish);
     }
 
     @Override
@@ -46,5 +49,10 @@ public class SpongeCookedFish implements CookedFish {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public Fish getRawFish() {
+        return this.fish;
     }
 }

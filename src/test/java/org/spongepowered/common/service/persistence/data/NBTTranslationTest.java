@@ -26,7 +26,6 @@ package org.spongepowered.common.service.persistence.data;
 
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.base.Optional;
 import net.minecraft.nbt.NBTTagCompound;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -37,6 +36,8 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.service.persistence.NbtTranslator;
+
+import java.util.Optional;
 
 public class NBTTranslationTest {
 

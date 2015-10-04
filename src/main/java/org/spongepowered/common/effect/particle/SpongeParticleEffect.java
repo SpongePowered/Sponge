@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class SpongeParticleEffect implements ParticleEffect {
 

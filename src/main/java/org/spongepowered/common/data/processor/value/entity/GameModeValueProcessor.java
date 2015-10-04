@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -35,10 +34,11 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMode, Value<GameMode>> {
 
@@ -51,12 +51,12 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
         if (container instanceof EntityPlayerMP) {
             return Optional.of((GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     protected Value<GameMode> constructValue(GameMode defaultValue) {
-        return new SpongeValue<GameMode>(getKey(), defaultValue, GameModes.NOT_SET);
+        return new SpongeValue<>(getKey(), defaultValue, GameModes.NOT_SET);
     }
 
     @Override
@@ -86,6 +86,6 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
     }
 
     private static ImmutableValue<GameMode> getGameModeValue(GameMode gameMode) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, gameMode, GameModes.SURVIVAL);
+        return ImmutableSpongeValue.cachedOf(Keys.GAME_MODE, GameModes.SURVIVAL, gameMode);
     }
 }

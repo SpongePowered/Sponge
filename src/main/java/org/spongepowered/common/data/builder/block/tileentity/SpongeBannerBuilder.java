@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Banner;
@@ -40,6 +39,7 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
 
@@ -75,9 +75,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         // Now we have to get the patterns list
         final List<PatternLayer> patternsList = container.getSerializableList(PATTERNS, PatternLayer.class, service).get();
         final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
-        for (PatternLayer pattern : patternsList) {
-            patternLayers.add(pattern);
-        }
+        patternsList.forEach(patternLayers::add);
         bannerData.set(patternLayers);
         final Banner banner = bannerOptional.get();
         banner.offer(bannerData);

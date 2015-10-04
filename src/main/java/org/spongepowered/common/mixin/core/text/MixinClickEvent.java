@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.core.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import net.minecraft.event.ClickEvent;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.util.Consumer;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,7 +37,9 @@ import org.spongepowered.common.text.action.SpongeCallbackHolder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Mixin(ClickEvent.class)
 public abstract class MixinClickEvent implements IMixinClickEvent {

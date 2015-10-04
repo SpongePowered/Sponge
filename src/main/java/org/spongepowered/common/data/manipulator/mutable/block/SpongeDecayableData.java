@@ -44,7 +44,7 @@ public class SpongeDecayableData extends AbstractBooleanData<DecayableData, Immu
 
     @Override
     public Value<Boolean> decayable() {
-        return new SpongeValue<Boolean>(Keys.DECAYABLE, true, getValue());
+        return new SpongeValue<>(Keys.DECAYABLE, true, getValue());
     }
 
     @Override

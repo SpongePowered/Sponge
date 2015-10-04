@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -36,11 +35,12 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
+
+import java.util.Optional;
 
 public class CareerDataProcessor extends AbstractEntitySingleDataProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
 
@@ -66,7 +66,7 @@ public class CareerDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected ImmutableValue<Career> constructImmutableValue(Career value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, value, Careers.FARMER);
+        return ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.FARMER, value);
     }
 
     @Override

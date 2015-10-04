@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.monster.EntityEnderman;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -36,6 +35,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Optional;
+
 public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
     public ScreamingValueProcessor() {
@@ -44,7 +45,7 @@ public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolea
 
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.IS_SCREAMING, false, defaultValue);
+        return new SpongeValue<>(Keys.IS_SCREAMING, false, defaultValue);
     }
 
     @Override
@@ -52,7 +53,7 @@ public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolea
         if (container.supports(Keys.IS_SCREAMING)) {
             return Optional.of(((EntityEnderman) container).isScreaming());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -60,6 +61,7 @@ public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolea
         return container instanceof EntityEnderman;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
         final ImmutableValue proposedValue = new ImmutableSpongeValue(Keys.IS_SCREAMING, value);

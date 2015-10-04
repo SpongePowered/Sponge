@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -34,7 +35,7 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.item.EntityFireworkRocket.class)
+@Mixin(EntityFireworkRocket.class)
 public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework {
 
     @Shadow private int lifetime;

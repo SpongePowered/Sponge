@@ -26,8 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.spongepowered.api.data.key.Key;
@@ -42,6 +40,9 @@ import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectio
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -59,7 +60,7 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
 
     @Override
     public ImmutableWeightedEntityCollectionValue with(WeightedCollection<WeightedEntity> value) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
+        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<>();
         weightedEntities.addAll(this.actualValue);
         weightedEntities.addAll(checkNotNull(value));
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
@@ -68,8 +69,8 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
     @Override
     public ImmutableWeightedEntityCollectionValue transform(
         Function<WeightedCollection<WeightedEntity>, WeightedCollection<WeightedEntity>> function) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
-        final WeightedCollection<WeightedEntity> temp = new WeightedCollection<WeightedEntity>();
+        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<>();
+        final WeightedCollection<WeightedEntity> temp = new WeightedCollection<>();
         temp.addAll(this.actualValue);
         weightedEntities.addAll(checkNotNull(checkNotNull(function).apply(temp)));
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
@@ -77,7 +78,7 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
 
     @Override
     public ImmutableWeightedEntityCollectionValue with(WeightedEntity... elements) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
+        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<>();
         weightedEntities.addAll(this.actualValue);
         weightedEntities.addAll(ImmutableList.copyOf(elements));
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
@@ -85,7 +86,7 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
 
     @Override
     public ImmutableWeightedEntityCollectionValue withAll(Iterable<WeightedEntity> elements) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
+        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<>();
         weightedEntities.addAll(this.actualValue);
         Iterables.addAll(weightedEntities, elements);
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
@@ -93,34 +94,23 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
 
     @Override
     public ImmutableWeightedEntityCollectionValue without(WeightedEntity element) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
-        for (WeightedEntity entity : this.actualValue) {
-            if (!entity.equals(element)) {
-                weightedEntities.add(entity);
-            }
-        }
+        final WeightedCollection<WeightedEntity> weightedEntities =
+            this.actualValue.stream().filter(entity -> !entity.equals(element)).collect(Collectors.toCollection(WeightedCollection::new));
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
     }
 
     @Override
     public ImmutableWeightedEntityCollectionValue withoutAll(Iterable<WeightedEntity> elements) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
-        for (WeightedEntity entity : this.actualValue) {
-            if (!Iterables.contains(elements, entity)) {
-                weightedEntities.add(entity);
-            }
-        }
+        final WeightedCollection<WeightedEntity> weightedEntities =
+            this.actualValue.stream().filter(entity -> !Iterables.contains(elements, entity))
+                .collect(Collectors.toCollection(WeightedCollection::new));
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
     }
 
     @Override
     public ImmutableWeightedEntityCollectionValue withoutAll(Predicate<WeightedEntity> predicate) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<WeightedEntity>();
-        for (WeightedEntity entity : this.actualValue) {
-            if (!predicate.apply(entity)) {
-                weightedEntities.add(entity);
-            }
-        }
+        final WeightedCollection<WeightedEntity> weightedEntities =
+            this.actualValue.stream().filter(entity -> !predicate.test(entity)).collect(Collectors.toCollection(WeightedCollection::new));
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
     }
 

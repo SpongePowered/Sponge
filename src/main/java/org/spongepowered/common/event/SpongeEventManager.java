@@ -27,8 +27,6 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -51,7 +49,9 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -207,7 +207,7 @@ public class SpongeEventManager implements EventManager {
             Iterator<RegisteredListener<?>> itr = this.handlersByEvent.values().iterator();
             while (itr.hasNext()) {
                 RegisteredListener<?> handler = itr.next();
-                if (unregister.apply(handler)) {
+                if (unregister.test(handler)) {
                     itr.remove();
                     changed = true;
                 }
@@ -222,25 +222,13 @@ public class SpongeEventManager implements EventManager {
     @Override
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
-        unregister(new Predicate<RegisteredListener<?>>() {
-
-            @Override
-            public boolean apply(RegisteredListener<?> handler) {
-                return listener.equals(handler.getHandle());
-            }
-        });
+        unregister(handler -> listener.equals(handler.getHandle()));
     }
 
     @Override
     public void unregisterPluginListeners(Object pluginObj) {
         final PluginContainer plugin = getPlugin(pluginObj);
-        unregister(new Predicate<RegisteredListener<?>>() {
-
-            @Override
-            public boolean apply(RegisteredListener<?> handler) {
-                return plugin.equals(handler.getPlugin());
-            }
-        });
+        unregister(handler -> plugin.equals(handler.getPlugin()));
     }
 
     protected RegisteredListener.Cache getHandlerCache(Event event) {

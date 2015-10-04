@@ -34,7 +34,6 @@ import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionDa
 import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeConnectedDirectionData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
@@ -54,27 +53,27 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
 
     @Override
     public ImmutableSetValue<Direction> connectedDirections() {
-        return new ImmutableSpongeSetValue<Direction>(Keys.CONNECTED_DIRECTIONS, this.directions);
+        return new ImmutableSpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.directions);
     }
 
     @Override
     public ImmutableValue<Boolean> conntectedNorth() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));
+        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));
     }
 
     @Override
     public ImmutableValue<Boolean> connectedSouth() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CONNECTED_SOUTH, false, this.directions.contains(Direction.SOUTH));
+        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_SOUTH, false, this.directions.contains(Direction.SOUTH));
     }
 
     @Override
     public ImmutableValue<Boolean> connectedEast() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CONNECTED_EAST, false, this.directions.contains(Direction.EAST));
+        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_EAST, false, this.directions.contains(Direction.EAST));
     }
 
     @Override
     public ImmutableValue<Boolean> connectedWest() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CONNECTED_WEST, false, this.directions.contains(Direction.WEST));
+        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_WEST, false, this.directions.contains(Direction.WEST));
     }
 
     @Override

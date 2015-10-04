@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,13 +33,14 @@ import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
+
+import java.util.Optional;
 
 public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<HorseColor, Value<HorseColor>> {
 
@@ -50,7 +50,7 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Horse
 
     @Override
     protected Value<HorseColor> constructValue(HorseColor defaultValue) {
-        return new SpongeValue<HorseColor>(Keys.HORSE_COLOR, defaultValue);
+        return new SpongeValue<>(Keys.HORSE_COLOR, defaultValue);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Horse
         if (this.supports(container)) {
             return Optional.of(HorseUtils.getHorseColor((EntityHorse) container));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -68,7 +68,7 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Horse
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, HorseColor value) {
-        ImmutableValue<HorseColor> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_COLOR, value, HorseColors.WHITE);
+        ImmutableValue<HorseColor> newValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.WHITE, value);
 
         if (this.supports(container)) {
             EntityHorse horse = (EntityHorse) container;
@@ -76,7 +76,7 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Horse
             HorseColor old = HorseUtils.getHorseColor(horse);
             SpongeHorseStyle style = (SpongeHorseStyle) HorseUtils.getHorseStyle(horse);
 
-            ImmutableValue<HorseColor> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_COLOR, old, HorseColors.WHITE);
+            ImmutableValue<HorseColor> oldValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.WHITE, old);
 
             horse.setHorseVariant(HorseUtils.getInternalVariant((SpongeHorseColor) value, style));
             return DataTransactionBuilder.successReplaceResult(newValue, oldValue);

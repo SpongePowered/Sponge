@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.data.property;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+
+import java.util.Optional;
 
 public class PropertyStoreDelegate<T extends Property<?, ?>> implements PropertyStore<T> {
 
@@ -48,7 +50,7 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -59,7 +61,18 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
                 return optional;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<T> getFor(Location<World> location, Direction direction) {
+        for (PropertyStore<T> propertyStore : this.propertyStores) {
+            final Optional<T> optional = propertyStore.getFor(location, direction);
+            if (optional.isPresent()) {
+                return optional;
+            }
+        }
+        return Optional.empty();
     }
 
     @Override

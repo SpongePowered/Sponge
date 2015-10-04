@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.weather;
 
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.effect.EntityLightningBolt.class)
+@Mixin(EntityLightningBolt.class)
 public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements Lightning {
 
     private boolean effect = false;
@@ -47,11 +47,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void setEffect(boolean effect) {
         this.effect = effect;
-    }
-
-    @Override
-    public ExpirableData getExpiringData() {
-        return get(ExpirableData.class).get();
     }
 
     @Inject(method = "onUpdate()V", at = {@At(value = "NEW", args = "class=net.minecraft.util.BlockPos"),

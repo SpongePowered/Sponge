@@ -25,12 +25,9 @@
 package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.util.OptionalUtils.asSet;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -55,6 +52,7 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.text.selector.SelectorTypes;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.LocatedSource;
 import org.spongepowered.api.world.Chunk;
@@ -67,7 +65,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A resolver that acts like Vanilla Minecraft in many regards.
@@ -76,24 +77,10 @@ import java.util.Set;
 public class SelectorResolver {
 
     private static final Function<CommandSource, String> GET_NAME =
-        new Function<CommandSource, String>() {
-
-            @Override
-            public String apply(CommandSource input) {
-                return input.getName();
-            }
-
-        };
+        input -> input.getName();
     private static final Vector3d ORIGIN = new Vector3d(0, 0, 0);
     private static final Set<ArgumentType<?>> LOCATION_BASED_ARGUMENTS;
-    private static final Function<Number, Double> TO_DOUBLE = new Function<Number, Double>() {
-
-        @Override
-        public Double apply(Number input) {
-            return input.doubleValue();
-        }
-
-    };
+    private static final Function<Number, Double> TO_DOUBLE = input -> input.doubleValue();
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
 
     static {
@@ -121,14 +108,7 @@ public class SelectorResolver {
     }
 
     private static <I, R> Predicate<I> requireTypePredicate(Class<I> inputType, final Class<R> requiredType) {
-        return new Predicate<I>() {
-
-            @Override
-            public boolean apply(I input) {
-                return requiredType.isInstance(input);
-            }
-
-        };
+        return requiredType::isInstance;
     }
 
     private final Collection<Extent> extents;
@@ -147,14 +127,14 @@ public class SelectorResolver {
     }
 
     public SelectorResolver(CommandSource origin, Selector selector, boolean force) {
-        this(Optional.fromNullable(extentFromSource(origin)).asSet(), positionFromSource(origin), origin, selector, force);
+        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), origin, selector, force);
     }
 
     private SelectorResolver(Collection<? extends Extent> extents, Vector3d position,
         CommandSource original, Selector selector, boolean force) {
         this.extents = ImmutableSet.copyOf(extents);
         this.position = position == null ? ORIGIN : position;
-        this.original = Optional.fromNullable(original);
+        this.original = Optional.ofNullable(original);
         this.selector = checkNotNull(selector);
         this.selectorFilter = makeFilter();
         this.alwaysUsePosition = force;
@@ -175,7 +155,7 @@ public class SelectorResolver {
         addTeamFilters(filters);
         addScoreFilters(filters);
         SelectorType selectorType = sel.getType();
-        Optional<Argument.Invertible<EntityType>> type = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
+        Optional<Invertible<EntityType>> type = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
         // isn't an ALL_ENTITIES selector or it is a RANDOM selector for only players
         boolean isPlayerOnlySelector =
             selectorType == SelectorTypes.ALL_PLAYERS || selectorType == SelectorTypes.NEAREST_PLAYER
@@ -185,7 +165,7 @@ public class SelectorResolver {
             // insert at the start so it applies first
             filters.add(0, requireTypePredicate(Entity.class, Player.class));
         }
-        return Predicates.and(filters);
+        return Functional.predicateAnd(filters);
     }
 
     private void addDimensionFilters(final Vector3d position, List<Predicate<Entity>> filters) {
@@ -196,36 +176,21 @@ public class SelectorResolver {
         final Vector3d boxMin = det1.min(det2);
         final Vector3d boxMax = det1.max(det2);
         if (sel.has(ArgumentTypes.DIMENSION.x())) {
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Vector3d pos = input.getLocation().getPosition();
-                    return pos.getX() >= boxMin.getX() && pos.getX() <= boxMax.getX();
-                }
-
+            filters.add(input -> {
+                Vector3d pos = input.getLocation().getPosition();
+                return pos.getX() >= boxMin.getX() && pos.getX() <= boxMax.getX();
             });
         }
         if (sel.has(ArgumentTypes.DIMENSION.y())) {
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Vector3d pos = input.getLocation().getPosition();
-                    return pos.getY() >= boxMin.getY() && pos.getY() <= boxMax.getY();
-                }
-
+            filters.add(input -> {
+                Vector3d pos = input.getLocation().getPosition();
+                return pos.getY() >= boxMin.getY() && pos.getY() <= boxMax.getY();
             });
         }
         if (sel.has(ArgumentTypes.DIMENSION.z())) {
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Vector3d pos = input.getLocation().getPosition();
-                    return pos.getZ() >= boxMin.getZ() && pos.getZ() <= boxMax.getZ();
-                }
-
+            filters.add(input -> {
+                Vector3d pos = input.getLocation().getPosition();
+                return pos.getZ() >= boxMin.getZ() && pos.getZ() <= boxMax.getZ();
             });
         }
     }
@@ -236,14 +201,9 @@ public class SelectorResolver {
         // If the gamemode is NOT_SET, that means accept any
         if (gamemode.isPresent() && gamemode.get() != GameModes.NOT_SET) {
             final GameMode actualMode = gamemode.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<GameModeData> mode = input.get(GameModeData.class);
-                    return mode.isPresent() && mode.get() == actualMode;
-                }
-
+            filters.add(input -> {
+                Optional<GameModeData> mode = input.get(GameModeData.class);
+                return mode.isPresent() && mode.get() == actualMode;
             });
         }
     }
@@ -254,26 +214,16 @@ public class SelectorResolver {
         Optional<Integer> levelMax = sel.get(ArgumentTypes.LEVEL.maximum());
         if (levelMin.isPresent()) {
             final int actualMin = levelMin.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().level().get() >= actualMin;
-                }
-
+            filters.add(input -> {
+                Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                return xp.isPresent() && xp.get().level().get() >= actualMin;
             });
         }
         if (levelMax.isPresent()) {
             final int actualMax = levelMax.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                    return xp.isPresent() && xp.get().level().get() <= actualMax;
-                }
-
+            filters.add(input -> {
+                Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                return xp.isPresent() && xp.get().level().get() <= actualMax;
             });
         }
     }
@@ -284,14 +234,9 @@ public class SelectorResolver {
         if (nameOpt.isPresent()) {
             final String name = nameOpt.get().getValue();
             final boolean inverted = nameOpt.get().isInverted();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
-                    return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
-                }
-
+            filters.add(input -> {
+                Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
+                return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
             });
         }
     }
@@ -303,26 +248,12 @@ public class SelectorResolver {
         if (radiusMin.isPresent()) {
             int radMin = radiusMin.get();
             final int radMinSquared = radMin * radMin;
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    return input.getLocation().getPosition().distanceSquared(position) >= radMinSquared;
-                }
-
-            });
+            filters.add(input -> input.getLocation().getPosition().distanceSquared(position) >= radMinSquared);
         }
         if (radiusMax.isPresent()) {
             int radMax = radiusMax.get();
             final int radMaxSquared = radMax * radMax;
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    return input.getLocation().getPosition().distanceSquared(position) <= radMaxSquared;
-                }
-
-            });
+            filters.add(input -> input.getLocation().getPosition().distanceSquared(position) <= radMaxSquared);
         }
     }
 
@@ -334,50 +265,22 @@ public class SelectorResolver {
         Optional<Double> rotMinX = sel.get(ArgumentTypes.ROTATION.minimum().x());
         if (rotMinX.isPresent()) {
             final double rmx = rotMinX.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    return input.getRotation().getX() >= rmx;
-                }
-
-            });
+            filters.add(input -> input.getRotation().getX() >= rmx);
         }
         Optional<Double> rotMinY = sel.get(ArgumentTypes.ROTATION.minimum().y());
         if (rotMinY.isPresent()) {
             final double rmy = rotMinY.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    return input.getRotation().getY() >= rmy;
-                }
-
-            });
+            filters.add(input -> input.getRotation().getY() >= rmy);
         }
         Optional<Double> rotMaxX = sel.get(ArgumentTypes.ROTATION.maximum().x());
         if (rotMaxX.isPresent()) {
             final double rx = rotMaxX.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    return input.getRotation().getX() <= rx;
-                }
-
-            });
+            filters.add(input -> input.getRotation().getX() <= rx);
         }
         Optional<Double> rotMaxY = sel.get(ArgumentTypes.ROTATION.maximum().y());
         if (rotMaxY.isPresent()) {
             final double ry = rotMaxY.get();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    return input.getRotation().getY() <= ry;
-                }
-
-            });
+            filters.add(input -> input.getRotation().getY() <= ry);
         }
     }
 
@@ -402,13 +305,13 @@ public class SelectorResolver {
             final boolean inverted = teamArg.isInverted();
             ImmutableSet.Builder<Team> teamBuilder = ImmutableSet.builder();
             for (World w : worlds) {
-                teamBuilder.addAll(w.getScoreboard().getTeam(teamArg.getValue()).asSet());
+                teamBuilder.addAll(asSet(w.getScoreboard().getTeam(teamArg.getValue())));
             }
             final Collection<Team> teams = teamBuilder.build();
-            filters.add(new Predicate<Entity>() {
+                filters.add(new Predicate<Entity>() {
 
                 @Override
-                public boolean apply(Entity input) {
+                public boolean test(Entity input) {
                     if (input instanceof TeamMember) {
                         return inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
                     }
@@ -434,26 +337,19 @@ public class SelectorResolver {
             Argument.Invertible<EntityType> typeArg = typeOpt.get();
             final boolean inverted = typeArg.isInverted();
             final EntityType type = typeArg.getValue();
-            filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean apply(Entity input) {
-                    return inverted ^ input.getType() == type;
-                }
-
-            });
+            filters.add(input -> inverted ^ input.getType() == type);
         }
     }
 
     private Vector3d getPositionOrDefault(Vector3d pos, ArgumentHolder.Vector3<?, ? extends Number> vecTypes) {
-        Optional<Double> x = this.selector.get(vecTypes.x()).transform(TO_DOUBLE);
-        Optional<Double> y = this.selector.get(vecTypes.y()).transform(TO_DOUBLE);
-        Optional<Double> z = this.selector.get(vecTypes.z()).transform(TO_DOUBLE);
-        return new Vector3d(x.or(Double.valueOf(pos.getX())), y.or(Double.valueOf(pos.getY())), z.or(Double.valueOf(pos.getZ())));
+        Optional<Double> x = this.selector.get(vecTypes.x()).map(TO_DOUBLE);
+        Optional<Double> y = this.selector.get(vecTypes.y()).map(TO_DOUBLE);
+        Optional<Double> z = this.selector.get(vecTypes.z()).map(TO_DOUBLE);
+        return new Vector3d(x.orElse(Double.valueOf(pos.getX())), y.orElse(Double.valueOf(pos.getY())), z.orElse(Double.valueOf(pos.getZ())));
     }
 
     public String getName() {
-        return this.original.transform(GET_NAME).or("SelectorResolver");
+        return this.original.map(GET_NAME).orElse("SelectorResolver");
     }
 
     public Set<Entity> resolve() {
@@ -462,20 +358,20 @@ public class SelectorResolver {
         if (INFINITE_TYPES.contains(selectorType)) {
             defaultCount = 0;
         }
-        int maxToSelect = this.selector.get(ArgumentTypes.COUNT).or(defaultCount);
+        int maxToSelect = this.selector.get(ArgumentTypes.COUNT).orElse(defaultCount);
         Set<? extends Extent> extents = getExtentSet();
         int count = 0;
         ImmutableSet.Builder<Entity> entities = ImmutableSet.builder();
         for (Extent extent : extents) {
             Collection<Entity> allEntities = extent.getEntities();
             if (selectorType == SelectorTypes.RANDOM) {
-                List<Entity> entityList = new ArrayList<Entity>(allEntities);
+                List<Entity> entityList = new ArrayList<>(allEntities);
                 Collections.shuffle(entityList);
                 allEntities = entityList;
             }
 
             for (Entity e : allEntities) {
-                if (!this.selectorFilter.apply(e)) {
+                if (!this.selectorFilter.test(e)) {
                     continue;
                 }
                 entities.add(e);

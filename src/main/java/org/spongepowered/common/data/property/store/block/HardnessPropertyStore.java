@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import org.spongepowered.api.data.property.block.HardnessProperty;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
+
+import java.util.Optional;
 
 public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessProperty> {
 
@@ -40,7 +41,7 @@ public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessPr
         if (block.getBlockHardness(null, null) > 0) {
             return Optional.of(new HardnessProperty(block.getBlockHardness(null, null)));
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

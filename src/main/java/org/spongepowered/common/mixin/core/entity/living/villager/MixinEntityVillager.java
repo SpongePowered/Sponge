@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.living.villager;
 
-import com.google.common.base.Optional;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
-import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
@@ -48,12 +46,13 @@ import org.spongepowered.common.interfaces.entity.IMixinVillager;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityAgeable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.passive.EntityVillager.class)
+@Mixin(EntityVillager.class)
 public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager {
 
     @Shadow private boolean isPlaying;
@@ -123,7 +122,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Override
     public Optional<Human> getCustomer() {
-        return Optional.fromNullable((Human) this.shadow$getCustomer());
+        return Optional.ofNullable((Human) this.shadow$getCustomer());
     }
 
     @Override
@@ -131,13 +130,4 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         this.setCustomer((EntityPlayer) human);
     }
 
-    @Override
-    public TradeOfferData getTradeOfferData() {
-        return get(TradeOfferData.class).get();
-    }
-
-    @Override
-    public CareerData getCareerData() {
-        return get(CareerData.class).get();
-    }
 }

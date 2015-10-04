@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.Vec3;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class MixinExplosion implements Explosion {
@@ -51,13 +52,13 @@ public abstract class MixinExplosion implements Explosion {
     @Shadow public double explosionX;
     @Shadow public double explosionY;
     @Shadow public double explosionZ;
-    @Shadow public net.minecraft.entity.Entity exploder;
+    @Shadow public Entity exploder;
     @Shadow public float explosionSize;
-    @SuppressWarnings("rawtypes") 
+    @SuppressWarnings("rawtypes")
     @Shadow public List affectedBlockPositions;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstructed(net.minecraft.world.World world, net.minecraft.entity.Entity entity, double originX, double originY,
+    public void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,
             double originZ, float radius, boolean isFlaming, boolean isSmoking,
             CallbackInfo ci) {
         this.origin = new Vector3d(this.explosionX, this.explosionY, this.explosionZ);
@@ -75,12 +76,12 @@ public abstract class MixinExplosion implements Explosion {
 
     @Override
     public Optional<Explosive> getSourceExplosive() {
-        return Optional.fromNullable((Explosive) this.exploder);
+        return Optional.ofNullable((Explosive) this.exploder);
     }
 
     @Override
     public void setSourceExplosive(Explosive source) {
-        this.exploder = (net.minecraft.entity.Entity) source;
+        this.exploder = (Entity) source;
     }
 
     @Override

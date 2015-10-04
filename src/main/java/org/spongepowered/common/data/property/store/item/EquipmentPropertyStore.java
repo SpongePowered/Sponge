@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.EquipmentProperty;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+
+import java.util.Optional;
 
 public class EquipmentPropertyStore extends AbstractItemStackPropertyStore<EquipmentProperty> {
 
@@ -51,6 +52,6 @@ public class EquipmentPropertyStore extends AbstractItemStackPropertyStore<Equip
             }
 
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

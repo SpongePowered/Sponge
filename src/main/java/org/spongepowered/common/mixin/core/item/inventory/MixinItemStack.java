@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTBase;
@@ -72,6 +71,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -297,7 +297,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 return Optional.of((T) existing.copy());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private void resyncCustomToTag() {

@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Optional;
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -40,6 +39,8 @@ import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<TradeOffer> {
 
@@ -118,7 +119,7 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
         checkNotNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
         this.firstItem = offer.getFirstBuyingItem();
-        this.secondItem = offer.getSecondBuyingItem().orNull();
+        this.secondItem = offer.getSecondBuyingItem().orElse(null);
         this.sellingItem = offer.getSellingItem();
         this.useCount = offer.getUses();
         this.maxUses = offer.getMaxUses();

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -42,6 +41,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -80,7 +80,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
                 return Optional.of((T) existing);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

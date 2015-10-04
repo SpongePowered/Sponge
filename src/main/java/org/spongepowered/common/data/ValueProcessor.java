@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -36,6 +35,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.CollectionValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
+
+import java.util.Optional;
 
 /**
  * An implementation processor for handling a particular {@link BaseValue}.
@@ -61,7 +62,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * changes to the game can provide their own {@link ValueProcessor}s
      * for specific cases. The notion is that the higher the priority, the
      * earlier the processor is used. If for any reason a processor's method
-     * is returning an {@link Optional#absent()} or
+     * is returning an {@link Optional#empty()} or
      * {@link DataTransactionResult} with a failure, the next processor in
      * line will be used. By default, all Sponge processors are with a
      * priority of 100.
@@ -76,8 +77,8 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * return type is {@link Optional}, this method too is applicable for
      * {@link ValueContainer#getOrNull(Key)} and
      * {@link ValueContainer#getOrElse(Key, Object)} as they are simply
-     * additional methods called from {@link Optional#orNull()} and
-     * {@link Optional#or(Object)}.
+     * additional methods called from {@link Optional#orElse(Object)} and
+     * {@link Optional#orElse(Object)}.
      *
      * <p>To truly understand the use of this method, the thought process
      * is that a {@link ValueContainer} being mixed in to existing minecraft
@@ -153,7 +154,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * Attempts to remove the known keyed data associated with this
      * {@link ValueProcessor} from the provided {@link ValueContainer}. If
      * the result is not possible, the result will be an expected
-     * {@link org.spongepowered.api.data.DataTransactionResult.Type#FAILURE}.
+     * {@link DataTransactionResult.Type#FAILURE}.
      *
      * @param container The value container to remove data from
      * @return The transaction result

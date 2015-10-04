@@ -49,12 +49,12 @@ public class ImmutableSpongeOwnableData extends AbstractImmutableData<ImmutableO
 
     @Override
     public ImmutableValue<GameProfile> profile() {
-        return new ImmutableSpongeValue<GameProfile>(Keys.OWNED_BY_PROFILE, this.profile);
+        return new ImmutableSpongeValue<>(Keys.OWNED_BY_PROFILE, this.profile);
     }
 
     @Override
     public ImmutableOwnableData copy() {
-        return new ImmutableSpongeOwnableData(profile);
+        return new ImmutableSpongeOwnableData(this.profile);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class DirectionResolver {
             case EAST: return EnumFacing.EAST;
             case NORTH: return EnumFacing.NORTH;
             default:
-                throw new IllegalArgumentException("No matching facing direction found for direction: " + direction);
+                throw new IllegalArgumentException("No matching direction found for direction: " + direction);
         }
     }
 
@@ -54,7 +54,7 @@ public class DirectionResolver {
             case EAST: return Direction.EAST;
             case NORTH: return Direction.NORTH;
             default:
-                throw new IllegalArgumentException("No matching facing direction found for direction: " + facing);
+                throw new IllegalArgumentException("No matching enum facing direction found for direction: " + facing);
         }
     }
 

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import org.spongepowered.api.data.property.block.StatisticsTrackedProperty;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
+
+import java.util.Optional;
 
 public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<StatisticsTrackedProperty> {
 

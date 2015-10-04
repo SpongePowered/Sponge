@@ -24,22 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.block.tileentity.Skull;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntitySkull.class)
+@Mixin(TileEntitySkull.class)
 public abstract class MixinTileEntitySkull extends MixinTileEntity implements Skull {
 
     @Shadow private int skullRotation;
 
-    @Shadow public abstract com.mojang.authlib.GameProfile getPlayerProfile();
-    @Shadow public abstract void setPlayerProfile(com.mojang.authlib.GameProfile playerProfile);
+    @Shadow public abstract GameProfile getPlayerProfile();
+    @Shadow public abstract void setPlayerProfile(GameProfile playerProfile);
     @Shadow public abstract int getSkullType();
     @Shadow public abstract void setType(int type);
 

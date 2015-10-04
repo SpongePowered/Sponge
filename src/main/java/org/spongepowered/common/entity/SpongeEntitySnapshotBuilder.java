@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
@@ -52,6 +51,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -137,8 +137,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
     @Override
     public SpongeEntitySnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
-        final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getImmutableProcessor(
-            (Class<ImmutableDataManipulator>) (Class) manipulator.getClass());
+        final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getImmutableProcessor((Class) manipulator.getClass());
         if (optional.isPresent()) {
             if (optional.get().supports(this.entityType)) {
                 addManipulator(manipulator);
@@ -182,7 +181,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
             add((ImmutableDataManipulator) manipulator);
         }
         if (holder instanceof SpongeEntitySnapshot) {
-            this.compound = ((SpongeEntitySnapshot) holder).getCompound().orNull();
+            this.compound = ((SpongeEntitySnapshot) holder).getCompound().orElse(null);
         }
         return this;
     }

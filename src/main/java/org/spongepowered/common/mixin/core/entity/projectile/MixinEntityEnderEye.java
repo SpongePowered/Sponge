@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.item.EntityEnderEye;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -35,7 +36,7 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.item.EntityEnderEye.class)
+@Mixin(EntityEnderEye.class)
 public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder {
 
     @Shadow private double targetX;

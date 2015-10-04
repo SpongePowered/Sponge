@@ -56,7 +56,7 @@ public abstract class MixinS48PacketResourcePackSend implements IMixinPacketReso
     public void setResourcePack(ResourcePack pack) {
         this.pack = pack;
         this.url = ((SpongeResourcePack) pack).getUrlString();
-        this.hash = pack.getHash().or("");
+        this.hash = pack.getHash().orElse("");
     }
 
     @Override

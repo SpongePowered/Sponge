@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
+import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -34,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityBrewingStand.class)
+@Mixin(TileEntityBrewingStand.class)
 public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockable implements BrewingStand {
 
     @Shadow private String customName;

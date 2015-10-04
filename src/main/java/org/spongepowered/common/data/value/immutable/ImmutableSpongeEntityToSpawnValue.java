@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
@@ -37,6 +36,7 @@ import org.spongepowered.api.util.weighted.WeightedEntity;
 import org.spongepowered.common.data.value.mutable.SpongeNextEntityToSpawnValue;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 

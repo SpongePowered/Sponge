@@ -26,9 +26,7 @@ package org.spongepowered.common.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
@@ -55,7 +53,9 @@ import org.spongepowered.common.service.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -169,7 +169,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                 return Optional.of((T) (Object) manipulator);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("rawtypes")
@@ -186,7 +186,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                     return Optional.of((T) manipulatorOptional.get().asImmutable());
                 }
             }
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -200,7 +200,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final ItemStack copy = this.privateStack.copy();
         final DataTransactionResult result = copy.transform(key, function);
         if (result.getType() != DataTransactionResult.Type.SUCCESS) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(copy.createSnapshot());
     }
@@ -210,7 +210,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final ItemStack copy = this.privateStack.copy();
         final DataTransactionResult result = copy.offer(key, value);
         if (result.getType() != DataTransactionResult.Type.SUCCESS) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(copy.createSnapshot());
     }
@@ -228,7 +228,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (result.getType() != DataTransactionResult.Type.FAILURE) {
             return Optional.of(copyStack.createSnapshot());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -249,7 +249,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             processorOptional.get().remove(copiedStack);
             return Optional.of(copiedStack.createSnapshot());
         } // todo custom data
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -277,17 +277,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return this.privateStack.get(key);
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return this.privateStack.getOrNull(key);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return this.privateStack.getOrElse(key, defaultValue);
-    }
-
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         return this.privateStack.getValue(key);
@@ -296,11 +285,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public boolean supports(Key<?> key) {
         return this.privateStack.supports(key);
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override

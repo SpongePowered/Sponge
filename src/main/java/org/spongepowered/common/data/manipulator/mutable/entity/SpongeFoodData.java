@@ -88,18 +88,18 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public MutableBoundedValue<Integer> foodLevel() {
-        return new SpongeBoundedValue<Integer>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, this.foodLevel);
+        return new SpongeBoundedValue<>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, this.foodLevel);
     }
 
     @Override
     public MutableBoundedValue<Double> exhaustion() {
-        return new SpongeBoundedValue<Double>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, (double) this.foodExhaustionLevel);
+        return new SpongeBoundedValue<>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, (double) this.foodExhaustionLevel);
     }
 
     @Override
     public MutableBoundedValue<Double> saturation() {
-        return new SpongeBoundedValue<Double>(Keys.SATURATION, 5.0D, doubleComparator(), 0D, Double.MAX_VALUE,
-                (double) this.foodSaturationLevel);
+        return new SpongeBoundedValue<>(Keys.SATURATION, 5.0D, doubleComparator(), 0D, Double.MAX_VALUE,
+                                        (double) this.foodSaturationLevel);
     }
 
     public int getFoodLevel() {
@@ -128,70 +128,16 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FOOD_LEVEL, new GetterFunction<Object>() {
+        registerFieldGetter(Keys.FOOD_LEVEL, this::getFoodLevel);
+        registerFieldSetter(Keys.FOOD_LEVEL, value -> setFoodLevel(((Number) value).intValue()));
+        registerKeyValue(Keys.FOOD_LEVEL, this::foodLevel);
 
-            @Override
-            public Object get() {
-                return getFoodLevel();
-            }
-        });
-        registerFieldSetter(Keys.FOOD_LEVEL, new SetterFunction<Object>() {
+        registerFieldGetter(Keys.SATURATION, this::getFoodSaturation);
+        registerFieldSetter(Keys.SATURATION, value -> setFoodSaturation(((Number) value).doubleValue()));
+        registerKeyValue(Keys.SATURATION, this::saturation);
 
-            @Override
-            public void set(Object value) {
-                setFoodLevel(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.FOOD_LEVEL, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return foodLevel();
-            }
-        });
-
-        registerFieldGetter(Keys.SATURATION, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getFoodSaturation();
-            }
-        });
-        registerFieldSetter(Keys.SATURATION, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setFoodSaturation(((Number) value).doubleValue());
-            }
-        });
-        registerKeyValue(Keys.SATURATION, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return saturation();
-            }
-        });
-
-        registerFieldGetter(Keys.EXHAUSTION, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getFoodExhaustion();
-            }
-        });
-        registerFieldSetter(Keys.EXHAUSTION, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setFoodExhaustion(((Number) value).doubleValue());
-            }
-        });
-        registerKeyValue(Keys.EXHAUSTION, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return exhaustion();
-            }
-        });
+        registerFieldGetter(Keys.EXHAUSTION, this::getFoodExhaustion);
+        registerFieldSetter(Keys.EXHAUSTION, value -> setFoodExhaustion(((Number) value).doubleValue()));
+        registerKeyValue(Keys.EXHAUSTION, this::exhaustion);
     }
 }

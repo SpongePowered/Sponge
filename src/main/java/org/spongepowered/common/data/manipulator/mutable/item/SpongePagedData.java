@@ -49,7 +49,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
     private List<Text> pages;
 
     public SpongePagedData() {
-        this(new ArrayList<Text>());
+        this(new ArrayList<>());
     }
 
     public SpongePagedData(List<Text> pages) {
@@ -60,7 +60,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
 
     @Override
     public ListValue<Text> pages() {
-        return new SpongeListValue<Text>(Keys.BOOK_PAGES, this.pages);
+        return new SpongeListValue<>(Keys.BOOK_PAGES, this.pages);
     }
 
     @Override
@@ -92,30 +92,12 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
         this.pages = Lists.newArrayList(pages);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.BOOK_PAGES, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getPages();
-            }
-        });
-        registerFieldSetter(Keys.BOOK_PAGES, new SetterFunction<Object>() {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public void set(Object value) {
-                setPages((List<Text>) value);
-            }
-        });
-        registerKeyValue(Keys.BOOK_PAGES, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return pages();
-            }
-        });
+        registerFieldGetter(Keys.BOOK_PAGES, SpongePagedData.this::getPages);
+        registerFieldSetter(Keys.BOOK_PAGES, value -> setPages((List<Text>) value));
+        registerKeyValue(Keys.BOOK_PAGES, SpongePagedData.this::pages);
     }
 
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataHolder;
@@ -35,10 +34,11 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingDa
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+
+import java.util.Optional;
 
 public class FlyingDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Boolean, Value<Boolean>, FlyingData, ImmutableFlyingData> {
 
@@ -76,6 +76,6 @@ public class FlyingDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_FLYING, value, false);
+        return ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, false, value);
     }
 }

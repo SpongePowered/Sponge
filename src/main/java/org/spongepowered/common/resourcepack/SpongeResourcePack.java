@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.resourcepack;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.resourcepack.ResourcePack;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -41,7 +41,7 @@ public abstract class SpongeResourcePack implements ResourcePack {
     public static final int HASH_SIZE = 40;
 
     public SpongeResourcePack(@Nullable String hash) {
-        this.hash = Optional.fromNullable(hash);
+        this.hash = Optional.ofNullable(hash);
     }
 
     public abstract String getUrlString();

@@ -39,6 +39,7 @@ import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignDa
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSignData, SignData> implements ImmutableSignData {
 
@@ -48,7 +49,7 @@ public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSign
     public ImmutableSpongeSignData(List<Text> lines) {
         super(ImmutableSignData.class);
         this.lines = ImmutableList.copyOf(lines);
-        this.linesValues = new ImmutableSpongeListValue<Text>(Keys.SIGN_LINES, this.lines);
+        this.linesValues = new ImmutableSpongeListValue<>(Keys.SIGN_LINES, this.lines);
         registerGetters();
     }
 
@@ -70,9 +71,7 @@ public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSign
     @Override
     public DataContainer toContainer() {
         List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
-        for (Text line : this.lines) {
-            jsonLines.add(Texts.json().to(line));
-        }
+        jsonLines.addAll(this.lines.stream().map(line -> Texts.json().to(line)).collect(Collectors.toList()));
         return new MemoryDataContainer().set(Keys.SIGN_LINES.getQuery(), jsonLines);
     }
 

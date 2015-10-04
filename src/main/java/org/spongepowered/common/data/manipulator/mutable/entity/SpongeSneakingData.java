@@ -44,7 +44,7 @@ public class SpongeSneakingData extends AbstractBooleanData<SneakingData, Immuta
 
     @Override
     public Value<Boolean> sneaking() {
-        return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, getValue());
+        return new SpongeValue<>(Keys.IS_SNEAKING, false, getValue());
     }
 
     @Override

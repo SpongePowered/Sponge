@@ -40,7 +40,7 @@ public class SpongeOccupiedData extends AbstractBooleanData<OccupiedData, Immuta
 
     @Override
     public Value<Boolean> occupied() {
-        return new SpongeValue<Boolean>(Keys.OCCUPIED, this.getValue());
+        return new SpongeValue<>(Keys.OCCUPIED, this.getValue());
     }
 
     @Override

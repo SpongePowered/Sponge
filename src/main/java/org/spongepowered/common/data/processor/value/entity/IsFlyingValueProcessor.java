@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -34,10 +33,11 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.Optional;
 
 public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
 
@@ -54,7 +54,7 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean
                 return Optional.of(((Entity) container).isAirBorne);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> proposedValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_FLYING, value, false);
+        final ImmutableValue<Boolean> proposedValue = ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, value, false);
         if (supports(container)) {
             final ImmutableValue<Boolean> oldFlyingData = getApiValueFromContainer(container).get().asImmutable();
             try {
@@ -89,7 +89,7 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean
 
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.IS_FLYING, false, defaultValue);
+        return new SpongeValue<>(Keys.IS_FLYING, false, defaultValue);
     }
 
 }

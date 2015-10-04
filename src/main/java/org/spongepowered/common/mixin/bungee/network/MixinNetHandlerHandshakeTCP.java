@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.bungee.network;
 
+import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
 import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.network.NetworkManager;
@@ -39,10 +40,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
+import java.net.InetSocketAddress;
+
 @Mixin(NetHandlerHandshakeTCP.class)
 public abstract class MixinNetHandlerHandshakeTCP {
 
-    private static final com.google.gson.Gson gson = new com.google.gson.Gson();
+    private static final Gson gson = new Gson();
 
     @Shadow private NetworkManager networkManager;
 
@@ -53,8 +56,8 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
             if (split.length == 3 || split.length == 4) {
                 packetIn.ip = split[0];
-                ((IMixinNetworkManager) this.networkManager).setRemoteAddress(new java.net.InetSocketAddress(split[1],
-                        ((java.net.InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
+                ((IMixinNetworkManager) this.networkManager).setRemoteAddress(new InetSocketAddress(split[1],
+                        ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
                 ((IMixinNetworkManager) this.networkManager).setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
             } else {
                 ChatComponentText chatcomponenttext =

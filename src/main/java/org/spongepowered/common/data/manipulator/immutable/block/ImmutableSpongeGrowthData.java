@@ -31,7 +31,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.manipulator.mutable.block.GrowthData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeGrowthData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -52,7 +51,7 @@ public class ImmutableSpongeGrowthData extends AbstractImmutableBoundedComparabl
 
     @Override
     public ImmutableBoundedValue<Integer> growthStage() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.GROWTH_STAGE, this.defaultValue, this.value,
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.GROWTH_STAGE, this.defaultValue, this.value,
                                                  this.comparator, this.lowerBound, this.upperBound);
     }
 }

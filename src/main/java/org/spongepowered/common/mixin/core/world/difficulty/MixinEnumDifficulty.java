@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.difficulty;
 
+import net.minecraft.world.EnumDifficulty;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
-@Mixin(net.minecraft.world.EnumDifficulty.class)
+@Mixin(EnumDifficulty.class)
 public class MixinEnumDifficulty implements Difficulty {
 
     @Shadow

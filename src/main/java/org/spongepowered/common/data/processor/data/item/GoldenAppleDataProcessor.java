@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
@@ -38,22 +36,17 @@ import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.GoldenAppleUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
+import java.util.Optional;
+
 public class GoldenAppleDataProcessor extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
 
     public GoldenAppleDataProcessor() {
-        super(new Predicate<ItemStack>() {
-
-            @Override
-            public boolean apply(ItemStack input) {
-                return input.getItem().equals(Items.golden_apple);
-            }
-        }, Keys.GOLDEN_APPLE_TYPE);
+        super(input -> input.getItem().equals(Items.golden_apple), Keys.GOLDEN_APPLE_TYPE);
     }
 
     @Override
@@ -74,7 +67,7 @@ public class GoldenAppleDataProcessor extends AbstractItemSingleDataProcessor<Go
 
     @Override
     protected ImmutableValue<GoldenApple> constructImmutableValue(GoldenApple value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, value);
+        return ImmutableSpongeValue.cachedOf(Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, value);
     }
 
     @Override

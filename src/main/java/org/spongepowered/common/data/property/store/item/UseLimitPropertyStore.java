@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.UseLimitProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+
+import java.util.Optional;
 
 public class UseLimitPropertyStore extends AbstractItemStackPropertyStore<UseLimitProperty> {
 
@@ -38,7 +39,7 @@ public class UseLimitPropertyStore extends AbstractItemStackPropertyStore<UseLim
         if (item.isDamageable()) {
             return Optional.of(new UseLimitProperty(item.getMaxDamage()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

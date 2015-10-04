@@ -25,11 +25,12 @@
 package org.spongepowered.common.data.property.store.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.property.entity.EyeLocationProperty;
 import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 public class EyeLocationPropertyStore extends AbstractEntityPropertyStore<EyeLocationProperty> {
 
@@ -40,4 +41,5 @@ public class EyeLocationPropertyStore extends AbstractEntityPropertyStore<EyeLoc
         final Vector3d eyeLocation = position.add(0, eyeHeight, 0);
         return Optional.of(new EyeLocationProperty(eyeLocation));
     }
+
 }

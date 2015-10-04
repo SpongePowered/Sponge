@@ -27,7 +27,6 @@ package org.spongepowered.common.data.manipulator.mutable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -45,6 +44,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.GetterFunction;
 import org.spongepowered.common.util.SetterFunction;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 public class SpongeCommandData extends AbstractData<CommandData, ImmutableCommandData> implements CommandData {
@@ -61,22 +62,22 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
 
     @Override
     public Value<String> storedCommand() {
-        return new SpongeValue<String>(Keys.COMMAND, getStoredCommand());
+        return new SpongeValue<>(Keys.COMMAND, getStoredCommand());
     }
 
     @Override
     public Value<Integer> successCount() {
-        return new SpongeValue<Integer>(Keys.SUCCESS_COUNT, getSuccessCount());
+        return new SpongeValue<>(Keys.SUCCESS_COUNT, getSuccessCount());
     }
 
     @Override
     public Value<Boolean> doesTrackOutput() {
-        return new SpongeValue<Boolean>(Keys.TRACKS_OUTPUT, this.tracks);
+        return new SpongeValue<>(Keys.TRACKS_OUTPUT, this.tracks);
     }
 
     @Override
     public OptionalValue<Text> lastOutput() {
-        return new SpongeOptionalValue<Text>(Keys.LAST_COMMAND_OUTPUT, getLastOutput());
+        return new SpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, getLastOutput());
     }
 
     @Override
@@ -85,7 +86,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
                 .setStoredCommand(this.getStoredCommand())
                 .setSuccessCount(this.getSuccessCount())
                 .shouldTrackOutput(this.tracks)
-                .setLastOutput(this.getLastOutput().or(Texts.of()));
+                .setLastOutput(this.getLastOutput().orElse(Texts.of()));
     }
 
     @Override
@@ -143,7 +144,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     public Optional<Text> getLastOutput() {
-        return Optional.fromNullable(this.lastOutput);
+        return Optional.ofNullable(this.lastOutput);
     }
 
     public CommandData setLastOutput(Text message) {
@@ -159,64 +160,19 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     @Override
     protected void registerGettersAndSetters() {
         // Keys.COMMAND
-        registerFieldGetter(Keys.COMMAND, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getStoredCommand();
-            }
-        });
-        registerFieldSetter(Keys.COMMAND, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setStoredCommand((String) value);
-            }
-        });
-        registerKeyValue(Keys.COMMAND, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return storedCommand();
-            }
-        });
+        registerFieldGetter(Keys.COMMAND, SpongeCommandData.this::getStoredCommand);
+        registerFieldSetter(Keys.COMMAND, value -> setStoredCommand((String) value));
+        registerKeyValue(Keys.COMMAND, SpongeCommandData.this::storedCommand);
 
         // Keys.SUCCESS_COUNT
-        registerFieldGetter(Keys.SUCCESS_COUNT, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getSuccessCount();
-            }
-        });
-        registerFieldSetter(Keys.SUCCESS_COUNT, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setSuccessCount(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.SUCCESS_COUNT, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return successCount();
-            }
-        });
+        registerFieldGetter(Keys.SUCCESS_COUNT, SpongeCommandData.this::getSuccessCount);
+        registerFieldSetter(Keys.SUCCESS_COUNT, value -> setSuccessCount(((Number) value).intValue()));
+        registerKeyValue(Keys.SUCCESS_COUNT, SpongeCommandData.this::successCount);
 
         // Keys.TRACKS_OUTPUT
-        registerFieldGetter(Keys.TRACKS_OUTPUT, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return tracksOutput();
-            }
-        });
-        registerFieldSetter(Keys.TRACKS_OUTPUT, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                shouldTrackOutput((Boolean) value);
-            }
-        });
-        registerKeyValue(Keys.TRACKS_OUTPUT, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return doesTrackOutput();
-            }
-        });
+        registerFieldGetter(Keys.TRACKS_OUTPUT, SpongeCommandData.this::tracksOutput);
+        registerFieldSetter(Keys.TRACKS_OUTPUT, value -> shouldTrackOutput((Boolean) value));
+        registerKeyValue(Keys.TRACKS_OUTPUT, SpongeCommandData.this::doesTrackOutput);
         // Keys.LAST_COMMAND_OUTPUT
     }
 }

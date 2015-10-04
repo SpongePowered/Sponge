@@ -50,7 +50,7 @@ public class SpongePotionEffectData extends AbstractData<PotionEffectData, Immut
 
     @Override
     public ListValue<PotionEffect> effects() {
-        return new SpongeListValue<PotionEffect>(Keys.POTION_EFFECTS, this.effects);
+        return new SpongeListValue<>(Keys.POTION_EFFECTS, this.effects);
     }
 
     @Override

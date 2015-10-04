@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile.fireball;
 
+import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -33,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.projectile.EntityLargeFireball.class)
+@Mixin(EntityLargeFireball.class)
 public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireball {
 
     @Shadow public int explosionPower;

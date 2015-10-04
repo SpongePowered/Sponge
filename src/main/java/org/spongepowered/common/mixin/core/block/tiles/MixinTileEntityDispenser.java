@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
+import net.minecraft.tileentity.TileEntityDispenser;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(net.minecraft.tileentity.TileEntityDispenser.class)
+@Mixin(TileEntityDispenser.class)
 public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser {
 
 }

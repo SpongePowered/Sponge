@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
@@ -43,6 +42,7 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ItemEnchantmentValueProcessor extends AbstractSpongeValueProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>> {
 
@@ -52,14 +52,14 @@ public class ItemEnchantmentValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected ListValue<ItemEnchantment> constructValue(List<ItemEnchantment> defaultValue) {
-        return new SpongeListValue<ItemEnchantment>(Keys.ITEM_ENCHANTMENTS, defaultValue);
+        return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, defaultValue);
     }
 
     @Override
     public Optional<List<ItemEnchantment>> getValueFromContainer(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
             if (!((ItemStack) container).isItemEnchanted()) {
-                return Optional.absent();
+                return Optional.empty();
             } else {
                 final List<ItemEnchantment> enchantments = Lists.newArrayList();
                 final NBTTagList list = ((ItemStack) container).getEnchantmentTagList();
@@ -74,7 +74,7 @@ public class ItemEnchantmentValueProcessor extends AbstractSpongeValueProcessor<
                 return Optional.of(enchantments);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

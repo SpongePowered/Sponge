@@ -29,10 +29,12 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.common.mixin.core.world.extent.MixinExtent;
+import org.spongepowered.common.mixin.core.world.extent.MixinExtentViewTransform;
 
 /**
- * Code for this class is mixed in from {@link org.spongepowered.common.mixin.core.world.extent.MixinExtent}
- * and {@link org.spongepowered.common.mixin.core.world.extent.MixinExtentViewTransform}.
+ * Code for this class is mixed in from {@link MixinExtent}
+ * and {@link MixinExtentViewTransform}.
  * This prevents duplicate code.
  */
 public class ExtentViewTransform {

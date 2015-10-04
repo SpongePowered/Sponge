@@ -24,18 +24,21 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.TemperatureProperty;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Optional;
+
 public class TemperaturePropertyStore extends AbstractSpongePropertyStore<TemperatureProperty> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<TemperatureProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
@@ -46,7 +49,7 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
                 return Optional.of(new TemperatureProperty(biome.temperature));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -54,5 +57,11 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final BiomeGenBase biome = world.getBiomeGenForCoords(VecHelper.toBlockPos(location.getBlockPosition()));
         return Optional.of(new TemperatureProperty(biome.temperature));
+    }
+
+    @Override
+    public Optional<TemperatureProperty> getFor(Location<World> location, Direction direction) {
+        // TODO gabziou fix this
+        return Optional.empty();
     }
 }

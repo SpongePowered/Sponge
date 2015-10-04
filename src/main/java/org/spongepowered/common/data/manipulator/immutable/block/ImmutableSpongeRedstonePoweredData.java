@@ -30,7 +30,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -43,7 +42,6 @@ public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableBounded
 
     @Override
     public ImmutableBoundedValue<Integer> power() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.POWER, 0, this.value,
-                                                 this.comparator, 0, 15);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.POWER, 0, this.value, this.comparator, 0, 15);
     }
 }

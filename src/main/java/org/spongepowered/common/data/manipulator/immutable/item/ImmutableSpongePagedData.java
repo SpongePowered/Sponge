@@ -59,7 +59,7 @@ public class ImmutableSpongePagedData extends AbstractImmutableData<ImmutablePag
 
     @Override
     public ImmutableListValue<Text> pages() {
-        return new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, this.pages);
+        return new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, this.pages);
     }
 
     @Override
@@ -89,20 +89,8 @@ public class ImmutableSpongePagedData extends AbstractImmutableData<ImmutablePag
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.BOOK_PAGES, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getPages();
-            }
-        });
-        registerKeyValue(Keys.BOOK_PAGES, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return pages();
-            }
-        });
+        registerFieldGetter(Keys.BOOK_PAGES, ImmutableSpongePagedData.this::getPages);
+        registerKeyValue(Keys.BOOK_PAGES, ImmutableSpongePagedData.this::pages);
     }
 
 }

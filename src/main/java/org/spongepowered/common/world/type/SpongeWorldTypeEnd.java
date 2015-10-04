@@ -37,7 +37,7 @@ public class SpongeWorldTypeEnd extends SpongeWorldType {
         super("END");
     }
 
-    public WorldChunkManager getChunkManager(net.minecraft.world.World world) {
+    public WorldChunkManager getChunkManager(World world) {
         return new WorldChunkManagerHell(BiomeGenBase.sky, 0f);
     }
 

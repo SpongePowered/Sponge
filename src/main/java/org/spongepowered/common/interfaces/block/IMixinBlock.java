@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.interfaces.block;
 
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -38,6 +37,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their

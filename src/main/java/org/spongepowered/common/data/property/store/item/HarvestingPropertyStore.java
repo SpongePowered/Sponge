@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -36,6 +35,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<HarvestingProperty> {
@@ -50,14 +50,10 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
         } else {
             final Collection<BlockType> blockTypes = Sponge.getSpongeRegistry().getAllOf(BlockType.class);
             final ImmutableSet.Builder<BlockType> builder = ImmutableSet.builder();
-            for (BlockType blockType : blockTypes) {
-                if (item.canHarvestBlock((Block) blockType)) {
-                    builder.add(blockType);
-                }
-            }
+            blockTypes.stream().filter(blockType -> item.canHarvestBlock((Block) blockType)).forEach(builder::add);
             final ImmutableSet<BlockType> blocks = builder.build();
             if (blocks.isEmpty()) {
-                return Optional.absent();
+                return Optional.empty();
             } else {
                 return Optional.of(new HarvestingProperty(blocks));
             }

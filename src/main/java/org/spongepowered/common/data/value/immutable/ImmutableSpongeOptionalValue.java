@@ -26,8 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
@@ -35,40 +33,43 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import javax.annotation.Nullable;
 
 public class ImmutableSpongeOptionalValue<E> extends ImmutableSpongeValue<Optional<E>> implements ImmutableOptionalValue<E> {
 
     public ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key) {
-        super(key, Optional.<E>absent());
+        super(key, Optional.<E>empty());
     }
 
     public ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> actualValue) {
-        super(key, Optional.<E>absent(), actualValue);
+        super(key, Optional.<E>empty(), actualValue);
     }
 
     @Override
     public ImmutableOptionalValue<E> with(Optional<E> value) {
-        return new ImmutableSpongeOptionalValue<E>(getKey(), checkNotNull(value));
+        return new ImmutableSpongeOptionalValue<>(getKey(), checkNotNull(value));
     }
 
     @Override
     public ImmutableOptionalValue<E> transform(Function<Optional<E>, Optional<E>> function) {
-        return new ImmutableSpongeOptionalValue<E>(getKey(), checkNotNull(function.apply(get())));
+        return new ImmutableSpongeOptionalValue<>(getKey(), checkNotNull(function.apply(get())));
     }
 
     @Override
     public OptionalValue<E> asMutable() {
-        return new SpongeOptionalValue<E>(getKey(), this.actualValue);
+        return new SpongeOptionalValue<>(getKey(), this.actualValue);
     }
 
     @Override
     public ImmutableOptionalValue<E> instead(@Nullable E value) {
-        return new ImmutableSpongeOptionalValue<E>(getKey(), Optional.fromNullable(value));
+        return new ImmutableSpongeOptionalValue<>(getKey(), Optional.ofNullable(value));
     }
 
     @Override
     public ImmutableValue<E> or(E value) { // TODO actually construct a new key for this kind...
-        return new ImmutableSpongeValue<E>(null, get().isPresent() ? get().get() : checkNotNull(value));
+        return new ImmutableSpongeValue<>(null, get().isPresent() ? get().get() : checkNotNull(value));
     }
 }

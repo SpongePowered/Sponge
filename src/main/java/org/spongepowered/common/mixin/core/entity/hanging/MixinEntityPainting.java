@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.hanging;
 
+import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
 import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(net.minecraft.entity.item.EntityPainting.class)
+@Mixin(EntityPainting.class)
 public abstract class MixinEntityPainting extends MixinEntityHanging implements Painting {
 
     @Override

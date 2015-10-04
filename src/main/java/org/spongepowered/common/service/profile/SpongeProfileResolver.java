@@ -248,7 +248,7 @@ public class SpongeProfileResolver implements GameProfileResolver {
     public Collection<GameProfile> match(String lastKnownName) {
         lastKnownName = checkNotNull(lastKnownName, "lastKnownName").toLowerCase(Locale.ROOT);
         Collection<GameProfile> allProfiles = this.getCachedProfiles();
-        Collection<org.spongepowered.api.GameProfile> matching = Sets.newHashSet();
+        Collection<GameProfile> matching = Sets.newHashSet();
         for (GameProfile profile : allProfiles) {
             if (profile.getName().startsWith(lastKnownName)) {
                 matching.add(profile);

@@ -52,27 +52,27 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
 
     @Override
     public SetValue<Direction> connectedDirections() {
-        return new SpongeSetValue<Direction>(Keys.CONNECTED_DIRECTIONS, this.connectedDirections);
+        return new SpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.connectedDirections);
     }
 
     @Override
     public Value<Boolean> connectedNorth() {
-        return new SpongeValue<Boolean>(Keys.CONNECTED_NORTH, this.connectedDirections.contains(Direction.NORTH));
+        return new SpongeValue<>(Keys.CONNECTED_NORTH, this.connectedDirections.contains(Direction.NORTH));
     }
 
     @Override
     public Value<Boolean> connectedSouth() {
-        return new SpongeValue<Boolean>(Keys.CONNECTED_SOUTH, this.connectedDirections.contains(Direction.SOUTH));
+        return new SpongeValue<>(Keys.CONNECTED_SOUTH, this.connectedDirections.contains(Direction.SOUTH));
     }
 
     @Override
     public Value<Boolean> connectedEast() {
-        return new SpongeValue<Boolean>(Keys.CONNECTED_EAST, this.connectedDirections.contains(Direction.EAST));
+        return new SpongeValue<>(Keys.CONNECTED_EAST, this.connectedDirections.contains(Direction.EAST));
     }
 
     @Override
     public Value<Boolean> connectedWest() {
-        return new SpongeValue<Boolean>(Keys.CONNECTED_WEST, this.connectedDirections.contains(Direction.WEST));
+        return new SpongeValue<>(Keys.CONNECTED_WEST, this.connectedDirections.contains(Direction.WEST));
     }
 
     @Override

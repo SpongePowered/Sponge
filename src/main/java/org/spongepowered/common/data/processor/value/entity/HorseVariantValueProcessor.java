@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,12 +33,13 @@ import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeHorseVariant;
+
+import java.util.Optional;
 
 public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<HorseVariant, Value<HorseVariant>> {
 
@@ -49,7 +49,7 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Hor
 
     @Override
     protected Value<HorseVariant> constructValue(HorseVariant defaultValue) {
-        return new SpongeValue<HorseVariant>(Keys.HORSE_VARIANT, defaultValue);
+        return new SpongeValue<>(Keys.HORSE_VARIANT, defaultValue);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Hor
         if (this.supports(container)) {
             return Optional.of(HorseUtils.getHorseVariant(((EntityHorse) container).getHorseType()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -67,12 +67,12 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Hor
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, HorseVariant value) {
-        ImmutableValue<HorseVariant> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_VARIANT, value, HorseVariants.HORSE);
+        ImmutableValue<HorseVariant> newValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, value);
 
         if (this.supports(container)) {
             EntityHorse horse = (EntityHorse) container;
 
-            ImmutableValue<HorseVariant> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(horse.getHorseType()), HorseVariants.HORSE);
+            ImmutableValue<HorseVariant> oldValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, HorseUtils.getHorseVariant(horse.getHorseType()));
             horse.setHorseType(((SpongeHorseVariant) value).type);
 
             return DataTransactionBuilder.successReplaceResult(newValue, oldValue);

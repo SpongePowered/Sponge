@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.base.Optional;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.data.property.item.BurningFuelProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+
+import java.util.Optional;
 
 public class BurningFuelPropertyStore extends AbstractItemStackPropertyStore<BurningFuelProperty> {
 
@@ -38,6 +39,6 @@ public class BurningFuelPropertyStore extends AbstractItemStackPropertyStore<Bur
         if (burnTime > 0) {
             return Optional.of(new BurningFuelProperty(burnTime));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

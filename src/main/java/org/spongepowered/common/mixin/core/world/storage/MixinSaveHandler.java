@@ -47,7 +47,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 @NonnullByDefault
-@Mixin(net.minecraft.world.storage.SaveHandler.class)
+@Mixin(SaveHandler.class)
 public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Shadow private File worldDirectory;

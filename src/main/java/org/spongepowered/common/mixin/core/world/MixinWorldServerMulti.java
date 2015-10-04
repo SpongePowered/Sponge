@@ -27,7 +27,9 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -35,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 @NonnullByDefault
-@Mixin(net.minecraft.world.WorldServerMulti.class)
+@Mixin(WorldServerMulti.class)
 public abstract class MixinWorldServerMulti extends WorldServer {
 
     public MixinWorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn) {
@@ -54,7 +56,7 @@ public abstract class MixinWorldServerMulti extends WorldServer {
 
     @Override
     @Overwrite
-    public net.minecraft.world.World init() {
+    public World init() {
         return super.init();
     }
 }

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
@@ -38,6 +37,8 @@ import org.spongepowered.api.util.weighted.WeightedEntity;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedEntityCollectionValue;
 
 import java.util.Collection;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectionValue<WeightedEntity, WeightedEntityCollectionValue,
     ImmutableWeightedEntityCollectionValue> implements WeightedEntityCollectionValue {
@@ -53,22 +54,15 @@ public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectio
 
     @Override
     public WeightedEntityCollectionValue filter(Predicate<? super WeightedEntity> predicate) {
-        final WeightedCollection<WeightedEntity> collection = new WeightedCollection<WeightedEntity>();
-        for (WeightedEntity entity : this.actualValue) {
-            if (checkNotNull(predicate).apply(entity)) {
-                collection.add(entity);
-            }
-        }
+        final WeightedCollection<WeightedEntity> collection =
+            this.actualValue.stream().filter(entity -> checkNotNull(predicate).test(entity))
+                .collect(Collectors.toCollection(WeightedCollection::new));
         return new SpongeWeightedEntityCollectionValue(getKey(), collection);
     }
 
     @Override
     public WeightedCollection<WeightedEntity> getAll() {
-        final WeightedCollection<WeightedEntity> collection = new WeightedCollection<WeightedEntity>();
-        for (WeightedEntity entity : this.actualValue) {
-            collection.add(entity);
-        }
-        return collection;
+        return this.actualValue.stream().collect(Collectors.toCollection(WeightedCollection::new));
     }
 
     @Override

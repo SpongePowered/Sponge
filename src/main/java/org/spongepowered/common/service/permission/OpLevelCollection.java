@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.permission;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.service.permission.MemorySubjectData;
@@ -41,6 +40,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class OpLevelCollection extends SpongeSubjectCollection {
@@ -112,7 +112,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
 
         @Override
         public Optional<CommandSource> getCommandSource() {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         @Override

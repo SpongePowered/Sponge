@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.permission;
 
-import com.google.common.base.Predicate;
 import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -32,6 +31,8 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.mixin.core.command.MixinSubject;
+
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -48,7 +49,7 @@ public class SubjectSettingCallback implements Predicate<PermissionService> {
     }
 
     @Override
-    public boolean apply(@Nullable PermissionService input) {
+    public boolean test(@Nullable PermissionService input) {
         if (input == null) {
             return false;
         }

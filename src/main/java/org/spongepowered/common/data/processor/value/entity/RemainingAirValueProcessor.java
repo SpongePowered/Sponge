@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
+import java.util.Optional;
+
 public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
     public RemainingAirValueProcessor() {
@@ -45,7 +46,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
             final EntityLivingBase entity = (EntityLivingBase) container;
             return Optional.of(entity.getAir());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -68,10 +69,10 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Int
             final EntityLivingBase entity = (EntityLivingBase) container;
             final Integer oldValue = entity.getAir();
             entity.setAir(value);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, value),
-                    new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.REMAINING_AIR, value),
+                                                               new ImmutableSpongeValue<>(Keys.REMAINING_AIR, oldValue));
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.REMAINING_AIR, value));
     }
 
     @Override

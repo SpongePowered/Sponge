@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.item.Enchantment;
@@ -32,6 +31,8 @@ import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataUtil;
+
+import java.util.Optional;
 
 public class SpongeItemEnchantmentBuilder implements DataBuilder<ItemEnchantment> {
 

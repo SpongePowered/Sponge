@@ -67,7 +67,7 @@ public abstract class MixinChunk implements Chunk {
     private Vector2i biomeMax;
     private ChunkCoordIntPair chunkCoordIntPair;
 
-    @Shadow private net.minecraft.world.World worldObj;
+    @Shadow private World worldObj;
     @Shadow public int xPosition;
     @Shadow public int zPosition;
     @Shadow private boolean isChunkLoaded;
@@ -107,26 +107,6 @@ public abstract class MixinChunk implements Chunk {
     @Override
     public Vector3i getPosition() {
         return this.chunkPos;
-    }
-
-    @Override
-    public Location<Chunk> getLocation(int x, int y, int z) {
-        return getLocation(new Vector3i(x, y, z));
-    }
-
-    @Override
-    public Location<Chunk> getLocation(Vector3i position) {
-        return new Location<Chunk>(this, position);
-    }
-
-    @Override
-    public Location<Chunk> getLocation(double x, double y, double z) {
-        return getLocation(new Vector3d(x, y, z));
-    }
-
-    @Override
-    public Location<Chunk> getLocation(Vector3d position) {
-        return new Location<Chunk>(this, position);
     }
 
     @Override

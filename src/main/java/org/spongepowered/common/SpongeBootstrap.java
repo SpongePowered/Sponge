@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.Predicate;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.apache.logging.log4j.spi.AbstractLogger;
+import org.slf4j.Logger;
 import org.slf4j.impl.SLF4JLogger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.data.property.PropertyRegistry;
@@ -75,7 +75,7 @@ import java.util.UUID;
  */
 @NonnullByDefault
 public final class SpongeBootstrap {
-    private static final org.slf4j.Logger slf4jLogger = new SLF4JLogger((AbstractLogger) Sponge.getLogger(), Sponge.getLogger().getName());
+    private static final Logger slf4jLogger = new SLF4JLogger((AbstractLogger) Sponge.getLogger(), Sponge.getLogger().getName());
 
     public static void initializeServices() {
         SimpleCommandService commandService = new SimpleCommandService(Sponge.getGame(), slf4jLogger,
@@ -99,12 +99,9 @@ public final class SpongeBootstrap {
         registerService(ConfigService.class, new SpongeConfigService(Sponge.getGame().getPluginManager()));
         registerService(UserStorage.class, new SpongeUserStorage());
         registerService(GameProfileResolver.class, new SpongeProfileResolver());
-        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new Predicate<PermissionService>() {
-            @Override
-            public boolean apply(PermissionService input) {
-                Sponge.getGame().getServer().getConsole().getContainingCollection();
-                return true;
-            }
+        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(input -> {
+            Sponge.getGame().getServer().getConsole().getContainingCollection();
+            return true;
         });
     }
 

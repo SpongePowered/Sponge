@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -35,6 +34,8 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.processor.data.entity.HorseDataProcessor;
+
+import java.util.Optional;
 
 public class HorseDataBuilder implements DataManipulatorBuilder<HorseData, ImmutableHorseData> {
 
@@ -57,8 +58,9 @@ public class HorseDataBuilder implements DataManipulatorBuilder<HorseData, Immut
     @Override
     public Optional<HorseData> build(DataView container) throws InvalidDataException {
         if (container.contains(Keys.HORSE_COLOR.getQuery()) && container.contains(Keys.HORSE_STYLE.getQuery()) && container.contains(Keys.HORSE_VARIANT.getQuery())) {
-            return Optional.<HorseData>of(new SpongeHorseData(HorseUtils.getHorseColor(container), HorseUtils.getHorseStyle(container), HorseUtils.getHorseVariant(container)));
+            return Optional.<HorseData>of(new SpongeHorseData(HorseUtils.getHorseColor(container), HorseUtils.getHorseStyle(container),
+                    HorseUtils.getHorseVariant(container)));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

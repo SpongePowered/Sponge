@@ -29,7 +29,6 @@ import net.minecraft.entity.item.EntityMinecartTNT;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.projectile.EntityFireball;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExplosiveRadiusData;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -37,8 +36,4 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 @Mixin({EntityFireball.class, EntityTNTPrimed.class, EntityFireworkRocket.class, EntityCreeper.class, EntityMinecartTNT.class})
 public abstract class MixinExplosive extends MixinEntity implements Explosive {
 
-    @Override
-    public ExplosiveRadiusData getExplosiveRadiusData() {
-        return get(ExplosiveRadiusData.class).get();
-    }
 }

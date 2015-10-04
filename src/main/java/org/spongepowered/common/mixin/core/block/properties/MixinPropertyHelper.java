@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block.properties;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import net.minecraft.block.properties.PropertyHelper;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.function.Predicate;
 
 @Mixin(value = PropertyHelper.class)
 public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>  {
@@ -52,7 +53,7 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
 
     @Override
     public Predicate<T> getPredicate() {
-        return Predicates.in(getPossibleValues());
+        return Functional.predicateIn(getPossibleValues());
     }
 
 }

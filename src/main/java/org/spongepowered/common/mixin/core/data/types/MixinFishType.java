@@ -25,15 +25,19 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.item.ItemFishFood;
+import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.Sponge;
+
+import java.util.Optional;
 
 @Mixin(ItemFishFood.FishType.class)
 public abstract class MixinFishType implements Fish {
 
-    @Shadow
-    private String unlocalizedName;
+    @Shadow private String unlocalizedName;
+    @Shadow private boolean cookable;
 
     @Override
     public String getId() {
@@ -43,5 +47,16 @@ public abstract class MixinFishType implements Fish {
     @Override
     public String getName() {
         return this.unlocalizedName;
+    }
+
+    @Override
+    public Optional<CookedFish> getCookedFish() {
+        if (this.cookable) {
+            final Optional<CookedFish> optional = Sponge.getSpongeRegistry().getType(CookedFish.class, "cooked." + this.unlocalizedName);
+            if (optional.isPresent()) {
+                return optional;
+            }
+        }
+        return Optional.empty();
     }
 }

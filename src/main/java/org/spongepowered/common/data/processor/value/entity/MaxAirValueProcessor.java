@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -38,6 +37,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
+import java.util.Optional;
+
 public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
     public MaxAirValueProcessor() {
@@ -46,7 +47,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
             final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
             return Optional.of(entity.getMaxAir());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 
@@ -70,10 +71,10 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
             final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
             final Integer oldValue = entity.getMaxAir();
             entity.setMaxAir(value);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, value),
-                    new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.MAX_AIR, value),
+                                                               new ImmutableSpongeValue<>(Keys.MAX_AIR, oldValue));
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.MAX_AIR, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.MAX_AIR, value));
     }
 
     @Override

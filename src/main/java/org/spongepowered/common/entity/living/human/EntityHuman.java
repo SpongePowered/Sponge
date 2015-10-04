@@ -27,7 +27,6 @@ package org.spongepowered.common.entity.living.human;
 
 import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
 
-import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -63,6 +62,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -309,13 +309,13 @@ public class EntityHuman extends EntityCreature {
 
     public Optional<SkinData> getSkinData() {
         if (this.skinUuid != null) {
-            return Optional.absent(); //Optional.<SkinData>of(new SpongeSkinData(this.skinUuid));
+            return Optional.empty(); //Optional.<SkinData>of(new SpongeSkinData(this.skinUuid));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public SkinData createSkinData() {
-        return this.getSkinData().orNull(); //.or(new SpongeSkinData(this.entityUniqueID));
+        return this.getSkinData().orElse(null); //.or(new SpongeSkinData(this.entityUniqueID));
     }
 
     public boolean removeSkin() {
@@ -332,7 +332,7 @@ public class EntityHuman extends EntityCreature {
 
     public Optional<SkinData> fillSkinData(SkinData manipulator) {
         if (this.skinUuid == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(manipulator.set(new SpongeValue<UUID>(Keys.SKIN, this.skinUuid)));
     }
@@ -387,7 +387,7 @@ public class EntityHuman extends EntityCreature {
         packet.z = MathHelper.floor_double(this.posZ * 32.0D);
         packet.yaw = (byte) ((int) (this.rotationYaw * 256.0F / 360.0F));
         packet.pitch = (byte) ((int) (this.rotationPitch * 256.0F / 360.0F));
-        ItemStack itemstack = (ItemStack) ((ArmorEquipable) this).getItemInHand().orNull();
+        ItemStack itemstack = (ItemStack) ((ArmorEquipable) this).getItemInHand().orElse(null);
         packet.currentItem = itemstack == null ? 0 : Item.getIdFromItem(itemstack.getItem());
         packet.watcher = this.getDataWatcher();
         return packet;

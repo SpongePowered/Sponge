@@ -24,15 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFalling;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -44,7 +39,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
@@ -62,6 +56,7 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @NonnullByDefault
@@ -127,12 +122,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
-        return Optional.absent(); // By default, all blocks just have a single state unless otherwise dictated.
+        return Optional.empty(); // By default, all blocks just have a single state unless otherwise dictated.
     }
 
     @Override

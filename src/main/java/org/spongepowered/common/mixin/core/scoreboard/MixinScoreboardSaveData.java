@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import com.google.common.collect.Maps;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.world.WorldSavedData;
@@ -62,7 +63,7 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
 
     public Map<UUID, SpongeScore> scoreMap = new HashMap<UUID, SpongeScore>();
 
-    private net.minecraft.scoreboard.Score lastScore = null;
+    private Score lastScore = null;
 
     public MixinScoreboardSaveData(String name) {
         super(name);
@@ -101,9 +102,9 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
     }
 
     @Redirect(method = "readScores", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getValueFromObjective(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreObjective;)Lnet/minecraft/scoreboard/Score;"))
-    public net.minecraft.scoreboard.Score onGetValueFromObjective(net.minecraft.scoreboard.Scoreboard scoreboard, String name, ScoreObjective objective) {
+    public Score onGetValueFromObjective(net.minecraft.scoreboard.Scoreboard scoreboard, String name, ScoreObjective objective) {
         if (this.lastScore != null) {
-            net.minecraft.scoreboard.Score score = this.lastScore;
+            Score score = this.lastScore;
             this.lastScore = null;
             return score;
         }
@@ -112,7 +113,7 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "scoresToNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Score;isLocked()Z"), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onScoresToNbt(CallbackInfoReturnable<NBTTagList> cir, NBTTagList nbttaglist, Collection collection, Iterator iterator, net.minecraft.scoreboard.Score score, NBTTagCompound nbttagcompound) {
+    public void onScoresToNbt(CallbackInfoReturnable<NBTTagList> cir, NBTTagList nbttaglist, Collection collection, Iterator iterator, Score score, NBTTagCompound nbttagcompound) {
         SpongeScore spongeScore = ((IMixinScore) score).getSpongeScore();
         if (spongeScore.getObjectives().size() > 1) {
             nbttagcompound.setLong(SPONGE_SCORE_UUID_MOST, spongeScore.getUuid().getMostSignificantBits());

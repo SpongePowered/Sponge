@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import com.google.common.base.Optional;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -38,6 +37,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+
+import java.util.Optional;
 
 public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableCommandData, CommandData> implements ImmutableCommandData {
 
@@ -57,22 +58,22 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
 
     @Override
     public ImmutableValue<String> storedCommand() {
-        return new ImmutableSpongeValue<String>(Keys.COMMAND, this.storedCommand);
+        return new ImmutableSpongeValue<>(Keys.COMMAND, this.storedCommand);
     }
 
     @Override
     public ImmutableValue<Integer> successCount() {
-        return new ImmutableSpongeValue<Integer>(Keys.SUCCESS_COUNT, this.success);
+        return new ImmutableSpongeValue<>(Keys.SUCCESS_COUNT, this.success);
     }
 
     @Override
     public ImmutableValue<Boolean> doesTrackOutput() {
-        return new ImmutableSpongeValue<Boolean>(Keys.TRACKS_OUTPUT, this.tracks);
+        return new ImmutableSpongeValue<>(Keys.TRACKS_OUTPUT, this.tracks);
     }
 
     @Override
     public ImmutableOptionalValue<Text> lastOutput() {
-        return new ImmutableSpongeOptionalValue<Text>(Keys.LAST_COMMAND_OUTPUT, Optional.fromNullable(this.lastOutput));
+        return new ImmutableSpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
     }
 
     @Override

@@ -31,7 +31,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableFluidLevelData;
 import org.spongepowered.api.data.manipulator.mutable.block.FluidLevelData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeFluidLevelData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -48,7 +47,7 @@ public class ImmutableSpongeFluidLevelData extends AbstractImmutableBoundedCompa
 
     @Override
     public ImmutableBoundedValue<Integer> level() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, Keys.FLUID_LEVEL, this.defaultValue, this.value, this.comparator,
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.FLUID_LEVEL, this.defaultValue, this.value, this.comparator,
                                                  this.lowerBound, this.upperBound);
     }
 }

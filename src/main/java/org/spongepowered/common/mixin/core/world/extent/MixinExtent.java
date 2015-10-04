@@ -26,9 +26,6 @@ package org.spongepowered.common.mixin.core.world.extent;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -45,9 +42,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -76,7 +71,9 @@ import org.spongepowered.common.world.extent.UnmodifiableBiomeAreaWrapper;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 @Mixin({World.class, Chunk.class, ExtentViewDownsize.class, ExtentViewTransform.class})
 public abstract class MixinExtent implements Extent {
@@ -139,41 +136,6 @@ public abstract class MixinExtent implements Extent {
     @Override
     public boolean containsBlock(Vector3i position) {
         return containsBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public void interactBlock(Vector3i position, Direction side) {
-        interactBlock(position.getX(), position.getY(), position.getZ(), side);
-    }
-
-    @Override
-    public void interactBlockWith(Vector3i position, ItemStack itemStack, Direction side) {
-        interactBlockWith(position.getX(), position.getY(), position.getZ(), itemStack, side);
-    }
-
-    @Override
-    public int getBlockDigTimeWith(Vector3i position, ItemStack itemStack) {
-        return getBlockDigTimeWith(position.getX(), position.getY(), position.getZ(), itemStack);
-    }
-
-    @Override
-    public boolean digBlock(Vector3i position) {
-        return digBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public boolean digBlockWith(Vector3i position, ItemStack itemStack) {
-        return digBlockWith(position.getX(), position.getY(), position.getZ(), itemStack);
-    }
-
-    @Override
-    public Collection<Direction> getPoweredBlockFaces(Vector3i position) {
-        return getPoweredBlockFaces(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public Collection<Direction> getIndirectlyPoweredBlockFaces(Vector3i position) {
-        return getIndirectlyPoweredBlockFaces(position.getX(), position.getY(), position.getZ());
     }
 
     @Override

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import com.google.common.base.Optional;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.login.server.S00PacketDisconnect;
 import net.minecraft.server.MinecraftServer;
@@ -56,6 +55,7 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Optional;
 
 @Mixin(NetHandlerLoginServer.class)
 public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IMixinNetHandlerLoginServer {
@@ -102,7 +102,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
             + "closeConnection(Ljava/lang/String;)V", shift = At.Shift.BY, by = -6), cancellable = true)
     public void onTryAcceptPlayer(CallbackInfo ci) {
         if (this.clientConEvent.isCancelled()) {
-            disconnectClient(Optional.fromNullable(this.clientConEvent.getMessage()));
+            disconnectClient(Optional.ofNullable(this.clientConEvent.getMessage()));
             ci.cancel();
         }
         this.clientConEvent = null;
@@ -145,7 +145,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
         ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, this, (GameProfile) this.loginGameProfile);
         Sponge.getGame().getEventManager().post(event);
         if (event != null && event.isCancelled()) {
-            this.disconnectClient(Optional.fromNullable(event.getMessage()));
+            this.disconnectClient(Optional.ofNullable(event.getMessage()));
         }
         return event.isCancelled();
     }

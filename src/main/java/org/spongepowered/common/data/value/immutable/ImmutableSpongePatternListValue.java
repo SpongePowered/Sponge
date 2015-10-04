@@ -26,8 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -43,6 +41,8 @@ import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<PatternLayer> implements ImmutablePatternListValue {
 
@@ -80,11 +80,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     @Override
     public ImmutablePatternListValue without(PatternLayer element) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
-        for (PatternLayer existingElement : this.actualValue) {
-            if (!existingElement.equals(element)) {
-                builder.add(existingElement);
-            }
-        }
+        this.actualValue.stream().filter(existingElement -> !existingElement.equals(element)).forEach(builder::add);
         return new ImmutableSpongePatternListValue(getKey(), builder.build());
 
     }
@@ -92,22 +88,14 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     @Override
     public ImmutablePatternListValue withoutAll(Iterable<PatternLayer> elements) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
-        for (PatternLayer existingElement : this.actualValue) {
-            if (!Iterables.contains(elements, existingElement)) {
-                builder.add(existingElement);
-            }
-        }
+        this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
         return new ImmutableSpongePatternListValue(getKey(), builder.build());
     }
 
     @Override
     public ImmutablePatternListValue withoutAll(Predicate<PatternLayer> predicate) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
-        for (PatternLayer existing : this.actualValue) {
-            if (checkNotNull(predicate).apply(existing)) {
-                builder.add(existing);
-            }
-        }
+        this.actualValue.stream().filter(existing -> checkNotNull(predicate).test(existing)).forEach(builder::add);
         return new ImmutableSpongePatternListValue(getKey(), builder.build());
     }
 

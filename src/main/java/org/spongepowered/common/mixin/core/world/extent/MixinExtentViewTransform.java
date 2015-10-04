@@ -27,10 +27,6 @@ package org.spongepowered.common.mixin.core.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -49,10 +45,10 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -65,8 +61,11 @@ import org.spongepowered.common.world.extent.ExtentViewTransform;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Mixin(ExtentViewTransform.class)
 public abstract class MixinExtentViewTransform implements Extent {
@@ -145,13 +144,14 @@ public abstract class MixinExtentViewTransform implements Extent {
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
-        return getBlock(x, y, z).getType();
+        return this.extent.getBlockType(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
+                .transformZ(x, y, z));
     }
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
         return this.extent.getBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
-            .transformZ(x, y, z));
+                .transformZ(x, y, z));
     }
 
     @Override
@@ -161,58 +161,58 @@ public abstract class MixinExtentViewTransform implements Extent {
     }
 
     @Override
+    public Location<? extends Extent> getLocation(Vector3i position) {
+        return new Location<Extent>(this, position);
+    }
+
+    @Override
+    public Location<? extends Extent> getLocation(int x, int y, int z) {
+        return getLocation(new Vector3i(x, y, z));
+    }
+
+    @Override
+    public Location<? extends Extent> getLocation(Vector3d position) {
+        return new Location<Extent>(this, position);
+    }
+
+    @Override
+    public Location<? extends Extent> getLocation(double x, double y, double z) {
+        return getLocation(new Vector3d(x, y, z));
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
+        this.extent.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
+                .transformZ(x, y, z), block, notifyNeighbors);
+    }
+
+    @Override
+    public void setBlockType(int x, int y, int z, BlockType type, boolean notifyNeighbors) {
+        this.extent.setBlockType(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
+                .transformZ(x, y, z), type, notifyNeighbors);
+    }
+
+    @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
         return this.extent
             .createSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
-                .transformZ(x, y, z));
+                    .transformZ(x, y, z));
+    }
+
+    @Override
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        final Vector3i position = snapshot.getPosition();
+        final int x = position.getX();
+        final int y = position.getY();
+        final int z = position.getZ();
+        return this.extent.restoreSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z), snapshot, force, notifyNeighbors);
     }
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
         return this.extent.restoreSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), snapshot, force, notifyNeighbors);
-    }
-
-    @Override
-    public void interactBlock(int x, int y, int z, Direction side) {
-        this.extent.interactBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), side);
-    }
-
-    @Override
-    public void interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side) {
-        this.extent.interactBlockWith(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), itemStack, side);
-    }
-
-    @Override
-    public boolean digBlock(int x, int y, int z) {
-        return this.extent.digBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z));
-    }
-
-    @Override
-    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack) {
-        return this.extent.digBlockWith(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), itemStack);
-    }
-
-    @Override
-    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack) {
-        return this.extent.getBlockDigTimeWith(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), itemStack);
-    }
-
-    @Override
-    public Collection<Direction> getPoweredBlockFaces(int x, int y, int z) {
-        return this.extent.getPoweredBlockFaces(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z));
-    }
-
-    @Override
-    public Collection<Direction> getIndirectlyPoweredBlockFaces(int x, int y, int z) {
-        return this.extent.getIndirectlyPoweredBlockFaces(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z));
+                this.inverseTransform.transformZ(x, y, z), snapshot, force, notifyNeighbors);
     }
 
     @Override
@@ -237,6 +237,12 @@ public abstract class MixinExtentViewTransform implements Extent {
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
         return this.extent.getProperty(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
             this.inverseTransform.transformZ(x, y, z), propertyClass);
+    }
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
+        return this.extent.getProperty(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z), direction, propertyClass);
     }
 
     @Override
@@ -451,7 +457,7 @@ public abstract class MixinExtentViewTransform implements Extent {
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getTileEntities(Predicates.and(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getTileEntities(Functional.predicateAnd(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
@@ -492,7 +498,7 @@ public abstract class MixinExtentViewTransform implements Extent {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getEntities(Predicates.and(new EntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getEntities(Functional.predicateAnd(new EntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
@@ -503,7 +509,7 @@ public abstract class MixinExtentViewTransform implements Extent {
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer) {
         // TODO once entity containers are implemented
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -538,7 +544,7 @@ public abstract class MixinExtentViewTransform implements Extent {
         }
 
         @Override
-        public boolean apply(Entity input) {
+        public boolean test(Entity input) {
             final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }
@@ -556,7 +562,7 @@ public abstract class MixinExtentViewTransform implements Extent {
         }
 
         @Override
-        public boolean apply(TileEntity input) {
+        public boolean test(TileEntity input) {
             final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }

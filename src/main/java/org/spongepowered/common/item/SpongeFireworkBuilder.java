@@ -32,7 +32,7 @@ import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
 
 public class SpongeFireworkBuilder implements FireworkEffectBuilder {

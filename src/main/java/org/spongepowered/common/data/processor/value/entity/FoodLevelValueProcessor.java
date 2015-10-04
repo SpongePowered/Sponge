@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +36,8 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
+import java.util.Optional;
+
 public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
     public FoodLevelValueProcessor() {
@@ -45,7 +46,7 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Intege
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Intege
                 return Optional.of(player.getFoodStats().getFoodLevel());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -71,11 +72,11 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Intege
             if (player.getFoodStats() != null) {
                 final Integer oldValue = player.getFoodStats().getFoodLevel();
                 player.getFoodStats().setFoodLevel(value);
-                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, value),
-                        new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, oldValue));
+                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.FOOD_LEVEL, value),
+                                                                   new ImmutableSpongeValue<>(Keys.FOOD_LEVEL, oldValue));
             }
         }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.FOOD_LEVEL, value));
     }
 
     @Override

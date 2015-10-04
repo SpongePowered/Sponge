@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.item;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
@@ -40,6 +39,8 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.service.persistence.NbtTranslator;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 

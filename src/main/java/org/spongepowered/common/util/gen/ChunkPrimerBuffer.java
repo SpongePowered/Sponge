@@ -27,7 +27,6 @@ package org.spongepowered.common.util.gen;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Optional;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
@@ -42,6 +41,8 @@ import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+
+import java.util.Optional;
 
 /**
  * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.

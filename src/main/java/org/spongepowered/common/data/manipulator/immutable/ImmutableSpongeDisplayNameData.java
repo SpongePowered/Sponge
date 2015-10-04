@@ -32,7 +32,6 @@ import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -52,12 +51,12 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
 
     @Override
     public ImmutableValue<Text> displayName() {
-        return new ImmutableSpongeValue<Text>(Keys.DISPLAY_NAME, this.displayName);
+        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, this.displayName);
     }
 
     @Override
     public ImmutableValue<Boolean> customNameVisible() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOWS_DISPLAY_NAME, this.displays, false);
+        return ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, this.displays);
     }
 
     @Override
@@ -92,31 +91,10 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.DISPLAY_NAME, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getDisplayName();
-            }
-        });
-        registerKeyValue(Keys.DISPLAY_NAME, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return displayName();
-            }
-        });
+        registerFieldGetter(Keys.DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::getDisplayName);
+        registerKeyValue(Keys.DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::displayName);
 
-        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return isDisplays();
-            }
-        });
-
-        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return customNameVisible();
-            }
-        });
+        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::isDisplays);
+        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::customNameVisible);
     }
 }

@@ -40,7 +40,7 @@ public class SpongeExtendedData extends AbstractBooleanData<ExtendedData, Immuta
 
     @Override
     public Value<Boolean> extended() {
-        return new SpongeValue<Boolean>(Keys.EXTENDED, this.getValue());
+        return new SpongeValue<>(Keys.EXTENDED, this.getValue());
     }
 
     @Override

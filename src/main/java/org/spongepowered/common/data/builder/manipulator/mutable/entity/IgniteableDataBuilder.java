@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.google.common.base.Optional;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
@@ -36,6 +35,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteab
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
+
+import java.util.Optional;
 
 public class IgniteableDataBuilder implements DataManipulatorBuilder<IgniteableData, ImmutableIgniteableData> {
 
@@ -57,7 +58,7 @@ public class IgniteableDataBuilder implements DataManipulatorBuilder<IgniteableD
                 return Optional.<IgniteableData>of(new SpongeIgniteableData(fireTicks, fireDelay));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

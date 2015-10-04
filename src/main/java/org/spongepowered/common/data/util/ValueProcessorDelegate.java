@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.util;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -32,6 +31,8 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.ValueProcessor;
+
+import java.util.Optional;
 
 /**
  * This is really just a lazy class to handle processing on multiple
@@ -70,7 +71,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -83,7 +84,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

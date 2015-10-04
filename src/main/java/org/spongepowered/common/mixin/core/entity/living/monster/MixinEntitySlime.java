@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntitySlime;
-import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
@@ -33,8 +32,4 @@ import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
 @Mixin(EntitySlime.class)
 public abstract class MixinEntitySlime extends MixinEntityLiving implements Slime {
 
-    @Override
-    public SlimeData getSlimeData() {
-        return get(SlimeData.class).get();
-    }
 }

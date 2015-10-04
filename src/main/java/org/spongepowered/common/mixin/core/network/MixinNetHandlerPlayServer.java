@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.network;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.base.Optional;
 import io.netty.buffer.Unpooled;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
@@ -42,7 +41,6 @@ import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
@@ -62,7 +60,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
-import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent.ResourcePackStatus;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.ChannelBuf;
@@ -93,6 +90,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)
@@ -373,7 +371,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         Sponge.getGame().getEventManager().post(event);
         event.getSink().sendMessage(event.getMessage());
     }
-        
+
     @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
     public void onResourcePackStatus(C19PacketResourcePackStatus packet, CallbackInfo ci) {
         String hash = packet.hash;

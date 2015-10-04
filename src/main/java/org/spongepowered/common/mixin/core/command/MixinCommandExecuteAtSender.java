@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Optional;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -43,13 +43,14 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(targets = IMixinCommandSender.EXECUTE_COMMAND_SENDER)
 @NonnullByDefault
 public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixinCommandSource, IMixinCommandSender {
 
-    @Shadow(aliases = "val$entity") private net.minecraft.entity.Entity field_174804_a;
+    @Shadow(aliases = "val$entity") private Entity field_174804_a;
     @Shadow(aliases = "val$sender") private ICommandSender field_174802_b;
 
     @Override
