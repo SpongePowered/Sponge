@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -64,6 +62,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -340,9 +339,23 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Optional<BlockState> withTrait(BlockTrait<?> trait, Comparable<?> value) {
-        if (this.properties.containsKey(trait) && ((Predicate<Comparable>) trait.getPredicate()).apply(value)) {
-            return Optional.of((BlockState) this.withProperty((IProperty) trait, value));
+    public Optional<BlockState> withTrait(BlockTrait<?> trait, Object value) {
+        if (value instanceof String) {
+            Comparable foundValue = null;
+            for (Comparable comparable : trait.getPossibleValues()) {
+                if (comparable.toString().equals(value)) {
+                    foundValue = comparable;
+                    break;
+                }
+            }
+            if (foundValue != null) {
+                return Optional.of((BlockState) this.withProperty((IProperty) trait, foundValue));
+            }
+        }
+        if (value instanceof Comparable) {
+            if (this.properties.containsKey(trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
+                return Optional.of((BlockState) this.withProperty((IProperty) trait, (Comparable) value));
+            }
         }
         return Optional.empty();
     }
