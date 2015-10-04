@@ -105,8 +105,9 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
                 builder.replace(author);
             }
             if (((ItemStack) container).getTagCompound() != null) {
-                ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, NbtDataUtil.INVALID_TITLE);
+                ((ItemStack) container).setTagCompound(new NBTTagCompound());
             }
+            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, NbtDataUtil.INVALID_TITLE);
             return builder.result(DataTransactionResult.Type.SUCCESS).build();
 
         }

@@ -67,18 +67,16 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
         if (supports(dataHolder)) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<AuthorData> data = from(dataHolder);
-            if (data.isPresent()) {
-                try {
-                    if (((ItemStack) dataHolder).getTagCompound() != null) {
-                        ((ItemStack) dataHolder).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, NbtDataUtil.INVALID_TITLE);
-                    }
-                    return builder.replace(data.get().getValues()).result(Type.SUCCESS).build();
-                } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the author of an itemstack!", e);
-                    return builder.result(Type.ERROR).build();
+            try {
+                if (((ItemStack) dataHolder).getTagCompound() == null) {
+                    ((ItemStack) dataHolder).setTagCompound(new NBTTagCompound());
                 }
-            } else {
-                return builder.result(Type.SUCCESS).build();
+                ((ItemStack) dataHolder).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, NbtDataUtil.INVALID_TITLE);
+
+                return builder.replace(data.get().getValues()).result(Type.SUCCESS).build();
+            } catch (Exception e) {
+                Sponge.getLogger().error("There was an issue removing the author of an itemstack!", e);
+                return builder.result(Type.ERROR).build();
             }
         }
         return DataTransactionBuilder.failNoData();

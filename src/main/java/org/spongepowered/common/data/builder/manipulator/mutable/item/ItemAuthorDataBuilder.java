@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -45,10 +46,15 @@ public class ItemAuthorDataBuilder implements DataManipulatorBuilder<AuthorData,
 
     @Override
     public Optional<AuthorData> build(DataView container) throws InvalidDataException {
-        DataUtil.checkDataExists(container, Keys.BOOK_AUTHOR.getQuery());
-        final String json = DataUtil.getData(container, Keys.BOOK_AUTHOR, String.class);
-        final Text author = Texts.json().fromUnchecked(json);
-        return Optional.<AuthorData>of(new SpongeAuthorData(author));
+        try {
+            DataUtil.checkDataExists(container, Keys.BOOK_AUTHOR.getQuery());
+            final String json = DataUtil.getData(container, Keys.BOOK_AUTHOR, String.class);
+            final Text author = Texts.json().fromUnchecked(json);
+            return Optional.<AuthorData>of(new SpongeAuthorData(author));
+        } catch (InvalidDataException e) {
+            Sponge.getLogger().debug("An exception occurred while building data: ", e);
+            return Optional.empty();
+        }
     }
 
     @Override
