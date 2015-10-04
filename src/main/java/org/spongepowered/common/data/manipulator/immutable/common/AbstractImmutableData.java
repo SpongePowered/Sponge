@@ -204,7 +204,9 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public int hashCode() {
         List<Object> objects = Lists.newArrayList();
-        objects.addAll(this.keyFieldGetterMap.values().stream().map(GetterFunction::get).collect(Collectors.toList()));
+        for (GetterFunction<?> function : this.keyFieldGetterMap.values()) {
+            objects.add(function.get());
+        }
         return Objects.hashCode(this.immutableClass, objects);
     }
 
