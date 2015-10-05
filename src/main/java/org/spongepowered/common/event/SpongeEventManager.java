@@ -170,7 +170,7 @@ public class SpongeEventManager implements EventManager {
 
     private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Order order,
             boolean ignoreCancelled, boolean beforeModifications, EventListener<? super T> handler) {
-        return new RegisteredListener<T>(plugin, eventClass, order, handler, ignoreCancelled, beforeModifications);
+        return new RegisteredListener<>(plugin, eventClass, order, handler, ignoreCancelled, beforeModifications);
     }
 
     private PluginContainer getPlugin(Object plugin) {

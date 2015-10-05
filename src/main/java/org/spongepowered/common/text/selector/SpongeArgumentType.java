@@ -57,14 +57,9 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
             } catch (NoSuchMethodException ignored) {
                 if (CatalogType.class.isAssignableFrom(type)) {
                     final Class<? extends CatalogType> type2 = type.asSubclass(CatalogType.class);
-                    converters.put(converterKey, new Function<String, T>() {
-
-                        @Override
-                        public T apply(String input) {
-                            // assume it exists for now
-                            return (T) Sponge.getGame().getRegistry().getType(type2, input).get();
-                        }
-
+                    converters.put(converterKey, (Function<String, T>) input -> {
+                        // assume it exists for now
+                        return (T) Sponge.getGame().getRegistry().getType(type2, input).get();
                     });
                 } else {
                     throw new IllegalStateException("can't convert " + type);

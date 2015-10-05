@@ -47,11 +47,6 @@ public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I exten
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, this.usedKey, this.value, this.value);
-    }
-
-    @Override
     public M asMutable() {
         return ReflectionUtil.createInstance(this.mutableClass, this.getValue());
     }

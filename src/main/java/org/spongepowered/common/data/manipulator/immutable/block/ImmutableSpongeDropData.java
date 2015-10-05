@@ -42,4 +42,9 @@ public class ImmutableSpongeDropData extends AbstractImmutableBooleanData<Immuta
     public ImmutableValue<Boolean> willDrop() {
         return ImmutableSpongeValue.cachedOf(Keys.SHOULD_DROP, true, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return willDrop();
+    }
 }

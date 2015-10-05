@@ -58,11 +58,10 @@ import java.util.Optional;
  * Wrapper around ICommands so they fit into the Sponge command system.
  */
 public class MinecraftCommandWrapper implements CommandCallable {
-    private static final String
-                TRANSLATION_NO_PERMISSION = "commands.generic.permission";
+    private static final String TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;
     protected final ICommand command;
-    private static final ThreadLocal<Throwable> commandErrors = new ThreadLocal<Throwable>();
+    private static final ThreadLocal<Throwable> commandErrors = new ThreadLocal<>();
     // This differs from null in that null means "not active".
     private static final Exception noError = new Exception();
 
@@ -163,7 +162,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public Optional<Text> getHelp(CommandSource source) {
-        String translation = command.getCommandUsage(WrapperICommandSender.of(source));
+        String translation = this.command.getCommandUsage(WrapperICommandSender.of(source));
         if (translation == null) {
             return Optional.empty();
         }
@@ -181,8 +180,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
             usage = translation.get(Locale.getDefault());
         }
 
-        List<String> parts = new ArrayList<String>(Arrays.asList(usage.split(" ")));
-        parts.removeAll(Collections.singleton("/" + command.getCommandName()));
+        List<String> parts = new ArrayList<>(Arrays.asList(usage.split(" ")));
+        parts.removeAll(Collections.singleton("/" + this.command.getCommandName()));
         StringBuilder out = new StringBuilder();
         for (String s : parts) {
             out.append(s);

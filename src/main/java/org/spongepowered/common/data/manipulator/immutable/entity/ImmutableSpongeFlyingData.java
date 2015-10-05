@@ -42,4 +42,9 @@ public class ImmutableSpongeFlyingData extends AbstractImmutableBooleanData<Immu
     public ImmutableValue<Boolean> flying() {
         return ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return flying();
+    }
 }

@@ -53,7 +53,7 @@ public class SpongeArgument<T> implements Argument<T> {
 
         @Override
         public Argument.Invertible<T> invert() {
-            return new SpongeArgument.Invertible<T>((ArgumentType.Invertible<T>) this.getType(), this.getValue(), !this.isInverted());
+            return new SpongeArgument.Invertible<>((ArgumentType.Invertible<T>) this.getType(), this.getValue(), !this.isInverted());
         }
 
     }

@@ -125,7 +125,7 @@ public class Sponge {
 
     public static SpongeConfig<SpongeConfig.GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
-            globalConfig = new SpongeConfig<SpongeConfig.GlobalConfig>(GLOBAL, new File(modConfigDir, "global.conf"), "sponge");
+            globalConfig = new SpongeConfig<>(GLOBAL, new File(modConfigDir, "global.conf"), "sponge");
         }
 
         return globalConfig;

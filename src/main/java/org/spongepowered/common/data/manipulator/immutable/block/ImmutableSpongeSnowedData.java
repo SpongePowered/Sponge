@@ -43,4 +43,9 @@ public class ImmutableSpongeSnowedData extends AbstractImmutableBooleanData<Immu
     public ImmutableValue<Boolean> hasSnow() {
         return ImmutableSpongeValue.cachedOf(Keys.SNOWED, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return hasSnow();
+    }
 }

@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 
@@ -35,6 +36,6 @@ public class ImmutableSpongeGameModeData extends AbstractImmutableSingleCatalogD
     implements ImmutableGameModeData {
 
     public ImmutableSpongeGameModeData(GameMode mode) {
-        super(ImmutableGameModeData.class, mode, Keys.GAME_MODE, SpongeGameModeData.class);
+        super(ImmutableGameModeData.class, mode, GameModes.NOT_SET, Keys.GAME_MODE, SpongeGameModeData.class);
     }
 }

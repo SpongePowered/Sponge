@@ -28,13 +28,14 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.manipulator.mutable.block.WallData;
 import org.spongepowered.api.data.type.WallType;
+import org.spongepowered.api.data.type.WallTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWallData;
 
 public class ImmutableSpongeWallData extends AbstractImmutableSingleCatalogData<WallType, ImmutableWallData, WallData> implements ImmutableWallData {
 
     public ImmutableSpongeWallData(WallType value) {
-        super(ImmutableWallData.class, value, Keys.WALL_TYPE, SpongeWallData.class);
+        super(ImmutableWallData.class, value, WallTypes.NORMAL, Keys.WALL_TYPE, SpongeWallData.class);
     }
 
 }

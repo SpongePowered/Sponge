@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableShrubData;
 import org.spongepowered.api.data.manipulator.mutable.block.ShrubData;
 import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeShrubData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeShrubData extends AbstractImmutableSingleCatalogData
     implements ImmutableShrubData {
 
     public ImmutableSpongeShrubData(ShrubType value) {
-        super(ImmutableShrubData.class, value, Keys.SHRUB_TYPE, SpongeShrubData.class);
+        super(ImmutableShrubData.class, value, ShrubTypes.DEAD_BUSH, Keys.SHRUB_TYPE, SpongeShrubData.class);
     }
 
 }

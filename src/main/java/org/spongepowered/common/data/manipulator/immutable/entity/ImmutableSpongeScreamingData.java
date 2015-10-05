@@ -43,4 +43,9 @@ public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<I
     public ImmutableValue<Boolean> screaming() {
         return ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return screaming();
+    }
 }

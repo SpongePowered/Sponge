@@ -79,7 +79,7 @@ class IterablePagination extends ActivePagination {
             }));
         }
 
-        List<Text> ret = new ArrayList<Text>(getMaxContentLinesPerPage());
+        List<Text> ret = new ArrayList<>(getMaxContentLinesPerPage());
         int addedLines = 0;
         while (addedLines <= getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {

@@ -59,10 +59,10 @@ import java.util.concurrent.ConcurrentMap;
 
 public class DimensionManager {
 
-    public static final Hashtable<Integer, Class<? extends WorldProvider>> providers = new Hashtable<Integer, Class<? extends WorldProvider>>();
-    public static final Hashtable<Integer, Boolean> spawnSettings = new Hashtable<Integer, Boolean>();
-    public static final Hashtable<Integer, Integer> dimensions = new Hashtable<Integer, Integer>();
-    public static final Hashtable<Integer, WorldServer> worlds = new Hashtable<Integer, WorldServer>();
+    public static final Hashtable<Integer, Class<? extends WorldProvider>> providers = new Hashtable<>();
+    public static final Hashtable<Integer, Boolean> spawnSettings = new Hashtable<>();
+    public static final Hashtable<Integer, Integer> dimensions = new Hashtable<>();
+    public static final Hashtable<Integer, WorldServer> worlds = new Hashtable<>();
     public static final ConcurrentMap<World, World> weakWorldMap = new MapMaker().weakKeys().weakValues().makeMap();
     public static final ArrayList<Integer> unloadQueue = Lists.newArrayList();
     public static final BitSet dimensionMap = new BitSet(Long.SIZE << 4);
@@ -146,11 +146,7 @@ public class DimensionManager {
     public static void loadDimensionDataMap(NBTTagCompound compound) {
         dimensionMap.clear();
         if (compound == null) {
-            for (Integer id : dimensions.keySet()) {
-                if (id >= 0) {
-                    dimensionMap.set(id);
-                }
-            }
+            dimensions.keySet().stream().filter(id -> id >= 0).forEach(dimensionMap::set);
         } else {
             int[] intArray = compound.getIntArray("DimensionArray");
             for (int i = 0; i < intArray.length; i++) {
@@ -214,7 +210,7 @@ public class DimensionManager {
             Sponge.getLogger().info("Unloading dimension {}", id);
         }
 
-        ArrayList<WorldServer> tmp = new ArrayList<WorldServer>();
+        ArrayList<WorldServer> tmp = new ArrayList<>();
         if (worlds.get(0) != null) {
             tmp.add(worlds.get(0));
         }

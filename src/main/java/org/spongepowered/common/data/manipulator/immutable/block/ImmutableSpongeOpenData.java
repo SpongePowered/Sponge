@@ -42,4 +42,9 @@ public class ImmutableSpongeOpenData extends AbstractImmutableBooleanData<Immuta
     public ImmutableValue<Boolean> open() {
         return ImmutableSpongeValue.cachedOf(Keys.OPEN, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return open();
+    }
 }

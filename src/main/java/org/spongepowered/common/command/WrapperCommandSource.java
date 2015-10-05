@@ -141,7 +141,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
         @Override
         public Location<World> getLocation() {
-            return new Location<World>(getWorld(), VecHelper.toVector(this.sender.getPositionVector()));
+            return new Location<>(getWorld(), VecHelper.toVector(this.sender.getPositionVector()));
         }
 
         @Override

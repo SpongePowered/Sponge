@@ -42,4 +42,9 @@ public class ImmutableSpongeOccupiedData extends AbstractImmutableBooleanData<Im
     public ImmutableValue<Boolean> occupied() {
         return ImmutableSpongeValue.cachedOf(Keys.OCCUPIED, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return occupied();
+    }
 }

@@ -43,7 +43,7 @@ import java.util.function.Function;
 
 public class DataFactoryCollection extends SpongeSubjectCollection {
     private final SpongePermissionService service;
-    private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<String, SpongeSubject>();
+    private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<>();
     private final Function<String, MemorySubjectData> dataFactory;
     private final Function<String, CommandSource> commandSourceFunction;
 

@@ -46,8 +46,7 @@ public class NonNullArrayList<E> extends ArrayList<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> collection) {
-        for(Iterator<? extends E> it = collection.iterator(); it.hasNext(); ) {
-            E next = it.next();
+        for (E next : collection) {
             checkNotNull(next, "Element cannot be null");
         }
         return super.addAll(collection);

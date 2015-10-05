@@ -51,19 +51,9 @@ public class PlayerKickHelper {
      */
     public static void kickPlayer(final EntityPlayerMP ply, final IChatComponent component) {
         ply.playerNetServerHandler.getNetworkManager().sendPacket(new S40PacketDisconnect(component),
-                new GenericFutureListener() {
-                    @Override
-                    public void operationComplete(Future future) throws Exception {
-                        ply.playerNetServerHandler.getNetworkManager().closeChannel(component);
-                    }
-                });
+                                                                  future -> ply.playerNetServerHandler.getNetworkManager().closeChannel(component));
         ply.playerNetServerHandler.getNetworkManager().disableAutoRead();
-        Futures.getUnchecked(MinecraftServer.getServer().addScheduledTask(new Runnable() {
-            @Override
-            public void run() {
-                ply.playerNetServerHandler.getNetworkManager().checkDisconnected();
-            }
-        }));
+        Futures.getUnchecked(MinecraftServer.getServer().addScheduledTask(() -> ply.playerNetServerHandler.getNetworkManager().checkDisconnected()));
 
     }
 

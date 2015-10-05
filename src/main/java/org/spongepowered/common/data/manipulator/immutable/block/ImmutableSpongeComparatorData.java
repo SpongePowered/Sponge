@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableComparatorData;
 import org.spongepowered.api.data.manipulator.mutable.block.ComparatorData;
 import org.spongepowered.api.data.type.ComparatorType;
+import org.spongepowered.api.data.type.ComparatorTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeComparatorData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeComparatorData extends AbstractImmutableSingleCatalo
         implements ImmutableComparatorData {
 
     public ImmutableSpongeComparatorData(ComparatorType value) {
-        super(ImmutableComparatorData.class, value, Keys.COMPARATOR_TYPE, SpongeComparatorData.class);
+        super(ImmutableComparatorData.class, value, ComparatorTypes.COMPARE, Keys.COMPARATOR_TYPE, SpongeComparatorData.class);
     }
 
 }

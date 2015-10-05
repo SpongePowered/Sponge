@@ -37,7 +37,7 @@ import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

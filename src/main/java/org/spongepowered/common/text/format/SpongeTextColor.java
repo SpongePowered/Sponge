@@ -31,7 +31,7 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
-import java.awt.*;
+import java.awt.Color;
 
 @NonnullByDefault
 public class SpongeTextColor implements TextColor {

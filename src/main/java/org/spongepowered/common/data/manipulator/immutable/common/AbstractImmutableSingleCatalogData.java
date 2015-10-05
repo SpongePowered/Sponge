@@ -41,10 +41,12 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
         M extends VariantData<E, M, I>> extends AbstractImmutableSingleData<E, I, M> implements ImmutableVariantData<E, I, M> {
 
     private final Class<? extends M> mutableClass;
+    private final E defaultValue;
 
-    public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
+    public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         this.mutableClass = checkNotNull(mutableClass);
+        this.defaultValue = checkNotNull(defaultValue, "The default value was null! This is unacceptable! Maybe the value was not registered?");
     }
 
     @Override
@@ -54,7 +56,7 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
 
     @Override
     protected ImmutableValue<?> getValueGetter() {
-        return ImmutableDataCachingUtil.getWildValue(ImmutableSpongeValue.class, this.usedKey, this.value, this.value);
+        return type();
     }
 
     @Override
@@ -69,6 +71,6 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
 
     @Override
     public ImmutableValue<E> type() {
-        return new ImmutableSpongeValue<>(this.usedKey, this.value, this.value);
+        return ImmutableSpongeValue.cachedOf(this.usedKey, this.defaultValue, this.value);
     }
 }

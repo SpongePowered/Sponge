@@ -42,4 +42,9 @@ public class ImmutableSpongeFilledData extends AbstractImmutableBooleanData<Immu
     public ImmutableValue<Boolean> filled() {
         return ImmutableSpongeValue.cachedOf(Keys.FILLED, true, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return filled();
+    }
 }

@@ -28,6 +28,7 @@ import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 
 import java.lang.reflect.Constructor;
@@ -62,12 +63,9 @@ public final class ReflectionUtil {
         final Constructor<T> ctor = findConstructor(objectClass, args);
         try {
             return ctor.newInstance(args);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            Sponge.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
+            + "with the args: " + Arrays.toString(args), e);
         }
         throw new IllegalArgumentException("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
          + "the args: " + Arrays.toString(args));
@@ -88,7 +86,7 @@ public final class ReflectionUtil {
             }
             for (int i = 0; i < paramTypes.length; i++) {
                 final Class<?> parameter = paramTypes[i];
-                if (!isAssignable(args[i] == null ? null : args[i].getClass(), parameter, true)) {
+                if (isAssignable(parameter, args[i] == null ? null : args[i].getClass(), true)) {
                     continue dance; // continue the outer loop since we didn't find the right one
                 }
             }

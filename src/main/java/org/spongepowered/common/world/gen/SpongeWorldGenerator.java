@@ -73,7 +73,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     public List<GeneratorPopulator> getGeneratorPopulators() {
         if (!(this.generatorPopulators instanceof ArrayList)) {
             // Need to make a copy to make the populators mutable
-            this.generatorPopulators = new ArrayList<GeneratorPopulator>(this.generatorPopulators);
+            this.generatorPopulators = new ArrayList<>(this.generatorPopulators);
         }
         return this.generatorPopulators;
     }
@@ -82,7 +82,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     public List<Populator> getPopulators() {
         if (!(this.populators instanceof ArrayList)) {
             // Need to make a copy to make the populators mutable
-            this.populators = new ArrayList<Populator>(this.populators);
+            this.populators = new ArrayList<>(this.populators);
         }
         return this.populators;
     }

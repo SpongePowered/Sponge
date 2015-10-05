@@ -45,4 +45,8 @@ public class ImmutableSpongeDirectionalData extends AbstractImmutableSingleEnumD
         return ImmutableSpongeValue.cachedOf(Keys.DIRECTION, Direction.NONE, this.value);
     }
 
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return direction();
+    }
 }

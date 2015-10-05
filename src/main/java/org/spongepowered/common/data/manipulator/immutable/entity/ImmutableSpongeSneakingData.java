@@ -42,4 +42,9 @@ public class ImmutableSpongeSneakingData extends AbstractImmutableBooleanData<Im
     public ImmutableValue<Boolean> sneaking() {
         return ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, this.value);
     }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return sneaking();
+    }
 }

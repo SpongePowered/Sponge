@@ -48,7 +48,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
         final Optional<Location<World>> safe = checkAboveAndBelowLocation(location, height, width);
         if (safe.isPresent()) {
             // Add 0.5 to X and Z of block position so always in centre of block
-            return Optional.of(new Location<World>(safe.get().getExtent(), safe.get().getBlockPosition().toDouble().add(0.5, 0, 0.5)));
+            return Optional.of(new Location<>(safe.get().getExtent(), safe.get().getBlockPosition().toDouble().add(0.5, 0, 0.5)));
         }
         return safe;
     }
@@ -91,7 +91,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             if (safePosition.isPresent()) {
                 // If a safe area was found: Return the checkLoc, it is the safe
                 // location.
-                return Optional.of(new Location<World>(location.getExtent(), safePosition.get()));
+                return Optional.of(new Location<>(location.getExtent(), safePosition.get()));
             }
         }
 

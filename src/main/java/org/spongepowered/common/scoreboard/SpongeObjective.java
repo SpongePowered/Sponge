@@ -45,13 +45,13 @@ import java.util.Set;
 
 public class SpongeObjective implements Objective {
 
-    private Map<net.minecraft.scoreboard.Scoreboard, ScoreObjective> objectives = new HashMap<net.minecraft.scoreboard.Scoreboard, ScoreObjective>();
+    private Map<net.minecraft.scoreboard.Scoreboard, ScoreObjective> objectives = new HashMap<>();
 
     private String name;
     private Text displayName;
     private Criterion criterion;
     private ObjectiveDisplayMode displayMode;
-    private Map<Text, Score> scores = new HashMap<Text, Score>();
+    private Map<Text, Score> scores = new HashMap<>();
 
     public boolean allowRecursion = true;
 
@@ -193,7 +193,7 @@ public class SpongeObjective implements Objective {
     public Set<Scoreboard> getScoreboards() {
         // This is a set, so no need to worry about mutiple NMS scoreboards which map to the same
         // api scoreboard
-        Set<Scoreboard> scoreboards = new HashSet<Scoreboard>();
+        Set<Scoreboard> scoreboards = new HashSet<>();
         for (net.minecraft.scoreboard.Scoreboard scoreboard: this.objectives.keySet()) {
             scoreboards.add(((IMixinScoreboard) scoreboard).getSpongeScoreboard());
         }

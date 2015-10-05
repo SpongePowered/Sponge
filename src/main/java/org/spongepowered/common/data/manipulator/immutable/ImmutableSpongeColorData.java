@@ -32,7 +32,7 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class ImmutableSpongeColorData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
 
