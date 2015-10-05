@@ -75,13 +75,13 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Text value) {
-        final ImmutableValue<Text> author = new ImmutableSpongeValue<Text>(Keys.BOOK_AUTHOR, value);
+        final ImmutableValue<Text> author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, value);
         if (this.supports(container)) {
             final Optional<Text> oldData = getValueFromContainer(container);
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             if (oldData.isPresent()) {
                 final ImmutableValue<Text> oldAuthor =
-                        new ImmutableSpongeValue<Text>(Keys.BOOK_AUTHOR, oldData.get());
+                        new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, oldData.get());
                 builder.replace(oldAuthor);
             }
             if (((ItemStack) container).getTagCompound() == null) {
@@ -101,7 +101,7 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<Text> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
-                final ImmutableValue<Text> author = new ImmutableSpongeValue<Text>(Keys.BOOK_AUTHOR, oldData.get());
+                final ImmutableValue<Text> author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, oldData.get());
                 builder.replace(author);
             }
             if (((ItemStack) container).getTagCompound() != null) {
