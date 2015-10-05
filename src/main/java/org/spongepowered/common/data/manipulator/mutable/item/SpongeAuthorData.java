@@ -56,12 +56,12 @@ public class SpongeAuthorData extends AbstractSingleData<Text, AuthorData, Immut
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(Keys.BOOK_AUTHOR.getQuery(), this.getValue());
+                .set(Keys.BOOK_AUTHOR.getQuery(), Texts.json().to(this.getValue()));
     }
 
     @Override
     public Value<Text> author() {
-        return new SpongeValue<Text>(Keys.BOOK_AUTHOR, this.getValue());
+        return new SpongeValue<Text>(Keys.BOOK_AUTHOR, Texts.of(NbtDataUtil.INVALID_TITLE), this.getValue());
     }
 
     @Override

@@ -44,10 +44,6 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
         super(ImmutableAuthorData.class, value, Keys.BOOK_AUTHOR);
     }
 
-    public ImmutableSpongeAuthorData() {
-        this(Texts.of(NbtDataUtil.INVALID_TITLE));
-    }
-
     @Override
     public ImmutableAuthorData copy() {
         return this;
@@ -56,12 +52,12 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(Keys.BOOK_AUTHOR.getQuery(), this.getValue());
+                .set(Keys.BOOK_AUTHOR.getQuery(), Texts.json().to(this.getValue()));
     }
 
     @Override
     public ImmutableValue<Text> author() {
-        return new ImmutableSpongeValue<Text>(Keys.BOOK_AUTHOR, this.getValue());
+        return new ImmutableSpongeValue<Text>(Keys.BOOK_AUTHOR, Texts.of(NbtDataUtil.INVALID_TITLE), this.getValue());
     }
 
     @Override
