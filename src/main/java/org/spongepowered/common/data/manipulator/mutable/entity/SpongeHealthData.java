@@ -114,11 +114,11 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.HEALTH, SpongeHealthData.this::getHealth);
-        registerFieldSetter(Keys.HEALTH, value -> setHealth(((Number) value).doubleValue()));
+        registerFieldSetter(Keys.HEALTH, SpongeHealthData.this::setHealth);
         registerKeyValue(Keys.HEALTH, SpongeHealthData.this::health);
 
         registerFieldGetter(Keys.MAX_HEALTH, SpongeHealthData.this::getMaxHealth);
-        registerFieldSetter(Keys.MAX_HEALTH, value -> setMaxHealth(((Number) value).doubleValue()));
+        registerFieldSetter(Keys.MAX_HEALTH, SpongeHealthData.this::setMaxHealth);
         registerKeyValue(Keys.MAX_HEALTH, SpongeHealthData.this::maxHealth);
     }
 }

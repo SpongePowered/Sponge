@@ -59,8 +59,8 @@ public class SpongeEnchantmentData extends AbstractData<EnchantmentData, Immutab
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.this::getEnchantments);
-        registerFieldSetter(Keys.ITEM_ENCHANTMENTS, value -> setEnchantments((List<ItemEnchantment>) value));
-        registerKeyValue(Keys.ITEM_ENCHANTMENTS, this::enchantments);
+        registerFieldSetter(Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.this::setEnchantments);
+        registerKeyValue(Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.this::enchantments);
     }
 
     @Override

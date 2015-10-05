@@ -96,7 +96,7 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.ITEM_LORE, SpongeLoreData.this::getLore);
-        registerFieldSetter(Keys.ITEM_LORE, value -> setLore((List<Text>) value));
+        registerFieldSetter(Keys.ITEM_LORE, SpongeLoreData.this::setLore);
         registerKeyValue(Keys.ITEM_LORE, SpongeLoreData.this::lore);
     }
 }

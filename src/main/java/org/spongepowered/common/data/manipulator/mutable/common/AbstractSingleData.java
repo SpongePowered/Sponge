@@ -65,7 +65,7 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(this.usedKey, AbstractSingleData.this::getValue);
-        registerFieldSetter(this.usedKey, value1 -> setValue((T) value1));
+        registerFieldSetter(this.usedKey, this::setValue);
         registerKeyValue(this.usedKey, AbstractSingleData.this::getValueGetter);
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
         // we can delegate this since we have a direct value check as this is
         // a Single value.
-        return key == this.usedKey ? Optional.of((E) (Object) this.value) : super.get(key);
+        return key == this.usedKey ? Optional.of((E) this.value) : super.get(key);
     }
 
     @Override

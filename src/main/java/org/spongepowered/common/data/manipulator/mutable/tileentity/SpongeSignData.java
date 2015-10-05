@@ -99,7 +99,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.SIGN_LINES, SpongeSignData.this::getLines);
-        registerFieldSetter(Keys.SIGN_LINES, value -> setLines((List<Text>) value));
+        registerFieldSetter(Keys.SIGN_LINES, SpongeSignData.this::setLines);
         registerKeyValue(Keys.SIGN_LINES, SpongeSignData.this::lines);
     }
 }

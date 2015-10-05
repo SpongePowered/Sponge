@@ -128,16 +128,16 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FOOD_LEVEL, this::getFoodLevel);
-        registerFieldSetter(Keys.FOOD_LEVEL, value -> setFoodLevel(((Number) value).intValue()));
-        registerKeyValue(Keys.FOOD_LEVEL, this::foodLevel);
+        registerFieldGetter(Keys.FOOD_LEVEL, SpongeFoodData.this::getFoodLevel);
+        registerFieldSetter(Keys.FOOD_LEVEL, SpongeFoodData.this::setFoodLevel);
+        registerKeyValue(Keys.FOOD_LEVEL, SpongeFoodData.this::foodLevel);
 
-        registerFieldGetter(Keys.SATURATION, this::getFoodSaturation);
-        registerFieldSetter(Keys.SATURATION, value -> setFoodSaturation(((Number) value).doubleValue()));
-        registerKeyValue(Keys.SATURATION, this::saturation);
+        registerFieldGetter(Keys.SATURATION, SpongeFoodData.this::getFoodSaturation);
+        registerFieldSetter(Keys.SATURATION, SpongeFoodData.this::setFoodSaturation);
+        registerKeyValue(Keys.SATURATION, SpongeFoodData.this::saturation);
 
-        registerFieldGetter(Keys.EXHAUSTION, this::getFoodExhaustion);
-        registerFieldSetter(Keys.EXHAUSTION, value -> setFoodExhaustion(((Number) value).doubleValue()));
-        registerKeyValue(Keys.EXHAUSTION, this::exhaustion);
+        registerFieldGetter(Keys.EXHAUSTION, SpongeFoodData.this::getFoodExhaustion);
+        registerFieldSetter(Keys.EXHAUSTION, SpongeFoodData.this::setFoodExhaustion);
+        registerKeyValue(Keys.EXHAUSTION, SpongeFoodData.this::exhaustion);
     }
 }

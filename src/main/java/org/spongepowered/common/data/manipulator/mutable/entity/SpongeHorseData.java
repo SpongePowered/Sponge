@@ -64,15 +64,15 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.HORSE_COLOR, SpongeHorseData.this::getHorseColor);
-        registerFieldSetter(Keys.HORSE_COLOR, value -> setHorseColor((HorseColor) value));
+        registerFieldSetter(Keys.HORSE_COLOR, SpongeHorseData.this::setHorseColor);
         registerKeyValue(Keys.HORSE_COLOR, SpongeHorseData.this::color);
 
         registerFieldGetter(Keys.HORSE_STYLE, SpongeHorseData.this::getHorseStyle);
-        registerFieldSetter(Keys.HORSE_STYLE, value -> setHorseStyle((HorseStyle) value));
+        registerFieldSetter(Keys.HORSE_STYLE, this::setHorseStyle);
         registerKeyValue(Keys.HORSE_STYLE, SpongeHorseData.this::style);
 
         registerFieldGetter(Keys.HORSE_VARIANT, SpongeHorseData.this::getHorseVariant);
-        registerFieldSetter(Keys.HORSE_VARIANT, value -> setHorseVariant((HorseVariant) value));
+        registerFieldSetter(Keys.HORSE_VARIANT, SpongeHorseData.this::setHorseVariant);
         registerKeyValue(Keys.HORSE_VARIANT, SpongeHorseData.this::variant);
     }
 

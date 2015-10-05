@@ -96,7 +96,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.BOOK_PAGES, SpongePagedData.this::getPages);
-        registerFieldSetter(Keys.BOOK_PAGES, value -> setPages((List<Text>) value));
+        registerFieldSetter(Keys.BOOK_PAGES, SpongePagedData.this::setPages);
         registerKeyValue(Keys.BOOK_PAGES, SpongePagedData.this::pages);
     }
 

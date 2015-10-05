@@ -42,13 +42,13 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -65,9 +65,9 @@ import javax.annotation.Nullable;
  * require extra casting to {@link Object} and recasting to the practical
  * {@code M} generics.
  *
- * <p>Note: It is ABSOLUTELY REQUIRED to {@link #registerKeyValue(Key, GetterFunction)}
- * and {@link #registerFieldGetter(Key, GetterFunction)} and
- * {@link #registerFieldSetter(Key, SetterFunction)} for all possible
+ * <p>Note: It is ABSOLUTELY REQUIRED to {@link #registerKeyValue(Key, Supplier)}
+ * and {@link #registerFieldGetter(Key, Supplier)} and
+ * {@link #registerFieldSetter(Key, Consumer)} for all possible
  * {@link Key}s and {@link Value}s the {@link DataManipulator} may provide as
  * all of the implementation methods provided here are handled using those. This
  * was done to avoid having to override {@link #getKeys()} and {@link #getValues()},
@@ -98,9 +98,9 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     // The largest issue was implementation. Since most fields are simple to get and
     // set, other values, such as ItemStacks require a bit of finer tuning.
     //
-    private final Map<Key<?>, GetterFunction<Value<?>>> keyValueMap = Maps.newHashMap();
-    private final Map<Key<?>, GetterFunction<?>> keyFieldGetterMap = Maps.newHashMap();
-    private final Map<Key<?>, SetterFunction<Object>> keyFieldSetterMap = Maps.newHashMap();
+    private final Map<Key<?>, Supplier<Value<?>>> keyValueMap = Maps.newHashMap();
+    private final Map<Key<?>, Supplier<?>> keyFieldGetterMap = Maps.newHashMap();
+    private final Map<Key<?>, Consumer<Object>> keyFieldSetterMap = Maps.newHashMap();
 
     protected AbstractData(Class<M> manipulatorClass) {
         this.manipulatorClass = checkNotNull(manipulatorClass);
@@ -118,7 +118,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * @param key The key for the value return type
      * @param function The function for getting the value
      */
-    protected final void registerKeyValue(Key<?> key, GetterFunction<Value<?>> function) {
+    protected final void registerKeyValue(Key<?> key, Supplier<Value<?>> function) {
         this.keyValueMap.put(checkNotNull(key), checkNotNull(function));
     }
 
@@ -134,7 +134,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * @param key The key for the value return type
      * @param function The function for getting the field
      */
-    protected final void registerFieldGetter(Key<?> key, GetterFunction<?> function) {
+    protected final void registerFieldGetter(Key<?> key, Supplier<?> function) {
         this.keyFieldGetterMap.put(checkNotNull(key), checkNotNull(function));
     }
 
@@ -150,8 +150,9 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * @param key The key for the value return type
      * @param function The function for setting the field
      */
-    protected final void registerFieldSetter(Key<?> key, SetterFunction<Object> function) {
-        this.keyFieldSetterMap.put(checkNotNull(key), checkNotNull(function));
+    @SuppressWarnings("rawtypes")
+    protected final <E> void registerFieldSetter(Key<? extends BaseValue<E>> key, Consumer<E> function) {
+        this.keyFieldSetterMap.put(checkNotNull(key), checkNotNull((Consumer) function));
     }
 
     protected abstract void registerGettersAndSetters();
@@ -195,14 +196,14 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     @Override
     public <E> M set(Key<? extends BaseValue<E>> key, E value) {
         checkArgument(supports(key), "This data manipulator doesn't support the following key: " + key.toString());
-        this.keyFieldSetterMap.get(key).set(value);
+        this.keyFieldSetterMap.get(key).accept(value);
         return (M) this;
     }
 
     @Override
     public M set(BaseValue<?> value) {
         checkArgument(supports(value), "This data manipulator doesn't support the following key: " + value.getKey().toString());
-        this.keyFieldSetterMap.get(value.getKey()).set(value.get());
+        this.keyFieldSetterMap.get(value.getKey()).accept(value.get());
         return (M) this;
     }
 
@@ -237,7 +238,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     @Override
     public <E> M transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
         checkArgument(supports(key));
-        this.keyFieldSetterMap.get(key).set(checkNotNull(function.apply((E) this.keyFieldGetterMap.get(key).get())));
+        this.keyFieldSetterMap.get(key).accept(checkNotNull(function.apply((E) this.keyFieldGetterMap.get(key).get())));
         return (M) this;
     }
 
@@ -281,7 +282,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     @Override
     public Set<ImmutableValue<?>> getValues() {
         ImmutableSet.Builder<ImmutableValue<?>> builder = ImmutableSet.builder();
-        for (GetterFunction<Value<?>> function : this.keyValueMap.values()) {
+        for (Supplier<Value<?>> function : this.keyValueMap.values()) {
             builder.add(checkNotNull(function.get()).asImmutable());
         }
         return builder.build();
