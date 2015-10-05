@@ -72,10 +72,10 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
             player.experience = 0;
             player.experienceLevel = value;
             return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_LEVEL, value),
-                    new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_LEVEL, oldValue));
+                    new ImmutableSpongeValue<>(Keys.EXPERIENCE_LEVEL, oldValue));
         }
 
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_LEVEL, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.EXPERIENCE_LEVEL, value));
     }
 
     @Override
@@ -85,6 +85,6 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 }

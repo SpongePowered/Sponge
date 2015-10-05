@@ -69,7 +69,7 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
 
     @Override
     public ImmutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, defaultValue, intComparator(), 0, Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, defaultValue, intComparator(), 0, Integer.MAX_VALUE);
     }
 
 }
