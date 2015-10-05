@@ -116,7 +116,7 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
 
     @Override
     protected Value<Text> constructValue(Text defaultValue) {
-        return new SpongeValue<Text>(Keys.BOOK_AUTHOR, defaultValue);
+        return new SpongeValue<>(Keys.BOOK_AUTHOR, defaultValue);
     }
 
 }

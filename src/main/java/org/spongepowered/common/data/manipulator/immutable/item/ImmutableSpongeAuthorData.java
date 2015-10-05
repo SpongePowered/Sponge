@@ -57,7 +57,7 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
 
     @Override
     public ImmutableValue<Text> author() {
-        return new ImmutableSpongeValue<Text>(Keys.BOOK_AUTHOR, Texts.of(NbtDataUtil.INVALID_TITLE), this.getValue());
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(NbtDataUtil.INVALID_TITLE), this.getValue());
     }
 
     @Override

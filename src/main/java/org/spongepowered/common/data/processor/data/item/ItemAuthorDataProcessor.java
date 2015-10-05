@@ -100,7 +100,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<Text>(Keys.BOOK_AUTHOR, value);
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, value);
     }
 
 }
