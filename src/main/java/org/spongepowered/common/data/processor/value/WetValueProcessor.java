@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.value;
 
+import java.util.Optional;
+
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -33,8 +35,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-
-import com.google.common.base.Optional;
 
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.item.ItemStack;

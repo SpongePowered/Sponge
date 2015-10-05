@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable;
 
+import java.util.Optional;
+
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -34,8 +36,6 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.util.DataUtil;
-
-import com.google.common.base.Optional;
 
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.item.ItemStack;

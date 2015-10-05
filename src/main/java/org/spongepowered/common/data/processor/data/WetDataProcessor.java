@@ -26,6 +26,8 @@ package org.spongepowered.common.data.processor.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Optional;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -43,8 +45,6 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetDat
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
-
-import com.google.common.base.Optional;
 
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.item.ItemStack;
