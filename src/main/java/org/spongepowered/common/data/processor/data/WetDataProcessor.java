@@ -73,7 +73,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
         if (this.supports(dataHolder)) {
             return this.from(dataHolder);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
             WetData merged = overlap.merge(checkNotNull(manipulator.copy()), this.from(dataHolder).get());
             return Optional.of(manipulator.set(Keys.IS_WET, merged.wet().get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
         if (key == Keys.IS_WET) {
             return Optional.<ImmutableWetData>of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWetData.class, (Boolean) value));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

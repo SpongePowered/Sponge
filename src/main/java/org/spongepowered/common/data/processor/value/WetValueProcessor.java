@@ -59,7 +59,7 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
                 return Optional.of(wolf.isWet());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

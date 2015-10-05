@@ -69,7 +69,7 @@ public class WetDataBuilder implements DataManipulatorBuilder<WetData, Immutable
             return Optional.<WetData>of(data);
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }
