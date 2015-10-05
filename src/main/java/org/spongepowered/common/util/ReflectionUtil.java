@@ -86,7 +86,7 @@ public final class ReflectionUtil {
             }
             for (int i = 0; i < paramTypes.length; i++) {
                 final Class<?> parameter = paramTypes[i];
-                if (isAssignable(parameter, args[i] == null ? null : args[i].getClass(), true)) {
+                if (!isAssignable(args[i] == null ? null : args[i].getClass(), parameter, true)) {
                     continue dance; // continue the outer loop since we didn't find the right one
                 }
             }
