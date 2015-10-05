@@ -31,13 +31,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<ImmutableExperienceHolderData, ExperienceHolderData> implements
         ImmutableExperienceHolderData {
@@ -123,69 +121,17 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.EXPERIENCE_LEVEL, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getLevel();
-            }
-        });
-
-        registerKeyValue(Keys.EXPERIENCE_LEVEL, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return level();
-            }
-        });
-
-        registerFieldGetter(Keys.TOTAL_EXPERIENCE, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getTotalExp();
-            }
-        });
-
-        registerKeyValue(Keys.TOTAL_EXPERIENCE, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return totalExperience();
-            }
-        });
-
-        registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getExpSinceLevel();
-            }
-        });
-
-        registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return experienceSinceLevel();
-            }
-        });
-
-        registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getExpBetweenLevels();
-            }
-        });
-
-        registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return experienceBetweenLevels();
-            }
-        });
+        // Keys.EXPERIENCE_LEVEL
+        registerFieldGetter(Keys.EXPERIENCE_LEVEL, ImmutableSpongeExperienceHolderData.this::getLevel);
+        registerKeyValue(Keys.EXPERIENCE_LEVEL, ImmutableSpongeExperienceHolderData.this::level);
+        // Keys.TOTAL_EXPERIENCE
+        registerFieldGetter(Keys.TOTAL_EXPERIENCE, ImmutableSpongeExperienceHolderData.this::getTotalExp);
+        registerKeyValue(Keys.TOTAL_EXPERIENCE, ImmutableSpongeExperienceHolderData.this::totalExperience);
+        // Keys.EXPERIENCE_SINCE_LEVEL
+        registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, ImmutableSpongeExperienceHolderData.this::getExpSinceLevel);
+        registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, ImmutableSpongeExperienceHolderData.this::experienceSinceLevel);
+        // Keys.EXPERIENCE_FROM_START_OF_LEVEL
+        registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, ImmutableSpongeExperienceHolderData.this::getExpBetweenLevels);
+        registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, ImmutableSpongeExperienceHolderData.this::experienceBetweenLevels);
     }
-
 }

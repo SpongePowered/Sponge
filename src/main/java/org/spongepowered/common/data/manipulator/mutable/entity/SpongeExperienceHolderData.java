@@ -34,14 +34,11 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperien
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderData, ImmutableExperienceHolderData> implements ExperienceHolderData {
 
@@ -92,23 +89,22 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     @Override
     public MutableBoundedValue<Integer> level() {
-        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.level);
+        return new SpongeBoundedValue<>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.level);
     }
 
     @Override
     public MutableBoundedValue<Integer> totalExperience() {
-        return new SpongeBoundedValue<Integer>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, this.totalExp);
+        return new SpongeBoundedValue<>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, this.totalExp);
     }
 
     @Override
     public MutableBoundedValue<Integer> experienceSinceLevel() {
-        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expSinceLevel);
+        return new SpongeBoundedValue<>(Keys.EXPERIENCE_SINCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, this.expSinceLevel);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> getExperienceBetweenLevels() {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, this.expBetweenLevels, intComparator(), 0,
-                Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, this.expBetweenLevels, intComparator(), 0, Integer.MAX_VALUE);
     }
 
     public int getLevel() {
@@ -134,7 +130,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
         this.totalExp = totalExp;
         int level = 0;
         for (int i = totalExp; i > 0; i -= ExperienceHolderUtils.getExpBetweenLevels(level)) {
-            level ++;
+            level++;
             if (i - ExperienceHolderUtils.getExpBetweenLevels(level) <= 0) {
                 this.expSinceLevel = i;
                 this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(level);
@@ -159,95 +155,27 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
         return this.expBetweenLevels;
     }
 
-    @Override
-    protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.EXPERIENCE_LEVEL, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getLevel();
-            }
-        });
-        registerFieldSetter(Keys.EXPERIENCE_LEVEL, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setLevel(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.EXPERIENCE_LEVEL, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return level();
-            }
-        });
-
-        registerFieldGetter(Keys.TOTAL_EXPERIENCE, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getTotalExp();
-            }
-        });
-        registerFieldSetter(Keys.TOTAL_EXPERIENCE, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setTotalExp(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.TOTAL_EXPERIENCE, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return totalExperience();
-            }
-        });
-
-        registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getExpSinceLevel();
-            }
-        });
-        registerFieldSetter(Keys.EXPERIENCE_SINCE_LEVEL, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setExpSinceLevel(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return experienceSinceLevel();
-            }
-        });
-
-        registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getExpBetweenLevels();
-            }
-        });
-        registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                // do nothing
-            }
-        });
-        registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return getExperienceBetweenLevels().asMutable();
-            }
-        });
+    private MutableBoundedValue<Integer> getExperienceBetweenLevelsMutable() {
+        return this.getExperienceBetweenLevels().asMutable();
     }
 
+    @Override
+    protected void registerGettersAndSetters() {
+        // Keys.EXPERIENCE_LEVEL
+        registerFieldGetter(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::getLevel);
+        registerFieldSetter(Keys.EXPERIENCE_LEVEL, value -> setLevel(((Number) value).intValue()));
+        registerKeyValue(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::level);
+        // Keys.TOTAL_EXPERIENCE
+        registerFieldGetter(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::getTotalExp);
+        registerFieldSetter(Keys.TOTAL_EXPERIENCE, value -> setTotalExp(((Number) value).intValue()));
+        registerKeyValue(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::totalExperience);
+        // Keys.EXPERIENCE_SINCE_LEVEL
+        registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::getExpSinceLevel);
+        registerFieldSetter(Keys.EXPERIENCE_SINCE_LEVEL, value -> setExpSinceLevel(((Number) value).intValue()));
+        registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::experienceSinceLevel);
+        // Keys.EXPERIENCE_FROM_START_OF_LEVEL
+        registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, SpongeExperienceHolderData.this::getExpBetweenLevels);
+        registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, value -> {});
+        registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, SpongeExperienceHolderData.this::getExperienceBetweenLevelsMutable);
+    }
 }
