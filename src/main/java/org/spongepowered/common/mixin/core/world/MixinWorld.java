@@ -614,16 +614,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void updateWorldGenerator() {
+        // No need to wrap generator if no modifiers are present
+        if (this.getProperties().getGeneratorModifiers().isEmpty()) {
+            return;
+        }
+
         IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
 
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
-        if (generatorSettings.contains(IMixinWorldType.STRING_VALUE)) {
-            String options = generatorSettings.getString(IMixinWorldType.STRING_VALUE).get();
-            if (options.equals("")) {
-                return;
-            }
-        }
         SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
 
         // Re-apply all world generator modifiers

@@ -344,8 +344,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 newWorldSettings = new WorldSettings(worldInfo);
             }
 
-            Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
-
             if (dim == 0) {
                 this.setResourcePackFromWorld(this.getFolderName(), worldsavehandler);
             }
@@ -354,6 +352,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
             UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             Sponge.getSpongeRegistry().registerWorldUniqueId(uuid, worldFolder);
+            Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+            Sponge.getGame().getEventManager().post(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this), (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
             final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
 
@@ -363,7 +363,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (!this.isSinglePlayer()) {
                 world.getWorldInfo().setGameType(this.getGameType());
             }
-            Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
+
             Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (World)
                     world));
         }

@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinScoreboardSaveData;
 import org.spongepowered.common.interfaces.IMixinWorld;
+import org.spongepowered.common.interfaces.IMixinWorldInfo;
 
 import java.util.Collection;
 import java.util.Set;
@@ -87,10 +88,13 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Inject(method = "init", at = @At("RETURN"))
     public void onPostInit(CallbackInfoReturnable<World> ci) {
-        // Run the world generator modifiers in the init method
-        // (the "init" method, not the "<init>" constructor)
-        IMixinWorld world = (IMixinWorld) ci.getReturnValue();
-        world.updateWorldGenerator();
+        net.minecraft.world.World world = ci.getReturnValue();
+        if (!((IMixinWorldInfo) world.getWorldInfo()).getIsMod()) {
+            // Run the world generator modifiers in the init method
+            // (the "init" method, not the "<init>" constructor)
+            IMixinWorld mixinWorld = (IMixinWorld) world;
+            mixinWorld.updateWorldGenerator();
+        }
     }
 
     @Override
