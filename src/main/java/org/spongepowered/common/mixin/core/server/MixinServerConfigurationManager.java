@@ -45,6 +45,7 @@ import net.minecraft.network.play.server.S1FPacketSetExperience;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.network.play.server.S39PacketPlayerAbilities;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.S40PacketDisconnect;
 import net.minecraft.network.play.server.S41PacketServerDifficulty;
 import net.minecraft.network.play.server.S44PacketWorldBorder;
 import net.minecraft.potion.PotionEffect;
@@ -65,11 +66,14 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -89,6 +93,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,6 +117,7 @@ public abstract class MixinServerConfigurationManager {
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(IChatComponent component);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
+    @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
     @Shadow public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
 
     /**
@@ -128,6 +134,23 @@ public abstract class MixinServerConfigurationManager {
         initializeConnectionToPlayer(netManager, playerIn, null);
     }
 
+    private void disconnectClient(NetworkManager netManager, Optional<Text> disconnectMessage, GameProfile profile) {
+        IChatComponent reason = null;
+        if (disconnectMessage.isPresent()) {
+            reason = SpongeTexts.toComponent(disconnectMessage.get());
+        } else {
+            reason = new ChatComponentTranslation("disconnect.disconnected");
+        }
+
+        try {
+            logger.info("Disconnecting " + profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText()));
+            netManager.sendPacket(new S40PacketDisconnect(reason));
+            netManager.closeChannel(reason);
+        } catch (Exception exception) {
+            logger.error("Error whilst disconnecting player", exception);
+        }
+    }
+
     public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
         GameProfile gameprofile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
@@ -136,7 +159,6 @@ public abstract class MixinServerConfigurationManager {
         playerprofilecache.addEntry(gameprofile);
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
         WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
-        Transform<World> fromTransform = ((Player)playerIn).getTransform();
 
         if (worldserver == null) {
             playerIn.dimension = 0;
@@ -144,6 +166,37 @@ public abstract class MixinServerConfigurationManager {
             BlockPos spawnPoint = ((IMixinWorldProvider) worldserver.provider).getRandomizedSpawnPoint();
             playerIn.setPosition(spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
         }
+
+        // Sponge start - fire login event
+        String kickReason = allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
+        Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
+        if (kickReason != null) {
+            disconnectMessage = Texts.of(kickReason);
+        }
+
+        Player player = (Player) playerIn;
+        Location<World> location = new Location<World>((World)worldserver, VecHelper.toVector(playerIn.getPosition()));
+        Transform<World> fromTransform = player.getTransform().setLocation(location);
+        MessageSink sink = MessageSinks.toAll();
+        ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), Cause.of((Player) playerIn), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform, (RemoteConnection) netManager, (org.spongepowered.api.GameProfile) gameprofile);
+        Sponge.getGame().getEventManager().post(loginEvent);
+        if (kickReason != null || loginEvent.isCancelled()) {
+            disconnectClient(netManager, Optional.ofNullable(loginEvent.getMessage()), gameprofile);
+            return;
+        }
+
+        double x = loginEvent.getToTransform().getPosition().getX();
+        double y = loginEvent.getToTransform().getPosition().getY();
+        double z = loginEvent.getToTransform().getPosition().getZ();
+        float pitch = (float) loginEvent.getToTransform().getPitch();
+        float yaw = (float) loginEvent.getToTransform().getYaw();
+        if (worldserver != loginEvent.getToTransform().getExtent()) {
+            worldserver = (net.minecraft.world.WorldServer) loginEvent.getToTransform().getExtent();
+        }
+
+        playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
+        playerIn.dimension = worldserver.provider.getDimensionId();
+        // Sponge end
 
         playerIn.setWorld(worldserver);
         playerIn.theItemInWorldManager.setWorld((WorldServer) playerIn.worldObj);
@@ -153,20 +206,18 @@ public abstract class MixinServerConfigurationManager {
             s1 = netManager.getRemoteAddress().toString();
         }
 
+        logger.info(playerIn.getCommandSenderName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
+                + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.getDimensionId()
+                + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         WorldInfo worldinfo = worldserver.getWorldInfo();
         BlockPos blockpos = worldserver.getSpawnPoint();
         this.setPlayerGameTypeBasedOnOther(playerIn, null, worldserver);
-
-        // Sponge Start
 
         if (handler == null) {
             // Create the handler here (so the player's gets set)
             handler = new NetHandlerPlayServer(this.mcServer, netManager, playerIn);
         }
-
         playerIn.playerNetServerHandler = handler;
-
-        // Sponge End
 
         // Support vanilla clients logging into custom dimensions
         int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.getDimensionId(), worldserver, playerIn);
@@ -217,30 +268,22 @@ public abstract class MixinServerConfigurationManager {
 
         chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
 
-        // Fire PlayerJoinEvent
-        Player player = (Player) playerIn;
-        Transform<World> toTransform = player.getTransform();
-        Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
-        Text message = SpongeTexts.toText(chatcomponenttranslation);
-        MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player);
-        Sponge.getGame().getEventManager().post(event);
-        // Set the resolved location of the event onto the player
-        ((Player) playerIn).setTransform(event.getToTransform());
-
-        logger.info(playerIn.getCommandSenderName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " at (" + playerIn.posX
-                + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
-
-        // Sponge start -> Send to the sink
-        event.getSink().sendMessage(event.getMessage());
-        // Sponge end
-
         this.func_96456_a((ServerScoreboard) worldserver.getScoreboard(), playerIn);
 
         for (Object o : playerIn.getActivePotionEffects()) {
             PotionEffect potioneffect = (PotionEffect) o;
             handler.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
+
+        // Fire PlayerJoinEvent
+        Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
+        Text message = SpongeTexts.toText(chatcomponenttranslation);
+        MessageSink originalSink = MessageSinks.toAll();
+        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), player);
+        Sponge.getGame().getEventManager().post(event);
+        // Send to the sink
+        event.getSink().sendMessage(event.getMessage());
+        // Sponge end
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {
             Entity entity = EntityList.createEntityFromNBT(nbttagcompound.getCompoundTag("Riding"), worldserver);

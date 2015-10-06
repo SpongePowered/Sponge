@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.configuration;
 
+import org.spongepowered.api.util.Functional;
+import org.spongepowered.api.block.BlockTypes;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -46,9 +48,12 @@ import org.spongepowered.common.util.IpSet;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.Nullable;
 
@@ -96,6 +101,11 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String GENERAL_CHUNK_LOAD_OVERRIDE = "chunk-load-override";
 
     // LOGGING
+    public static final String LOGGING_BLOCK_BREAK = "block-break";
+    public static final String LOGGING_BLOCK_MODIFY = "block-modify";
+    public static final String LOGGING_BLOCK_PLACE = "block-place";
+    public static final String LOGGING_BLOCK_POPULATE = "block-populate";
+    public static final String LOGGING_BLOCK_TRACKING = "block-tracking";
     public static final String LOGGING_CHUNK_LOAD = "chunk-load";
     public static final String LOGGING_CHUNK_UNLOAD = "chunk-unload";
     public static final String LOGGING_ENTITY_DEATH = "entity-death";
@@ -104,6 +114,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String LOGGING_ENTITY_SPAWN = "entity-spawn";
     public static final String LOGGING_ENTITY_SPEED_REMOVAL = "entity-speed-removal";
     public static final String LOGGING_STACKTRACES = "log-stacktraces";
+
+    // BLOCK TRACKING BLACKLIST
+    public static final String BLOCK_TRACKING = "block-tracking";
+    public static final String BLOCK_TRACKING_BLACKLIST = "block-blacklist";
 
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
@@ -187,6 +201,16 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         } catch (IOException | ObjectMappingException e) {
             LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
         }
+    }
+
+    public CompletableFuture<CommentedConfigurationNode> updateSetting(String key, Object value) {
+        return Functional.asyncFailableFuture(() -> {
+            CommentedConfigurationNode upd = getSetting(key);
+            upd.setValue(value);
+            this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
+            this.loader.save(this.root);
+            return upd;
+        }, ForkJoinPool.commonPool());
     }
 
     public CommentedConfigurationNode getRootNode() {
@@ -303,6 +327,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     public static class ConfigBase {
 
+        @Setting(value = BLOCK_TRACKING)
+        private BlockTrackingCategory blockTracking = new BlockTrackingCategory();
         @Setting
         private DebugCategory debug = new DebugCategory();
         @Setting
@@ -315,6 +341,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private LoggingCategory logging = new LoggingCategory();
         @Setting
         private WorldCategory world = new WorldCategory();
+
+        public BlockTrackingCategory getBlockTracking() {
+            return this.blockTracking;
+        }
 
         public DebugCategory getDebug() {
             return this.debug;
@@ -570,6 +600,16 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class LoggingCategory extends Category {
 
+        @Setting(value = LOGGING_BLOCK_BREAK, comment = "Log when blocks are broken")
+        private boolean blockBreakLogging = false;
+        @Setting(value = LOGGING_BLOCK_MODIFY, comment = "Log when blocks are modified")
+        private boolean blockModifyLogging = false;
+        @Setting(value = LOGGING_BLOCK_PLACE, comment = "Log when blocks are placed")
+        private boolean blockPlaceLogging = false;
+        @Setting(value = LOGGING_BLOCK_POPULATE, comment = "Log when blocks are populated in a chunk")
+        private boolean blockPopulateLogging = false;
+        @Setting(value = LOGGING_BLOCK_TRACKING, comment = "Log when blocks are placed by players and tracked")
+        private boolean blockTrackLogging = false;
         @Setting(value = LOGGING_CHUNK_LOAD, comment = "Log when chunks are loaded")
         private boolean chunkLoadLogging = false;
         @Setting(value = LOGGING_CHUNK_UNLOAD, comment = "Log when chunks are unloaded")
@@ -587,68 +627,108 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = LOGGING_ENTITY_SPEED_REMOVAL, comment = "Whether to log entity removals due to speed")
         private boolean logEntitySpeedRemoval = false;
 
+        public boolean blockBreakLogging() {
+            return this.blockBreakLogging;
+        }
+
+        public void setBlockBreakLogging(boolean flag) {
+            this.blockBreakLogging = flag;
+        }
+
+        public boolean blockModifyLogging() {
+            return this.blockModifyLogging;
+        }
+
+        public void setBlockModifyLogging(boolean flag) {
+            this.blockModifyLogging = flag;
+        }
+
+        public boolean blockPlaceLogging() {
+            return this.blockPlaceLogging;
+        }
+
+        public void setBlockPlaceLogging(boolean flag) {
+            this.blockPlaceLogging = flag;
+        }
+
+        public boolean blockPopulateLogging() {
+            return this.blockPopulateLogging;
+        }
+
+        public void setBlockPopulateLogging(boolean flag) {
+            this.blockPopulateLogging = flag;
+        }
+
+        public boolean blockTrackLogging() {
+            return this.blockTrackLogging;
+        }
+
+        public void setBlockTrackLogging(boolean flag) {
+            this.blockTrackLogging = flag;
+        }
+
         public boolean chunkLoadLogging() {
             return this.chunkLoadLogging;
         }
 
-        public void setChunkLoadLogging(boolean chunkLoadLogging) {
-            this.chunkLoadLogging = chunkLoadLogging;
+        public void setChunkLoadLogging(boolean flag) {
+            this.chunkLoadLogging = flag;
         }
 
         public boolean chunkUnloadLogging() {
             return this.chunkUnloadLogging;
         }
 
-        public void setChunkUnloadLogging(boolean chunkUnloadLogging) {
-            this.chunkUnloadLogging = chunkUnloadLogging;
+        public void setChunkUnloadLogging(boolean flag) {
+            this.chunkUnloadLogging = flag;
         }
 
         public boolean entitySpawnLogging() {
             return this.entitySpawnLogging;
         }
 
-        public void setEntitySpawnLogging(boolean entitySpawnLogging) {
-            this.entitySpawnLogging = entitySpawnLogging;
+        public void setEntitySpawnLogging(boolean flag) {
+            this.entitySpawnLogging = flag;
         }
 
         public boolean entityDespawnLogging() {
             return this.entityDespawnLogging;
         }
 
-        public void setEntityDespawnLogging(boolean entityDespawnLogging) {
-            this.entityDespawnLogging = entityDespawnLogging;
+        public void setEntityDespawnLogging(boolean flag) {
+            this.entityDespawnLogging = flag;
         }
 
         public boolean entityDeathLogging() {
             return this.entityDeathLogging;
         }
 
-        public void setEntityDeathLogging(boolean entityDeathLogging) {
-            this.entityDeathLogging = entityDeathLogging;
+        public void setEntityDeathLogging(boolean flag) {
+            this.entityDeathLogging = flag;
         }
 
         public boolean logWithStackTraces() {
             return this.logWithStackTraces;
         }
 
-        public void setLogWithStackTraces(boolean logWithStackTraces) {
-            this.logWithStackTraces = logWithStackTraces;
+        public void setLogWithStackTraces(boolean flag) {
+            this.logWithStackTraces = flag;
         }
 
         public boolean logEntityCollisionChecks() {
             return this.logEntityCollisionChecks;
         }
 
-        public void setLogEntityCollisionChecks(boolean logEntityCollisionChecks) {
-            this.logEntityCollisionChecks = logEntityCollisionChecks;
+        public void setLogEntityCollisionChecks(boolean flag) {
+            this.logEntityCollisionChecks = flag;
         }
 
         public boolean logEntitySpeedRemoval() {
             return this.logEntitySpeedRemoval;
         }
 
-        public void setLogEntitySpeedRemoval(boolean logEntitySpeedRemoval) {
-            this.logEntitySpeedRemoval = logEntitySpeedRemoval;
+        public void setLogEntitySpeedRemoval(boolean flag) {
+            this.logEntitySpeedRemoval = flag;
         }
     }
 
@@ -675,6 +755,17 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPluginEntityActivation(boolean state) {
             this.pluginEntityActivation = state;
+        }
+    }
+
+    @ConfigSerializable
+    public static class BlockTrackingCategory extends Category {
+
+        @Setting(value = BLOCK_TRACKING_BLACKLIST, comment = "Add block ids you wish to blacklist for player block placement tracking.")
+        private List<String> blockBlacklist = new ArrayList<String>();
+
+        public List<String> getBlockBlacklist() {
+            return this.blockBlacklist;
         }
     }
 

@@ -22,43 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.world;
 
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.gen.GeneratorPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.common.configuration.SpongeConfig;
 
-import java.util.List;
-import java.util.Optional;
+public enum CaptureType {
 
-public interface IMixinWorld {
+    BREAK,
+    FLUID,
+    MODIFY,
+    PLACE,
+    POPULATE
 
-    SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
-
-    ImmutableList<Populator> getPopulators();
-
-    ImmutableList<GeneratorPopulator> getGeneratorPopulators();
-
-    List<BlockSnapshot> getBlockBreakList();
-
-    boolean capturingTerrainGen();
-
-    Optional<BlockSnapshot> getCurrentTickBlock();
-
-    Optional<Entity> getCurrentTickEntity();
-
-    Optional<TileEntity> getCurrentTickTileEntity();
-
-    void updateWorldGenerator();
-
-    void handlePostTickCaptures(Cause cause);
-
-    void setCapturingTerrainGen(boolean flag);
-
-    void setCapturingEntitySpawns(boolean flag);
 }

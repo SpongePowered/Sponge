@@ -329,6 +329,8 @@ import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.gen.PopulatorFactory;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
@@ -548,6 +550,7 @@ import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldBuilder;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
+import org.spongepowered.common.world.gen.SpongePopulatorType;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
 import org.spongepowered.common.world.type.SpongeWorldTypeNether;
@@ -657,6 +660,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("void", new SpongeDamageType("void"))
             .build();
 
+    public final Map<Class<? extends net.minecraft.world.gen.feature.WorldGenerator>, PopulatorType> populatorClassToTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newHashMap();
     public final Map<String, Enchantment> enchantmentMappings = Maps.newHashMap();
@@ -691,6 +695,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
     private final Map<String, Art> artMappings = Maps.newHashMap();
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
+    protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
     public final Map<String, TileEntityType> tileEntityTypeMappings = Maps.newHashMap();
     private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
             .put("dead_bush", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
@@ -786,6 +791,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(Operation.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(ParticleType.class, this.particleByName)
                 .put(PlantType.class, this.plantTypeMappings)
+                .put(PopulatorType.class, this.populatorTypeMappings)
                 .put(PotionEffectType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(PortionType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(PrismarineType.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -2111,6 +2117,57 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(ObjectiveDisplayModes.class, SpongeGameRegistry.objectiveDisplayModeMappings);
     }
 
+    private void setPopulatorTypes() {
+        this.populatorTypeMappings.put("big_mushroom", new SpongePopulatorType("big_mushroom", net.minecraft.world.gen.feature.WorldGenBigMushroom.class));
+        this.populatorTypeMappings.put("big_tree", new SpongePopulatorType("big_tree", net.minecraft.world.gen.feature.WorldGenBigTree.class));
+        this.populatorTypeMappings.put("birch_tree", new SpongePopulatorType("birch_tree", net.minecraft.world.gen.feature.WorldGenForest.class));
+        this.populatorTypeMappings.put("block_blob", new SpongePopulatorType("block_blob", net.minecraft.world.gen.feature.WorldGenBlockBlob.class));
+        this.populatorTypeMappings.put("cactus", new SpongePopulatorType("cactus", net.minecraft.world.gen.feature.WorldGenCactus.class));
+        this.populatorTypeMappings.put("canopy_tree", new SpongePopulatorType("canopy_tree", net.minecraft.world.gen.feature.WorldGenCanopyTree.class));
+        this.populatorTypeMappings.put("dead_bush", new SpongePopulatorType("dead_bush", net.minecraft.world.gen.feature.WorldGenDeadBush.class));
+        this.populatorTypeMappings.put("desert_well", new SpongePopulatorType("desert_well", net.minecraft.world.gen.feature.WorldGenDesertWells.class));
+        this.populatorTypeMappings.put("double_plant", new SpongePopulatorType("double_plant", net.minecraft.world.gen.feature.WorldGenBigMushroom.class));
+        this.populatorTypeMappings.put("dungeon", new SpongePopulatorType("dungeon", net.minecraft.world.gen.feature.WorldGenDungeons.class));
+        this.populatorTypeMappings.put("ender_crystal_platform", new SpongePopulatorType("ender_crystal_platform", net.minecraft.world.gen.feature.WorldGenSpikes.class));
+        this.populatorTypeMappings.put("flower", new SpongePopulatorType("flower", net.minecraft.world.gen.feature.WorldGenFlowers.class));
+        this.populatorTypeMappings.put("glowstone", new SpongePopulatorType("glowstone", net.minecraft.world.gen.feature.WorldGenGlowStone1.class));
+        this.populatorTypeMappings.put("ice_path", new SpongePopulatorType("ice_path", net.minecraft.world.gen.feature.WorldGenIcePath.class));
+        this.populatorTypeMappings.put("ice_spike", new SpongePopulatorType("ice_spike", net.minecraft.world.gen.feature.WorldGenIceSpike.class));
+        this.populatorTypeMappings.put("jungle_bush_tree", new SpongePopulatorType("jungle_bush_tree", net.minecraft.world.gen.feature.WorldGenShrub.class));
+        this.populatorTypeMappings.put("lake", new SpongePopulatorType("lake", net.minecraft.world.gen.feature.WorldGenLakes.class));
+        this.populatorTypeMappings.put("lava", new SpongePopulatorType("lava", net.minecraft.world.gen.feature.WorldGenHellLava.class));
+        this.populatorTypeMappings.put("liquid", new SpongePopulatorType("liquid", net.minecraft.world.gen.feature.WorldGenLiquids.class));
+        this.populatorTypeMappings.put("mega_jungle_tree", new SpongePopulatorType("mega_jungle_tree", net.minecraft.world.gen.feature.WorldGenMegaJungle.class));
+        this.populatorTypeMappings.put("mega_pine_tree", new SpongePopulatorType("mega_pinge_tree", net.minecraft.world.gen.feature.WorldGenMegaPineTree.class));
+        this.populatorTypeMappings.put("melon", new SpongePopulatorType("melon", net.minecraft.world.gen.feature.WorldGenMelon.class));
+        this.populatorTypeMappings.put("ore", new SpongePopulatorType("ore", net.minecraft.world.gen.feature.WorldGenMinable.class));
+        this.populatorTypeMappings.put("pointy_taiga_tree", new SpongePopulatorType("pointy_taiga_tree", net.minecraft.world.gen.feature.WorldGenTaiga1.class));
+        this.populatorTypeMappings.put("pumpkin", new SpongePopulatorType("pumpkin", net.minecraft.world.gen.feature.WorldGenPumpkin.class));
+        this.populatorTypeMappings.put("reed", new SpongePopulatorType("reed", net.minecraft.world.gen.feature.WorldGenReed.class));
+        this.populatorTypeMappings.put("savanna_tree", new SpongePopulatorType("savanna_tree", net.minecraft.world.gen.feature.WorldGenSavannaTree.class));
+        this.populatorTypeMappings.put("shrub", new SpongePopulatorType("shrub", net.minecraft.world.gen.feature.WorldGenTallGrass.class));
+        this.populatorTypeMappings.put("swamp_tree", new SpongePopulatorType("swamp_tree", net.minecraft.world.gen.feature.WorldGenSwamp.class));
+        this.populatorTypeMappings.put("tall_taiga_tree", new SpongePopulatorType("tall_taiga_tree", net.minecraft.world.gen.feature.WorldGenTaiga2.class));
+        this.populatorTypeMappings.put("tree", new SpongePopulatorType("tree", net.minecraft.world.gen.feature.WorldGenTrees.class));
+        this.populatorTypeMappings.put("vine", new SpongePopulatorType("vine", net.minecraft.world.gen.feature.WorldGenVines.class));
+        this.populatorTypeMappings.put("water_lily", new SpongePopulatorType("water_lily", net.minecraft.world.gen.feature.WorldGenWaterlily.class));
+
+        RegistryHelper.mapFields(PopulatorTypes.class, new Function<String, PopulatorType>() {
+
+            @Override
+            public PopulatorType apply(String fieldName) {
+                PopulatorType populatorType = SpongeGameRegistry.this.populatorTypeMappings.get(fieldName.toLowerCase());
+                SpongeGameRegistry.this.populatorClassToTypeMappings
+                        .put(((SpongePopulatorType) populatorType).populatorClass, populatorType);
+                // remove old mapping
+                SpongeGameRegistry.this.populatorTypeMappings.remove(fieldName.toLowerCase());
+                // add new mapping with minecraft id
+                SpongeGameRegistry.this.populatorTypeMappings.put(((SpongePopulatorType) populatorType).getId(), populatorType);
+                return populatorType;
+            }
+        });
+    }
+
     private void setEntityTypes() {
         // internal mapping of our EntityTypes to actual MC names
         this.entityTypeMappings.put("item", newEntityTypeFromName("Item"));
@@ -2468,6 +2525,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setCoal();
         setFishes();
         setEntityTypes();
+        setPopulatorTypes();
         SpongePropertyRegistry.completeRegistration();
         SpongeDataRegistry.finalizeRegistration();
     }

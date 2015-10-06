@@ -78,7 +78,10 @@ public class NbtDataUtil {
     public static final byte TAG_INT_ARRAY = 11;
 
     // These are Sponge's NBT tag keys
-    public static final String SPONGE_TAG = "SpongeData";
+    public static final String SPONGE_DATA = "SpongeData";
+    public static final String SPONGE_ENTITY_CREATOR = "Creator";
+    public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
+    public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
     public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
 
     // Compatibility tags for Forge
@@ -147,11 +150,11 @@ public class NbtDataUtil {
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
         if (rootCompound.hasKey(FORGE_DATA_TAG, TAG_COMPOUND)) {
             final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA_TAG);
-            if (forgeCompound.hasKey(SPONGE_TAG, TAG_COMPOUND)) {
-                cleanseInnerCompound(forgeCompound, SPONGE_TAG);
+            if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+                cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }
-        } else if (rootCompound.hasKey(SPONGE_TAG, TAG_COMPOUND)) {
-            cleanseInnerCompound(rootCompound, SPONGE_TAG);
+        } else if (rootCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+            cleanseInnerCompound(rootCompound, SPONGE_DATA);
         }
         return rootCompound;
     }

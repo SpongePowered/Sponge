@@ -265,7 +265,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Overwrite
-    protected void loadAllWorlds(String overworldFolder, String unused, long seed, WorldType type, String generator) {
+    protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generator) {
         this.convertMapIfNeeded(overworldFolder);
         this.setUserMessage("menu.loadingLevel");
 
@@ -299,7 +299,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory() :
                                 new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
                 if (dim == 0) {
-                    worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldFolder).get();
+                    // overworld uses the client set world name
+                    if (Sponge.getSpongeRegistry().getWorldProperties(worldFolder).isPresent()) {
+                        worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldFolder).get();
+                    } else {
+                        worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldName).get(); // client copied world
+                    }
                 } else {
                     worldInfo = worldsavehandler.loadWorldInfo();
                 }
