@@ -56,6 +56,12 @@ public class SpongePatternListValue extends SpongeListValue<PatternLayer> implem
     }
 
     @Override
+    public PatternListValue set(int index, PatternLayer element) {
+        super.set(index, element);
+        return this;
+    }
+
+    @Override
     public PatternListValue filter(Predicate<? super PatternLayer> predicate) {
         super.filter(predicate);
         return this;
@@ -85,14 +91,8 @@ public class SpongePatternListValue extends SpongeListValue<PatternLayer> implem
     }
 
     @Override
-    public PatternListValue remove(int index) {
-        super.remove(index);
-        return this;
-    }
-
-    @Override
-    public PatternListValue set(int index, PatternLayer element) {
-        super.set(index, element);
+    public PatternListValue add(PatternLayer element) {
+        super.add(element);
         return this;
     }
 
@@ -103,14 +103,14 @@ public class SpongePatternListValue extends SpongeListValue<PatternLayer> implem
     }
 
     @Override
-    public PatternListValue add(PatternLayer element) {
-        super.add(element);
+    public PatternListValue addAll(Iterable<PatternLayer> elements) {
+        super.addAll(elements);
         return this;
     }
 
     @Override
-    public PatternListValue addAll(Iterable<PatternLayer> elements) {
-        super.addAll(elements);
+    public PatternListValue remove(int index) {
+        super.remove(index);
         return this;
     }
 

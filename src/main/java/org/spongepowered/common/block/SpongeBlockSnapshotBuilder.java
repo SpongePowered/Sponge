@@ -113,6 +113,20 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
         return this;
     }
 
+    @Override
+    public SpongeBlockSnapshotBuilder from(BlockSnapshot holder) {
+        this.blockState = holder.getState();
+        this.worldUuid = holder.getWorldUniqueId();
+        this.coords = holder.getPosition();
+        this.manipulators = Lists.newArrayList(holder.getManipulators());
+        if (holder instanceof SpongeBlockSnapshot) {
+            if (((SpongeBlockSnapshot) holder).compound != null) {
+                this.compound = (NBTTagCompound) ((SpongeBlockSnapshot) holder).compound.copy();
+            }
+        }
+        return this;
+    }
+
     public SpongeBlockSnapshotBuilder unsafeNbt(NBTTagCompound compound) {
         this.compound = (NBTTagCompound) compound.copy();
         return this;
@@ -136,20 +150,6 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
             }
         }
         this.manipulators.add(manipulator);
-        return this;
-    }
-
-    @Override
-    public SpongeBlockSnapshotBuilder from(BlockSnapshot holder) {
-        this.blockState = holder.getState();
-        this.worldUuid = holder.getWorldUniqueId();
-        this.coords = holder.getPosition();
-        this.manipulators = Lists.newArrayList(holder.getManipulators());
-        if (holder instanceof SpongeBlockSnapshot) {
-            if (((SpongeBlockSnapshot) holder).compound != null) {
-                this.compound = (NBTTagCompound) ((SpongeBlockSnapshot) holder).compound.copy();
-            }
-        }
         return this;
     }
 

@@ -129,6 +129,43 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
     }
 
     @Override
+    public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
+        this.entityType = holder.getType();
+        this.worldId = holder.getWorldUniqueId();
+        this.position = holder.getPosition().toDouble();
+        final Optional<Transform<World>> optional = holder.getTransform();
+        if (optional.isPresent()) {
+            this.position = optional.get().getPosition();
+            this.rotation = optional.get().getRotation();
+            this.scale = optional.get().getScale();
+        }
+        this.manipulators = Lists.newArrayList();
+        for (ImmutableDataManipulator<?, ?> manipulator : holder.getContainers()) {
+            add((ImmutableDataManipulator) manipulator);
+        }
+        if (holder instanceof SpongeEntitySnapshot) {
+            this.compound = ((SpongeEntitySnapshot) holder).getCompound().orElse(null);
+        }
+        return this;
+    }
+
+    public SpongeEntitySnapshotBuilder from(net.minecraft.entity.Entity minecraftEntity) {
+        this.entityType = ((Entity) minecraftEntity).getType();
+        this.worldId = ((Entity) minecraftEntity).getWorld().getUniqueId();
+        final Transform<World> transform = ((Entity) minecraftEntity).getTransform();
+        this.position = transform.getPosition();
+        this.rotation = transform.getRotation();
+        this.scale = transform.getScale();
+        this.manipulators = Lists.newArrayList();
+        this.manipulators.addAll(((Entity) minecraftEntity).getContainers().stream()
+                .map(DataManipulator::asImmutable)
+                .collect(Collectors.toList()));
+        this.compound = new NBTTagCompound();
+        minecraftEntity.writeToNBT(this.compound);
+        return this;
+    }
+
+    @Override
     public SpongeEntitySnapshotBuilder add(DataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         return add((ImmutableDataManipulator) manipulator.asImmutable());
@@ -164,43 +201,6 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
             this.manipulators.remove(replaceIndex);
         }
         this.manipulators.add(manipulator);
-    }
-
-    @Override
-    public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
-        this.entityType = holder.getType();
-        this.worldId = holder.getWorldUniqueId();
-        this.position = holder.getPosition().toDouble();
-        final Optional<Transform<World>> optional = holder.getTransform();
-        if (optional.isPresent()) {
-            this.position = optional.get().getPosition();
-            this.rotation = optional.get().getRotation();
-            this.scale = optional.get().getScale();
-        }
-        this.manipulators = Lists.newArrayList();
-        for (ImmutableDataManipulator<?, ?> manipulator : holder.getContainers()) {
-            add((ImmutableDataManipulator) manipulator);
-        }
-        if (holder instanceof SpongeEntitySnapshot) {
-            this.compound = ((SpongeEntitySnapshot) holder).getCompound().orElse(null);
-        }
-        return this;
-    }
-
-    public SpongeEntitySnapshotBuilder from(net.minecraft.entity.Entity minecraftEntity) {
-        this.entityType = ((Entity) minecraftEntity).getType();
-        this.worldId = ((Entity) minecraftEntity).getWorld().getUniqueId();
-        final Transform<World> transform = ((Entity) minecraftEntity).getTransform();
-        this.position = transform.getPosition();
-        this.rotation = transform.getRotation();
-        this.scale = transform.getScale();
-        this.manipulators = Lists.newArrayList();
-        this.manipulators.addAll(((Entity) minecraftEntity).getContainers().stream()
-                .map(DataManipulator::asImmutable)
-                .collect(Collectors.toList()));
-        this.compound = new NBTTagCompound();
-        minecraftEntity.writeToNBT(this.compound);
-        return this;
     }
 
     public SpongeEntitySnapshotBuilder unsafeCompound(NBTTagCompound compound) {

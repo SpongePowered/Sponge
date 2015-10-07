@@ -189,6 +189,18 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return Optional.empty();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+        checkNotNull(key);
+        for (ImmutableValue<?> value : this.values) {
+            if (value.getKey().equals(key)) {
+                return Optional.of((E) value.get());
+            }
+        }
+        return Optional.empty();
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
@@ -217,6 +229,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         }
         final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
         return processorOptional.isPresent() && processorOptional.get().supports(this.entityType);
+    }
+
+    @Override
+    public boolean supports(Key<?> key) {
+        return this.keys.contains(key);
     }
 
     @Override
@@ -299,18 +316,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        checkNotNull(key);
-        for (ImmutableValue<?> value : this.values) {
-            if (value.getKey().equals(key)) {
-                return Optional.of((E) value.get());
-            }
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         checkNotNull(key);
         for (ImmutableValue<?> value : this.values) {
@@ -319,11 +324,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(Key<?> key) {
-        return this.keys.contains(key);
     }
 
     @Override

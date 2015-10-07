@@ -91,14 +91,6 @@ public class SpongeScoreboard implements Scoreboard {
         this.updateDisplaySlot(objective, displaySlot);
     }
 
-    private void updateDisplaySlot(Objective objective, DisplaySlot displaySlot) {
-        this.allowRecursion = false;
-        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
-            scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(), ((SpongeObjective) objective).getObjective(scoreboard));
-        }
-        this.allowRecursion = true;
-    }
-
     @Override
     public void addObjective(Objective objective) throws IllegalArgumentException {
         if (this.objectives.containsValue(objective)) {
@@ -108,6 +100,14 @@ public class SpongeScoreboard implements Scoreboard {
         }
         this.objectives.put(objective.getName(), objective);
         this.addObjectiveInternal(objective);
+    }
+
+    private void updateDisplaySlot(Objective objective, DisplaySlot displaySlot) {
+        this.allowRecursion = false;
+        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
+            scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(), ((SpongeObjective) objective).getObjective(scoreboard));
+        }
+        this.allowRecursion = true;
     }
 
     private void addObjectiveInternal(Objective objective) {

@@ -55,12 +55,6 @@ public final class VecHelper {
         return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    // === MC BlockPos --> Flow Vector3d ==
-
-    public static Vector3d toVector3d(BlockPos pos) {
-        return new Vector3d(pos.getX(), pos.getY(), pos.getZ());
-    }
-
     // === Rotations --> Flow Vector ===
 
     public static Vector3d toVector(Rotations rotation) {
@@ -85,12 +79,6 @@ public final class VecHelper {
         return new Vector3i(chunk.chunkXPos, 0, chunk.chunkZPos);
     }
 
-    // === Flow Vector3i --> MC ChunkCoordIntPair ===
-
-    public static ChunkCoordIntPair toChunkCoordIntPair(Vector3i vector) {
-        return new ChunkCoordIntPair(vector.getX(), vector.getZ());
-    }
-
     // === MC Vec3 --> flow Vector3d ==
 
     public static Vector3d toVector(Vec3 vector) {
@@ -101,6 +89,18 @@ public final class VecHelper {
 
     public static Vec3 toVector(Vector3d vector) {
         return new Vec3(vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    // === MC BlockPos --> Flow Vector3d ==
+
+    public static Vector3d toVector3d(BlockPos pos) {
+        return new Vector3d(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    // === Flow Vector3i --> MC ChunkCoordIntPair ===
+
+    public static ChunkCoordIntPair toChunkCoordIntPair(Vector3i vector) {
+        return new ChunkCoordIntPair(vector.getX(), vector.getZ());
     }
 
     // === Flow Vector --> Rotations ===

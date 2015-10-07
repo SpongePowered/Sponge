@@ -103,18 +103,6 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
     }
 
     @Override
-    public TradeOffer build() throws IllegalStateException {
-        checkState(this.firstItem != null, "Trading item has not been set");
-        checkState(this.sellingItem != null, "Selling item has not been set");
-        checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
-        MerchantRecipe recipe =
-                new MerchantRecipe((net.minecraft.item.ItemStack) this.firstItem, (net.minecraft.item.ItemStack) this.secondItem,
-                        (net.minecraft.item.ItemStack) this.sellingItem, this.useCount, this.maxUses);
-        recipe.rewardsExp = this.allowsExperience;
-        return (TradeOffer) recipe;
-    }
-
-    @Override
     public TradeOfferBuilder from(TradeOffer offer) {
         checkNotNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
@@ -136,6 +124,18 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
         this.maxUses = 7;
         this.allowsExperience = true;
         return this;
+    }
+
+    @Override
+    public TradeOffer build() throws IllegalStateException {
+        checkState(this.firstItem != null, "Trading item has not been set");
+        checkState(this.sellingItem != null, "Selling item has not been set");
+        checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
+        MerchantRecipe recipe =
+                new MerchantRecipe((net.minecraft.item.ItemStack) this.firstItem, (net.minecraft.item.ItemStack) this.secondItem,
+                        (net.minecraft.item.ItemStack) this.sellingItem, this.useCount, this.maxUses);
+        recipe.rewardsExp = this.allowsExperience;
+        return (TradeOffer) recipe;
     }
 
     @Override

@@ -61,6 +61,11 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
     }
 
     @Override
+    public boolean supports(EntityType entityType) {
+        return Entity.class.isAssignableFrom(entityType.getEntityClass());
+    }
+
+    @Override
     public Optional<DisplayNameData> from(DataHolder dataHolder) {
         if (dataHolder instanceof Entity && ((Entity) dataHolder).hasCustomName()) {
             final String displayName = ((Entity) dataHolder).getCustomNameTag();
@@ -182,10 +187,5 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
             return from(dataHolder);
         }
         return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(EntityType entityType) {
-        return Entity.class.isAssignableFrom(entityType.getEntityClass());
     }
 }

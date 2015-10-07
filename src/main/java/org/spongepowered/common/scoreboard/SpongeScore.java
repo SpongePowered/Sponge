@@ -63,6 +63,10 @@ public class SpongeScore implements Score {
         return this.score;
     }
 
+    public net.minecraft.scoreboard.Score getScore(ScoreObjective objective) {
+        return this.scores.get(objective);
+    }
+
     @Override
     public void setScore(int score) {
         this.score = score;
@@ -118,10 +122,6 @@ public class SpongeScore implements Score {
     @SuppressWarnings("deprecation")
     public void removeFromScoreObjective(ScoreObjective objective) {
         objective.theScoreboard.removeObjectiveFromEntity(Texts.legacy().to(this.name), objective);
-    }
-
-    public net.minecraft.scoreboard.Score getScore(ScoreObjective objective) {
-        return this.scores.get(objective);
     }
 
     public UUID getUuid() {

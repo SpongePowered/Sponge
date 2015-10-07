@@ -37,16 +37,16 @@ public interface IMixinCustomDataHolder {
 
     DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function);
 
+    <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value);
+
     <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass);
 
     DataTransactionResult removeCustom(Class<? extends DataManipulator<?, ?>> customClass);
 
+    DataTransactionResult removeCustom(Key<?> key);
+
     boolean hasManipulators();
 
     List<DataManipulator<?, ?>> getCustomManipulators();
-
-    <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value);
-
-    DataTransactionResult removeCustom(Key<?> key);
 
 }

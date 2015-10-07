@@ -76,6 +76,12 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
+    public void setBlock(int x, int y, int z, BlockState block) {
+        checkRange(x, y, z);
+        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
+    }
+
+    @Override
     public void setBlockType(Vector3i position, BlockType type) {
         setBlockType(position.getX(), position.getY(), position.getZ(), type);
     }
@@ -83,12 +89,6 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     @Override
     public void setBlockType(int x, int y, int z, BlockType type) {
         setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
-        checkRange(x, y, z);
-        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
     }
 
     @Override

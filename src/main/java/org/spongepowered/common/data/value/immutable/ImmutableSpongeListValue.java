@@ -53,58 +53,8 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
     }
 
     @Override
-    public ImmutableListValue<E> transform(Function<List<E>, List<E>> function) {
-        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
-    }
-
-    @Override
-    public ListValue<E> asMutable() {
-        final List<E> list = Lists.newArrayList();
-        list.addAll(this.actualValue);
-        return new SpongeListValue<>(getKey(), list);
-    }
-
-    @Override
     public ImmutableListValue<E> with(E... elements) {
         return new ImmutableSpongeListValue<>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).add(elements).build());
-    }
-
-    @Override
-    public ImmutableListValue<E> withAll(Iterable<E> elements) {
-        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).addAll(elements).build());
-    }
-
-    @Override
-    public ImmutableListValue<E> without(E element) {
-        final ImmutableList.Builder<E> builder = ImmutableList.builder();
-        this.actualValue.stream().filter(existingElement -> !existingElement.equals(element)).forEach(builder::add);
-        return new ImmutableSpongeListValue<>(getKey(), builder.build());
-    }
-
-    @Override
-    public ImmutableListValue<E> withoutAll(Iterable<E> elements) {
-        final ImmutableList.Builder<E> builder = ImmutableList.builder();
-        this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
-        return new ImmutableSpongeListValue<>(getKey(), builder.build());
-    }
-
-    @Override
-    public ImmutableListValue<E> withoutAll(Predicate<E> predicate) {
-        final ImmutableList.Builder<E> builder = ImmutableList.builder();
-        this.actualValue.stream().filter(existing -> checkNotNull(predicate).test(existing)).forEach(builder::add);
-        return new ImmutableSpongeListValue<>(getKey(), builder.build());
-    }
-
-    @Override
-    public List<E> getAll() {
-        final List<E> list = Lists.newArrayList();
-        list.addAll(this.actualValue);
-        return list;
-    }
-
-    @Override
-    public E get(int index) {
-        return this.actualValue.get(index);
     }
 
     @Override
@@ -134,6 +84,30 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
     }
 
     @Override
+    public ImmutableListValue<E> transform(Function<List<E>, List<E>> function) {
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
+    }
+
+    @Override
+    public ListValue<E> asMutable() {
+        final List<E> list = Lists.newArrayList();
+        list.addAll(this.actualValue);
+        return new SpongeListValue<>(getKey(), list);
+    }
+
+    @Override
+    public ImmutableListValue<E> withAll(Iterable<E> elements) {
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).addAll(elements).build());
+    }
+
+    @Override
+    public ImmutableListValue<E> without(E element) {
+        final ImmutableList.Builder<E> builder = ImmutableList.builder();
+        this.actualValue.stream().filter(existingElement -> !existingElement.equals(element)).forEach(builder::add);
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
+    }
+
+    @Override
     public ImmutableListValue<E> without(int index) {
         final ImmutableList.Builder<E> builder = ImmutableList.builder();
         for (final ListIterator<E> iterator = this.actualValue.listIterator(); iterator.hasNext(); ) {
@@ -142,6 +116,32 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
             }
         }
         return new ImmutableSpongeListValue<>(getKey(), builder.build());
+    }
+
+    @Override
+    public ImmutableListValue<E> withoutAll(Iterable<E> elements) {
+        final ImmutableList.Builder<E> builder = ImmutableList.builder();
+        this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
+    }
+
+    @Override
+    public ImmutableListValue<E> withoutAll(Predicate<E> predicate) {
+        final ImmutableList.Builder<E> builder = ImmutableList.builder();
+        this.actualValue.stream().filter(existing -> checkNotNull(predicate).test(existing)).forEach(builder::add);
+        return new ImmutableSpongeListValue<>(getKey(), builder.build());
+    }
+
+    @Override
+    public List<E> getAll() {
+        final List<E> list = Lists.newArrayList();
+        list.addAll(this.actualValue);
+        return list;
+    }
+
+    @Override
+    public E get(int index) {
+        return this.actualValue.get(index);
     }
 
     @Override

@@ -53,6 +53,16 @@ public class ImmutableSpongeEntityToSpawnValue extends ImmutableSpongeValue<Weig
     }
 
     @Override
+    public ImmutableMobSpawnerData.ImmutableNextEntityToSpawnValue with(EntityType type,
+                                                                        @Nullable Collection<DataManipulator<?, ?>> additionalProperties) {
+        if (additionalProperties == null) {
+            return new ImmutableSpongeEntityToSpawnValue(new WeightedEntity(checkNotNull(type), 1));
+        } else {
+            return new ImmutableSpongeEntityToSpawnValue(new WeightedEntity(checkNotNull(type), 1, additionalProperties));
+        }
+    }
+
+    @Override
     public ImmutableSpongeEntityToSpawnValue transform(Function<WeightedEntity, WeightedEntity> function) {
         final WeightedEntity value = checkNotNull(function).apply(get());
         return new ImmutableSpongeEntityToSpawnValue(checkNotNull(value));
@@ -61,15 +71,5 @@ public class ImmutableSpongeEntityToSpawnValue extends ImmutableSpongeValue<Weig
     @Override
     public MobSpawnerData.NextEntityToSpawnValue asMutable() {
         return new SpongeNextEntityToSpawnValue(this.actualValue);
-    }
-
-    @Override
-    public ImmutableMobSpawnerData.ImmutableNextEntityToSpawnValue with(EntityType type,
-                                                                        @Nullable Collection<DataManipulator<?, ?>> additionalProperties) {
-        if (additionalProperties == null) {
-            return new ImmutableSpongeEntityToSpawnValue(new WeightedEntity(checkNotNull(type), 1));
-        } else {
-            return new ImmutableSpongeEntityToSpawnValue(new WeightedEntity(checkNotNull(type), 1, additionalProperties));
-        }
     }
 }

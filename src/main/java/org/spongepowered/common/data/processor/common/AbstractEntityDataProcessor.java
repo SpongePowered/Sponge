@@ -56,35 +56,20 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
         return true;
     }
 
-    protected abstract boolean doesDataExist(E entity);
-
-    protected abstract boolean set(E entity, Map<Key<?>, Object> keyValues);
-
-    protected abstract Map<Key<?>, ?> getValues(E entity);
-
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
         return this.entityClass.isInstance(dataHolder) && supports((E) dataHolder);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Optional<M> from(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            if (doesDataExist((E) dataHolder)) {
-                final M manipulator = createManipulator();
-                final Map<Key<?>, ?> keyValues = getValues((E) dataHolder);
-                for (Map.Entry<Key<?>, ?> entry : keyValues.entrySet()) {
-                    manipulator.set((Key) entry.getKey(), entry.getValue());
-                }
-                return Optional.of(manipulator);
-            }
-        }
-        return Optional.empty();
+    public boolean supports(EntityType entityType) {
+        return this.entityClass.isAssignableFrom(entityType.getEntityClass());
     }
+
+    protected abstract boolean doesDataExist(E entity);
+
+    protected abstract boolean set(E entity, Map<Key<?>, Object> keyValues);
 
     @SuppressWarnings("unchecked")
     @Override
@@ -116,6 +101,26 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
+    protected abstract Map<Key<?>, ?> getValues(E entity);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Optional<M> from(DataHolder dataHolder) {
+        if (!supports(dataHolder)) {
+            return Optional.empty();
+        } else {
+            if (doesDataExist((E) dataHolder)) {
+                final M manipulator = createManipulator();
+                final Map<Key<?>, ?> keyValues = getValues((E) dataHolder);
+                for (Map.Entry<Key<?>, ?> entry : keyValues.entrySet()) {
+                    manipulator.set((Key) entry.getKey(), entry.getValue());
+                }
+                return Optional.of(manipulator);
+            }
+        }
+        return Optional.empty();
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
@@ -123,10 +128,5 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
             return Optional.of((I) immutable.asMutable().set((Key) key, value).asImmutable());
         }
         return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(EntityType entityType) {
-        return this.entityClass.isAssignableFrom(entityType.getEntityClass());
     }
 }

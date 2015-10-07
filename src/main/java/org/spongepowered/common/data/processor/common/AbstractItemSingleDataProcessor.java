@@ -53,8 +53,32 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
         this.predicate = predicate;
     }
 
-
     protected abstract boolean set(ItemStack itemStack, T value);
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
+        if (supports(dataHolder)) {
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<M> old = from(dataHolder);
+            final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
+            final T newValue = merged.get(this.key).get();
+            final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
+            try {
+                if (set((ItemStack) dataHolder, newValue)) {
+                    if (old.isPresent()) {
+                        builder.replace(old.get().getValues());
+                    }
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success((ImmutableValue<?>) immutableValue).build();
+                } else {
+                    return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
+                }
+            } catch (Exception e) {
+                return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) newValue).build();
+            }
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
+    }
 
     protected abstract Optional<T> getVal(ItemStack itemStack);
 
@@ -84,31 +108,6 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
     public Optional<M> fill(DataContainer container, M m) {
         m.set(this.key, DataUtil.getData(container, this.key));
         return Optional.of(m);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
-        if (supports(dataHolder)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            final Optional<M> old = from(dataHolder);
-            final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
-            final T newValue = merged.get(this.key).get();
-            final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
-            try {
-                if (set((ItemStack) dataHolder, newValue)) {
-                    if (old.isPresent()) {
-                        builder.replace(old.get().getValues());
-                    }
-                    return builder.result(DataTransactionResult.Type.SUCCESS).success((ImmutableValue<?>) immutableValue).build();
-                } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
-                }
-            } catch (Exception e) {
-                return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) newValue).build();
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
     @SuppressWarnings("unchecked")

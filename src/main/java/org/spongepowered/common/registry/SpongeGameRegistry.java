@@ -1029,6 +1029,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return Optional.ofNullable(this.worldPropertiesNameMappings.get(worldName));
     }
 
+    public Optional<WorldProperties> getWorldProperties(UUID uuid) {
+        return Optional.ofNullable(this.worldPropertiesUuidMappings.get(uuid));
+    }
+
     public Collection<WorldProperties> getAllWorldProperties() {
         return Collections.unmodifiableCollection(this.worldPropertiesNameMappings.values());
     }
@@ -1049,10 +1053,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         // TODO: This is client-only
         //return WorldSettings.GameType.getByName(mode.getTranslation().getId());
         throw new UnsupportedOperationException();
-    }
-
-    public Optional<WorldProperties> getWorldProperties(UUID uuid) {
-        return Optional.ofNullable(this.worldPropertiesUuidMappings.get(uuid));
     }
 
     @Override

@@ -172,6 +172,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return Optional.empty();
     }
 
+    @Override
+    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+        return this.privateStack.get(key);
+    }
+
     @SuppressWarnings("rawtypes")
     @Override
     public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
@@ -193,6 +198,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return false;
+    }
+
+    @Override
+    public boolean supports(Key<?> key) {
+        return this.privateStack.supports(key);
     }
 
     @Override
@@ -273,18 +283,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        return this.privateStack.get(key);
-    }
-
-    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         return this.privateStack.getValue(key);
-    }
-
-    @Override
-    public boolean supports(Key<?> key) {
-        return this.privateStack.supports(key);
     }
 
     @Override
