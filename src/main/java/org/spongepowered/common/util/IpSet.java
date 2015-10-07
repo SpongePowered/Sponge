@@ -75,11 +75,6 @@ public class IpSet implements Predicate<InetAddress> {
         return new IpSet(address, prefixLen);
     }
 
-    /**
-     *
-     * @param spec
-     * @return
-     */
     public static IpSet fromCidr(String spec) {
         String addrString;
         int prefixLen;
