@@ -154,7 +154,7 @@ import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
 import org.spongepowered.api.data.property.block.HardnessProperty;
 import org.spongepowered.api.data.property.block.HeldItemProperty;
 import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
-import org.spongepowered.api.data.property.block.LightEmissionProperty;
+import org.spongepowered.api.data.property.block.LuminanceProperty;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.property.block.PassableProperty;
 import org.spongepowered.api.data.property.block.PoweredProperty;
@@ -482,7 +482,7 @@ import org.spongepowered.common.data.property.store.block.GroundLuminancePropert
 import org.spongepowered.common.data.property.store.block.HardnessPropertyStore;
 import org.spongepowered.common.data.property.store.block.HeldItemPropertyStore;
 import org.spongepowered.common.data.property.store.block.IndirectlyPoweredPropertyStore;
-import org.spongepowered.common.data.property.store.block.LightEmissionPropertyStore;
+import org.spongepowered.common.data.property.store.block.LuminancePropertyStore;
 import org.spongepowered.common.data.property.store.block.MatterPropertyStore;
 import org.spongepowered.common.data.property.store.block.PassablePropertyStore;
 import org.spongepowered.common.data.property.store.block.PoweredPropertyStore;
@@ -2009,7 +2009,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         propertyRegistry.register(HardnessProperty.class, new HardnessPropertyStore());
         propertyRegistry.register(HeldItemProperty.class, new HeldItemPropertyStore());
         propertyRegistry.register(IndirectlyPoweredProperty.class, new IndirectlyPoweredPropertyStore());
-        propertyRegistry.register(LightEmissionProperty.class, new LightEmissionPropertyStore());
+        propertyRegistry.register(LuminanceProperty.class, new LuminancePropertyStore());
         propertyRegistry.register(MatterProperty.class, new MatterPropertyStore());
         propertyRegistry.register(PassableProperty.class, new PassablePropertyStore());
         propertyRegistry.register(PoweredProperty.class, new PoweredPropertyStore());
