@@ -86,10 +86,10 @@ public abstract class MixinBlockLog extends MixinBlock {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
             if (blockState.getBlock() instanceof BlockOldLog) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                    treeType.equals(TreeTypes.BIRCH) ||
-                    treeType.equals(TreeTypes.SPRUCE) ||
-                    treeType.equals(TreeTypes.JUNGLE)) {
+                if (treeType.equals(TreeTypes.OAK)
+                    || treeType.equals(TreeTypes.BIRCH)
+                    || treeType.equals(TreeTypes.SPRUCE)
+                    || treeType.equals(TreeTypes.JUNGLE)) {
                     return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
                 }
             } else if (blockState.getBlock() instanceof BlockNewLog) {
@@ -111,10 +111,10 @@ public abstract class MixinBlockLog extends MixinBlock {
             final TreeType treeType = (TreeType) value;
             final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
             if (blockState.getBlock() instanceof BlockOldLog) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                    treeType.equals(TreeTypes.BIRCH) ||
-                    treeType.equals(TreeTypes.SPRUCE) ||
-                    treeType.equals(TreeTypes.JUNGLE)) {
+                if (treeType.equals(TreeTypes.OAK)
+                        || treeType.equals(TreeTypes.BIRCH)
+                        || treeType.equals(TreeTypes.SPRUCE)
+                        || treeType.equals(TreeTypes.JUNGLE)) {
                     return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
                 }
             } else if (blockState.getBlock() instanceof BlockNewLog) {
