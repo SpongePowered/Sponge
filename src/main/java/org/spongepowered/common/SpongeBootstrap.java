@@ -166,16 +166,15 @@ public final class SpongeBootstrap {
                     }
                     if (spongeData.hasKey("dimensionId") && spongeData.getBoolean("enabled")) {
                         int dimension = spongeData.getInteger("dimensionId");
-                        for (Map.Entry<Class<? extends Dimension>, DimensionType> mapEntry : Sponge.getSpongeRegistry().dimensionClassMappings
-                                .entrySet()) {
-                            if (mapEntry.getKey().getCanonicalName().equalsIgnoreCase(spongeData.getString("dimensionType"))) {
-                                Sponge.getSpongeRegistry().registerWorldDimensionId(dimension, child.getName());
-                                if (!DimensionManager.isDimensionRegistered(dimension)) {
-                                    DimensionManager.registerDimension(dimension,
-                                            ((SpongeDimensionType) mapEntry.getValue()).getDimensionTypeId());
-                                }
-                            }
-                        }
+                        Sponge.getSpongeRegistry().dimensionClassMappings.entrySet().stream()
+                                .filter(mapEntry -> mapEntry.getKey().getCanonicalName().equalsIgnoreCase(spongeData.getString("dimensionType")))
+                                .forEach(mapEntry -> {
+                                        Sponge.getSpongeRegistry().registerWorldDimensionId(dimension, child.getName());
+                                        if (!DimensionManager.isDimensionRegistered(dimension)) {
+                                            DimensionManager.registerDimension(dimension, ((SpongeDimensionType) mapEntry.getValue())
+                                                    .getDimensionTypeId());
+                                        }
+                                    });
                     } else {
                         Sponge.getLogger().info("World {} is disabled! Skipping world registration...", child.getName());
                     }

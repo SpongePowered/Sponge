@@ -274,11 +274,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             return Optional.empty();
         }
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
-        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-            if (!containerClass.isAssignableFrom(manipulator.getClass())) {
-                builder.add(manipulator);
-            }
-        }
+        this.manipulators.stream()
+                .filter(manipulator -> !containerClass.isAssignableFrom(manipulator.getClass()))
+                .forEach(builder::add);
         final SpongeEntitySnapshotBuilder snapshotBuilder = createBuilder();
         snapshotBuilder.manipulators = builder.build();
         return Optional.of(snapshotBuilder.build());

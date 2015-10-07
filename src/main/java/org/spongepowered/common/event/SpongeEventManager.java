@@ -88,11 +88,9 @@ public class SpongeEventManager implements EventManager {
         Set<Class<?>> types = (Set) TypeToken.of(rootEvent).getTypes().rawTypes();
 
         synchronized (this.lock) {
-            for (Class<?> type : types) {
-                if (Event.class.isAssignableFrom(type)) {
-                    handlers.addAll(this.handlersByEvent.get(type));
-                }
-            }
+            types.stream()
+                    .filter(Event.class::isAssignableFrom)
+                    .forEach(type -> handlers.addAll(this.handlersByEvent.get(type)));
         }
 
         Collections.sort(handlers);

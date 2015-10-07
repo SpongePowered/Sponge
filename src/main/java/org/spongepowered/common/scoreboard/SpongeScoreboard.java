@@ -49,6 +49,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -140,9 +141,7 @@ public class SpongeScoreboard implements Scoreboard {
 
     public void removeObjectiveInternal(SpongeObjective objective) {
         this.allowRecursion = false;
-        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
-            objective.removeFromScoreboard(scoreboard);
-        }
+        this.scoreboards.forEach(objective::removeFromScoreboard);
         this.allowRecursion = true;
     }
 
@@ -150,22 +149,19 @@ public class SpongeScoreboard implements Scoreboard {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<Score> getScores(Text name) {
         HashSet scores = Sets.newHashSet();
-        for (Objective objective: this.objectives.values()) {
-            if (objective.getScores().containsKey(name)) {
-                scores.add(objective.getScore(name));
-            }
-        }
+        scores.addAll(this.objectives.values().stream()
+                .filter(objective -> objective.getScores().containsKey(name))
+                .map(objective -> objective.getScore(name))
+                .collect(Collectors.toList()));
         return scores;
     }
 
     @Override
     public void removeScores(Text name) {
         this.allowRecursion = false;
-        for (Objective objective: this.objectives.values()) {
-            if (objective.getScores().containsKey(name)) {
-                objective.removeScore(objective.getScore(name));
-            }
-        }
+        this.objectives.values().stream()
+                .filter(objective -> objective.getScores().containsKey(name))
+                .forEach(objective -> objective.removeScore(objective.getScore(name)));
         this.allowRecursion = true;
     }
 
@@ -193,11 +189,9 @@ public class SpongeScoreboard implements Scoreboard {
 
     public void removeMemberFromTeam(Text member) {
         if (this.memberTeams.containsKey(member)) {
-            for (ScorePlayerTeam scoreTeam : ((SpongeTeam) this.memberTeams.get(member)).getTeams().values()) {
-                if (scoreTeam.theScoreboard.getPlayersTeam(Texts.legacy().to(member)) != null) {
-                    scoreTeam.theScoreboard.removePlayerFromTeam(Texts.legacy().to(member), scoreTeam);
-                }
-            }
+            ((SpongeTeam) this.memberTeams.get(member)).getTeams().values().stream()
+                    .filter(scoreTeam -> scoreTeam.theScoreboard.getPlayersTeam(Texts.legacy().to(member)) != null)
+                    .forEach(scoreTeam -> scoreTeam.theScoreboard.removePlayerFromTeam(Texts.legacy().to(member), scoreTeam));
         }
         this.memberTeams.remove(member);
     }
@@ -209,22 +203,16 @@ public class SpongeScoreboard implements Scoreboard {
 
         Set<Text> keysToRemove = Sets.newHashSet();
 
-        for (Map.Entry<Text, Team> userTeam: this.memberTeams.entrySet()) {
-            if (team.equals(userTeam.getValue())) {
-                keysToRemove.add(userTeam.getKey());
-            }
-        }
+        keysToRemove.addAll(this.memberTeams.entrySet().stream()
+                .filter(userTeam -> team.equals(userTeam.getValue()))
+                .map(Map.Entry::getKey).collect(Collectors.toList()));
 
-        for (Text member: keysToRemove) {
-            this.memberTeams.remove(member);
-        }
+        keysToRemove.forEach(this.memberTeams::remove);
     }
 
     private void removeTeamInternal(Team team) {
         this.allowRecursion = false;
-        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
-            ((SpongeTeam) team).removeFromScoreboard(scoreboard);
-        }
+        this.scoreboards.forEach(((SpongeTeam) team)::removeFromScoreboard);
         this.allowRecursion = true;
     }
 

@@ -648,9 +648,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
                 try {
                     final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
-                    for (DataManipulator<?, ?> manipulator : manipulators) {
-                        offer(manipulator);
-                    }
+                    manipulators.forEach(this::offer);
                 } catch (InvalidDataException e) {
                     Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
                 }

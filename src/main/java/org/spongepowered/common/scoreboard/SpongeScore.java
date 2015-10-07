@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class SpongeScore implements Score {
 
@@ -76,17 +77,14 @@ public class SpongeScore implements Score {
 
     @Override
     public Set<Objective> getObjectives() {
-        Set<Objective> objectives = new HashSet<>();
-        for (ScoreObjective objective: this.scores.keySet()) {
-            objectives.add(((IMixinScoreObjective) objective).getSpongeObjective());
-        }
+        Set<Objective> objectives = this.scores.keySet().stream()
+                .map(objective -> ((IMixinScoreObjective) objective).getSpongeObjective())
+                .collect(Collectors.toSet());
         return objectives;
     }
 
     public void addToObjective(Objective objective) {
-        for (ScoreObjective scoreObjective: ((SpongeObjective) objective).getObjectives()) {
-            this.addToScoreObjective(scoreObjective);
-        }
+        ((SpongeObjective) objective).getObjectives().forEach(this::addToScoreObjective);
     }
 
     @SuppressWarnings({"deprecation", "unchecked"})
@@ -114,9 +112,7 @@ public class SpongeScore implements Score {
     }
 
     public void removeFromObjective(Objective objective) {
-        for (ScoreObjective scoreObjective: ((SpongeObjective) objective).getObjectives()) {
-            this.removeFromScoreObjective(scoreObjective);
-        }
+        ((SpongeObjective) objective).getObjectives().forEach(this::removeFromScoreObjective);
     }
 
     @SuppressWarnings("deprecation")

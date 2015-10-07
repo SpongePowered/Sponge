@@ -52,6 +52,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 class UserDiscoverer {
 
@@ -110,9 +111,9 @@ class UserDiscoverer {
         Set<org.spongepowered.api.GameProfile> profiles = Sets.newHashSet();
 
         // Add all cached profiles
-        for (User user : userCache.values()) {
-            profiles.add(user.getProfile());
-        }
+        profiles.addAll(userCache.values().stream()
+                .map(User::getProfile)
+                .collect(Collectors.toList()));
 
         // Add all known profiles from the data files
         SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
@@ -126,17 +127,16 @@ class UserDiscoverer {
 
         // Add all whitelisted users
         UserListWhitelist whiteList = MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
-        for (UserListWhitelistEntry entry : (Collection<UserListWhitelistEntry>) whiteList.getValues().values()) {
-            profiles.add((org.spongepowered.api.GameProfile) entry.value);
-        }
+        profiles.addAll(((Collection<UserListWhitelistEntry>) whiteList.getValues().values()).stream()
+                .map(entry -> (org.spongepowered.api.GameProfile) entry.value)
+                .collect(Collectors.toList()));
 
         // Add all banned users
         UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
-        for (BanEntry entry : (Collection<BanEntry>) banList.getValues().values()) {
-            if (entry instanceof UserListBansEntry) {
-                profiles.add((org.spongepowered.api.GameProfile) entry.value);
-            }
-        }
+        profiles.addAll(((Collection<BanEntry>) banList.getValues().values()).stream()
+                .filter(entry -> entry instanceof UserListBansEntry)
+                .map(entry -> (org.spongepowered.api.GameProfile) entry.value)
+                .collect(Collectors.toList()));
         return profiles;
     }
 

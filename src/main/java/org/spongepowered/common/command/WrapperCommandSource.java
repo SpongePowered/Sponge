@@ -61,13 +61,13 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
                 Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(1, "@")));
         this.data.setPermission(SubjectData.GLOBAL_CONTEXT, "minecraft.commandblock",
                 Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(2, "")));
-        for (CommandMapping command : Sponge.getGame().getCommandDispatcher().getCommands()) {
-            if (command.getCallable() instanceof MinecraftCommandWrapper) {
-                MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
-                this.data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
-                        Tristate.fromBoolean(wrapper.command.canCommandSenderUseCommand(sender)));
-            }
-        }
+        Sponge.getGame().getCommandDispatcher().getCommands().stream()
+                .filter(command -> command.getCallable() instanceof MinecraftCommandWrapper)
+                .forEach(command -> {
+                        MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
+                        this.data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
+                                Tristate.fromBoolean(wrapper.command.canCommandSenderUseCommand(sender)));
+                    });
     }
 
     @Override

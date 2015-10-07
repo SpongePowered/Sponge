@@ -36,6 +36,7 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public final class SpongeTexts {
 
@@ -93,17 +94,17 @@ public final class SpongeTexts {
 
     public static List<String> asJson(List<Text> list) {
         List<String> json = Lists.newArrayList();
-        for (Text line : list) {
-            json.add(Texts.json().to(line));
-        }
+        json.addAll(list.stream()
+                .map(line -> Texts.json().to(line))
+                .collect(Collectors.toList()));
         return json;
     }
 
     public static List<Text> fromJson(List<String> json) {
         List<Text> list = Lists.newArrayList();
-        for (String line : json) {
-           list.add(Texts.json().fromUnchecked(line));
-        }
+        list.addAll(json.stream()
+                .map(line -> Texts.json().fromUnchecked(line))
+                .collect(Collectors.toList()));
         return list;
     }
 

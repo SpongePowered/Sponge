@@ -53,6 +53,7 @@ import org.spongepowered.common.service.persistence.NbtTranslator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -194,9 +195,9 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
         this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((Entity) minecraftEntity).getContainers()) {
-            this.manipulators.add(manipulator.asImmutable());
-        }
+        this.manipulators.addAll(((Entity) minecraftEntity).getContainers().stream()
+                .map(DataManipulator::asImmutable)
+                .collect(Collectors.toList()));
         this.compound = new NBTTagCompound();
         minecraftEntity.writeToNBT(this.compound);
         return this;
