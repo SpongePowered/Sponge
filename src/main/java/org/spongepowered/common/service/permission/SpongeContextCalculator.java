@@ -65,8 +65,8 @@ public class SpongeContextCalculator implements ContextCalculator {
                     final InetAddress addr = checkNotNull(function.apply(key), "addr");
                     builder.add(new Context(contextKey, addr.getHostAddress()));
                     for (String set : Maps.filterValues(Sponge.getGlobalConfig().getConfig().getIpSets(), input -> {
-                        return input.apply(addr);
-                    }).keySet()) {
+                            return input.apply(addr);
+                        }).keySet()) {
                         builder.add(new Context(contextKey, set));
                     }
                     return builder.build();

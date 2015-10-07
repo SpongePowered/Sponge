@@ -115,7 +115,8 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
                 builder.success(immutableTexts).result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
             }
-        } if (container instanceof ItemStack) {
+        }
+        if (container instanceof ItemStack) {
             if (!((ItemStack) container).getItem().equals(Items.sign)) {
                 return DataTransactionBuilder.failResult(immutableTexts);
             } else {

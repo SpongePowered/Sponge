@@ -100,9 +100,9 @@ public final class SpongeBootstrap {
         registerService(UserStorage.class, new SpongeUserStorage());
         registerService(GameProfileResolver.class, new SpongeProfileResolver());
         Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(input -> {
-            Sponge.getGame().getServer().getConsole().getContainingCollection();
-            return true;
-        });
+                Sponge.getGame().getServer().getConsole().getContainingCollection();
+                return true;
+            });
     }
 
     private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {

@@ -103,22 +103,22 @@ public class SpongePaginationService implements PaginationService {
                 .child(CommandSpec.builder()
                            .description(t("Go to the next page"))
                            .executor((src, args) -> {
-                               args.<ActivePagination>getOne("pagination-id").get().nextPage();
-                               return CommandResult.success();
-                           }).build(), "next", "n")
+                                   args.<ActivePagination>getOne("pagination-id").get().nextPage();
+                                   return CommandResult.success();
+                               }).build(), "next", "n")
                 .child(CommandSpec.builder()
                            .description(t("Go to the previous page"))
                            .executor((src, args) -> {
-                               args.<ActivePagination>getOne("pagination-id").get().previousPage();
-                               return CommandResult.success();
-                           }).build(), "previous", "prev", "p")
+                                   args.<ActivePagination>getOne("pagination-id").get().previousPage();
+                                   return CommandResult.success();
+                               }).build(), "previous", "prev", "p")
                 .child(CommandSpec.builder()
                            .description(t("Go to a specific page"))
                            .arguments(integer(t("page")))
                            .executor((src, args) -> {
-                               args.<ActivePagination>getOne("pagination-id").get().specificPage(args.<Integer>getOne("page").get());
-                               return CommandResult.success();
-                           }).build(), "page")
+                                   args.<ActivePagination>getOne("pagination-id").get().specificPage(args.<Integer>getOne("page").get());
+                                   return CommandResult.success();
+                               }).build(), "page")
                 .build(), "pagination", "page");
         }
 

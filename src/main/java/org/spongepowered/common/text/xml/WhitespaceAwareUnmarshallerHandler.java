@@ -54,9 +54,7 @@ class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
      * </ol>
      **/
     @Override
-    public void characters(
-            char[] ch, int start, int length
-    ) throws SAXException {
+    public void characters(char[] ch, int start, int length) throws SAXException {
         for (int i = start + length - 1; i >= start; --i) {
             if (!Character.isWhitespace(ch[i])) {
                 this.uh.characters(ch, start, length);

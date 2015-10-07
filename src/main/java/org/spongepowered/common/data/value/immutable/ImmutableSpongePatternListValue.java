@@ -148,7 +148,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
             }
         }
         return new ImmutableSpongePatternListValue(getKey(), builder.build());
-   }
+    }
 
     @Override
     public ImmutablePatternListValue with(BannerPatternShape patternShape, DyeColor color) {

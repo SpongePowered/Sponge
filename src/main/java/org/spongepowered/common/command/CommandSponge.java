@@ -306,15 +306,14 @@ public class CommandSponge {
                 .description(Texts.of("Generate a dump of the Sponge heap"))
                 .permission("sponge.command.heap")
                 .executor((src, args) -> {
-                    File file = new File(new File(new File("."), "dumps"),
-                            "heap-dump-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.bin");
-                    src.sendMessage(Texts.of("Writing JVM heap data to: ", file));
-                    SpongeHooks.dumpHeap(file, true);
-                    src.sendMessage(Texts.of("Heap dump complete"));
-                    return CommandResult.success();
-                })
+                        File file = new File(new File(new File("."), "dumps"),
+                                "heap-dump-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.bin");
+                        src.sendMessage(Texts.of("Writing JVM heap data to: ", file));
+                        SpongeHooks.dumpHeap(file, true);
+                        src.sendMessage(Texts.of("Heap dump complete"));
+                        return CommandResult.success();
+                    })
                 .build();
-
     }
 
 
@@ -323,10 +322,10 @@ public class CommandSponge {
                 .description(Texts.of("Display Sponge's current version"))
                 .permission("sponge.command.version")
                 .executor((src, args) -> {
-                    src.sendMessage(Texts.of("SpongeMod: ", title(Sponge.getGame().getPlatform().getVersion()), "\n",
-                            "SpongeAPI: ", title(Sponge.getGame().getPlatform().getApiVersion())));
-                    return CommandResult.success();
-                })
+                        src.sendMessage(Texts.of("SpongeMod: ", title(Sponge.getGame().getPlatform().getVersion()), "\n",
+                                "SpongeAPI: ", title(Sponge.getGame().getPlatform().getApiVersion())));
+                        return CommandResult.success();
+                    })
                 .build();
     }
 
@@ -335,9 +334,9 @@ public class CommandSponge {
                 .description(Texts.of("Audit Mixin classes for implementation"))
                 .permission("sponge.command.audit")
                 .executor((src, args) -> {
-                    MixinEnvironment.getCurrentEnvironment().audit();
-                    return CommandResult.empty();
-                })
+                        MixinEnvironment.getCurrentEnvironment().audit();
+                        return CommandResult.empty();
+                    })
                 .build();
     }
 
@@ -378,34 +377,35 @@ public class CommandSponge {
                 .permission("sponge.command.plugins")
                 .arguments(optional(new PluginsCommandElement(Texts.of("plugin"))))
                 .executor((src, args) -> {
-                    if (args.hasAny("plugin")) {
-                        for (PluginContainer container : args.<PluginContainer>getAll("plugin")) {
-                            TextBuilder build = Texts.builder().append(title(container.getName()),
-                                    Texts.of(" v" + container.getVersion()), NEWLINE_TEXT)
-                                    .append(Texts.of(INDENT, title("ID: "), container.getId(), NEWLINE_TEXT,
-                                            INDENT, title("Main class: "), container.getInstance() == null ? " Virtual mod " :
-                                                    container.getInstance().getClass().getCanonicalName()));
-                            // TODO: Provide more metadata once it is exposed
-                            src.sendMessage(build.build());
+                        if (args.hasAny("plugin")) {
+                            for (PluginContainer container : args.<PluginContainer>getAll("plugin")) {
+                                TextBuilder build = Texts.builder().append(title(container.getName()),
+                                        Texts.of(" v" + container.getVersion()), NEWLINE_TEXT)
+                                        .append(Texts.of(INDENT, title("ID: "), container.getId(), NEWLINE_TEXT,
+                                                INDENT, title("Main class: "), container.getInstance() == null ? " Virtual mod " :
+                                                        container.getInstance().getClass().getCanonicalName()));
+                                // TODO: Provide more metadata once it is exposed
+                                src.sendMessage(build.build());
 
-                        }
-                    } else {
-                        Collection<PluginContainer> plugins = Sponge.getGame().getPluginManager().getPlugins();
-                        TextBuilder build = Texts.builder(String.format("Plugins (%d): ", plugins.size()));
-                        boolean first = true;
-                        for (PluginContainer next : plugins) {
-                            if (!first) {
-                                build.append(SEPARATOR_TEXT);
                             }
-                            first = false;
-                            build.append(Texts.builder(next.getName())
-                                    .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()))
-                                    .onHover(TextActions.showText(Texts.of("Version " + next.getVersion())))
-                                    .color(TextColors.GREEN).build());
+                        } else {
+                            Collection<PluginContainer> plugins = Sponge.getGame().getPluginManager().getPlugins();
+                            TextBuilder build = Texts.builder(String.format("Plugins (%d): ", plugins.size()));
+                            boolean first = true;
+                            for (PluginContainer next : plugins) {
+                                if (!first) {
+                                    build.append(SEPARATOR_TEXT);
+                                }
+                                first = false;
+                                build.append(Texts.builder(next.getName())
+                                        .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()))
+                                        .onHover(TextActions.showText(Texts.of("Version " + next.getVersion())))
+                                        .color(TextColors.GREEN).build());
+                            }
+                            src.sendMessage(build.build());
                         }
-                        src.sendMessage(build.build());
-                    }
-                    return CommandResult.success();
-                }).build();
+                        return CommandResult.success();
+                    })
+                .build();
     }
 }

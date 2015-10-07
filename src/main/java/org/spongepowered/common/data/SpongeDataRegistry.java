@@ -141,13 +141,13 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
-    getBuilder(Class<T> manipulatorClass) {
+        getBuilder(Class<T> manipulatorClass) {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
-    getBuilderForImmutable(Class<I> immutableManipulatorClass) {
+        getBuilderForImmutable(Class<I> immutableManipulatorClass) {
         return Optional
                 .ofNullable((DataManipulatorBuilder<T, I>) (Object) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
@@ -158,7 +158,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     }
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-    registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
+        registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
                                  Class<? extends I> implImClass, DataProcessor<T, I> processor, DataManipulatorBuilder<T, I> builder) {
         checkState(allowRegistrations, "Registrations are no longer allowed!");
         checkState(!this.processorMap.containsKey(checkNotNull(manipulatorClass)), "Already registered a DataProcessor for the given "
@@ -206,7 +206,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     }
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
-    getImmutableProcessor(Class<I> immutableClass) {
+        getImmutableProcessor(Class<I> immutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) (Object) this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 

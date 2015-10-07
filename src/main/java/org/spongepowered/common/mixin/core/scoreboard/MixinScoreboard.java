@@ -188,10 +188,10 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
                 Optional<Player> spongePlayer = Sponge.getGame().getServer().getPlayer(name);
-                    this.scoreboard.allowRecursion = false;
-                    spongeTeam.removeMember(Texts.legacy().from(name));
-                    this.scoreboard.allowRecursion = true;
-                    ci.cancel();
+                this.scoreboard.allowRecursion = false;
+                spongeTeam.removeMember(Texts.legacy().from(name));
+                this.scoreboard.allowRecursion = true;
+                ci.cancel();
             }
         }
     }

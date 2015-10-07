@@ -150,7 +150,8 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 builder.success(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
             }
-        } if (dataHolder instanceof ItemStack) {
+        }
+        if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).getItem().equals(Items.sign)) {
                 return DataTransactionBuilder.failResult(manipulator.getValues());
             }

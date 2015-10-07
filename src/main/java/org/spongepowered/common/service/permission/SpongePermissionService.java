@@ -75,15 +75,14 @@ public class SpongePermissionService implements PermissionService {
                                                                             s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
 
         this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
-                                                                     s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)),
-                                                                     s -> {
-                                                                         if (s.equals("Server")) {
-                                                                             return Sponge.getGame().getServer().getConsole();
-                                                                         } else if (s.equals("RCON")) {
-                                                                             // TODO: Implement RCON API?
-                                                                         }
-                                                                         return null;
-                                                                     }));
+                s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)), s -> {
+                if (s.equals("Server")) {
+                    return Sponge.getGame().getServer().getConsole();
+                } else if (s.equals("RCON")) {
+                    // TODO: Implement RCON API?
+                }
+                return null;
+            }));
 
         this.defaultData = new FixedParentMemorySubjectData(this, getGroupForOpLevel(0));
     }

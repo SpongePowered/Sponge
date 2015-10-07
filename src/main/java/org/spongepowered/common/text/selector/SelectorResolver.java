@@ -177,21 +177,21 @@ public class SelectorResolver {
         final Vector3d boxMax = det1.max(det2);
         if (sel.has(ArgumentTypes.DIMENSION.x())) {
             filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getX() >= boxMin.getX() && pos.getX() <= boxMax.getX();
-            });
+                    Vector3d pos = input.getLocation().getPosition();
+                    return pos.getX() >= boxMin.getX() && pos.getX() <= boxMax.getX();
+                });
         }
         if (sel.has(ArgumentTypes.DIMENSION.y())) {
             filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getY() >= boxMin.getY() && pos.getY() <= boxMax.getY();
-            });
+                    Vector3d pos = input.getLocation().getPosition();
+                    return pos.getY() >= boxMin.getY() && pos.getY() <= boxMax.getY();
+                });
         }
         if (sel.has(ArgumentTypes.DIMENSION.z())) {
             filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getZ() >= boxMin.getZ() && pos.getZ() <= boxMax.getZ();
-            });
+                    Vector3d pos = input.getLocation().getPosition();
+                    return pos.getZ() >= boxMin.getZ() && pos.getZ() <= boxMax.getZ();
+                });
         }
     }
 
@@ -202,9 +202,9 @@ public class SelectorResolver {
         if (gamemode.isPresent() && gamemode.get() != GameModes.NOT_SET) {
             final GameMode actualMode = gamemode.get();
             filters.add(input -> {
-                Optional<GameModeData> mode = input.get(GameModeData.class);
-                return mode.isPresent() && mode.get() == actualMode;
-            });
+                    Optional<GameModeData> mode = input.get(GameModeData.class);
+                    return mode.isPresent() && mode.get() == actualMode;
+                });
         }
     }
 
@@ -215,16 +215,16 @@ public class SelectorResolver {
         if (levelMin.isPresent()) {
             final int actualMin = levelMin.get();
             filters.add(input -> {
-                Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                return xp.isPresent() && xp.get().level().get() >= actualMin;
-            });
+                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                    return xp.isPresent() && xp.get().level().get() >= actualMin;
+                });
         }
         if (levelMax.isPresent()) {
             final int actualMax = levelMax.get();
             filters.add(input -> {
-                Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                return xp.isPresent() && xp.get().level().get() <= actualMax;
-            });
+                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                    return xp.isPresent() && xp.get().level().get() <= actualMax;
+                });
         }
     }
 
@@ -235,9 +235,9 @@ public class SelectorResolver {
             final String name = nameOpt.get().getValue();
             final boolean inverted = nameOpt.get().isInverted();
             filters.add(input -> {
-                Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
-                return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
-            });
+                    Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
+                    return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
+                });
         }
     }
 
@@ -308,22 +308,20 @@ public class SelectorResolver {
                 teamBuilder.addAll(asSet(w.getScoreboard().getTeam(teamArg.getValue())));
             }
             final Collection<Team> teams = teamBuilder.build();
-                filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean test(Entity input) {
-                    return input instanceof TeamMember && inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
-                }
-
-                private Collection<Text> collectMembers(Collection<Team> teams) {
-                    ImmutableSet.Builder<Text> users = ImmutableSet.builder();
-                    for (Team t : teams) {
-                        users.addAll(t.getMembers());
+            filters.add(new Predicate<Entity>() {
+                    @Override
+                    public boolean test(Entity input) {
+                        return input instanceof TeamMember && inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
                     }
-                    return users.build();
-                }
 
-            });
+                    private Collection<Text> collectMembers(Collection<Team> teams) {
+                        ImmutableSet.Builder<Text> users = ImmutableSet.builder();
+                        for (Team t : teams) {
+                            users.addAll(t.getMembers());
+                        }
+                        return users.build();
+                    }
+                });
         }
     }
 
