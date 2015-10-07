@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
@@ -93,7 +94,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
             final Optional<M> old = from(dataHolder);
             final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final T newValue = merged.get(this.key).get();
-            final V immutableValue = merged.getValue(this.key).get();
+            final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
             try {
                 if (set((ItemStack) dataHolder, newValue)) {
                     if (old.isPresent()) {
