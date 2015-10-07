@@ -39,9 +39,7 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.text.IMixinText;
 
-import java.util.Locale;
 import java.util.Optional;
 
 public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text, Value<Text>> {
@@ -80,14 +78,13 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
             final Optional<Text> oldData = getValueFromContainer(container);
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             if (oldData.isPresent()) {
-                final ImmutableValue<Text> oldAuthor =
-                        new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, oldData.get());
+                final ImmutableValue<Text> oldAuthor = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, oldData.get());
                 builder.replace(oldAuthor);
             }
-            if (((ItemStack) container).getTagCompound() == null) {
+            if (!((ItemStack) container).hasTagCompound()) {
                 ((ItemStack) container).setTagCompound(new NBTTagCompound());
             }
-            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, ((IMixinText) value).toLegacy('\247', Locale.ENGLISH));
+            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, Texts.legacy().to(value));
             builder.success(author);
             return builder.result(DataTransactionResult.Type.SUCCESS).build();
 
@@ -104,10 +101,10 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
                 final ImmutableValue<Text> author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, oldData.get());
                 builder.replace(author);
             }
-            if (((ItemStack) container).getTagCompound() != null) {
+            if (!((ItemStack) container).hasTagCompound()) {
                 ((ItemStack) container).setTagCompound(new NBTTagCompound());
             }
-            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, NbtDataUtil.INVALID_TITLE);
+            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, "");
             return builder.result(DataTransactionResult.Type.SUCCESS).build();
 
         }

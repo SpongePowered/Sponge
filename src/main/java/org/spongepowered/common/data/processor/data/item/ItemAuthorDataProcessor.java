@@ -43,9 +43,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.interfaces.text.IMixinText;
 
-import java.util.Locale;
 import java.util.Optional;
 
 public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
@@ -60,11 +58,10 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<AuthorData> data = from(dataHolder);
             try {
-                if (((ItemStack) dataHolder).getTagCompound() == null) {
+                if (!((ItemStack) dataHolder).hasTagCompound()) {
                     ((ItemStack) dataHolder).setTagCompound(new NBTTagCompound());
                 }
-                ((ItemStack) dataHolder).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, NbtDataUtil.INVALID_TITLE);
-
+                ((ItemStack) dataHolder).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, "");
                 return builder.replace(data.get().getValues()).result(Type.SUCCESS).build();
             } catch (Exception e) {
                 Sponge.getLogger().error("There was an issue removing the author of an itemstack!", e);
@@ -81,10 +78,10 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
 
     @Override
     protected boolean set(ItemStack itemStack, Text value) {
-        if (itemStack.getTagCompound() == null) {
+        if (!itemStack.hasTagCompound()) {
             itemStack.setTagCompound(new NBTTagCompound());
         }
-        itemStack.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, ((IMixinText) value).toLegacy('\247', Locale.ENGLISH));
+        itemStack.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, Texts.legacy().to(value));
         return true;
     }
 

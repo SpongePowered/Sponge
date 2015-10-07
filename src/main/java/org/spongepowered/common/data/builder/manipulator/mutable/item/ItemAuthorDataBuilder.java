@@ -61,10 +61,10 @@ public class ItemAuthorDataBuilder implements DataManipulatorBuilder<AuthorData,
     @Override
     public Optional<AuthorData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
-            if (((ItemStack) dataHolder).getItem() != Items.writable_book || ((ItemStack) dataHolder).getItem() != Items.written_book) {
+            if (((ItemStack) dataHolder).getItem() != Items.writable_book && ((ItemStack) dataHolder).getItem() != Items.written_book) {
                 return Optional.empty();
             }
-            if (((ItemStack) dataHolder).getTagCompound() == null || ((ItemStack) dataHolder).getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
+            if (!((ItemStack) dataHolder).hasTagCompound() || !((ItemStack) dataHolder).getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
                 return Optional.<AuthorData>of(new SpongeAuthorData());
             }
             final String json = ((ItemStack) dataHolder).getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
