@@ -22,61 +22,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.common;
+package org.spongepowered.common.data.manipulator.mutable.common.collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
+import com.google.common.collect.Sets;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
+import java.util.Set;
 
-/**
- * Another abstract helper class further simplifying implementing various
- * single value enum based {@link DataManipulator}s.
- *
- * @param <E>
- * @param <M>
- * @param <I>
- */
-public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-        extends AbstractSingleData<E, M, I> {
+public abstract class AbstractSingleSetData<E, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+    extends AbstractSingleData<Set<E>, M, I> {
 
     private final Class<? extends I> immutableClass;
 
-    protected AbstractSingleEnumData(Class<M> manipulatorClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends I> immutableClass) {
-        super(manipulatorClass, value, usedKey);
+    public AbstractSingleSetData(Class<M> manipulatorClass, Set<E> value,
+                                  Key<? extends BaseValue<Set<E>>> usedKey,
+                                  Class<? extends I> immutableClass) {
+        super(manipulatorClass, Sets.newHashSet(value), usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
-        this.immutableClass = checkNotNull(immutableClass);
+        this.immutableClass = immutableClass;
     }
 
     @Override
-    public int compareTo(M o) {
-        return o.get(this.usedKey).get().ordinal() - this.getValue().ordinal();
+    public Set<E> getValue() {
+        return Sets.newHashSet(super.getValue());
     }
 
     @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(this.usedKey.getQuery(), this.getValue().name());
+    public M setValue(Set<E> value) {
+        return super.setValue(Sets.newHashSet(value));
+    }
+
+    @Override
+    protected Value<?> getValueGetter() {
+        return new SpongeSetValue<>(this.usedKey, getValue());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public M copy() {
-        return (M) (Object) ReflectionUtil.createInstance(this.getClass(), this.getValue());
+        return (M) ReflectionUtil.createInstance(this.getClass(), getValue());
     }
 
     @Override
     public I asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, getValue());
+        return ReflectionUtil.createInstance(this.immutableClass, getValue());
     }
-
 }

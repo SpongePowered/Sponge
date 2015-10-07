@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.common;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.CatalogType;
@@ -38,6 +39,8 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
+import java.lang.reflect.Modifier;
+
 public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends VariantData<T, M, I>, I extends ImmutableVariantData<T, I, M>>
         extends AbstractSingleData<T, M, I> implements VariantData<T, M, I> {
 
@@ -45,6 +48,8 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
 
     protected AbstractSingleCatalogData(Class<M> manipulatorClass, T value, Key<? extends BaseValue<T>> usedKey, Class<? extends I> immutableClass) {
         super(manipulatorClass, value, usedKey);
+        checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.immutableClass = checkNotNull(immutableClass);
     }
 
