@@ -313,10 +313,7 @@ public class SelectorResolver {
 
                 @Override
                 public boolean test(Entity input) {
-                    if (input instanceof TeamMember) {
-                        return inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
-                    }
-                    return false;
+                    return input instanceof TeamMember && inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
                 }
 
                 private Collection<Text> collectMembers(Collection<Team> teams) {

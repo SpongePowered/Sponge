@@ -557,10 +557,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         int dim = ((net.minecraft.world.World) world).provider.getDimensionId();
-        if (DimensionManager.getWorldFromDimId(dim) != null) {
-            return DimensionManager.unloadWorldFromDimId(dim);
-        }
-        return false;
+        return DimensionManager.getWorldFromDimId(dim) != null && DimensionManager.unloadWorldFromDimId(dim);
     }
 
     @Override

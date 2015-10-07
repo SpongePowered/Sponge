@@ -45,11 +45,8 @@ public class BungeeCordPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (!Sponge.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
-                && mixinClassName.contains("mixin.bungee")) {
-            return false;
-        }
-        return true;
+        return !(!Sponge.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
+                && mixinClassName.contains("mixin.bungee"));
     }
 
     @Override
