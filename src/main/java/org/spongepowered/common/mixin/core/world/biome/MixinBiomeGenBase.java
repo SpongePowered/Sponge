@@ -53,7 +53,7 @@ public abstract class MixinBiomeGenBase implements BiomeType {
     @Shadow
     public float maxHeight;
 
-    private final List<Populator> populators = new ArrayList<Populator>();
+    private final List<Populator> populators = new ArrayList<>();
 
     @Override
     public String getName() {

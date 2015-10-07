@@ -187,7 +187,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<World>((World) this.worldObj, getPosition());
+        return new Location<>((World) this.worldObj, getPosition());
     }
 
     @Override
@@ -238,7 +238,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
         // detach passengers
         net.minecraft.entity.Entity passenger = thisEntity.riddenByEntity;
-        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<net.minecraft.entity.Entity>();
+        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<>();
         while (passenger != null) {
             if (passenger instanceof EntityPlayerMP && !this.worldObj.isRemote) {
                 ((EntityPlayerMP) passenger).mountEntity(null);
@@ -378,7 +378,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Transform<World> getTransform() {
-        return new Transform<World>(getWorld(), getPosition(), getRotation(), getScale());
+        return new Transform<>(getWorld(), getPosition(), getRotation(), getScale());
     }
 
     @Override
@@ -395,7 +395,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             if (props.get().isEnabled()) {
                 Optional<World> world = Sponge.getGame().getServer().loadWorld(worldName);
                 if (world.isPresent()) {
-                    Location<World> location = new Location<World>(world.get(), position);
+                    Location<World> location = new Location<>(world.get(), position);
                     return setLocationSafely(location);
                 }
             }

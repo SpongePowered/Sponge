@@ -67,11 +67,11 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
                 value -= player.xpBarCap();
             }
             player.experience = (float) value / player.xpBarCap();
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, value),
-                    new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.EXPERIENCE_SINCE_LEVEL, value),
+                    new ImmutableSpongeValue<>(Keys.EXPERIENCE_SINCE_LEVEL, oldValue));
         }
 
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.EXPERIENCE_SINCE_LEVEL, value));
     }
 
     @Override
@@ -81,7 +81,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.EXPERIENCE_SINCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.EXPERIENCE_SINCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
 }

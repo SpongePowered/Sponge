@@ -50,7 +50,7 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
     @Shadow
     MinecraftServer scoreboardMCServer;
 
-    private List<EntityPlayerMP> players = new ArrayList<EntityPlayerMP>();
+    private List<EntityPlayerMP> players = new ArrayList<>();
 
     private void sendToPlayers(Packet packet) {
         for (EntityPlayerMP player: this.players) {

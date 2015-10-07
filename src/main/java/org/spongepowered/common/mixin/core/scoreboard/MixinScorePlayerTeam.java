@@ -184,7 +184,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
 
     @SuppressWarnings("rawtypes")
     public MessageSink getSink() {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
         Iterator iterator = collection.iterator();
@@ -201,7 +201,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
 
     @SuppressWarnings("rawtypes")
     public MessageSink getSinkForPlayer(EntityPlayerMP player) {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
         Iterator iterator = collection.iterator();
@@ -217,7 +217,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     }
 
     public MessageSink getNonTeamSink() {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i) {
             EntityPlayerMP player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);

@@ -354,7 +354,7 @@ public abstract class MixinServerConfigurationManager {
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
-            return new Transform<World>(location, Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<>(location, Vector3d.ZERO, Vector3d.ZERO);
         }
 
         Vector3d spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
@@ -371,7 +371,7 @@ public abstract class MixinServerConfigurationManager {
         if (optRespawn.isPresent()) {
             // API TODO: Make this support multiple world spawn points
             // TODO Make RespawnLocationData 'shadow' the bed location from below
-            return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
         }
 
         BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
@@ -394,7 +394,7 @@ public abstract class MixinServerConfigurationManager {
             playerIn.dimension = prevDim;
         }
 
-        return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+        return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
     }
 
     @Overwrite

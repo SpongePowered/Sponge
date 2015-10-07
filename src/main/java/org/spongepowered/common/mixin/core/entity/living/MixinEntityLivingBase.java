@@ -162,7 +162,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     public List<PotionEffect> getPotionEffects() {
-        List<PotionEffect> potionEffects = new ArrayList<PotionEffect>();
+        List<PotionEffect> potionEffects = new ArrayList<>();
         for (Object obj : getActivePotionEffects()) {
             potionEffects.add((PotionEffect) obj);
         }
