@@ -36,13 +36,10 @@ import com.google.common.reflect.TypeToken;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDoublePlant;
-import net.minecraft.block.BlockEnchantmentTable;
 import net.minecraft.block.BlockFlower;
-import net.minecraft.block.BlockJukebox;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockPrismarine;
 import net.minecraft.block.BlockQuartz;
-import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.BlockRedstoneComparator;
 import net.minecraft.block.BlockSandStone;
@@ -61,7 +58,6 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemFishFood;
-import net.minecraft.item.ItemRecord;
 import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
@@ -552,6 +548,7 @@ import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeGoldenApple;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
+import org.spongepowered.common.mixin.core.data.types.IMixinObjectiveStat;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.common.rotation.SpongeRotation;
@@ -597,7 +594,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
@@ -819,36 +815,36 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .build();
     public final Map<String, Statistic> statisticMappings = new ImmutableMap.Builder<String, Statistic>()
             .put("animals_bred", (Statistic) StatList.animalsBredStat)
-            .put("armor_cleaned", (Statistic) StatList)
-            .put("banner_cleaned", (Statistic) StatList)
+            .put("armor_cleaned", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.armorCleaned")).getStatistic())
+            .put("banner_cleaned", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.bannerCleaned")).getStatistic())
             .put("beacon_interaction", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.beacon)])
             .put("boat_distance", (Statistic) StatList.distanceByBoatStat)
             .put("brewingstand_interaction", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.brewing_stand)])
-            .put("cake_slices_eaten", (Statistic) StatList)
-            .put("cauldron_filled", (Statistic) StatList)
-            .put("cauldron_used", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.cauldron)])
-            .put("chest_opened", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.chest)])
+            .put("cake_slices_eaten", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.cakeSlicesEaten")).getStatistic())
+            .put("cauldron_filled", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.cauldronFilled")).getStatistic())
+            .put("cauldron_used", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.cauldronUsed")).getStatistic())
+            .put("chest_opened", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.chestOpened")).getStatistic())
             .put("climb_distance", (Statistic) StatList.distanceClimbedStat)
-            .put("crafting_table_interaction", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.crafting_table)])
+            .put("crafting_table_interaction", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.craftingTableInteraction")).getStatistic())
             .put("crouch_distance", (Statistic) StatList.distanceCrouchedStat)
             .put("damage_dealt", (Statistic) StatList.damageDealtStat)
             .put("damage_taken", (Statistic) StatList.damageTakenStat)
             .put("deaths", (Statistic) StatList.deathsStat)
-            .put("dispenser_inspected", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.dispenser)])
+            .put("dispenser_inspected", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.dispenserInspected")).getStatistic())
             .put("dive_distance", (Statistic) StatList.distanceDoveStat)
-            .put("dropper_inspected", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.dropper)])
-            .put("enderchest_opened", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.ender_chest)])
+            .put("dropper_inspected", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.dropperInspected")).getStatistic())
+            .put("enderchest_opened", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.enderchestOpened")).getStatistic())
             .put("fall_distance", (Statistic) StatList.distanceFallenStat)
             .put("fish_caught", (Statistic) StatList.fishCaughtStat)
-            .put("flower_potted", (Statistic) StatList)
-            .put("furnace_interaction", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.furnace)])
+            .put("flower_potted", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.flowerPotted")).getStatistic())
+            .put("furnace_interaction", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.furnaceInteraction")).getStatistic())
             .put("fly_distance", (Statistic) StatList.distanceFlownStat)
-            .put("hopper_inspected", (Statistic) StatList)
+            .put("hopper_inspected", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.hopperInspected")).getStatistic())
             .put("horse_distance", (Statistic) StatList.distanceByHorseStat)
             .put("items_dropped", (Statistic) StatList.dropStat)
-            .put("items_enchanted", (Statistic) StatList)
-            .put("noteblock_played", (Statistic) StatList)
-            .put("noteblock_tuned", (Statistic) StatList)
+            .put("items_enchanted", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.itemEnchanted")).getStatistic())
+            .put("noteblock_played", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.noteblockPlayed")).getStatistic())
+            .put("noteblock_tuned", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.noteblockTuned")).getStatistic())
             .put("jump", (Statistic) StatList.jumpStat)
             .put("junk_fished", (Statistic) StatList.junkFishedStat)
             .put("leave_game", (Statistic) StatList.leaveGameStat)
@@ -857,13 +853,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("pig_distance", (Statistic) StatList.distanceByPigStat)
             .put("player_kills", (Statistic) StatList.playerKillsStat)
             .put("time_played", (Statistic) StatList.minutesPlayedStat)
-            .put("record_played", (Statistic) )
+            .put("record_played", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.recordPlayed")).getStatistic())
             .put("sprint_distance", (Statistic) StatList.distanceSprintedStat)
             .put("swim_distance", (Statistic) StatList.distanceSwumStat)
             .put("talked_to_villager", (Statistic) StatList.timesTalkedToVillagerStat)
             .put("time_since_death", (Statistic) StatList.timeSinceDeathStat)
             .put("traded_with_villager", (Statistic) StatList.timesTradedWithVillagerStat)
-            .put("trapped_chest_triggered", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.trapped_chest)])
+            .put("trapped_chest_triggered", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.trappedChestTriggered")).getStatistic())
             .put("treasure_fished", (Statistic) StatList.treasureFishedStat)
             .put("walk_distance", (Statistic) StatList.distanceWalkedStat)
             .build();
@@ -945,7 +941,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(SlabType.class, this.slabTypeMappings)
                 .put(SoundType.class, this.soundNames)
                 .put(StairShape.class, this.stairShapeMappings)
-                .put(Statistic.class, this.statisticMappings) // TODO
+                .put(Statistic.class, this.statisticMappings)
                 .put(StatisticFormat.class, this.statisticFormatMappings)
                 .put(StatisticGroup.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(StoneType.class, this.stoneTypeMappings)
