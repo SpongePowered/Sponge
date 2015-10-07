@@ -87,8 +87,8 @@ public class ChatComponentPlaceholder extends ChatComponentStyle {
 
     @Override
     public String toString() {
-        return "PlaceholderComponent{component=\'" + this.placeholderKey + "\', fallback=\'"
-                + this.fallback + "\', siblings=" + this.siblings + ", style=" + this.getChatStyle() + '}';
+        return "PlaceholderComponent{component='" + this.placeholderKey + "', fallback='"
+                + this.fallback + "', siblings=" + this.siblings + ", style=" + this.getChatStyle() + '}';
     }
 
 }
