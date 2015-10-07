@@ -403,11 +403,10 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     public NBTTagList newDoubleNBTList(double ... numbers) {
         NBTTagList nbttaglist = new NBTTagList();
-        double[] adouble = numbers;
         int i = numbers.length;
 
         for (int j = 0; j < i; ++j) {
-            double d1 = adouble[j];
+            double d1 = numbers[j];
             nbttaglist.appendTag(new NBTTagDouble(d1));
         }
 
