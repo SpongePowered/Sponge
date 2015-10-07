@@ -569,7 +569,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
@@ -670,7 +669,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final List<PotionEffectType> potionList = new ArrayList<>();
     private final List<BiomeType> biomeTypes = new ArrayList<>();
     private final Map<String, SoundType> soundNames = Maps.newHashMap();
-    private final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
+    private final Map<String, CoalType> coalTypeMappings = Maps.newHashMap();
     private final WorldGeneratorRegistry worldGeneratorRegistry = new WorldGeneratorRegistry();
     private final Hashtable<Class<? extends WorldProvider>, Integer> classToProviders = new Hashtable<>();
     private final Map<UUID, WorldProperties> worldPropertiesUuidMappings = Maps.newHashMap();
@@ -988,15 +987,15 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public List<String> getDefaultGameRules() {
 
-        List<String> gameruleList = new ArrayList<>();
+        List<String> gameRuleList = new ArrayList<>();
         for (Field f : DefaultGameRules.class.getFields()) {
             try {
-                gameruleList.add((String) f.get(null));
+                gameRuleList.add((String) f.get(null));
             } catch (Exception e) {
                 // Ignoring error
             }
         }
-        return gameruleList;
+        return gameRuleList;
     }
 
     @Override
@@ -1386,9 +1385,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setCoal() {
         // Because Minecraft doesn't have any enum stuff for this....
-        this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL"));
-        this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL"));
-        RegistryHelper.mapFields(CoalTypes.class, this.coaltypeMappings);
+        this.coalTypeMappings.put("coal", new SpongeCoalType(0, "COAL"));
+        this.coalTypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL"));
+        RegistryHelper.mapFields(CoalTypes.class, this.coalTypeMappings);
     }
 
     private void setRotations() {

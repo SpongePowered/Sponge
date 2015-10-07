@@ -41,13 +41,13 @@ public class SpongeMobSpawnerBuilder extends AbstractTileBuilder<MobSpawner> {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<MobSpawner> build(DataView container) throws InvalidDataException {
-        Optional<MobSpawner> mobspawnerOptional = super.build(container);
-        if (!mobspawnerOptional.isPresent()) {
+        Optional<MobSpawner> mobSpawnerOptional = super.build(container);
+        if (!mobSpawnerOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a MobSpawner tile entity!");
         }
         // TODO Actually figure out how to handle creating weighted entities
 
-        ((TileEntityMobSpawner) mobspawnerOptional.get()).validate();
-        return Optional.of(mobspawnerOptional.get());
+        ((TileEntityMobSpawner) mobSpawnerOptional.get()).validate();
+        return Optional.of(mobSpawnerOptional.get());
     }
 }

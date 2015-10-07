@@ -57,7 +57,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     }
 
     @Override
-    public ImmutableValue<Boolean> conntectedNorth() {
+    public ImmutableValue<Boolean> connectedNorth() {
         return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));
     }
 

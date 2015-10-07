@@ -135,7 +135,7 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         if (shouldEcho()) {
             this.scoreboard.allowRecursion = false;
             // The objective is nullable, so no need to check the result of getSpongeObjective
-            //System.out.format("Scoreboard: {} Objecite: {} DisplaySlot: ", new Object[] {this.scoreboard, objective,Iterables.get((
+            //System.out.format("Scoreboard: {} Objective: {} DisplaySlot: ", new Object[] {this.scoreboard, objective, Iterables.get((
             //        (SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot) });
             this.scoreboard.addObjective(((IMixinScoreObjective) objective).getSpongeObjective(),
                                          Iterables.get(((SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot));

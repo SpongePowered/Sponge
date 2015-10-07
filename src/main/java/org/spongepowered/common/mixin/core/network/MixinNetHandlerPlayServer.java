@@ -139,20 +139,20 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     /**
-     * @Author Zidane
+     * @author Zidane
      *
-     * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
+     * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileEntitySign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
      * @param packetIn Injected packet param
      * @param ci Info to provide mixin on how to handle the callback
      * @param worldserver Injected world param
      * @param blockpos Injected blockpos param
-     * @param tileentity Injected tilentity param
-     * @param tileentitysign Injected tileentitysign param
+     * @param tileEntity Injected tileEntity param
+     * @param tileEntitySign Injected tileEntitySign param
      */
     @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
+    public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileEntity, TileEntitySign tileEntitySign) {
         ci.cancel();
-        final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
+        final Optional<SignData> existingSignData = ((Sign) tileEntitySign).get(SignData.class);
         if (!existingSignData.isPresent()) {
             // TODO Unsure if this is the best to do here...
             throw new RuntimeException("Critical error! Sign data not present on sign!");
@@ -167,15 +167,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
         final ChangeSignEvent event =
                 SpongeEventFactory.createChangeSignEvent(Sponge.getGame(), Cause.of(this.playerEntity), changedSignData.asImmutable(),
-                        changedSignData, (Sign) tileentitysign);
+                        changedSignData, (Sign) tileEntitySign);
         if (!Sponge.getGame().getEventManager().post(event)) {
-            ((Sign) tileentitysign).offer(event.getText());
+            ((Sign) tileEntitySign).offer(event.getText());
         } else {
             // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
             // it will be the text of the sign that was showing in the world
-            ((Sign) tileentitysign).offer(existingSignData.get());
+            ((Sign) tileEntitySign).offer(existingSignData.get());
         }
-        tileentitysign.markDirty();
+        tileEntitySign.markDirty();
         worldserver.markBlockForUpdate(blockpos);
     }
 
@@ -248,7 +248,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                             this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
                         }
                     } catch (Exception exception1) {
-                        logger.error("Couldn\'t set command block", exception1);
+                        logger.error("Couldn't set command block", exception1);
                     } finally {
                         packetbuffer.release();
                     }
@@ -273,7 +273,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+    public void proccessPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();
@@ -344,8 +344,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      */
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendChatMsg(Lnet/minecraft/util/IChatComponent;)V"))
-    public void onSendChatMsgCall(ServerConfigurationManager thisCtx, IChatComponent chatcomponenttranslation) {
-        this.tmpQuitMessage = (ChatComponentTranslation) chatcomponenttranslation;
+    public void onSendChatMsgCall(ServerConfigurationManager thisCtx, IChatComponent chatComponentTranslation) {
+        this.tmpQuitMessage = (ChatComponentTranslation) chatComponentTranslation;
     }
 
     /**

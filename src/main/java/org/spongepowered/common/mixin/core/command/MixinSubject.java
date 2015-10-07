@@ -81,9 +81,9 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     @Nullable
     private Subject internalSubject() {
         if (this.thisSubject == null) {
-            Optional<PermissionService> serv = Sponge.getGame().getServiceManager().provide(PermissionService.class);
-            if (serv.isPresent()) {
-                new SubjectSettingCallback(this).test(serv.get());
+            Optional<PermissionService> service = Sponge.getGame().getServiceManager().provide(PermissionService.class);
+            if (service.isPresent()) {
+                new SubjectSettingCallback(this).test(service.get());
             }
         }
         return this.thisSubject;

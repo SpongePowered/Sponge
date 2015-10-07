@@ -67,8 +67,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
             + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci, NBTTagCompound nbttagcompound1, NBTTagCompound nbttagcompound2) {
-        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound2);
+    public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound nbtTagCompound, CallbackInfo ci, NBTTagCompound nbtTagCompound1, NBTTagCompound nbtTagCompound2) {
+        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbtTagCompound2);
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
@@ -78,8 +78,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Inject(method = "saveWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
             + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbttagcompound, NBTTagCompound nbttagcompound1) {
-        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound1);
+    public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbtTagCompound, NBTTagCompound nbtTagCompound1) {
+        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbtTagCompound1);
     }
 
     @Inject(method = "saveWorldInfo", at = @At("RETURN"))

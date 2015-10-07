@@ -173,7 +173,7 @@ abstract class SchedulerBase {
             try {
                 task.getRunnable().run();
             } catch (Throwable t) {
-                Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
+                Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occurred.", task.getName(),
                         task.getOwner(), t);
             }
         });

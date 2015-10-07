@@ -55,7 +55,7 @@ public final class ImmutableDataCachingUtil {
      * retrieval.
      *
      * <p>Note that two instances of an {@link ImmutableDataManipulator} may be
-     * equal to eachother, but they may not be the same instance, this is due
+     * equal to each other, but they may not be the same instance, this is due
      * to caching and outside instantiation.</p>
      *
      * @param immutableClass The immutable manipulator class to get an instance of

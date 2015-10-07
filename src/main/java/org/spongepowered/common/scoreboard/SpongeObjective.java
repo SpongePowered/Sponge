@@ -192,7 +192,7 @@ public class SpongeObjective implements Objective {
 
     @Override
     public Set<Scoreboard> getScoreboards() {
-        // This is a set, so no need to worry about mutiple NMS scoreboards which map to the same
+        // This is a set, so no need to worry about multiple NMS scoreboards which map to the same
         // api scoreboard
         Set<Scoreboard> scoreboards = this.objectives.keySet().stream()
                 .map(scoreboard -> ((IMixinScoreboard) scoreboard).getSpongeScoreboard())

@@ -129,23 +129,23 @@ public abstract class MixinServerConfigurationManager {
     }
 
     public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
-        GameProfile gameprofile = playerIn.getGameProfile();
+        GameProfile gameProfile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
-        GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
-        String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
-        playerprofilecache.addEntry(gameprofile);
+        GameProfile gameProfile1 = playerprofilecache.getProfileByUUID(gameProfile.getId());
+        String s = gameProfile1 == null ? gameProfile.getName() : gameProfile1.getName();
+        playerprofilecache.addEntry(gameProfile);
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
+        WorldServer worldServer = this.mcServer.worldServerForDimension(playerIn.dimension);
         Transform<World> fromTransform = ((Player)playerIn).getTransform();
 
-        if (worldserver == null) {
+        if (worldServer == null) {
             playerIn.dimension = 0;
-            worldserver = this.mcServer.worldServerForDimension(0);
-            BlockPos spawnPoint = ((IMixinWorldProvider) worldserver.provider).getRandomizedSpawnPoint();
+            worldServer = this.mcServer.worldServerForDimension(0);
+            BlockPos spawnPoint = ((IMixinWorldProvider) worldServer.provider).getRandomizedSpawnPoint();
             playerIn.setPosition(spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
         }
 
-        playerIn.setWorld(worldserver);
+        playerIn.setWorld(worldServer);
         playerIn.theItemInWorldManager.setWorld((WorldServer) playerIn.worldObj);
         String s1 = "local";
 
@@ -153,9 +153,9 @@ public abstract class MixinServerConfigurationManager {
             s1 = netManager.getRemoteAddress().toString();
         }
 
-        WorldInfo worldinfo = worldserver.getWorldInfo();
-        BlockPos blockpos = worldserver.getSpawnPoint();
-        this.setPlayerGameTypeBasedOnOther(playerIn, null, worldserver);
+        WorldInfo worldinfo = worldServer.getWorldInfo();
+        BlockPos blockpos = worldServer.getSpawnPoint();
+        this.setPlayerGameTypeBasedOnOther(playerIn, null, worldServer);
 
         // Sponge Start
 
@@ -169,14 +169,14 @@ public abstract class MixinServerConfigurationManager {
         // Sponge End
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.getDimensionId(), worldserver, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(worldServer.provider.getDimensionId(), worldServer, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            DimensionManager.sendDimensionRegistration(worldserver, playerIn, dimension);
+            DimensionManager.sendDimensionRegistration(worldServer, playerIn, dimension);
         }
 
         handler.sendPacket(new S01PacketJoinGame(playerIn.getEntityId(), playerIn.theItemInWorldManager.getGameType(), worldinfo
-                .isHardcoreModeEnabled(), dimension, worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo
-                .getTerrainType(), worldserver.getGameRules().getGameRuleBooleanValue("reducedDebugInfo")));
+                .isHardcoreModeEnabled(), dimension, worldServer.getDifficulty(), this.getMaxPlayers(), worldinfo
+                .getTerrainType(), worldServer.getGameRules().getGameRuleBooleanValue("reducedDebugInfo")));
         handler.sendPacket(new S3FPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
                 .getServerInstance().getServerModName())));
         handler.sendPacket(new S41PacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
@@ -189,7 +189,7 @@ public abstract class MixinServerConfigurationManager {
 
         this.playerLoggedIn(playerIn);
         handler.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
-        this.updateTimeAndWeatherForPlayer(playerIn, worldserver);
+        this.updateTimeAndWeatherForPlayer(playerIn, worldServer);
 
         // Sponge Start - Use the server's ResourcePack object
         Optional<ResourcePack> pack = ((Server)this.mcServer).getDefaultResourcePack();
@@ -235,7 +235,7 @@ public abstract class MixinServerConfigurationManager {
         event.getSink().sendMessage(event.getMessage());
         // Sponge end
 
-        this.func_96456_a((ServerScoreboard) worldserver.getScoreboard(), playerIn);
+        this.func_96456_a((ServerScoreboard) worldServer.getScoreboard(), playerIn);
 
         for (Object o : playerIn.getActivePotionEffects()) {
             PotionEffect potioneffect = (PotionEffect) o;
@@ -243,11 +243,11 @@ public abstract class MixinServerConfigurationManager {
         }
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {
-            Entity entity = EntityList.createEntityFromNBT(nbttagcompound.getCompoundTag("Riding"), worldserver);
+            Entity entity = EntityList.createEntityFromNBT(nbttagcompound.getCompoundTag("Riding"), worldServer);
 
             if (entity != null) {
                 entity.forceSpawn = true;
-                worldserver.spawnEntityInWorld(entity);
+                worldServer.spawnEntityInWorld(entity);
                 playerIn.mountEntity(entity);
                 entity.forceSpawn = false;
             }
@@ -265,7 +265,7 @@ public abstract class MixinServerConfigurationManager {
         // ### PHASE 1 ### Get the location to spawn
 
         // Vanilla will always use overworld, set to the world the player was in
-        // UNLESS comming back from the end.
+        // UNLESS coming back from the end.
         if (!conqueredEnd && targetDimension == 0) {
             targetDimension = playerIn.dimension;
         }

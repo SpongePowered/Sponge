@@ -43,11 +43,11 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Map;
 
-public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, ImmutableWireAttachmentData> implements WireAttachmentData {
+public class SpongeWireAttachmentData extends AbstractData<WireAttachmentData, ImmutableWireAttachmentData> implements WireAttachmentData {
 
     private Map<Direction, WireAttachmentType> wireAttachmentMap;
 
-    public SpongeWireAttachementData(Map<Direction, WireAttachmentType> attachmentMap) {
+    public SpongeWireAttachmentData(Map<Direction, WireAttachmentType> attachmentMap) {
         super(WireAttachmentData.class);
         this.wireAttachmentMap = Maps.newHashMap(attachmentMap);
         registerGettersAndSetters();
@@ -80,7 +80,7 @@ public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, 
 
     @Override
     public WireAttachmentData copy() {
-        return new SpongeWireAttachementData(this.wireAttachmentMap);
+        return new SpongeWireAttachmentData(this.wireAttachmentMap);
     }
 
     @Override

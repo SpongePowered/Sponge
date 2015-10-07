@@ -89,7 +89,7 @@ public abstract class MixinBlockLever extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         final ImmutableDataManipulator rawManipulator = manipulator;
         if (rawManipulator instanceof ImmutableDirectionalData) {
-            final BlockLever.EnumOrientation orientatio = null;
+            final BlockLever.EnumOrientation orientation = null;
         }
         return super.getStateWithData(blockState, manipulator);
     }

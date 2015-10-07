@@ -56,7 +56,7 @@ import javax.annotation.Nullable;
  * Basically, this is the default implementation that automatically delegates
  * <b>ALL</b> actual data processing to either their associated
  * {@link DataProcessor}s or {@link ValueProcessor}s to avoid relying on
- * implementation residing in the actua {@link DataManipulator}s themselves.
+ * implementation residing in the actual {@link DataManipulator}s themselves.
  * As all vanilla related manipulators are based on data existing from
  * Minecraft's current implementation (i.e. not an ECS), it is required
  * that all processing exists in the associated processors and not within these
@@ -110,7 +110,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * Simple registration method for the keys to value return methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -126,7 +126,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * Simple registration method for the keys to field getter methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -142,7 +142,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * Simple registration method for the keys to field setter methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>

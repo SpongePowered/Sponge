@@ -92,7 +92,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
             final Cycleable next = value.cycleNext();
             return with((Key<? extends BaseValue<Object>>) (Object) key, next).get();
         }
-        throw new IllegalArgumentException("Used an invalid cyclable key! Check with supports in the future!");
+        throw new IllegalArgumentException("Used an invalid cycleable key! Check with supports in the future!");
     }
 
     @Override

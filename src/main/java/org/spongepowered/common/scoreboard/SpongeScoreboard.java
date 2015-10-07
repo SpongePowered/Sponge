@@ -221,7 +221,7 @@ public class SpongeScoreboard implements Scoreboard {
         if (this.teams.containsValue(team)) {
             throw new IllegalArgumentException("The specified team already exists on this scoreboard!");
         } else if (this.teams.containsKey(team.getName())) {
-            throw new IllegalArgumentException("A team with the specified name already exists on this scorebord!");
+            throw new IllegalArgumentException("A team with the specified name already exists on this scoreboard!");
         }
         this.addTeamInternal(team);
         this.teams.put(team.getName(), team);

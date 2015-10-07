@@ -41,11 +41,11 @@ public class SpongeDaylightBuilder extends AbstractTileBuilder<DaylightDetector>
     @Override
     @SuppressWarnings("unchecked")
     public Optional<DaylightDetector> build(DataView container) throws InvalidDataException {
-        Optional<DaylightDetector> daylightdetectorOptional = super.build(container);
-        if (!daylightdetectorOptional.isPresent()) {
+        Optional<DaylightDetector> daylightDetectorOptional = super.build(container);
+        if (!daylightDetectorOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a DaylightDetector tile entity!");
         }
-        ((TileEntityDaylightDetector) daylightdetectorOptional.get()).validate();
-        return Optional.of(daylightdetectorOptional.get());
+        ((TileEntityDaylightDetector) daylightDetectorOptional.get()).validate();
+        return Optional.of(daylightDetectorOptional.get());
     }
 }

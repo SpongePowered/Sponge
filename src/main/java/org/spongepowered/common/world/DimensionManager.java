@@ -290,10 +290,10 @@ public class DimensionManager {
             return; // If a provider hasn't been registered then we can't hotload the dim
         }
         MinecraftServer mcServer = overworld.getMinecraftServer();
-        ISaveHandler savehandler = overworld.getSaveHandler();
+        ISaveHandler saveHandler = overworld.getSaveHandler();
 
         WorldServer world =
-                (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.theProfiler).init()));
+                (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, saveHandler, dim, overworld, mcServer.theProfiler).init()));
         world.addWorldAccess(new WorldManager(mcServer, world));
         Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (org.spongepowered.api.world.World) world));
         if (!mcServer.isSinglePlayer()) {
@@ -317,12 +317,12 @@ public class DimensionManager {
         return dim;
     }
 
-    public static void sendDimensionRegistration(WorldServer worldserver, EntityPlayerMP playerIn, int dim) {
+    public static void sendDimensionRegistration(WorldServer worldServer, EntityPlayerMP playerIn, int dim) {
 //        // register dimension on client-side
 //        FMLEmbeddedChannel serverChannel = NetworkRegistry.INSTANCE.getChannel("FORGE", Side.SERVER);
 //        serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.PLAYER);
 //        serverChannel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(playerIn);
 //        serverChannel.writeOutbound(new ForgeMessage.DimensionRegisterMessage(dimension,
-//                ((SpongeDimensionType) ((Dimension) worldserver.provider).getType()).getDimensionTypeId()));
+//                ((SpongeDimensionType) ((Dimension) worldServer.provider).getType()).getDimensionTypeId()));
     }
 }

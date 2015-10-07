@@ -41,11 +41,11 @@ public class SpongeEndPortalBuilder extends AbstractTileBuilder<EndPortal> {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<EndPortal> build(DataView container) throws InvalidDataException {
-        Optional<EndPortal> endportalOptional = super.build(container);
-        if (!endportalOptional.isPresent()) {
+        Optional<EndPortal> endPortalOptional = super.build(container);
+        if (!endPortalOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a EndPortal tile entity!");
         }
-        ((TileEntityEndPortal) endportalOptional.get()).validate();
-        return Optional.of(endportalOptional.get());
+        ((TileEntityEndPortal) endPortalOptional.get()).validate();
+        return Optional.of(endPortalOptional.get());
     }
 }

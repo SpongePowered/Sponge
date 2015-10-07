@@ -109,8 +109,8 @@ class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
     }
 
     @Override
-    public void startElement(String uri, String localName, String name, Attributes atts) throws SAXException {
-        this.uh.startElement(uri, localName, name, atts);
+    public void startElement(String uri, String localName, String name, Attributes attrs) throws SAXException {
+        this.uh.startElement(uri, localName, name, attrs);
     }
 
     @Override

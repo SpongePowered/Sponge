@@ -67,7 +67,7 @@ import javax.annotation.Nullable;
  * all of the implementation methods provided here are handled using those. This
  * was done to avoid having to override {@link #getKeys()} and {@link #getValues()},
  * let alone using {@link ValueProcessor}s for simple setters and getters. I believe
- * this to be faster than haivng to retrieve a processor from a map, checking if
+ * this to be faster than having to retrieve a processor from a map, checking if
  * the class is an instance of the type implementation to access the setters
  * and getters.</p>
  *
@@ -103,7 +103,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
      * Simple registration method for the keys to value return methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -119,7 +119,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
      * Simple registration method for the keys to field getter methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -140,7 +140,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         // We actually need to check that the processor is available, otherwise
         // we throw an IllegalArgumentException, because people don't check for
         // support!!
-        checkArgument(processor.isPresent(), "Invalid Key for " + this.immutableClass.getCanonicalName() + ". Use supprts(Key) to avoid "
+        checkArgument(processor.isPresent(), "Invalid Key for " + this.immutableClass.getCanonicalName() + ". Use supports(Key) to avoid "
                 + "exceptions!");
         // Then we pass it to the processor :)
         return processor.get().with(checkNotNull(key), checkNotNull(value), (I) (Object) this);
@@ -153,7 +153,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         // We actually need to check that the processor is available, otherwise
         // we throw an IllegalArgumentException, because people don't check for
         // support!!
-        checkArgument(processor.isPresent(), "Invalid Value for " + this.immutableClass.getCanonicalName() + ". Use supprts(BaseValue) to avoid "
+        checkArgument(processor.isPresent(), "Invalid Value for " + this.immutableClass.getCanonicalName() + ". Use supports(BaseValue) to avoid "
                 + "exceptions!");
         // Then we pass it to the processor :)
         // We can easily use the key provided, since that is the identifier, not the actual value itself
