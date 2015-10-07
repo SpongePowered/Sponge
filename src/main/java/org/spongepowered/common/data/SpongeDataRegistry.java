@@ -239,9 +239,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     }
 
     public <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
-        return Optional.<ValueProcessor<E, ? extends BaseValue<E>>>ofNullable(
-                (ValueProcessor<E, ? extends BaseValue<E>>) (Object) this.valueDelegates.get
-                        (key));
+        return Optional.<ValueProcessor<E, ? extends BaseValue<E>>>ofNullable((ValueProcessor<E, ? extends BaseValue<E>>) (Object) this.valueDelegates.get(key));
     }
 
 }

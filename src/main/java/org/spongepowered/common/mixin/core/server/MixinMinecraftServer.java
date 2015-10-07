@@ -327,8 +327,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     }
                 }
             } else {
-                if (((WorldProperties) worldInfo).getUniqueId() == null || ((WorldProperties) worldInfo).getUniqueId().equals
-                        (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+                if (((WorldProperties) worldInfo).getUniqueId() == null ||
+                        ((WorldProperties) worldInfo).getUniqueId().equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
 
                     if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension

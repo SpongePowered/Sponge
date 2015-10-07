@@ -206,12 +206,9 @@ public abstract class MixinServerConfigurationManager {
         // Move logic for creating join message up here
         ChatComponentTranslation chatcomponenttranslation;
 
-        if (!playerIn.getCommandSenderName().equalsIgnoreCase(s))
-        {
+        if (!playerIn.getCommandSenderName().equalsIgnoreCase(s)) {
             chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
-        }
-        else
-        {
+        } else {
             chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
         }
 

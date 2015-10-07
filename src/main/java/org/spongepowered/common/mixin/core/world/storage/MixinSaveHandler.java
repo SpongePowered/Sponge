@@ -53,14 +53,14 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Shadow private File worldDirectory;
     @Shadow private long initializationTime;
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 0, remap = false))
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V",
+            ordinal = 0, remap = false))
     public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 1, remap = false))
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V",
+            ordinal = 1, remap = false))
     public String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }

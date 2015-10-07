@@ -140,8 +140,8 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
 
     @Override
     public Optional<TradeOffer> build(DataView container) throws InvalidDataException {
-        if (!container.contains(FIRST_QUERY) || !container.contains(SECOND_QUERY) || !container.contains(BUYING_QUERY) || !container.contains
-                (EXPERIENCE_QUERY) || !container.contains(MAX_QUERY) || !container.contains(USES_QUERY)) {
+        if (!container.contains(FIRST_QUERY) || !container.contains(SECOND_QUERY) || !container.contains(BUYING_QUERY) ||
+                !container.contains(EXPERIENCE_QUERY) || !container.contains(MAX_QUERY) || !container.contains(USES_QUERY)) {
             throw new InvalidDataException("Not enough information for constructing a TradeOffer!!");
         }
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
