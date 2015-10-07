@@ -44,7 +44,11 @@ import java.util.Optional;
 
 public class RepresentedItemDataBuilder implements DataManipulatorBuilder<RepresentedItemData, ImmutableRepresentedItemData> {
 
-    private final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+    private final SerializationService serializationService;
+
+    public RepresentedItemDataBuilder(SerializationService serializationService) {
+        this.serializationService = serializationService;
+    }
 
     @Override
     public Optional<RepresentedItemData> build(DataView container) throws InvalidDataException {
