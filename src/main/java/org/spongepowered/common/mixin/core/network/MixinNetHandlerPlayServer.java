@@ -195,7 +195,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             PacketBuffer packetbuffer;
             try {
                 if (!this.serverController.isCommandBlockEnabled()) {
-                    this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.notEnabled", new Object[0]));
+                    this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.notEnabled"));
                     // Sponge: Check permissions for command block usage TODO: Maybe throw an event instead?
                     // } else if (this.playerEntity.canCommandSenderUseCommand(2, "") && this.playerEntity.capabilities.isCreativeMode) {
                 } else {
@@ -245,7 +245,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                             }
 
                             commandblocklogic.func_145756_e();
-                            this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
+                            this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", s1));
                         }
                     } catch (Exception exception1) {
                         logger.error("Couldn't set command block", exception1);
