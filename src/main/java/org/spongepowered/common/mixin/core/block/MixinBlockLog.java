@@ -56,9 +56,9 @@ public abstract class MixinBlockLog extends MixinBlock {
 
     protected ImmutableTreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type;
-        if(blockState.getBlock() instanceof BlockOldLog) {
+        if (blockState.getBlock() instanceof BlockOldLog) {
             type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLog.VARIANT);
-        } else if(blockState.getBlock() instanceof BlockNewLog) {
+        } else if (blockState.getBlock() instanceof BlockNewLog) {
             type = (BlockPlanks.EnumType) blockState.getValue(BlockNewLog.VARIANT);
         } else {
             type = BlockPlanks.EnumType.OAK;

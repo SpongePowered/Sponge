@@ -111,7 +111,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     }
 
     @Inject(method = "closeSocket", at = @At("HEAD"))
-    public void rconLogoutCallback(CallbackInfo ci){
+    public void rconLogoutCallback(CallbackInfo ci) {
         if (this.source == null) {
             initSource();
         }

@@ -88,7 +88,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     public ImmutablePatternListValue with(int index, Iterable<PatternLayer> values) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         for (final ListIterator<PatternLayer> iterator = this.actualValue.listIterator(); iterator.hasNext(); ) {
-            if (iterator.nextIndex() -1 == index) {
+            if (iterator.nextIndex() - 1 == index) {
                 builder.addAll(values);
             }
             builder.add(iterator.next());
@@ -149,7 +149,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     public ImmutablePatternListValue set(int index, PatternLayer element) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         for (final ListIterator<PatternLayer> iterator = this.actualValue.listIterator(); iterator.hasNext(); ) {
-            if (iterator.nextIndex() -1 == index) {
+            if (iterator.nextIndex() - 1 == index) {
                 builder.add(checkNotNull(element));
                 iterator.next();
             } else {

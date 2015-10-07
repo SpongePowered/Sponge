@@ -96,7 +96,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
             Entity leashedEntity = (Entity)(Object) this;
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getGame(), Cause.of(playerIn), leashedEntity);
             Sponge.getGame().getEventManager().post(event);
-            if(event.isCancelled()) {
+            if (event.isCancelled()) {
                 ci.cancel();
             }
         }
@@ -109,7 +109,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
             Entity leashedEntity = (Entity)(Object) this;
             UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getGame(), Cause.of(entity), leashedEntity);
             Sponge.getGame().getEventManager().post(event);
-            if(event.isCancelled()) {
+            if (event.isCancelled()) {
                 ci.cancel();
             }
         }

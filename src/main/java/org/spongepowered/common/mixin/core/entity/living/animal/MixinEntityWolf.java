@@ -48,7 +48,7 @@ import java.util.Random;
 
 @NonnullByDefault
 @Mixin(EntityWolf.class)
-@Implements(value = {@Interface(iface = Wolf.class, prefix = "wolf$"), @Interface(iface = IMixinAggressive.class, prefix="soft$")})
+@Implements(value = {@Interface(iface = Wolf.class, prefix = "wolf$"), @Interface(iface = IMixinAggressive.class, prefix = "soft$")})
 public abstract class MixinEntityWolf extends MixinEntityAnimal {
 
     @Shadow(prefix = "shadow$")

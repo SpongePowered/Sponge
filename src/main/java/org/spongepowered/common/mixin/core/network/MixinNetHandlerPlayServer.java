@@ -273,7 +273,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void proccessPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+    public void proccessPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci) {
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();

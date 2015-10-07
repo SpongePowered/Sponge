@@ -505,8 +505,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public Optional<DataView> getPropertySection(DataQuery path) {
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
-            return Optional
-                    .<DataView> of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
+            return Optional.<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
         } else {
             return Optional.empty();
         }

@@ -318,7 +318,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
                 worldInfo = new WorldInfo(newWorldSettings, worldFolder);
                 ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
-                if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
+                if (dim == 0 || dim == -1 || dim == 1) { // if vanilla dimension
                     ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
                     ((WorldProperties) worldInfo).setLoadOnStartup(true);
                     ((WorldProperties) worldInfo).setEnabled(true);
@@ -331,7 +331,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         ((WorldProperties) worldInfo).getUniqueId().equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
 
-                    if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
+                    if (dim == 0 || dim == -1 || dim == 1) { // if vanilla dimension
                         ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
                         ((WorldProperties) worldInfo).setLoadOnStartup(true);
                         ((WorldProperties) worldInfo).setEnabled(true);

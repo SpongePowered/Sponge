@@ -110,7 +110,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector(pos));
         final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Sponge.getGame(), Cause.of(world), blockSnapshot);
         Sponge.getGame().getEventManager().post(event);
-        if(event.isCancelled()) {
+        if (event.isCancelled()) {
             ci.cancel();
         }
     }
