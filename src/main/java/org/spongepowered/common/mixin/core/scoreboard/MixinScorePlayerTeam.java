@@ -187,10 +187,9 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
-        Iterator iterator = collection.iterator();
 
-        while (iterator.hasNext()) {
-            String s = (String)iterator.next();
+        for (Object o : collection) {
+            String s = (String) o;
             EntityPlayerMP teamPlayer = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(s);
             if (teamPlayer != null) {
                 sources.add((Player) teamPlayer);
@@ -204,10 +203,9 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
-        Iterator iterator = collection.iterator();
 
-        while (iterator.hasNext()) {
-            String s = (String)iterator.next();
+        for (Object o : collection) {
+            String s = (String) o;
             EntityPlayerMP teamPlayer = player.mcServer.getConfigurationManager().getPlayerByUsername(s);
             if (teamPlayer != null && player != teamPlayer) {
                 sources.add((Player) teamPlayer);
