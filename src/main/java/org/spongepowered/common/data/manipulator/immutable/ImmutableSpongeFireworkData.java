@@ -65,11 +65,6 @@ public class ImmutableSpongeFireworkData extends AbstractImmutableData<Immutable
     }
 
     @Override
-    public ImmutableFireworkData copy() {
-        return new ImmutableSpongeFireworkData(this.fireworkEffects, this.modifier);
-    }
-
-    @Override
     public FireworkData asMutable() {
         return new SpongeFireworkData(this.fireworkEffects, this.modifier);
     }

@@ -62,11 +62,6 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
     }
 
     @Override
-    public ImmutableHealthData copy() {
-        return new ImmutableSpongeHealthData(this.health, this.maxHealth);
-    }
-
-    @Override
     public HealthData asMutable() {
         return new SpongeHealthData(this.health, this.maxHealth);
     }

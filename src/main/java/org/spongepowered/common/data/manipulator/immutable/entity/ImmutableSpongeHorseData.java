@@ -101,11 +101,6 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     }
 
     @Override
-    public ImmutableHorseData copy() {
-        return this;
-    }
-
-    @Override
     public HorseData asMutable() {
         return new SpongeHorseData(this.horseColor, this.horseStyle, this.horseVariant);
     }

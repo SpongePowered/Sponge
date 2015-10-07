@@ -59,11 +59,6 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
     }
 
     @Override
-    public ImmutableExperienceHolderData copy() {
-        return this;
-    }
-
-    @Override
     public ExperienceHolderData asMutable() {
         return new SpongeExperienceHolderData(this.level, this.totalExp, this.expSinceLevel);
     }

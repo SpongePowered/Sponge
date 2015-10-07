@@ -77,11 +77,6 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
     }
 
     @Override
-    public ImmutableCommandData copy() {
-        return new ImmutableSpongeCommandData(this.storedCommand, this.success, this.tracks, this.lastOutput);
-    }
-
-    @Override
     public CommandData asMutable() {
         return new SpongeCommandData()
                 .setSuccessCount(this.success)

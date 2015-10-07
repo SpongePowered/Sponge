@@ -77,11 +77,6 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     }
 
     @Override
-    public ImmutableConnectedDirectionData copy() {
-        return this;
-    }
-
-    @Override
     public ConnectedDirectionData asMutable() {
         return new SpongeConnectedDirectionData(this.directions);
     }

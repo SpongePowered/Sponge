@@ -60,11 +60,6 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
     }
 
     @Override
-    public ImmutableDisplayNameData copy() {
-        return new ImmutableSpongeDisplayNameData(this.displayName, this.displays);
-    }
-
-    @Override
     public DisplayNameData asMutable() {
         return new SpongeDisplayNameData(this.displayName).setDisplays(this.displays);
     }

@@ -43,10 +43,19 @@ public final class ImmutableDataCachingUtil {
 
     private ImmutableDataCachingUtil() {}
 
-    private static final Cache<String, ImmutableDataManipulator<?, ?>> manipulatorCache = CacheBuilder.newBuilder().maximumSize(3000)
-            .concurrencyLevel(4).build();
+    public static final int CACHE_LIMIT_FOR_INDIVIDUAL_TYPE = 100;
+    public static final int MANIPULATOR_CACHE_LIMIT = 100000;
+    public static final int VALUE_CACHE_LIMIT = 100000;
 
-    private static final Cache<String, ImmutableValue<?>> valueCache = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(4000).build();
+    private static final Cache<String, ImmutableDataManipulator<?, ?>> manipulatorCache = CacheBuilder.newBuilder()
+        .maximumSize(MANIPULATOR_CACHE_LIMIT)
+        .concurrencyLevel(4)
+        .build();
+
+    private static final Cache<String, ImmutableValue<?>> valueCache = CacheBuilder.newBuilder()
+        .concurrencyLevel(4)
+        .maximumSize(VALUE_CACHE_LIMIT)
+        .build();
 
     /**
      * Retrieves a basic manipulator from {@link Cache}. If the {@link Cache}

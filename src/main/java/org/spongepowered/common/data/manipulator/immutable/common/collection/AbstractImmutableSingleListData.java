@@ -22,59 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.common;
+package org.spongepowered.common.data.manipulator.immutable.common.collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 
-public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>> extends
-        AbstractImmutableSingleData<E, I, M> {
+public abstract class AbstractImmutableSingleListData<E, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
+    extends AbstractImmutableSingleData<List<E>, I, M> {
 
-    private final Class<? extends M> mutableClass;
-    private final E defaultvalue;
-    protected final ImmutableValue<E> cachedValue;
+    private final Class<? extends M> mutable;
 
-    public AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
-        super(immutableClass, value, usedKey);
+    public AbstractImmutableSingleListData(Class<I> manipulatorClass, List<E> value,
+                                           Key<? extends BaseValue<List<E>>> usedKey,
+                                           Class<? extends M> mutableClass) {
+        super(manipulatorClass, ImmutableList.copyOf(value), usedKey);
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
-        this.mutableClass = checkNotNull(mutableClass);
-        this.defaultvalue = defaultValue;
-        this.cachedValue = ImmutableSpongeValue.cachedOf(this.usedKey, this.defaultvalue, this.value);
-    }
-
-    public ImmutableValue<E> type() {
-        return this.cachedValue;
+        this.mutable = mutableClass;
     }
 
     @Override
     protected ImmutableValue<?> getValueGetter() {
-        return type();
+        return new ImmutableSpongeListValue<>(this.usedKey, ImmutableList.copyOf(this.value));
     }
 
     @Override
     public M asMutable() {
-        return ReflectionUtil.createInstance(this.mutableClass, this.getValue());
+        return ReflectionUtil.createInstance(this.mutable, this.value);
     }
 
     @Override
     public int compareTo(I o) {
-        return o.get(this.usedKey).get().ordinal() - this.value.ordinal();
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return super.toContainer().set(this.usedKey.getQuery(), this.value.name());
+        return 0;
     }
 }

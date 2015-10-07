@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.common;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ComparisonChain;
@@ -36,6 +37,8 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.util.ReflectionUtil;
 
+import java.lang.reflect.Modifier;
+
 public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
         AbstractSingleData<Boolean, M, I> {
 
@@ -43,6 +46,8 @@ public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I ext
 
     protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey, Class<? extends I> immutableClass) {
         super(manipulatorClass, value, usedKey);
+        checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.immutableClass = checkNotNull(immutableClass);
     }
 

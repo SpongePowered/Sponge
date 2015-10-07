@@ -56,11 +56,6 @@ public class ImmutableSpongeTradeOfferData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableTradeOfferData copy() {
-        return new ImmutableSpongeTradeOfferData(this.offers);
-    }
-
-    @Override
     public TradeOfferData asMutable() {
         return new SpongeTradeOfferData(this.offers);
     }

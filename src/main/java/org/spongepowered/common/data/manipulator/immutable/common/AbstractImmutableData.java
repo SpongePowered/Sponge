@@ -161,6 +161,11 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
 
     }
 
+    @Override
+    public final I copy() {
+        return (I) this;
+    }
+
     // Beyond this point is involving keyFieldGetters or keyValueGetters. No external
     // implementation required.
 

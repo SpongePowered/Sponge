@@ -22,28 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.block;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
-import org.spongepowered.api.data.manipulator.mutable.block.AxisData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.util.Axis;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleEnumData;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeAxisData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-
-public class ImmutableSpongeAxisData extends AbstractImmutableSingleEnumData<Axis, ImmutableAxisData, AxisData> implements ImmutableAxisData {
-
-    public ImmutableSpongeAxisData(Axis value) {
-        super(ImmutableAxisData.class, checkNotNull(value), Axis.X, Keys.AXIS, SpongeAxisData.class);
-    }
-
-    @Override
-    public ImmutableValue<Axis> axis() {
-        return this.cachedValue;
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.manipulator.immutable.common.collection;
