@@ -60,6 +60,7 @@ public class SpongeDisplaySlot implements DisplaySlot {
     public int getIndex() {
         return this.id;
     }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

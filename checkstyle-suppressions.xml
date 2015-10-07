@@ -4,5 +4,5 @@
 <suppressions>
     <suppress checks="(JavadocMethod|(Method|Member|Parameter|LocalVariable)Name)" files="src[\\/](main|test)[\\/]java"/>
     <suppress checks="Indentation" files="package-info\.java"/>
-    <suppress checks="(AbbreviationAsWordInName|OverloadMethodsDeclarationOrder)" files="[\\/]mixin[\\/]"/>
+    <suppress checks="(AbbreviationAsWordInName|EmptyLineSeparator|OverloadMethodsDeclarationOrder)" files="[\\/]mixin[\\/]"/>
 </suppressions>

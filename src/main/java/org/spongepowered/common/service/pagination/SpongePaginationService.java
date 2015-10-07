@@ -82,6 +82,7 @@ public class SpongePaginationService implements PaginationService {
             return this.lastUuid;
         }
     }
+
     final ConcurrentMap<Class<? extends CommandSource>, PaginationCalculator<?>> calculators = new ConcurrentHashMap<>();
     final ConcurrentMap<CommandSource, SourcePaginations> activePaginations = new MapMaker().weakKeys().makeMap();
     private final AtomicBoolean commandRegistered = new AtomicBoolean();
