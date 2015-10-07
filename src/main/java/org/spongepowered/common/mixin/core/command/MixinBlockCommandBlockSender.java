@@ -37,6 +37,6 @@ public abstract class MixinBlockCommandBlockSender implements IMixinCommandSende
 
     @Override
     public CommandSource asCommandSource() {
-        return (CommandSource) field_145767_a;
+        return (CommandSource) this.field_145767_a;
     }
 }

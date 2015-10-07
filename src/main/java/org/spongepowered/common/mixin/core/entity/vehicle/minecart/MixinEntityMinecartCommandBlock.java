@@ -44,7 +44,7 @@ public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecar
 
     @Override
     public ICommandSender asICommandSender() {
-        return commandBlockLogic;
+        return this.commandBlockLogic;
     }
 
     public String getCommand() {

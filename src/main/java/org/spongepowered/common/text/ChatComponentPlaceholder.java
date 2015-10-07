@@ -81,7 +81,7 @@ public class ChatComponentPlaceholder extends ChatComponentStyle {
             return false;
         } else {
             ChatComponentPlaceholder other = (ChatComponentPlaceholder) obj;
-            return placeholderKey.equals(other.placeholderKey) && super.equals(obj);
+            return this.placeholderKey.equals(other.placeholderKey) && super.equals(obj);
         }
     }
 
