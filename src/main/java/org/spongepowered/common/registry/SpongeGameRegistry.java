@@ -48,10 +48,13 @@ import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.BlockWall;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
@@ -87,6 +90,7 @@ import org.spongepowered.api.attribute.Attribute;
 import org.spongepowered.api.attribute.AttributeBuilder;
 import org.spongepowered.api.attribute.AttributeCalculator;
 import org.spongepowered.api.attribute.AttributeModifierBuilder;
+import org.spongepowered.api.attribute.Attributes;
 import org.spongepowered.api.attribute.Operation;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockSnapshotBuilder;
@@ -878,6 +882,15 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("fractional", (StatisticFormat) StatBase.field_111202_k)
             .put("time", (StatisticFormat) StatBase.timeStatType)
             .build();
+    public final Map<String, Attribute> attributeMappings = new ImmutableMap.Builder<String, Attribute>()
+            .put("generic_max_health", (Attribute) SharedMonsterAttributes.maxHealth)
+            .put("generic_follow_range", (Attribute) SharedMonsterAttributes.followRange)
+            .put("generic_knockback_resistance", (Attribute) SharedMonsterAttributes.knockbackResistance)
+            .put("generic_movement_speed", (Attribute) SharedMonsterAttributes.movementSpeed)
+            .put("generic_attack_damage", (Attribute) SharedMonsterAttributes.attackDamage)
+            .put("horse_jump_strength", (Attribute) EntityHorse.horseJumpStrength)
+            .put("zombie_spawn_reinforcements", (Attribute) EntityZombie.reinforcementChance)
+            .build();
 
     private final Map<String, Weather> weatherMappings = Maps.newHashMap();
 
@@ -890,7 +903,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             ImmutableMap.<Class<? extends CatalogType>, Map<String, ? extends CatalogType>>builder()
                 .put(Achievement.class, this.achievementMappings)
                 .put(Art.class, this.artMappings)
-                .put(Attribute.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                .put(Attribute.class, this.attributeMappings)
                 .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
                 .put(BiomeType.class, this.biomeTypeMappings)
                 .put(BlockType.class, blockTypeMappings)
@@ -2500,6 +2513,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(StatisticFormats.class, this.statisticFormatMappings);
     }
 
+    private void setAttributeMappings() {
+        RegistryHelper.mapFields(Attributes.class, this.attributeMappings);
+    }
+
     private void setDoublePlantMappings() {
         RegistryHelper.mapFields(DoublePlantTypes.class, this.doublePlantMappings);
     }
@@ -2687,6 +2704,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setStatisticMappings();
         setStoneTypeMappings();
         setStatisticFormatMappings();
+        setAttributeMappings();
         setLogAxes();
     }
 
