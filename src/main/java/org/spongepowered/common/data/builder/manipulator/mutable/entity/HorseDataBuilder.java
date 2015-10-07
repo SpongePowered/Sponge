@@ -57,9 +57,11 @@ public class HorseDataBuilder implements DataManipulatorBuilder<HorseData, Immut
 
     @Override
     public Optional<HorseData> build(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.HORSE_COLOR.getQuery()) && container.contains(Keys.HORSE_STYLE.getQuery()) && container.contains(Keys.HORSE_VARIANT.getQuery())) {
-            return Optional.<HorseData>of(new SpongeHorseData(HorseUtils.getHorseColor(container), HorseUtils.getHorseStyle(container),
-                    HorseUtils.getHorseVariant(container)));
+        if (container.contains(Keys.HORSE_COLOR.getQuery())
+            && container.contains(Keys.HORSE_STYLE.getQuery())
+            && container.contains(Keys.HORSE_VARIANT.getQuery())) {
+            return Optional.of(new SpongeHorseData(HorseUtils.getHorseColor(container), HorseUtils.getHorseStyle(container),
+                                                   HorseUtils.getHorseVariant(container)));
         }
         return Optional.empty();
     }

@@ -59,11 +59,6 @@ public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSign
     }
 
     @Override
-    public ImmutableSignData copy() {
-        return new ImmutableSpongeSignData(this.lines);
-    }
-
-    @Override
     public SignData asMutable() {
         return new SpongeSignData(Lists.newArrayList(this.lines));
     }

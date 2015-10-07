@@ -41,10 +41,10 @@ import org.spongepowered.common.entity.SpongeHorseVariant;
 
 import java.util.Optional;
 
-public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<HorseVariant, Value<HorseVariant>> {
+public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<EntityHorse, HorseVariant, Value<HorseVariant>> {
 
     public HorseVariantValueProcessor() {
-        super(Keys.HORSE_VARIANT);
+        super(EntityHorse.class, Keys.HORSE_VARIANT);
     }
 
     @Override
@@ -53,31 +53,19 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Hor
     }
 
     @Override
-    public Optional<HorseVariant> getValueFromContainer(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            return Optional.of(HorseUtils.getHorseVariant(((EntityHorse) container).getHorseType()));
-        }
-        return Optional.empty();
+    protected boolean set(EntityHorse container, HorseVariant value) {
+        container.setHorseType(((SpongeHorseVariant) value).type);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityHorse;
+    protected Optional<HorseVariant> getVal(EntityHorse container) {
+        return Optional.of(HorseUtils.getHorseVariant(container.getHorseType()));
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, HorseVariant value) {
-        ImmutableValue<HorseVariant> newValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, value);
-
-        if (this.supports(container)) {
-            EntityHorse horse = (EntityHorse) container;
-
-            ImmutableValue<HorseVariant> oldValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, HorseUtils.getHorseVariant(horse.getHorseType()));
-            horse.setHorseType(((SpongeHorseVariant) value).type);
-
-            return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-        }
-        return DataTransactionBuilder.failResult(newValue);
+    protected ImmutableValue<HorseVariant> constructImmutableValue(HorseVariant value) {
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, value);
     }
 
     @Override

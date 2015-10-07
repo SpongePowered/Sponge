@@ -27,7 +27,7 @@ package org.spongepowered.common.item;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.common.item.ItemsHelper.validateData;
+import static org.spongepowered.common.data.util.ItemsHelper.validateData;
 
 import com.google.common.collect.Sets;
 import net.minecraft.item.Item;
@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
+import org.spongepowered.common.data.util.ItemsHelper;
 
 import java.util.Optional;
 import java.util.Set;
@@ -68,7 +69,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
 
     @Override
     public ItemStackBuilder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
-        return null;
+        return itemData(itemData.asMutable());
     }
 
     @Override
@@ -117,26 +118,11 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         checkState(this.type != null, "Item type has not been set");
         checkState(this.quantity <= this.maxQuantity, "Quantity cannot be greater than the max quantity (%s)", this.maxQuantity);
         // TODO How to enforce maxQuantity in the returned stack?
-        final int damage;
-        // Check if there's any additional data
-        if (this.itemDataSet == null) {
-            damage = 0;
-        } else {
-            // We need to actually get the damage value.
-            Optional<Integer> damageOption = ItemsHelper.getDamageValue(this.type, this.itemDataSet);
-            if (damageOption.isPresent()) {
-                damage = damageOption.get();
-            } else {
-                // If there wasn't one set, well, default to 0
-                damage = 0;
-            }
-        }
+        final int damage = 0;
         ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, damage);
 
         if (this.itemDataSet != null) {
-            for (DataManipulator<?, ?> data : this.itemDataSet) {
-                stack.offer(data);
-            }
+            this.itemDataSet.forEach(stack::offer);
         }
         return stack;
     }

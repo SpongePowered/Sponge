@@ -71,6 +71,14 @@ public class KeyRegistry {
     private static final Map<String, Key<?>> keyMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     public static void registerKeys() {
+        generateKeyMap();
+        RegistryHelper.mapFields(Keys.class, keyMap);
+    }
+
+    private static void generateKeyMap() {
+        if (!keyMap.isEmpty()) {
+            return;
+        }
         keyMap.put("axis", makeSingleKey(Axis.class, Value.class, of("Axis")));
         keyMap.put("color", makeSingleKey(Color.class, Value.class, of("Color")));
         keyMap.put("health", makeSingleKey(Double.TYPE, MutableBoundedValue.class, of("Health")));
@@ -135,7 +143,12 @@ public class KeyRegistry {
         keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceSinceLevel")));
         keyMap.put("experience_from_start_of_level", makeSingleKey(Integer.TYPE, ImmutableBoundedValue.class, of("ExperienceFromStartOfLevel")));
         keyMap.put("book_author", makeSingleKey(Text.class, Value.class, of("BookAuthor")));
-        RegistryHelper.mapFields(Keys.class, keyMap);
+
+    }
+
+    private static Map<String, Key<?>> getKeyMap() {
+        generateKeyMap();
+        return keyMap;
     }
 
 }

@@ -44,7 +44,7 @@ public class BreathingDataBuilder implements DataManipulatorBuilder<BreathingDat
         if (container.contains(Keys.MAX_AIR.getQuery()) && container.contains(Keys.REMAINING_AIR.getQuery())) {
             final int maxAir = DataUtil.getData(container, Keys.MAX_AIR, Integer.class);
             final int remainingAir = DataUtil.getData(container, Keys.REMAINING_AIR, Integer.class);
-            return Optional.<BreathingData>of(new SpongeBreathingData(maxAir, remainingAir));
+            return Optional.of(new SpongeBreathingData(maxAir, remainingAir));
         }
         return Optional.empty();
     }

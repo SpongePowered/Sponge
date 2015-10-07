@@ -61,7 +61,7 @@ public class ItemLoreDataBuilder implements DataManipulatorBuilder<LoreData, Imm
                 return Optional.empty();
             }
             final NBTTagList list = subCompound.getTagList(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_STRING);
-            return Optional.<LoreData>of(new SpongeLoreData(SpongeTexts.fromLegacy(list)));
+            return Optional.of(new SpongeLoreData(SpongeTexts.fromLegacy(list)));
         } else {
             return Optional.empty();
         }
@@ -71,6 +71,6 @@ public class ItemLoreDataBuilder implements DataManipulatorBuilder<LoreData, Imm
     public Optional<LoreData> build(DataView container) throws InvalidDataException {
         DataUtil.checkDataExists(container, Keys.ITEM_LORE.getQuery());
         final List<String> json = container.getStringList(Keys.ITEM_LORE.getQuery()).get();
-        return Optional.<LoreData>of(new SpongeLoreData(SpongeTexts.fromJson(json)));
+        return Optional.of(new SpongeLoreData(SpongeTexts.fromJson(json)));
     }
 }

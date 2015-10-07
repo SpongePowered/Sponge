@@ -94,8 +94,8 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
             final Optional<M> old = from(dataHolder);
             final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final Map<Key<?>, Object> map = Maps.newHashMap();
-            final Set<ImmutableValue<?>> newVals = merged.getValues();
-            for (ImmutableValue<?> value : newVals) {
+            final Set<ImmutableValue<?>> newValues = merged.getValues();
+            for (ImmutableValue<?> value : newValues) {
                 map.put(value.getKey(), value.get());
             }
             try {
@@ -104,13 +104,13 @@ public abstract class AbstractEntityDataProcessor<E extends Entity, M extends Da
                         builder.replace(old.get().getValues());
                     }
 
-                    return builder.result(DataTransactionResult.Type.SUCCESS).success(newVals).build();
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success(newValues).build();
                 } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).reject(newVals).build();
+                    return builder.result(DataTransactionResult.Type.FAILURE).reject(newValues).build();
                 }
             } catch (Exception e) {
                 Sponge.getLogger().debug("An exception occurred when setting data: ", e);
-                return builder.result(DataTransactionResult.Type.ERROR).reject(newVals).build();
+                return builder.result(DataTransactionResult.Type.ERROR).reject(newValues).build();
             }
         }
         return DataTransactionBuilder.failResult(manipulator.getValues());

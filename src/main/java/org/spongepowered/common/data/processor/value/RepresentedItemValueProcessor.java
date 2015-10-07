@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.item.ItemStack;
@@ -35,14 +36,16 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.EntityDataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<ItemStackSnapshot, Value<ItemStackSnapshot>> {
+public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<Entity, ItemStackSnapshot, Value<ItemStackSnapshot>> {
 
     public RepresentedItemValueProcessor() {
-        super(Keys.REPRESENTED_ITEM);
+        super(Entity.class, Keys.REPRESENTED_ITEM);
     }
 
     @Override
@@ -51,50 +54,30 @@ public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    public Optional<ItemStackSnapshot> getValueFromContainer(ValueContainer<?> container) {
+    protected boolean set(Entity container, ItemStackSnapshot value) {
         if (container instanceof EntityItemFrame) {
-            final ItemStack itemStack = ((EntityItemFrame) container).getDisplayedItem();
-            if (itemStack != null) {
-                return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot());
-            }
+            ((EntityItemFrame) container).setDisplayedItem((ItemStack) value.createStack());
+            return true;
         } else if (container instanceof EntityItem) {
-            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((EntityItem) container).getEntityItem()).createSnapshot());
+            ((EntityItem) container).setEntityItemStack((ItemStack) value.createStack());
+            return true;
         }
-        return Optional.empty();
+        return false;
+    }
+
+    @Override
+    protected Optional<ItemStackSnapshot> getVal(Entity container) {
+        return EntityDataUtil.getRepresentedItemFrom(container);
+    }
+
+    @Override
+    protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, value);
     }
 
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof EntityItem || container instanceof EntityItemFrame;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, ItemStackSnapshot value) {
-        final ImmutableValue<ItemStackSnapshot> newValue = constructValue(value).asImmutable();
-        if (container instanceof EntityItemFrame) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            if (((EntityItemFrame) container).getDisplayedItem() != null) {
-                builder.replace(constructValue(getValueFromContainer(container).get()).asImmutable());
-            }
-            try {
-                final ItemStack itemStack = (ItemStack) value.createStack();
-                ((EntityItemFrame) container).setDisplayedItem(itemStack);
-                builder.success(newValue);
-                return builder.result(DataTransactionResult.Type.SUCCESS).build();
-            } catch (Exception e) {
-                return builder.result(DataTransactionResult.Type.ERROR).build();
-            }
-        } else if (container instanceof EntityItem) {
-            final ImmutableValue<ItemStackSnapshot> old = constructValue(getValueFromContainer(container).get()).asImmutable();
-            final ItemStack itemStack = (ItemStack) value.createStack();
-            try {
-                ((EntityItem) container).setEntityItemStack(itemStack);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newValue);
-            }
-            return DataTransactionBuilder.successReplaceResult(newValue, old);
-        }
-        return DataTransactionBuilder.failResult(newValue);
     }
 
     @Override

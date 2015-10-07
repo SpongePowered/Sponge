@@ -36,6 +36,10 @@ dependencies {
     compile 'com.zaxxer:HikariCP-java6:2.3.9'
 
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
+    testCompile 'org.powermock:powermock-module-junit4:1.6.3'
+    testCompile 'org.powermock:powermock-api-easymock:1.6.3'
+    testCompile 'org.powermock:powermock-api-mockito:1.6.3'
+    testCompile 'org.easymock:easymock:3.2'
     runtime 'org.mariadb.jdbc:mariadb-java-client:1.1.9'
     runtime 'com.h2database:h2:1.4.189'
     runtime 'org.xerial:sqlite-jdbc:3.8.11.1'

@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.data.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.text.SpongeTexts;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -56,6 +63,7 @@ public class NbtDataUtil {
     public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
 
     public static final String ITEM_DISPLAY = "display";
+    public static final String ITEM_DISPLAY_NAME = "name";
     public static final String ITEM_LORE = "Lore";
 
     public static final String ITEM_BOOK_PAGES = "pages";
@@ -102,7 +110,7 @@ public class NbtDataUtil {
      * not exist, none are created. To create a new compound regardless,
      * {@link #getOrCreateCompound(ItemStack)} is recommended.
      *
-     * @param itemStack The itemstack to get the compound from
+     * @param itemStack The item stack to get the compound from
      * @return The main compound, if available
      */
     public static Optional<NBTTagCompound> getItemCompound(ItemStack itemStack) {
@@ -185,6 +193,9 @@ public class NbtDataUtil {
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
         final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        if (list.hasNoTags()) {
+            return new ArrayList<>();
+        }
         return SpongeTexts.fromLegacy(list);
     }
 
@@ -207,5 +218,54 @@ public class NbtDataUtil {
             compound.setString(ITEM_BOOK_AUTHOR, INVALID_TITLE);
         }
         compound.setBoolean(ITEM_BOOK_RESOLVED, true);
+    }
+
+    public static List<ItemEnchantment> getItemEnchantments(ItemStack itemStack) {
+        if (!itemStack.isItemEnchanted()) {
+            return Collections.EMPTY_LIST;
+        }
+        final List<ItemEnchantment> enchantments = Lists.newArrayList();
+        final NBTTagList list = itemStack.getEnchantmentTagList();
+        for (int i = 0; i < list.tagCount(); i++) {
+            final NBTTagCompound compound = list.getCompoundTagAt(i);
+            final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
+            final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+
+            final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+            enchantments.add(new ItemEnchantment(enchantment, level));
+        }
+        return enchantments;
+    }
+
+    public static void setItemEnchantments(ItemStack itemStack, List<ItemEnchantment> value) {
+        final NBTTagCompound compound;
+        if (itemStack.getTagCompound() == null) {
+            compound = new NBTTagCompound();
+            itemStack.setTagCompound(compound);
+        } else {
+            compound = itemStack.getTagCompound();
+        }
+        final NBTTagList enchantments = compound.getTagList(NbtDataUtil.ITEM_ENCHANTMENT_LIST, NbtDataUtil.TAG_COMPOUND);
+        final Map<Enchantment, Integer> mergedMap = Maps.newLinkedHashMap(); // We need to retain insertion order.
+        if (enchantments.tagCount() != 0) {
+            for (int i = 0; i < enchantments.tagCount(); i++) { // we have to filter out the enchantments we're replacing...
+                final NBTTagCompound enchantmentCompound = enchantments.getCompoundTagAt(i);
+                final short enchantmentId = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
+                final short level = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+                mergedMap.put(enchantment, (int) level);
+            }
+        }
+        for (ItemEnchantment enchantment : value) {
+            mergedMap.put(enchantment.getEnchantment(), enchantment.getLevel());
+        }
+        final NBTTagList newList = new NBTTagList(); // Reconstruct the newly merged enchantment list
+        for (Map.Entry<Enchantment, Integer> entry : mergedMap.entrySet()) {
+            final NBTTagCompound enchantmentCompound = new NBTTagCompound();
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) ((net.minecraft.enchantment.Enchantment) entry.getKey()).effectId);
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
+            newList.appendTag(enchantmentCompound);
+        }
+        compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
     }
 }

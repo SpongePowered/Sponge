@@ -55,11 +55,6 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
     }
 
     @Override
-    public ImmutableFoodData copy() {
-        return new ImmutableSpongeFoodData(this.foodLevel, this.foodSaturationLevel, this.foodExhaustionLevel);
-    }
-
-    @Override
     public FoodData asMutable() {
         return new SpongeFoodData(this.foodLevel, this.foodSaturationLevel, this.foodExhaustionLevel);
     }

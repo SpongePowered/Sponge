@@ -34,13 +34,15 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeAttachedData extends AbstractImmutableBooleanData<ImmutableAttachedData, AttachedData> implements ImmutableAttachedData {
 
+    private final ImmutableValue<Boolean> attachedValue = ImmutableSpongeValue.cachedOf(Keys.ATTACHED, false, this.getValue());
+
     public ImmutableSpongeAttachedData(boolean attached) {
         super(ImmutableAttachedData.class, attached, Keys.ATTACHED, SpongeAttachedData.class);
     }
 
     @Override
     public ImmutableValue<Boolean> attached() {
-        return new ImmutableSpongeValue<>(Keys.ATTACHED, false, this.getValue());
+        return this.attachedValue;
     }
 
     @Override

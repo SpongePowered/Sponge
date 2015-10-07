@@ -31,18 +31,20 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
 import java.util.Optional;
 
-public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<IMixinEntityLivingBase, Integer, MutableBoundedValue<Integer>> {
 
     public MaxAirValueProcessor() {
-        super(Keys.MAX_AIR);
+        super(IMixinEntityLivingBase.class, Keys.MAX_AIR);
     }
 
     @Override
@@ -51,30 +53,19 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
     }
 
     @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
-            return Optional.of(entity.getMaxAir());
-        }
-        return Optional.empty();
-    }
-
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityLivingBase;
+    protected boolean set(IMixinEntityLivingBase container, Integer value) {
+        container.setMaxAir(value);
+        return true;
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        if (supports(container)) {
-            final IMixinEntityLivingBase entity = (IMixinEntityLivingBase) container;
-            final Integer oldValue = entity.getMaxAir();
-            entity.setMaxAir(value);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.MAX_AIR, value),
-                                                               new ImmutableSpongeValue<>(Keys.MAX_AIR, oldValue));
-        }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.MAX_AIR, value));
+    protected Optional<Integer> getVal(IMixinEntityLivingBase container) {
+        return Optional.of(container.getMaxAir());
+    }
+
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.MAX_AIR, 300, value, intComparator(), 0, Integer.MAX_VALUE);
     }
 
     @Override

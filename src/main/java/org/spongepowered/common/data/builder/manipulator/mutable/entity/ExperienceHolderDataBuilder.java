@@ -41,12 +41,13 @@ public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<Exper
 
     @Override
     public Optional<ExperienceHolderData> build(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.EXPERIENCE_LEVEL.getQuery()) && container.contains(Keys.TOTAL_EXPERIENCE.getQuery())
-                && container.contains(Keys.EXPERIENCE_SINCE_LEVEL.getQuery()) && container.contains(Keys.EXPERIENCE_FROM_START_OF_LEVEL.getQuery())) {
+        if (container.contains(Keys.EXPERIENCE_LEVEL.getQuery())
+            && container.contains(Keys.TOTAL_EXPERIENCE.getQuery())
+            && container.contains(Keys.EXPERIENCE_SINCE_LEVEL.getQuery())) {
             final int level = DataUtil.getData(container, Keys.EXPERIENCE_LEVEL, Integer.class);
             final int totalExp = DataUtil.getData(container, Keys.TOTAL_EXPERIENCE, Integer.class);
             final int expSinceLevel = DataUtil.getData(container, Keys.EXPERIENCE_SINCE_LEVEL, Integer.class);
-            return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
+            return Optional.of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
         }
         return Optional.empty();
     }
@@ -63,7 +64,7 @@ public class ExperienceHolderDataBuilder implements DataManipulatorBuilder<Exper
             final int level = player.experienceLevel;
             final int totalExp = player.experienceTotal;
             final int expSinceLevel = (int) (player.experience * player.xpBarCap());
-            return Optional.<ExperienceHolderData>of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
+            return Optional.of(new SpongeExperienceHolderData(level, totalExp, expSinceLevel));
         }
         return Optional.empty();
     }

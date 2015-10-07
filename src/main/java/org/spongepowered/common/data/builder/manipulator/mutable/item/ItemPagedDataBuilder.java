@@ -56,7 +56,7 @@ public class ItemPagedDataBuilder implements DataManipulatorBuilder<PagedData, I
                 return Optional.empty();
             }
             final NBTTagList list = ((ItemStack) dataHolder).getTagCompound().getTagList(NbtDataUtil.ITEM_BOOK_PAGES, NbtDataUtil.TAG_STRING);
-            return Optional.<PagedData>of(new SpongePagedData(SpongeTexts.fromLegacy(list)));
+            return Optional.of(new SpongePagedData(SpongeTexts.fromLegacy(list)));
         } else {
             return Optional.empty();
         }
@@ -64,9 +64,9 @@ public class ItemPagedDataBuilder implements DataManipulatorBuilder<PagedData, I
 
     @Override
     public Optional<PagedData> build(DataView container) throws InvalidDataException {
-        DataUtil.checkDataExists(container, Keys.ITEM_LORE.getQuery());
+        DataUtil.checkDataExists(container, Keys.BOOK_PAGES.getQuery());
         final List<String> json = container.getStringList(Keys.BOOK_PAGES.getQuery()).get();
-        return Optional.<PagedData>of(new SpongePagedData(SpongeTexts.fromJson(json)));
+        return Optional.of(new SpongePagedData(SpongeTexts.fromJson(json)));
     }
 
 }

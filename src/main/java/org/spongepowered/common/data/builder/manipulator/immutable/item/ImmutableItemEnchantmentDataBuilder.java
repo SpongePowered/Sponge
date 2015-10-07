@@ -62,17 +62,8 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
             if (!((ItemStack) dataHolder).isItemEnchanted()) {
                 return Optional.empty();
             } else {
-                final List<ItemEnchantment> enchantments = Lists.newArrayList();
-                final NBTTagList list = ((ItemStack) dataHolder).getEnchantmentTagList();
-                for (int i = 0; i < list.tagCount(); i++) {
-                    final NBTTagCompound compound = list.getCompoundTagAt(i);
-                    final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                    final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-
-                    final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
-                    enchantments.add(new ItemEnchantment(enchantment, level));
-                }
-                return Optional.<ImmutableEnchantmentData>of(new ImmutableSpongeEnchantmentData(enchantments));
+                final List<ItemEnchantment> enchantments = NbtDataUtil.getItemEnchantments((ItemStack) dataHolder);
+                return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
             }
         }
         return Optional.empty();
@@ -90,6 +81,6 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
         final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
                                                                                  ItemEnchantment.class,
                                                                                  serializationService).get();
-        return Optional.<ImmutableEnchantmentData>of(new ImmutableSpongeEnchantmentData(enchantments));
+        return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
     }
 }

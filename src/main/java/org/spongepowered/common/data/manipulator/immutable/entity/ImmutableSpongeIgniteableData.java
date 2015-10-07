@@ -64,11 +64,6 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableIgniteableData copy() {
-        return this;
-    }
-
-    @Override
     public IgniteableData asMutable() {
         return new SpongeIgniteableData(this.fireTicks, this.fireDelay);
     }

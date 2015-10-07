@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.common;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -35,6 +37,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
+import java.lang.reflect.Modifier;
 import java.util.Comparator;
 
 /**
@@ -60,6 +63,8 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
                                                   Comparator<T> comparator, Class<? extends M> mutableClass, T lowerBound, T upperBound) {
         super(immutableClass, value, usedKey);
         this.comparator = comparator;
+        checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.mutableClass = mutableClass;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;

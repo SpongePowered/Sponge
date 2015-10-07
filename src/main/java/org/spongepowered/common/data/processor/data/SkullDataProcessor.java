@@ -60,9 +60,9 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
     @Override
     public Optional<SkullData> from(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntitySkull) {
-            return Optional.<SkullData>of(new SpongeSkullData(SkullUtils.getSkullType((TileEntitySkull) dataHolder)));
+            return Optional.of(new SpongeSkullData(SkullUtils.getSkullType((TileEntitySkull) dataHolder)));
         } else if (SkullUtils.isValidItemStack(dataHolder)) {
-            return Optional.<SkullData>of(new SpongeSkullData(SkullUtils.getSkullType((ItemStack) dataHolder)));
+            return Optional.of(new SpongeSkullData(SkullUtils.getSkullType((ItemStack) dataHolder)));
         }
         return Optional.empty();
     }
@@ -119,7 +119,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
     @Override
     public Optional<ImmutableSkullData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableSkullData immutable) {
         if (key.equals(Keys.SKULL_TYPE)) {
-            return Optional.<ImmutableSkullData>of(new ImmutableSpongeSkullData((SkullType) value));
+            return Optional.of(new ImmutableSpongeSkullData((SkullType) value));
         }
         return Optional.empty();
     }

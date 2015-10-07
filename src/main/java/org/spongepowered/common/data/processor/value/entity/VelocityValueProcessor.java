@@ -38,10 +38,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3d, Value<Vector3d>> {
+public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Entity, Vector3d, Value<Vector3d>> {
 
     public VelocityValueProcessor() {
-        super(Keys.VELOCITY);
+        super(Entity.class, Keys.VELOCITY);
     }
 
     @Override
@@ -50,34 +50,21 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Vector3
     }
 
     @Override
-    public Optional<Vector3d> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            return Optional.of(new Vector3d(((Entity) container).motionX, ((Entity) container).motionY, ((Entity) container).motionZ));
-        }
-        return Optional.empty();
+    protected boolean set(Entity container, Vector3d value) {
+        container.motionX = value.getX();
+        container.motionY = value.getY();
+        container.motionZ = value.getZ();
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof Entity;
+    protected Optional<Vector3d> getVal(Entity container) {
+        return Optional.of(new Vector3d(container.motionX, container.motionY, container.motionZ));
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Vector3d value) {
-        final ImmutableValue<Vector3d> newValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, value);
-        if (container instanceof Entity) {
-            final Vector3d old = getValueFromContainer(container).get();
-            final ImmutableValue<Vector3d> oldValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, old);
-            try {
-                ((Entity) container).motionX = value.getX();
-                ((Entity) container).motionY = value.getY();
-                ((Entity) container).motionZ = value.getZ();
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                DataTransactionBuilder.errorResult(newValue);
-            }
-        }
-        return DataTransactionBuilder.failResult(newValue);
+    protected ImmutableValue<Vector3d> constructImmutableValue(Vector3d value) {
+        return new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, value);
     }
 
     @Override

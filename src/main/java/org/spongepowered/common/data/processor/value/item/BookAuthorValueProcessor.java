@@ -42,54 +42,15 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text, Value<Text>> {
+public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Text, Value<Text>> {
 
     public BookAuthorValueProcessor() {
-        super(Keys.BOOK_AUTHOR);
+        super(ItemStack.class, Keys.BOOK_AUTHOR);
     }
 
     @Override
-    public Optional<Text> getValueFromContainer(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            final ItemStack itemStack = (ItemStack) container;
-            if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
-                return Optional.empty();
-            }
-            final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
-            final Text author = Texts.json().fromUnchecked(json);
-            return Optional.<Text>of(author);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        if (container instanceof ItemStack) {
-            return ((ItemStack) container).getItem() == Items.writable_book || ((ItemStack) container).getItem() == Items.written_book;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Text value) {
-        final ImmutableValue<Text> author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, value);
-        if (this.supports(container)) {
-            final Optional<Text> oldData = getValueFromContainer(container);
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            if (oldData.isPresent()) {
-                final ImmutableValue<Text> oldAuthor = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, oldData.get());
-                builder.replace(oldAuthor);
-            }
-            if (!((ItemStack) container).hasTagCompound()) {
-                ((ItemStack) container).setTagCompound(new NBTTagCompound());
-            }
-            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, Texts.legacy().to(value));
-            builder.success(author);
-            return builder.result(DataTransactionResult.Type.SUCCESS).build();
-
-        }
-        return DataTransactionBuilder.failResult(author);
+    protected boolean supports(ItemStack container) {
+        return container.getItem() == Items.writable_book || container.getItem() == Items.written_book;
     }
 
     @Override
@@ -100,6 +61,31 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
     @Override
     protected Value<Text> constructValue(Text defaultValue) {
         return new SpongeValue<>(Keys.BOOK_AUTHOR, defaultValue);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    protected boolean set(ItemStack container, Text value) {
+        if (!container.hasTagCompound()) {
+            container.setTagCompound(new NBTTagCompound());
+        }
+        container.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, Texts.legacy().to(value));
+        return true;
+    }
+
+    @Override
+    protected Optional<Text> getVal(ItemStack container) {
+        if (!container.hasTagCompound() || !container.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
+            return Optional.empty();
+        }
+        final String json = container.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
+        final Text author = Texts.json().fromUnchecked(json);
+        return Optional.of(author);
+    }
+
+    @Override
+    protected ImmutableValue<Text> constructImmutableValue(Text value) {
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), value);
     }
 
 }
