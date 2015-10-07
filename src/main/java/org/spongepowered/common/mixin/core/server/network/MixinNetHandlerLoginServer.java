@@ -68,9 +68,9 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
     private ClientConnectionEvent.Login clientConEvent;
 
     @Shadow
-    abstract public String getConnectionInfo();
+    public abstract String getConnectionInfo();
     @Shadow
-    abstract public com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
+    public abstract com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
 
     @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
             + "allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))
