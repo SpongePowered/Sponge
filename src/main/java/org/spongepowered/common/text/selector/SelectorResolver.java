@@ -342,7 +342,7 @@ public class SelectorResolver {
         Optional<Double> x = this.selector.get(vecTypes.x()).map(TO_DOUBLE);
         Optional<Double> y = this.selector.get(vecTypes.y()).map(TO_DOUBLE);
         Optional<Double> z = this.selector.get(vecTypes.z()).map(TO_DOUBLE);
-        return new Vector3d(x.orElse(Double.valueOf(pos.getX())), y.orElse(Double.valueOf(pos.getY())), z.orElse(Double.valueOf(pos.getZ())));
+        return new Vector3d(x.orElse(pos.getX()), y.orElse(pos.getY()), z.orElse(pos.getZ()));
     }
 
     public String getName() {
