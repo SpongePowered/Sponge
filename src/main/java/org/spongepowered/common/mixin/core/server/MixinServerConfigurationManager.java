@@ -106,7 +106,8 @@ public abstract class MixinServerConfigurationManager {
     @SuppressWarnings("rawtypes")
     @Shadow public List playerEntityList;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
-    @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_, net.minecraft.world.World worldIn);
+    @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_,
+                                                               net.minecraft.world.World worldIn);
     @Shadow protected abstract void func_96456_a(ServerScoreboard scoreboardIn, EntityPlayerMP playerIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
@@ -220,7 +221,8 @@ public abstract class MixinServerConfigurationManager {
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         Text message = SpongeTexts.toText(chatcomponenttranslation);
         MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player);
+        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player),
+                originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player);
         Sponge.getGame().getEventManager().post(event);
         // Set the resolved location of the event onto the player
         ((Player) playerIn).setTransform(event.getToTransform());
@@ -299,7 +301,8 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplEventFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
+                SpongeImplEventFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn,
+                        this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);
         player.setTransform(event.getToTransform());

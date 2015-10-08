@@ -42,8 +42,8 @@ public class SpongeBlockDamageSource implements BlockDamageSource {
     private final boolean explosive;
     private final boolean magical;
 
-    public SpongeBlockDamageSource(Location<World> location, BlockSnapshot blockState, DamageType damageType, boolean isAbsolute, boolean bypassesArmor,
-                                   boolean difficultyScaled, boolean explosive, boolean magical) {
+    public SpongeBlockDamageSource(Location<World> location, BlockSnapshot blockState, DamageType damageType, boolean isAbsolute,
+                                   boolean bypassesArmor, boolean difficultyScaled, boolean explosive, boolean magical) {
         this.location = location;
         this.blockSnapshot = blockState;
         this.damageType = damageType;

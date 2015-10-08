@@ -43,7 +43,8 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
     private final Class<? extends M> mutableClass;
     private final E defaultValue;
 
-    public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
+    public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey,
+                                              Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         this.mutableClass = checkNotNull(mutableClass);
         this.defaultValue = checkNotNull(defaultValue, "The default value was null! This is unacceptable! Maybe the value was not registered?");

@@ -105,7 +105,8 @@ public class SpongeScoreboard implements Scoreboard {
     private void updateDisplaySlot(Objective objective, DisplaySlot displaySlot) {
         this.allowRecursion = false;
         for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
-            scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(), ((SpongeObjective) objective).getObjective(scoreboard));
+            scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(),
+                    ((SpongeObjective) objective).getObjective(scoreboard));
         }
         this.allowRecursion = true;
     }
@@ -284,7 +285,8 @@ public class SpongeScoreboard implements Scoreboard {
         for (DisplaySlot displaySlot: Sponge.getGame().getRegistry().getAllOf(DisplaySlot.class)) {
             Optional<Objective> objective = spongeScoreboard.getObjective(displaySlot);
             if (objective.isPresent()) {
-                scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(), scoreboard.getObjective(objective.get().getName()));
+                scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(),
+                        scoreboard.getObjective(objective.get().getName()));
             }
         }
     }
@@ -310,7 +312,8 @@ public class SpongeScoreboard implements Scoreboard {
 
     public net.minecraft.scoreboard.Scoreboard getPlayerScoreboard() {
         // A new scoreboard handle is created for each world, so that the /scoreboard command can (optionally) not interfere across worlds
-        // Since per-player scoreboards don't exist in vanilla, using the same instance when setScoreboard is used with the same SpongeScoreboard is fine
+        // Since per-player scoreboards don't exist in vanilla, using the same instance when setScoreboard is used with the same SpongeScoreboard
+        // is fine
         return this.playerScoreboard;
     }
 }

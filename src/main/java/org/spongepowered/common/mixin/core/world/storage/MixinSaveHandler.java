@@ -67,7 +67,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
             + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound nbtTagCompound, CallbackInfo ci, NBTTagCompound nbtTagCompound1, NBTTagCompound nbtTagCompound2) {
+    public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound nbtTagCompound, CallbackInfo ci,
+                                                     NBTTagCompound nbtTagCompound1, NBTTagCompound nbtTagCompound2) {
         saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbtTagCompound2);
     }
 
@@ -78,7 +79,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Inject(method = "saveWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
             + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbtTagCompound, NBTTagCompound nbtTagCompound1) {
+    public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbtTagCompound,
+                                           NBTTagCompound nbtTagCompound1) {
         saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbtTagCompound1);
     }
 
@@ -140,7 +142,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     private void saveDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
         // Only save dimension data to root world
-        if (this.worldDirectory.getParentFile() == null || (Sponge.getGame().getPlatform().getType().isClient() && this.worldDirectory.getParentFile().equals(
+        if (this.worldDirectory.getParentFile() == null || (Sponge.getGame().getPlatform().getType().isClient()
+                && this.worldDirectory.getParentFile().equals(
                 Sponge.getGame().getSavesDirectory()))) {
             final NBTTagCompound customWorldDataCompound = new NBTTagCompound();
             final NBTTagCompound customDimensionDataCompound = DimensionManager.saveDimensionDataMap();

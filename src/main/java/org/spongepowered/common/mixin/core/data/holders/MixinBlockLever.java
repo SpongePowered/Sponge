@@ -51,13 +51,14 @@ public abstract class MixinBlockLever extends MixinBlock {
 
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         final BlockLever.EnumOrientation intDir = (BlockLever.EnumOrientation) (Object) blockState.getValue(BlockLever.FACING);
-        final ImmutableDirectionalData directionalData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, getFor(intDir));
+        final ImmutableDirectionalData directionalData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
+                getFor(intDir));
         return directionalData;
     }
 
     protected ImmutablePoweredData getPoweredData(IBlockState blockState) {
         final ImmutablePoweredData poweredData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class,
-                                                                                         (Boolean) blockState.getValue(BlockLever.POWERED));
+                (Boolean) blockState.getValue(BlockLever.POWERED));
         return poweredData;
     }
 

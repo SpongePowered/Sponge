@@ -72,8 +72,10 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
                             @Nullable
                             @Override
                             public Iterable<CommandSource> apply(SubjectCollection input) {
-                                return Iterables.filter(Iterables.transform(Maps.filterValues(input.getAllWithPermission(PermissionSink.this.permission),
-                                                Predicates.equalTo(true)).keySet(), func -> func.getCommandSource().orElse(null)), Predicates.notNull());
+                                return Iterables.filter(Iterables.transform(
+                                        Maps.filterValues(input.getAllWithPermission(PermissionSink.this.permission),
+                                                Predicates.equalTo(true)).keySet(),
+                                                func -> func.getCommandSource().orElse(null)), Predicates.notNull());
                             }
                         }));
         }

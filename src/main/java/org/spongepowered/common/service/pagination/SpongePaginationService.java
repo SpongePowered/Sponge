@@ -131,8 +131,8 @@ public class SpongePaginationService implements PaginationService {
     }
 
     @Override
-    public <T extends CommandSource> void setPaginationCalculator(Class<T> type, PaginationCalculator<? super T> calculator) throws
-                                                                                                                             IllegalArgumentException {
+    public <T extends CommandSource> void setPaginationCalculator(Class<T> type, PaginationCalculator<? super T> calculator)
+            throws IllegalArgumentException {
         PaginationCalculator<?> existing = this.calculators.putIfAbsent(type, calculator);
         if (existing != null) {
             throw new IllegalArgumentException("Pagination calculator already registered for the type " + type);

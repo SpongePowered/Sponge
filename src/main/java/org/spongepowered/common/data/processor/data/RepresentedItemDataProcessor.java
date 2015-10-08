@@ -43,7 +43,9 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
-public class RepresentedItemDataProcessor extends AbstractEntitySingleDataProcessor<Entity, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+public class RepresentedItemDataProcessor
+    extends AbstractEntitySingleDataProcessor<Entity, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData,
+            ImmutableRepresentedItemData> {
 
     public RepresentedItemDataProcessor() {
         super(Entity.class, Keys.REPRESENTED_ITEM);

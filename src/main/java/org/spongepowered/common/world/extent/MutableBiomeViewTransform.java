@@ -48,7 +48,8 @@ public class MutableBiomeViewTransform extends AbstractBiomeViewTransform<Mutabl
 
     @Override
     public MutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        return new MutableBiomeViewDownsize(this.area, this.inverseTransform.transform(newMin), this.inverseTransform.transform(newMax)).getBiomeView(this.transform);
+        return new MutableBiomeViewDownsize(this.area, this.inverseTransform.transform(newMin),
+                this.inverseTransform.transform(newMax)).getBiomeView(this.transform);
     }
 
     @Override

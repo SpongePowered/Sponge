@@ -44,8 +44,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
-                                                                                                                           AbstractMultiDataProcessor<M, I> {
+public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+    extends AbstractMultiDataProcessor<M, I> {
 
     private final Predicate<ItemStack> predicate;
 

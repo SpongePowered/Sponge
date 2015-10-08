@@ -93,66 +93,76 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
         }
     }
 
-    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onUpdateScoreValue(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96516_a", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onRemoveScore(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_178820_a", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onRemoveScoreForObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "setObjectiveInDisplaySlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "setObjectiveInDisplaySlot", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onSetObjectiveInDisplaySlot(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onAddPlayerToTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onRemovePlayerFromTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onUpdateObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onBroadcastTeamCreated(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onSendTeamUpdate(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96513_c", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     public void onRemoveTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "func_96549_e", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
-            false))
+    @Redirect(method = "func_96549_e", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0,
+            remap = false))
     public Iterator onGetPlayerIteratorForObjectives(List list) {
         return this.players.iterator();
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "func_96546_g", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
-            false))
+    @Redirect(method = "func_96546_g", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0,
+            remap = false))
     public Iterator onGetPlayerIterator(List list) {
         return this.players.iterator();
     }

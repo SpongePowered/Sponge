@@ -44,7 +44,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class AbstractEntityDataProcessor<E extends Entity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractMultiDataProcessor<M, I> {
+public abstract class AbstractEntityDataProcessor<E extends Entity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+    extends AbstractMultiDataProcessor<M, I> {
 
     private final Class<E> entityClass;
 

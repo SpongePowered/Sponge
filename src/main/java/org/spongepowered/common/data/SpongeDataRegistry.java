@@ -114,7 +114,8 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
             registry.dataProcessorDelegates.put(entry.getKey(), delegate);
         }
         registry.processorMap.clear();
-        for (Map.Entry<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> entry : registry.immutableProcessorMap.entrySet()) {
+        for (Map.Entry<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> entry
+                : registry.immutableProcessorMap.entrySet()) {
             ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
             Collections.sort(entry.getValue(), ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
             dataListBuilder.addAll(entry.getValue());

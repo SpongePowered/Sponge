@@ -43,7 +43,10 @@ import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> {
+public abstract class
+    AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>,
+            I extends ImmutableDataManipulator<I, M>>
+    extends AbstractSingleDataProcessor<T, V, M, I> {
 
     private final Class<E> entityClass;
 

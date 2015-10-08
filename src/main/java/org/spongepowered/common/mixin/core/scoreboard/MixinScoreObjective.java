@@ -79,6 +79,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
     }
 
     private boolean shouldEcho() {
-        return (((IMixinScoreboard) this.theScoreboard).echoToSponge() || (this.spongeObjective.getScoreboards().size() == 1)) && this.spongeObjective.allowRecursion;
+        return (((IMixinScoreboard) this.theScoreboard).echoToSponge() || (this.spongeObjective.getScoreboards().size() == 1))
+                && this.spongeObjective.allowRecursion;
     }
 }

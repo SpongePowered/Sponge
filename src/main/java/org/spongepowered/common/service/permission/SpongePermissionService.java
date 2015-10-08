@@ -72,7 +72,7 @@ public class SpongePermissionService implements PermissionService {
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
         this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
-                                                                            s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
+                s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
 
         this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
                 s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)), s -> {

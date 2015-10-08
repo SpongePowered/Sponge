@@ -222,7 +222,8 @@ public abstract class Element {
 
         if (text.getHoverAction().isPresent()) {
             HoverEvent nmsEvent = SpongeHoverAction.getHandle(text.getHoverAction().get(), locale);
-            currentElement.onHover = nmsEvent.getAction().getCanonicalName() + "('" + TextXmlRepresentation.INSTANCE.to(SpongeTexts.toText(nmsEvent.getValue()), locale) + "')";
+            currentElement.onHover = nmsEvent.getAction().getCanonicalName() + "('"
+                    + TextXmlRepresentation.INSTANCE.to(SpongeTexts.toText(nmsEvent.getValue()), locale) + "')";
         }
 
         if (text.getShiftClickAction().isPresent()) {

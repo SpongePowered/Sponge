@@ -78,7 +78,8 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> remainingDelay() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay, this.remainingDelay);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay,
+                this.remainingDelay);
     }
 
     @Override
@@ -104,7 +105,8 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> requiredPlayerRange() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.playerRange);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE,
+                this.playerRange);
     }
 
     @Override

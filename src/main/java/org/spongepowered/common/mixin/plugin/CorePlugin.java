@@ -46,7 +46,8 @@ public class CorePlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return !"net.minecraft.network.rcon.RConConsoleSource".equals(targetClassName) || MixinEnvironment.getCurrentEnvironment().getSide() != Side.CLIENT;
+        return !"net.minecraft.network.rcon.RConConsoleSource".equals(targetClassName)
+                || MixinEnvironment.getCurrentEnvironment().getSide() != Side.CLIENT;
     }
 
     @Override

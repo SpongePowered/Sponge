@@ -52,8 +52,10 @@ public abstract class MixinChatComponentSerializer {
     @Shadow
     public abstract IChatComponent deserialize(JsonElement jsonElement, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_);
 
-    @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/util/IChatComponent;",
-            at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonElement;getAsJsonObject()Lcom/google/gson/JsonObject;", ordinal = 0, shift = Shift.BY, by = 3, remap = false),
+    @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)"
+            + "Lnet/minecraft/util/IChatComponent;", at = @At(value = "INVOKE",
+                    target = "Lcom/google/gson/JsonElement;getAsJsonObject()Lcom/google/gson/JsonObject;", ordinal = 0, shift = Shift.BY, by = 3,
+                    remap = false),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void deserializePlaceholder(JsonElement jsonElement, Type type, JsonDeserializationContext context,
             CallbackInfoReturnable<IChatComponent> cir, JsonObject jsonObject) {
@@ -93,9 +95,8 @@ public abstract class MixinChatComponentSerializer {
     @Shadow
     public abstract JsonElement serialize(IChatComponent chatComponent, Type type, JsonSerializationContext context);
 
-    @Inject(method = "serialize(Lnet/minecraft/util/IChatComponent;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;",
-            at = @At(value = "HEAD"),
-            cancellable = true)
+    @Inject(method = "serialize(Lnet/minecraft/util/IChatComponent;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)"
+            + "Lcom/google/gson/JsonElement;", at = @At(value = "HEAD"), cancellable = true)
     public void serializePlaceholder(IChatComponent chatComponent, Type type, JsonSerializationContext context,
             CallbackInfoReturnable<JsonElement> cir) {
         if (chatComponent instanceof ChatComponentPlaceholder) {

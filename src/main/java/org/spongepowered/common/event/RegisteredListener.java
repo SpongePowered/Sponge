@@ -49,7 +49,8 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
     private final boolean ignoreCancelled;
     private final boolean beforeModifications;
 
-    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean ignoreCancelled, boolean beforeModifications) {
+    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean ignoreCancelled,
+                       boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventClass = checkNotNull(eventClass, "eventClass");
         this.order = checkNotNull(order, "order");

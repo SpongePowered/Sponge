@@ -1841,7 +1841,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(ItemStack.class, new SpongeItemStackDataBuilder());
         service.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotBuilder());
         service.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
-        service.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class, new ImmutableItemEnchantmentDataBuilder());
+        service.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
+                new ImmutableItemEnchantmentDataBuilder());
         // Data Manipulators
 
         final HealthDataProcessor healthProcessor = new HealthDataProcessor();

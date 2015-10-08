@@ -37,7 +37,8 @@ public class ImmutableBiomeViewTransform extends AbstractBiomeViewTransform<Immu
 
     @Override
     public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        return new ImmutableBiomeViewDownsize(this.area, this.inverseTransform.transform(newMin), this.inverseTransform.transform(newMax)).getBiomeView(this.transform);
+        return new ImmutableBiomeViewDownsize(this.area, this.inverseTransform.transform(newMin),
+                this.inverseTransform.transform(newMax)).getBiomeView(this.transform);
     }
 
     @Override

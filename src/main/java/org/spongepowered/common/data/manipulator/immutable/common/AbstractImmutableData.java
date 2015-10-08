@@ -75,7 +75,8 @@ import javax.annotation.Nullable;
  * @param <M> The mutable manipulator type
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>> implements ImmutableDataManipulator<I, M> {
+public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
+    implements ImmutableDataManipulator<I, M> {
 
     private final Class<I> immutableClass;
 

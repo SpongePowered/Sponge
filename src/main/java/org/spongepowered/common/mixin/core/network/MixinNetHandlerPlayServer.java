@@ -149,8 +149,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @param tileEntity Injected tileEntity param
      * @param tileEntitySign Injected tileEntitySign param
      */
-    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileEntity, TileEntitySign tileEntitySign) {
+    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true,
+            locals = LocalCapture.CAPTURE_FAILSOFT)
+    public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileEntity,
+                                    TileEntitySign tileEntitySign) {
         ci.cancel();
         final Optional<SignData> existingSignData = ((Sign) tileEntitySign).get(SignData.class);
         if (!existingSignData.isPresent()) {
@@ -272,7 +275,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         this.justTeleported = true;
     }
 
-    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
+    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2),
+            cancellable = true)
     public void proccessPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci) {
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
