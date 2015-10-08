@@ -118,7 +118,7 @@ public abstract class MixinServerConfigurationManager {
     /**
      * Bridge methods to proxy modified method in Vanilla, nothing in Forge
      */
-    public void func_72355_a (NetworkManager netManager, EntityPlayerMP playerIn) {
+    public void func_72355_a(NetworkManager netManager, EntityPlayerMP playerIn) {
         initializeConnectionToPlayer(netManager, playerIn, null);
     }
 

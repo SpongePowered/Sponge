@@ -139,11 +139,9 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
             final FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(world.getWorldInfo().getGeneratorOptions());
             return new WorldChunkManagerHell(
                     BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), BiomeGenBase.field_180279_ad), 0.5F);
-        }
-        else if ((Object) this == WorldType.DEBUG_WORLD) {
+        } else if ((Object) this == WorldType.DEBUG_WORLD) {
             return new WorldChunkManagerHell(BiomeGenBase.plains, 0.0F);
-        }
-        else {
+        } else {
             return new WorldChunkManager(world);
         }
     }
