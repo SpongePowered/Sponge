@@ -79,7 +79,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.worldUniqueId = checkNotNull(builder.worldUuid);
         this.pos = checkNotNull(builder.coords);
-        this.extraData = builder.manipulators == null ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
+        this.extraData = builder.manipulators == null
+                ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
         ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
         for (ImmutableValue<?> value : this.blockState.getValues()) {
             mapBuilder.put(value.getKey(), value);
