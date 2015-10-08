@@ -35,13 +35,15 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text, ImmutableAuthorData, AuthorData> implements ImmutableAuthorData {
 
+    final ImmutableSpongeValue<Text> author;
+
     public ImmutableSpongeAuthorData(Text value) {
         super(ImmutableAuthorData.class, value, Keys.BOOK_AUTHOR);
+        this.author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), value);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
 
     @Override
     public ImmutableValue<Text> author() {
-        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), this.getValue());
+        return author;
     }
 
     @Override
