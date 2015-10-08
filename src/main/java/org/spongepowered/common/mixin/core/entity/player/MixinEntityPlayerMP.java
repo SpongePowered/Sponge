@@ -209,7 +209,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             double dz = this.posZ - position.getZ();
 
             if (dx * dx + dy * dy + dz * dz < radius * radius) {
-                packets.forEach(this.playerNetServerHandler::sendPacket);
+                for (Packet packet : packets) {
+                    this.playerNetServerHandler.sendPacket(packet);
+                }
             }
         }
     }

@@ -177,7 +177,9 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
                 }
                 try {
                     final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
-                    manipulators.forEach(this::offer);
+                    for (DataManipulator<?, ?> manipulator : manipulators) {
+                        offer(manipulator);
+                    }
                 } catch (InvalidDataException e) {
                     Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
                 }

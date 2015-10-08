@@ -103,7 +103,9 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
             .worldId(location.getExtent().getUniqueId());
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
             final TileEntity tileEntity = location.getTileEntity().get();
-            tileEntity.getContainers().forEach(builder::add);
+            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
+                builder.add(manipulator);
+            }
             final NBTTagCompound compound = new NBTTagCompound();
             ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
             builder.unsafeNbt(compound);

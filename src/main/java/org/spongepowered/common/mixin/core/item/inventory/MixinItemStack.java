@@ -72,7 +72,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -345,9 +344,9 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Override
     public List<DataManipulator<?, ?>> getCustomManipulators() {
         final List<DataManipulator<?, ?>> list = Lists.newArrayList();
-        list.addAll(this.manipulators.stream()
-                .map(DataManipulator::copy)
-                .collect(Collectors.toList()));
+        for (DataManipulator<?, ?> manipulator : this.manipulators) {
+            list.add(manipulator.copy());
+        }
         return list;
     }
 

@@ -537,9 +537,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.keepSpawnLoaded = nbt.getBoolean("keepSpawnLoaded");
         this.loadOnStartup = nbt.getBoolean("loadOnStartup");
         this.isMod = nbt.getBoolean("isMod");
-        Sponge.getSpongeRegistry().dimensionClassMappings.values().stream()
-                .filter(type -> type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType")))
-                .forEach(type -> this.dimensionType = type);
+        for (DimensionType type : Sponge.getSpongeRegistry().dimensionClassMappings.values()) {
+            if (type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType"))) {
+                this.dimensionType = type;
+            }
+        }
 
         // Read generator modifiers
         NBTTagList generatorModifiersNbt = nbt.getTagList("generatorModifiers", 8);
