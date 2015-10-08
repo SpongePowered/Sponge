@@ -202,6 +202,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
 
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
@@ -444,6 +445,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // TODO MixinEntityFishHook.setShooter makes angler null sometimes,
             // but that will cause NPE when ticking
             return false;
+        }
+        if(entity instanceof net.minecraft.entity.effect.EntityWeatherEffect) {
+            return addWeatherEffect((net.minecraft.entity.Entity) entity);
         }
         return spawnEntityInWorld(((net.minecraft.entity.Entity) entity));
     }
