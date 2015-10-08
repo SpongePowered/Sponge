@@ -24,24 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.block.BlockStone;
-import org.spongepowered.api.data.type.StoneType;
+import net.minecraft.block.BlockPrismarine;
+import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockStone.EnumType.class)
-@Implements(@Interface(iface = StoneType.class, prefix = "type$"))
-public abstract class MixinStoneEnumType implements StoneType {
+@Mixin(BlockPrismarine.EnumType.class)
+@Implements(@Interface(iface = PrismarineType.class, prefix = "type$"))
+public abstract class MixinEnumPrismarineType implements PrismarineType {
 
-    @Shadow private String name;
+    @Shadow private String unlocalizedName;
 
     public String type$getId() {
-        return this.name;
+        return this.unlocalizedName;
     }
 
     public String type$getName() {
-        return this.name;
+        return this.unlocalizedName;
     }
 }

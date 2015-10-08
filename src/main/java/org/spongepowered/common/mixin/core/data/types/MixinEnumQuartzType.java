@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockQuartz.EnumType.class)
 @Implements(@Interface(iface = QuartzType.class, prefix = "type$"))
-public abstract class MixinQuartsEnumType implements QuartzType {
+public abstract class MixinEnumQuartzType implements QuartzType {
 
     @Shadow private String unlocalizedName;
 
