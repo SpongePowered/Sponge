@@ -104,8 +104,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     }
 
     @Redirect(method = "onUpdate()V", at =
-            @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
-        )
+            @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
         if (entity.worldObj.isRemote) {
             EntitySnapshot fishHookSnapshot = ((FishHook) this).createSnapshot();
@@ -179,7 +178,6 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             if (event.getItemStackTransaction().isPresent()) {
                 ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().get().getFinalSnapshot();
                 EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ,
-
                         (net.minecraft.item.ItemStack) itemSnapshot.createStack());
                 double d1 = this.angler.posX - this.posX;
                 double d3 = this.angler.posY - this.posY;
