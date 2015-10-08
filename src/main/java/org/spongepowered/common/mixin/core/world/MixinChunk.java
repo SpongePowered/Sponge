@@ -92,14 +92,14 @@ public abstract class MixinChunk implements Chunk {
 
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
     public void onChunkLoadInject(CallbackInfo ci) {
-        if (!worldObj.isRemote) {
+        if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
         }
     }
 
     @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
     public void onChunkUnloadInject(CallbackInfo ci) {
-        if (!worldObj.isRemote) {
+        if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
         }
     }

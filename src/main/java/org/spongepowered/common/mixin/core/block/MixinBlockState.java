@@ -92,7 +92,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
             final Cycleable next = value.cycleNext();
             return with((Key<? extends BaseValue<Object>>) (Object) key, next).get();
         }
-        throw new IllegalArgumentException("Used an invalid cyclable key! Check with supports in the future!");
+        throw new IllegalArgumentException("Used an invalid cycleable key! Check with supports in the future!");
     }
 
     @Override
@@ -103,9 +103,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
             .worldId(location.getExtent().getUniqueId());
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
             final TileEntity tileEntity = location.getTileEntity().get();
-            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
-                builder.add(manipulator);
-            }
+            tileEntity.getContainers().forEach(builder::add);
             final NBTTagCompound compound = new NBTTagCompound();
             ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
             builder.unsafeNbt(compound);

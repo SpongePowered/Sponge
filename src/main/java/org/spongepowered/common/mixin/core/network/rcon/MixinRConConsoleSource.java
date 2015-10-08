@@ -44,7 +44,8 @@ import org.spongepowered.common.interfaces.IMixinRConConsoleSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 
 @Mixin(RConConsoleSource.class)
-public abstract class MixinRConConsoleSource implements ICommandSender, IMixinCommandSource, IMixinCommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
+public abstract class MixinRConConsoleSource
+        implements ICommandSender, IMixinCommandSource, IMixinCommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
     @Shadow
     private StringBuffer buffer;
 

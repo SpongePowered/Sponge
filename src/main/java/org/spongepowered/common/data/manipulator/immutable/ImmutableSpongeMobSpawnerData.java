@@ -71,17 +71,20 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     public ImmutableBoundedValue<Short> remainingDelay() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_REMAINING_DELAY, (short) 0, this.remaining, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_REMAINING_DELAY, (short) 0, this.remaining, shortComparator(), (short) 0,
+                Short.MAX_VALUE);
     }
 
     @Override
     public ImmutableBoundedValue<Short> minimumSpawnDelay() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, this.minSpawnDelay, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, this.minSpawnDelay, shortComparator(), (short) 0,
+                Short.MAX_VALUE);
     }
 
     @Override
     public ImmutableBoundedValue<Short> maximumSpawnDelay() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MAXIMUM_DELAY, (short) 0, this.maxSpawnDelay, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MAXIMUM_DELAY, (short) 0, this.maxSpawnDelay, shortComparator(), (short) 0,
+                Short.MAX_VALUE);
     }
 
     @Override
@@ -91,17 +94,20 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     public ImmutableBoundedValue<Short> maximumNearbyEntities() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) 0, this.maxNearby, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) 0, this.maxNearby, shortComparator(), (short) 0,
+                Short.MAX_VALUE);
     }
 
     @Override
     public ImmutableBoundedValue<Short> requiredPlayerRange() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_REQURED_PLAYER_RANGE, (short) 0, this.playerRange, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, (short) 0, this.playerRange, shortComparator(), (short) 0,
+                Short.MAX_VALUE);
     }
 
     @Override
     public ImmutableBoundedValue<Short> spawnRange() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_SPAWN_RANGE, (short) 0, this.spawnRange, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_SPAWN_RANGE, (short) 0, this.spawnRange, shortComparator(), (short) 0,
+                Short.MAX_VALUE);
     }
 
     @Override
@@ -129,7 +135,8 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     public MobSpawnerData asMutable() {
-        return new SpongeMobSpawnerData(this.remaining, this.minSpawnDelay, this.maxSpawnDelay, this.count, this.maxNearby, this.playerRange, this.spawnRange, this.nextToSpawn, this.entitiesToSpawn);
+        return new SpongeMobSpawnerData(this.remaining, this.minSpawnDelay, this.maxSpawnDelay, this.count, this.maxNearby, this.playerRange,
+                this.spawnRange, this.nextToSpawn, this.entitiesToSpawn);
     }
 
     @Override
@@ -145,7 +152,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
             .set(Keys.SPAWNER_MAXIMUM_DELAY, this.maxSpawnDelay)
             .set(Keys.SPAWNER_SPAWN_COUNT, this.count)
             .set(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, this.maxNearby)
-            .set(Keys.SPAWNER_REQURED_PLAYER_RANGE, this.playerRange)
+            .set(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, this.playerRange)
             .set(Keys.SPAWNER_SPAWN_RANGE, this.spawnRange)
             .set(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, this.nextToSpawn)
             .set(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);

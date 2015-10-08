@@ -134,9 +134,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, damage);
 
         if (this.itemDataSet != null) {
-            for (DataManipulator<?, ?> data : this.itemDataSet) {
-                stack.offer(data);
-            }
+            this.itemDataSet.forEach(stack::offer);
         }
         return stack;
     }

@@ -59,11 +59,6 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
     }
 
     @Override
-    public Optional<PotionEffect> build(DataView container) throws InvalidDataException {
-        return Optional.empty(); // TODO
-    }
-
-    @Override
     public PotionEffectBuilder potionType(PotionEffectType potionEffectType) {
         checkNotNull(potionEffectType, "Potion effect type cannot be null");
         this.potionType = potionEffectType;
@@ -104,5 +99,10 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
                 this.amplifier,
                 this.isAmbient,
                 this.showParticles);
+    }
+
+    @Override
+    public Optional<PotionEffect> build(DataView container) throws InvalidDataException {
+        return Optional.empty(); // TODO
     }
 }

@@ -95,9 +95,9 @@ public class SpongeCallbackHolder {
                 .description(t("Execute a callback registered as part of a Text object. Primarily for internal use"))
                 .arguments(new CallbackCommandElement(t("callback")))
                 .executor((src, args) -> {
-                    args.<Consumer<CommandSource>>getOne("callback").get().accept(src);
-                    return CommandResult.success();
-                }).build();
+                        args.<Consumer<CommandSource>>getOne("callback").get().accept(src);
+                        return CommandResult.success();
+                    }).build();
     }
 
     private class CallbackCommandElement extends CommandElement {

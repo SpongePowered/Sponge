@@ -28,7 +28,7 @@ import net.minecraft.command.ICommandSender;
 
 public interface IMixinCommandSource {
 
-    public String getIdentifier();
+    String getIdentifier();
 
-    public ICommandSender asICommandSender();
+    ICommandSender asICommandSender();
 }

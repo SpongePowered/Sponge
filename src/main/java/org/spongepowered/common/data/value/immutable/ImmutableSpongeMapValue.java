@@ -57,6 +57,12 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
     }
 
     @Override
+    public ImmutableMapValue<K, V> with(K key, V value) {
+        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).put(checkNotNull(key),
+                checkNotNull(value)).build());
+    }
+
+    @Override
     public ImmutableMapValue<K, V> transform(Function<Map<K, V>, Map<K, V>> function) {
         return new ImmutableSpongeMapValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
@@ -71,12 +77,6 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
     @Override
     public int size() {
         return this.actualValue.size();
-    }
-
-    @Override
-    public ImmutableMapValue<K, V> with(K key, V value) {
-        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).put(checkNotNull(key),
-                                                                                                                 checkNotNull(value)).build());
     }
 
     @Override

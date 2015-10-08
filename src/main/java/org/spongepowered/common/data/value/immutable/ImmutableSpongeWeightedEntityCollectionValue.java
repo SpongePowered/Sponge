@@ -67,20 +67,25 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
     }
 
     @Override
+    public ImmutableWeightedEntityCollectionValue with(WeightedEntity... elements) {
+        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<>();
+        weightedEntities.addAll(this.actualValue);
+        weightedEntities.addAll(ImmutableList.copyOf(elements));
+        return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
+    }
+
+    @Override
+    public ImmutableWeightedEntityCollectionValue with(EntityType entityType, Collection<DataManipulator<?, ?>> entityData) {
+        return with(new WeightedEntity(entityType, 1, entityData));
+    }
+
+    @Override
     public ImmutableWeightedEntityCollectionValue transform(
         Function<WeightedCollection<WeightedEntity>, WeightedCollection<WeightedEntity>> function) {
         final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<>();
         final WeightedCollection<WeightedEntity> temp = new WeightedCollection<>();
         temp.addAll(this.actualValue);
         weightedEntities.addAll(checkNotNull(checkNotNull(function).apply(temp)));
-        return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
-    }
-
-    @Override
-    public ImmutableWeightedEntityCollectionValue with(WeightedEntity... elements) {
-        final WeightedCollection<WeightedEntity> weightedEntities = new WeightedCollection<>();
-        weightedEntities.addAll(this.actualValue);
-        weightedEntities.addAll(ImmutableList.copyOf(elements));
         return new ImmutableSpongeWeightedEntityCollectionValue(getKey(), weightedEntities);
     }
 
@@ -117,11 +122,6 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
     @Override
     public WeightedEntityCollectionValue asMutable() {
         return new SpongeWeightedEntityCollectionValue(getKey(), getAll());
-    }
-
-    @Override
-    public ImmutableWeightedEntityCollectionValue with(EntityType entityType, Collection<DataManipulator<?, ?>> entityData) {
-        return with(new WeightedEntity(entityType, 1, entityData));
     }
 
     @Nullable

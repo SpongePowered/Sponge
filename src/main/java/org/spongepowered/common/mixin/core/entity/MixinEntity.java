@@ -187,7 +187,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<World>((World) this.worldObj, getPosition());
+        return new Location<>((World) this.worldObj, getPosition());
     }
 
     @Override
@@ -238,7 +238,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
         // detach passengers
         net.minecraft.entity.Entity passenger = thisEntity.riddenByEntity;
-        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<net.minecraft.entity.Entity>();
+        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<>();
         while (passenger != null) {
             if (passenger instanceof EntityPlayerMP && !this.worldObj.isRemote) {
                 ((EntityPlayerMP) passenger).mountEntity(null);
@@ -378,7 +378,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Transform<World> getTransform() {
-        return new Transform<World>(getWorld(), getPosition(), getRotation(), getScale());
+        return new Transform<>(getWorld(), getPosition(), getRotation(), getScale());
     }
 
     @Override
@@ -395,7 +395,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             if (props.get().isEnabled()) {
                 Optional<World> world = Sponge.getGame().getServer().loadWorld(worldName);
                 if (world.isPresent()) {
-                    Location<World> location = new Location<World>(world.get(), position);
+                    Location<World> location = new Location<>(world.get(), position);
                     return setLocationSafely(location);
                 }
             }
@@ -550,36 +550,36 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         toWorld.theChunkProviderServer.loadChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
 
         if (entity instanceof EntityPlayer) {
-            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
+            EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
 
             // Support vanilla clients going into custom dimensions
-            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionId(), toWorld, entityplayermp1);
-            if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
-                DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
+            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionId(), toWorld, entityPlayerMP);
+            if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
+                DimensionManager.sendDimensionRegistration(toWorld, entityPlayerMP, clientDimension);
             } else {
                 // Force vanilla client to refresh their chunk cache if same dimension
                 if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
-                    entityplayermp1.playerNetServerHandler.sendPacket(
+                    entityPlayerMP.playerNetServerHandler.sendPacket(
                         new S07PacketRespawn((byte) (clientDimension >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.theItemInWorldManager.getGameType()));
+                            entityPlayerMP.theItemInWorldManager.getGameType()));
                 }
             }
 
-            entityplayermp1.playerNetServerHandler.sendPacket(
+            entityPlayerMP.playerNetServerHandler.sendPacket(
                 new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                    entityplayermp1.theItemInWorldManager.getGameType()));
+                    entityPlayerMP.theItemInWorldManager.getGameType()));
             entity.setWorld(toWorld);
             entity.isDead = false;
-            entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
-                entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
-            entityplayermp1.setSneaking(false);
-            mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
-            toWorld.getPlayerManager().addPlayer(entityplayermp1);
-            toWorld.spawnEntityInWorld(entityplayermp1);
-            mcServer.getConfigurationManager().playerEntityList.add(entityplayermp1);
-            entityplayermp1.theItemInWorldManager.setWorld(toWorld);
-            entityplayermp1.addSelfToInternalCraftingInventory();
-            entityplayermp1.setHealth(entityplayermp1.getHealth());
+            entityPlayerMP.playerNetServerHandler.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
+                entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
+            entityPlayerMP.setSneaking(false);
+            mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
+            toWorld.getPlayerManager().addPlayer(entityPlayerMP);
+            toWorld.spawnEntityInWorld(entityPlayerMP);
+            mcServer.getConfigurationManager().playerEntityList.add(entityPlayerMP);
+            entityPlayerMP.theItemInWorldManager.setWorld(toWorld);
+            entityPlayerMP.addSelfToInternalCraftingInventory();
+            entityPlayerMP.setHealth(entityPlayerMP.getHealth());
         } else {
             toWorld.spawnEntityInWorld(entity);
         }
@@ -648,9 +648,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
                 try {
                     final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
-                    for (DataManipulator<?, ?> manipulator : manipulators) {
-                        offer(manipulator);
-                    }
+                    manipulators.forEach(this::offer);
                 } catch (InvalidDataException e) {
                     Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
                 }

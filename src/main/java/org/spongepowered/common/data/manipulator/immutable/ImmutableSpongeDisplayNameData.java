@@ -37,7 +37,8 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.GetterFunction;
 
-public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<ImmutableDisplayNameData, DisplayNameData> implements ImmutableDisplayNameData {
+public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<ImmutableDisplayNameData, DisplayNameData>
+    implements ImmutableDisplayNameData {
 
     private final Text displayName;
     private final boolean displays;

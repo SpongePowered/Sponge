@@ -120,7 +120,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria(Lnet/minecraft/scoreboard/IScoreObjectiveCriteria;)Ljava/util/Collection;"))
+    @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria"
+            + "(Lnet/minecraft/scoreboard/IScoreObjectiveCriteria;)Ljava/util/Collection;"))
     public Collection onGetObjectivesFromCriteria(net.minecraft.scoreboard.Scoreboard this$0, IScoreObjectiveCriteria criteria) {
         return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
     }
@@ -208,9 +209,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             double dz = this.posZ - position.getZ();
 
             if (dx * dx + dy * dy + dz * dz < radius * radius) {
-                for (Packet packet : packets) {
-                    this.playerNetServerHandler.sendPacket(packet);
-                }
+                packets.forEach(this.playerNetServerHandler::sendPacket);
             }
         }
     }

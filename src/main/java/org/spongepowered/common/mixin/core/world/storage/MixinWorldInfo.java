@@ -45,7 +45,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.data.type.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
@@ -505,8 +505,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public Optional<DataView> getPropertySection(DataQuery path) {
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
-            return Optional
-                    .<DataView> of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
+            return Optional.<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
         } else {
             return Optional.empty();
         }
@@ -538,11 +537,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.keepSpawnLoaded = nbt.getBoolean("keepSpawnLoaded");
         this.loadOnStartup = nbt.getBoolean("loadOnStartup");
         this.isMod = nbt.getBoolean("isMod");
-        for (DimensionType type : Sponge.getSpongeRegistry().dimensionClassMappings.values()) {
-            if (type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType"))) {
-                this.dimensionType = type;
-            }
-        }
+        Sponge.getSpongeRegistry().dimensionClassMappings.values().stream()
+                .filter(type -> type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType")))
+                .forEach(type -> this.dimensionType = type);
 
         // Read generator modifiers
         NBTTagList generatorModifiersNbt = nbt.getTagList("generatorModifiers", 8);

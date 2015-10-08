@@ -36,7 +36,7 @@ import java.util.Optional;
 
 public class SpongeImmutableRegistry implements ImmutableDataRegistry {
 
-    private final static SpongeImmutableRegistry instance = new SpongeImmutableRegistry();
+    private static final SpongeImmutableRegistry instance = new SpongeImmutableRegistry();
 
     private SpongeImmutableRegistry() {
     }

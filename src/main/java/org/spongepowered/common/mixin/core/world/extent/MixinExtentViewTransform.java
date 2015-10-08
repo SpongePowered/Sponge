@@ -474,7 +474,7 @@ public abstract class MixinExtentViewTransform implements Extent {
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         final Location<World> location = entity.getLocation();
-        entity.setLocation(new Location<World>(location.getExtent(), inverseTransform(location.getPosition())));
+        entity.setLocation(new Location<>(location.getExtent(), inverseTransform(location.getPosition())));
         return this.extent.spawnEntity(entity, cause);
     }
 

@@ -25,20 +25,20 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
-import org.spongepowered.api.data.property.block.LightEmissionProperty;
+import org.spongepowered.api.data.property.block.LuminanceProperty;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
 
-public class LightEmissionPropertyStore extends AbstractBlockPropertyStore<LightEmissionProperty> {
+public class LuminancePropertyStore extends AbstractBlockPropertyStore<LuminanceProperty> {
 
-    public LightEmissionPropertyStore() {
+    public LuminancePropertyStore() {
         super(true);
     }
 
     @Override
-    protected Optional<LightEmissionProperty> getForBlock(Block block) {
-        return Optional.of(new LightEmissionProperty(block.getLightValue()));
+    protected Optional<LuminanceProperty> getForBlock(Block block) {
+        return Optional.of(new LuminanceProperty(block.getLightValue()));
     }
 
 }

@@ -35,6 +35,7 @@ import org.spongepowered.api.item.FireworkShape;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SpongeFireworkMeta implements FireworkEffect {
 
@@ -80,13 +81,13 @@ public class SpongeFireworkMeta implements FireworkEffect {
     @Override
     public DataContainer toContainer() {
         List<Integer> colors = Lists.newArrayList();
-        for (Color color : this.colors) {
-            colors.add(color.getRGB());
-        }
+        colors.addAll(this.colors.stream()
+                .map(Color::getRGB)
+                .collect(Collectors.toList()));
         List<Integer> fades = Lists.newArrayList();
-        for (Color color : this.fades) {
-            fades.add(color.getRGB());
-        }
+        fades.addAll(this.fades.stream()
+                .map(Color::getRGB)
+                .collect(Collectors.toList()));
         return new MemoryDataContainer()
                 .set(of("Type"), this.shape.getId())
                 .set(of("Colors"), colors)

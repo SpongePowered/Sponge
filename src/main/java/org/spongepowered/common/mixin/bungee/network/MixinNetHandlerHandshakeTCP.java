@@ -49,7 +49,8 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
     @Shadow private NetworkManager networkManager;
 
-    @Inject(method = "processHandshake", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/NetworkManager;setNetHandler(Lnet/minecraft/network/INetHandler;)V", ordinal = 0), cancellable = true)
+    @Inject(method = "processHandshake", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+            target = "Lnet/minecraft/network/NetworkManager;setNetHandler(Lnet/minecraft/network/INetHandler;)V", ordinal = 0), cancellable = true)
     public void onProcessHandshakeEnd(C00Handshake packetIn, CallbackInfo ci) {
         if (Sponge.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()) {
             String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data

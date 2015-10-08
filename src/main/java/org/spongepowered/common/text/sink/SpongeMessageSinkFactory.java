@@ -69,13 +69,15 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
             PermissionService service =  Sponge.getGame().getServiceManager().provideUnchecked(PermissionService.class);
             return Iterables.concat(
                     Iterables.transform(service.getKnownSubjects().values(), new Function<SubjectCollection, Iterable<CommandSource>>() {
-                @Nullable
-                @Override
-                public Iterable<CommandSource> apply(SubjectCollection input) {
-                    return Iterables.filter(Iterables.transform(Maps.filterValues(input.getAllWithPermission(PermissionSink.this.permission),
-                                    Predicates.equalTo(true)).keySet(), func -> func.getCommandSource().orElse(null)), Predicates.notNull());
-                }
-            }));
+                            @Nullable
+                            @Override
+                            public Iterable<CommandSource> apply(SubjectCollection input) {
+                                return Iterables.filter(Iterables.transform(
+                                        Maps.filterValues(input.getAllWithPermission(PermissionSink.this.permission),
+                                                Predicates.equalTo(true)).keySet(),
+                                                func -> func.getCommandSource().orElse(null)), Predicates.notNull());
+                            }
+                        }));
         }
     }
 

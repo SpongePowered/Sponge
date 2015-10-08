@@ -216,7 +216,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract int getRedstonePower(BlockPos pos, EnumFacing facing);
     @Shadow public abstract int getStrongPower(BlockPos pos, EnumFacing direction);
     @Shadow public abstract int isBlockIndirectlyGettingPowered(BlockPos pos);
-    @Shadow public abstract net.minecraft.world.Explosion newExplosion(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking);
+    @Shadow public abstract net.minecraft.world.Explosion newExplosion(net.minecraft.entity.Entity entityIn, double x, double y, double z,
+                                                                       float strength, boolean isFlaming, boolean isSmoking);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
@@ -228,8 +229,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             new File(Sponge.getModConfigDirectory() + File.separator + "worlds" + File.separator
                                     + providerName + File.separator
                                     + (providerIn.getDimensionId() == 0 ? "DIM0" :
-                                            Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId()))
-                                    , "world.conf"), Sponge.ECOSYSTEM_NAME.toLowerCase());
+                                            Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId())), "world.conf"),
+                            Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
 
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {

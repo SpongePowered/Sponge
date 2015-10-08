@@ -65,7 +65,7 @@ public final class ReflectionUtil {
             return ctor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             Sponge.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
-            + "with the args: " + Arrays.toString(args), e);
+                + "with the args: " + Arrays.toString(args), e);
         }
         throw new IllegalArgumentException("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
          + "the args: " + Arrays.toString(args));

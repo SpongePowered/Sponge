@@ -154,7 +154,7 @@ import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
 import org.spongepowered.api.data.property.block.HardnessProperty;
 import org.spongepowered.api.data.property.block.HeldItemProperty;
 import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
-import org.spongepowered.api.data.property.block.LightEmissionProperty;
+import org.spongepowered.api.data.property.block.LuminanceProperty;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.property.block.PassableProperty;
 import org.spongepowered.api.data.property.block.PoweredProperty;
@@ -193,6 +193,8 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.Fishes;
+import org.spongepowered.api.data.type.GameMode;
+import org.spongepowered.api.data.type.GameModes;
 import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.data.type.Hinge;
@@ -241,8 +243,6 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
@@ -482,7 +482,7 @@ import org.spongepowered.common.data.property.store.block.GroundLuminancePropert
 import org.spongepowered.common.data.property.store.block.HardnessPropertyStore;
 import org.spongepowered.common.data.property.store.block.HeldItemPropertyStore;
 import org.spongepowered.common.data.property.store.block.IndirectlyPoweredPropertyStore;
-import org.spongepowered.common.data.property.store.block.LightEmissionPropertyStore;
+import org.spongepowered.common.data.property.store.block.LuminancePropertyStore;
 import org.spongepowered.common.data.property.store.block.MatterPropertyStore;
 import org.spongepowered.common.data.property.store.block.PassablePropertyStore;
 import org.spongepowered.common.data.property.store.block.PoweredPropertyStore;
@@ -569,7 +569,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
@@ -670,7 +669,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final List<PotionEffectType> potionList = new ArrayList<>();
     private final List<BiomeType> biomeTypes = new ArrayList<>();
     private final Map<String, SoundType> soundNames = Maps.newHashMap();
-    private final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
+    private final Map<String, CoalType> coalTypeMappings = Maps.newHashMap();
     private final WorldGeneratorRegistry worldGeneratorRegistry = new WorldGeneratorRegistry();
     private final Hashtable<Class<? extends WorldProvider>, Integer> classToProviders = new Hashtable<>();
     private final Map<UUID, WorldProperties> worldPropertiesUuidMappings = Maps.newHashMap();
@@ -988,15 +987,15 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public List<String> getDefaultGameRules() {
 
-        List<String> gameruleList = new ArrayList<>();
+        List<String> gameRuleList = new ArrayList<>();
         for (Field f : DefaultGameRules.class.getFields()) {
             try {
-                gameruleList.add((String) f.get(null));
+                gameRuleList.add((String) f.get(null));
             } catch (Exception e) {
                 // Ignoring error
             }
         }
-        return gameruleList;
+        return gameRuleList;
     }
 
     @Override
@@ -1030,6 +1029,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return Optional.ofNullable(this.worldPropertiesNameMappings.get(worldName));
     }
 
+    public Optional<WorldProperties> getWorldProperties(UUID uuid) {
+        return Optional.ofNullable(this.worldPropertiesUuidMappings.get(uuid));
+    }
+
     public Collection<WorldProperties> getAllWorldProperties() {
         return Collections.unmodifiableCollection(this.worldPropertiesNameMappings.values());
     }
@@ -1050,10 +1053,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         // TODO: This is client-only
         //return WorldSettings.GameType.getByName(mode.getTranslation().getId());
         throw new UnsupportedOperationException();
-    }
-
-    public Optional<WorldProperties> getWorldProperties(UUID uuid) {
-        return Optional.ofNullable(this.worldPropertiesUuidMappings.get(uuid));
     }
 
     @Override
@@ -1226,8 +1225,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             }
         }
         RegistryHelper.mapFields(PotionEffectTypes.class, fieldName -> {
-            return getPotion(fieldName.toLowerCase()).get();
-        });
+                return getPotion(fieldName.toLowerCase()).get();
+            });
     }
 
     private void setBiomeTypes() {
@@ -1386,9 +1385,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setCoal() {
         // Because Minecraft doesn't have any enum stuff for this....
-        this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL"));
-        this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL"));
-        RegistryHelper.mapFields(CoalTypes.class, this.coaltypeMappings);
+        this.coalTypeMappings.put("coal", new SpongeCoalType(0, "COAL"));
+        this.coalTypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL"));
+        RegistryHelper.mapFields(CoalTypes.class, this.coalTypeMappings);
     }
 
     private void setRotations() {
@@ -1397,10 +1396,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setWeathers() {
         RegistryHelper.mapFields(Weathers.class, fieldName -> {
-            final Weather weather = new SpongeWeather(fieldName);
-            SpongeGameRegistry.this.weatherMappings.put(fieldName.toLowerCase(), weather);
-            return weather;
-        });
+                final Weather weather = new SpongeWeather(fieldName);
+                SpongeGameRegistry.this.weatherMappings.put(fieldName.toLowerCase(), weather);
+                return weather;
+            });
     }
 
     private void setResourcePackFactory() {
@@ -1755,11 +1754,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         soundMappings.put("villager_yes", "mob.villager.yes");
 
         RegistryHelper.mapFields(SoundTypes.class, fieldName -> {
-            String soundName = soundMappings.get(fieldName.toLowerCase());
-            SoundType sound = new SpongeSound(soundName);
-            SpongeGameRegistry.this.soundNames.put(soundName, sound);
-            return sound;
-        });
+                String soundName = soundMappings.get(fieldName.toLowerCase());
+                SoundType sound = new SpongeSound(soundName);
+                SpongeGameRegistry.this.soundNames.put(soundName, sound);
+                return sound;
+            });
     }
 
     private void setDifficulties() {
@@ -1842,7 +1841,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(ItemStack.class, new SpongeItemStackDataBuilder());
         service.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotBuilder());
         service.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
-        service.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class, new ImmutableItemEnchantmentDataBuilder());
+        service.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
+                new ImmutableItemEnchantmentDataBuilder());
         // Data Manipulators
 
         final HealthDataProcessor healthProcessor = new HealthDataProcessor();
@@ -2009,7 +2009,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         propertyRegistry.register(HardnessProperty.class, new HardnessPropertyStore());
         propertyRegistry.register(HeldItemProperty.class, new HeldItemPropertyStore());
         propertyRegistry.register(IndirectlyPoweredProperty.class, new IndirectlyPoweredPropertyStore());
-        propertyRegistry.register(LightEmissionProperty.class, new LightEmissionPropertyStore());
+        propertyRegistry.register(LuminanceProperty.class, new LuminancePropertyStore());
         propertyRegistry.register(MatterProperty.class, new MatterPropertyStore());
         propertyRegistry.register(PassableProperty.class, new PassablePropertyStore());
         propertyRegistry.register(PoweredProperty.class, new PoweredPropertyStore());
@@ -2037,74 +2037,74 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setNotePitches() {
         RegistryHelper.mapFields(NotePitches.class, input -> {
-            NotePitch pitch = new SpongeNotePitch((byte) SpongeGameRegistry.this.notePitchMappings.size(), input);
-            SpongeGameRegistry.this.notePitchMappings.put(input.toLowerCase(), pitch);
-            return pitch;
-        });
+                NotePitch pitch = new SpongeNotePitch((byte) SpongeGameRegistry.this.notePitchMappings.size(), input);
+                SpongeGameRegistry.this.notePitchMappings.put(input.toLowerCase(), pitch);
+                return pitch;
+            });
     }
 
     private void setSkullTypes() {
         RegistryHelper.mapFields(SkullTypes.class, input -> {
-            SkullType skullType = new SpongeSkullType((byte) SpongeGameRegistry.this.skullTypeMappings.size(), input);
-            SpongeGameRegistry.this.skullTypeMappings.put(input.toLowerCase(), skullType);
-            return skullType;
-        });
+                SkullType skullType = new SpongeSkullType((byte) SpongeGameRegistry.this.skullTypeMappings.size(), input);
+                SpongeGameRegistry.this.skullTypeMappings.put(input.toLowerCase(), skullType);
+                return skullType;
+            });
     }
 
     private void setTreeTypes() {
         RegistryHelper.mapFields(TreeTypes.class, input -> {
-            TreeType treeType = new SpongeTreeType((byte) SpongeGameRegistry.this.treeTypeMappings.size(), input);
-            SpongeGameRegistry.this.treeTypeMappings.put(input.toLowerCase(), treeType);
-            return treeType;
-        });
+                TreeType treeType = new SpongeTreeType((byte) SpongeGameRegistry.this.treeTypeMappings.size(), input);
+                SpongeGameRegistry.this.treeTypeMappings.put(input.toLowerCase(), treeType);
+                return treeType;
+            });
     }
 
     private void setBannerPatternShapes() {
         RegistryHelper.mapFields(BannerPatternShapes.class, input -> {
-            BannerPatternShape bannerPattern = (BannerPatternShape) (Object) TileEntityBanner.EnumBannerPattern.valueOf(input);
-            SpongeGameRegistry.this.bannerPatternShapeMappings.put(bannerPattern.getName().toLowerCase(), bannerPattern);
-            SpongeGameRegistry.this.idToBannerPatternShapeMappings.put(bannerPattern.getId().toLowerCase(), bannerPattern);
-            return bannerPattern;
-        });
+                BannerPatternShape bannerPattern = (BannerPatternShape) (Object) TileEntityBanner.EnumBannerPattern.valueOf(input);
+                SpongeGameRegistry.this.bannerPatternShapeMappings.put(bannerPattern.getName().toLowerCase(), bannerPattern);
+                SpongeGameRegistry.this.idToBannerPatternShapeMappings.put(bannerPattern.getId().toLowerCase(), bannerPattern);
+                return bannerPattern;
+            });
     }
 
     private void setFishes() {
         RegistryHelper.mapFields(Fishes.class, input -> {
-            Fish fish = (Fish) (Object) ItemFishFood.FishType.valueOf(input);
-            if (fish != null) {
-                SpongeGameRegistry.this.fishMappings.put(fish.getId().toLowerCase(), fish);
-                return fish;
-            } else {
-                return null;
-            }
-        });
+                Fish fish = (Fish) (Object) ItemFishFood.FishType.valueOf(input);
+                if (fish != null) {
+                    SpongeGameRegistry.this.fishMappings.put(fish.getId().toLowerCase(), fish);
+                    return fish;
+                } else {
+                    return null;
+                }
+            });
 
         RegistryHelper.mapFields(CookedFishes.class, input -> {
-            Fish fish = (Fish) (Object) ItemFishFood.FishType.valueOf(input);
-            CookedFish cooked = new SpongeCookedFish(input, input, fish); // TODO
-            if (cooked != null) {
-                SpongeGameRegistry.this.cookedFishMappings.put(cooked.getId().toLowerCase(), cooked);
-                return cooked;
-            } else {
-                return null;
-            }
-        });
+                Fish fish = (Fish) (Object) ItemFishFood.FishType.valueOf(input);
+                CookedFish cooked = new SpongeCookedFish(input, input, fish); // TODO
+                if (cooked != null) {
+                    SpongeGameRegistry.this.cookedFishMappings.put(cooked.getId().toLowerCase(), cooked);
+                    return cooked;
+                } else {
+                    return null;
+                }
+            });
     }
 
     private void setDyeColors() {
         RegistryHelper.mapFields(DyeColors.class, input -> {
-            DyeColor dyeColor = (DyeColor) (Object) EnumDyeColor.valueOf(input);
-            SpongeGameRegistry.this.dyeColorMappings.put(dyeColor.getName().toLowerCase(), dyeColor);
-            return dyeColor;
-        });
+                DyeColor dyeColor = (DyeColor) (Object) EnumDyeColor.valueOf(input);
+                SpongeGameRegistry.this.dyeColorMappings.put(dyeColor.getName().toLowerCase(), dyeColor);
+                return dyeColor;
+            });
     }
 
     private void setArts() {
         RegistryHelper.mapFields(Arts.class, fieldName -> {
-            Art art = (Art) (Object) EntityPainting.EnumArt.valueOf(fieldName);
-            SpongeGameRegistry.this.artMappings.put(art.getName().toLowerCase(), art);
-            return art;
-        });
+                Art art = (Art) (Object) EntityPainting.EnumArt.valueOf(fieldName);
+                SpongeGameRegistry.this.artMappings.put(art.getName().toLowerCase(), art);
+                return art;
+            });
     }
 
     private void setObjectiveDisplayModes() {
@@ -2181,19 +2181,19 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", -7));
 
         RegistryHelper.mapFields(EntityTypes.class, fieldName -> {
-            if (fieldName.equals("UNKNOWN")) {
-                // TODO Something for Unknown?
-                return null;
-            }
-            EntityType entityType = SpongeGameRegistry.this.entityTypeMappings.get(fieldName.toLowerCase());
-            SpongeGameRegistry.this.entityClassToTypeMappings
-                    .put(((SpongeEntityType) entityType).entityClass, entityType);
-            // remove old mapping
-            SpongeGameRegistry.this.entityTypeMappings.remove(fieldName.toLowerCase());
-            // add new mapping with minecraft id
-            SpongeGameRegistry.this.entityTypeMappings.put(((SpongeEntityType) entityType).getId(), entityType);
-            return entityType;
-        });
+                if (fieldName.equals("UNKNOWN")) {
+                    // TODO Something for Unknown?
+                    return null;
+                }
+                EntityType entityType = SpongeGameRegistry.this.entityTypeMappings.get(fieldName.toLowerCase());
+                SpongeGameRegistry.this.entityClassToTypeMappings
+                        .put(((SpongeEntityType) entityType).entityClass, entityType);
+                // remove old mapping
+                SpongeGameRegistry.this.entityTypeMappings.remove(fieldName.toLowerCase());
+                // add new mapping with minecraft id
+                SpongeGameRegistry.this.entityTypeMappings.put(((SpongeEntityType) entityType).getId(), entityType);
+                return entityType;
+            });
 
         RegistryHelper.mapFields(SkeletonTypes.class, SpongeEntityConstants.SKELETON_TYPES);
         RegistryHelper.mapFields(HorseColors.class, SpongeEntityConstants.HORSE_COLORS);

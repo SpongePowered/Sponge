@@ -38,8 +38,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.data.type.GameMode;
+import org.spongepowered.api.data.type.GameModes;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
@@ -77,11 +77,10 @@ import java.util.stream.Collectors;
 // TODO decide if we want selector resolvers as part of the API, ask @kenzierocks for details
 public class SelectorResolver {
 
-    private static final Function<CommandSource, String> GET_NAME =
-        input -> input.getName();
+    private static final Function<CommandSource, String> GET_NAME = CommandSource::getName;
     private static final Vector3d ORIGIN = new Vector3d(0, 0, 0);
     private static final Set<ArgumentType<?>> LOCATION_BASED_ARGUMENTS;
-    private static final Function<Number, Double> TO_DOUBLE = input -> input.doubleValue();
+    private static final Function<Number, Double> TO_DOUBLE = Number::doubleValue;
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
 
     static {
@@ -178,21 +177,21 @@ public class SelectorResolver {
         final Vector3d boxMax = det1.max(det2);
         if (sel.has(ArgumentTypes.DIMENSION.x())) {
             filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getX() >= boxMin.getX() && pos.getX() <= boxMax.getX();
-            });
+                    Vector3d pos = input.getLocation().getPosition();
+                    return pos.getX() >= boxMin.getX() && pos.getX() <= boxMax.getX();
+                });
         }
         if (sel.has(ArgumentTypes.DIMENSION.y())) {
             filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getY() >= boxMin.getY() && pos.getY() <= boxMax.getY();
-            });
+                    Vector3d pos = input.getLocation().getPosition();
+                    return pos.getY() >= boxMin.getY() && pos.getY() <= boxMax.getY();
+                });
         }
         if (sel.has(ArgumentTypes.DIMENSION.z())) {
             filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getZ() >= boxMin.getZ() && pos.getZ() <= boxMax.getZ();
-            });
+                    Vector3d pos = input.getLocation().getPosition();
+                    return pos.getZ() >= boxMin.getZ() && pos.getZ() <= boxMax.getZ();
+                });
         }
     }
 
@@ -203,9 +202,9 @@ public class SelectorResolver {
         if (gamemode.isPresent() && gamemode.get() != GameModes.NOT_SET) {
             final GameMode actualMode = gamemode.get();
             filters.add(input -> {
-                Optional<GameModeData> mode = input.get(GameModeData.class);
-                return mode.isPresent() && mode.get() == actualMode;
-            });
+                    Optional<GameModeData> mode = input.get(GameModeData.class);
+                    return mode.isPresent() && mode.get() == actualMode;
+                });
         }
     }
 
@@ -216,16 +215,16 @@ public class SelectorResolver {
         if (levelMin.isPresent()) {
             final int actualMin = levelMin.get();
             filters.add(input -> {
-                Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                return xp.isPresent() && xp.get().level().get() >= actualMin;
-            });
+                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                    return xp.isPresent() && xp.get().level().get() >= actualMin;
+                });
         }
         if (levelMax.isPresent()) {
             final int actualMax = levelMax.get();
             filters.add(input -> {
-                Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
-                return xp.isPresent() && xp.get().level().get() <= actualMax;
-            });
+                    Optional<ExperienceHolderData> xp = input.get(ExperienceHolderData.class);
+                    return xp.isPresent() && xp.get().level().get() <= actualMax;
+                });
         }
     }
 
@@ -236,9 +235,9 @@ public class SelectorResolver {
             final String name = nameOpt.get().getValue();
             final boolean inverted = nameOpt.get().isInverted();
             filters.add(input -> {
-                Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
-                return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
-            });
+                    Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
+                    return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
+                });
         }
     }
 
@@ -309,25 +308,20 @@ public class SelectorResolver {
                 teamBuilder.addAll(asSet(w.getScoreboard().getTeam(teamArg.getValue())));
             }
             final Collection<Team> teams = teamBuilder.build();
-                filters.add(new Predicate<Entity>() {
-
-                @Override
-                public boolean test(Entity input) {
-                    if (input instanceof TeamMember) {
-                        return inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
+            filters.add(new Predicate<Entity>() {
+                    @Override
+                    public boolean test(Entity input) {
+                        return input instanceof TeamMember && inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
                     }
-                    return false;
-                }
 
-                private Collection<Text> collectMembers(Collection<Team> teams) {
-                    ImmutableSet.Builder<Text> users = ImmutableSet.builder();
-                    for (Team t : teams) {
-                        users.addAll(t.getMembers());
+                    private Collection<Text> collectMembers(Collection<Team> teams) {
+                        ImmutableSet.Builder<Text> users = ImmutableSet.builder();
+                        for (Team t : teams) {
+                            users.addAll(t.getMembers());
+                        }
+                        return users.build();
                     }
-                    return users.build();
-                }
-
-            });
+                });
         }
     }
 
@@ -346,7 +340,7 @@ public class SelectorResolver {
         Optional<Double> x = this.selector.get(vecTypes.x()).map(TO_DOUBLE);
         Optional<Double> y = this.selector.get(vecTypes.y()).map(TO_DOUBLE);
         Optional<Double> z = this.selector.get(vecTypes.z()).map(TO_DOUBLE);
-        return new Vector3d(x.orElse(Double.valueOf(pos.getX())), y.orElse(Double.valueOf(pos.getY())), z.orElse(Double.valueOf(pos.getZ())));
+        return new Vector3d(x.orElse(pos.getX()), y.orElse(pos.getY()), z.orElse(pos.getZ()));
     }
 
     public String getName() {

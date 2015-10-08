@@ -79,7 +79,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.worldUniqueId = checkNotNull(builder.worldUuid);
         this.pos = checkNotNull(builder.coords);
-        this.extraData = builder.manipulators == null ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
+        this.extraData = builder.manipulators == null
+                ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
         ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
         for (ImmutableValue<?> value : this.blockState.getValues()) {
             mapBuilder.put(value.getKey(), value);
@@ -210,6 +211,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
+    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+        if (this.keyValueMap.containsKey(key)) {
+            return Optional.of((E) this.keyValueMap.get(key).get());
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
         return get(containerClass);
     }
@@ -217,6 +226,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return this.blockState.supports(containerClass);
+    }
+
+    @Override
+    public boolean supports(Key<?> key) {
+        return this.keyValueMap.containsKey(key);
     }
 
     @Override
@@ -302,24 +316,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        if (this.keyValueMap.containsKey(key)) {
-            return Optional.of((E) this.keyValueMap.get(key).get());
-        }
-        return Optional.empty();
-    }
-
-    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((V) this.keyValueMap.get(key).asMutable());
         }
         return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(Key<?> key) {
-        return this.keyValueMap.containsKey(key);
     }
 
     @Override

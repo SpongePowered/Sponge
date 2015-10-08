@@ -49,6 +49,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -90,14 +91,6 @@ public class SpongeScoreboard implements Scoreboard {
         this.updateDisplaySlot(objective, displaySlot);
     }
 
-    private void updateDisplaySlot(Objective objective, DisplaySlot displaySlot) {
-        this.allowRecursion = false;
-        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
-            scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(), ((SpongeObjective) objective).getObjective(scoreboard));
-        }
-        this.allowRecursion = true;
-    }
-
     @Override
     public void addObjective(Objective objective) throws IllegalArgumentException {
         if (this.objectives.containsValue(objective)) {
@@ -107,6 +100,15 @@ public class SpongeScoreboard implements Scoreboard {
         }
         this.objectives.put(objective.getName(), objective);
         this.addObjectiveInternal(objective);
+    }
+
+    private void updateDisplaySlot(Objective objective, DisplaySlot displaySlot) {
+        this.allowRecursion = false;
+        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
+            scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(),
+                    ((SpongeObjective) objective).getObjective(scoreboard));
+        }
+        this.allowRecursion = true;
     }
 
     private void addObjectiveInternal(Objective objective) {
@@ -140,9 +142,7 @@ public class SpongeScoreboard implements Scoreboard {
 
     public void removeObjectiveInternal(SpongeObjective objective) {
         this.allowRecursion = false;
-        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
-            objective.removeFromScoreboard(scoreboard);
-        }
+        this.scoreboards.forEach(objective::removeFromScoreboard);
         this.allowRecursion = true;
     }
 
@@ -150,22 +150,19 @@ public class SpongeScoreboard implements Scoreboard {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<Score> getScores(Text name) {
         HashSet scores = Sets.newHashSet();
-        for (Objective objective: this.objectives.values()) {
-            if (objective.getScores().containsKey(name)) {
-                scores.add(objective.getScore(name));
-            }
-        }
+        scores.addAll(this.objectives.values().stream()
+                .filter(objective -> objective.getScores().containsKey(name))
+                .map(objective -> objective.getScore(name))
+                .collect(Collectors.toList()));
         return scores;
     }
 
     @Override
     public void removeScores(Text name) {
         this.allowRecursion = false;
-        for (Objective objective: this.objectives.values()) {
-            if (objective.getScores().containsKey(name)) {
-                objective.removeScore(objective.getScore(name));
-            }
-        }
+        this.objectives.values().stream()
+                .filter(objective -> objective.getScores().containsKey(name))
+                .forEach(objective -> objective.removeScore(objective.getScore(name)));
         this.allowRecursion = true;
     }
 
@@ -193,11 +190,9 @@ public class SpongeScoreboard implements Scoreboard {
 
     public void removeMemberFromTeam(Text member) {
         if (this.memberTeams.containsKey(member)) {
-            for (ScorePlayerTeam scoreTeam : ((SpongeTeam) this.memberTeams.get(member)).getTeams().values()) {
-                if (scoreTeam.theScoreboard.getPlayersTeam(Texts.legacy().to(member)) != null) {
-                    scoreTeam.theScoreboard.removePlayerFromTeam(Texts.legacy().to(member), scoreTeam);
-                }
-            }
+            ((SpongeTeam) this.memberTeams.get(member)).getTeams().values().stream()
+                    .filter(scoreTeam -> scoreTeam.theScoreboard.getPlayersTeam(Texts.legacy().to(member)) != null)
+                    .forEach(scoreTeam -> scoreTeam.theScoreboard.removePlayerFromTeam(Texts.legacy().to(member), scoreTeam));
         }
         this.memberTeams.remove(member);
     }
@@ -209,22 +204,16 @@ public class SpongeScoreboard implements Scoreboard {
 
         Set<Text> keysToRemove = Sets.newHashSet();
 
-        for (Map.Entry<Text, Team> userTeam: this.memberTeams.entrySet()) {
-            if (team.equals(userTeam.getValue())) {
-                keysToRemove.add(userTeam.getKey());
-            }
-        }
+        keysToRemove.addAll(this.memberTeams.entrySet().stream()
+                .filter(userTeam -> team.equals(userTeam.getValue()))
+                .map(Map.Entry::getKey).collect(Collectors.toList()));
 
-        for (Text member: keysToRemove) {
-            this.memberTeams.remove(member);
-        }
+        keysToRemove.forEach(this.memberTeams::remove);
     }
 
     private void removeTeamInternal(Team team) {
         this.allowRecursion = false;
-        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.scoreboards) {
-            ((SpongeTeam) team).removeFromScoreboard(scoreboard);
-        }
+        this.scoreboards.forEach(((SpongeTeam) team)::removeFromScoreboard);
         this.allowRecursion = true;
     }
 
@@ -233,7 +222,7 @@ public class SpongeScoreboard implements Scoreboard {
         if (this.teams.containsValue(team)) {
             throw new IllegalArgumentException("The specified team already exists on this scoreboard!");
         } else if (this.teams.containsKey(team.getName())) {
-            throw new IllegalArgumentException("A team with the specified name already exists on this scorebord!");
+            throw new IllegalArgumentException("A team with the specified name already exists on this scoreboard!");
         }
         this.addTeamInternal(team);
         this.teams.put(team.getName(), team);
@@ -296,7 +285,8 @@ public class SpongeScoreboard implements Scoreboard {
         for (DisplaySlot displaySlot: Sponge.getGame().getRegistry().getAllOf(DisplaySlot.class)) {
             Optional<Objective> objective = spongeScoreboard.getObjective(displaySlot);
             if (objective.isPresent()) {
-                scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(), scoreboard.getObjective(objective.get().getName()));
+                scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(),
+                        scoreboard.getObjective(objective.get().getName()));
             }
         }
     }
@@ -322,7 +312,8 @@ public class SpongeScoreboard implements Scoreboard {
 
     public net.minecraft.scoreboard.Scoreboard getPlayerScoreboard() {
         // A new scoreboard handle is created for each world, so that the /scoreboard command can (optionally) not interfere across worlds
-        // Since per-player scoreboards don't exist in vanilla, using the same instance when setScoreboard is used with the same SpongeScoreboard is fine
+        // Since per-player scoreboards don't exist in vanilla, using the same instance when setScoreboard is used with the same SpongeScoreboard
+        // is fine
         return this.playerScoreboard;
     }
 }

@@ -50,11 +50,14 @@ public abstract class MixinEntityAIMate {
     @Shadow private EntityAnimal theAnimal;
     @Shadow private EntityAnimal targetMate;
 
-    @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/entity/passive/EntityAnimal.createChild(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/entity/passive/EntityAnimal.createChild"
+                    + "(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;", shift = At.Shift.AFTER),
+            locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callBreedEvent(CallbackInfo ci, EntityAgeable entityageable) {
-        final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(Sponge.getGame(), Cause.of(this.theAnimal), Optional.<Vector3d>empty(), (Ageable)entityageable, (Ageable)this.targetMate);
+        final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(Sponge.getGame(), Cause.of(this.theAnimal),
+                Optional.<Vector3d>empty(), (Ageable)entityageable, (Ageable)this.targetMate);
         Sponge.getGame().getEventManager().post(event);
-        if(event.isCancelled()) {
+        if (event.isCancelled()) {
             ci.cancel();
         }
     }

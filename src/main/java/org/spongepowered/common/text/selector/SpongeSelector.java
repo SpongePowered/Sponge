@@ -95,10 +95,7 @@ public class SpongeSelector implements Selector {
 
     @Override
     public boolean isInverted(ArgumentType.Invertible<?> type) {
-        if (!has(type)) {
-            return false;
-        }
-        return ((Argument.Invertible<?>) this.arguments.get(type)).isInverted();
+        return has(type) && ((Argument.Invertible<?>) this.arguments.get(type)).isInverted();
     }
 
     @Override

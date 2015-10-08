@@ -62,32 +62,33 @@ public class SpongeHelpCommand {
                 Texts.of("View a list of all commands. Hover over\n" + " a command to view its description. Click\n"
                          + " a command to insert it into your chat bar."))
             .executor((src, args) -> {
-                Optional<String> command = args.getOne("command");
-                if (command.isPresent()) {
-                    Optional<? extends CommandMapping> mapping = Sponge.getGame().getCommandDispatcher().get(command.get());
-                    if (mapping.isPresent()) {
-                        CommandCallable callable = mapping.get().getCallable();
-                        Optional<? extends Text> desc = callable.getHelp(src);
-                        if (desc.isPresent()) {
-                            src.sendMessage(desc.get());
-                        } else {
-                            src.sendMessage(Texts.of("Usage: /", command.get(), callable.getUsage(src)));
+                    Optional<String> command = args.getOne("command");
+                    if (command.isPresent()) {
+                        Optional<? extends CommandMapping> mapping = Sponge.getGame().getCommandDispatcher().get(command.get());
+                        if (mapping.isPresent()) {
+                            CommandCallable callable = mapping.get().getCallable();
+                            Optional<? extends Text> desc = callable.getHelp(src);
+                            if (desc.isPresent()) {
+                                src.sendMessage(desc.get());
+                            } else {
+                                src.sendMessage(Texts.of("Usage: /", command.get(), callable.getUsage(src)));
+                            }
+                            return CommandResult.success();
                         }
-                        return CommandResult.success();
+                        throw new CommandException(Texts.of("No such command: ", command.get()));
                     }
-                    throw new CommandException(Texts.of("No such command: ", command.get()));
-                }
 
-                PaginationBuilder builder = Sponge.getGame().getServiceManager().provide(PaginationService.class).get().builder();
-                builder.title(Texts.builder("Available commands:").color(TextColors.DARK_GREEN).build());
+                    PaginationBuilder builder = Sponge.getGame().getServiceManager().provide(PaginationService.class).get().builder();
+                    builder.title(Texts.builder("Available commands:").color(TextColors.DARK_GREEN).build());
 
-                TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
-                commands.addAll(Collections2.filter(Sponge.getGame().getCommandDispatcher().getAll().values(), input -> input.getCallable()
-                    .testPermission(src)));
-                builder.contents(ImmutableList.copyOf(Collections2.transform(commands, input -> getDescription(src, input))));
-                builder.sendTo(src);
-                return CommandResult.success();
-            }).build();
+                    TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
+                    commands.addAll(Collections2.filter(Sponge.getGame().getCommandDispatcher().getAll().values(), input -> input.getCallable()
+                        .testPermission(src)));
+                    builder.contents(ImmutableList.copyOf(Collections2.transform(commands, input -> getDescription(src, input))));
+                    builder.sendTo(src);
+                    return CommandResult.success();
+                })
+            .build();
     }
 
     private static Text getDescription(CommandSource source, CommandMapping mapping) {

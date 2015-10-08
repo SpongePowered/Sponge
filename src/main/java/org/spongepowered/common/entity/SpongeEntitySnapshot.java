@@ -189,6 +189,18 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return Optional.empty();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+        checkNotNull(key);
+        for (ImmutableValue<?> value : this.values) {
+            if (value.getKey().equals(key)) {
+                return Optional.of((E) value.get());
+            }
+        }
+        return Optional.empty();
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
@@ -217,6 +229,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         }
         final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
         return processorOptional.isPresent() && processorOptional.get().supports(this.entityType);
+    }
+
+    @Override
+    public boolean supports(Key<?> key) {
+        return this.keys.contains(key);
     }
 
     @Override
@@ -274,11 +291,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             return Optional.empty();
         }
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
-        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-            if (!containerClass.isAssignableFrom(manipulator.getClass())) {
-                builder.add(manipulator);
-            }
-        }
+        this.manipulators.stream()
+                .filter(manipulator -> !containerClass.isAssignableFrom(manipulator.getClass()))
+                .forEach(builder::add);
         final SpongeEntitySnapshotBuilder snapshotBuilder = createBuilder();
         snapshotBuilder.manipulators = builder.build();
         return Optional.of(snapshotBuilder.build());
@@ -301,18 +316,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        checkNotNull(key);
-        for (ImmutableValue<?> value : this.values) {
-            if (value.getKey().equals(key)) {
-                return Optional.of((E) value.get());
-            }
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         checkNotNull(key);
         for (ImmutableValue<?> value : this.values) {
@@ -321,11 +324,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(Key<?> key) {
-        return this.keys.contains(key);
     }
 
     @Override
@@ -360,7 +358,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
         NBTTagCompound newCompound = (NBTTagCompound) this.compound.copy();
-        newCompound.setTag("Pos", newDoubleNBTList(new double[] {location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ()}));
+        newCompound.setTag("Pos", newDoubleNBTList(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ()));
         newCompound.setInteger("Dimension", ((IMixinWorldInfo)location.getExtent().getProperties()).getDimensionId());
         builder.compound = newCompound;
         return builder.build();
@@ -403,11 +401,10 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     public NBTTagList newDoubleNBTList(double ... numbers) {
         NBTTagList nbttaglist = new NBTTagList();
-        double[] adouble = numbers;
         int i = numbers.length;
 
         for (int j = 0; j < i; ++j) {
-            double d1 = adouble[j];
+            double d1 = numbers[j];
             nbttaglist.appendTag(new NBTTagDouble(d1));
         }
 

@@ -43,7 +43,10 @@ import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> {
+public abstract class
+    AbstractEntitySingleDataProcessor<E extends Entity, T, V extends BaseValue<T>, M extends DataManipulator<M, I>,
+            I extends ImmutableDataManipulator<I, M>>
+    extends AbstractSingleDataProcessor<T, V, M, I> {
 
     private final Class<E> entityClass;
 
@@ -56,17 +59,43 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
         return true;
     }
 
-    protected abstract boolean set(E entity, T value);
-
-    protected abstract Optional<T> getVal(E entity);
-
-    protected abstract ImmutableValue<T> constructImmutableValue(T value);
-
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
         return this.entityClass.isInstance(dataHolder) && supports((E) dataHolder);
     }
+
+    protected abstract boolean set(E entity, T value);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
+        if (supports(dataHolder)) {
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<M> old = from(dataHolder);
+            final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
+            final T newValue = merged.get(this.key).get();
+            final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
+            try {
+                if (set((E) dataHolder, newValue)) {
+                    if (old.isPresent()) {
+                        builder.replace(old.get().getValues());
+                    }
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success((ImmutableValue<?>) immutableValue).build();
+                } else {
+                    return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
+                }
+            } catch (Exception e) {
+                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
+                return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) immutableValue).build();
+            }
+        }
+        return DataTransactionBuilder.failResult(manipulator.getValues());
+    }
+
+    protected abstract Optional<T> getVal(E entity);
+
+    protected abstract ImmutableValue<T> constructImmutableValue(T value);
 
     @SuppressWarnings("unchecked")
     @Override
@@ -96,32 +125,6 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, T, V e
     public Optional<M> fill(DataContainer container, M m) {
         m.set(this.key, DataUtil.getData(container, this.key));
         return Optional.of(m);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
-        if (supports(dataHolder)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            final Optional<M> old = from(dataHolder);
-            final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
-            final T newValue = merged.get(this.key).get();
-            final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
-            try {
-                if (set((E) dataHolder, newValue)) {
-                    if (old.isPresent()) {
-                        builder.replace(old.get().getValues());
-                    }
-                    return builder.result(DataTransactionResult.Type.SUCCESS).success((ImmutableValue<?>) immutableValue).build();
-                } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
-                }
-            } catch (Exception e) {
-                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
-                return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) immutableValue).build();
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
     @SuppressWarnings("unchecked")

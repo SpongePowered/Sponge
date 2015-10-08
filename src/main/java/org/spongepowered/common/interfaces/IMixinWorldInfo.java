@@ -37,7 +37,7 @@ public interface IMixinWorldInfo {
 
     int getDimensionId();
 
-    void setDimensionId(int id);;
+    void setDimensionId(int id);
 
     void setSpongeRootLevelNBT(NBTTagCompound nbt);
 

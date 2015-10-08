@@ -184,13 +184,12 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
 
     @SuppressWarnings("rawtypes")
     public MessageSink getSink() {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
-        Iterator iterator = collection.iterator();
 
-        while (iterator.hasNext()) {
-            String s = (String)iterator.next();
+        for (Object o : collection) {
+            String s = (String) o;
             EntityPlayerMP teamPlayer = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(s);
             if (teamPlayer != null) {
                 sources.add((Player) teamPlayer);
@@ -201,13 +200,12 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
 
     @SuppressWarnings("rawtypes")
     public MessageSink getSinkForPlayer(EntityPlayerMP player) {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
-        Iterator iterator = collection.iterator();
 
-        while (iterator.hasNext()) {
-            String s = (String)iterator.next();
+        for (Object o : collection) {
+            String s = (String) o;
             EntityPlayerMP teamPlayer = player.mcServer.getConfigurationManager().getPlayerByUsername(s);
             if (teamPlayer != null && player != teamPlayer) {
                 sources.add((Player) teamPlayer);
@@ -217,7 +215,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     }
 
     public MessageSink getNonTeamSink() {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i) {
             EntityPlayerMP player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);

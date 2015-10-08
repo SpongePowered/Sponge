@@ -54,8 +54,8 @@ public class MutableBlockViewTransform extends AbstractBlockViewTransform<Mutabl
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
-        this.volume.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform.transformZ
-            (x, y, z), block);
+        this.volume.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z), block);
     }
 
     @Override

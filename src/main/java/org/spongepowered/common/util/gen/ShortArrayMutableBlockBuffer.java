@@ -61,6 +61,12 @@ public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements
     }
 
     @Override
+    public void setBlock(int x, int y, int z, BlockState block) {
+        checkRange(x, y, z);
+        this.blocks[getIndex(x, y, z)] = (short) Block.BLOCK_STATE_IDS.get(block);
+    }
+
+    @Override
     public void setBlockType(Vector3i position, BlockType type) {
         setBlockType(position.getX(), position.getY(), position.getZ(), type);
     }
@@ -68,12 +74,6 @@ public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements
     @Override
     public void setBlockType(int x, int y, int z, BlockType type) {
         setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
-        checkRange(x, y, z);
-        this.blocks[getIndex(x, y, z)] = (short) Block.BLOCK_STATE_IDS.get(block);
     }
 
     @Override

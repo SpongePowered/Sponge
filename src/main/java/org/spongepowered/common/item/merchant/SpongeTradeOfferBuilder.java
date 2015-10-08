@@ -103,18 +103,6 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
     }
 
     @Override
-    public TradeOffer build() throws IllegalStateException {
-        checkState(this.firstItem != null, "Trading item has not been set");
-        checkState(this.sellingItem != null, "Selling item has not been set");
-        checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
-        MerchantRecipe recipe =
-                new MerchantRecipe((net.minecraft.item.ItemStack) this.firstItem, (net.minecraft.item.ItemStack) this.secondItem,
-                        (net.minecraft.item.ItemStack) this.sellingItem, this.useCount, this.maxUses);
-        recipe.rewardsExp = this.allowsExperience;
-        return (TradeOffer) recipe;
-    }
-
-    @Override
     public TradeOfferBuilder from(TradeOffer offer) {
         checkNotNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
@@ -139,9 +127,21 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
     }
 
     @Override
+    public TradeOffer build() throws IllegalStateException {
+        checkState(this.firstItem != null, "Trading item has not been set");
+        checkState(this.sellingItem != null, "Selling item has not been set");
+        checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
+        MerchantRecipe recipe =
+                new MerchantRecipe((net.minecraft.item.ItemStack) this.firstItem, (net.minecraft.item.ItemStack) this.secondItem,
+                        (net.minecraft.item.ItemStack) this.sellingItem, this.useCount, this.maxUses);
+        recipe.rewardsExp = this.allowsExperience;
+        return (TradeOffer) recipe;
+    }
+
+    @Override
     public Optional<TradeOffer> build(DataView container) throws InvalidDataException {
-        if (!container.contains(FIRST_QUERY) || !container.contains(SECOND_QUERY) || !container.contains(BUYING_QUERY) || !container.contains
-                (EXPERIENCE_QUERY) || !container.contains(MAX_QUERY) || !container.contains(USES_QUERY)) {
+        if (!container.contains(FIRST_QUERY) || !container.contains(SECOND_QUERY) || !container.contains(BUYING_QUERY)
+                || !container.contains(EXPERIENCE_QUERY) || !container.contains(MAX_QUERY) || !container.contains(USES_QUERY)) {
             throw new InvalidDataException("Not enough information for constructing a TradeOffer!!");
         }
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();

@@ -38,7 +38,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
 
-public class ImmutableSpongePotionEffectData extends AbstractImmutableData<ImmutablePotionEffectData, PotionEffectData> implements ImmutablePotionEffectData {
+public class ImmutableSpongePotionEffectData extends AbstractImmutableData<ImmutablePotionEffectData, PotionEffectData>
+    implements ImmutablePotionEffectData {
 
     private final ImmutableList<PotionEffect> effects;
 

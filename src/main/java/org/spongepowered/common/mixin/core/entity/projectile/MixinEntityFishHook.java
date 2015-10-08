@@ -110,7 +110,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         if (entity.worldObj.isRemote) {
             EntitySnapshot fishHookSnapshot = ((FishHook) this).createSnapshot();
             EntitySnapshot hookedEntitySnapshot = ((Entity) entity).createSnapshot();
-            FishingEvent.Hook event = SpongeEventFactory.createFishingEventHook(Sponge.getGame(), Cause.of(this.angler), fishHookSnapshot, (FishHook) this, hookedEntitySnapshot, Optional.ofNullable(
+            FishingEvent.Hook event = SpongeEventFactory.createFishingEventHook(Sponge.getGame(), Cause.of(this.angler), fishHookSnapshot,
+                    (FishHook) this, hookedEntitySnapshot, Optional.ofNullable(
                     (Entity) entity), (Entity) entity);
             if (!Sponge.getGame().getEventManager().post(event)) {
                 if (this.getShooter() instanceof Entity) {
@@ -177,7 +178,9 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
             if (event.getItemStackTransaction().isPresent()) {
                 ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().get().getFinalSnapshot();
-                EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, (net.minecraft.item.ItemStack) itemSnapshot.createStack());
+                EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ,
+
+                        (net.minecraft.item.ItemStack) itemSnapshot.createStack());
                 double d1 = this.angler.posX - this.posX;
                 double d3 = this.angler.posY - this.posY;
                 double d5 = this.angler.posZ - this.posZ;

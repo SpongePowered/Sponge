@@ -106,10 +106,12 @@ class SpongePaginationBuilder implements PaginationBuilder {
             calculator = this.service.getUnpaginatedCalculator(); // TODO: or like 50 lines?
         }
         final PaginationCalculator<CommandSource> finalCalculator = calculator;
-        Iterable<Map.Entry<Text, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
-            int lines = finalCalculator.getLines(source, input);
-            return Maps.immutableEntry(input, lines);
-        }).collect(Collectors.toList());
+        Iterable<Map.Entry<Text, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false)
+                .map(input -> {
+                        int lines = finalCalculator.getLines(source, input);
+                        return Maps.immutableEntry(input, lines);
+                    })
+                .collect(Collectors.toList());
 
         Text title = this.title;
         if (title != null) {

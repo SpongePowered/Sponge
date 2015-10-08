@@ -91,8 +91,8 @@ public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List
 
     @Override
     protected boolean set(ItemStack itemStack, List<Text> value) {
-       NbtDataUtil.setPagesToNBT(itemStack, value);
-       return true;
+        NbtDataUtil.setPagesToNBT(itemStack, value);
+        return true;
     }
 
     @Override

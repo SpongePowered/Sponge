@@ -33,7 +33,7 @@ import org.spongepowered.api.util.weighted.WeightedObject;
 
 public abstract class ImmutableSpongeWeightedCollectionValue<E extends WeightedObject<?>, I extends ImmutableWeightedCollectionValue<E, I, M>,
     M extends WeightedCollectionValue<E, M, I>> extends ImmutableSpongeCollectionValue<E, WeightedCollection<E>, I, M> implements
-ImmutableWeightedCollectionValue<E, I, M> {
+    ImmutableWeightedCollectionValue<E, I, M> {
 
     public ImmutableSpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<E>>> key) {
         super(key, new WeightedCollection<>());

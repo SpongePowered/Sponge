@@ -33,10 +33,10 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
+import org.spongepowered.api.data.type.GameMode;
+import org.spongepowered.api.data.type.GameModes;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
@@ -44,7 +44,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
-public class GameModeDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayer, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
+public class GameModeDataProcessor
+    extends AbstractEntitySingleDataProcessor<EntityPlayer, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
 
     public GameModeDataProcessor() {
         super(EntityPlayer.class, Keys.GAME_MODE);

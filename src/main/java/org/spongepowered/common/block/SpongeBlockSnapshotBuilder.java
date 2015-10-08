@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -104,10 +105,24 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
             this.compound = new NBTTagCompound();
             ((TileEntity) location.getTileEntity().get()).writeToNBT(this.compound);
             final List<ImmutableDataManipulator<?, ?>> list = Lists.newArrayList();
-            for (DataManipulator<?, ?> manipulator : location.getContainers()) {
-                list.add(manipulator.asImmutable());
-            }
+            list.addAll(location.getContainers().stream()
+                    .map(DataManipulator::asImmutable)
+                    .collect(Collectors.toList()));
             this.manipulators = list;
+        }
+        return this;
+    }
+
+    @Override
+    public SpongeBlockSnapshotBuilder from(BlockSnapshot holder) {
+        this.blockState = holder.getState();
+        this.worldUuid = holder.getWorldUniqueId();
+        this.coords = holder.getPosition();
+        this.manipulators = Lists.newArrayList(holder.getManipulators());
+        if (holder instanceof SpongeBlockSnapshot) {
+            if (((SpongeBlockSnapshot) holder).compound != null) {
+                this.compound = (NBTTagCompound) ((SpongeBlockSnapshot) holder).compound.copy();
+            }
         }
         return this;
     }
@@ -135,20 +150,6 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
             }
         }
         this.manipulators.add(manipulator);
-        return this;
-    }
-
-    @Override
-    public SpongeBlockSnapshotBuilder from(BlockSnapshot holder) {
-        this.blockState = holder.getState();
-        this.worldUuid = holder.getWorldUniqueId();
-        this.coords = holder.getPosition();
-        this.manipulators = Lists.newArrayList(holder.getManipulators());
-        if (holder instanceof SpongeBlockSnapshot) {
-            if (((SpongeBlockSnapshot) holder).compound != null) {
-                this.compound = (NBTTagCompound) ((SpongeBlockSnapshot) holder).compound.copy();
-            }
-        }
         return this;
     }
 
@@ -195,9 +196,7 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
         } else {
             extraData = ImmutableList.of();
         }
-        for (ImmutableDataManipulator<?, ?> manipulator : extraData) {
-            builder.add(manipulator);
-        }
+        extraData.forEach(builder::add);
         return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(builder));
     }
 }

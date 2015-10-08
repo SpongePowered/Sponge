@@ -61,7 +61,7 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
 
     @Override
     public Optional<TemperatureProperty> getFor(Location<World> location, Direction direction) {
-        // TODO gabziou fix this
+        // TODO gabizou fix this
         return Optional.empty();
     }
 }

@@ -135,7 +135,7 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         if (shouldEcho()) {
             this.scoreboard.allowRecursion = false;
             // The objective is nullable, so no need to check the result of getSpongeObjective
-            //System.out.format("Scoreboard: {} Objecite: {} DisplaySlot: ", new Object[] {this.scoreboard, objective,Iterables.get((
+            //System.out.format("Scoreboard: {} Objective: {} DisplaySlot: ", new Object[] {this.scoreboard, objective, Iterables.get((
             //        (SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot) });
             this.scoreboard.addObjective(((IMixinScoreObjective) objective).getSpongeObjective(),
                                          Iterables.get(((SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot));
@@ -168,9 +168,11 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         }
     }
 
-    @Inject(method = "addPlayerToTeam", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/scoreboard/Scoreboard;getTeam(Ljava/lang/String;)Lnet/minecraft/scoreboard/ScorePlayerTeam;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void onAddPlayerToTeam(String player, String newTeam, CallbackInfoReturnable<Boolean> ci, ScorePlayerTeam team) throws
-                                                                                                                           TextMessageException {
+    @Inject(method = "addPlayerToTeam", at = @At(value = "INVOKE_ASSIGN",
+            target = "Lnet/minecraft/scoreboard/Scoreboard;getTeam(Ljava/lang/String;)Lnet/minecraft/scoreboard/ScorePlayerTeam;"),
+            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    public void onAddPlayerToTeam(String player, String newTeam, CallbackInfoReturnable<Boolean> ci, ScorePlayerTeam team)
+            throws TextMessageException {
         if (shouldEcho()) {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
@@ -188,17 +190,18 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
                 Optional<Player> spongePlayer = Sponge.getGame().getServer().getPlayer(name);
-                    this.scoreboard.allowRecursion = false;
-                    spongeTeam.removeMember(Texts.legacy().from(name));
-                    this.scoreboard.allowRecursion = true;
-                    ci.cancel();
+                this.scoreboard.allowRecursion = false;
+                spongeTeam.removeMember(Texts.legacy().from(name));
+                this.scoreboard.allowRecursion = true;
+                ci.cancel();
             }
         }
     }
 
     @Inject(method = "getValueFromObjective", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", shift
             = At.Shift.BY, by = 3, ordinal = 1, remap = false), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void onGetValueFromObjective(String name, ScoreObjective objective, CallbackInfoReturnable<net.minecraft.scoreboard.Score> cir, Object map, net.minecraft.scoreboard.Score score) {
+    public void onGetValueFromObjective(String name, ScoreObjective objective, CallbackInfoReturnable<net.minecraft.scoreboard.Score> cir, Object map,
+                                        net.minecraft.scoreboard.Score score) {
         if (shouldEcho() && score == null) {
             this.scoreboard.allowRecursion = false;
             @SuppressWarnings("deprecation")

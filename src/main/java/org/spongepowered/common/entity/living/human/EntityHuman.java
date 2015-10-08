@@ -133,8 +133,8 @@ public class EntityHuman extends EntityCreature {
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound tagCompund) {
-        super.readEntityFromNBT(tagCompund);
+    public void readEntityFromNBT(NBTTagCompound tagCompound) {
+        super.readEntityFromNBT(tagCompound);
         String skinUuidString = ((IMixinEntity) this).getSpongeData().getString("skinUuid");
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));

@@ -88,11 +88,9 @@ public class SpongeEventManager implements EventManager {
         Set<Class<?>> types = (Set) TypeToken.of(rootEvent).getTypes().rawTypes();
 
         synchronized (this.lock) {
-            for (Class<?> type : types) {
-                if (Event.class.isAssignableFrom(type)) {
-                    handlers.addAll(this.handlersByEvent.get(type));
-                }
-            }
+            types.stream()
+                    .filter(Event.class::isAssignableFrom)
+                    .forEach(type -> handlers.addAll(this.handlersByEvent.get(type)));
         }
 
         Collections.sort(handlers);
@@ -163,6 +161,22 @@ public class SpongeEventManager implements EventManager {
         register(handlers);
     }
 
+    @Override
+    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, EventListener<? super T> handler) {
+        registerListener(plugin, eventClass, Order.DEFAULT, handler);
+    }
+
+    @Override
+    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, EventListener<? super T> handler) {
+        register(createRegistration(getPlugin(plugin), eventClass, order, false, false, handler));
+    }
+
+    @Override
+    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
+                                                   EventListener<? super T> handler) {
+        register(createRegistration(getPlugin(plugin), eventClass, order, false, beforeModifications, handler));
+    }
+
     private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Listener listener,
             EventListener<? super T> handler) {
         return createRegistration(plugin, eventClass, listener.order(), listener.ignoreCancelled(), listener.beforeModifications(), handler);
@@ -182,22 +196,6 @@ public class SpongeEventManager implements EventManager {
     @Override
     public void registerListeners(Object plugin, Object listener) {
         registerListener(getPlugin(plugin), listener);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, EventListener<? super T> handler) {
-        registerListener(plugin, eventClass, Order.DEFAULT, handler);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, EventListener<? super T> handler) {
-        register(createRegistration(getPlugin(plugin), eventClass, order, false, false, handler));
-    }
-
-    @Override
-    public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
-                                           EventListener<? super T> handler) {
-        register(createRegistration(getPlugin(plugin), eventClass, order, false, beforeModifications, handler));
     }
 
     private void unregister(Predicate<RegisteredListener<?>> unregister) {

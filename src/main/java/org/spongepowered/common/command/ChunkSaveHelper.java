@@ -81,7 +81,8 @@ public class ChunkSaveHelper {
                     chunkEntityCounts.adjustOrPutValue(chunkCoords, 1, 1);
                     classEntityCounts.adjustOrPutValue(entity.getClass(), 1, 1);
                     if ((entity.getBoundingBox() != null) && logAll) {
-                        BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
+                        BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY),
+                                GenericMath.floor(entity.posZ));
                         if (!collidingCoords.contains(coords)) {
                             collidingCoords.add(coords);
                             int size = entity.worldObj.getEntitiesWithinAABBExcludingEntity(entity, entity.getBoundingBox().expand(1, 1, 1)).size();

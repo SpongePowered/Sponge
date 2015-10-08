@@ -28,19 +28,23 @@
  *
  * <dl>
  * <dt>{@link org.spongepowered.api.util.command.CommandSource}</dt>
- * <dd>{@link MixinCommandSource}
+ * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSource}
  * <dt>{@link org.spongepowered.api.util.command.source.LocatedSource}</dt>
- * <dd>{@link MixinLocatedSource}
+ * <dd>{@link org.spongepowered.common.mixin.core.command.MixinLocatedSource}
  * <dt>{@link org.spongepowered.api.util.command.source.CommandBlockSource}</dt>
- * <dd>{@link MixinCommandBlockSource}
- * <dt>{@link org.spongepowered.api.util.command.RconSource}</dt>
+ * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandBlockSource}
+ * <dt>{@link org.spongepowered.api.util.command.source.RconSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.MixinRConConsoleSource}
- * <dt>{@link org.spongepowered.api.util.command.SignSource}</dt>
- * <dd>{@link MixinSignCommandSender}
+ * <dt>{@link org.spongepowered.api.util.command.source.SignSource}</dt>
+ * <dd>{@link org.spongepowered.common.mixin.core.command.MixinSignCommandSender}
  * <dt>{@link org.spongepowered.api.util.command.source.ProxySource} via /execute
- * <dd>{@link MixinCommandExecuteAtSender}
+ * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandExecuteAtSender}
  * </dl>
  *
- * In addition, {@link MixinBlockCommandBlockSender} and {@link MixinMinecartCommandBlockSender} are for inner classes that are separate from the mixin that actually implements their command source interfaces.
+ * <p>In addition,
+ * {@link org.spongepowered.common.mixin.core.command.MixinBlockCommandBlockSender}
+ * and {@link org.spongepowered.common.mixin.core.command.MixinMinecartCommandBlockSender}
+ * are for inner classes that are separate from the mixin that actually
+ * implements their command source interfaces.</p>
  */
 package org.spongepowered.common.mixin.core.command;

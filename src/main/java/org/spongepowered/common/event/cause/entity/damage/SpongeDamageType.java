@@ -56,10 +56,7 @@ public class SpongeDamageType implements DamageType {
             return false;
         }
         final SpongeDamageType other = (SpongeDamageType) obj;
-        if (!this.id.equals(other.id)) {
-            return false;
-        }
-        return true;
+        return this.id.equals(other.id);
     }
 
     @Override

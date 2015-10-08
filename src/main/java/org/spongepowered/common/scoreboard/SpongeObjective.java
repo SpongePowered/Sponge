@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SpongeObjective implements Objective {
 
@@ -191,12 +192,11 @@ public class SpongeObjective implements Objective {
 
     @Override
     public Set<Scoreboard> getScoreboards() {
-        // This is a set, so no need to worry about mutiple NMS scoreboards which map to the same
+        // This is a set, so no need to worry about multiple NMS scoreboards which map to the same
         // api scoreboard
-        Set<Scoreboard> scoreboards = new HashSet<>();
-        for (net.minecraft.scoreboard.Scoreboard scoreboard: this.objectives.keySet()) {
-            scoreboards.add(((IMixinScoreboard) scoreboard).getSpongeScoreboard());
-        }
+        Set<Scoreboard> scoreboards = this.objectives.keySet().stream()
+                .map(scoreboard -> ((IMixinScoreboard) scoreboard).getSpongeScoreboard())
+                .collect(Collectors.toSet());
         return scoreboards;
     }
 

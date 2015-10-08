@@ -66,7 +66,8 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         break;
                     case SHOW_ACHIEVEMENT:
                         String stat = this.value.getUnformattedText();
-                        setHandle(TextActions.showAchievement((Achievement) checkNotNull(StatList.getOneShotStat(stat), "Unknown statistic: %s", stat)));
+                        setHandle(TextActions.showAchievement((Achievement) checkNotNull(StatList.getOneShotStat(stat), "Unknown statistic: %s",
+                                stat)));
                         break;
                     case SHOW_ITEM:
                         setHandle(TextActions.showItem((ItemStack) net.minecraft.item.ItemStack.loadItemStackFromNBT(loadNbt())));

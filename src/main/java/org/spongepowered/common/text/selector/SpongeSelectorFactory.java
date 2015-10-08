@@ -84,7 +84,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                     return null;
                 } catch (IllegalArgumentException e) {
                     Sponge.getLogger()
-                            .debug(m + " failed with paramter " + input, e);
+                            .debug(m + " failed with parameter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
                     throw Throwables.propagate(e.getCause());
@@ -99,7 +99,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                     return null;
                 } catch (IllegalArgumentException e) {
                     Sponge.getLogger()
-                            .debug(m + " failed with paramter " + input, e);
+                            .debug(m + " failed with parameter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
                     throw Throwables.propagate(e.getCause());

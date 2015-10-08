@@ -34,7 +34,9 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeRepresentedItemData extends AbstractImmutableSingleData<ItemStackSnapshot, ImmutableRepresentedItemData, RepresentedItemData> implements ImmutableRepresentedItemData {
+public class ImmutableSpongeRepresentedItemData
+    extends AbstractImmutableSingleData<ItemStackSnapshot, ImmutableRepresentedItemData, RepresentedItemData>
+    implements ImmutableRepresentedItemData {
 
     public ImmutableSpongeRepresentedItemData(ItemStackSnapshot itemStack) {
         super(ImmutableRepresentedItemData.class, itemStack, Keys.REPRESENTED_ITEM);

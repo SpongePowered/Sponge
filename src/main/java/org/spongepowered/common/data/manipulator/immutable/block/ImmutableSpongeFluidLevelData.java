@@ -35,7 +35,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeFluidLevelData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
-public class ImmutableSpongeFluidLevelData extends AbstractImmutableBoundedComparableData<Integer, ImmutableFluidLevelData, FluidLevelData> implements ImmutableFluidLevelData {
+public class ImmutableSpongeFluidLevelData extends AbstractImmutableBoundedComparableData<Integer, ImmutableFluidLevelData, FluidLevelData>
+    implements ImmutableFluidLevelData {
 
     private final int defaultValue;
 

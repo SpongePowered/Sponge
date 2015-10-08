@@ -106,7 +106,8 @@ public abstract class MixinServerConfigurationManager {
     @SuppressWarnings("rawtypes")
     @Shadow public List playerEntityList;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
-    @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_, net.minecraft.world.World worldIn);
+    @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_,
+                                                               net.minecraft.world.World worldIn);
     @Shadow protected abstract void func_96456_a(ServerScoreboard scoreboardIn, EntityPlayerMP playerIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
@@ -117,7 +118,7 @@ public abstract class MixinServerConfigurationManager {
     /**
      * Bridge methods to proxy modified method in Vanilla, nothing in Forge
      */
-    public void func_72355_a (NetworkManager netManager, EntityPlayerMP playerIn) {
+    public void func_72355_a(NetworkManager netManager, EntityPlayerMP playerIn) {
         initializeConnectionToPlayer(netManager, playerIn, null);
     }
 
@@ -129,23 +130,23 @@ public abstract class MixinServerConfigurationManager {
     }
 
     public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
-        GameProfile gameprofile = playerIn.getGameProfile();
+        GameProfile gameProfile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
-        GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
-        String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
-        playerprofilecache.addEntry(gameprofile);
+        GameProfile gameProfile1 = playerprofilecache.getProfileByUUID(gameProfile.getId());
+        String s = gameProfile1 == null ? gameProfile.getName() : gameProfile1.getName();
+        playerprofilecache.addEntry(gameProfile);
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
+        WorldServer worldServer = this.mcServer.worldServerForDimension(playerIn.dimension);
         Transform<World> fromTransform = ((Player)playerIn).getTransform();
 
-        if (worldserver == null) {
+        if (worldServer == null) {
             playerIn.dimension = 0;
-            worldserver = this.mcServer.worldServerForDimension(0);
-            BlockPos spawnPoint = ((IMixinWorldProvider) worldserver.provider).getRandomizedSpawnPoint();
+            worldServer = this.mcServer.worldServerForDimension(0);
+            BlockPos spawnPoint = ((IMixinWorldProvider) worldServer.provider).getRandomizedSpawnPoint();
             playerIn.setPosition(spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
         }
 
-        playerIn.setWorld(worldserver);
+        playerIn.setWorld(worldServer);
         playerIn.theItemInWorldManager.setWorld((WorldServer) playerIn.worldObj);
         String s1 = "local";
 
@@ -153,9 +154,9 @@ public abstract class MixinServerConfigurationManager {
             s1 = netManager.getRemoteAddress().toString();
         }
 
-        WorldInfo worldinfo = worldserver.getWorldInfo();
-        BlockPos blockpos = worldserver.getSpawnPoint();
-        this.setPlayerGameTypeBasedOnOther(playerIn, null, worldserver);
+        WorldInfo worldinfo = worldServer.getWorldInfo();
+        BlockPos blockpos = worldServer.getSpawnPoint();
+        this.setPlayerGameTypeBasedOnOther(playerIn, null, worldServer);
 
         // Sponge Start
 
@@ -169,14 +170,14 @@ public abstract class MixinServerConfigurationManager {
         // Sponge End
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.getDimensionId(), worldserver, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(worldServer.provider.getDimensionId(), worldServer, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            DimensionManager.sendDimensionRegistration(worldserver, playerIn, dimension);
+            DimensionManager.sendDimensionRegistration(worldServer, playerIn, dimension);
         }
 
         handler.sendPacket(new S01PacketJoinGame(playerIn.getEntityId(), playerIn.theItemInWorldManager.getGameType(), worldinfo
-                .isHardcoreModeEnabled(), dimension, worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo
-                .getTerrainType(), worldserver.getGameRules().getGameRuleBooleanValue("reducedDebugInfo")));
+                .isHardcoreModeEnabled(), dimension, worldServer.getDifficulty(), this.getMaxPlayers(), worldinfo
+                .getTerrainType(), worldServer.getGameRules().getGameRuleBooleanValue("reducedDebugInfo")));
         handler.sendPacket(new S3FPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
                 .getServerInstance().getServerModName())));
         handler.sendPacket(new S41PacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
@@ -189,7 +190,7 @@ public abstract class MixinServerConfigurationManager {
 
         this.playerLoggedIn(playerIn);
         handler.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
-        this.updateTimeAndWeatherForPlayer(playerIn, worldserver);
+        this.updateTimeAndWeatherForPlayer(playerIn, worldServer);
 
         // Sponge Start - Use the server's ResourcePack object
         Optional<ResourcePack> pack = ((Server)this.mcServer).getDefaultResourcePack();
@@ -206,13 +207,10 @@ public abstract class MixinServerConfigurationManager {
         // Move logic for creating join message up here
         ChatComponentTranslation chatcomponenttranslation;
 
-        if (!playerIn.getCommandSenderName().equalsIgnoreCase(s))
-        {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", new Object[] {playerIn.getDisplayName(), s});
-        }
-        else
-        {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", new Object[] {playerIn.getDisplayName()});
+        if (!playerIn.getCommandSenderName().equalsIgnoreCase(s)) {
+            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
+        } else {
+            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
         }
 
         chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
@@ -223,7 +221,8 @@ public abstract class MixinServerConfigurationManager {
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         Text message = SpongeTexts.toText(chatcomponenttranslation);
         MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player);
+        final ClientConnectionEvent.Join event = SpongeImplEventFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player),
+                originalMessage, message, originalSink, player.getMessageSink(), fromTransform, toTransform, player);
         Sponge.getGame().getEventManager().post(event);
         // Set the resolved location of the event onto the player
         ((Player) playerIn).setTransform(event.getToTransform());
@@ -235,7 +234,7 @@ public abstract class MixinServerConfigurationManager {
         event.getSink().sendMessage(event.getMessage());
         // Sponge end
 
-        this.func_96456_a((ServerScoreboard) worldserver.getScoreboard(), playerIn);
+        this.func_96456_a((ServerScoreboard) worldServer.getScoreboard(), playerIn);
 
         for (Object o : playerIn.getActivePotionEffects()) {
             PotionEffect potioneffect = (PotionEffect) o;
@@ -243,11 +242,11 @@ public abstract class MixinServerConfigurationManager {
         }
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {
-            Entity entity = EntityList.createEntityFromNBT(nbttagcompound.getCompoundTag("Riding"), worldserver);
+            Entity entity = EntityList.createEntityFromNBT(nbttagcompound.getCompoundTag("Riding"), worldServer);
 
             if (entity != null) {
                 entity.forceSpawn = true;
-                worldserver.spawnEntityInWorld(entity);
+                worldServer.spawnEntityInWorld(entity);
                 playerIn.mountEntity(entity);
                 entity.forceSpawn = false;
             }
@@ -265,7 +264,7 @@ public abstract class MixinServerConfigurationManager {
         // ### PHASE 1 ### Get the location to spawn
 
         // Vanilla will always use overworld, set to the world the player was in
-        // UNLESS comming back from the end.
+        // UNLESS coming back from the end.
         if (!conqueredEnd && targetDimension == 0) {
             targetDimension = playerIn.dimension;
         }
@@ -302,7 +301,8 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplEventFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
+                SpongeImplEventFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn,
+                        this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         Sponge.getGame().getEventManager().post(event);
         player.setTransform(event.getToTransform());
@@ -354,7 +354,7 @@ public abstract class MixinServerConfigurationManager {
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
-            return new Transform<World>(location, Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<>(location, Vector3d.ZERO, Vector3d.ZERO);
         }
 
         Vector3d spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
@@ -371,7 +371,7 @@ public abstract class MixinServerConfigurationManager {
         if (optRespawn.isPresent()) {
             // API TODO: Make this support multiple world spawn points
             // TODO Make RespawnLocationData 'shadow' the bed location from below
-            return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
         }
 
         BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
@@ -394,7 +394,7 @@ public abstract class MixinServerConfigurationManager {
             playerIn.dimension = prevDim;
         }
 
-        return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+        return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
     }
 
     @Overwrite

@@ -53,22 +53,23 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Shadow private File worldDirectory;
     @Shadow private long initializationTime;
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 0, remap = false))
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V",
+            ordinal = 0, remap = false))
     public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 1, remap = false))
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V",
+            ordinal = 1, remap = false))
     public String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
             + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci, NBTTagCompound nbttagcompound1, NBTTagCompound nbttagcompound2) {
-        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound2);
+    public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound nbtTagCompound, CallbackInfo ci,
+                                                     NBTTagCompound nbtTagCompound1, NBTTagCompound nbtTagCompound2) {
+        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbtTagCompound2);
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
@@ -78,8 +79,9 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     @Inject(method = "saveWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
             + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbttagcompound, NBTTagCompound nbttagcompound1) {
-        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound1);
+    public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbtTagCompound,
+                                           NBTTagCompound nbtTagCompound1) {
+        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbtTagCompound1);
     }
 
     @Inject(method = "saveWorldInfo", at = @At("RETURN"))
@@ -140,7 +142,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     private void saveDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
         // Only save dimension data to root world
-        if (this.worldDirectory.getParentFile() == null || (Sponge.getGame().getPlatform().getType().isClient() && this.worldDirectory.getParentFile().equals(
+        if (this.worldDirectory.getParentFile() == null || (Sponge.getGame().getPlatform().getType().isClient()
+                && this.worldDirectory.getParentFile().equals(
                 Sponge.getGame().getSavesDirectory()))) {
             final NBTTagCompound customWorldDataCompound = new NBTTagCompound();
             final NBTTagCompound customDimensionDataCompound = DimensionManager.saveDimensionDataMap();

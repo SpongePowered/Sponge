@@ -269,7 +269,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.convertMapIfNeeded(overworldFolder);
         this.setUserMessage("menu.loadingLevel");
 
-        List<Integer> idList = new LinkedList<Integer>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
+        List<Integer> idList = new LinkedList<>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
         idList.remove(Integer.valueOf(0));
         idList.add(0, 0); // load overworld first
         for (int dim : idList) {
@@ -292,20 +292,20 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             WorldInfo worldInfo;
             WorldSettings newWorldSettings ;
-            AnvilSaveHandler worldsavehandler;
+            AnvilSaveHandler worldSaveHandler;
 
             if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
-                worldsavehandler =
+                worldSaveHandler =
                         new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory() :
                                 new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
                 if (dim == 0) {
                     worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldFolder).get();
                 } else {
-                    worldInfo = worldsavehandler.loadWorldInfo();
+                    worldInfo = worldSaveHandler.loadWorldInfo();
                 }
             } else {
-                worldsavehandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
-                worldInfo = worldsavehandler.loadWorldInfo();
+                worldSaveHandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
+                worldInfo = worldSaveHandler.loadWorldInfo();
             }
 
             if (worldInfo == null) {
@@ -318,7 +318,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
                 worldInfo = new WorldInfo(newWorldSettings, worldFolder);
                 ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
-                if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
+                if (dim == 0 || dim == -1 || dim == 1) { // if vanilla dimension
                     ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
                     ((WorldProperties) worldInfo).setLoadOnStartup(true);
                     ((WorldProperties) worldInfo).setEnabled(true);
@@ -327,11 +327,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     }
                 }
             } else {
-                if (((WorldProperties) worldInfo).getUniqueId() == null || ((WorldProperties) worldInfo).getUniqueId().equals
-                        (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+                if (((WorldProperties) worldInfo).getUniqueId() == null
+                        || ((WorldProperties) worldInfo).getUniqueId().equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
 
-                    if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
+                    if (dim == 0 || dim == -1 || dim == 1) { // if vanilla dimension
                         ((WorldProperties) worldInfo).setKeepSpawnLoaded(true);
                         ((WorldProperties) worldInfo).setLoadOnStartup(true);
                         ((WorldProperties) worldInfo).setEnabled(true);
@@ -345,7 +345,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
 
             if (dim == 0) {
-                this.setResourcePackFromWorld(this.getFolderName(), worldsavehandler);
+                this.setResourcePackFromWorld(this.getFolderName(), worldSaveHandler);
             }
 
             ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
@@ -353,8 +353,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             Sponge.getSpongeRegistry().registerWorldUniqueId(uuid, worldFolder);
             Sponge.getSpongeRegistry().registerWorldProperties((WorldProperties) worldInfo);
-            Sponge.getGame().getEventManager().post(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this), (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
-            final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
+            Sponge.getGame().getEventManager().post(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this),
+                    (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
+            final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldSaveHandler, worldInfo, dim,
                     this.theProfiler).init();
 
             world.initialize(newWorldSettings);
@@ -441,12 +442,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         int dim;
         WorldInfo worldInfo = null;
-        AnvilSaveHandler savehandler = getHandler(worldName);
+        AnvilSaveHandler saveHandler = getHandler(worldName);
         Optional<WorldProperties> worldProperties = Sponge.getSpongeRegistry().getWorldProperties(worldName);
         if (worldProperties.isPresent()) {
             worldInfo = (WorldInfo) worldProperties.get();
         } else {
-            worldInfo = savehandler.loadWorldInfo();
+            worldInfo = saveHandler.loadWorldInfo();
         }
 
         if (worldInfo != null) {
@@ -477,7 +478,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
 
-        WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
+        WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, saveHandler, worldInfo, dim, this.theProfiler).init();
 
         world.initialize(settings);
         ((IMixinWorldProvider) world.provider).setDimension(dim);
@@ -549,23 +550,20 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
 
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this), settings, (WorldProperties)
-                worldInfo));
+        Sponge.getGame().getEventManager().post(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this), settings,
+                (WorldProperties) worldInfo));
         return Optional.of((WorldProperties) worldInfo);
     }
 
     @Override
     public boolean unloadWorld(World world) {
         int dim = ((net.minecraft.world.World) world).provider.getDimensionId();
-        if (DimensionManager.getWorldFromDimId(dim) != null) {
-            return DimensionManager.unloadWorldFromDimId(dim);
-        }
-        return false;
+        return DimensionManager.getWorldFromDimId(dim) != null && DimensionManager.unloadWorldFromDimId(dim);
     }
 
     @Override
     public Collection<World> getWorlds() {
-        List<World> worlds = new ArrayList<World>();
+        List<World> worlds = new ArrayList<>();
         for (WorldServer worldServer : DimensionManager.getWorlds()) {
             worlds.add((World) worldServer);
         }

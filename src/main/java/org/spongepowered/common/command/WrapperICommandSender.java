@@ -72,32 +72,32 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public BlockPos getPosition() {
-        if (source instanceof LocatedSource) {
-            return VecHelper.toBlockPos(((LocatedSource) source).getLocation().getBlockPosition());
+        if (this.source instanceof LocatedSource) {
+            return VecHelper.toBlockPos(((LocatedSource) this.source).getLocation().getBlockPosition());
         }
         return BlockPos.ORIGIN;
     }
 
     @Override
     public Vec3 getPositionVector() {
-        if (source instanceof LocatedSource) {
-            return VecHelper.toVector(((LocatedSource) source).getLocation().getPosition());
+        if (this.source instanceof LocatedSource) {
+            return VecHelper.toVector(((LocatedSource) this.source).getLocation().getPosition());
         }
         return new Vec3(0, 0, 0);
     }
 
     @Override
     public World getEntityWorld() {
-        if (source instanceof LocatedSource) {
-            return (World) ((LocatedSource) source).getWorld();
+        if (this.source instanceof LocatedSource) {
+            return (World) ((LocatedSource) this.source).getWorld();
         }
         return null;
     }
 
     @Override
     public Entity getCommandSenderEntity() {
-        if (source instanceof Entity) {
-            return (Entity) source;
+        if (this.source instanceof Entity) {
+            return (Entity) this.source;
         }
         return null;
     }

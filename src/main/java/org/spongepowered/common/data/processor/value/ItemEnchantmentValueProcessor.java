@@ -113,7 +113,8 @@ public class ItemEnchantmentValueProcessor extends AbstractSpongeValueProcessor<
             final NBTTagList newList = new NBTTagList(); // Reconstruct the newly merged enchantment list
             for (Map.Entry<Enchantment, Integer> entry : mergedMap.entrySet()) {
                 final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-                enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) ((net.minecraft.enchantment.Enchantment) entry.getKey()).effectId);
+                enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID,
+                        (short) ((net.minecraft.enchantment.Enchantment) entry.getKey()).effectId);
                 enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
                 newList.appendTag(enchantmentCompound);
             }

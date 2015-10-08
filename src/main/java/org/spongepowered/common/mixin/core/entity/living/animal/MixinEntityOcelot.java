@@ -48,7 +48,8 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
 
     private ItemStack currentItemStack;
 
-    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityOcelot;isTamed()Z", shift = At.Shift.BEFORE, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityOcelot;isTamed()Z", shift = At.Shift.BEFORE,
+            ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
         this.currentItemStack = currentItemStack.copy();
     }
@@ -61,7 +62,8 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
     @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player) {
         int random = rand.nextInt(bound);
-        if (random == 0 && !Sponge.getGame().getEventManager().post(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(), Cause.of(player, this.currentItemStack), this))) {
+        if (random == 0 && !Sponge.getGame().getEventManager().post(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(),
+                Cause.of(player,this.currentItemStack), this))) {
             this.currentItemStack = null;
             return random;
         }

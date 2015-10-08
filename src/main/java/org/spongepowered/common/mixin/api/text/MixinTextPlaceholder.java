@@ -43,8 +43,8 @@ public class MixinTextPlaceholder extends MixinText {
 
     @Override
     protected ChatComponentStyle createComponent(Locale locale) {
-        if (fallback.isPresent()) {
-            return new ChatComponentPlaceholder(this.key, ((IMixinText) fallback.get()).toComponent(locale));
+        if (this.fallback.isPresent()) {
+            return new ChatComponentPlaceholder(this.key, ((IMixinText) this.fallback.get()).toComponent(locale));
         } else {
             return new ChatComponentPlaceholder(this.key);
         }

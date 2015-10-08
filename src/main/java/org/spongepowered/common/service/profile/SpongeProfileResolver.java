@@ -52,7 +52,7 @@ import java.util.concurrent.Executors;
 
 public class SpongeProfileResolver implements GameProfileResolver {
 
-    private static abstract class Query<V> implements Callable<V> {
+    private abstract static class Query<V> implements Callable<V> {
 
         private final boolean useCache;
         protected final MinecraftServer server = MinecraftServer.getServer();

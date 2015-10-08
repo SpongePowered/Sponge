@@ -62,12 +62,8 @@ public class SpongeScoreboardBuilder implements ScoreboardBuilder {
     @Override
     public Scoreboard build() throws IllegalStateException {
         SpongeScoreboard scoreboard = new SpongeScoreboard();
-        for (Objective objective: this.objectives) {
-            scoreboard.addObjective(objective);
-        }
-        for (Team team: this.teams) {
-            scoreboard.addTeam(team);
-        }
+        this.objectives.forEach(scoreboard::addObjective);
+        this.teams.forEach(scoreboard::addTeam);
         return scoreboard;
     }
 }

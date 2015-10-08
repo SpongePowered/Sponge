@@ -61,13 +61,13 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
     private static final String SPONGE_SCORE_UUID_LEAST = "SpongeScoreUUIDLeast";
     private static final String SPONGE_SCORE_UUID_MOST = "SpongeScoreUUIDMost";
 
-    public Map<UUID, SpongeScore> scoreMap = new HashMap<UUID, SpongeScore>();
+    public Map<UUID, SpongeScore> scoreMap = new HashMap<>();
 
     private Score lastScore = null;
 
     public MixinScoreboardSaveData(String name) {
         super(name);
-        this.scoreMap = new HashMap<UUID, SpongeScore>();
+        this.scoreMap = new HashMap<>();
     }
 
     @Inject(method = "<init>(Ljava/lang/String;)V", at = @At("RETURN"), remap = false)
@@ -87,7 +87,9 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
     }
 
     @SuppressWarnings("deprecation")
-    @Inject(method = "readScores", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getValueFromObjective(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreObjective;)Lnet/minecraft/scoreboard/Score;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "readScores", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/scoreboard/Scoreboard;getValueFromObjective(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreObjective;)"
+            + "Lnet/minecraft/scoreboard/Score;"), locals = LocalCapture.CAPTURE_FAILHARD)
     public void onAfterSetLocked(NBTTagList nbt, CallbackInfo ci, int i, NBTTagCompound nbttagcompound, ScoreObjective objective) {
         if (nbttagcompound.hasKey(SPONGE_SCORE_UUID_LEAST)) {
             UUID uuid = new UUID(nbttagcompound.getLong(SPONGE_SCORE_UUID_MOST), nbttagcompound.getLong(SPONGE_SCORE_UUID_LEAST));
@@ -101,7 +103,9 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
         }
     }
 
-    @Redirect(method = "readScores", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getValueFromObjective(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreObjective;)Lnet/minecraft/scoreboard/Score;"))
+    @Redirect(method = "readScores", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/scoreboard/Scoreboard;getValueFromObjective(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreObjective;)"
+            + "Lnet/minecraft/scoreboard/Score;"))
     public Score onGetValueFromObjective(net.minecraft.scoreboard.Scoreboard scoreboard, String name, ScoreObjective objective) {
         if (this.lastScore != null) {
             Score score = this.lastScore;
@@ -112,8 +116,10 @@ public abstract class MixinScoreboardSaveData extends WorldSavedData implements 
     }
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "scoresToNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Score;isLocked()Z"), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onScoresToNbt(CallbackInfoReturnable<NBTTagList> cir, NBTTagList nbttaglist, Collection collection, Iterator iterator, Score score, NBTTagCompound nbttagcompound) {
+    @Inject(method = "scoresToNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Score;isLocked()Z"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
+    public void onScoresToNbt(CallbackInfoReturnable<NBTTagList> cir, NBTTagList nbttaglist, Collection collection, Iterator iterator, Score score,
+                              NBTTagCompound nbttagcompound) {
         SpongeScore spongeScore = ((IMixinScore) score).getSpongeScore();
         if (spongeScore.getObjectives().size() > 1) {
             nbttagcompound.setLong(SPONGE_SCORE_UUID_MOST, spongeScore.getUuid().getMostSignificantBits());

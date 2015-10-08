@@ -35,7 +35,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeGrowthData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
-public class ImmutableSpongeGrowthData extends AbstractImmutableBoundedComparableData<Integer, ImmutableGrowthData, GrowthData> implements ImmutableGrowthData {
+public class ImmutableSpongeGrowthData extends AbstractImmutableBoundedComparableData<Integer, ImmutableGrowthData, GrowthData>
+    implements ImmutableGrowthData {
 
     private final int defaultValue;
 

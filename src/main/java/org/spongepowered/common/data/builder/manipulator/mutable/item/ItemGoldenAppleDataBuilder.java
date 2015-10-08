@@ -60,7 +60,8 @@ public class ItemGoldenAppleDataBuilder implements DataManipulatorBuilder<Golden
     @Override
     public Optional<GoldenAppleData> build(DataView container) throws InvalidDataException {
         if (container.contains(Keys.GOLDEN_APPLE_TYPE.getQuery())) {
-            return Optional.<GoldenAppleData>of(new SpongeGoldenAppleData(Sponge.getSpongeRegistry().getType(GoldenApple.class, DataUtil.getData(container, Keys.GOLDEN_APPLE_TYPE, String.class)).get()));
+            return Optional.<GoldenAppleData>of(new SpongeGoldenAppleData(Sponge.getSpongeRegistry()
+                    .getType(GoldenApple.class, DataUtil.getData(container, Keys.GOLDEN_APPLE_TYPE, String.class)).get()));
         }
         return Optional.empty();
     }
