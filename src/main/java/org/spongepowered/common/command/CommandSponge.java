@@ -118,7 +118,6 @@ public class CommandSponge {
                 .build();
     }
 
-
     // TODO: Have some sort of separator between outputs for each world/dimension/global/whatever (that are exactly one line?)
     private abstract static class ConfigUsingExecutor implements CommandExecutor {
         @Override
@@ -315,7 +314,6 @@ public class CommandSponge {
                     })
                 .build();
     }
-
 
     private static CommandSpec getVersionCommand() {
         return CommandSpec.builder()

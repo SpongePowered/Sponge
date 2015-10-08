@@ -64,7 +64,6 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
             }
             NON_UNICODE_CHAR_WIDTHS = nonUnicodeCharWidths;
 
-
             List<? extends ConfigurationNode> glyphWidths = node.getNode("glyph-widths").getChildrenList();
             byte[] unicodeCharWidths = new byte[glyphWidths.size()];
             for (int i = 0; i < nonUnicodeCharWidths.length; ++i) {

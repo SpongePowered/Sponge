@@ -50,7 +50,6 @@ public final class SpongeBlockDamageSourceBuilder implements BlockDamageSourceBu
 
     }
 
-
     @Override
     public BlockDamageSourceBuilder scalesWithDifficulty() {
         this.scales = true;

@@ -98,7 +98,6 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 
-
     /**
      * Gets the internal byte array, and prevents further of it through this
      * object uses until {@link #reuse(Vector2i)} is called.

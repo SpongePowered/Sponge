@@ -63,7 +63,6 @@ public abstract class ImmutableSpongeCollectionValue<E, V extends Collection<E>,
         return this.actualValue.isEmpty();
     }
 
-
     @Override
     public boolean contains(E element) {
         return this.actualValue.contains(element);

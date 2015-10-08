@@ -45,7 +45,6 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
     @Shadow private String throwerName;
     @Shadow public abstract EntityLivingBase getThrower();
 
-
     @Nullable
     public ProjectileSource projectileSource;
 

@@ -2283,7 +2283,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(LogAxes.class, this.logAxisMappings);
     }
 
-
     private void setDoublePlantMappings() {
         RegistryHelper.mapFields(DoublePlantTypes.class, this.doublePlantMappings);
     }

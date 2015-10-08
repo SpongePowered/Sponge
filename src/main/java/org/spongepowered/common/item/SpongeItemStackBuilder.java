@@ -65,7 +65,6 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         return this;
     }
 
-
     @Override
     public ItemStackBuilder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
         return null;

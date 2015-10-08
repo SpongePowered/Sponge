@@ -342,7 +342,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return this.compound == null ? Optional.<NBTTagCompound>empty() : Optional.of((NBTTagCompound) this.compound.copy());
     }
 
-
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.blockState((BlockState) this.blockState)

@@ -67,7 +67,6 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
 
-
     @Override
     public SpongeBlockSnapshotBuilder world(WorldProperties worldProperties) {
         this.worldUuid = checkNotNull(worldProperties).getUniqueId();

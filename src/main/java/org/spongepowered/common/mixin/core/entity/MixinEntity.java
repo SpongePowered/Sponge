@@ -136,7 +136,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
 
-
     // @formatter:on
 
     @Inject(method = "setSize", at = @At("RETURN"))

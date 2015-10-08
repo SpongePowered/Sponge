@@ -51,7 +51,6 @@ public class Color extends Element {
         this.name = color.getName();
     }
 
-
     @Override
     protected void modifyBuilder(TextBuilder builder) {
         if (this.name == null && this.n != null) {

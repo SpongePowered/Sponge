@@ -124,7 +124,6 @@ public class ItemEnchantmentDataProcessor
         return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
 
-
     @Override
     public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());

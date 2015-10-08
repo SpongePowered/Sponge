@@ -68,5 +68,4 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     // TODO implement for tree type, decayable etc.
 
-
 }

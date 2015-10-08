@@ -124,6 +124,5 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
         registerFieldSetter(Keys.SHOWS_DISPLAY_NAME, this::setDisplays);
         registerKeyValue(Keys.SHOWS_DISPLAY_NAME, SpongeDisplayNameData.this::customNameVisible);
 
-
     }
 }

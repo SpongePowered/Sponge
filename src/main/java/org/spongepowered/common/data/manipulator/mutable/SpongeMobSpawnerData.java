@@ -75,7 +75,6 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         super(MobSpawnerData.class);
     }
 
-
     @Override
     public MutableBoundedValue<Short> remainingDelay() {
         return new SpongeBoundedValue<>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay,

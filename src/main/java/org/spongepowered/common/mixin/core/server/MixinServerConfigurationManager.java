@@ -201,7 +201,6 @@ public abstract class MixinServerConfigurationManager {
 
         playerIn.addSelfToInternalCraftingInventory();
 
-
         // Sponge Start
 
         // Move logic for creating join message up here
@@ -282,7 +281,6 @@ public abstract class MixinServerConfigurationManager {
             location = location.add(0, 1, 0);
         }
         playerIn.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
-
 
         // ### PHASE 2 ### Remove player from current dimension
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);

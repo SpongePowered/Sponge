@@ -50,7 +50,6 @@ public abstract class MixinWorldBorder implements WorldBorder {
     @Shadow private long startTime;
     @Shadow private double damageAmount;
 
-
     @Shadow public abstract double getCenterX();
     @Shadow public abstract double getCenterZ();
     @Shadow public abstract double getTargetSize();

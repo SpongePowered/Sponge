@@ -53,7 +53,6 @@ public class LegacyTextRepresentation implements TextRepresentation {
         this.legacyChar = legacyChar;
     }
 
-
     static {
         char[] lookup = new char[formatting.length];
 

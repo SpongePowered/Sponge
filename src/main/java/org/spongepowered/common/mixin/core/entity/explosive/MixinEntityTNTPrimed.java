@@ -48,7 +48,6 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     @Shadow private EntityLivingBase tntPlacedBy;
     @Shadow public abstract void explode();
 
-
     private void setFuse(int fuse) {
         checkArgument(fuse >= 0);
         this.fuse = fuse;

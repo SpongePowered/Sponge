@@ -257,8 +257,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         this.setFlag(5, invisible);
     }
 
-
-
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);

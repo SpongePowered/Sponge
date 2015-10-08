@@ -72,7 +72,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         .concurrencyLevel(4)
         .makeMap();
 
-
     // Processor delegates
 
     private final Map<Key<? extends BaseValue<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new MapMaker()
@@ -89,7 +88,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
     private SpongeDataRegistry() {
     }
-
 
     public static SpongeDataRegistry getInstance() {
         return SpongeDataRegistry.instance;
@@ -125,7 +123,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         registry.immutableProcessorMap.clear();
 
     }
-
 
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(Class<T> manipulatorClass,
@@ -191,7 +188,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         immutableProcessorList.add(processor);
     }
 
-
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
         Class<T> mutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) (Object) this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
@@ -215,7 +211,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
     public Optional<DataProcessor> getWildImmutableProcessor(Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
         return Optional.<DataProcessor>ofNullable(this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
-
 
     public <E, V extends BaseValue<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
         checkState(allowRegistrations, "Registrations are no longer allowed!");

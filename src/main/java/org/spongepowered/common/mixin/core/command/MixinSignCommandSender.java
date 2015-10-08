@@ -60,5 +60,4 @@ public abstract class MixinSignCommandSender implements ICommandSender, IMixinCo
         return (Sign) this.field_174797_a;
     }
 
-
 }

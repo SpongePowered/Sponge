@@ -258,8 +258,6 @@ public class SpongeHooks {
         }
     }
 
-
-
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void dumpHeap(File file, boolean live) {
         try {

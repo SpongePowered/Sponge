@@ -76,11 +76,9 @@ public class SpongeCallbackHolder {
                 }
             });
 
-
     public static SpongeCallbackHolder getInstance() {
         return INSTANCE;
     }
-
 
     public UUID getOrCreateIdForCallback(Consumer<CommandSource> callback) {
         return callbackCache.getUnchecked(checkNotNull(callback, "callback"));

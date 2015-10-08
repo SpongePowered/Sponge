@@ -47,7 +47,6 @@ public class SpongeImmutableRegistry implements ImmutableDataRegistry {
 
     private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> builderMap = new MapMaker().concurrencyLevel(4).makeMap();
 
-
     @Override
     public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> void register(Class<T> manipulatorClass, B builder) {
         if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {

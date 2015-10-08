@@ -172,7 +172,6 @@ public class SqlServiceImpl implements SqlService, Closeable {
             return this.fullUrl;
         }
 
-
         @Override
         public boolean equals(Object o) {
             if (this == o) {

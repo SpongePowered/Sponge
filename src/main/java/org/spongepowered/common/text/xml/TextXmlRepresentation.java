@@ -82,7 +82,6 @@ public class TextXmlRepresentation implements TextRepresentation {
         return writer.getBuffer().toString();
     }
 
-
     /**
      * Also courtesy of http://jazzjuice.blogspot.de/2009/06/jaxb-xmlmixed-and-white-space-anomalies.html
      */

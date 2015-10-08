@@ -74,7 +74,6 @@ public abstract class MixinBlockLog extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLogAxisData.class, logAxis);
     }
 
-
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
         return ImmutableTreeData.class.isAssignableFrom(immutable) || ImmutableLogAxisData.class.isAssignableFrom(immutable);
