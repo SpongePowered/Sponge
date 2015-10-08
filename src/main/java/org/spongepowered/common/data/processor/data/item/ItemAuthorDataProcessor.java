@@ -30,7 +30,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataTransactionResult.Type;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
@@ -38,7 +37,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -54,20 +52,6 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        if (supports(dataHolder)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            final Optional<AuthorData> data = from(dataHolder);
-            try {
-                if (!((ItemStack) dataHolder).hasTagCompound()) {
-                    ((ItemStack) dataHolder).setTagCompound(new NBTTagCompound());
-                }
-                ((ItemStack) dataHolder).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, "");
-                return builder.replace(data.get().getValues()).result(Type.SUCCESS).build();
-            } catch (Exception e) {
-                Sponge.getLogger().error("There was an issue removing the author of an itemstack!", e);
-                return builder.result(Type.ERROR).build();
-            }
-        }
         return DataTransactionBuilder.failNoData();
     }
 

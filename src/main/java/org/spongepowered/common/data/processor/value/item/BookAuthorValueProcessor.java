@@ -94,20 +94,6 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<Text,
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            final Optional<Text> oldData = getValueFromContainer(container);
-            if (oldData.isPresent()) {
-                final ImmutableValue<Text> author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, oldData.get());
-                builder.replace(author);
-            }
-            if (!((ItemStack) container).hasTagCompound()) {
-                ((ItemStack) container).setTagCompound(new NBTTagCompound());
-            }
-            ((ItemStack) container).getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, "");
-            return builder.result(DataTransactionResult.Type.SUCCESS).build();
-
-        }
         return DataTransactionBuilder.failNoData();
     }
 
