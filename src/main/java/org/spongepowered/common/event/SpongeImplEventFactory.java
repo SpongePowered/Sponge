@@ -51,8 +51,8 @@ public class SpongeImplEventFactory {
         return SpongeEventFactory.createLoadWorldEvent(game, Cause.of(Sponge.getGame().getServer()), world);
     }
 
-    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Transform<World> fromTransform, Transform<World> toTransform, Player targetEntity) {
-        return SpongeEventFactory.createClientConnectionEventJoin(game, cause, originalMessage, message, originalSink, sink, fromTransform, toTransform, targetEntity);
+    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventJoin(game, cause, originalMessage, message, originalSink, sink, targetEntity);
     }
 
     public static RespawnPlayerEvent createRespawnPlayerEvent(Game game, Cause cause, Transform<World> fromTransform, Transform<World> toTransform, Player targetEntity, boolean bedSpawn) {

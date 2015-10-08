@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.world.DimensionManager;
@@ -96,8 +97,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             final NBTTagCompound compound = CompressedStreamTools.readCompressed(new FileInputStream(spongeFile.exists() ? spongeFile :
                     spongeOldFile));
             ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
-            if (compound.hasKey(Sponge.ECOSYSTEM_NAME)) {
-                ((IMixinWorldInfo) info).readSpongeNbt(compound.getCompoundTag(Sponge.ECOSYSTEM_NAME));
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                ((IMixinWorldInfo) info).readSpongeNbt(compound.getCompoundTag(NbtDataUtil.SPONGE_DATA));
             }
         }
     }

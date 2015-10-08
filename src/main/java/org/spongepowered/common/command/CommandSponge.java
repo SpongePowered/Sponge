@@ -252,19 +252,19 @@ public class CommandSponge {
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         final Optional<String> key = args.getOne("key");
                         final Optional<String> value = args.getOne("value");
-                        if (config.getSetting(key.get()) == null) {
+                        if (config.getSetting(key.get()) == null || config.getSetting(key.get()).isVirtual()) {
                             throw new CommandException(Texts.of("Key ", Texts.builder(key.get()).color(TextColors.GREEN).build(), " is not "
                                     + "valid"));
                         }
-                        CommentedConfigurationNode setting = config.getSetting(key.get());
 
                         if (value.isPresent()) { // Set
-                            setting.setValue(value.get());
+                            config.updateSetting(key.get(), value.get());
+
                             return Texts.builder().append(Texts.of(TextColors.GOLD, key), Texts.of(" set to "),
-                                    title(String.valueOf(setting.getValue()))).build();
+                                    title(value.get())).build();
                         } else {
                             return Texts.builder().append(Texts.of(TextColors.GOLD, key), Texts.of(" is "),
-                                    title(String.valueOf(setting.getValue()))).build();
+                                    title(String.valueOf(config.getSetting(key.get()).getValue()))).build();
                         }
                     }
                 })

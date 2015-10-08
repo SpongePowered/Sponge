@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -61,11 +63,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,6 +90,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private ImmutableCollection<String> generatorModifiers;
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
+    private NBTTagList playerUniqueIdNbt;
+    private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
+    private List<UUID> pendingUniqueIds = new ArrayList<UUID>();
+    private int trackedUniqueIdCount = 0;
 
     @Shadow private long randomSeed;
     @Shadow private WorldType terrainType;
@@ -128,7 +138,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.worldEnabled = true;
         this.spongeRootLevelNbt = new NBTTagCompound();
         this.spongeNbt = new NBTTagCompound();
-        this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
+        this.playerUniqueIdNbt = new NBTTagList();
+        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
     }
 
     @Inject(method = "<init>*", at = @At("RETURN"))
@@ -136,7 +148,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.worldEnabled = true;
         this.spongeRootLevelNbt = new NBTTagCompound();
         this.spongeNbt = new NBTTagCompound();
-        this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
+        this.playerUniqueIdNbt = new NBTTagList();
+        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
 
         WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
         this.dimensionType = creationSettings.getDimensionType();
@@ -148,7 +162,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.worldEnabled = true;
         this.spongeRootLevelNbt = new NBTTagCompound();
         this.spongeNbt = new NBTTagCompound();
-        this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
+        this.playerUniqueIdNbt = new NBTTagList();
+        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
     }
 
     @Override
@@ -519,15 +535,51 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public int getIndexForUniqueId(UUID uuid) {
+        if (this.playerUniqueIdMap.inverse().get(uuid) == null) {
+            this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
+            this.pendingUniqueIds.add(uuid);
+            return this.trackedUniqueIdCount++;
+        } else {
+            return this.playerUniqueIdMap.inverse().get(uuid);
+        }
+    }
+
+    @Override
+    public Optional<UUID> getUniqueIdForIndex(int index) {
+        return Optional.ofNullable(this.playerUniqueIdMap.get(index));
+    }
+
+    @Override
     public NBTTagCompound getSpongeRootLevelNbt() {
-        updateSpongeNbt();
+        writeSpongeNbt();
         return this.spongeRootLevelNbt;
     }
 
     @Override
     public NBTTagCompound getSpongeNbt() {
-        updateSpongeNbt();
+        writeSpongeNbt();
         return this.spongeNbt;
+    }
+
+    @Override
+    public void setSpongeRootLevelNBT(NBTTagCompound nbt) {
+        this.spongeRootLevelNbt = nbt;
+        if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
+            this.spongeNbt = nbt.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+            if (this.spongeNbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE)) {
+                this.playerUniqueIdNbt = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, 10);
+            } else {
+                this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+            }
+        } else {
+            // Migrate old NBT data to new location
+            // Note: this should be removed soon
+            if (nbt.hasKey("Sponge")) {
+                this.spongeNbt = nbt.getCompoundTag("Sponge");
+            }
+            this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+        }
     }
 
     @Override
@@ -551,26 +603,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             ids.add(generatorModifiersNbt.getStringTagAt(i));
         }
         this.generatorModifiers = ids.build();
-    }
-
-    @Override
-    public DataContainer getAdditionalProperties() {
-        NBTTagCompound additionalProperties = (NBTTagCompound) this.spongeRootLevelNbt.copy();
-        additionalProperties.removeTag(Sponge.ECOSYSTEM_NAME);
-        return NbtTranslator.getInstance().translateFrom(additionalProperties);
-    }
-
-    @Override
-    public void setSpongeRootLevelNBT(NBTTagCompound nbt) {
-        this.spongeRootLevelNbt = nbt;
-        if (nbt.hasKey(Sponge.ECOSYSTEM_NAME)) {
-            this.spongeNbt = nbt.getCompoundTag(Sponge.ECOSYSTEM_NAME);
-        } else {
-            this.spongeRootLevelNbt.setTag(Sponge.ECOSYSTEM_NAME, this.spongeNbt);
+        this.trackedUniqueIdCount = 0;
+        for (int i = 0; i < this.playerUniqueIdNbt.tagCount(); i++) {
+            NBTTagCompound valueNbt = this.playerUniqueIdNbt.getCompoundTagAt(i);
+            UUID uuid = new UUID(valueNbt.getLong("uuid_most"), valueNbt.getLong("uuid_least"));
+            this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
+            this.trackedUniqueIdCount++;
         }
     }
 
-    private void updateSpongeNbt() {
+    private void writeSpongeNbt() {
         if (this.levelName != null) {
             this.spongeNbt.setString("LevelName", this.levelName);
         }
@@ -596,5 +638,22 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             }
             this.spongeNbt.setTag("generatorModifiers", generatorModifierNbt);
         }
+
+        Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
+        while (iterator.hasNext()) {
+            UUID uuidToAdd = iterator.next();
+            NBTTagCompound valueNbt = new NBTTagCompound();
+            valueNbt.setLong("uuid_most", uuidToAdd.getMostSignificantBits());
+            valueNbt.setLong("uuid_least", uuidToAdd.getLeastSignificantBits());
+            this.playerUniqueIdNbt.appendTag(valueNbt);
+            iterator.remove();
+        }
+    }
+
+    @Override
+    public DataContainer getAdditionalProperties() {
+        NBTTagCompound additionalProperties = (NBTTagCompound) this.spongeRootLevelNbt.copy();
+        additionalProperties.removeTag(Sponge.ECOSYSTEM_NAME);
+        return NbtTranslator.getInstance().translateFrom(additionalProperties);
     }
 }

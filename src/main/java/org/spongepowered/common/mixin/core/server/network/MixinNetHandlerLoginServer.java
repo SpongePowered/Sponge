@@ -50,22 +50,18 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
-import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.text.SpongeTexts;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Optional;
 
 @Mixin(NetHandlerLoginServer.class)
-public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IMixinNetHandlerLoginServer {
+public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLoginServer {
 
     @Shadow private static Logger logger;
     @Shadow public NetworkManager networkManager;
     @Shadow private MinecraftServer server;
     @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
-
-    private ClientConnectionEvent.Login clientConEvent;
 
     @Shadow
     abstract public String getConnectionInfo();
@@ -75,37 +71,7 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
     @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
             + "allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))
     public String onAllowUserToConnect(ServerConfigurationManager confMgr, SocketAddress address, com.mojang.authlib.GameProfile profile) {
-        String kickReason = confMgr.allowUserToConnect(address, profile);
-        Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
-        if (kickReason != null) {
-            disconnectMessage = Texts.of(kickReason);
-        }
-
-        MessageSink sink = MessageSinks.toAll();
-        this.clientConEvent = SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, this, (GameProfile) this.loginGameProfile);
-        if (kickReason != null) {
-            this.clientConEvent.setCancelled(true);
-        }
-
-        Sponge.getGame().getEventManager().post(this.clientConEvent);
         return null; // We handle disconnecting
-    }
-
-    /**
-     * The &#64;At target positions this inject to directly below the above
-     * redirect. It can't be handled in the same method because the callback
-     * info is not available in a redirect.
-     *
-     * @param ci Callback info
-     */
-    @Inject(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/NetHandlerLoginServer;"
-            + "closeConnection(Ljava/lang/String;)V", shift = At.Shift.BY, by = -6), cancellable = true)
-    public void onTryAcceptPlayer(CallbackInfo ci) {
-        if (this.clientConEvent.isCancelled()) {
-            disconnectClient(Optional.ofNullable(this.clientConEvent.getMessage()));
-            ci.cancel();
-        }
-        this.clientConEvent = null;
     }
 
     private void closeConnection(IChatComponent reason) {
@@ -129,20 +95,10 @@ public abstract class MixinNetHandlerLoginServer implements RemoteConnection, IM
     }
 
     @Override
-    public InetSocketAddress getAddress() {
-        return ((IMixinNetworkManager) this.networkManager).getAddress();
-    }
-
-    @Override
-    public InetSocketAddress getVirtualHost() {
-        return ((IMixinNetworkManager) this.networkManager).getVirtualHost();
-    }
-
-    @Override
     public boolean fireAuthEvent() {
         Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
         MessageSink sink = MessageSinks.toAll();
-        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, this, (GameProfile) this.loginGameProfile);
+        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, (RemoteConnection) this.networkManager, (GameProfile) this.loginGameProfile);
         Sponge.getGame().getEventManager().post(event);
         if (event != null && event.isCancelled()) {
             this.disconnectClient(Optional.ofNullable(event.getMessage()));
