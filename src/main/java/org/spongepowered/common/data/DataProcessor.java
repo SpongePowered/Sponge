@@ -85,7 +85,7 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
      * to the {@link DataHolder}. In the case of implementation, what really
      * happens is that all pre-logic before data is actually "offered" to a
      * {@link DataHolder}, the data is filtered for various reasons from
-     * various plugins. After the data is finished being manipulated
+     * various plugins. After the data is finished being manipulatoed
      * by the various sources, including the possibly provided
      * {@link MergeFunction}, the {@link DataManipulator} is finally offered
      * to the {@link DataHolder}. The resulting {@link DataTransactionResult}

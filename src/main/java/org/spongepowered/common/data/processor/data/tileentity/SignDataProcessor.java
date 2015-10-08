@@ -74,8 +74,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 return Optional.empty();
             } else {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
-                if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND)
-                        || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
+                if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND) || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
                     return Optional.empty();
                 }
                 final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
@@ -110,8 +109,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 return Optional.of(manipulator);
             } else {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
-                if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND)
-                        || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
+                if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND) || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
                     return Optional.empty();
                 }
                 final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
@@ -152,8 +150,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 builder.success(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS);
                 return builder.build();
             }
-        }
-        if (dataHolder instanceof ItemStack) {
+        } if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).getItem().equals(Items.sign)) {
                 return DataTransactionBuilder.failResult(manipulator.getValues());
             }

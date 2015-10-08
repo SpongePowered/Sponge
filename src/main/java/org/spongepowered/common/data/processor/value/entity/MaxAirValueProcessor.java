@@ -59,6 +59,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<Integer, 
         return Optional.empty();
     }
 
+
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof EntityLivingBase;

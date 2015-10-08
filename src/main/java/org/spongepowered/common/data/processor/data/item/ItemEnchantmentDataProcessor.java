@@ -54,8 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ItemEnchantmentDataProcessor
-    extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
+public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
 
     public ItemEnchantmentDataProcessor() {
         super(input -> true, Keys.ITEM_ENCHANTMENTS);
@@ -123,6 +122,7 @@ public class ItemEnchantmentDataProcessor
     protected ImmutableValue<List<ItemEnchantment>> constructImmutableValue(List<ItemEnchantment> value) {
         return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
+
 
     @Override
     public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {

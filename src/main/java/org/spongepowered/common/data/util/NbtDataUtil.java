@@ -169,7 +169,7 @@ public class NbtDataUtil {
     }
 
     public static void removeLoreFromNBT(ItemStack stack) {
-        if (stack.getSubCompound(ITEM_DISPLAY, false) == null) {
+        if(stack.getSubCompound(ITEM_DISPLAY, false) == null) {
             return;
         }
         stack.getSubCompound(ITEM_DISPLAY, false).removeTag(ITEM_LORE);
@@ -193,7 +193,7 @@ public class NbtDataUtil {
         stack.getTagCompound().setTag(ITEM_BOOK_PAGES, list);
     }
 
-    public static void setPagesToNBT(ItemStack stack, List<Text> pages) {
+    public static void setPagesToNBT(ItemStack stack, List<Text> pages){
         final NBTTagList list = SpongeTexts.asLegacy(pages);
         final NBTTagCompound compound = getOrCreateCompound(stack);
         compound.setTag(ITEM_BOOK_PAGES, list);

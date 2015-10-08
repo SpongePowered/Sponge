@@ -40,8 +40,7 @@ import org.spongepowered.common.util.GetterFunction;
 
 import java.util.List;
 
-public class ImmutableSpongeEnchantmentData extends AbstractImmutableData<ImmutableEnchantmentData, EnchantmentData>
-    implements ImmutableEnchantmentData {
+public class ImmutableSpongeEnchantmentData extends AbstractImmutableData<ImmutableEnchantmentData, EnchantmentData> implements ImmutableEnchantmentData {
 
     private final ImmutableList<ItemEnchantment> enchantments;
 

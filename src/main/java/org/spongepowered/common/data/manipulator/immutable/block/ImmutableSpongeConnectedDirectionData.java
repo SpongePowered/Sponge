@@ -41,8 +41,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Set;
 
-public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData<ImmutableConnectedDirectionData, ConnectedDirectionData>
-    implements ImmutableConnectedDirectionData {
+public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData<ImmutableConnectedDirectionData, ConnectedDirectionData>  implements ImmutableConnectedDirectionData {
 
     private final ImmutableSet<Direction> directions;
 
@@ -58,7 +57,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     }
 
     @Override
-    public ImmutableValue<Boolean> connectedNorth() {
+    public ImmutableValue<Boolean> conntectedNorth() {
         return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));
     }
 

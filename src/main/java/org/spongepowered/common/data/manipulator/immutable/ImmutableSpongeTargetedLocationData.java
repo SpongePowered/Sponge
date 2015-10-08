@@ -35,8 +35,7 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.SpongeTargetedLocationData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeTargetedLocationData
-    extends AbstractImmutableSingleData<Location<World>, ImmutableTargetedLocationData, TargetedLocationData>
+public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingleData<Location<World>, ImmutableTargetedLocationData, TargetedLocationData>
     implements ImmutableTargetedLocationData {
 
     public ImmutableSpongeTargetedLocationData(Location<World> value) {

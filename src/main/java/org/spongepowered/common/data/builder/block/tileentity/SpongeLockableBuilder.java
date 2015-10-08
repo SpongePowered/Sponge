@@ -62,7 +62,7 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
         }
         // TODO
 //        if (container.contains(new DataQuery("Lock"))) {
-//            LockableData lock = new SpongeLockableData
+//            LockableData lock = new SpongeLocableData
 //            lockable.setLockableData(container.getString(new DataQuery("Lock")).get());
 //        }
         return Optional.of((T) lockable);

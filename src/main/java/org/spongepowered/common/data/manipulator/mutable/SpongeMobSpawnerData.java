@@ -75,10 +75,10 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         super(MobSpawnerData.class);
     }
 
+
     @Override
     public MutableBoundedValue<Short> remainingDelay() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay,
-                this.remainingDelay);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay, this.remainingDelay);
     }
 
     @Override
@@ -104,8 +104,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> requiredPlayerRange() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE,
-                this.playerRange);
+        return new SpongeBoundedValue<>(Keys.SPAWNER_REQURED_PLAYER_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.playerRange);
     }
 
     @Override
@@ -156,7 +155,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
             .set(Keys.SPAWNER_MAXIMUM_DELAY.getQuery(), this.maximumDelay)
             .set(Keys.SPAWNER_SPAWN_COUNT.getQuery(), this.count)
             .set(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES.getQuery(), this.maximumEntities)
-            .set(Keys.SPAWNER_REQUIRED_PLAYER_RANGE.getQuery(), this.playerRange)
+            .set(Keys.SPAWNER_REQURED_PLAYER_RANGE.getQuery(), this.playerRange)
             .set(Keys.SPAWNER_SPAWN_RANGE.getQuery(), this.spawnRange)
             .set(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN.getQuery(), this.nextEntityToSpawn)
             .set(Keys.SPAWNER_ENTITIES.getQuery(), this.entities);

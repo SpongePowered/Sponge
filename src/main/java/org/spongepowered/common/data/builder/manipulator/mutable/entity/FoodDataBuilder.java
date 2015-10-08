@@ -43,6 +43,7 @@ public class FoodDataBuilder implements DataManipulatorBuilder<FoodData, Immutab
         return new SpongeFoodData();
     }
 
+
     @Override
     public Optional<FoodData> createFrom(DataHolder dataHolder) {
         return null;

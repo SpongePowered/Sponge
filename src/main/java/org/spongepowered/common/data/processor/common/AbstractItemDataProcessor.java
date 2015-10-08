@@ -44,8 +44,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-    extends AbstractMultiDataProcessor<M, I> {
+public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
+                                                                                                                           AbstractMultiDataProcessor<M, I> {
 
     private final Predicate<ItemStack> predicate;
 
@@ -56,6 +56,31 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
     protected abstract boolean doesDataExist(ItemStack itemStack);
 
     protected abstract boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues);
+
+    protected abstract Map<Key<?>, ?> getValues(ItemStack itemStack);
+
+    @Override
+    public boolean supports(DataHolder dataHolder) {
+        return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Optional<M> from(DataHolder dataHolder) {
+        if (!supports(dataHolder)) {
+            return Optional.empty();
+        } else {
+            if (doesDataExist((ItemStack) dataHolder)) {
+                final M manipulator = createManipulator();
+                final Map<Key<?>, ?> keyValues = getValues((ItemStack) dataHolder);
+                for (Map.Entry<Key<?>, ?> entry :keyValues.entrySet()) {
+                    manipulator.set((Key) entry.getKey(), entry.getValue());
+                }
+                return Optional.of(manipulator);
+            }
+        }
+        return Optional.empty();
+    }
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
@@ -85,36 +110,6 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
         return DataTransactionBuilder.failResult(manipulator.getValues());
     }
 
-    protected abstract Map<Key<?>, ?> getValues(ItemStack itemStack);
-
-    @Override
-    public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
-    }
-
-    @Override
-    public boolean supports(EntityType entityType) {
-        return false;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<M> from(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            if (doesDataExist((ItemStack) dataHolder)) {
-                final M manipulator = createManipulator();
-                final Map<Key<?>, ?> keyValues = getValues((ItemStack) dataHolder);
-                for (Map.Entry<Key<?>, ?> entry :keyValues.entrySet()) {
-                    manipulator.set((Key) entry.getKey(), entry.getValue());
-                }
-                return Optional.of(manipulator);
-            }
-        }
-        return Optional.empty();
-    }
-
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
@@ -122,5 +117,10 @@ public abstract class AbstractItemDataProcessor<M extends DataManipulator<M, I>,
             return Optional.of((I) immutable.asMutable().set((Key) key, value).asImmutable());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return false;
     }
 }

@@ -42,11 +42,11 @@ public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<Enchantme
     @Override
     @SuppressWarnings("unchecked")
     public Optional<EnchantmentTable> build(DataView container) throws InvalidDataException {
-        Optional<EnchantmentTable> enchantmentTableOptional = super.build(container);
-        if (!enchantmentTableOptional.isPresent()) {
+        Optional<EnchantmentTable> enchantmenttableOptional = super.build(container);
+        if (!enchantmenttableOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a EnchantmentTable tile entity!");
         }
-        EnchantmentTable enchantmenttable = enchantmentTableOptional.get();
+        EnchantmentTable enchantmenttable = enchantmenttableOptional.get();
         if (container.contains(new DataQuery("CustomName"))) {
             ((TileEntityEnchantmentTable) enchantmenttable).setCustomName(container.getString(new DataQuery("CustomName")).get());
         }

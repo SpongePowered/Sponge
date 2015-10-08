@@ -64,7 +64,7 @@ public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> im
     @Override
     public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
         Optional<E> optionalValue = getValueFromContainer(container);
-        if (optionalValue.isPresent()) {
+        if(optionalValue.isPresent()) {
             return Optional.of(constructValue(optionalValue.get()));
         } else {
             return Optional.empty();

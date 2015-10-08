@@ -43,8 +43,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
-public class GoldenAppleDataProcessor
-    extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
+public class GoldenAppleDataProcessor extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
 
     public GoldenAppleDataProcessor() {
         super(input -> input.getItem().equals(Items.golden_apple), Keys.GOLDEN_APPLE_TYPE);

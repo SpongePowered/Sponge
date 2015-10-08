@@ -46,8 +46,7 @@ public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<
             final Extent extent = ((Location) propertyHolder).getExtent();
             if (extent instanceof World) {
                 final net.minecraft.world.World world = (net.minecraft.world.World) extent;
-                final boolean powered = world.isBlockIndirectlyGettingPowered(
-                        VecHelper.toBlockPos(((Location) propertyHolder).getBlockPosition())) > 0;
+                final boolean powered = world.isBlockIndirectlyGettingPowered(VecHelper.toBlockPos(((Location) propertyHolder).getBlockPosition())) > 0;
                 return Optional.of(new IndirectlyPoweredProperty(powered));
             }
         }

@@ -32,8 +32,8 @@ import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeInstrumentData;
 
-public class ImmutableSpongeInstrumentData extends AbstractImmutableSingleCatalogData<InstrumentType, ImmutableInstrumentData, InstrumentData>
-    implements ImmutableInstrumentData {
+public class ImmutableSpongeInstrumentData extends AbstractImmutableSingleCatalogData<InstrumentType, ImmutableInstrumentData, InstrumentData> implements
+                                                                                                                                               ImmutableInstrumentData {
 
     public ImmutableSpongeInstrumentData(InstrumentType value) {
         super(ImmutableInstrumentData.class, value, InstrumentTypes.HARP, Keys.INSTRUMENT_TYPE, SpongeInstrumentData.class);

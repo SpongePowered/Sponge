@@ -33,8 +33,7 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vector3d, ImmutableVelocityData, VelocityData>
-    implements ImmutableVelocityData {
+public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vector3d, ImmutableVelocityData, VelocityData> implements ImmutableVelocityData {
 
     public ImmutableSpongeVelocityData(Vector3d value) {
         super(ImmutableVelocityData.class, value, Keys.VELOCITY);

@@ -72,8 +72,7 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Hor
         if (this.supports(container)) {
             EntityHorse horse = (EntityHorse) container;
 
-            ImmutableValue<HorseVariant> oldValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE,
-                    HorseUtils.getHorseVariant(horse.getHorseType()));
+            ImmutableValue<HorseVariant> oldValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, HorseUtils.getHorseVariant(horse.getHorseType()));
             horse.setHorseType(((SpongeHorseVariant) value).type);
 
             return DataTransactionBuilder.successReplaceResult(newValue, oldValue);

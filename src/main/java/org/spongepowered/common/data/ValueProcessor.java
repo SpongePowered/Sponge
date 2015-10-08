@@ -101,7 +101,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * second case will use the same {@link ValueProcessor} but be retrieving
      * the values directly from the {@link HealthData} {@link DataManipulator}.
      * This differs with object creation as the second method will result in an
-     * unnecessary {@link DataManipulator} to be created, and then finally a
+     * unecessary {@link DataManipulator} to be created, and then finally a
      * {@link ValueProcessor} method call for the {@link DataManipulator}
      * instead of the {@link Entity} having a direct call.</p>
      *
@@ -114,7 +114,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * {@link Key}, {@link Value} and {@link ValueProcessor} is needed to
      * manipulate the data.</p>
      *
-     * @param container The value container to retrieve the value from
+     * @param container The value container to retrieve the value froms
      * @return The value, if available and compatible
      */
     Optional<E> getValueFromContainer(ValueContainer<?> container);
@@ -154,7 +154,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * Attempts to remove the known keyed data associated with this
      * {@link ValueProcessor} from the provided {@link ValueContainer}. If
      * the result is not possible, the result will be an expected
-     * {@link org.spongepowered.api.data.DataTransactionResult.Type#FAILURE}.
+     * {@link DataTransactionResult.Type#FAILURE}.
      *
      * @param container The value container to remove data from
      * @return The transaction result

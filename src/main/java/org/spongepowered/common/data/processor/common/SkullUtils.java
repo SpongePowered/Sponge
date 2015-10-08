@@ -49,22 +49,22 @@ public class SkullUtils {
         return Iterables.get(Sponge.getSpongeRegistry().skullTypeMappings.values(), skullType);
     }
 
-    public static SkullType getSkullType(TileEntitySkull tileEntitySkull) {
-        return SkullUtils.getSkullType(tileEntitySkull.getSkullType());
-    }
-
-    public static SkullType getSkullType(ItemStack itemStack) {
-        return SkullUtils.getSkullType(itemStack.getMetadata());
-    }
-
     public static boolean isValidItemStack(Object container) {
         return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.skull);
+    }
+
+    public static SkullType getSkullType(TileEntitySkull tileEntitySkull) {
+        return SkullUtils.getSkullType(tileEntitySkull.getSkullType());
     }
 
     public static void setSkullType(TileEntitySkull tileEntitySkull, int skullType) {
         tileEntitySkull.setType(skullType);
         tileEntitySkull.markDirty();
         tileEntitySkull.getWorld().markBlockForUpdate(tileEntitySkull.getPos());
+    }
+
+    public static SkullType getSkullType(ItemStack itemStack) {
+        return SkullUtils.getSkullType(itemStack.getMetadata());
     }
 
 }

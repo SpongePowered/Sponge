@@ -41,8 +41,7 @@ public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I ext
 
     private final Class<? extends I> immutableClass;
 
-    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey,
-                                  Class<? extends I> immutableClass) {
+    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey, Class<? extends I> immutableClass) {
         super(manipulatorClass, value, usedKey);
         this.immutableClass = checkNotNull(immutableClass);
     }

@@ -57,13 +57,13 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     }
 
     @Override
-    public ImmutableSetValue<E> with(E... elements) {
-        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
+    public ImmutableSetValue<E> transform(Function<Set<E>, Set<E>> function) {
+        return new ImmutableSpongeSetValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
 
     @Override
-    public ImmutableSetValue<E> transform(Function<Set<E>, Set<E>> function) {
-        return new ImmutableSpongeSetValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
+    public ImmutableSetValue<E> with(E... elements) {
+        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override

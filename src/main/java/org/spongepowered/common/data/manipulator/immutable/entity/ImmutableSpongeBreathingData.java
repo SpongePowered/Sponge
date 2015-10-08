@@ -77,8 +77,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
 
     @Override
     public ImmutableBoundedValue<Integer> remainingAir() {
-        return new ImmutableSpongeBoundedValue<>(Keys.REMAINING_AIR, this.remainingAir, this.maxAir, ComparatorUtil.intComparator(), -20,
-                this.maxAir);
+        return new ImmutableSpongeBoundedValue<>(Keys.REMAINING_AIR, this.remainingAir, this.maxAir, ComparatorUtil.intComparator(), -20, this.maxAir);
     }
 
     @Override

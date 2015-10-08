@@ -36,7 +36,7 @@ import java.util.Optional;
 
 public class SpongeImmutableRegistry implements ImmutableDataRegistry {
 
-    private static final SpongeImmutableRegistry instance = new SpongeImmutableRegistry();
+    private final static SpongeImmutableRegistry instance = new SpongeImmutableRegistry();
 
     private SpongeImmutableRegistry() {
     }
@@ -46,6 +46,7 @@ public class SpongeImmutableRegistry implements ImmutableDataRegistry {
     }
 
     private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> builderMap = new MapMaker().concurrencyLevel(4).makeMap();
+
 
     @Override
     public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> void register(Class<T> manipulatorClass, B builder) {

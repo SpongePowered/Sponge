@@ -74,11 +74,11 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
                 level++;
             }
             player.experienceTotal = value;
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.TOTAL_EXPERIENCE, value),
-                    new ImmutableSpongeValue<>(Keys.TOTAL_EXPERIENCE, oldValue));
+            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, value),
+                    new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, oldValue));
         }
 
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.TOTAL_EXPERIENCE, value));
+        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, value));
     }
 
     @Override
@@ -88,7 +88,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<Integer>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
 }

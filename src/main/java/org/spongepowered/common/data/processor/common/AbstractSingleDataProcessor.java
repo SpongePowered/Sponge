@@ -36,9 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleDa
 
 import java.util.Optional;
 
-public abstract class
-    AbstractSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-    extends AbstractSpongeDataProcessor<M, I> {
+public abstract class AbstractSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
 
     protected final Key<V> key;
 

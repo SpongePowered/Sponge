@@ -61,7 +61,7 @@ public class SpongePatternLayerBuilder implements DataBuilder<PatternLayer> {
         String id = container.getString(ID).get();
 
         // We can get these pattern shapes from the game registry willy nilly, however, we still need to validate
-        // that the pattern exists, if it doesn't, well, throw an InvalidDataException!
+        // that the pattern exists, if it doesn't, well, thow an InvalidDataException!
         Optional<BannerPatternShape> shapeOptional = this.game.getRegistry().getType(BannerPatternShape.class, id);
         if (!shapeOptional.isPresent()) {
             throw new InvalidDataException("The provided container has an invalid banner pattern shape entry!");

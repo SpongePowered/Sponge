@@ -37,8 +37,7 @@ import org.spongepowered.common.util.ReflectionUtil;
 
 import java.util.Comparator;
 
-public abstract class
-    AbstractBoundedComparableData<T extends Comparable<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
     extends AbstractSingleData<T, M, I> {
 
     private final Class<? extends I> immutableClass;

@@ -40,8 +40,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.EnumSet;
 import java.util.Set;
 
-public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectionData, ImmutableConnectedDirectionData>
-    implements ConnectedDirectionData {
+public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectionData, ImmutableConnectedDirectionData> implements ConnectedDirectionData {
 
     private EnumSet<Direction> connectedDirections = EnumSet.noneOf(Direction.class);
 

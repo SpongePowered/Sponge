@@ -32,8 +32,7 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDecayableData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeDecayableData extends AbstractImmutableBooleanData<ImmutableDecayableData, DecayableData>
-    implements ImmutableDecayableData {
+public class ImmutableSpongeDecayableData extends AbstractImmutableBooleanData<ImmutableDecayableData, DecayableData> implements ImmutableDecayableData {
 
     public ImmutableSpongeDecayableData(boolean value) {
         super(ImmutableDecayableData.class, value, Keys.DECAYABLE, SpongeDecayableData.class);

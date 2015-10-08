@@ -175,8 +175,8 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
         registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, SpongeExperienceHolderData.this::getExpBetweenLevels);
         registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, value -> {
-                // do nothing
-            });
+            // do nothing
+        });
         registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, () -> getExperienceBetweenLevels().asMutable());
     }
 
