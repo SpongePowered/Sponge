@@ -146,6 +146,8 @@ public class KeyRegistry {
         keyMap.put("book_author", makeSingleKey(Text.class, Value.class, of("BookAuthor")));
         keyMap.put("breakable_block_types", makeSetKey(BlockType.class, of("CanDestroy")));
         keyMap.put("placeable_blocks", makeSetKey(BlockType.class, of("CanPlaceOn")));
+        keyMap.put("walking_speed", makeSingleKey(Double.class, Value.class, of("WalkingSpeed")));
+        keyMap.put("flying_speed", makeSingleKey(Double.class, Value.class, of("FlyingSpeed")));
 
     }
 
