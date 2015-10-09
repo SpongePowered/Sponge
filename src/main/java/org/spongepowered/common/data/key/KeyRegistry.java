@@ -135,6 +135,8 @@ public class KeyRegistry {
         keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceSinceLevel")));
         keyMap.put("experience_from_start_of_level", makeSingleKey(Integer.TYPE, ImmutableBoundedValue.class, of("ExperienceFromStartOfLevel")));
         keyMap.put("book_author", makeSingleKey(Text.class, Value.class, of("BookAuthor")));
+        keyMap.put("walking_speed", makeSingleKey(Double.class, Value.class, of("WalkingSpeed")));
+        keyMap.put("flying_speed", makeSingleKey(Double.class, Value.class, of("FlyingSpeed")));
         RegistryHelper.mapFields(Keys.class, keyMap);
     }
 
