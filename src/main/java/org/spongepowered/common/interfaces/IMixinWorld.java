@@ -25,6 +25,8 @@
 package org.spongepowered.common.interfaces;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
@@ -46,7 +48,15 @@ public interface IMixinWorld {
 
     List<BlockSnapshot> getBlockBreakList();
 
+    BlockSnapshot createSpongeBlockSnapshot(IBlockState state, BlockPos pos, int updateFlag);
+
+    boolean isWorldSpawnerRunning();
+
+    boolean isChunkSpawnerRunning();
+
     boolean capturingTerrainGen();
+
+    boolean processingCaptureCause();
 
     Optional<BlockSnapshot> getCurrentTickBlock();
 
@@ -58,7 +68,15 @@ public interface IMixinWorld {
 
     void handlePostTickCaptures(Cause cause);
 
+    void setProcessingCaptureCause(boolean flag);
+
+    void setWorldSpawnerRunning(boolean flag);
+
+    void setChunkSpawnerRunning(boolean flag);
+
     void setCapturingTerrainGen(boolean flag);
 
     void setCapturingEntitySpawns(boolean flag);
+
+    void setCurrentTickBlock(BlockSnapshot snapshot);
 }

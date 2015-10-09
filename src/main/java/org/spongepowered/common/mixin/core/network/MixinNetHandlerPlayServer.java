@@ -136,7 +136,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return this.playerEntity.ping;
     }
 
-    @Override
+    /*@Override
     public void sendCustomPayload(Object plugin, String channel, ChannelBuf dataStream) {
         throw new UnsupportedOperationException(); // TODO
     }
@@ -144,7 +144,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Override
     public void sendCustomPayload(Object plugin, String channel, byte[] data) {
         sendPacket(new S3FPacketCustomPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(data))));
-    }
+    }*/
 
     /**
      * @Author Zidane
