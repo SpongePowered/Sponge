@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.type.SpongeStatisticFormat;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
@@ -48,7 +49,7 @@ public abstract class MixinStatBase implements Statistic {
     @Shadow private IScoreObjectiveCriteria field_150957_c;
 
     public Optional<StatisticFormat> statistic$getStatisticFormat() {
-        return Optional.of((StatisticFormat) this.type);
+        return Optional.of(SpongeStatisticFormat.byStatType(this.type));
     }
 
     public StatisticGroup statistic$getGroup() {

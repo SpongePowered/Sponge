@@ -65,7 +65,6 @@
         "data.types.MixinEnumStoneType",
         "data.types.MixinFishType",
         "data.types.MixinGameType",
-        "data.types.MixinIStatType",
         "data.types.MixinObjectiveStat",
         "data.types.MixinRailDirection",
         "data.types.MixinRangedAttribute",

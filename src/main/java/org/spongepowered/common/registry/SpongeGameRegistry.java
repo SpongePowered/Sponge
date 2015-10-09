@@ -550,6 +550,7 @@ import org.spongepowered.common.data.type.SpongeOperation;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.type.SpongeSlabType;
 import org.spongepowered.common.data.type.SpongeStairShape;
+import org.spongepowered.common.data.type.SpongeStatisticFormat;
 import org.spongepowered.common.data.type.SpongeTreeType;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -651,7 +652,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("action_bar", new SpongeChatType((byte) 2))
             .build();
 
-    private static final ImmutableMap<String, Rotation> rotationMappings = new ImmutableMap.Builder<String, Rotation>()
+    private final ImmutableMap<String, Rotation> rotationMappings = new ImmutableMap.Builder<String, Rotation>()
             .put("top", new SpongeRotation(0))
             .put("top_right", new SpongeRotation(45))
             .put("right", new SpongeRotation(90))
@@ -898,10 +899,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("smooth_andesite", (StoneType) (Object) BlockStone.EnumType.ANDESITE_SMOOTH)
             .build();
     public final Map<String, StatisticFormat> statisticFormatMappings = new ImmutableMap.Builder<String, StatisticFormat>()
-            .put("count", (StatisticFormat) StatBase.simpleStatType)
-            .put("distance", (StatisticFormat) StatBase.distanceStatType)
-            .put("fractional", (StatisticFormat) StatBase.field_111202_k)
-            .put("time", (StatisticFormat) StatBase.timeStatType)
+            .put("count", new SpongeStatisticFormat("COUNT"))
+            .put("distance", new SpongeStatisticFormat("COUNT"))
+            .put("fractional", new SpongeStatisticFormat("FRACTIONAL"))
+            .put("time", new SpongeStatisticFormat("TIME"))
             .build();
     public final Map<String, Attribute> attributeMappings = new ImmutableMap.Builder<String, Attribute>()
             .put("generic_max_health", (Attribute) SharedMonsterAttributes.maxHealth)
@@ -981,7 +982,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(QuartzType.class, this.quartzTypeMappings)
                 .put(RabbitType.class, SpongeEntityConstants.RABBIT_TYPES)
                 .put(RailDirection.class, this.railDirectionMappings)
-                .put(Rotation.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                .put(Rotation.class, this.rotationMappings)
                 .put(SandstoneType.class, this.sandstoneTypeMappings)
                 .put(ShrubType.class, this.shrubTypeMappings)
                 .put(SelectorType.class, this.selectorMappings)
