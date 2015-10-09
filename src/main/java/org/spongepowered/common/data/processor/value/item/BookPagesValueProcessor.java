@@ -34,6 +34,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -44,16 +45,34 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import java.util.List;
 import java.util.Optional;
 
-public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<Text>, ListValue<Text>> {
+public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<ItemStack, List<Text>, ListValue<Text>> {
 
     public BookPagesValueProcessor() {
-        super(Keys.BOOK_PAGES);
+        super(ItemStack.class, Keys.BOOK_PAGES);
 
     }
 
     @Override
     protected ListValue<Text> constructValue(List<Text> defaultValue) {
         return new SpongeListValue<>(Keys.BOOK_PAGES, defaultValue);
+    }
+
+    @Override
+    protected boolean set(ItemStack container, List<Text> value) {
+        return false;
+    }
+
+    @Override
+    protected Optional<List<Text>> getVal(ItemStack container) {
+        if (!container.hasTagCompound() || !container.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_PAGES)) {
+            return Optional.empty();
+        }
+        return Optional.of(NbtDataUtil.getPagesFromNBT(getTagCompound(container)));
+    }
+
+    @Override
+    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
+        return null;
     }
 
     @Override

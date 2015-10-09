@@ -30,6 +30,7 @@ import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.text.SpongeTexts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -185,6 +186,9 @@ public class NbtDataUtil {
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
         final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        if (list.hasNoTags()) {
+            return new ArrayList<>();
+        }
         return SpongeTexts.fromLegacy(list);
     }
 

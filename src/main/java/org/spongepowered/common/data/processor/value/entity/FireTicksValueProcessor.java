@@ -34,15 +34,16 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity, Integer, MutableBoundedValue<Integer>> {
 
     public FireTicksValueProcessor() {
-        super(Keys.FIRE_TICKS);
+        super(Entity.class, Keys.FIRE_TICKS);
     }
 
     @Override
@@ -56,18 +57,6 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Intege
     @Override
     public boolean supports(ValueContainer<?> container) {
         return container instanceof Entity;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        final ImmutableValue<Integer> proposedValue = new ImmutableSpongeValue<>(Keys.FIRE_TICKS, value);
-        if (supports(container)) {
-            final ImmutableValue<Integer> newFireTicksData = new ImmutableSpongeValue<>(Keys.FIRE_TICKS, value);
-            final ImmutableValue<Integer> oldFireTicksValue = getApiValueFromContainer(container).get().asImmutable();
-            ((Entity) (container)).fire = value;
-            return DataTransactionBuilder.successReplaceResult(oldFireTicksValue, newFireTicksData);
-        }
-        return DataTransactionBuilder.failResult(proposedValue);
     }
 
     @Override
@@ -87,6 +76,25 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Intege
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return new SpongeBoundedValue<>(this.getKey(), 1, intComparator(), 1, Integer.MAX_VALUE, defaultValue);
+    }
+
+    @Override
+    protected boolean set(Entity container, Integer value) {
+        container.fire = value;
+        return true;
+    }
+
+    @Override
+    protected Optional<Integer> getVal(Entity container) {
+        if (container.fire > 0) {
+            return Optional.of(container.fire);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeBoundedValue<>(Keys.FIRE_TICKS, value, 0, intComparator(), 0, Integer.MAX_VALUE);
     }
 
 }

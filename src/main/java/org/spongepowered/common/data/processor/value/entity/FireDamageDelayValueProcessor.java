@@ -40,37 +40,12 @@ import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<Entity, Integer, MutableBoundedValue<Integer>> {
 
     public FireDamageDelayValueProcessor() {
-        super(Keys.FIRE_DAMAGE_DELAY);
+        super(Entity.class, Keys.FIRE_DAMAGE_DELAY);
     }
 
-    @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            return Optional.of(((Entity) container).fireResistance);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof Entity && ((Entity) container).fire > 0;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        checkArgument(value >= 0, "Fire tick delay must be equal to or greater than zero!");
-        final ImmutableValue<Integer> proposedValue = new ImmutableSpongeValue<>(Keys.FIRE_DAMAGE_DELAY, value);
-        if (supports(container)) {
-            final ImmutableValue<Integer> newFireDelayData = new ImmutableSpongeValue<>(Keys.FIRE_DAMAGE_DELAY, value);
-            final ImmutableValue<Integer> oldFireDelayValue = getApiValueFromContainer(container).get().asImmutable();
-            ((Entity) (container)).fireResistance = value;
-            return DataTransactionBuilder.successReplaceResult(oldFireDelayValue, newFireDelayData);
-        }
-        return DataTransactionBuilder.failResult(proposedValue);
-    }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
@@ -80,5 +55,23 @@ public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return new SpongeBoundedValue<>(this.getKey(), 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+    }
+
+    @Override
+    protected boolean set(Entity container, Integer value) {
+        if (value < 0) {
+
+        }
+        return false;
+    }
+
+    @Override
+    protected Optional<Integer> getVal(Entity container) {
+        return null;
+    }
+
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return null;
     }
 }
