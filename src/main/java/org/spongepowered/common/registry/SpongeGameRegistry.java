@@ -137,6 +137,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteab
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppleData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
@@ -157,6 +158,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
+import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
@@ -410,6 +412,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.Igniteab
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.ScreamingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.SneakingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.VelocityDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemAuthorDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemGoldenAppleDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.item.ItemLoreDataBuilder;
@@ -432,6 +435,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGoldenAppleData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
@@ -452,6 +456,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteable
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
@@ -473,6 +478,7 @@ import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcesso
 import org.spongepowered.common.data.processor.data.entity.SneakingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.item.GoldenAppleDataProcessor;
+import org.spongepowered.common.data.processor.data.item.ItemAuthorDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemEnchantmentDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemLoreDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemPagedDataProcessor;
@@ -503,6 +509,7 @@ import org.spongepowered.common.data.processor.value.entity.ScreamingValueProces
 import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TotalExperienceValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
+import org.spongepowered.common.data.processor.value.item.BookAuthorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
@@ -2140,12 +2147,18 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         service.registerBuilder(GoldenAppleData.class, itemGoldenAppleDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(GoldenAppleData.class, SpongeGoldenAppleData.class, ImmutableGoldenAppleData.class,
                 ImmutableSpongeGoldenAppleData.class, goldenAppleDataProcessor, itemGoldenAppleDataBuilder);
-                
+
         final ExperienceHolderDataProcessor experienceHolderDataProcessor = new ExperienceHolderDataProcessor();
         final ExperienceHolderDataBuilder experienceHolderDataBuilder = new ExperienceHolderDataBuilder();
         service.registerBuilder(ExperienceHolderData.class, experienceHolderDataBuilder);
         dataRegistry.registerDataProcessorAndImpl(ExperienceHolderData.class, SpongeExperienceHolderData.class, ImmutableExperienceHolderData.class,
                 ImmutableSpongeExperienceHolderData.class, experienceHolderDataProcessor, experienceHolderDataBuilder);
+
+        final ItemAuthorDataProcessor itemAuthorDataProcessor = new ItemAuthorDataProcessor();
+        final ItemAuthorDataBuilder itemAuthorDataBuilder = new ItemAuthorDataBuilder();
+        service.registerBuilder(AuthorData.class, itemAuthorDataBuilder);
+        dataRegistry.registerDataProcessorAndImpl(AuthorData.class, SpongeAuthorData.class, ImmutableAuthorData.class,
+                ImmutableSpongeAuthorData.class, itemAuthorDataProcessor, itemAuthorDataBuilder);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -2178,6 +2191,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         dataRegistry.registerValueProcessor(Keys.TOTAL_EXPERIENCE, new TotalExperienceValueProcessor());
         dataRegistry.registerValueProcessor(Keys.EXPERIENCE_SINCE_LEVEL, new ExperienceSinceLevelValueProcessor());
         dataRegistry.registerValueProcessor(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new ExperienceFromStartOfLevelValueProcessor());
+         dataRegistry.registerValueProcessor(Keys.BOOK_AUTHOR, new BookAuthorValueProcessor());
 
     }
 
