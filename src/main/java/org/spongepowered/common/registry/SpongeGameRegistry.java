@@ -2136,15 +2136,20 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.populatorTypeMappings.put("big_tree", new SpongePopulatorType("big_tree", net.minecraft.world.gen.feature.WorldGenBigTree.class));
         this.populatorTypeMappings.put("birch_tree", new SpongePopulatorType("birch_tree", net.minecraft.world.gen.feature.WorldGenForest.class));
         this.populatorTypeMappings.put("block_blob", new SpongePopulatorType("block_blob", net.minecraft.world.gen.feature.WorldGenBlockBlob.class));
+        this.populatorTypeMappings.put("bonus_chest", new SpongePopulatorType("bonus_chest", net.minecraft.world.gen.feature.WorldGeneratorBonusChest.class));
+        this.populatorTypeMappings.put("bush", new SpongePopulatorType("bush", net.minecraft.world.gen.GeneratorBushFeature.class));
         this.populatorTypeMappings.put("cactus", new SpongePopulatorType("cactus", net.minecraft.world.gen.feature.WorldGenCactus.class));
         this.populatorTypeMappings.put("canopy_tree", new SpongePopulatorType("canopy_tree", net.minecraft.world.gen.feature.WorldGenCanopyTree.class));
+        this.populatorTypeMappings.put("clay", new SpongePopulatorType("clay", net.minecraft.world.gen.feature.WorldGenClay.class));
         this.populatorTypeMappings.put("dead_bush", new SpongePopulatorType("dead_bush", net.minecraft.world.gen.feature.WorldGenDeadBush.class));
         this.populatorTypeMappings.put("desert_well", new SpongePopulatorType("desert_well", net.minecraft.world.gen.feature.WorldGenDesertWells.class));
         this.populatorTypeMappings.put("double_plant", new SpongePopulatorType("double_plant", net.minecraft.world.gen.feature.WorldGenBigMushroom.class));
         this.populatorTypeMappings.put("dungeon", new SpongePopulatorType("dungeon", net.minecraft.world.gen.feature.WorldGenDungeons.class));
         this.populatorTypeMappings.put("ender_crystal_platform", new SpongePopulatorType("ender_crystal_platform", net.minecraft.world.gen.feature.WorldGenSpikes.class));
+        this.populatorTypeMappings.put("fire", new SpongePopulatorType("fire", net.minecraft.world.gen.feature.WorldGenFire.class));
         this.populatorTypeMappings.put("flower", new SpongePopulatorType("flower", net.minecraft.world.gen.feature.WorldGenFlowers.class));
         this.populatorTypeMappings.put("glowstone", new SpongePopulatorType("glowstone", net.minecraft.world.gen.feature.WorldGenGlowStone1.class));
+        this.populatorTypeMappings.put("glowstone2", new SpongePopulatorType("glowstone2", net.minecraft.world.gen.feature.WorldGenGlowStone2.class));
         this.populatorTypeMappings.put("ice_path", new SpongePopulatorType("ice_path", net.minecraft.world.gen.feature.WorldGenIcePath.class));
         this.populatorTypeMappings.put("ice_spike", new SpongePopulatorType("ice_spike", net.minecraft.world.gen.feature.WorldGenIceSpike.class));
         this.populatorTypeMappings.put("jungle_bush_tree", new SpongePopulatorType("jungle_bush_tree", net.minecraft.world.gen.feature.WorldGenShrub.class));
@@ -2158,6 +2163,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.populatorTypeMappings.put("pointy_taiga_tree", new SpongePopulatorType("pointy_taiga_tree", net.minecraft.world.gen.feature.WorldGenTaiga1.class));
         this.populatorTypeMappings.put("pumpkin", new SpongePopulatorType("pumpkin", net.minecraft.world.gen.feature.WorldGenPumpkin.class));
         this.populatorTypeMappings.put("reed", new SpongePopulatorType("reed", net.minecraft.world.gen.feature.WorldGenReed.class));
+        this.populatorTypeMappings.put("sand", new SpongePopulatorType("sand", net.minecraft.world.gen.feature.WorldGenSand.class));
         this.populatorTypeMappings.put("savanna_tree", new SpongePopulatorType("savanna_tree", net.minecraft.world.gen.feature.WorldGenSavannaTree.class));
         this.populatorTypeMappings.put("shrub", new SpongePopulatorType("shrub", net.minecraft.world.gen.feature.WorldGenTallGrass.class));
         this.populatorTypeMappings.put("swamp_tree", new SpongePopulatorType("swamp_tree", net.minecraft.world.gen.feature.WorldGenSwamp.class));
