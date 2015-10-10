@@ -44,13 +44,13 @@ import net.minecraft.block.BlockQuartz;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.BlockRedstoneComparator;
 import net.minecraft.block.BlockSandStone;
+import net.minecraft.block.BlockSilverfish;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.BlockWall;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
@@ -67,7 +67,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.AchievementList;
-import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
@@ -206,6 +205,7 @@ import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
+import org.spongepowered.api.data.type.DisguisedBlockTypes;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.data.type.DyeColor;
@@ -231,6 +231,7 @@ import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.api.data.type.PrismarineTypes;
 import org.spongepowered.api.data.type.Profession;
@@ -323,6 +324,7 @@ import org.spongepowered.api.statistic.StatisticBuilder;
 import org.spongepowered.api.statistic.StatisticFormat;
 import org.spongepowered.api.statistic.StatisticFormats;
 import org.spongepowered.api.statistic.StatisticGroup;
+import org.spongepowered.api.statistic.StatisticGroups;
 import org.spongepowered.api.statistic.Statistics;
 import org.spongepowered.api.statistic.TeamStatistic;
 import org.spongepowered.api.statistic.achievement.Achievement;
@@ -551,6 +553,7 @@ import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.type.SpongeSlabType;
 import org.spongepowered.common.data.type.SpongeStairShape;
 import org.spongepowered.common.data.type.SpongeStatisticFormat;
+import org.spongepowered.common.data.type.SpongeStatisticGroup;
 import org.spongepowered.common.data.type.SpongeTreeType;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -570,7 +573,7 @@ import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeGoldenApple;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
-import org.spongepowered.common.mixin.core.data.types.IMixinObjectiveStat;
+import org.spongepowered.common.mixin.core.stats.IMixinObjectiveStat;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.common.rotation.SpongeRotation;
@@ -750,6 +753,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public final Map<String, SlabType> slabTypeMappings = Maps.newHashMap();
     public final Map<String, StairShape> stairShapeMappings = Maps.newHashMap();
     public final Map<String, Hinge> hingeMappings = Maps.newHashMap();
+    public final Map<String, DisguisedBlockType> disguisedBlockTypeMappings = Maps.newHashMap();
     private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
             .put("dead_bush", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
             .put("tall_grass", (ShrubType) (Object) BlockTallGrass.EnumType.GRASS)
@@ -927,6 +931,24 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("multiply_base", new SpongeOperation("MULTIPLY_BASE", false))
             .put("multiply", new SpongeOperation("MULTIPLY", false))
             .build();
+    public final Map<String, PortionType> portionTypeMappings = new ImmutableMap.Builder<String, PortionType>()
+            .put("bottom", (PortionType) (Object) BlockDoor.EnumDoorHalf.LOWER)
+            .put("top", (PortionType) (Object) BlockDoor.EnumDoorHalf.UPPER)
+            .build();
+    public final Map<String,StatisticGroup> statisticGroupMappings = new ImmutableMap.Builder<String, StatisticGroup>()
+            .put("general", new SpongeStatisticGroup("GENERAL"))
+            .put("hidden", new SpongeStatisticGroup("HIDDEN"))
+            .put("has_killed_entity", new SpongeStatisticGroup("HAS_KILLED_ENTITY"))
+            .put("killed_by_entity", new SpongeStatisticGroup("KILLED_BY_ENTITY"))
+            .put("craft_item", new SpongeStatisticGroup("CRAFT_ITEM"))
+            .put("use_item", new SpongeStatisticGroup("USE_ITEM"))
+            .put("break_item", new SpongeStatisticGroup("BREAK_ITEM"))
+            .put("craft_block", new SpongeStatisticGroup("CRAFT_BLOCK"))
+            .put("use_block", new SpongeStatisticGroup("USE_BLOCK"))
+            .put("mine_block", new SpongeStatisticGroup("MINE_BLOCK"))
+            .put("has_killed_team", new SpongeStatisticGroup("HAS_KILLED_TEAM"))
+            .put("killed_by_team", new SpongeStatisticGroup("KILLED_BY_TEAM"))
+            .build();
 
     private final Map<String, Weather> weatherMappings = Maps.newHashMap();
 
@@ -951,7 +973,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(Difficulty.class, difficultyMappings)
                 .put(DimensionType.class, this.dimensionTypeMappings)
                 .put(DirtType.class, this.dirtTypeMappings)
-                .put(DisguisedBlockType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                .put(DisguisedBlockType.class, this.disguisedBlockTypeMappings)
                 .put(DisplaySlot.class, this.displaySlotMappings)
                 .put(DoublePlantType.class, this.doublePlantMappings)
                 .put(DyeColor.class, this.dyeColorMappings)
@@ -976,7 +998,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(PlantType.class, this.plantTypeMappings)
                 .put(PotionEffectType.class, this.potionEffectTypeMappings)
                 .put(PopulatorType.class, this.populatorTypeMappings)
-                .put(PortionType.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                .put(PortionType.class, this.portionTypeMappings)
                 .put(PrismarineType.class, this.prismarineTypeMappings)
                 .put(Profession.class, this.professionMappings)
                 .put(QuartzType.class, this.quartzTypeMappings)
@@ -993,7 +1015,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(StairShape.class, this.stairShapeMappings)
                 .put(Statistic.class, this.statisticMappings)
                 .put(StatisticFormat.class, this.statisticFormatMappings)
-                .put(StatisticGroup.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                .put(StatisticGroup.class, this.statisticGroupMappings)
                 .put(StoneType.class, this.stoneTypeMappings)
                 .put(TextColor.class, textColorMappings)
                 .put(TextStyle.Base.class, textStyleMappings)
@@ -2368,6 +2390,14 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         });
     }
 
+    private void setDisguisedBlockTypes() {
+        RegistryHelper.mapFields(DisguisedBlockTypes.class, name -> {
+            DisguisedBlockType type = (DisguisedBlockType) (Object) BlockSilverfish.EnumType.valueOf(name);
+            SpongeGameRegistry.this.disguisedBlockTypeMappings.put(type.getName().toLowerCase(), type);
+            return type;
+        });
+    }
+
     private void setObjectiveDisplayModes() {
         RegistryHelper.mapFields(ObjectiveDisplayModes.class, SpongeGameRegistry.objectiveDisplayModeMappings);
     }
@@ -2628,6 +2658,14 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(Operations.class, this.operationMappings);
     }
 
+    private void setPortionTypeMappings() {
+        RegistryHelper.mapFields(PortionTypes.class, this.portionTypeMappings);
+    }
+
+    private void setStatisticGroupMappings() {
+        RegistryHelper.mapFields(StatisticGroups.class, this.statisticGroupMappings);
+    }
+
     private void setDoublePlantMappings() {
         RegistryHelper.mapFields(DoublePlantTypes.class, this.doublePlantMappings);
     }
@@ -2795,6 +2833,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setSlabTypes();
         setStairShapes();
         setHinges();
+        setDisguisedBlockTypes();
         setDyeColors();
         setSkullTypes();
         setTreeTypes();
@@ -2819,6 +2858,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setAttributeMappings();
         setEquipmentTypeMappings();
         setOperationMappings();
+        setPortionTypeMappings();
+        setStatisticGroupMappings();
         setLogAxes();
     }
 

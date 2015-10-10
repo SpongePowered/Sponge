@@ -30,7 +30,6 @@ import net.minecraft.stats.StatBase;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.data.types.IMixinObjectiveStat;
 
 @Mixin(ObjectiveStat.class)
 public abstract class MixinObjectiveStat extends ScoreDummyCriteria implements IMixinObjectiveStat {
