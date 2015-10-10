@@ -80,7 +80,7 @@ public abstract class MixinAchievement extends StatBase implements Achievement {
     }
 
     public Text achievement$toText() {
-        return Texts.of(achievement$getTranslation());
+        return Texts.of(new SpongeTranslation("achievement." + this.statId));
     }
 
     public Translation achievement$getTranslation() {
