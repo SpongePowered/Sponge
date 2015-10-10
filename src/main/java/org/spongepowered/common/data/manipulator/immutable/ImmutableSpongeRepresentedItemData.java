@@ -51,11 +51,6 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableSingleD
     }
 
     @Override
-    public ImmutableRepresentedItemData copy() {
-        return this;
-    }
-
-    @Override
     public RepresentedItemData asMutable() {
         return new SpongeRepresentedItemData(this.value);
     }

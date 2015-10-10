@@ -60,6 +60,6 @@ public class SpongeImmutableRegistry implements ImmutableDataRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> Optional<B> getBuilder(Class<T> manipulatorClass) {
-        return Optional.ofNullable((B) (Object) this.builderMap.get(checkNotNull(manipulatorClass)));
+        return Optional.ofNullable((B) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 }

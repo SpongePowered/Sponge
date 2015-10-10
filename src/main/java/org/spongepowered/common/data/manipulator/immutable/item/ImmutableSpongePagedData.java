@@ -63,11 +63,6 @@ public class ImmutableSpongePagedData extends AbstractImmutableData<ImmutablePag
     }
 
     @Override
-    public ImmutableSpongePagedData copy() {
-        return this;
-    }
-
-    @Override
     public PagedData asMutable() {
         return new SpongePagedData(this.pages);
     }

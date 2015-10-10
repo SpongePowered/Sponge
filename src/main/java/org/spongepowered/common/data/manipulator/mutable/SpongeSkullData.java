@@ -28,10 +28,15 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
 public class SpongeSkullData extends AbstractSingleCatalogData<SkullType, SkullData, ImmutableSkullData> implements SkullData {
+
+    public SpongeSkullData() {
+        this(SkullTypes.SKELETON);
+    }
 
     public SpongeSkullData(SkullType value) {
         super(SkullData.class, value, Keys.SKULL_TYPE, ImmutableSpongeSkullData.class);

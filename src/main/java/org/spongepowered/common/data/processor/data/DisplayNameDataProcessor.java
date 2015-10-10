@@ -120,10 +120,10 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
     @Override
     public Optional<ImmutableDisplayNameData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableDisplayNameData immutable) {
         if (key == Keys.DISPLAY_NAME) {
-            return Optional.<ImmutableDisplayNameData>of(
+            return Optional.of(
                     new ImmutableSpongeDisplayNameData((Text) value, immutable.customNameVisible().get()));
         } else if (key == Keys.SHOWS_DISPLAY_NAME) {
-            return Optional.<ImmutableDisplayNameData>of(
+            return Optional.of(
                     new ImmutableSpongeDisplayNameData(immutable.displayName().get(), (Boolean) value));
         }
         return Optional.empty();
@@ -139,7 +139,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                     ((ItemStack) dataHolder).clearCustomName();
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the displayname from an itemstack!", e);
+                    Sponge.getLogger().error("There was an issue removing the displayName from an ItemStack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
@@ -170,11 +170,11 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
             if (((Entity) dataHolder).hasCustomName()) {
                 return from(dataHolder);
             } else {
-                return Optional.<DisplayNameData>of(new SpongeDisplayNameData());
+                return Optional.of(new SpongeDisplayNameData());
             }
         } else if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).hasDisplayName()) {
-                return Optional.<DisplayNameData>of(new SpongeDisplayNameData());
+                return Optional.of(new SpongeDisplayNameData());
             } else {
                 return from(dataHolder);
             }

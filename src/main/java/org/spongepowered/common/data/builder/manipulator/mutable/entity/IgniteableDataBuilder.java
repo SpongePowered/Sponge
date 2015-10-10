@@ -55,7 +55,7 @@ public class IgniteableDataBuilder implements DataManipulatorBuilder<IgniteableD
             final int fireTicks = ((Entity) dataHolder).fire;
             final int fireDelay = ((Entity) dataHolder).fireResistance;
             if (fireTicks > 0) {
-                return Optional.<IgniteableData>of(new SpongeIgniteableData(fireTicks, fireDelay));
+                return Optional.of(new SpongeIgniteableData(fireTicks, fireDelay));
             }
         }
         return Optional.empty();
@@ -63,9 +63,12 @@ public class IgniteableDataBuilder implements DataManipulatorBuilder<IgniteableD
 
     @Override
     public Optional<IgniteableData> build(DataView container) throws InvalidDataException {
-        int delay = getData(container, Keys.FIRE_DAMAGE_DELAY);
-        int ticks = getData(container, Keys.FIRE_TICKS);
-        IgniteableData igniteableData = new SpongeIgniteableData(ticks, delay);
-        return Optional.of(igniteableData);
+        if (container.contains(Keys.FIRE_DAMAGE_DELAY.getQuery()) && container.contains(Keys.FIRE_TICKS.getQuery())) {
+            int delay = getData(container, Keys.FIRE_DAMAGE_DELAY);
+            int ticks = getData(container, Keys.FIRE_TICKS);
+            IgniteableData igniteableData = new SpongeIgniteableData(ticks, delay);
+            return Optional.of(igniteableData);
+        }
+        return Optional.empty();
     }
 }

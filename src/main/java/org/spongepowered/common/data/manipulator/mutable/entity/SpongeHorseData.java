@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -51,9 +53,9 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
 
     public SpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, HorseVariant horseVariant) {
         super(HorseData.class);
-        this.horseColor = horseColor;
-        this.horseStyle = horseStyle;
-        this.horseVariant = horseVariant;
+        this.horseColor = checkNotNull(horseColor, "The Horse Color was null!");
+        this.horseStyle = checkNotNull(horseStyle, "The Horse Style was null!");
+        this.horseVariant = checkNotNull(horseVariant, "The Horse Variant was null!");
         registerGettersAndSetters();
     }
 

@@ -78,11 +78,6 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
     }
 
     @Override
-    public ImmutableWireAttachmentData copy() {
-        return new ImmutableSpongeWireAttachmentData(this.wireAttachmentMap);
-    }
-
-    @Override
     public WireAttachmentData asMutable() {
         return new SpongeWireAttachementData(this.wireAttachmentMap);
     }

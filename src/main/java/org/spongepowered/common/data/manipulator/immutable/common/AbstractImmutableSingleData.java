@@ -58,12 +58,6 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
         return this.value;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public I copy() {
-        return (I) this;
-    }
-
     @Override
     public abstract M asMutable();
 

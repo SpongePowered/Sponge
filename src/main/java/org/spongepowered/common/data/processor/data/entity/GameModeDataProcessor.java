@@ -60,8 +60,6 @@ public class GameModeDataProcessor extends AbstractEntitySingleDataProcessor<Ent
         if (Sponge.getGame().getPlatform().getType().isServer()) {
             entity.setGameType((WorldSettings.GameType) (Object) value);
             return true;
-        } else if (Sponge.getGame().getPlatform().getType().isClient()) {
-            // ((AbstractClientPlayer) entity).getPlayerInfo().getGa // TODO do we really need to handle this?
         }
         return false;
     }
@@ -70,12 +68,6 @@ public class GameModeDataProcessor extends AbstractEntitySingleDataProcessor<Ent
     protected Optional<GameMode> getVal(EntityPlayer entity) {
         if (entity instanceof EntityPlayerMP) {
             return Optional.of((GameMode) (Object) ((EntityPlayerMP) entity).theItemInWorldManager.getGameType());
-        }
-        if (Sponge.getGame().getPlatform().getType().isClient()) {
-            /* TODO: This will only compile on the client (in SpongeForge)
-            if (entity instanceof AbstractClientPlayer) {
-                return Optional.of((GameMode) (Object) ((AbstractClientPlayer) entity).getPlayerInfo().getGameType());
-            }*/
         }
         return Optional.empty();
     }

@@ -86,7 +86,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
         return Optional.of(m);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
         if (supports(dataHolder)) {

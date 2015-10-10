@@ -62,11 +62,6 @@ public class ImmutableSpongeEnchantmentData extends AbstractImmutableData<Immuta
     }
 
     @Override
-    public ImmutableEnchantmentData copy() {
-        return this;
-    }
-
-    @Override
     public EnchantmentData asMutable() {
         return new SpongeEnchantmentData(this.enchantments);
     }

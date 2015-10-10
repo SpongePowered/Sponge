@@ -31,17 +31,19 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<Double, MutableBoundedValue<Double>> {
+public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, MutableBoundedValue<Double>> {
 
     public FoodSaturationValueProcessor() {
-        super(Keys.SATURATION);
+        super(EntityPlayer.class, Keys.SATURATION);
     }
 
     @Override
@@ -50,33 +52,19 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<D
     }
 
     @Override
-    public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                return Optional.of((double) player.getFoodStats().getSaturationLevel());
-            }
-        }
-        return Optional.empty();
+    protected boolean set(EntityPlayer container, Double value) {
+        container.getFoodStats().foodSaturationLevel = value.floatValue();
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityPlayer;
+    protected Optional<Double> getVal(EntityPlayer container) {
+        return Optional.of((double) container.getFoodStats().getSaturationLevel());
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                final Double oldValue = (double) player.getFoodStats().getSaturationLevel();
-                player.getFoodStats().foodSaturationLevel = value.floatValue();
-                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.SATURATION, value),
-                                                                   new ImmutableSpongeValue<>(Keys.SATURATION, oldValue));
-            }
-        }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.SATURATION, value));
+    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 0D, doubleComparator(), 0D, Double.MAX_VALUE);
     }
 
     @Override

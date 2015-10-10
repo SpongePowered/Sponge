@@ -47,7 +47,7 @@ public class ItemAuthorDataBuilder implements DataManipulatorBuilder<AuthorData,
         if (container.contains(Keys.BOOK_AUTHOR.getQuery())) {
             final String json = DataUtil.getData(container, Keys.BOOK_AUTHOR, String.class);
             final Text author = Texts.json().fromUnchecked(json);
-            return Optional.<AuthorData>of(new SpongeAuthorData(author));
+            return Optional.of(new SpongeAuthorData(author));
         } else {
             return Optional.empty();
         }
@@ -65,11 +65,11 @@ public class ItemAuthorDataBuilder implements DataManipulatorBuilder<AuthorData,
                 return Optional.empty();
             }
             if (!((ItemStack) dataHolder).hasTagCompound() || !((ItemStack) dataHolder).getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
-                return Optional.<AuthorData>of(new SpongeAuthorData());
+                return Optional.of(new SpongeAuthorData());
             }
             final String json = ((ItemStack) dataHolder).getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
             final Text author = Texts.json().fromUnchecked(json);
-            return Optional.<AuthorData>of(new SpongeAuthorData(author));
+            return Optional.of(new SpongeAuthorData(author));
         } else {
             return Optional.empty();
         }

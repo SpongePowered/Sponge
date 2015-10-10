@@ -56,7 +56,7 @@ import javax.annotation.Nullable;
  * Basically, this is the default implementation that automatically delegates
  * <b>ALL</b> actual data processing to either their associated
  * {@link DataProcessor}s or {@link ValueProcessor}s to avoid relying on
- * implementation residing in the actua {@link DataManipulator}s themselves.
+ * implementation residing in the actual {@link DataManipulator}s themselves.
  * As all vanilla related manipulators are based on data existing from
  * Minecraft's current implementation (i.e. not an ECS), it is required
  * that all processing exists in the associated processors and not within these
@@ -110,7 +110,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * Simple registration method for the keys to value return methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -126,7 +126,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * Simple registration method for the keys to field getter methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -135,14 +135,14 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * @param function The function for getting the field
      */
     protected final void registerFieldGetter(Key<?> key, Supplier<?> function) {
-        this.keyFieldGetterMap.put(checkNotNull(key), checkNotNull(function));
+        this.keyFieldGetterMap.put(checkNotNull(key, "The key cannot be null"), checkNotNull(function, "The function cannot be null"));
     }
 
     /**
      * Simple registration method for the keys to field setter methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -156,17 +156,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     }
 
     protected abstract void registerGettersAndSetters();
-
-    @Override
-    public Optional<M> fill(DataHolder dataHolder) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
-        if (!processor.isPresent()) {
-            return Optional.empty();
-        }
-        // .... and delegate to the processor!
-        return processor.get().fill(dataHolder, copy(), MergeFunction.IGNORE_ALL);
-    }
 
     @Override
     public Optional<M> fill(DataHolder dataHolder, MergeFunction overlap) {
@@ -188,7 +177,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
         if (!processor.isPresent()) {
             return Optional.empty();
         }
-        return processor.get().fill(container, (M) (Object) this);
+        return processor.get().fill(container, (M) this);
     }
 
     // Beyond this point is all implementation with the getter/setter functions!
@@ -198,41 +187,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
         checkArgument(supports(key), "This data manipulator doesn't support the following key: " + key.toString());
         this.keyFieldSetterMap.get(key).accept(value);
         return (M) this;
-    }
-
-    @Override
-    public M set(BaseValue<?> value) {
-        checkArgument(supports(value), "This data manipulator doesn't support the following key: " + value.getKey().toString());
-        this.keyFieldSetterMap.get(value.getKey()).accept(value.get());
-        return (M) this;
-    }
-
-    @Override
-    public M set(BaseValue<?>... values) {
-        for (BaseValue<?> value : checkNotNull(values)) {
-            try { // Though we should be "argument" aware,
-                // so we use the try catch.
-                set(value);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace(); // print the stacktrace, but we continue
-            }
-        }
-        // finally, return this object, casted for JDK 6's really bad generic inference calculations.
-        return (M) (Object) this;
-    }
-
-    @Override
-    public M set(Iterable<? extends BaseValue<?>> values) { // Basically, the exact same as above...
-        for (BaseValue<?> value : checkNotNull(values)) {
-            try { // Though we should be "argument" aware,
-                  // so we use the try catch.
-                set(value);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace(); // print the stacktrace, but we continue
-            }
-        }
-        // finally, return this object, casted for JDK 6's really bad generic inference calculations.
-        return (M) (Object) this;
     }
 
     @Override
@@ -248,17 +202,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
             return Optional.empty();
         }
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
-    }
-
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null); // Just use the provided optional
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(checkNotNull(defaultValue)); // Or use the optional with a default value
     }
 
     @Override

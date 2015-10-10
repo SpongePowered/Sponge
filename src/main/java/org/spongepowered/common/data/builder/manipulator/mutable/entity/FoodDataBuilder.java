@@ -53,10 +53,10 @@ public class FoodDataBuilder implements DataManipulatorBuilder<FoodData, Immutab
     public Optional<FoodData> build(DataView container) throws InvalidDataException {
         if (container.contains(Keys.FOOD_LEVEL.getQuery()) && container.contains(Keys.SATURATION.getQuery())
             && container.contains(Keys.EXHAUSTION.getQuery())) {
-            final int foodLevel = DataUtil.getData(container, Keys.FOOD_LEVEL, Integer.class);
-            final float foodSaturationLevel = DataUtil.getData(container, Keys.SATURATION, Double.class).floatValue();
-            final float foodExhaustionLevel = DataUtil.getData(container, Keys.EXHAUSTION, Double.class).floatValue();
-            return Optional.<FoodData>of(new SpongeFoodData(foodLevel, foodSaturationLevel, foodExhaustionLevel));
+            final int foodLevel = DataUtil.getData(container, Keys.FOOD_LEVEL);
+            final float foodSaturationLevel = container.getDouble(Keys.SATURATION.getQuery()).get().floatValue();
+            final float foodExhaustionLevel = container.getDouble(Keys.EXHAUSTION.getQuery()).get().floatValue();
+            return Optional.of(new SpongeFoodData(foodLevel, foodSaturationLevel, foodExhaustionLevel));
         }
         return Optional.empty();
     }

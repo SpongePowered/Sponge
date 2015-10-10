@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
+import static org.spongepowered.common.data.util.ItemsHelper.getTagCompound;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;

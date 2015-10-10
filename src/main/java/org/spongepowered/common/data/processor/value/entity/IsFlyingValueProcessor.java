@@ -32,54 +32,16 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
+public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
 
     public IsFlyingValueProcessor() {
-        super(Keys.IS_FLYING);
-    }
-
-    @Override
-    public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            if (container instanceof EntityPlayer) {
-                return Optional.of(((EntityPlayer) container).capabilities.isFlying);
-            } else {
-                return Optional.of(((Entity) container).isAirBorne);
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof Entity;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> proposedValue = ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, value, false);
-        if (supports(container)) {
-            final ImmutableValue<Boolean> oldFlyingData = getApiValueFromContainer(container).get().asImmutable();
-            try {
-                if (container instanceof EntityPlayer) {
-                    ((EntityPlayer) container).capabilities.isFlying = proposedValue.get();
-                } else {
-                    ((Entity) container).isAirBorne = proposedValue.get();
-                }
-                return DataTransactionBuilder.successReplaceResult(oldFlyingData, proposedValue);
-            } catch (Exception e) {
-                Sponge.getLogger().debug("Could not set the flying state.", e);
-                return DataTransactionBuilder.errorResult(proposedValue);
-            }
-        }
-        return DataTransactionBuilder.failResult(proposedValue);
+        super(Entity.class, Keys.IS_FLYING);
     }
 
     @Override
@@ -90,6 +52,30 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Boolean
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
         return new SpongeValue<>(Keys.IS_FLYING, false, defaultValue);
+    }
+
+    @Override
+    protected boolean set(Entity container, Boolean value) {
+        if (container instanceof EntityPlayer) {
+            ((EntityPlayer) container).capabilities.isFlying = value;
+        } else {
+            container.isAirBorne = value;
+        }
+        return true;
+    }
+
+    @Override
+    protected Optional<Boolean> getVal(Entity container) {
+        if (container instanceof EntityPlayer) {
+            return Optional.of(((EntityPlayer) container).capabilities.isFlying);
+        } else {
+            return Optional.of(container.isAirBorne);
+        }
+    }
+
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, false, value);
     }
 
 }

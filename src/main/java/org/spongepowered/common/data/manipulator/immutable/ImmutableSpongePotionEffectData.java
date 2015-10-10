@@ -33,49 +33,22 @@ import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
+import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
 
-public class ImmutableSpongePotionEffectData extends AbstractImmutableData<ImmutablePotionEffectData, PotionEffectData> implements ImmutablePotionEffectData {
-
-    private final ImmutableList<PotionEffect> effects;
+public class ImmutableSpongePotionEffectData extends AbstractImmutableSingleListData<PotionEffect, ImmutablePotionEffectData, PotionEffectData>
+    implements ImmutablePotionEffectData {
 
     public ImmutableSpongePotionEffectData(List<PotionEffect> effects) {
-        super(ImmutablePotionEffectData.class);
-        this.effects = ImmutableList.copyOf(effects);
-        registerGetters();
+        super(ImmutablePotionEffectData.class, effects, Keys.POTION_EFFECTS, SpongePotionEffectData.class);
     }
 
     @Override
     public ImmutableListValue<PotionEffect> effects() {
-        return new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, this.effects);
+        return new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, ImmutableList.copyOf(this.value));
     }
 
-    @Override
-    public ImmutablePotionEffectData copy() {
-        return new ImmutableSpongePotionEffectData(this.effects);
-    }
-
-    @Override
-    public PotionEffectData asMutable() {
-        return new SpongePotionEffectData(this.effects);
-    }
-
-    @Override
-    public int compareTo(ImmutablePotionEffectData o) {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer()
-            .set(Keys.POTION_EFFECTS, this.effects);
-    }
-
-    @Override
-    protected void registerGetters() {
-        // TODO
-    }
 }

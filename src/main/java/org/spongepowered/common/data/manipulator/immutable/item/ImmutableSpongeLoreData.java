@@ -63,11 +63,6 @@ public class ImmutableSpongeLoreData extends AbstractImmutableData<ImmutableLore
     }
 
     @Override
-    public ImmutableSpongeLoreData copy() {
-        return this;
-    }
-
-    @Override
     public LoreData asMutable() {
         return new SpongeLoreData(this.lore);
     }

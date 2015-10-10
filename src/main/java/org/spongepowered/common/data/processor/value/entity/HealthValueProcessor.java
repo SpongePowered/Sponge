@@ -26,12 +26,14 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -39,10 +41,10 @@ import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class HealthValueProcessor extends AbstractSpongeValueProcessor<Double, MutableBoundedValue<Double>> {
+public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBase, Double, MutableBoundedValue<Double>> {
 
     public HealthValueProcessor() {
-        super(Keys.HEALTH);
+        super(EntityLivingBase.class, Keys.HEALTH);
     }
 
     @Override
@@ -51,11 +53,18 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<Double, M
     }
 
     @Override
-    public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof EntityLivingBase) {
-            return Optional.of((double) ((EntityLivingBase) container).getHealth());
-        }
-        return Optional.empty();
+    protected boolean set(EntityLivingBase container, Double value) {
+        return false;
+    }
+
+    @Override
+    protected Optional<Double> getVal(EntityLivingBase container) {
+        return Optional.of((double) container.getHealth());
+    }
+
+    @Override
+    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+        return new ImmutableSpongeBoundedValue<>(Keys.HEALTH, value, 20D, doubleComparator(), 0D, 20D);
     }
 
     @Override
@@ -63,8 +72,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<Double, M
         if (container instanceof EntityLivingBase) {
             final double health = ((EntityLivingBase) container).getHealth();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            return Optional.<MutableBoundedValue<Double>>of(new SpongeBoundedValue<>(Keys.HEALTH, maxHealth, doubleComparator(),
-                                                                                     1D, maxHealth, health));
+            return Optional.<MutableBoundedValue<Double>>of(new SpongeBoundedValue<>(Keys.HEALTH, maxHealth, doubleComparator(), 1D, maxHealth, health));
         }
         return Optional.empty();
     }

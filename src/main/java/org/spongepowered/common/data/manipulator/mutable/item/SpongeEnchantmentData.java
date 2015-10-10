@@ -46,12 +46,12 @@ public class SpongeEnchantmentData extends AbstractData<EnchantmentData, Immutab
     private List<ItemEnchantment> enchantments;
 
     public SpongeEnchantmentData() {
-        super(EnchantmentData.class);
-        registerGettersAndSetters();
+        this(Lists.<ItemEnchantment>newArrayList());
     }
 
     public SpongeEnchantmentData(List<ItemEnchantment> enchantments) {
-        this();
+        super(EnchantmentData.class);
+        registerGettersAndSetters();
         this.enchantments = Lists.newArrayList(enchantments);
     }
 

@@ -53,11 +53,6 @@ public class ImmutableSpongeOwnableData extends AbstractImmutableData<ImmutableO
     }
 
     @Override
-    public ImmutableOwnableData copy() {
-        return new ImmutableSpongeOwnableData(this.profile);
-    }
-
-    @Override
     public OwnableData asMutable() {
         return new SpongeOwnableData(this.profile);
     }

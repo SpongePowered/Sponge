@@ -47,11 +47,6 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
     }
 
     @Override
-    public ImmutableAuthorData copy() {
-        return this;
-    }
-
-    @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(Keys.BOOK_AUTHOR.getQuery(), Texts.json().to(this.getValue()));
@@ -59,7 +54,7 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
 
     @Override
     public ImmutableValue<Text> author() {
-        return author;
+        return this.author;
     }
 
     @Override

@@ -39,60 +39,31 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
+public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
 
     public DisplayNameVisibleValueProcessor() {
-        super(Keys.SHOWS_DISPLAY_NAME);
+        super(Entity.class, Keys.SHOWS_DISPLAY_NAME);
     }
 
     @Override
     public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, defaultValue);
+        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, false, defaultValue);
     }
 
     @Override
-    public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            return Optional.of(((Entity) container).getAlwaysRenderNameTag());
-        } else if (container instanceof ItemStack || container instanceof IWorldNameable) {
-            return Optional.of(true);
-        }
-        return Optional.empty();
+    protected boolean set(Entity container, Boolean value) {
+        container.setAlwaysRenderNameTag(value);
+        return true;
     }
 
     @Override
-    public Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
-        final Optional<Boolean> optional = getValueFromContainer(container);
-        if (optional.isPresent()) {
-            return Optional.<Value<Boolean>>of(new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, true, optional.get()));
-        }
-        return Optional.empty();
+    protected Optional<Boolean> getVal(Entity container) {
+        return Optional.of(container.getAlwaysRenderNameTag());
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof Entity || container instanceof ItemStack || container instanceof IWorldNameable;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> proposed = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, true, value);
-        if (container instanceof Entity) {
-            final boolean old = ((Entity) container).getAlwaysRenderNameTag();
-            final ImmutableValue<Boolean> oldValue = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, true, old);
-            try {
-                ((Entity) container).setAlwaysRenderNameTag(value);
-                return DataTransactionBuilder.builder()
-                        .replace(oldValue)
-                        .success(proposed)
-                        .result(DataTransactionResult.Type.SUCCESS)
-                        .build();
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(proposed);
-            }
-
-        }
-        return DataTransactionBuilder.failResult(proposed);
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, value);
     }
 
     @Override
