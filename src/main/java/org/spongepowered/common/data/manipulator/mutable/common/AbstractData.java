@@ -158,17 +158,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     protected abstract void registerGettersAndSetters();
 
     @Override
-    public Optional<M> fill(DataHolder dataHolder) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
-        if (!processor.isPresent()) {
-            return Optional.empty();
-        }
-        // .... and delegate to the processor!
-        return processor.get().fill(dataHolder, copy(), MergeFunction.IGNORE_ALL);
-    }
-
-    @Override
     public Optional<M> fill(DataHolder dataHolder, MergeFunction overlap) {
         // Basic stuff, getting the processor....
         final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
@@ -201,41 +190,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     }
 
     @Override
-    public M set(BaseValue<?> value) {
-        checkArgument(supports(value), "This data manipulator doesn't support the following key: " + value.getKey().toString());
-        this.keyFieldSetterMap.get(value.getKey()).accept(value.get());
-        return (M) this;
-    }
-
-    @Override
-    public M set(BaseValue<?>... values) {
-        for (BaseValue<?> value : checkNotNull(values)) {
-            try { // Though we should be "argument" aware,
-                // so we use the try catch.
-                set(value);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace(); // print the stacktrace, but we continue
-            }
-        }
-        // finally, return this object, casted for JDK 6's really bad generic inference calculations.
-        return (M) this;
-    }
-
-    @Override
-    public M set(Iterable<? extends BaseValue<?>> values) { // Basically, the exact same as above...
-        for (BaseValue<?> value : checkNotNull(values)) {
-            try { // Though we should be "argument" aware,
-                  // so we use the try catch.
-                set(value);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace(); // print the stacktrace, but we continue
-            }
-        }
-        // finally, return this object, casted for JDK 6's really bad generic inference calculations.
-        return (M) this;
-    }
-
-    @Override
     public <E> M transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
         checkArgument(supports(key));
         this.keyFieldSetterMap.get(key).accept(checkNotNull(function.apply((E) this.keyFieldGetterMap.get(key).get())));
@@ -248,17 +202,6 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
             return Optional.empty();
         }
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
-    }
-
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null); // Just use the provided optional
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(checkNotNull(defaultValue)); // Or use the optional with a default value
     }
 
     @Override

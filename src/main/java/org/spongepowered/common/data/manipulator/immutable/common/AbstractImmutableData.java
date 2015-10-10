@@ -144,21 +144,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     }
 
     @Override
-    public Optional<I> with(BaseValue<?> value) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        // We actually need to check that the processor is available, otherwise
-        // we throw an IllegalArgumentException, because people don't check for
-        // support!!
-        checkArgument(processor.isPresent(), "Invalid Value for " + this.immutableClass.getCanonicalName() + ". Use supports(BaseValue) to avoid "
-                + "exceptions!");
-        // Then we pass it to the processor :)
-        // We can easily use the key provided, since that is the identifier, not the actual value itself
-        return processor.get().with(value.getKey(), checkNotNull(value).get(), (I) this);
-
-    }
-
-    @Override
     public final I copy() {
         return (I) this;
     }
