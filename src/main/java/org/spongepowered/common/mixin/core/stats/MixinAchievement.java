@@ -45,9 +45,9 @@ import java.util.Optional;
 @Implements(@Interface(iface = Achievement.class, prefix = "achievement$"))
 public abstract class MixinAchievement extends StatBase implements Achievement {
 
-    @Shadow public Achievement parentAchievement;
+    @Shadow public net.minecraft.stats.Achievement parentAchievement;
 
-    public MixinAchievement(String statIdIn, IChatComponent statNameIn, IStatType typeIn) {
+    public MixinAchievement(String statIdIn, IChatComponent statNameIn, IStatType typeIn, Achievement nil) {
         super(statIdIn, statNameIn, typeIn);
     }
 
@@ -56,7 +56,7 @@ public abstract class MixinAchievement extends StatBase implements Achievement {
     }
 
     public Optional<Achievement> achievement$getParent() {
-        return Optional.ofNullable(this.parentAchievement);
+        return Optional.ofNullable((Achievement) this.parentAchievement);
     }
 
     public Collection<Achievement> achievement$getChildren() {

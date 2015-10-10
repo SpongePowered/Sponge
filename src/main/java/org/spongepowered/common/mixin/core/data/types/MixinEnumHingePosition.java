@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockDoor;
 import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -34,7 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockDoor.EnumHingePosition.class)
 @Implements(@Interface(iface = Hinge.class, prefix = "hinge$"))
-public abstract class MixinEnumHingePosition implements Hinge {
+public abstract class MixinEnumHingePosition implements Hinge, Cycleable<Hinge> {
 
     @Shadow public abstract String getName();
 
@@ -42,12 +43,13 @@ public abstract class MixinEnumHingePosition implements Hinge {
         return this.getName();
     }
 
+    @Override
+    public Hinge cycleNext() {
+        return this.getName().equals("left") ? (Hinge) (Object) BlockDoor.EnumHingePosition.RIGHT : (Hinge) (Object) BlockDoor.EnumHingePosition.LEFT;
+    }
+
     @Intrinsic
     public String hinge$getName() {
         return this.getName();
-    }
-
-    public Hinge hinge$cycleNext() {
-        return this.getName().equals("left") ? (Hinge) (Object) BlockDoor.EnumHingePosition.RIGHT : (Hinge) (Object) BlockDoor.EnumHingePosition.LEFT;
     }
 }
