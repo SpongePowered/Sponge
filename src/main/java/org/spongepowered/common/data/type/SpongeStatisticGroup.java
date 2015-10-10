@@ -27,10 +27,12 @@ package org.spongepowered.common.data.type;
 import org.spongepowered.api.statistic.StatisticFormat;
 import org.spongepowered.api.statistic.StatisticFormats;
 import org.spongepowered.api.statistic.StatisticGroup;
+import org.spongepowered.api.statistic.StatisticGroups;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
 
 public class SpongeStatisticGroup implements StatisticGroup {
+
     private final String id;
 
     public SpongeStatisticGroup(String id) {
@@ -39,6 +41,34 @@ public class SpongeStatisticGroup implements StatisticGroup {
 
     public SpongeStatisticGroup() {
         this("GENERAL");
+    }
+
+    public static StatisticGroup getGroupByID(String stat) {
+        if (stat.startsWith("stat.entityKilledBy.")) {
+            return StatisticGroups.KILLED_BY_ENTITY;
+        } else if (stat.startsWith("stat.killEntity.")) {
+            return StatisticGroups.HAS_KILLED_ENTITY;
+        } else if (stat.startsWith("stat.craftItem.")) {
+            return StatisticGroups.CRAFT_ITEM;
+        } else if (stat.startsWith("stat.useItem.")) {
+            return StatisticGroups.USE_ITEM;
+        } else if (stat.startsWith("stat.breakItem.")) {
+            return StatisticGroups.BREAK_ITEM;
+        } else if (stat.startsWith("stat.mineBlock.")) {
+            return StatisticGroups.MINE_BLOCK;
+        } else if (stat.startsWith("stat.craftBlock.")) {
+            return StatisticGroups.CRAFT_BLOCK;
+        } else if (stat.startsWith("stat.useBlock.")) {
+            return StatisticGroups.USE_BLOCK;
+        } else if (stat.startsWith("teamkill.")) {
+            return StatisticGroups.HAS_KILLED_TEAM;
+        } else if (stat.startsWith("killedByTeam.")) {
+            return StatisticGroups.KILLED_BY_TEAM;
+        } else if (stat.startsWith("stat.")) {
+            return StatisticGroups.GENERAL;
+        } else {
+            return StatisticGroups.HIDDEN;
+        }
     }
 
     @Override
