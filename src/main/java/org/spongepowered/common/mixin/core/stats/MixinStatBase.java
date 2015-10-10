@@ -22,26 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.mixin.core.stats;
 
-import net.minecraft.scoreboard.ScoreDummyCriteria;
-import net.minecraft.stats.ObjectiveStat;
+import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.stats.IStatType;
 import net.minecraft.stats.StatBase;
 import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.statistic.StatisticFormat;
+import org.spongepowered.api.statistic.StatisticGroup;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.type.SpongeStatisticFormat;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(ObjectiveStat.class)
-public abstract class MixinObjectiveStat extends ScoreDummyCriteria implements IMixinObjectiveStat {
+import java.util.Optional;
 
-    @Shadow private StatBase field_151459_g;
+@Mixin(StatBase.class)
+@Implements(@Interface(iface = Statistic.class, prefix = "statistic$"))
+public abstract class MixinStatBase implements Statistic {
 
-    public MixinObjectiveStat(String name) {
-        super(name);
+    @Shadow public String statId;
+    @Shadow private IStatType type;
+    @Shadow private IScoreObjectiveCriteria field_150957_c;
+
+    public Optional<StatisticFormat> statistic$getStatisticFormat() {
+        return Optional.of(SpongeStatisticFormat.byStatType(this.type));
     }
 
-    @Override
-    public Statistic getStatistic() {
-        return (Statistic) this.field_151459_g;
+    public StatisticGroup statistic$getGroup() {
+        return (StatisticGroup) this.field_150957_c;
+    }
+
+    public String statistic$getId() {
+        return this.statId;
+    }
+
+    public String statistic$getName() {
+        return this.statId;
+    }
+
+    public Translation statistic$getTranslation() {
+        return new SpongeTranslation(this.statId);
     }
 }

@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockRedstoneComparator.Mode.class)
 @Implements(@Interface(iface = ComparatorType.class, prefix = "mode$"))
-public abstract class MixinComparatorMode implements ComparatorType {
+public abstract class MixinComparatorType implements ComparatorType {
 
     @Shadow private String name;
 
