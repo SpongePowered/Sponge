@@ -37,9 +37,14 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.builder.manipulator.SpongeDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataBuilder;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -206,6 +211,11 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         }
         checkArgument(!immutableProcessorList.contains(processor), "Duplicate DataProcessor Registration!");
         immutableProcessorList.add(processor);
+        
+        SpongeSerializationService service = (SpongeSerializationService) Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+        SpongeDataBuilder<T, I> builder = new SpongeDataBuilder<>(implClass, processor);
+        service.registerBuilderAndImpl(manipulatorClass, implClass, builder);
+        service.registerBuilderAndImpl(immutableDataManipulator, implImClass, new SpongeImmutableDataBuilder<>(implImClass, builder));
     }
 
     /**
