@@ -22,45 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.animal;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import net.minecraft.entity.passive.EntitySheep;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
-import org.spongepowered.api.entity.living.animal.Sheep;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.List;
+public class SpongeShearedData extends AbstractBooleanData<ShearedData, ImmutableShearedData> implements ShearedData {
 
-@NonnullByDefault
-@Mixin(EntitySheep.class)
-@Implements(@Interface(iface = Sheep.class, prefix = "sheep$"))
-public abstract class MixinEntitySheep extends MixinEntityAnimal implements Sheep {
+    public SpongeShearedData(boolean value) {
+        super(ShearedData.class, value, Keys.IS_SHEARED, ImmutableSpongeShearedData.class);
+    }
 
-    @Shadow public abstract boolean getSheared();
+    public SpongeShearedData() {
+        this(false);
+    }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ShearedData.class).get());
+    protected Value<?> getValueGetter() {
+        return sheared();
     }
 
-    public boolean isSheared() {
-        return this.getSheared();
+    @Override
+    public Value<Boolean> sheared() {
+        return new SpongeValue<>(Keys.IS_SHEARED, false, this.getValue());
     }
-
-    public void setSheared(boolean sheared) {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(16);
-
-        if (sheared) {
-            this.dataWatcher.updateObject(16, (byte) (b0 | 16));
-        } else {
-            this.dataWatcher.updateObject(16, (byte) (b0 & -17));
-        }
-    }
-
 }
