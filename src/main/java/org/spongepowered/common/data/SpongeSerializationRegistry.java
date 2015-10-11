@@ -59,6 +59,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthDa
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteableData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePigSaddleData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSittingData;
@@ -85,6 +86,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
@@ -142,6 +144,7 @@ import org.spongepowered.common.data.builder.manipulator.mutable.entity.HealthDa
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.HorseDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.IgniteableDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.MovementSpeedDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.mutable.entity.PigSaddleDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.ScreamingDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.ShearedDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.mutable.entity.SittingDataBuilder;
@@ -170,6 +173,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHorseData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgniteableData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePigSaddleData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSittingData;
@@ -196,6 +200,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
@@ -222,6 +227,7 @@ import org.spongepowered.common.data.processor.data.entity.HealthDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.HorseDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.IgniteableDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.MovementSpeedDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.PigSaddleDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ShearedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SittingDataProcessor;
@@ -265,6 +271,7 @@ import org.spongepowered.common.data.processor.value.entity.SneakingValueProcess
 import org.spongepowered.common.data.processor.value.entity.TotalExperienceValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.PigSaddleValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookAuthorValueProcessor;
@@ -273,11 +280,9 @@ import org.spongepowered.common.data.processor.value.item.BreakableValueProcesso
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
-import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
 import org.spongepowered.common.data.processor.value.item.PlaceableValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntityDisplayNameValueProcessor;
-import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
@@ -481,6 +486,13 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImplBuilder(ShearedData.class, SpongeShearedData.class, ImmutableShearedData.class,
                 ImmutableSpongeShearedData.class, shearedDataProcessor, shearedDataBuilder);
 
+        final PigSaddleDataProcessor pigSaddleDataProcessor = new PigSaddleDataProcessor();
+        final PigSaddleDataBuilder pigSaddleDataBuilder = new PigSaddleDataBuilder();
+        service.registerBuilder(PigSaddleData.class, pigSaddleDataBuilder);
+        dataRegistry.registerDataProcessorAndImplBuilder(PigSaddleData.class, SpongePigSaddleData.class, ImmutablePigSaddleData.class,
+                ImmutableSpongePigSaddleData.class, pigSaddleDataProcessor, pigSaddleDataBuilder);
+
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -523,6 +535,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.FLYING_SPEED, new FlyingSpeedValueProcessor());
         dataRegistry.registerValueProcessor(Keys.IS_SITTING, new IsSittingValueProcessor());
         dataRegistry.registerValueProcessor(Keys.IS_SHEARED, new IsShearedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.PIG_SADDLE, new PigSaddleValueProcessor());
     }
 
 }
