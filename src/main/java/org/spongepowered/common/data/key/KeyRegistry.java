@@ -139,6 +139,7 @@ public class KeyRegistry {
         keyMap.put("plant_type", makeSingleKey(PlantType.class, Value.class, of("PlantType")));
         keyMap.put("tree_type", makeSingleKey(TreeType.class, Value.class, of("TreeType")));
         keyMap.put("log_axis", makeSingleKey(LogAxis.class, Value.class, of("LogAxis")));
+        keyMap.put("invisible", makeSingleKey(Boolean.class, Value.class, of("Invisible")));
         keyMap.put("powered", makeSingleKey(Boolean.class, Value.class, of("Powered")));
         keyMap.put("layer", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Layer")));
         keyMap.put("represented_item", makeSingleKey(ItemStackSnapshot.class, Value.class, of("ItemStackSnapshot")));

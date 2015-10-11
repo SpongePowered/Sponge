@@ -106,4 +106,14 @@ public final class EntityUtil {
         return true;
     }
 
+    public static boolean removeEntityFromPlayerTracking(Entity entity) {
+        final EntityTracker entityTracker = ((WorldServer) entity.worldObj).getEntityTracker();
+        EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
+        for (EntityPlayerMP player : (Set<EntityPlayerMP>) entry.trackingPlayers) {
+            S13PacketDestroyEntities packet = new S13PacketDestroyEntities(entity.getEntityId());
+            player.playerNetServerHandler.sendPacket(packet);
+        }
+        return true;
+    }
+
 }
