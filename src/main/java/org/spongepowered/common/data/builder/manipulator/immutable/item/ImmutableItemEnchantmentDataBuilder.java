@@ -27,10 +27,7 @@ package org.spongepowered.common.data.builder.manipulator.immutable.item;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataHolder;
@@ -39,7 +36,6 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
@@ -62,17 +58,8 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
             if (!((ItemStack) dataHolder).isItemEnchanted()) {
                 return Optional.empty();
             } else {
-                final List<ItemEnchantment> enchantments = Lists.newArrayList();
-                final NBTTagList list = ((ItemStack) dataHolder).getEnchantmentTagList();
-                for (int i = 0; i < list.tagCount(); i++) {
-                    final NBTTagCompound compound = list.getCompoundTagAt(i);
-                    final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                    final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-
-                    final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
-                    enchantments.add(new ItemEnchantment(enchantment, level));
-                }
-                return Optional.<ImmutableEnchantmentData>of(new ImmutableSpongeEnchantmentData(enchantments));
+                final List<ItemEnchantment> enchantments = NbtDataUtil.getItemEnchantments((ItemStack) dataHolder);
+                return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
             }
         }
         return Optional.empty();
@@ -90,6 +77,6 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
         final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
                                                                                  ItemEnchantment.class,
                                                                                  serializationService).get();
-        return Optional.<ImmutableEnchantmentData>of(new ImmutableSpongeEnchantmentData(enchantments));
+        return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
     }
 }

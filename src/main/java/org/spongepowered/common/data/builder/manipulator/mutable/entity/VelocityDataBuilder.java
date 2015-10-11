@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.flowpowered.math.vector.Vector3d;
@@ -53,22 +52,21 @@ public class VelocityDataBuilder implements DataManipulatorBuilder<VelocityData,
             final double x = ((Entity) dataHolder).motionX;
             final double y = ((Entity) dataHolder).motionY;
             final double z = ((Entity) dataHolder).motionZ;
-            return Optional.<VelocityData>of(new SpongeVelocityData(new Vector3d(x, y, z)));
+            return Optional.of(new SpongeVelocityData(new Vector3d(x, y, z)));
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<VelocityData> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, Keys.VELOCITY.getQuery());
-        final DataView internalView = container.getView(Keys.VELOCITY.getQuery()).get();
-        checkDataExists(internalView, SpongeVelocityData.VELOCITY_X);
-        checkDataExists(internalView, SpongeVelocityData.VELOCITY_Y);
-        checkDataExists(internalView, SpongeVelocityData.VELOCITY_Z);
-        final double x = getData(internalView, SpongeVelocityData.VELOCITY_X, Double.class);
-        final double y = getData(internalView, SpongeVelocityData.VELOCITY_Y, Double.class);
-        final double z = getData(internalView, SpongeVelocityData.VELOCITY_Z, Double.class);
-        final VelocityData velocityData = new SpongeVelocityData(new Vector3d(x, y, z));
-        return Optional.of(velocityData);
+        if (container.contains(Keys.VELOCITY.getQuery())) {
+            final DataView internalView = container.getView(Keys.VELOCITY.getQuery()).get();
+            final double x = getData(internalView, SpongeVelocityData.VELOCITY_X, Double.class);
+            final double y = getData(internalView, SpongeVelocityData.VELOCITY_Y, Double.class);
+            final double z = getData(internalView, SpongeVelocityData.VELOCITY_Z, Double.class);
+            final VelocityData velocityData = new SpongeVelocityData(new Vector3d(x, y, z));
+            return Optional.of(velocityData);
+        }
+        return Optional.empty();
     }
 }

@@ -202,6 +202,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
 
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
@@ -445,6 +446,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // but that will cause NPE when ticking
             return false;
         }
+        if(entity instanceof net.minecraft.entity.effect.EntityWeatherEffect) {
+            return addWeatherEffect((net.minecraft.entity.Entity) entity);
+        }
         return spawnEntityInWorld(((net.minecraft.entity.Entity) entity));
     }
 
@@ -614,16 +618,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void updateWorldGenerator() {
+        // No need to wrap generator if no modifiers are present
+        if (this.getProperties().getGeneratorModifiers().isEmpty()) {
+            return;
+        }
+
         IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
 
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
-        if (generatorSettings.contains(IMixinWorldType.STRING_VALUE)) {
-            String options = generatorSettings.getString(IMixinWorldType.STRING_VALUE).get();
-            if (options.equals("")) {
-                return;
-            }
-        }
         SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
 
         // Re-apply all world generator modifiers

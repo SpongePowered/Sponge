@@ -31,6 +31,7 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.MapMaker;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -49,6 +50,7 @@ import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -70,6 +72,14 @@ public class KeyRegistry {
     private static final Map<String, Key<?>> keyMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     public static void registerKeys() {
+        generateKeyMap();
+        RegistryHelper.mapFields(Keys.class, keyMap);
+    }
+
+    private static void generateKeyMap() {
+        if (!keyMap.isEmpty()) {
+            return;
+        }
         keyMap.put("axis", makeSingleKey(Axis.class, Value.class, of("Axis")));
         keyMap.put("color", makeSingleKey(Color.class, Value.class, of("Color")));
         keyMap.put("health", makeSingleKey(Double.TYPE, MutableBoundedValue.class, of("Health")));
@@ -130,7 +140,21 @@ public class KeyRegistry {
         keyMap.put("is_wet", makeSingleKey(Boolean.class, Value.class, of("IsWet")));
         keyMap.put("golden_apple_type", makeSingleKey(GoldenApple.class, Value.class, of("GoldenAppleType")));
         keyMap.put("is_flying", makeSingleKey(Boolean.class, Value.class, of("IsFlying")));
-        RegistryHelper.mapFields(Keys.class, keyMap);
+        keyMap.put("experience_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceLevel")));
+        keyMap.put("total_experience", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("TotalExperience")));
+        keyMap.put("experience_since_level", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("ExperienceSinceLevel")));
+        keyMap.put("experience_from_start_of_level", makeSingleKey(Integer.TYPE, ImmutableBoundedValue.class, of("ExperienceFromStartOfLevel")));
+        keyMap.put("book_author", makeSingleKey(Text.class, Value.class, of("BookAuthor")));
+        keyMap.put("breakable_block_types", makeSetKey(BlockType.class, of("CanDestroy")));
+        keyMap.put("placeable_blocks", makeSetKey(BlockType.class, of("CanPlaceOn")));
+        keyMap.put("walking_speed", makeSingleKey(Double.class, Value.class, of("WalkingSpeed")));
+        keyMap.put("flying_speed", makeSingleKey(Double.class, Value.class, of("FlyingSpeed")));
+
+    }
+
+    private static Map<String, Key<?>> getKeyMap() {
+        generateKeyMap();
+        return keyMap;
     }
 
 }

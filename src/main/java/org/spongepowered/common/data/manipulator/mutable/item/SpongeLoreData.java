@@ -32,14 +32,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +93,7 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.ITEM_LORE, SpongeLoreData.this::getLore);
-        registerFieldSetter(Keys.ITEM_LORE, value -> setLore((List<Text>) value));
+        registerFieldSetter(Keys.ITEM_LORE, SpongeLoreData.this::setLore);
         registerKeyValue(Keys.ITEM_LORE, SpongeLoreData.this::lore);
     }
 }

@@ -38,8 +38,6 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeDisplayNameData extends AbstractData<DisplayNameData, ImmutableDisplayNameData> implements DisplayNameData {
 
@@ -117,11 +115,11 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.DISPLAY_NAME, SpongeDisplayNameData.this::getDisplayName);
-        registerFieldSetter(Keys.DISPLAY_NAME, value -> setDisplayName((Text) value));
+        registerFieldSetter(Keys.DISPLAY_NAME, this::setDisplayName);
         registerKeyValue(Keys.DISPLAY_NAME, SpongeDisplayNameData.this::displayName);
 
         registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, SpongeDisplayNameData.this::isDisplays);
-        registerFieldSetter(Keys.SHOWS_DISPLAY_NAME, value -> setDisplays((Boolean) value));
+        registerFieldSetter(Keys.SHOWS_DISPLAY_NAME, this::setDisplays);
         registerKeyValue(Keys.SHOWS_DISPLAY_NAME, SpongeDisplayNameData.this::customNameVisible);
 
 

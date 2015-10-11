@@ -168,6 +168,7 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "addPlayerToTeam", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/scoreboard/Scoreboard;getTeam(Ljava/lang/String;)Lnet/minecraft/scoreboard/ScorePlayerTeam;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void onAddPlayerToTeam(String player, String newTeam, CallbackInfoReturnable<Boolean> ci, ScorePlayerTeam team) throws
                                                                                                                            TextMessageException {
@@ -182,6 +183,7 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "removePlayerFromTeam", at = @At("HEAD"), cancellable = true)
     public void onRemovePlayerFromTeam(String name, ScorePlayerTeam team, CallbackInfo ci) throws TextMessageException {
         if (shouldEcho()) {

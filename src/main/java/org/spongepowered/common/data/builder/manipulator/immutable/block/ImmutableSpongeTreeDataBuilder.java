@@ -65,6 +65,6 @@ public class ImmutableSpongeTreeDataBuilder implements ImmutableDataManipulatorB
         checkDataExists(container, Keys.TREE_TYPE.getQuery());
         final String treeTypeId = container.getString(Keys.TREE_TYPE.getQuery()).get();
         final TreeType treeType = Sponge.getSpongeRegistry().getType(TreeType.class, treeTypeId).get();
-        return Optional.<ImmutableTreeData>of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType));
+        return Optional.of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType));
     }
 }

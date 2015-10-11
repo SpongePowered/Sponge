@@ -27,11 +27,7 @@ package org.spongepowered.common.data.processor.data.item;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -42,7 +38,6 @@ import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
@@ -51,7 +46,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
@@ -67,35 +61,7 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
 
     @Override
     protected boolean set(ItemStack itemStack, List<ItemEnchantment> value) {
-        final NBTTagCompound compound;
-        if (itemStack.getTagCompound() == null) {
-            compound = new NBTTagCompound();
-            itemStack.setTagCompound(compound);
-        } else {
-            compound = itemStack.getTagCompound();
-        }
-        final NBTTagList enchantments = compound.getTagList(NbtDataUtil.ITEM_ENCHANTMENT_LIST, NbtDataUtil.TAG_COMPOUND);
-        final Map<Enchantment, Integer> mergedMap = Maps.newLinkedHashMap(); // We need to retain insertion order.
-        if (enchantments.tagCount() != 0) {
-            for (int i = 0; i < enchantments.tagCount(); i++) { // we have to filter out the enchantments we're replacing...
-                final NBTTagCompound enchantmentCompound = enchantments.getCompoundTagAt(i);
-                final short enchantmentId = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                final short level = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
-                mergedMap.put(enchantment, (int) level);
-            }
-        }
-        for (ItemEnchantment enchantment : value) {
-            mergedMap.put(enchantment.getEnchantment(), enchantment.getLevel());
-        }
-        final NBTTagList newList = new NBTTagList(); // reconstruct the newly merged enchantment list
-        for (Map.Entry<Enchantment, Integer> entry : mergedMap.entrySet()) {
-            final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) ((net.minecraft.enchantment.Enchantment) entry.getKey()).effectId);
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
-            newList.appendTag(enchantmentCompound);
-        }
-        compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
+        NbtDataUtil.setItemEnchantments(itemStack, value);
         return true;
     }
 
@@ -104,17 +70,7 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
         if (!itemStack.isItemEnchanted()) {
             return Optional.empty();
         } else {
-            final List<ItemEnchantment> enchantments = Lists.newArrayList();
-            final NBTTagList list = itemStack.getEnchantmentTagList();
-            for (int i = 0; i < list.tagCount(); i++) {
-                final NBTTagCompound compound = list.getCompoundTagAt(i);
-                final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-
-                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
-                enchantments.add(new ItemEnchantment(enchantment, level));
-            }
-            return Optional.of(enchantments);
+            return Optional.of(NbtDataUtil.getItemEnchantments(itemStack));
         }
     }
 

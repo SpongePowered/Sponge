@@ -41,8 +41,6 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeComman
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.Optional;
 
@@ -161,17 +159,17 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     protected void registerGettersAndSetters() {
         // Keys.COMMAND
         registerFieldGetter(Keys.COMMAND, SpongeCommandData.this::getStoredCommand);
-        registerFieldSetter(Keys.COMMAND, value -> setStoredCommand((String) value));
+        registerFieldSetter(Keys.COMMAND, this::setStoredCommand);
         registerKeyValue(Keys.COMMAND, SpongeCommandData.this::storedCommand);
 
         // Keys.SUCCESS_COUNT
         registerFieldGetter(Keys.SUCCESS_COUNT, SpongeCommandData.this::getSuccessCount);
-        registerFieldSetter(Keys.SUCCESS_COUNT, value -> setSuccessCount(((Number) value).intValue()));
+        registerFieldSetter(Keys.SUCCESS_COUNT, this::setSuccessCount);
         registerKeyValue(Keys.SUCCESS_COUNT, SpongeCommandData.this::successCount);
 
         // Keys.TRACKS_OUTPUT
         registerFieldGetter(Keys.TRACKS_OUTPUT, SpongeCommandData.this::tracksOutput);
-        registerFieldSetter(Keys.TRACKS_OUTPUT, value -> shouldTrackOutput((Boolean) value));
+        registerFieldSetter(Keys.TRACKS_OUTPUT, this::shouldTrackOutput);
         registerKeyValue(Keys.TRACKS_OUTPUT, SpongeCommandData.this::doesTrackOutput);
         // Keys.LAST_COMMAND_OUTPUT
     }

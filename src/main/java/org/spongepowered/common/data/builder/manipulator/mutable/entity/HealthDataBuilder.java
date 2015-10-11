@@ -27,11 +27,13 @@ package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 
@@ -47,13 +49,18 @@ public class HealthDataBuilder implements DataManipulatorBuilder<HealthData, Imm
         if (dataHolder instanceof EntityLivingBase) {
             final double maxHealth = ((EntityLivingBase) dataHolder).getMaxHealth();
             final double health = ((EntityLivingBase) dataHolder).getHealth();
-            return Optional.<HealthData>of(new SpongeHealthData(health, maxHealth));
+            return Optional.of(new SpongeHealthData(health, maxHealth));
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<HealthData> build(DataView container) throws InvalidDataException {
+        if (container.contains(Keys.HEALTH.getQuery()) && container.contains(Keys.MAX_HEALTH.getQuery())) {
+            final double health = DataUtil.getData(container, Keys.HEALTH);
+            final double maxHealth = DataUtil.getData(container, Keys.MAX_HEALTH);
+            return Optional.of(new SpongeHealthData(health, maxHealth));
+        }
         return Optional.empty();
     }
 }

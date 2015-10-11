@@ -34,7 +34,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.util.GetterFunction;
 
 import java.util.Optional;
 import java.util.Set;
@@ -56,12 +55,6 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
 
     public T getValue() {
         return this.value;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public I copy() {
-        return (I) this;
     }
 
     @Override

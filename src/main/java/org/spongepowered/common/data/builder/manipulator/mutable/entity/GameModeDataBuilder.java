@@ -49,8 +49,7 @@ public class GameModeDataBuilder implements DataManipulatorBuilder<GameModeData,
     @Override
     public Optional<GameModeData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof EntityPlayerMP) {
-            return Optional.<GameModeData>of(new SpongeGameModeData(
-                    (GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType()));
+            return Optional.of(new SpongeGameModeData((GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType()));
         }
         return Optional.empty();
     }
@@ -60,7 +59,7 @@ public class GameModeDataBuilder implements DataManipulatorBuilder<GameModeData,
         final String modeId = DataUtil.getData(container, Keys.GAME_MODE, String.class);
         final Optional<GameMode> optional = Sponge.getSpongeRegistry().getType(GameMode.class, modeId);
         if (optional.isPresent()) {
-            return Optional.<GameModeData>of(new SpongeGameModeData(optional.get()));
+            return Optional.of(new SpongeGameModeData(optional.get()));
         }
         return Optional.empty();
     }

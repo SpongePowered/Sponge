@@ -27,8 +27,10 @@ package org.spongepowered.common.interfaces.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.entity.living.player.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IMixinEntity {
 
@@ -45,6 +47,8 @@ public interface IMixinEntity {
     long getActivatedTick();
 
     boolean getDefaultActivationState();
+
+    Optional<User> getSpongeCreator();
 
     void setActivatedTick(long tick);
 

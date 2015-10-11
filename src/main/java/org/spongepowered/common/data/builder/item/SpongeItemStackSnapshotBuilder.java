@@ -64,6 +64,6 @@ public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnap
         } else {
             compound = null;
         }
-        return Optional.<ItemStackSnapshot>of(new SpongeItemStackSnapshot(itemType, count, damage, manipulators, compound));
+        return Optional.of(new SpongeItemStackSnapshot(itemType, count, damage, manipulators, compound));
     }
 }

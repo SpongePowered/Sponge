@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -40,8 +42,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHorseData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData> implements HorseData {
 
@@ -51,9 +51,9 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
 
     public SpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, HorseVariant horseVariant) {
         super(HorseData.class);
-        this.horseColor = horseColor;
-        this.horseStyle = horseStyle;
-        this.horseVariant = horseVariant;
+        this.horseColor = checkNotNull(horseColor, "The Horse Color was null!");
+        this.horseStyle = checkNotNull(horseStyle, "The Horse Style was null!");
+        this.horseVariant = checkNotNull(horseVariant, "The Horse Variant was null!");
         registerGettersAndSetters();
     }
 
@@ -64,15 +64,15 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.HORSE_COLOR, SpongeHorseData.this::getHorseColor);
-        registerFieldSetter(Keys.HORSE_COLOR, value -> setHorseColor((HorseColor) value));
+        registerFieldSetter(Keys.HORSE_COLOR, SpongeHorseData.this::setHorseColor);
         registerKeyValue(Keys.HORSE_COLOR, SpongeHorseData.this::color);
 
         registerFieldGetter(Keys.HORSE_STYLE, SpongeHorseData.this::getHorseStyle);
-        registerFieldSetter(Keys.HORSE_STYLE, value -> setHorseStyle((HorseStyle) value));
+        registerFieldSetter(Keys.HORSE_STYLE, this::setHorseStyle);
         registerKeyValue(Keys.HORSE_STYLE, SpongeHorseData.this::style);
 
         registerFieldGetter(Keys.HORSE_VARIANT, SpongeHorseData.this::getHorseVariant);
-        registerFieldSetter(Keys.HORSE_VARIANT, value -> setHorseVariant((HorseVariant) value));
+        registerFieldSetter(Keys.HORSE_VARIANT, SpongeHorseData.this::setHorseVariant);
         registerKeyValue(Keys.HORSE_VARIANT, SpongeHorseData.this::variant);
     }
 

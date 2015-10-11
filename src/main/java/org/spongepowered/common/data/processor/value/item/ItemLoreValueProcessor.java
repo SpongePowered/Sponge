@@ -32,6 +32,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -42,10 +43,10 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Text>, ListValue<Text>> {
+public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<ItemStack, List<Text>, ListValue<Text>> {
 
     public ItemLoreValueProcessor() {
-        super(Keys.ITEM_LORE);
+        super(ItemStack.class, Keys.ITEM_LORE);
     }
 
     @Override
@@ -54,43 +55,26 @@ public class ItemLoreValueProcessor extends AbstractSpongeValueProcessor<List<Te
     }
 
     @Override
-    public Optional<List<Text>> getValueFromContainer(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            final ItemStack itemStack = (ItemStack) container;
-            final NBTTagCompound subCompound = itemStack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
-            if (subCompound == null) {
-                return Optional.empty();
-            }
-            if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_LIST)) {
-                return Optional.empty();
-            }
-            return Optional.of(NbtDataUtil.getLoreFromNBT(subCompound));
-        }
-        return Optional.empty();
+    protected boolean set(ItemStack container, List<Text> value) {
+        NbtDataUtil.setLoreToNBT(container, value);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof ItemStack;
+    protected Optional<List<Text>> getVal(ItemStack container) {
+        final NBTTagCompound subCompound = container.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
+        if (subCompound == null) {
+            return Optional.empty();
+        }
+        if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_LIST)) {
+            return Optional.empty();
+        }
+        return Optional.of(NbtDataUtil.getLoreFromNBT(subCompound));
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, List<Text> value) {
-        final ImmutableListValue<Text> lore = new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
-        if (this.supports(container)) {
-            final Optional<List<Text>> oldData = getValueFromContainer(container);
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            if (oldData.isPresent()) {
-                final ImmutableListValue<Text> oldLore =
-                    new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(oldData.get()));
-                builder.replace(oldLore);
-            }
-            NbtDataUtil.setLoreToNBT((ItemStack) container, lore.get());
-            builder.success(lore);
-            return builder.result(DataTransactionResult.Type.SUCCESS).build();
-
-        }
-        return DataTransactionBuilder.failResult(lore);
+    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
+        return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
     }
 
     @Override

@@ -34,12 +34,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> implements FoodData {
 
@@ -128,16 +125,16 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FOOD_LEVEL, this::getFoodLevel);
-        registerFieldSetter(Keys.FOOD_LEVEL, value -> setFoodLevel(((Number) value).intValue()));
-        registerKeyValue(Keys.FOOD_LEVEL, this::foodLevel);
+        registerFieldGetter(Keys.FOOD_LEVEL, SpongeFoodData.this::getFoodLevel);
+        registerFieldSetter(Keys.FOOD_LEVEL, SpongeFoodData.this::setFoodLevel);
+        registerKeyValue(Keys.FOOD_LEVEL, SpongeFoodData.this::foodLevel);
 
-        registerFieldGetter(Keys.SATURATION, this::getFoodSaturation);
-        registerFieldSetter(Keys.SATURATION, value -> setFoodSaturation(((Number) value).doubleValue()));
-        registerKeyValue(Keys.SATURATION, this::saturation);
+        registerFieldGetter(Keys.SATURATION, SpongeFoodData.this::getFoodSaturation);
+        registerFieldSetter(Keys.SATURATION, SpongeFoodData.this::setFoodSaturation);
+        registerKeyValue(Keys.SATURATION, SpongeFoodData.this::saturation);
 
-        registerFieldGetter(Keys.EXHAUSTION, this::getFoodExhaustion);
-        registerFieldSetter(Keys.EXHAUSTION, value -> setFoodExhaustion(((Number) value).doubleValue()));
-        registerKeyValue(Keys.EXHAUSTION, this::exhaustion);
+        registerFieldGetter(Keys.EXHAUSTION, SpongeFoodData.this::getFoodExhaustion);
+        registerFieldSetter(Keys.EXHAUSTION, SpongeFoodData.this::setFoodExhaustion);
+        registerKeyValue(Keys.EXHAUSTION, SpongeFoodData.this::exhaustion);
     }
 }

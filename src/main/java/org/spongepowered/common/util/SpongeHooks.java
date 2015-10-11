@@ -26,9 +26,11 @@ package org.spongepowered.common.util;
 
 import com.flowpowered.math.vector.Vector3i;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -39,12 +41,20 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTransaction;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.configuration.SpongeConfig.WorldConfig;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
+import org.spongepowered.common.world.CaptureType;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -52,6 +62,7 @@ import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 
 import javax.management.MBeanServer;
 
@@ -63,15 +74,15 @@ public class SpongeHooks {
     private static TObjectLongHashMap<CollisionWarning> recentWarnings = new TObjectLongHashMap<>();
 
     public static void logInfo(String msg, Object... args) {
-        MinecraftServer.getServer().logInfo(MessageFormat.format(msg, args));
+        Sponge.getLogger().info(MessageFormat.format(msg, args));
     }
 
     public static void logWarning(String msg, Object... args) {
-        MinecraftServer.getServer().logWarning(MessageFormat.format(msg, args));
+        Sponge.getLogger().warn(MessageFormat.format(msg, args));
     }
 
     public static void logSevere(String msg, Object... args) {
-        MinecraftServer.getServer().logSevere(MessageFormat.format(msg, args));
+        Sponge.getLogger().fatal(MessageFormat.format(msg, args));
     }
 
     public static void logStack(SpongeConfig<?> config) {
@@ -83,43 +94,119 @@ public class SpongeHooks {
     }
 
     public static void logEntityDeath(Entity entity) {
+        if (entity == null || entity.worldObj.isRemote) {
+            return;
+        }
+
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (config.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("[" + config.getConfigName() + "] [" + config.getConfigName() + "] Dim: {0} setDead(): {1}",
+            logInfo("Dim: {0} setDead(): {1}",
                     entity.worldObj.provider.getDimensionId(), entity);
             logStack(config);
         }
     }
 
     public static void logEntityDespawn(Entity entity, String reason) {
+        if (entity == null || entity.worldObj.isRemote) {
+            return;
+        }
+
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (config.getConfig().getLogging().entityDespawnLogging()) {
-            logInfo("[" + config.getConfigName() + "] Dim: {0} Despawning ({1}): {2}", entity.worldObj.provider.getDimensionId(), reason, entity);
+            logInfo("Dim: {0} Despawning ({1}): {2}", entity.worldObj.provider.getDimensionId(), reason, entity);
             logStack(config);
         }
     }
 
-    public static void logEntitySpawn(Entity entity) {
+    public static void logEntitySpawn(Cause cause, Entity entity) {
+        if (entity == null || entity.worldObj.isRemote) {
+            return;
+        }
+
+        String spawnName = entity.getCommandSenderName();
+        if (entity instanceof EntityItem) {
+            spawnName = ((EntityItem) entity).getEntityItem().getDisplayName();
+        }
+
+        Optional<User> user = cause.first(User.class);
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (config.getConfig().getLogging().entitySpawnLogging()) {
-            logInfo("[" + config.getConfigName() + "] Dim: {0} Spawning: {1}", entity.worldObj.provider.getDimensionId(), entity);
+            logInfo("SPAWNED " + spawnName + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}]",
+                    getFriendlyCauseName(cause),
+                    user.isPresent() ? user.get().getName() : "None",
+                    entity.worldObj.getWorldInfo().getWorldName(),
+                    entity.worldObj.provider.getDimensionId());
+            logStack(config);
+        }
+    }
+
+    public static void logBlockTrack(World world, Block block, BlockPos pos, EntityPlayer player, boolean allowed) {
+        if (world.isRemote) {
+            return;
+        }
+
+        SpongeConfig<?> config = getActiveConfig(world);
+        if (config.getConfig().getLogging().blockTrackLogging() && allowed) {
+            logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
+                    player.getCommandSenderName(),
+                    world.getWorldInfo().getWorldName() + "(" + world.provider.getDimensionId() + ")",
+                    ((BlockType)block).getId(),
+                    pos);
+            logStack(config);
+        } else if (config.getConfig().getLogging().blockTrackLogging() && !allowed) {
+            logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][World: {1}][DimId: {2}][Block: {3}][Pos: {4}]",
+                    player.getCommandSenderName(),
+                    world.getWorldInfo().getWorldName(),
+                    world.provider.getDimensionId(),
+                    ((BlockType)block).getId(),
+                    pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
+        }
+    }
+
+    public static void logBlockAction(Cause cause, World world, CaptureType type, BlockTransaction transaction) {
+        if (world.isRemote) {
+            return;
+        }
+
+        SpongeConfig<?> config = getActiveConfig(world);
+        Optional<User> user = cause.first(User.class);
+        if (config.getConfig().getLogging().blockBreakLogging() && type == CaptureType.BREAK
+                || config.getConfig().getLogging().blockModifyLogging() && type == CaptureType.MODIFY
+                || config.getConfig().getLogging().blockPlaceLogging() && type == CaptureType.PLACE
+                || config.getConfig().getLogging().blockPopulateLogging() && type == CaptureType.POPULATE) {
+
+            logInfo("Block " + type.name() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
+                    getFriendlyCauseName(cause),
+                    user.isPresent() ? user.get().getName() : "None",
+                    world.getWorldInfo().getWorldName(),
+                    world.provider.getDimensionId(),
+                    transaction.getOriginal().getState(),
+                    transaction.getFinalReplacement().getState());
             logStack(config);
         }
     }
 
     public static void logChunkLoad(World world, Vector3i chunkPos) {
+        if (world.isRemote) {
+            return;
+        }
+
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkLoadLogging()) {
-            logInfo("[" + config.getConfigName() + "] Load Chunk At [{0}] ({1}, {2})", world.provider.getDimensionId(), chunkPos.getX(),
+            logInfo("Load Chunk At [{0}] ({1}, {2})", world.provider.getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
     }
 
     public static void logChunkUnload(World world, Vector3i chunkPos) {
+        if (world.isRemote) {
+            return;
+        }
+
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
-            logInfo("[" + config.getConfigName() + "] Unload Chunk At [{0}] ({1}, {2})", world.provider.getDimensionId(), chunkPos.getX(),
+            logInfo("Unload Chunk At [{0}] ({1}, {2})", world.provider.getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
@@ -128,11 +215,15 @@ public class SpongeHooks {
     @SuppressWarnings("unused")
     private static void logChunkLoadOverride(ChunkProviderServer provider, int x, int z) {
         SpongeConfig<?> config = getActiveConfig(provider.worldObj);
-        logInfo("[" + config.getConfigName() + "]  Chunk Load Override: {0}, Dimension ID: {1}", provider.chunkLoadOverride,
+        logInfo("Chunk Load Override: {0}, Dimension ID: {1}", provider.chunkLoadOverride,
                 provider.worldObj.provider.getDimensionId());
     }
 
     public static boolean checkBoundingBoxSize(Entity entity, AxisAlignedBB aabb) {
+        if (entity == null || entity.worldObj.isRemote) {
+            return false;
+        }
+
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer) {
             return false; // only check living entities that are not players
@@ -168,28 +259,32 @@ public class SpongeHooks {
     }
 
     public static boolean checkEntitySpeed(Entity entity, double x, double y, double z) {
+        if (entity == null || entity.worldObj.isRemote) {
+            return false;
+        }
+
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         int maxSpeed = config.getConfig().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
             double distance = x * x + z * z;
             if (distance > maxSpeed) {
                 if (config.getConfig().getLogging().logEntitySpeedRemoval()) {
-                    logInfo("[" + config.getConfigName() + "] Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
+                    logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof EntityLivingBase) {
                         EntityLivingBase livingBase = (EntityLivingBase) entity;
-                        logInfo("[" + config.getConfigName() + "] Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}",
+                        logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}",
                                 entity.motionX, entity.motionY,
                                 entity.motionZ,
                                 livingBase.moveStrafing, livingBase.moveForward);
                     }
 
                     if (config.getConfig().getLogging().logWithStackTraces()) {
-                        logInfo("[" + config.getConfigName() + "] Move offset: ({0}, {1}, {2})", x, y, z);
-                        logInfo("[" + config.getConfigName() + "] Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
-                        logInfo("[" + config.getConfigName() + "] Entity: {0}", entity);
+                        logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
+                        logInfo("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
+                        logInfo("Entity: {0}", entity);
                         NBTTagCompound tag = new NBTTagCompound();
                         entity.writeToNBT(tag);
-                        logInfo("[" + config.getConfigName() + "] Entity NBT: {0}", tag);
+                        logInfo("Entity NBT: {0}", tag);
                         logStack(config);
                     }
                 }
@@ -210,6 +305,10 @@ public class SpongeHooks {
     // TODO - needs to be hooked
     @SuppressWarnings("rawtypes")
     public static void logEntitySize(Entity entity, List list) {
+        if (entity == null || entity.worldObj.isRemote) {
+            return;
+        }
+
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (!config.getConfig().getLogging().logEntityCollisionChecks()) {
             return;
@@ -323,5 +422,35 @@ public class SpongeHooks {
             // TODO: Need to figure out what is sensible for other BlockState implementing classes.
             throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
         }
+    }
+
+    public static String getFriendlyCauseName(Cause cause) {
+        String causedBy = "Unknown";
+        if (cause.root().isPresent()) {
+            Object rootCause = cause.root().get();
+            if (rootCause instanceof User) {
+                User user = (User) rootCause;
+                causedBy = user.getName();
+            } else if (rootCause instanceof EntityItem) {
+                EntityItem item = (EntityItem) rootCause;
+                causedBy = item.getEntityItem().getDisplayName();
+            }
+            else if (rootCause instanceof Entity) {
+                Entity causeEntity = (Entity) rootCause;
+                causedBy = causeEntity.getCommandSenderName();
+            }else if (rootCause instanceof BlockSnapshot) {
+                BlockSnapshot snapshot = (BlockSnapshot) rootCause;
+                causedBy = snapshot.getState().getType().getId();
+            } else if (rootCause instanceof CatalogType) {
+                CatalogType type = (CatalogType) rootCause;
+                causedBy = type.getId();
+            } else if (rootCause instanceof PluginContainer) {
+                PluginContainer plugin = (PluginContainer) rootCause;
+                causedBy = plugin.getId();
+            } else {
+                causedBy = rootCause.getClass().getName();
+            }
+        }
+        return causedBy;
     }
 }

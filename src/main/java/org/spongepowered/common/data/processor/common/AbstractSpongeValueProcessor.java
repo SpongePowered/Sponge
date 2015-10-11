@@ -26,20 +26,26 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.data.DataTransactionBuilder;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
 
-public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
+public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
 
+    private final Class<C> containerClass;
     private final Key<V> key;
 
-    protected AbstractSpongeValueProcessor(Key<V> key) {
+    protected AbstractSpongeValueProcessor(Class<C> containerClass, Key<V> key) {
         this.key = checkNotNull(key, "The key is null!");
+        this.containerClass = containerClass;
     }
 
     /**
@@ -51,6 +57,23 @@ public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> im
      */
     protected abstract V constructValue(E defaultValue);
 
+    protected abstract boolean set(C container, E value);
+
+    protected abstract Optional<E> getVal(C container);
+
+    protected abstract ImmutableValue<E> constructImmutableValue(E value);
+
+    protected boolean supports(C container) {
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean supports(ValueContainer<?> container) {
+        return this.containerClass.isInstance(container) && supports((C) container);
+    }
+
+
     @Override
     public final Key<? extends BaseValue<E>> getKey() {
         return this.key;
@@ -61,14 +84,48 @@ public abstract class AbstractSpongeValueProcessor<E, V extends BaseValue<E>> im
         return 100;
     }
 
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<E> getValueFromContainer(ValueContainer<?> container) {
+        if (!supports(container)) {
+            return Optional.empty();
+        } else {
+            return getVal((C) container);
+        }
+    }
+
     @Override
     public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
-        Optional<E> optionalValue = getValueFromContainer(container);
+        final Optional<E> optionalValue = getValueFromContainer(container);
         if(optionalValue.isPresent()) {
             return Optional.of(constructValue(optionalValue.get()));
         } else {
             return Optional.empty();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
+        final ImmutableValue<E> newValue = constructImmutableValue(value);
+        if (supports(container)) {
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<E> oldVal = getVal((C) container);
+            try {
+                if (set((C) container, value)) {
+                    if (oldVal.isPresent()) {
+                        builder.replace(constructImmutableValue(oldVal.get()));
+                    }
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success(newValue).build();
+                }
+                return builder.result(DataTransactionResult.Type.FAILURE).reject(newValue).build();
+            } catch (Exception e) {
+                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
+                return builder.result(DataTransactionResult.Type.ERROR).reject(newValue).build();
+            }
+        }
+        return DataTransactionBuilder.failResult(newValue);
     }
 
 }

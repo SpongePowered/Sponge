@@ -105,8 +105,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Inject(method = "readFromNBT", at = @At("RETURN"))
     private void onRead(NBTTagCompound compound, CallbackInfo info) {
-        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_TAG, NbtDataUtil.TAG_COMPOUND)) {
-            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_TAG));
+        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
         }
     }
 
@@ -247,13 +247,13 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             } else {
                 compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
                 if (compound.hasNoTags()) {
-                    getTagCompound().removeTag(NbtDataUtil.SPONGE_TAG);
+                    getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
                     return;
                 }
             }
         }
         if (compound.hasNoTags()) {
-            getTagCompound().removeTag(NbtDataUtil.SPONGE_TAG);
+            getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
             if (getTagCompound().hasNoTags()) {
                 setTagCompound(null);
             }
@@ -307,11 +307,11 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            final NBTTagCompound spongeCompound = getSubCompound(NbtDataUtil.SPONGE_TAG, true);
+            final NBTTagCompound spongeCompound = getSubCompound(NbtDataUtil.SPONGE_DATA, true);
             spongeCompound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else {
             if (hasTagCompound()) {
-                this.getTagCompound().removeTag(NbtDataUtil.SPONGE_TAG);
+                this.getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
             }
             if (this.getTagCompound().hasNoTags()) {
                 this.setTagCompound(null);

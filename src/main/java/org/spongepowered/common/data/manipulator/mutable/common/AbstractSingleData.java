@@ -32,8 +32,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.Optional;
 
@@ -65,7 +63,7 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(this.usedKey, AbstractSingleData.this::getValue);
-        registerFieldSetter(this.usedKey, value1 -> setValue((T) value1));
+        registerFieldSetter(this.usedKey, this::setValue);
         registerKeyValue(this.usedKey, AbstractSingleData.this::getValueGetter);
     }
 
@@ -75,7 +73,7 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
         // we can delegate this since we have a direct value check as this is
         // a Single value.
-        return key == this.usedKey ? Optional.of((E) (Object) this.value) : super.get(key);
+        return key == this.usedKey ? Optional.of((E) this.value) : super.get(key);
     }
 
     @Override
@@ -98,7 +96,7 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     public M setValue(T value) {
         this.value = checkNotNull(value);
         // double casting due to jdk 6 type inference
-        return (M) (Object) this;
+        return (M) this;
     }
 
     @Override

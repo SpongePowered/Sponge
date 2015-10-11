@@ -22,8 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.mixin.core.network.play.client;
 
-public interface FieldFunction<T> extends GetterFunction<T>, SetterFunction<T> {
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 
+@Mixin(C08PacketPlayerBlockPlacement.class)
+public abstract class MixinC08PacketPlayerBlockPlacement implements IMixinC08PacketPlayerBlockPlacement {
+    public final long timestamp = System.currentTimeMillis();
+
+    @Override
+    public long getTimeStamp() {
+        return this.timestamp;
+    }
 }

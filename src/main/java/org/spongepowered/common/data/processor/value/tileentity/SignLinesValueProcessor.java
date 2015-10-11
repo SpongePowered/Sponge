@@ -26,23 +26,18 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
@@ -50,11 +45,10 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.List;
 import java.util.Optional;
 
-@SuppressWarnings("deprecation")
-public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<Text>, ListValue<Text>> {
+public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<TileEntitySign, List<Text>, ListValue<Text>> {
 
     public SignLinesValueProcessor() {
-        super(Keys.SIGN_LINES);
+        super(TileEntitySign.class, Keys.SIGN_LINES);
     }
 
     @Override
@@ -63,81 +57,27 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
     }
 
     @Override
-    public Optional<List<Text>> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof TileEntitySign) {
-            final IChatComponent[] rawLines = ((TileEntitySign) container).signText;
-            final List<Text> signLines = Lists.newArrayListWithCapacity(4);
-            for (int i = 0; i < rawLines.length; i++) {
-                signLines.add(i, SpongeTexts.toText(rawLines[i]));
-            }
-            return Optional.of(signLines);
-        } else if (container instanceof ItemStack) {
-            if (!((ItemStack) container).hasTagCompound()) {
-                return Optional.empty();
-            } else {
-                final NBTTagCompound mainCompound = ((ItemStack) container).getTagCompound();
-                if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND) || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
-                    return Optional.empty();
-                }
-                final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
-                final String id = tileCompound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
-                if (!id.equalsIgnoreCase(NbtDataUtil.SIGN)) {
-                    return Optional.empty();
-                }
-                final List<Text> texts = Lists.newArrayListWithCapacity(4);
-                texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text1")));
-                texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text2")));
-                texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text3")));
-                texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text4")));
-                return Optional.of(texts);
-            }
+    protected boolean set(TileEntitySign container, List<Text> value) {
+        for (int i = 0; i < 4; i++) {
+            container.signText[i] = SpongeTexts.toComponent(value.get(i));
         }
-        return Optional.empty();
+        container.markDirty();
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof TileEntitySign || (container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.sign));
+    protected Optional<List<Text>> getVal(TileEntitySign container) {
+        final IChatComponent[] rawLines = container.signText;
+        final List<Text> signLines = Lists.newArrayListWithCapacity(4);
+        for (int i = 0; i < rawLines.length; i++) {
+            signLines.add(i, SpongeTexts.toText(rawLines[i]));
+        }
+        return Optional.of(signLines);
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, List<Text> value) {
-        final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
-        if (container instanceof TileEntitySign) {
-            final Optional<SignData> oldData = ((Sign) container).get(SignData.class);
-            if (oldData.isPresent()) {
-                DataTransactionBuilder builder = DataTransactionBuilder.builder();
-                builder.replace(oldData.get().getValues());
-                for (int i = 0; i < 4; i++) {
-                    ((TileEntitySign) container).signText[i] = SpongeTexts.toComponent(value.get(i));
-                }
-                ((TileEntitySign) container).markDirty();
-                builder.success(immutableTexts).result(DataTransactionResult.Type.SUCCESS);
-                return builder.build();
-            }
-        } if (container instanceof ItemStack) {
-            if (!((ItemStack) container).getItem().equals(Items.sign)) {
-                return DataTransactionBuilder.failResult(immutableTexts);
-            } else {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-                final Optional<List<Text>> oldData = getValueFromContainer(container);
-                if (oldData.isPresent()) {
-                    final ImmutableListValue<Text> immutableListValue =
-                        new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
-                    builder.replace(immutableListValue);
-                }
-                final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(((ItemStack) container));
-                final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
-                tileCompound.setString(NbtDataUtil.BLOCK_ENTITY_ID, NbtDataUtil.SIGN);
-                tileCompound.setString("Text1", Texts.json().to(value.get(1)));
-                tileCompound.setString("Text2", Texts.json().to(value.get(2)));
-                tileCompound.setString("Text3", Texts.json().to(value.get(3)));
-                tileCompound.setString("Text4", Texts.json().to(value.get(4)));
-                builder.success(immutableTexts);
-                return builder.result(DataTransactionResult.Type.SUCCESS).build();
-            }
-        }
-        return DataTransactionBuilder.failResult(immutableTexts);
+    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
+        return new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
     }
 
     @Override
@@ -154,33 +94,9 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<List<T
                     ((TileEntitySign) container).signText[i] = SpongeTexts.toComponent(Texts.of());
                 }
                 ((TileEntitySign) container).markDirty();
+                return builder.result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
                 return builder.result(DataTransactionResult.Type.ERROR).build();
-            }
-            return builder.result(DataTransactionResult.Type.SUCCESS).build();
-        } else if (container instanceof ItemStack) {
-            if (!((ItemStack) container).getItem().equals(Items.sign)) {
-                return DataTransactionBuilder.failNoData();
-            } else {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-                final Optional<List<Text>> oldData = getValueFromContainer(container);
-                if (oldData.isPresent()) {
-                    final ImmutableListValue<Text> immutableTexts =
-                        new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
-                    builder.replace(immutableTexts);
-                }
-                if (!((ItemStack) container).hasTagCompound()) {
-                    return builder.result(DataTransactionResult.Type.SUCCESS).build();
-                }
-                try {
-                    final Optional<NBTTagCompound> mainCompound = NbtDataUtil.getItemCompound(((ItemStack) container));
-                    if (mainCompound.isPresent()) {
-                        mainCompound.get().removeTag(NbtDataUtil.BLOCK_ENTITY_TAG);
-                    }
-                    return builder.result(DataTransactionResult.Type.SUCCESS).build();
-                } catch (Exception e) {
-                    return builder.result(DataTransactionResult.Type.ERROR).build();
-                }
             }
         }
         return DataTransactionBuilder.failNoData();

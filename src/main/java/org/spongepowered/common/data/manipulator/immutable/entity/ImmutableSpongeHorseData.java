@@ -40,7 +40,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHorseData, HorseData> implements ImmutableHorseData {
 
@@ -98,11 +97,6 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
                 .compare(this.horseStyle.getId(), other.style().get().getId())
                 .compare(this.horseVariant.getId(), other.variant().get().getId())
                 .result();
-    }
-
-    @Override
-    public ImmutableHorseData copy() {
-        return this;
     }
 
     @Override

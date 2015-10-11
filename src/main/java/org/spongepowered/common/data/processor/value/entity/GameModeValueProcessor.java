@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -40,10 +41,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMode, Value<GameMode>> {
+public class GameModeValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, GameMode, Value<GameMode>> {
 
     public GameModeValueProcessor() {
-        super(Keys.GAME_MODE);
+        super(EntityPlayer.class, Keys.GAME_MODE);
     }
 
     @Override
@@ -60,24 +61,19 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityPlayerMP;
+    protected boolean set(EntityPlayer container, GameMode value) {
+        container.setGameType((WorldSettings.GameType) (Object) value);
+        return true;
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, GameMode value) {
-        final ImmutableValue<GameMode> newValue = getGameModeValue(value);
-        if (container instanceof EntityPlayerMP) {
-            final GameMode old = (GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType();
-            final ImmutableValue<GameMode> oldValue = getGameModeValue(old);
-            try {
-                ((EntityPlayerMP) container).setGameType((WorldSettings.GameType) (Object) value);
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newValue);
-            }
-        }
-        return DataTransactionBuilder.failResult(newValue);
+    protected Optional<GameMode> getVal(EntityPlayer container) {
+        return Optional.of((GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
+    }
+
+    @Override
+    protected ImmutableValue<GameMode> constructImmutableValue(GameMode value) {
+        return ImmutableSpongeValue.cachedOf(getKey(), GameModes.NOT_SET, value);
     }
 
     @Override
@@ -85,7 +81,4 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<GameMod
         return DataTransactionBuilder.failNoData();
     }
 
-    private static ImmutableValue<GameMode> getGameModeValue(GameMode gameMode) {
-        return ImmutableSpongeValue.cachedOf(Keys.GAME_MODE, GameModes.SURVIVAL, gameMode);
-    }
 }

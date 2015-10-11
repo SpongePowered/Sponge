@@ -70,7 +70,9 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal {
 
     @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityWolf;isTamed()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
-        this.currentItemStack = currentItemStack.copy();
+        if (currentItemStack != null) {
+            this.currentItemStack = currentItemStack.copy();
+        }
     }
 
     @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))

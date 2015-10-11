@@ -34,12 +34,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgniteableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeIgniteableData extends AbstractData<IgniteableData, ImmutableIgniteableData> implements IgniteableData {
 
@@ -115,11 +112,11 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::getFireTicks);
-        registerFieldSetter(Keys.FIRE_TICKS, value -> setFireTicks(((Number) value).intValue()));
+        registerFieldSetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::setFireTicks);
         registerKeyValue(Keys.FIRE_TICKS, SpongeIgniteableData.this::fireTicks);
 
         registerFieldGetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::getFireDelay);
-        registerFieldSetter(Keys.FIRE_DAMAGE_DELAY, value -> setFireDelay(((Number) value).intValue()));
+        registerFieldSetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::setFireDelay);
         registerKeyValue(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::fireDelay);
     }
 
