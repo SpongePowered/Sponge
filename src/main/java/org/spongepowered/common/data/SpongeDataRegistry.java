@@ -162,15 +162,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return Optional.ofNullable(this.immutableBuilderMap.get(checkNotNull(immutable)));
     }
 
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-        registerDataProcessorAndImplBuilder(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-                                        Class<? extends I> implImClass, DataProcessor<T, I> processor, DataManipulatorBuilder<T, I> builder) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        register(manipulatorClass, immutableDataManipulator, builder);
-        register(implClass, implImClass, builder);
-        registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
-    }
-
     /**
      * Registers a {@link DataManipulator} class and the
      * {@link ImmutableDataManipulator} class along with the implemented
