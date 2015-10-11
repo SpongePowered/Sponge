@@ -30,14 +30,15 @@ import org.spongepowered.api.scheduler.Task;
 
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An internal representation of a {@link Task} created by a plugin.
  */
 public class ScheduledTask implements Task {
 
-    final long offset;
-    final long period;
+    final long offset; //nanoseconds or ticks
+    final long period; //nanoseconds or ticks
     final boolean delayIsTicks;
     final boolean intervalIsTicks;
     private final PluginContainer owner;
@@ -106,12 +107,20 @@ public class ScheduledTask implements Task {
 
     @Override
     public long getDelay() {
-        return this.offset;
+        if (this.delayIsTicks) {
+            return this.offset;
+        } else {
+            return TimeUnit.NANOSECONDS.toMillis(this.offset);
+        }
     }
 
     @Override
     public long getInterval() {
-        return this.period;
+        if (this.intervalIsTicks) {
+            return this.period;
+        } else {
+            return TimeUnit.NANOSECONDS.toMillis(this.period);
+        }
     }
 
     @Override
@@ -146,6 +155,21 @@ public class ScheduledTask implements Task {
 
     long getTimestamp() {
         return this.timestamp;
+    }
+
+    /**
+     * Returns a timestamp after which the next execution will take place.
+     * Should only be compared to
+     * {@link SchedulerBase#getTimestamp(ScheduledTask)}.
+     *
+     * @return The next execution timestamp
+     */
+    long nextExecutionTimestamp() {
+        if (this.state.isActive) {
+            return this.timestamp + this.period;
+        } else {
+            return this.timestamp + this.offset;
+        }
     }
 
     void setTimestamp(long timestamp) {
