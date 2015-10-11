@@ -34,24 +34,22 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
 import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleSetData;
 
 import java.util.List;
 import java.util.Set;
 
 @NonnullByDefault
-public class SpongeBreakableData extends AbstractSingleData<Set<BlockType>, BreakableData, ImmutableBreakableData> implements BreakableData {
+public class SpongeBreakableData extends AbstractSingleSetData<BlockType, BreakableData, ImmutableBreakableData> implements BreakableData {
     
     public SpongeBreakableData() {
         this(Sets.<BlockType>newHashSet());
     }
 
     public SpongeBreakableData(Set<BlockType> breakable) {
-        super(BreakableData.class, Sets.newHashSet(breakable), Keys.BREAKABLE_BLOCK_TYPES);
+        super(BreakableData.class, Sets.newHashSet(breakable), Keys.BREAKABLE_BLOCK_TYPES, ImmutableSpongeBreakableData.class);
     }
 
     @Override
@@ -69,23 +67,9 @@ public class SpongeBreakableData extends AbstractSingleData<Set<BlockType>, Brea
         return new MemoryDataContainer().set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), breakableIds);
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public SetValue<BlockType> breakable() {
-        return new SpongeSetValue<BlockType>(Keys.BREAKABLE_BLOCK_TYPES, Sets.newHashSet(getValue()));
-    }
-
-    @Override
-    public BreakableData copy() {
-        return new SpongeBreakableData(getValue());
-    }
-
-    @Override
-    public ImmutableBreakableData asImmutable() {
-        return new ImmutableSpongeBreakableData(getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return breakable();
+        return (SetValue<BlockType>) getValueGetter();
     }
 }

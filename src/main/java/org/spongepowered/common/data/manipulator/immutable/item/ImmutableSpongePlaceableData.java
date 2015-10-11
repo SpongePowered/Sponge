@@ -34,24 +34,19 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
 import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
+import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleSetData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 
 import java.util.Set;
 
-public class ImmutableSpongePlaceableData extends AbstractImmutableSingleData<Set<BlockType>, ImmutablePlaceableData, PlaceableData> implements ImmutablePlaceableData {
+public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData<BlockType, ImmutablePlaceableData, PlaceableData> implements ImmutablePlaceableData {
 
-    private final ImmutableSetValue<BlockType> setValue;
-
-    public ImmutableSpongePlaceableData() {
+	public ImmutableSpongePlaceableData() {
         this(ImmutableSet.<BlockType>of());
     }
 
     public ImmutableSpongePlaceableData(Set<BlockType> placeable) {
-        super(ImmutablePlaceableData.class, placeable = ImmutableSet.copyOf(placeable), Keys.PLACEABLE_BLOCKS);
-        this.setValue = new ImmutableSpongeSetValue<BlockType>(Keys.PLACEABLE_BLOCKS, placeable);
+        super(ImmutablePlaceableData.class, placeable, Keys.PLACEABLE_BLOCKS, SpongePlaceableData.class);
     }
 
     @Override
@@ -69,18 +64,9 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleData<Se
         return new MemoryDataContainer().set(Keys.PLACEABLE_BLOCKS.getQuery(), placeableIds);
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public ImmutableSetValue<BlockType> placeable() {
-        return setValue;
-    }
-
-    @Override
-    public PlaceableData asMutable() {
-        return new SpongePlaceableData(getValue());
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return placeable();
+        return (ImmutableSetValue<BlockType>) getValueGetter();
     }
 }
