@@ -148,6 +148,7 @@ public class KeyRegistry {
         keyMap.put("placeable_blocks", makeSetKey(BlockType.class, of("CanPlaceOn")));
         keyMap.put("walking_speed", makeSingleKey(Double.class, Value.class, of("WalkingSpeed")));
         keyMap.put("flying_speed", makeSingleKey(Double.class, Value.class, of("FlyingSpeed")));
+        keyMap.put("elder_guardian", makeSingleKey(Boolean.TYPE, Value.class, of("Elder")));
 
     }
 
