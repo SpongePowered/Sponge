@@ -38,9 +38,9 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import net.minecraft.entity.passive.EntityWolf;
 
-public class WetValueProcessor extends AbstractSpongeValueProcessor<EntityWolf, Boolean, Value<Boolean>> {
+public class EntityWetValueProcessor extends AbstractSpongeValueProcessor<EntityWolf, Boolean, Value<Boolean>> {
 
-	public WetValueProcessor() {
+	public EntityWetValueProcessor() {
 		super(EntityWolf.class, Keys.IS_WET);
 	}
 
