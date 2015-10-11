@@ -37,6 +37,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<ImmutableMovementSpeedData, MovementSpeedData> implements ImmutableMovementSpeedData  {
 
@@ -69,12 +70,12 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
 
     @Override
     public ImmutableBoundedValue<Double> walkSpeed() {
-        return new ImmutableSpongeBoundedValue<>(Keys.WALKING_SPEED, this.walkSpeed, 0.1d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.WALKING_SPEED, 0.1d, this.walkSpeed, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
     @Override
     public ImmutableBoundedValue<Double> flySpeed() {
-        return new ImmutableSpongeBoundedValue<>(Keys.FLYING_SPEED, this.flySpeed, 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.FLYING_SPEED, 0.05d, this.flySpeed, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
     @Override
