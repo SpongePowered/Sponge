@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
+import org.spongepowered.api.service.scheduler.SpongeExecutorService;
 import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.service.scheduler.TaskBuilder;
 import org.spongepowered.common.Sponge;
@@ -127,6 +128,16 @@ public class SpongeScheduler implements SchedulerService {
     @Override
     public int getPreferredTickInterval() {
         return TICK_DURATION_MS;
+    }
+
+    @Override
+    public SpongeExecutorService createSyncExecutor(Object plugin) {
+        return new TaskExecutorService(() -> createTaskBuilder(), syncScheduler, checkPluginInstance(plugin).getInstance());
+    }
+
+    @Override
+    public SpongeExecutorService createAsyncExecutor(Object plugin) {
+        return new TaskExecutorService(() -> createTaskBuilder().async(), asyncScheduler, checkPluginInstance(plugin).getInstance());
     }
 
     /**
