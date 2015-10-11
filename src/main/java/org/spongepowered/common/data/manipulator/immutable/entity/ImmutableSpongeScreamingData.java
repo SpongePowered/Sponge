@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -42,6 +41,11 @@ public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<I
 
     @Override
     public ImmutableValue<Boolean> screaming() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_SCREAMING, this.value, false);
+        return ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, this.value);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return screaming();
     }
 }

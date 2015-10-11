@@ -38,8 +38,6 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeDisplayNameData extends AbstractData<DisplayNameData, ImmutableDisplayNameData> implements DisplayNameData {
 
@@ -63,12 +61,12 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
 
     @Override
     public Value<Text> displayName() {
-        return new SpongeValue<Text>(Keys.DISPLAY_NAME, Texts.of(), this.displayName);
+        return new SpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), this.displayName);
     }
 
     @Override
     public Value<Boolean> customNameVisible() {
-        return new SpongeValue<Boolean>(Keys.SHOWS_DISPLAY_NAME, false, this.displays);
+        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, false, this.displays);
     }
 
     @Override
@@ -97,7 +95,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     }
 
     public Text getDisplayName() {
-        return displayName;
+        return this.displayName;
     }
 
     public SpongeDisplayNameData setDisplayName(Text displayName) {
@@ -106,7 +104,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     }
 
     public boolean isDisplays() {
-        return displays;
+        return this.displays;
     }
 
     public SpongeDisplayNameData setDisplays(boolean displays) {
@@ -116,43 +114,13 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.DISPLAY_NAME, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getDisplayName();
-            }
-        });
-        registerFieldSetter(Keys.DISPLAY_NAME, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setDisplayName((Text) value);
-            }
-        });
-        registerKeyValue(Keys.DISPLAY_NAME, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return displayName();
-            }
-        });
+        registerFieldGetter(Keys.DISPLAY_NAME, SpongeDisplayNameData.this::getDisplayName);
+        registerFieldSetter(Keys.DISPLAY_NAME, this::setDisplayName);
+        registerKeyValue(Keys.DISPLAY_NAME, SpongeDisplayNameData.this::displayName);
 
-        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return isDisplays();
-            }
-        });
-        registerFieldSetter(Keys.SHOWS_DISPLAY_NAME, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setDisplays((Boolean) value);
-            }
-        });
-        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return customNameVisible();
-            }
-        });
+        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, SpongeDisplayNameData.this::isDisplays);
+        registerFieldSetter(Keys.SHOWS_DISPLAY_NAME, this::setDisplays);
+        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, SpongeDisplayNameData.this::customNameVisible);
 
 
     }

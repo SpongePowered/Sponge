@@ -34,7 +34,6 @@ import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.GoldenAppleUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -42,44 +41,38 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class GoldenAppleValueProcessor extends AbstractSpongeValueProcessor<GoldenApple, Value<GoldenApple>> {
+public class GoldenAppleValueProcessor extends AbstractSpongeValueProcessor<ItemStack, GoldenApple, Value<GoldenApple>> {
 
     public GoldenAppleValueProcessor() {
-        super(Keys.GOLDEN_APPLE_TYPE);
+        super(ItemStack.class, Keys.GOLDEN_APPLE_TYPE);
     }
 
     @Override
     protected Value<GoldenApple> constructValue(GoldenApple defaultValue) {
-        return new SpongeValue<GoldenApple>(Keys.GOLDEN_APPLE_TYPE, defaultValue);
+        return new SpongeValue<>(Keys.GOLDEN_APPLE_TYPE, defaultValue);
     }
 
     @Override
-    public Optional<GoldenApple> getValueFromContainer(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            return Optional.of(GoldenAppleUtils.getType((ItemStack) container));
-        }
-        return Optional.empty();
+    protected boolean set(ItemStack container, GoldenApple value) {
+        GoldenAppleUtils.setType(container, value);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.golden_apple);
+    protected Optional<GoldenApple> getVal(ItemStack container) {
+        return Optional.of(GoldenAppleUtils.getType(container));
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, GoldenApple value) {
-        final ImmutableValue<GoldenApple> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.GOLDEN_APPLE_TYPE, value, GoldenApples.GOLDEN_APPLE);
-        if (this.supports(container)) {
-            GoldenApple old = this.getValueFromContainer(container).get();
-            final ImmutableValue<GoldenApple> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.GOLDEN_APPLE_TYPE, old,
-                    GoldenApples.GOLDEN_APPLE);
-
-
-            GoldenAppleUtils.setType((ItemStack) container, value);
-            return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-        }
-        return DataTransactionBuilder.failResult(newValue);
+    protected ImmutableValue<GoldenApple> constructImmutableValue(GoldenApple value) {
+        return ImmutableSpongeValue.cachedOf(Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, value);
     }
+
+    @Override
+    protected boolean supports(ItemStack container) {
+        return container.getItem().equals(Items.golden_apple);
+    }
+
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {

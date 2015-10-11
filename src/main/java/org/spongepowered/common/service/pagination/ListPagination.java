@@ -44,15 +44,15 @@ class ListPagination extends ActivePagination {
     public ListPagination(CommandSource src, PaginationCalculator<CommandSource> calc, List<Map.Entry<Text, Integer>> lines,
             Text title, Text header, Text footer, String padding) {
         super(src, calc, title, header, footer, padding);
-        List<List<Text>> pages = new ArrayList<List<Text>>();
-        List<Text> currentPage = new ArrayList<Text>();
+        List<List<Text>> pages = new ArrayList<>();
+        List<Text> currentPage = new ArrayList<>();
         int currentPageLines = 0;
 
         for (Map.Entry<Text, Integer> ent : lines) {
             if (getMaxContentLinesPerPage() > 0 && ent.getValue() + currentPageLines > getMaxContentLinesPerPage() && currentPageLines != 0) {
                 currentPageLines = 0;
                 pages.add(currentPage);
-                currentPage = new ArrayList<Text>();
+                currentPage = new ArrayList<>();
             }
             currentPageLines += ent.getValue();
             currentPage.add(ent.getKey());

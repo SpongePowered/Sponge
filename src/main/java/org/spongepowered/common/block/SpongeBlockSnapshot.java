@@ -27,7 +27,6 @@ package org.spongepowered.common.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -61,6 +60,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -73,9 +73,16 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
     private final ImmutableMap<Key<?>, ImmutableValue<?>> keyValueMap;
     private final ImmutableSet<ImmutableValue<?>> valueSet;
+    private int updateFlag; // internal use
     @Nullable final NBTTagCompound compound;
 
-    SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
+    // Internal use for restores
+    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, int flag) {
+        this(builder);
+        this.updateFlag = flag;
+    }
+
+    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.worldUniqueId = checkNotNull(builder.worldUuid);
         this.pos = checkNotNull(builder.coords);
@@ -138,13 +145,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);
         IBlockState replaced = (IBlockState) this.blockState;
-        if (current.getBlock() != replaced.getBlock()
-            || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced)) {
-            if (force) {
-                world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
-            } else {
-                return false;
-            }
+        if (!force && (current.getBlock() != replaced.getBlock()
+            || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
+            return false;
         }
 
         world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
@@ -164,7 +167,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public Optional<Location<World>> getLocation() {
         Optional<World> worldOptional = Sponge.getGame().getServer().getWorld(this.worldUniqueId);
         if (worldOptional.isPresent()) {
-            return Optional.of(new Location<World>(worldOptional.get(), this.getPosition()));
+            return Optional.of(new Location<>(worldOptional.get(), this.getPosition()));
         }
         return Optional.empty();
     }
@@ -309,17 +312,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return Optional.empty();
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(defaultValue);
-    }
-
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (this.keyValueMap.containsKey(key)) {
@@ -331,11 +323,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public boolean supports(Key<?> key) {
         return this.keyValueMap.containsKey(key);
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override
@@ -370,6 +357,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             builder.unsafeNbt(this.compound);
         }
         return builder;
+    }
+
+    // Used internally for restores
+    public int getUpdateFlag() {
+        return this.updateFlag;
     }
 
     @Override

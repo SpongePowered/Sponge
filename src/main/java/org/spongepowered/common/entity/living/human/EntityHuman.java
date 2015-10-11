@@ -334,7 +334,7 @@ public class EntityHuman extends EntityCreature {
         if (this.skinUuid == null) {
             return Optional.empty();
         }
-        return Optional.of(manipulator.set(new SpongeValue<UUID>(Keys.SKIN, this.skinUuid)));
+        return Optional.of(manipulator.set(new SpongeValue<>(Keys.SKIN, this.skinUuid)));
     }
 
     private boolean isAliveAndInWorld() {
@@ -425,7 +425,7 @@ public class EntityHuman extends EntityCreature {
     public void pushPackets(EntityPlayerMP player, Packet... packets) {
         List<Packet[]> queue = this.playerPacketMap.get(player);
         if (queue == null) {
-            this.playerPacketMap.put(player == null ? null : player.getUniqueID(), queue = new ArrayList<Packet[]>());
+            this.playerPacketMap.put(player == null ? null : player.getUniqueID(), queue = new ArrayList<>());
         }
         queue.add(packets);
     }

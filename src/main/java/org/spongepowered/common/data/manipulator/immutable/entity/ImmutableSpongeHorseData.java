@@ -37,11 +37,9 @@ import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHorseData, HorseData> implements ImmutableHorseData {
 
@@ -59,65 +57,29 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.HORSE_COLOR, new GetterFunction<Object>() {
+        registerFieldGetter(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::getHorseColor);
+        registerKeyValue(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::color);
 
-            @Override
-            public Object get() {
-                return getHorseColor();
-            }
-        });
-        registerKeyValue(Keys.HORSE_COLOR, new GetterFunction<ImmutableValue<?>>() {
+        registerFieldGetter(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::getHorseStyle);
+        registerKeyValue(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::style);
 
-            @Override
-            public ImmutableValue<?> get() {
-                return color();
-            }
-        });
-
-        registerFieldGetter(Keys.HORSE_STYLE, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getHorseStyle();
-            }
-        });
-        registerKeyValue(Keys.HORSE_STYLE, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return style();
-            }
-        });
-
-        registerFieldGetter(Keys.HORSE_VARIANT, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getHorseVariant();
-            }
-        });
-        registerKeyValue(Keys.HORSE_VARIANT, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return variant();
-            }
-        });
+        registerFieldGetter(Keys.HORSE_VARIANT, ImmutableSpongeHorseData.this::getHorseVariant);
+        registerKeyValue(Keys.HORSE_VARIANT, ImmutableSpongeHorseData.this::variant);
     }
 
     @Override
     public ImmutableValue<HorseColor> color() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
     }
 
     @Override
     public ImmutableValue<HorseStyle> style() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
     }
 
     @Override
     public ImmutableValue<HorseVariant> variant() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_VARIANT, HorseVariants.HORSE, this.horseVariant);
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, this.horseVariant);
     }
 
     @Override
@@ -138,24 +100,19 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     }
 
     @Override
-    public ImmutableHorseData copy() {
-        return this;
-    }
-
-    @Override
     public HorseData asMutable() {
         return new SpongeHorseData(this.horseColor, this.horseStyle, this.horseVariant);
     }
 
     private HorseColor getHorseColor() {
-        return horseColor;
+        return this.horseColor;
     }
 
     private HorseStyle getHorseStyle() {
-        return horseStyle;
+        return this.horseStyle;
     }
 
     private HorseVariant getHorseVariant() {
-        return horseVariant;
+        return this.horseVariant;
     }
 }

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -38,22 +37,23 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 
-public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSpongeDataProcessor<M, I> {
+public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> {
 
     private final Predicate<ItemStack> predicate;
-    private final Key<V> key;
 
     protected AbstractItemSingleDataProcessor(Predicate<ItemStack> predicate, Key<V> key) {
+        super(key);
         this.predicate = predicate;
-        this.key = key;
     }
 
-    protected abstract M createManipulator();
 
     protected abstract boolean set(ItemStack itemStack, T value);
 
@@ -64,7 +64,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof ItemStack && this.predicate.apply((ItemStack) dataHolder);
+        return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
     }
 
     @SuppressWarnings("unchecked")
@@ -82,36 +82,12 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
     }
 
     @Override
-    public Optional<M> createFrom(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            Optional<M> optional = from(dataHolder);
-            if (!optional.isPresent()) {
-                return Optional.of(createManipulator());
-            } else {
-                return optional;
-            }
-        }
-    }
-
-    @Override
-    public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
-            return Optional.of(manipulator.set(this.key, merged.get(this.key).get()));
-        }
-    }
-
-    @Override
     public Optional<M> fill(DataContainer container, M m) {
         m.set(this.key, DataUtil.getData(container, this.key));
         return Optional.of(m);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
         if (supports(dataHolder)) {
@@ -119,7 +95,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
             final Optional<M> old = from(dataHolder);
             final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final T newValue = merged.get(this.key).get();
-            final V immutableValue = merged.getValue(this.key).get();
+            final V immutableValue = (V) ((Value) merged.getValue(this.key).get()).asImmutable();
             try {
                 if (set((ItemStack) dataHolder, newValue)) {
                     if (old.isPresent()) {
@@ -130,6 +106,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
                     return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
                 }
             } catch (Exception e) {
+                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) newValue).build();
             }
         }

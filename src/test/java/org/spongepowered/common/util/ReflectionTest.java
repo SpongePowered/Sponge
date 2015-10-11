@@ -32,7 +32,6 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.lang.reflect.Constructor;
@@ -107,8 +106,8 @@ public class ReflectionTest {
             }
         };
 
-        final ImmutableValue<Double> myVal = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, 10D, 1D);
-        final ImmutableValue<Double> testVal = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, 10D, 1d);
+        final ImmutableValue<Double> myVal = ImmutableSpongeValue.cachedOf(key, 10D, 1D);
+        final ImmutableValue<Double> testVal = ImmutableSpongeValue.cachedOf(key, 10D, 1d);
 
         assert myVal == testVal;
 

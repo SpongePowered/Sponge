@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.nbt.NBTTagCompound;
@@ -65,6 +63,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -120,7 +119,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public Optional<Transform<World>> getTransform() {
         Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Transform<World> transform = new Transform<World>(optional.get(), this.position, this.rotation);
+            final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
             return Optional.of(transform);
         }
         return Optional.empty();
@@ -135,7 +134,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public Optional<Location<World>> getLocation() {
         Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Location<World> location = new Location<World>(optional.get(), this.position);
+            final Location<World> location = new Location<>(optional.get(), this.position);
             return Optional.of(location);
         }
         return Optional.empty();
@@ -242,10 +241,10 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> Optional<EntitySnapshot> with(Key<? extends BaseValue<E>> key, E value) {
-        return transform(key, (Function) Functions.constant(value));
+        return transform(key, input -> value);
     }
 
     @Override
@@ -253,12 +252,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<EntitySnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
         return Optional.of(createBuilder().add((ImmutableDataManipulator) valueContainer).build());
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<EntitySnapshot> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
         final EntitySnapshotBuilder builder = createBuilder();
@@ -311,17 +311,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return Optional.empty();
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(defaultValue);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
@@ -337,11 +326,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public boolean supports(Key<?> key) {
         return this.keys.contains(key);
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override

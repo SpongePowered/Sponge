@@ -31,52 +31,39 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, MutableBoundedValue<Integer>> {
 
     public FoodLevelValueProcessor() {
-        super(Keys.FOOD_LEVEL);
+        super(EntityPlayer.class, Keys.FOOD_LEVEL);
     }
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                return Optional.of(player.getFoodStats().getFoodLevel());
-            }
-        }
-        return Optional.empty();
+    protected boolean set(EntityPlayer container, Integer value) {
+        container.getFoodStats().setFoodLevel(value);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityPlayer;
+    protected Optional<Integer> getVal(EntityPlayer container) {
+        return Optional.of(container.getFoodStats().getFoodLevel());
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            if (player.getFoodStats() != null) {
-                final Integer oldValue = player.getFoodStats().getFoodLevel();
-                player.getFoodStats().setFoodLevel(value);
-                return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, value),
-                        new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, oldValue));
-            }
-        }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.FOOD_LEVEL, value));
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 20, intComparator(), 0, Integer.MAX_VALUE);
     }
 
     @Override

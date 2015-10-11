@@ -35,42 +35,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<Entity, Integer, MutableBoundedValue<Integer>> {
 
     public FireDamageDelayValueProcessor() {
-        super(Keys.FIRE_DAMAGE_DELAY);
+        super(Entity.class, Keys.FIRE_DAMAGE_DELAY);
     }
 
-    @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            return Optional.of(((Entity) container).fireResistance);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof Entity && ((Entity) container).fire > 0;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        checkArgument(value >= 0, "Fire tick delay must be equal to or greater than zero!");
-        final ImmutableValue<Integer> proposedValue = new ImmutableSpongeValue<Integer>(Keys.FIRE_DAMAGE_DELAY, value);
-        if (supports(container)) {
-            final ImmutableValue<Integer> newFireDelayData = new ImmutableSpongeValue<Integer>(Keys.FIRE_DAMAGE_DELAY, value);
-            final ImmutableValue<Integer> oldFireDelayValue = getApiValueFromContainer(container).get().asImmutable();
-            ((Entity) (container)).fireResistance = value;
-            return DataTransactionBuilder.successReplaceResult(oldFireDelayValue, newFireDelayData);
-        }
-        return DataTransactionBuilder.failResult(proposedValue);
-    }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
@@ -79,6 +54,23 @@ public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(this.getKey(), 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(this.getKey(), 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+    }
+
+    @Override
+    protected boolean set(Entity container, Integer value) {
+        checkArgument(value >= 0, "Fire tick delay must be equal to or greater than zero!");
+        container.fireResistance = value;
+        return true;
+    }
+
+    @Override
+    protected Optional<Integer> getVal(Entity container) {
+        return Optional.of(container.fireResistance);
+    }
+
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 20, intComparator(), 0, Integer.MAX_VALUE);
     }
 }

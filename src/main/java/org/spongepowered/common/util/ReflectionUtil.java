@@ -24,14 +24,17 @@
  */
 package org.spongepowered.common.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 /**
@@ -56,18 +59,17 @@ public final class ReflectionUtil {
     }
 
     public static <T> T createInstance(final Class<T> objectClass, Object... args) {
+        checkArgument(!Modifier.isAbstract(objectClass.getModifiers()), "Cannot construct an instance of an abstract class!");
+        checkArgument(!Modifier.isInterface(objectClass.getModifiers()), "Cannot construct an instance of an interface!");
         if (args == null) {
             args = new Object[] {null};
         }
         final Constructor<T> ctor = findConstructor(objectClass, args);
         try {
             return ctor.newInstance(args);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            Sponge.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
+            + "with the args: " + Arrays.toString(args), e);
         }
         throw new IllegalArgumentException("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
          + "the args: " + Arrays.toString(args));

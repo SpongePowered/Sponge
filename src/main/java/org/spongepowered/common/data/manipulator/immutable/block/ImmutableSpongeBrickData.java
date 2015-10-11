@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBrickData;
 import org.spongepowered.api.data.manipulator.mutable.block.BrickData;
 import org.spongepowered.api.data.type.BrickType;
+import org.spongepowered.api.data.type.BrickTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeBrickData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeBrickData extends AbstractImmutableSingleCatalogData
         implements ImmutableBrickData {
 
     public ImmutableSpongeBrickData(BrickType value) {
-        super(ImmutableBrickData.class, value, Keys.BRICK_TYPE, SpongeBrickData.class);
+        super(ImmutableBrickData.class, value, BrickTypes.DEFAULT, Keys.BRICK_TYPE, SpongeBrickData.class);
     }
 
 }

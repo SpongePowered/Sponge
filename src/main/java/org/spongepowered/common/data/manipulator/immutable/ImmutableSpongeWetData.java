@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,6 +40,11 @@ public class ImmutableSpongeWetData extends AbstractImmutableBooleanData<Immutab
 
     @Override
     public ImmutableValue<Boolean> wet() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_WET, this.value, false);
+        return ImmutableSpongeValue.cachedOf(Keys.IS_WET, false, this.value);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return wet();
     }
 }

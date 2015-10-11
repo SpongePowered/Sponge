@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePistonData;
 import org.spongepowered.api.data.manipulator.mutable.block.PistonData;
 import org.spongepowered.api.data.type.PistonType;
+import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePistonData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongePistonData extends AbstractImmutableSingleCatalogDat
         ImmutablePistonData {
 
     public ImmutableSpongePistonData(PistonType value) {
-        super(ImmutablePistonData.class, value, Keys.PISTON_TYPE, SpongePistonData.class);
+        super(ImmutablePistonData.class, value, PistonTypes.NORMAL, Keys.PISTON_TYPE, SpongePistonData.class);
     }
 
 }

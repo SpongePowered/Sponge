@@ -39,6 +39,6 @@ public class ImmutableSpongeGoldenAppleData extends AbstractImmutableSingleCatal
     }
 
     public ImmutableSpongeGoldenAppleData(GoldenApple value) {
-        super(ImmutableGoldenAppleData.class, value, Keys.GOLDEN_APPLE_TYPE, SpongeGoldenAppleData.class);
+        super(ImmutableGoldenAppleData.class, value, GoldenApples.GOLDEN_APPLE, Keys.GOLDEN_APPLE_TYPE, SpongeGoldenAppleData.class);
     }
 }

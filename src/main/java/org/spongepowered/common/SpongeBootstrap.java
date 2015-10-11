@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.Predicate;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -53,6 +52,7 @@ import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
@@ -100,12 +100,9 @@ public final class SpongeBootstrap {
         registerService(ConfigService.class, new SpongeConfigService(Sponge.getGame().getPluginManager()));
         registerService(UserStorage.class, new SpongeUserStorage());
         registerService(GameProfileResolver.class, new SpongeProfileResolver());
-        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new Predicate<PermissionService>() {
-            @Override
-            public boolean apply(PermissionService input) {
-                Sponge.getGame().getServer().getConsole().getContainingCollection();
-                return true;
-            }
+        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(input -> {
+            Sponge.getGame().getServer().getConsole().getContainingCollection();
+            return true;
         });
     }
 
@@ -145,8 +142,8 @@ public final class SpongeBootstrap {
 
             try {
                 NBTTagCompound nbt = CompressedStreamTools.readCompressed(new FileInputStream(levelData));
-                if (nbt.hasKey(Sponge.ECOSYSTEM_NAME)) {
-                    NBTTagCompound spongeData = nbt.getCompoundTag(Sponge.ECOSYSTEM_NAME);
+                if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                    NBTTagCompound spongeData = nbt.getCompoundTag(NbtDataUtil.SPONGE_DATA);
                     boolean enabled = spongeData.getBoolean("enabled");
                     boolean loadOnStartup = spongeData.getBoolean("loadOnStartup");
                     int dimensionId = spongeData.getInteger("dimensionId");

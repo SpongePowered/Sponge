@@ -22,10 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value;
+package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -37,58 +36,42 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.type.SpongeSkullType;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SkullValueProcessor extends AbstractSpongeValueProcessor<SkullType, Value<SkullType>> {
+public class ItemSkullValueProcessor extends AbstractSpongeValueProcessor<ItemStack, SkullType, Value<SkullType>> {
 
-    public SkullValueProcessor() {
-        super(Keys.SKULL_TYPE);
+    public ItemSkullValueProcessor() {
+        super(ItemStack.class, Keys.SKULL_TYPE);
     }
 
     @Override
-    public Value<SkullType> constructValue(SkullType defaultValue) {
-        return new SpongeValue<SkullType>(Keys.SKULL_TYPE, SkullTypes.SKELETON, defaultValue);
+    protected boolean supports(ItemStack container) {
+        return SkullUtils.isValidItemStack(container);
     }
 
     @Override
-    public Optional<SkullType> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof TileEntitySkull) {
-            return Optional.of(SkullUtils.getSkullType((TileEntitySkull) container));
-        } else if (SkullUtils.isValidItemStack(container)) {
-            return Optional.of(SkullUtils.getSkullType((ItemStack) container));
-        }
-        return Optional.empty();
+    protected Value<SkullType> constructValue(SkullType defaultValue) {
+        return new SpongeValue<>(Keys.SKULL_TYPE, SkullTypes.SKELETON, defaultValue);
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return SkullUtils.supportsObject(container);
+    protected boolean set(ItemStack container, SkullType value) {
+        final int skullType = ((SpongeSkullType) value).getByteId();
+        container.setItemDamage(skullType);
+        return true;
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, SkullType value) {
-        @SuppressWarnings("unchecked")
-        ImmutableValue<SkullType> proposedValue = this.constructValue(value).asImmutable();
-        ImmutableValue<SkullType> oldValue;
+    protected Optional<SkullType> getVal(ItemStack container) {
+        return Optional.of(SkullUtils.getSkullType(container));
+    }
 
-        DataTransactionBuilder builder = DataTransactionBuilder.builder();
-
-        int skullType = ((SpongeSkullType) value).getByteId();
-
-        if (container instanceof TileEntitySkull) {
-            oldValue = getApiValueFromContainer(container).get().asImmutable();
-            SkullUtils.setSkullType((TileEntitySkull) container, skullType);
-        } else if (SkullUtils.isValidItemStack(container)) {
-            oldValue = getApiValueFromContainer(container).get().asImmutable();
-            ((ItemStack) container).setItemDamage(skullType);
-        } else {
-            return DataTransactionBuilder.failResult(proposedValue);
-        }
-
-        return builder.success(proposedValue).replace(oldValue).result(DataTransactionResult.Type.SUCCESS).build();
-
+    @Override
+    protected ImmutableValue<SkullType> constructImmutableValue(SkullType value) {
+        return ImmutableSpongeValue.cachedOf(Keys.SKULL_TYPE, SkullTypes.SKELETON, value);
     }
 
     @Override

@@ -26,8 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
@@ -38,6 +36,9 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListValue<E>, ImmutableListValue<E>> implements ListValue<E> {
 
@@ -62,12 +63,8 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
     @Override
     public ListValue<E> filter(Predicate<? super E> predicate) {
         final List<E> list = Lists.newArrayList();
-        for (E element : this.actualValue) {
-            if (checkNotNull(predicate).apply(element)) {
-                list.add(element);
-            }
-        }
-        return new SpongeListValue<E>(getKey(), list);
+        list.addAll(this.actualValue.stream().filter(element -> checkNotNull(predicate).test(element)).collect(Collectors.toList()));
+        return new SpongeListValue<>(getKey(), list);
     }
 
     @Override
@@ -77,7 +74,7 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
 
     @Override
     public ImmutableListValue<E> asImmutable() {
-        return new ImmutableSpongeListValue<E>(getKey(), ImmutableList.copyOf(this.actualValue));
+        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(this.actualValue));
     }
 
     @Override

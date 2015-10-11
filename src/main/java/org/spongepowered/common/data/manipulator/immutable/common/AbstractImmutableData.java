@@ -40,14 +40,12 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.util.GetterFunction;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 /**
  * So, considering this is the root of the immutable variants of
@@ -60,13 +58,13 @@ import javax.annotation.Nullable;
  * may be cached for better performance when processing obtaining new
  * {@link ImmutableDataManipulator}s with different values.
  *
- * <p>Note: It is ABSOLUTELY REQUIRED to {@link #registerKeyValue(Key, GetterFunction)}
- * and {@link #registerFieldGetter(Key, GetterFunction)} for all possible
+ * <p>Note: It is ABSOLUTELY REQUIRED to {@link #registerKeyValue(Key, Supplier)}
+ * and {@link #registerFieldGetter(Key, Supplier)} for all possible
  * {@link Key}s and {@link Value}s the {@link DataManipulator} may provide as
  * all of the implementation methods provided here are handled using those. This
  * was done to avoid having to override {@link #getKeys()} and {@link #getValues()},
  * let alone using {@link ValueProcessor}s for simple setters and getters. I believe
- * this to be faster than haivng to retrieve a processor from a map, checking if
+ * this to be faster than having to retrieve a processor from a map, checking if
  * the class is an instance of the type implementation to access the setters
  * and getters.</p>
  *
@@ -91,8 +89,8 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     // The largest issue was implementation. Since most fields are simple to get and
     // set, other values, such as ItemStacks require a bit of finer tuning.
     //
-    private final Map<Key<?>, GetterFunction<ImmutableValue<?>>> keyValueMap = Maps.newHashMap();
-    private final Map<Key<?>, GetterFunction<?>> keyFieldGetterMap = Maps.newHashMap();
+    private final Map<Key<?>, Supplier<ImmutableValue<?>>> keyValueMap = Maps.newHashMap();
+    private final Map<Key<?>, Supplier<?>> keyFieldGetterMap = Maps.newHashMap();
 
     protected AbstractImmutableData(Class<I> immutableClass) {
         this.immutableClass = checkNotNull(immutableClass);
@@ -102,7 +100,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
      * Simple registration method for the keys to value return methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -110,7 +108,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
      * @param key The key for the value return type
      * @param function The function for getting the value
      */
-    protected final void registerKeyValue(Key<?> key, GetterFunction<ImmutableValue<?>> function) {
+    protected final void registerKeyValue(Key<?> key, Supplier<ImmutableValue<?>> function) {
         this.keyValueMap.put(checkNotNull(key), checkNotNull(function));
     }
 
@@ -118,7 +116,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
      * Simple registration method for the keys to field getter methods.
      *
      * <p>Note that this is still going to be usable, but will be made simpler
-     * when Java 8 is used, as lambda expressions can refrence methods. The
+     * when Java 8 is used, as lambda expressions can reference methods. The
      * update won't actually change these registration methods, but the
      * {@link DataManipulator}s calling these registration methods will
      * become single line simplifications.</p>
@@ -126,7 +124,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
      * @param key The key for the value return type
      * @param function The function for getting the field
      */
-    protected final void registerFieldGetter(Key<?> key, GetterFunction<?> function) {
+    protected final void registerFieldGetter(Key<?> key, Supplier<?> function) {
         this.keyFieldGetterMap.put(checkNotNull(key), checkNotNull(function));
     }
 
@@ -139,25 +137,15 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         // We actually need to check that the processor is available, otherwise
         // we throw an IllegalArgumentException, because people don't check for
         // support!!
-        checkArgument(processor.isPresent(), "Invalid Key for " + this.immutableClass.getCanonicalName() + ". Use supprts(Key) to avoid "
+        checkArgument(processor.isPresent(), "Invalid Key for " + this.immutableClass.getCanonicalName() + ". Use supports(Key) to avoid "
                 + "exceptions!");
         // Then we pass it to the processor :)
-        return processor.get().with(checkNotNull(key), checkNotNull(value), (I) (Object) this);
+        return processor.get().with(checkNotNull(key), checkNotNull(value), (I) this);
     }
 
     @Override
-    public Optional<I> with(BaseValue<?> value) {
-        // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
-        // We actually need to check that the processor is available, otherwise
-        // we throw an IllegalArgumentException, because people don't check for
-        // support!!
-        checkArgument(processor.isPresent(), "Invalid Value for " + this.immutableClass.getCanonicalName() + ". Use supprts(BaseValue) to avoid "
-                + "exceptions!");
-        // Then we pass it to the processor :)
-        // We can easily use the key provided, since that is the identifier, not the actual value itself
-        return processor.get().with(value.getKey(), checkNotNull(value).get(), (I) (Object) this);
-
+    public final I copy() {
+        return (I) this;
     }
 
     // Beyond this point is involving keyFieldGetters or keyValueGetters. No external
@@ -169,19 +157,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
             return Optional.empty();
         }
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
-    }
-
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        checkArgument(supports(key));
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        checkArgument(supports(key));
-        return get(key).orElse(checkNotNull(defaultValue, "Provided a null default value for 'getOrElse(Key, null)'!"));
     }
 
     @Override
@@ -198,11 +173,6 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     }
 
     @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return this.keyFieldGetterMap.containsKey(checkNotNull(baseValue).getKey());
-    }
-
-    @Override
     public Set<Key<?>> getKeys() {
         return ImmutableSet.copyOf(this.keyValueMap.keySet());
     }
@@ -210,7 +180,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public Set<ImmutableValue<?>> getValues() {
         ImmutableSet.Builder<ImmutableValue<?>> builder = ImmutableSet.builder();
-        for (GetterFunction<ImmutableValue<?>> function : this.keyValueMap.values()) {
+        for (Supplier<ImmutableValue<?>> function : this.keyValueMap.values()) {
             builder.add(checkNotNull(function.get()));
         }
         return builder.build();
@@ -221,7 +191,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public int hashCode() {
         List<Object> objects = Lists.newArrayList();
-        for (GetterFunction<?> function : this.keyFieldGetterMap.values()) {
+        for (Supplier<?> function : this.keyFieldGetterMap.values()) {
             objects.add(function.get());
         }
         return Objects.hashCode(this.immutableClass, objects);

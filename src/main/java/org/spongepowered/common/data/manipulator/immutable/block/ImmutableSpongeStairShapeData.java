@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStairShapeData;
 import org.spongepowered.api.data.manipulator.mutable.block.StairShapeData;
 import org.spongepowered.api.data.type.StairShape;
+import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeStairShapeData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeStairShapeData extends AbstractImmutableSingleCatalo
     implements ImmutableStairShapeData {
 
     public ImmutableSpongeStairShapeData(StairShape value) {
-        super(ImmutableStairShapeData.class, value, Keys.STAIR_SHAPE, SpongeStairShapeData.class);
+        super(ImmutableStairShapeData.class, value, StairShapes.STRAIGHT, Keys.STAIR_SHAPE, SpongeStairShapeData.class);
     }
 
 }

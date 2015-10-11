@@ -34,12 +34,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthData> implements HealthData {
 
@@ -60,12 +57,12 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
 
     @Override
     public MutableBoundedValue<Double> health() {
-        return new SpongeBoundedValue<Double>(Keys.HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.health);
+        return new SpongeBoundedValue<>(Keys.HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.health);
     }
 
     @Override
     public MutableBoundedValue<Double> maxHealth() {
-        return new SpongeBoundedValue<Double>(Keys.MAX_HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.maxHealth);
+        return new SpongeBoundedValue<>(Keys.MAX_HEALTH, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE, this.maxHealth);
     }
 
     @Override
@@ -113,42 +110,12 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.HEALTH, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getHealth();
-            }
-        });
-        registerFieldSetter(Keys.HEALTH, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setHealth(((Number) value).doubleValue());
-            }
-        });
-        registerKeyValue(Keys.HEALTH, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return health();
-            }
-        });
+        registerFieldGetter(Keys.HEALTH, SpongeHealthData.this::getHealth);
+        registerFieldSetter(Keys.HEALTH, SpongeHealthData.this::setHealth);
+        registerKeyValue(Keys.HEALTH, SpongeHealthData.this::health);
 
-        registerFieldGetter(Keys.MAX_HEALTH, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getMaxHealth();
-            }
-        });
-        registerFieldSetter(Keys.MAX_HEALTH, new SetterFunction<Object>() {
-            @Override
-            public void set(Object value) {
-                setMaxHealth(((Number) value).doubleValue());
-            }
-        });
-        registerKeyValue(Keys.MAX_HEALTH, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return maxHealth();
-            }
-        });
+        registerFieldGetter(Keys.MAX_HEALTH, SpongeHealthData.this::getMaxHealth);
+        registerFieldSetter(Keys.MAX_HEALTH, SpongeHealthData.this::setMaxHealth);
+        registerKeyValue(Keys.MAX_HEALTH, SpongeHealthData.this::maxHealth);
     }
 }

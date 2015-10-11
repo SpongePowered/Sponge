@@ -32,6 +32,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -39,23 +40,30 @@ import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class HealthValueProcessor extends AbstractSpongeValueProcessor<Double, MutableBoundedValue<Double>> {
+public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBase, Double, MutableBoundedValue<Double>> {
 
     public HealthValueProcessor() {
-        super(Keys.HEALTH);
+        super(EntityLivingBase.class, Keys.HEALTH);
     }
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<Double>(Keys.HEALTH, 0D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.HEALTH, 0D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
     }
 
     @Override
-    public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof EntityLivingBase) {
-            return Optional.of((double) ((EntityLivingBase) container).getHealth());
-        }
-        return Optional.empty();
+    protected boolean set(EntityLivingBase container, Double value) {
+        return false;
+    }
+
+    @Override
+    protected Optional<Double> getVal(EntityLivingBase container) {
+        return Optional.of((double) container.getHealth());
+    }
+
+    @Override
+    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+        return new ImmutableSpongeBoundedValue<>(Keys.HEALTH, value, 20D, doubleComparator(), 0D, 20D);
     }
 
     @Override
@@ -63,8 +71,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<Double, M
         if (container instanceof EntityLivingBase) {
             final double health = ((EntityLivingBase) container).getHealth();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            return Optional.<MutableBoundedValue<Double>>of(new SpongeBoundedValue<Double>(Keys.HEALTH, maxHealth, doubleComparator(),
-                                                                                           1D, maxHealth, health));
+            return Optional.<MutableBoundedValue<Double>>of(new SpongeBoundedValue<>(Keys.HEALTH, maxHealth, doubleComparator(), 1D, maxHealth, health));
         }
         return Optional.empty();
     }
@@ -76,14 +83,14 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<Double, M
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
-        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, value, 20D,
-                                                                                                    doubleComparator(), 1D,
-                                                                                                    (double) Float.MAX_VALUE);
+        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<>(Keys.HEALTH, value, 20D,
+                                                                                              doubleComparator(), 1D,
+                                                                                              (double) Float.MAX_VALUE);
         if (container instanceof EntityLivingBase) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            final ImmutableBoundedValue<Double> newHealthValue = new ImmutableSpongeBoundedValue<Double>(Keys.HEALTH, value, maxHealth,
-                                                                                                         doubleComparator(), 0D, maxHealth);
+            final ImmutableBoundedValue<Double> newHealthValue = new ImmutableSpongeBoundedValue<>(Keys.HEALTH, value, maxHealth,
+                                                                                                   doubleComparator(), 0D, maxHealth);
             final ImmutableBoundedValue<Double> oldHealthValue = getApiValueFromContainer(container).get().asImmutable();
             if (value > maxHealth) {
                 return DataTransactionBuilder.errorResult(newHealthValue);

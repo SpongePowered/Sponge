@@ -34,7 +34,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.util.GetterFunction;
 
 import java.util.Optional;
 import java.util.Set;
@@ -58,12 +57,6 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
         return this.value;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public I copy() {
-        return (I) this;
-    }
-
     @Override
     public abstract M asMutable();
 
@@ -74,18 +67,8 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(this.usedKey, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getValue();
-            }
-        });
-        registerKeyValue(this.usedKey, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return getValueGetter();
-            }
-        });
+        registerFieldGetter(this.usedKey, AbstractImmutableSingleData.this::getValue);
+        registerKeyValue(this.usedKey, AbstractImmutableSingleData.this::getValueGetter);
     }
 
     @SuppressWarnings("unchecked")
@@ -97,11 +80,6 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
     @Override
     public boolean supports(Key<?> key) {
         return checkNotNull(key) == this.usedKey;
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return checkNotNull(baseValue.getKey()) == this.usedKey;
     }
 
     @Override

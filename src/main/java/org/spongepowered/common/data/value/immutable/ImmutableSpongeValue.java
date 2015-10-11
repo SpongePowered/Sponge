@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -35,10 +34,21 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.AbstractBaseValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.function.Function;
+
 public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements ImmutableValue<E> {
 
-    public static <T> ImmutableValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actual) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actual);
+    /**
+     * Gets a cached {@link ImmutableValue} of the default value and the actual value.
+     *
+     * @param key The key for the value
+     * @param defaultValue The default value
+     * @param actualValue The actual value
+     * @param <T> The type of value
+     * @return The cached immutable value
+     */
+    public static <T> ImmutableValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue) {
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actualValue);
     }
 
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {
@@ -51,17 +61,17 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
 
     @Override
     public ImmutableValue<E> with(E value) {
-        return new ImmutableSpongeValue<E>(this.getKey(), getDefault(), value);
+        return new ImmutableSpongeValue<>(this.getKey(), getDefault(), value);
     }
 
     @Override
     public ImmutableValue<E> transform(Function<E, E> function) {
         final E value = checkNotNull(function).apply(get());
-        return new ImmutableSpongeValue<E>(this.getKey(), getDefault(), value);
+        return new ImmutableSpongeValue<>(this.getKey(), getDefault(), value);
     }
 
     @Override
     public Value<E> asMutable() {
-        return new SpongeValue<E>(getKey(), getDefault(), get());
+        return new SpongeValue<>(getKey(), getDefault(), get());
     }
 }

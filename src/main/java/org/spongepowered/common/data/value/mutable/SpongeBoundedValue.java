@@ -27,7 +27,6 @@ package org.spongepowered.common.data.value.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Function;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
@@ -35,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 import java.util.Comparator;
+import java.util.function.Function;
 
 public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoundedValue<E> {
 
@@ -86,6 +86,6 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
 
     @Override
     public ImmutableBoundedValue<E> asImmutable() {
-        return new ImmutableSpongeBoundedValue<E>(getKey(), this.actualValue, getDefault(), this.comparator, this.minimum, this.maximum);
+        return new ImmutableSpongeBoundedValue<>(getKey(), this.actualValue, getDefault(), this.comparator, this.minimum, this.maximum);
     }
 }

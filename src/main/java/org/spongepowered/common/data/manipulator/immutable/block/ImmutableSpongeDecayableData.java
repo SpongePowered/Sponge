@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDecayableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DecayableData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDecayableData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,6 +40,11 @@ public class ImmutableSpongeDecayableData extends AbstractImmutableBooleanData<I
 
     @Override
     public ImmutableValue<Boolean> decayable() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DECAYABLE, this.value, false);
+        return ImmutableSpongeValue.cachedOf(Keys.DECAYABLE, false, this.value);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return decayable();
     }
 }

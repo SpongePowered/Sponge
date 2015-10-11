@@ -22,10 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
-
-public interface SetterFunction<V> {
-
-    void set(V value);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.manipulator.immutable.common.collection;

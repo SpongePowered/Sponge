@@ -32,14 +32,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +46,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
     private List<Text> pages;
 
     public SpongePagedData() {
-        this(new ArrayList<Text>());
+        this(new ArrayList<>());
     }
 
     public SpongePagedData(List<Text> pages) {
@@ -60,7 +57,7 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
 
     @Override
     public ListValue<Text> pages() {
-        return new SpongeListValue<Text>(Keys.BOOK_PAGES, this.pages);
+        return new SpongeListValue<>(Keys.BOOK_PAGES, this.pages);
     }
 
     @Override
@@ -92,30 +89,12 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
         this.pages = Lists.newArrayList(pages);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.BOOK_PAGES, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getPages();
-            }
-        });
-        registerFieldSetter(Keys.BOOK_PAGES, new SetterFunction<Object>() {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public void set(Object value) {
-                setPages((List<Text>) value);
-            }
-        });
-        registerKeyValue(Keys.BOOK_PAGES, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return pages();
-            }
-        });
+        registerFieldGetter(Keys.BOOK_PAGES, SpongePagedData.this::getPages);
+        registerFieldSetter(Keys.BOOK_PAGES, SpongePagedData.this::setPages);
+        registerKeyValue(Keys.BOOK_PAGES, SpongePagedData.this::pages);
     }
 
 }

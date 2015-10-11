@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBigMushroomData;
 import org.spongepowered.api.data.manipulator.mutable.block.BigMushroomData;
 import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeBigMushroomData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeBigMushroomData extends AbstractImmutableSingleCatal
         implements ImmutableBigMushroomData {
 
     public ImmutableSpongeBigMushroomData(BigMushroomType value) {
-        super(ImmutableBigMushroomData.class, value, Keys.BIG_MUSHROOM_TYPE, SpongeBigMushroomData.class);
+        super(ImmutableBigMushroomData.class, value, BigMushroomTypes.ALL_OUTSIDE, Keys.BIG_MUSHROOM_TYPE, SpongeBigMushroomData.class);
     }
 
 }

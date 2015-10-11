@@ -26,7 +26,6 @@ package org.spongepowered.common.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -56,6 +55,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -277,17 +277,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return this.privateStack.get(key);
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return this.privateStack.getOrNull(key);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return this.privateStack.getOrElse(key, defaultValue);
-    }
-
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         return this.privateStack.getValue(key);
@@ -296,11 +285,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public boolean supports(Key<?> key) {
         return this.privateStack.supports(key);
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override

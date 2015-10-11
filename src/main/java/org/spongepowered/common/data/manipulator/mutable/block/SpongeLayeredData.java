@@ -43,7 +43,7 @@ public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, La
 
     @Override
     public MutableBoundedValue<Integer> layer() {
-        return new SpongeBoundedValue<Integer>(Keys.LAYER, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
+        return new SpongeBoundedValue<>(Keys.LAYER, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
     }
 
     @Override

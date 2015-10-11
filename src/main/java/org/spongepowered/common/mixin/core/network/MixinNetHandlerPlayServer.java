@@ -32,11 +32,13 @@ import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
@@ -84,6 +86,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
@@ -107,6 +110,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     private Location<World> lastMoveLocation = null;
 
     private final Map<String, ResourcePack> sentResourcePacks = new HashMap<String, ResourcePack>();
+
+    private Long lastPacket;
+    // Store the last block right-clicked
+    private Item lastItem;
 
     @Override
     public Player getPlayer() {
@@ -408,4 +415,23 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
+    @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)
+    public void injectBlockPlacement(C08PacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
+        // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
+        // aimed at a block. We shouldn't need to get the second packet if the data is handled
+        // but we cannot know what the client will do, so we might still get it
+        //
+        // If the time between packets is small enough, and the 'signature' similar, we discard the
+        // second one. This sadly has to remain until Mojang makes their packets saner. :(
+        //  -- Grum
+        if (packetIn.getPlacedBlockDirection() == 255) {
+            if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
+                this.lastPacket = null;
+                ci.cancel();
+            }
+        } else {
+            this.lastItem = packetIn.getStack() == null ? null : packetIn.getStack().getItem();
+            this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
+        }
+    }
 }

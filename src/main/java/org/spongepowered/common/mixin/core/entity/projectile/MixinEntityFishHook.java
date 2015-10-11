@@ -107,17 +107,17 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
         )
     public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
-        if (entity.worldObj.isRemote) {
-            EntitySnapshot fishHookSnapshot = ((FishHook) this).createSnapshot();
-            EntitySnapshot hookedEntitySnapshot = ((Entity) entity).createSnapshot();
-            FishingEvent.Hook event = SpongeEventFactory.createFishingEventHook(Sponge.getGame(), Cause.of(this.angler), fishHookSnapshot, (FishHook) this, hookedEntitySnapshot, Optional.ofNullable(
-                    (Entity) entity), (Entity) entity);
-            if (!Sponge.getGame().getEventManager().post(event)) {
-                if (this.getShooter() instanceof Entity) {
-                    DamageSource.causeThrownDamage((net.minecraft.entity.Entity)(Object) this, (net.minecraft.entity.Entity) this.getShooter());
-                }
-                return entity.attackEntityFrom(damageSource, (float) this.getDamage());
+        EntitySnapshot fishHookSnapshot = this.createSnapshot();
+        EntitySnapshot hookedEntitySnapshot = ((Entity) entity).createSnapshot();
+        FishingEvent.Hook event = SpongeEventFactory
+                .createFishingEventHook(Sponge.getGame(), Cause.of(this.angler), fishHookSnapshot, (FishHook) this, hookedEntitySnapshot,
+                        Optional.ofNullable(
+                                (Entity) entity), (Entity) entity);
+        if (!Sponge.getGame().getEventManager().post(event)) {
+            if (this.getShooter() instanceof Entity) {
+                DamageSource.causeThrownDamage((net.minecraft.entity.Entity) (Object) this, (net.minecraft.entity.Entity) this.getShooter());
             }
+            return entity.attackEntityFrom(damageSource, (float) this.getDamage());
         }
         return false;
     }

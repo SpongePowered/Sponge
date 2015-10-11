@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -53,7 +52,7 @@ import java.util.Optional;
 public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, ListValue<Text>, LoreData, ImmutableLoreData> {
 
     public ItemLoreDataProcessor() {
-        super(Predicates.<ItemStack>alwaysTrue(), Keys.ITEM_LORE);
+        super(input -> true, Keys.ITEM_LORE);
     }
 
     @SuppressWarnings("unchecked")
@@ -108,7 +107,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
-       return new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
+       return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
     }
 
 }

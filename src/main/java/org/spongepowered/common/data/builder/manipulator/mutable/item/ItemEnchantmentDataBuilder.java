@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.item;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -37,10 +35,8 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
@@ -48,6 +44,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemEnchantmentDataBuilder implements DataManipulatorBuilder<EnchantmentData, ImmutableEnchantmentData> {
+
+    private final SerializationService serializationService;
+
+    public ItemEnchantmentDataBuilder(SerializationService serializationService) {
+        this.serializationService = checkNotNull(serializationService);
+    }
 
     @Override
     public EnchantmentData create() {
@@ -60,17 +62,8 @@ public class ItemEnchantmentDataBuilder implements DataManipulatorBuilder<Enchan
             if (!((ItemStack) dataHolder).isItemEnchanted()) {
                 return Optional.empty();
             } else {
-                final List<ItemEnchantment> enchantments = Lists.newArrayList();
-                final NBTTagList list = ((ItemStack) dataHolder).getEnchantmentTagList();
-                for (int i = 0; i < list.tagCount(); i++) {
-                    final NBTTagCompound compound = list.getCompoundTagAt(i);
-                    final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                    final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-
-                    final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
-                    enchantments.add(new ItemEnchantment(enchantment, level));
-                }
-                return Optional.<EnchantmentData>of(new SpongeEnchantmentData(enchantments));
+                final List<ItemEnchantment> enchantments = NbtDataUtil.getItemEnchantments((ItemStack) dataHolder);
+                return Optional.of(new SpongeEnchantmentData(enchantments));
             }
         }
         return Optional.empty();
@@ -79,10 +72,9 @@ public class ItemEnchantmentDataBuilder implements DataManipulatorBuilder<Enchan
     @Override
     public Optional<EnchantmentData> build(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
         final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
                                                                                  ItemEnchantment.class,
-                                                                                 serializationService).get();
-        return Optional.<EnchantmentData>of(new SpongeEnchantmentData(enchantments));
+                                                                                 this.serializationService).get();
+        return Optional.of(new SpongeEnchantmentData(enchantments));
     }
 }

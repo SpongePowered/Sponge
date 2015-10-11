@@ -33,6 +33,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.Sponge;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
@@ -42,10 +43,19 @@ public final class ImmutableDataCachingUtil {
 
     private ImmutableDataCachingUtil() {}
 
-    private static final Cache<String, ImmutableDataManipulator<?, ?>> manipulatorCache = CacheBuilder.newBuilder().maximumSize(3000)
-            .concurrencyLevel(4).build();
+    public static final int CACHE_LIMIT_FOR_INDIVIDUAL_TYPE = 100;
+    public static final int MANIPULATOR_CACHE_LIMIT = 100000;
+    public static final int VALUE_CACHE_LIMIT = 100000;
 
-    private static final Cache<String, ImmutableValue<?>> valueCache = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(4000).build();
+    private static final Cache<String, ImmutableDataManipulator<?, ?>> manipulatorCache = CacheBuilder.newBuilder()
+        .maximumSize(MANIPULATOR_CACHE_LIMIT)
+        .concurrencyLevel(4)
+        .build();
+
+    private static final Cache<String, ImmutableValue<?>> valueCache = CacheBuilder.newBuilder()
+        .concurrencyLevel(4)
+        .maximumSize(VALUE_CACHE_LIMIT)
+        .build();
 
     /**
      * Retrieves a basic manipulator from {@link Cache}. If the {@link Cache}
@@ -54,7 +64,7 @@ public final class ImmutableDataCachingUtil {
      * retrieval.
      *
      * <p>Note that two instances of an {@link ImmutableDataManipulator} may be
-     * equal to eachother, but they may not be the same instance, this is due
+     * equal to each other, but they may not be the same instance, this is due
      * to caching and outside instantiation.</p>
      *
      * @param immutableClass The immutable manipulator class to get an instance of
@@ -68,23 +78,14 @@ public final class ImmutableDataCachingUtil {
         // We can't really use the generic typing here because it's complicated...
         try {
             // Let's get the key
-            return (T) (Object) ImmutableDataCachingUtil.manipulatorCache.get(key,
-                    new Callable<ImmutableDataManipulator<?, ?>>() {
-                        @Override
-                        public ImmutableDataManipulator<?, ?> call() throws Exception {
-                            try {
-                                return createUnsafeInstance(immutableClass, args);
-                            } catch (InvocationTargetException e) {
-                                System.err.println("Something went gravely wrong in constructing " + immutableClass.getCanonicalName());
-                                e.printStackTrace();
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                            throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName());
-                        }
-                    });
+            return (T) ImmutableDataCachingUtil.manipulatorCache.get(key, (Callable<ImmutableDataManipulator<?, ?>>) () -> {
+                    try {
+                        return createUnsafeInstance(immutableClass, args);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        Sponge.getLogger().error("Could not construct an ImmutableDataManipulator: " + immutableClass.getCanonicalName(), e);
+                    }
+                    throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName());
+            });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName(), e);
         }
@@ -95,75 +96,18 @@ public final class ImmutableDataCachingUtil {
             final Key<? extends BaseValue<E>> usedKey, final E arg, final E defaultArg, final Object... extraArgs) {
         final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
         try {
-            return (T) (Object) ImmutableDataCachingUtil.valueCache.get(key,
-                    new Callable<ImmutableValue<?>>() {
-                        @Override
-                        public ImmutableValue<?> call() throws Exception {
-                            try {
-                                return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
-                            } catch (InvocationTargetException e) {
-                                System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
-                                e.printStackTrace();
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
-                        }
-                    });
-        } catch (ExecutionException e) {
-            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <E, V extends ImmutableValue<?>, T extends ImmutableValue<E>> T getValue(final Class<V> valueClass,
-            final Key<? extends BaseValue<E>> usedKey, final E arg, final E defaultArg) {
-        final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
-        try {
-            return (T) (Object) ImmutableDataCachingUtil.valueCache.get(key,
-                    new Callable<ImmutableValue<?>>() {
-                        @Override
-                        public ImmutableValue<?> call() throws Exception {
-                            try {
-                                return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
-                            } catch (InvocationTargetException e) {
-                                System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
-                                e.printStackTrace();
-                            } catch (InstantiationException e) {
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
-                        }
-                    });
-        } catch (ExecutionException e) {
-            throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);
-        }
-    }
-
-    public static <E, V extends ImmutableValue<?>> ImmutableValue<?> getWildValue(final Class<V> valueClass, final Key<? extends BaseValue<E>> usedKey, final E arg, final E defaultArg) {
-        final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
-        try {
-            return ImmutableDataCachingUtil.valueCache.get(key,
-                new Callable<ImmutableValue<?>>() {
-                    @Override
-                    public ImmutableValue<?> call() throws Exception {
-                        try {
+            return (T) ImmutableDataCachingUtil.valueCache.get(key, (Callable<ImmutableValue<?>>) () -> {
+                    try {
+                        if (extraArgs == null || extraArgs.length == 0) {
                             return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
-                        } catch (InvocationTargetException e) {
-                            System.err.println("Something went gravely wrong in constructing " + valueClass.getCanonicalName());
-                            e.printStackTrace();
-                        } catch (InstantiationException e) {
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
+                        } else {
+                            return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
                         }
-                        throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        Sponge.getLogger().error("Could not construct an ImmutableValue: " + valueClass.getCanonicalName(), e);
                     }
-                });
+                    throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
+            });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);
         }

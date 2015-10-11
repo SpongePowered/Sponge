@@ -32,14 +32,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +46,7 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
     private List<Text> lore;
 
     public SpongeLoreData() {
-        this(new ArrayList<Text>());
+        this(new ArrayList<>());
     }
 
     public SpongeLoreData(List<Text> lore) {
@@ -60,7 +57,7 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
 
     @Override
     public ListValue<Text> lore() {
-        return new SpongeListValue<Text>(Keys.ITEM_LORE, this.lore);
+        return new SpongeListValue<>(Keys.ITEM_LORE, this.lore);
     }
 
     @Override
@@ -92,28 +89,11 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
         this.lore = Lists.newArrayList(lore);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.ITEM_LORE, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getLore();
-            }
-        });
-        registerFieldSetter(Keys.ITEM_LORE, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setLore((List<Text>) value);
-            }
-        });
-        registerKeyValue(Keys.ITEM_LORE, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return lore();
-            }
-        });
+        registerFieldGetter(Keys.ITEM_LORE, SpongeLoreData.this::getLore);
+        registerFieldSetter(Keys.ITEM_LORE, SpongeLoreData.this::setLore);
+        registerKeyValue(Keys.ITEM_LORE, SpongeLoreData.this::lore);
     }
 }

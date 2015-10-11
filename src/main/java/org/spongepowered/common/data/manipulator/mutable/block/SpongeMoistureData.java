@@ -43,7 +43,7 @@ public class SpongeMoistureData extends AbstractBoundedComparableData<Integer, M
 
     @Override
     public MutableBoundedValue<Integer> moisture() {
-        return new SpongeBoundedValue<Integer>(Keys.MOISTURE, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
+        return new SpongeBoundedValue<>(Keys.MOISTURE, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
     }
 
     @Override

@@ -80,6 +80,7 @@ public abstract class AbstractBaseValue<E> implements BaseValue<E> {
         return Objects.hashCode(this.key, this.defaultValue, this.actualValue);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
-import static org.spongepowered.common.data.util.DataUtil.getData;
-
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
@@ -43,9 +40,10 @@ public class SneakingDataBuilder implements DataManipulatorBuilder<SneakingData,
 
     @Override
     public Optional<SneakingData> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, Keys.IS_SNEAKING.getQuery());
-        final boolean sneaking = getData(container, Keys.IS_SNEAKING, Boolean.TYPE);
-        return Optional.<SneakingData>of(new SpongeSneakingData(sneaking));
+        if (container.contains(Keys.IS_SNEAKING.getQuery())) {
+            return Optional.of(new SpongeSneakingData(container.getBoolean(Keys.IS_SNEAKING.getQuery()).get()));
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -57,7 +55,7 @@ public class SneakingDataBuilder implements DataManipulatorBuilder<SneakingData,
     public Optional<SneakingData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
             final boolean sneaking = ((Entity) dataHolder).isSneaking();
-            return Optional.<SneakingData>of(new SpongeSneakingData(sneaking));
+            return Optional.of(new SpongeSneakingData(sneaking));
         }
         return Optional.empty();
     }

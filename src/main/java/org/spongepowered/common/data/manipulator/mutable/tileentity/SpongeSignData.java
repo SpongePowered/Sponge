@@ -31,17 +31,15 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @NonnullByDefault
 public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> implements SignData {
@@ -65,15 +63,13 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     @Override
     public DataContainer toContainer() {
         List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
-        for (Text line : this.lines) {
-            jsonLines.add(Texts.json().to(line));
-        }
+        jsonLines.addAll(this.lines.stream().map(line -> Texts.json().to(line)).collect(Collectors.toList()));
         return new MemoryDataContainer().set(Keys.SIGN_LINES.getQuery(), jsonLines);
     }
 
     @Override
     public ListValue<Text> lines() {
-        return new SpongeListValue<Text>(Keys.SIGN_LINES, Lists.newArrayList(this.lines));
+        return new SpongeListValue<>(Keys.SIGN_LINES, Lists.newArrayList(this.lines));
     }
 
     @Override
@@ -96,26 +92,11 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.SIGN_LINES, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getLines();
-            }
-        });
-        registerFieldSetter(Keys.SIGN_LINES, new SetterFunction<Object>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void set(Object value) {
-                setLines((List<Text>) value);
-            }
-        });
-        registerKeyValue(Keys.SIGN_LINES, new GetterFunction<Value<?>>() {
-            @Override
-            public Value<?> get() {
-                return lines();
-            }
-        });
+        registerFieldGetter(Keys.SIGN_LINES, SpongeSignData.this::getLines);
+        registerFieldSetter(Keys.SIGN_LINES, SpongeSignData.this::setLines);
+        registerKeyValue(Keys.SIGN_LINES, SpongeSignData.this::lines);
     }
 }

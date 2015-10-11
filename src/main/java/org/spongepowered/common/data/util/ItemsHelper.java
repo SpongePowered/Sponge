@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item;
+package org.spongepowered.common.data.util;
 
 import static org.spongepowered.api.data.DataTransactionBuilder.successNoData;
 
@@ -52,7 +52,7 @@ public final class ItemsHelper {
         return compound;
     }
 
-    private ItemsHelper() { // No subclassing for you!
+    private ItemsHelper() { // No sub-classing for you!
     }
 
     public static <T extends DataManipulator<T,?>> Optional<T> getClone(T DataManipulator, Class<T> clazz) {

@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLogAxisData;
 import org.spongepowered.api.data.manipulator.mutable.block.LogAxisData;
+import org.spongepowered.api.data.type.LogAxes;
 import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeLogAxisData;
@@ -34,8 +35,12 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeLogAxisData
 public class ImmutableSpongeLogAxisData extends AbstractImmutableSingleCatalogData<LogAxis, ImmutableLogAxisData, LogAxisData>
     implements ImmutableLogAxisData {
 
+    public ImmutableSpongeLogAxisData() {
+        this(LogAxes.Y);
+    }
+
     public ImmutableSpongeLogAxisData(LogAxis value) {
-        super(ImmutableLogAxisData.class, value, Keys.LOG_AXIS, SpongeLogAxisData.class);
+        super(ImmutableLogAxisData.class, value, LogAxes.Y, Keys.LOG_AXIS, SpongeLogAxisData.class);
     }
 
 }

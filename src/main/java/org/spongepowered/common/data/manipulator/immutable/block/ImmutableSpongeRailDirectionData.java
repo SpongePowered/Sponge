@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRailDirectionData;
 import org.spongepowered.api.data.manipulator.mutable.block.RailDirectionData;
 import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRailDirectionData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeRailDirectionData extends AbstractImmutableSingleCat
     implements ImmutableRailDirectionData {
 
     public ImmutableSpongeRailDirectionData(RailDirection value) {
-        super(ImmutableRailDirectionData.class, value, Keys.RAIL_DIRECTION, SpongeRailDirectionData.class);
+        super(ImmutableRailDirectionData.class, value, RailDirections.NORTH_SOUTH, Keys.RAIL_DIRECTION, SpongeRailDirectionData.class);
     }
 
 }

@@ -30,10 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -109,6 +106,7 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
@@ -168,6 +166,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -201,8 +202,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
 
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
-            Predicate<net.minecraft.entity.Entity> filter);
+            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
@@ -261,26 +263,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public String getName() {
         return this.worldInfo.getWorldName();
-    }
-
-    @Override
-    public Location<World> getLocation(int x, int y, int z) {
-        return getLocation(new Vector3i(x, y, z));
-    }
-
-    @Override
-    public Location<World> getLocation(Vector3i position) {
-        return new Location<World>(this, position);
-    }
-
-    @Override
-    public Location<World> getLocation(double x, double y, double z) {
-        return getLocation(new Vector3d(x, y, z));
-    }
-
-    @Override
-    public Location<World> getLocation(Vector3d position) {
-        return new Location<World>(this, position);
     }
 
     @Override
@@ -360,8 +342,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // This already returns a new copy
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class, (Predicate<net.minecraft.entity.Entity>) (Object)
-            filter);
+        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
+                                                              Functional.java8ToGuava((Predicate<net.minecraft.entity.Entity>) (Object) filter));
     }
 
     @Override
@@ -463,6 +445,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // TODO MixinEntityFishHook.setShooter makes angler null sometimes,
             // but that will cause NPE when ticking
             return false;
+        }
+        if(entity instanceof net.minecraft.entity.effect.EntityWeatherEffect) {
+            return addWeatherEffect((net.minecraft.entity.Entity) entity);
         }
         return spawnEntityInWorld(((net.minecraft.entity.Entity) entity));
     }
@@ -633,16 +618,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void updateWorldGenerator() {
+        // No need to wrap generator if no modifiers are present
+        if (this.getProperties().getGeneratorModifiers().isEmpty()) {
+            return;
+        }
+
         IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
 
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
-        if (generatorSettings.contains(IMixinWorldType.STRING_VALUE)) {
-            String options = generatorSettings.getString(IMixinWorldType.STRING_VALUE).get();
-            if (options.equals("")) {
-                return;
-            }
-        }
         SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
 
         // Re-apply all world generator modifiers
@@ -872,7 +856,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
-        return Lists.newArrayList(Collections2.filter((List<TileEntity>) (Object) this.loadedTileEntityList, filter));
+        return ((List<TileEntity>) (Object) this.loadedTileEntityList).stream()
+            .filter(filter)
+            .collect(Collectors.toList());
     }
 
     @Override

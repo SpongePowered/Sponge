@@ -31,55 +31,16 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
+public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
 
     public SneakingValueProcessor() {
-        super(Keys.IS_SNEAKING);
-    }
-
-    @Override
-    public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            return Optional.of(((Entity) container).isSneaking());
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Value<Boolean>> getApiValueFromContainer(ValueContainer<?> container) {
-        if (container instanceof Entity) {
-            final boolean sneaking = ((Entity) container).isSneaking();
-            return Optional.<Value<Boolean>>of(new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, sneaking));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof Entity;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue<Boolean> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_SNEAKING, value, false);
-        if (container instanceof Entity) {
-            final boolean old = getValueFromContainer(container).get();
-            final ImmutableValue<Boolean> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_SNEAKING, old, false);
-            try {
-                ((Entity)container).setSneaking(value.booleanValue());
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                DataTransactionBuilder.errorResult(newValue);
-            }
-        }
-        return DataTransactionBuilder.failResult(newValue);
+        super(Entity.class, Keys.IS_SNEAKING);
     }
 
     @Override
@@ -89,7 +50,23 @@ public class SneakingValueProcessor extends AbstractSpongeValueProcessor<Boolean
 
     @Override
     protected Value<Boolean> constructValue(Boolean sneaking) {
-        return new SpongeValue<Boolean>(Keys.IS_SNEAKING, false, sneaking);
+        return new SpongeValue<>(Keys.IS_SNEAKING, false, sneaking);
+    }
+
+    @Override
+    protected boolean set(Entity container, Boolean value) {
+        container.setSneaking(value);
+        return true;
+    }
+
+    @Override
+    protected Optional<Boolean> getVal(Entity container) {
+        return Optional.of(container.isSneaking());
+    }
+
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, value);
     }
 
 }

@@ -175,6 +175,7 @@
         "network.MixinNetHandlerPlayServer",
         "network.packet.MixinS3BPacketScoreboardObjective",
         "network.packet.MixinS48PacketResourcePackSend",
+        "network.play.client.MixinC08PacketPlayerBlockPlacement",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "scoreboard.MixinCriterion",

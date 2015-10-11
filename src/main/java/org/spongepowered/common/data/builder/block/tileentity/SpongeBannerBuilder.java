@@ -75,9 +75,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         // Now we have to get the patterns list
         final List<PatternLayer> patternsList = container.getSerializableList(PATTERNS, PatternLayer.class, service).get();
         final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
-        for (PatternLayer pattern : patternsList) {
-            patternLayers.add(pattern);
-        }
+        patternsList.forEach(patternLayers::add);
         bannerData.set(patternLayers);
         final Banner banner = bannerOptional.get();
         banner.offer(bannerData);

@@ -32,11 +32,9 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmen
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.util.GetterFunction;
 
 import java.util.List;
 
@@ -52,28 +50,13 @@ public class ImmutableSpongeEnchantmentData extends AbstractImmutableData<Immuta
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_ENCHANTMENTS, new GetterFunction<Object>() {
-            @Override
-            public Object get() {
-                return getEnchantments();
-            }
-        });
-        registerKeyValue(Keys.ITEM_ENCHANTMENTS, new GetterFunction<ImmutableValue<?>>() {
-            @Override
-            public ImmutableValue<?> get() {
-                return enchantments();
-            }
-        });
+        registerFieldGetter(Keys.ITEM_ENCHANTMENTS, ImmutableSpongeEnchantmentData.this::getEnchantments);
+        registerKeyValue(Keys.ITEM_ENCHANTMENTS, ImmutableSpongeEnchantmentData.this::enchantments);
     }
 
     @Override
     public ImmutableListValue<ItemEnchantment> enchantments() {
-        return new ImmutableSpongeListValue<ItemEnchantment>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
-    }
-
-    @Override
-    public ImmutableEnchantmentData copy() {
-        return this;
+        return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
     }
 
     @Override

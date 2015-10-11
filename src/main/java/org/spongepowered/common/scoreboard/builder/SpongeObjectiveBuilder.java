@@ -45,7 +45,7 @@ public class SpongeObjectiveBuilder implements ObjectiveBuilder {
     private Text displayName;
     private Criterion criterion;
     private ObjectiveDisplayMode objectiveDisplayMode = ObjectiveDisplayModes.INTEGER;
-    private Map<String, Score> entries = new HashMap<String, Score>();
+    private Map<String, Score> entries = new HashMap<>();
 
     @Override
     public ObjectiveBuilder name(String name) {
@@ -81,7 +81,7 @@ public class SpongeObjectiveBuilder implements ObjectiveBuilder {
         this.displayName = null;
         this.criterion = null;
         this.objectiveDisplayMode = ObjectiveDisplayModes.INTEGER;
-        this.entries = new HashMap<String, Score>();
+        this.entries = new HashMap<>();
         return this;
     }
 

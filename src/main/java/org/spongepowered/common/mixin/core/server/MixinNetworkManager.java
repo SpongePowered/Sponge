@@ -28,6 +28,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
@@ -40,7 +41,7 @@ import java.net.UnknownHostException;
 
 @SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
-public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements IMixinNetworkManager {
+public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements RemoteConnection, IMixinNetworkManager {
 
     @Shadow
     public abstract SocketAddress getRemoteAddress();

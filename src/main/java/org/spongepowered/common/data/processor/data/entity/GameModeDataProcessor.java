@@ -38,7 +38,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -61,8 +60,6 @@ public class GameModeDataProcessor extends AbstractEntitySingleDataProcessor<Ent
         if (Sponge.getGame().getPlatform().getType().isServer()) {
             entity.setGameType((WorldSettings.GameType) (Object) value);
             return true;
-        } else if (Sponge.getGame().getPlatform().getType().isClient()) {
-            // ((AbstractClientPlayer) entity).getPlayerInfo().getGa // TODO do we really need to handle this?
         }
         return false;
     }
@@ -72,18 +69,12 @@ public class GameModeDataProcessor extends AbstractEntitySingleDataProcessor<Ent
         if (entity instanceof EntityPlayerMP) {
             return Optional.of((GameMode) (Object) ((EntityPlayerMP) entity).theItemInWorldManager.getGameType());
         }
-        if (Sponge.getGame().getPlatform().getType().isClient()) {
-            /* TODO: This will only compile on the client (in SpongeForge)
-            if (entity instanceof AbstractClientPlayer) {
-                return Optional.of((GameMode) (Object) ((AbstractClientPlayer) entity).getPlayerInfo().getGameType());
-            }*/
-        }
         return Optional.empty();
     }
 
     @Override
     protected ImmutableValue<GameMode> constructImmutableValue(GameMode value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.GAME_MODE, value, GameModes.SURVIVAL);
+        return ImmutableSpongeValue.cachedOf(Keys.GAME_MODE, GameModes.SURVIVAL, value);
     }
 
     @Override

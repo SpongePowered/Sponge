@@ -105,9 +105,9 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
-        if (!entity.worldObj.isRemote) {
+        if (!this.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
-            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getGame(), Cause.of(entity), leashedEntity);
+            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getGame(), entity == null ? Cause.of() : Cause.of(entity), leashedEntity);
             Sponge.getGame().getEventManager().post(event);
             if(event.isCancelled()) {
                 ci.cancel();

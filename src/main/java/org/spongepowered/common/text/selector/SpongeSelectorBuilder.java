@@ -81,7 +81,7 @@ public class SpongeSelectorBuilder implements SelectorBuilder {
 
     @Override
     public <T> SelectorBuilder add(ArgumentType<T> type, T value) {
-        this.arguments.put(type, new SpongeArgument<T>(type, value));
+        this.arguments.put(type, new SpongeArgument<>(type, value));
         return this;
     }
 

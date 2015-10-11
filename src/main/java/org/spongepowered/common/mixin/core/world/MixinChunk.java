@@ -110,26 +110,6 @@ public abstract class MixinChunk implements Chunk {
     }
 
     @Override
-    public Location<Chunk> getLocation(int x, int y, int z) {
-        return getLocation(new Vector3i(x, y, z));
-    }
-
-    @Override
-    public Location<Chunk> getLocation(Vector3i position) {
-        return new Location<Chunk>(this, position);
-    }
-
-    @Override
-    public Location<Chunk> getLocation(double x, double y, double z) {
-        return getLocation(new Vector3d(x, y, z));
-    }
-
-    @Override
-    public Location<Chunk> getLocation(Vector3d position) {
-        return new Location<Chunk>(this, position);
-    }
-
-    @Override
     public boolean isLoaded() {
         return this.isChunkLoaded;
     }

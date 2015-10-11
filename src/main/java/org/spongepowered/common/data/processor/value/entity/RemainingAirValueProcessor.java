@@ -31,6 +31,7 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -38,41 +39,36 @@ import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>> {
 
     public RemainingAirValueProcessor() {
-        super(Keys.REMAINING_AIR);
+        super(EntityLivingBase.class, Keys.REMAINING_AIR);
     }
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
     }
 
     @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityLivingBase entity = (EntityLivingBase) container;
-            return Optional.of(entity.getAir());
-        }
-        return Optional.empty();
+    protected boolean set(EntityLivingBase container, Integer value) {
+        container.setAir(value);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityLivingBase;
+    protected Optional<Integer> getVal(EntityLivingBase container) {
+        return Optional.of(container.getAir());
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        if (supports(container)) {
-            final EntityLivingBase entity = (EntityLivingBase) container;
-            final Integer oldValue = entity.getAir();
-            entity.setAir(value);
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, value),
-                    new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, oldValue));
-        }
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.REMAINING_AIR, value));
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeValue<>(Keys.REMAINING_AIR, 300, value);
+    }
+
+    @Override
+    protected boolean supports(EntityLivingBase container) {
+        return container.isInWater();
     }
 
     @Override

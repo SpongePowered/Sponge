@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessData;
 import org.spongepowered.api.data.manipulator.mutable.block.SeamlessData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSeamlessData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,6 +40,11 @@ public class ImmutableSpongeSeamlessData extends AbstractImmutableBooleanData<Im
 
     @Override
     public ImmutableValue<Boolean> seamless() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SEAMLESS, this.value, false);
+        return ImmutableSpongeValue.cachedOf(Keys.SEAMLESS, false, this.value);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return seamless();
     }
 }

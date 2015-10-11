@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
@@ -35,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -66,7 +66,7 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
 
     @Override
     public ImmutableOptionalValue<E> asImmutable() {
-        return new ImmutableSpongeOptionalValue<E>(getKey(), this.actualValue);
+        return new ImmutableSpongeOptionalValue<>(getKey(), this.actualValue);
     }
 
     @Override
@@ -76,6 +76,6 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
 
     @Override
     public Value<E> or(E defaultValue) { // TODO actually construct the keys
-        return new SpongeValue<E>(null, null, get().isPresent() ? get().get() : checkNotNull(defaultValue));
+        return new SpongeValue<>(null, null, get().isPresent() ? get().get() : checkNotNull(defaultValue));
     }
 }

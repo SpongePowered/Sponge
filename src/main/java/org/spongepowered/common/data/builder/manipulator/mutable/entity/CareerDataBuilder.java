@@ -55,7 +55,7 @@ public class CareerDataBuilder implements DataManipulatorBuilder<CareerData, Imm
         final String careerId = DataUtil.getData(container, Keys.CAREER, String.class);
         final Optional<Career> optional = Sponge.getSpongeRegistry().getType(Career.class, careerId);
         if (optional.isPresent()) {
-            return Optional.<CareerData>of(new SpongeCareerData(optional.get()));
+            return Optional.of(new SpongeCareerData(optional.get()));
         }
         return Optional.empty();
     }

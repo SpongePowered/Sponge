@@ -58,27 +58,22 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
 
     @Override
     public ImmutableValue<String> storedCommand() {
-        return new ImmutableSpongeValue<String>(Keys.COMMAND, this.storedCommand);
+        return new ImmutableSpongeValue<>(Keys.COMMAND, this.storedCommand);
     }
 
     @Override
     public ImmutableValue<Integer> successCount() {
-        return new ImmutableSpongeValue<Integer>(Keys.SUCCESS_COUNT, this.success);
+        return new ImmutableSpongeValue<>(Keys.SUCCESS_COUNT, this.success);
     }
 
     @Override
     public ImmutableValue<Boolean> doesTrackOutput() {
-        return new ImmutableSpongeValue<Boolean>(Keys.TRACKS_OUTPUT, this.tracks);
+        return new ImmutableSpongeValue<>(Keys.TRACKS_OUTPUT, this.tracks);
     }
 
     @Override
     public ImmutableOptionalValue<Text> lastOutput() {
-        return new ImmutableSpongeOptionalValue<Text>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
-    }
-
-    @Override
-    public ImmutableCommandData copy() {
-        return new ImmutableSpongeCommandData(this.storedCommand, this.success, this.tracks, this.lastOutput);
+        return new ImmutableSpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
     }
 
     @Override

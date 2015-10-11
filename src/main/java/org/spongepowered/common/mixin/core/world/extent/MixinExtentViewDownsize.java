@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.core.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -51,6 +48,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -67,6 +65,8 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Mixin(ExtentViewDownsize.class)
 public abstract class MixinExtentViewDownsize implements Extent {
@@ -456,7 +456,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getTileEntities(Predicates.<TileEntity>and(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getTileEntities(Functional.predicateAnd(new TileEntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
@@ -494,7 +494,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getEntities(Predicates.<Entity>and(new EntityInBounds(this.blockMin, this.blockMax), filter));
+        return this.extent.getEntities(Functional.predicateAnd(new EntityInBounds(this.blockMin, this.blockMax), filter));
     }
 
     @Override
@@ -544,7 +544,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
         }
 
         @Override
-        public boolean apply(Entity input) {
+        public boolean test(Entity input) {
             final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }
@@ -562,7 +562,7 @@ public abstract class MixinExtentViewDownsize implements Extent {
         }
 
         @Override
-        public boolean apply(TileEntity input) {
+        public boolean test(TileEntity input) {
             final Location<World> block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.min, this.max);
         }

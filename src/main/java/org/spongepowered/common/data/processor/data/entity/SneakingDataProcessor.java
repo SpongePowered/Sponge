@@ -33,7 +33,6 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneaking
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -64,7 +63,7 @@ public class SneakingDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_SNEAKING, value, false);
+        return ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, value);
     }
 
     @Override

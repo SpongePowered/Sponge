@@ -34,13 +34,17 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeScreamingData extends AbstractBooleanData<ScreamingData, ImmutableScreamingData> implements ScreamingData {
 
-    public SpongeScreamingData(Boolean value) {
+    public SpongeScreamingData() {
+        this(false);
+    }
+
+    public SpongeScreamingData(boolean value) {
         super(ScreamingData.class, value, Keys.IS_SCREAMING, ImmutableSpongeScreamingData.class);
     }
 
     @Override
     public Value<Boolean> screaming() {
-        return new SpongeValue<Boolean>(Keys.IS_SCREAMING, this.getValue());
+        return new SpongeValue<>(Keys.IS_SCREAMING, this.getValue());
     }
 
     @Override

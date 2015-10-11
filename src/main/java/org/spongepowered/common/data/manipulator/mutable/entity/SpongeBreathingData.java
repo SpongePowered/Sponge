@@ -33,12 +33,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBreathingData> implements BreathingData {
 
@@ -83,12 +80,12 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
 
     @Override
     public MutableBoundedValue<Integer> remainingAir() {
-        return new SpongeBoundedValue<Integer>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, this.maxAir);
+        return new SpongeBoundedValue<>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, this.maxAir);
     }
 
     @Override
     public MutableBoundedValue<Integer> maxAir() {
-        return new SpongeBoundedValue<Integer>(Keys.REMAINING_AIR, this.maxAir, intComparator(), -20, this.maxAir, this.remainingAir);
+        return new SpongeBoundedValue<>(Keys.REMAINING_AIR, this.maxAir, intComparator(), -20, this.maxAir, this.remainingAir);
     }
 
     private int getMaxAir() {
@@ -109,48 +106,12 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.MAX_AIR, new GetterFunction<Object>() {
+        registerFieldGetter(Keys.MAX_AIR, SpongeBreathingData.this::getMaxAir);
+        registerFieldSetter(Keys.MAX_AIR, SpongeBreathingData.this::setMaxAir);
+        registerKeyValue(Keys.MAX_AIR, SpongeBreathingData.this::maxAir);
 
-            @Override
-            public Object get() {
-                return getMaxAir();
-            }
-        });
-        registerFieldSetter(Keys.MAX_AIR, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setMaxAir(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.MAX_AIR, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return maxAir();
-            }
-        });
-
-        registerFieldGetter(Keys.REMAINING_AIR, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getRemainingAir();
-            }
-        });
-        registerFieldSetter(Keys.REMAINING_AIR, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setRemainingAir(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.REMAINING_AIR, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return remainingAir();
-            }
-        });
+        registerFieldGetter(Keys.REMAINING_AIR, SpongeBreathingData.this::getRemainingAir);
+        registerFieldSetter(Keys.REMAINING_AIR, SpongeBreathingData.this::setRemainingAir);
+        registerKeyValue(Keys.REMAINING_AIR, SpongeBreathingData.this::remainingAir);
     }
 }

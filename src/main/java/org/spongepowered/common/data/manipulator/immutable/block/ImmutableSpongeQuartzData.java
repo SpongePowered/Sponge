@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableQuartzData;
 import org.spongepowered.api.data.manipulator.mutable.block.QuartzData;
 import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.api.data.type.QuartzTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeQuartzData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeQuartzData extends AbstractImmutableSingleCatalogDat
     implements ImmutableQuartzData {
 
     public ImmutableSpongeQuartzData(QuartzType value) {
-        super(ImmutableQuartzData.class, value, Keys.QUARTZ_TYPE, SpongeQuartzData.class);
+        super(ImmutableQuartzData.class, value, QuartzTypes.DEFAULT, Keys.QUARTZ_TYPE, SpongeQuartzData.class);
     }
 
 }

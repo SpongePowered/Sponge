@@ -27,7 +27,6 @@ package org.spongepowered.common.data.value.immutable.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -38,6 +37,7 @@ import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class ImmutableSpongeEntityValue implements ImmutableValue<Entity> {
 
@@ -45,7 +45,7 @@ public class ImmutableSpongeEntityValue implements ImmutableValue<Entity> {
     private final Key<? extends BaseValue<Entity>> key;
 
     public ImmutableSpongeEntityValue(Key<? extends BaseValue<Entity>> key, Entity entity) {
-        this.weakReference = new WeakReference<Entity>(checkNotNull(entity));
+        this.weakReference = new WeakReference<>(checkNotNull(entity));
         this.key = checkNotNull(key);
     }
 

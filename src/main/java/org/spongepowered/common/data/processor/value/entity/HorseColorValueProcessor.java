@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -43,46 +42,32 @@ import org.spongepowered.common.entity.SpongeHorseStyle;
 
 import java.util.Optional;
 
-public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<HorseColor, Value<HorseColor>> {
+public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<EntityHorse, HorseColor, Value<HorseColor>> {
 
     public HorseColorValueProcessor() {
-        super(Keys.HORSE_COLOR);
+        super(EntityHorse.class, Keys.HORSE_COLOR);
     }
 
     @Override
     protected Value<HorseColor> constructValue(HorseColor defaultValue) {
-        return new SpongeValue<HorseColor>(Keys.HORSE_COLOR, defaultValue);
+        return new SpongeValue<>(Keys.HORSE_COLOR, defaultValue);
     }
 
     @Override
-    public Optional<HorseColor> getValueFromContainer(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            return Optional.of(HorseUtils.getHorseColor((EntityHorse) container));
-        }
-        return Optional.empty();
+    protected boolean set(EntityHorse container, HorseColor value) {
+        final SpongeHorseStyle style = (SpongeHorseStyle) HorseUtils.getHorseStyle(container);
+        container.setHorseVariant(HorseUtils.getInternalVariant((SpongeHorseColor) value, style));
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityHorse;
+    protected Optional<HorseColor> getVal(EntityHorse container) {
+        return Optional.of(HorseUtils.getHorseColor(container));
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, HorseColor value) {
-        ImmutableValue<HorseColor> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_COLOR, value, HorseColors.WHITE);
-
-        if (this.supports(container)) {
-            EntityHorse horse = (EntityHorse) container;
-
-            HorseColor old = HorseUtils.getHorseColor(horse);
-            SpongeHorseStyle style = (SpongeHorseStyle) HorseUtils.getHorseStyle(horse);
-
-            ImmutableValue<HorseColor> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.HORSE_COLOR, old, HorseColors.WHITE);
-
-            horse.setHorseVariant(HorseUtils.getInternalVariant((SpongeHorseColor) value, style));
-            return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-        }
-        return DataTransactionBuilder.failResult(newValue);
+    protected ImmutableValue<HorseColor> constructImmutableValue(HorseColor value) {
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.WHITE, value);
     }
 
     @Override

@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.data.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.text.SpongeTexts;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -56,12 +63,16 @@ public class NbtDataUtil {
     public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
 
     public static final String ITEM_DISPLAY = "display";
+    public static final String ITEM_DISPLAY_NAME = "name";
     public static final String ITEM_LORE = "Lore";
 
     public static final String ITEM_BOOK_PAGES = "pages";
     public static final String ITEM_BOOK_TITLE = "title";
     public static final String ITEM_BOOK_AUTHOR = "author";
     public static final String ITEM_BOOK_RESOLVED = "resolved";
+    
+    public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";
+    public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
@@ -78,7 +89,10 @@ public class NbtDataUtil {
     public static final byte TAG_INT_ARRAY = 11;
 
     // These are Sponge's NBT tag keys
-    public static final String SPONGE_TAG = "SpongeData";
+    public static final String SPONGE_DATA = "SpongeData";
+    public static final String SPONGE_ENTITY_CREATOR = "Creator";
+    public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
+    public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
     public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
 
     // Compatibility tags for Forge
@@ -99,7 +113,7 @@ public class NbtDataUtil {
      * not exist, none are created. To create a new compound regardless,
      * {@link #getOrCreateCompound(ItemStack)} is recommended.
      *
-     * @param itemStack The itemstack to get the compound from
+     * @param itemStack The item stack to get the compound from
      * @return The main compound, if available
      */
     public static Optional<NBTTagCompound> getItemCompound(ItemStack itemStack) {
@@ -147,21 +161,20 @@ public class NbtDataUtil {
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
         if (rootCompound.hasKey(FORGE_DATA_TAG, TAG_COMPOUND)) {
             final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA_TAG);
-            if (forgeCompound.hasKey(SPONGE_TAG, TAG_COMPOUND)) {
-                final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(SPONGE_TAG);
-                spongeCompound.removeTag(CUSTOM_MANIPULATOR_TAG_LIST);
-                if (spongeCompound.hasNoTags()) {
-                    forgeCompound.removeTag(SPONGE_TAG);
-                }
+            if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+                cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }
-        } else if (rootCompound.hasKey(SPONGE_TAG, TAG_COMPOUND)) {
-            final NBTTagCompound spongeCompound = rootCompound.getCompoundTag(SPONGE_TAG);
-            spongeCompound.removeTag(CUSTOM_MANIPULATOR_TAG_LIST);
-            if (spongeCompound.hasNoTags()) {
-                rootCompound.removeTag(SPONGE_TAG);
-            }
+        } else if (rootCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+            cleanseInnerCompound(rootCompound, SPONGE_DATA);
         }
         return rootCompound;
+    }
+
+    private static void cleanseInnerCompound(NBTTagCompound compound, String innerCompound) {
+        final NBTTagCompound inner = compound.getCompoundTag(innerCompound);
+        if (inner.hasNoTags()) {
+            compound.removeTag(innerCompound);
+        }
     }
 
     public static List<Text> getLoreFromNBT(NBTTagCompound subCompound) {
@@ -183,6 +196,9 @@ public class NbtDataUtil {
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
         final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        if (list.hasNoTags()) {
+            return new ArrayList<>();
+        }
         return SpongeTexts.fromLegacy(list);
     }
 
@@ -205,5 +221,54 @@ public class NbtDataUtil {
             compound.setString(ITEM_BOOK_AUTHOR, INVALID_TITLE);
         }
         compound.setBoolean(ITEM_BOOK_RESOLVED, true);
+    }
+
+    public static List<ItemEnchantment> getItemEnchantments(ItemStack itemStack) {
+        if (!itemStack.isItemEnchanted()) {
+            return Collections.EMPTY_LIST;
+        }
+        final List<ItemEnchantment> enchantments = Lists.newArrayList();
+        final NBTTagList list = itemStack.getEnchantmentTagList();
+        for (int i = 0; i < list.tagCount(); i++) {
+            final NBTTagCompound compound = list.getCompoundTagAt(i);
+            final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
+            final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+
+            final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+            enchantments.add(new ItemEnchantment(enchantment, level));
+        }
+        return enchantments;
+    }
+
+    public static void setItemEnchantments(ItemStack itemStack, List<ItemEnchantment> value) {
+        final NBTTagCompound compound;
+        if (itemStack.getTagCompound() == null) {
+            compound = new NBTTagCompound();
+            itemStack.setTagCompound(compound);
+        } else {
+            compound = itemStack.getTagCompound();
+        }
+        final NBTTagList enchantments = compound.getTagList(NbtDataUtil.ITEM_ENCHANTMENT_LIST, NbtDataUtil.TAG_COMPOUND);
+        final Map<Enchantment, Integer> mergedMap = Maps.newLinkedHashMap(); // We need to retain insertion order.
+        if (enchantments.tagCount() != 0) {
+            for (int i = 0; i < enchantments.tagCount(); i++) { // we have to filter out the enchantments we're replacing...
+                final NBTTagCompound enchantmentCompound = enchantments.getCompoundTagAt(i);
+                final short enchantmentId = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
+                final short level = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+                mergedMap.put(enchantment, (int) level);
+            }
+        }
+        for (ItemEnchantment enchantment : value) {
+            mergedMap.put(enchantment.getEnchantment(), enchantment.getLevel());
+        }
+        final NBTTagList newList = new NBTTagList(); // Reconstruct the newly merged enchantment list
+        for (Map.Entry<Enchantment, Integer> entry : mergedMap.entrySet()) {
+            final NBTTagCompound enchantmentCompound = new NBTTagCompound();
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) ((net.minecraft.enchantment.Enchantment) entry.getKey()).effectId);
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
+            newList.appendTag(enchantmentCompound);
+        }
+        compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
     }
 }

@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.common.text.sink;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
@@ -72,14 +73,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
                 @Override
                 public Iterable<CommandSource> apply(SubjectCollection input) {
                     return Iterables.filter(Iterables.transform(Maps.filterValues(input.getAllWithPermission(PermissionSink.this.permission),
-                                    Predicates.equalTo(true)).keySet(),
-                            new Function<Subject, CommandSource>() {
-                                @Nullable
-                                @Override
-                                public CommandSource apply(@Nullable Subject input) {
-                                    return input.getCommandSource().orElse(null);
-                                }
-                            }), Predicates.notNull());
+                                    Predicates.equalTo(true)).keySet(), func -> func.getCommandSource().orElse(null)), Predicates.notNull());
                 }
             }));
         }
@@ -124,7 +118,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
     public static final MessageSink TO_NONE = new MessageSink() {
         @Override
         public Iterable<CommandSource> getRecipients() {
-            return new HashSet<CommandSource>();
+            return new HashSet<>();
         }
     };
 
@@ -173,7 +167,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
         private final Set<CommandSource> contents;
 
         private FixedSink(Set<CommandSource> provided) {
-            Set<CommandSource> contents = Collections.newSetFromMap(new WeakHashMap<CommandSource, Boolean>());
+            Set<CommandSource> contents = Collections.newSetFromMap(new WeakHashMap<>());
             contents.addAll(provided);
             this.contents = Collections.unmodifiableSet(contents);
         }

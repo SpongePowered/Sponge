@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDropData;
 import org.spongepowered.api.data.manipulator.mutable.block.DropData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDropData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,6 +40,11 @@ public class ImmutableSpongeDropData extends AbstractImmutableBooleanData<Immuta
 
     @Override
     public ImmutableValue<Boolean> willDrop() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.SHOULD_DROP, this.value, true);
+        return ImmutableSpongeValue.cachedOf(Keys.SHOULD_DROP, true, this.value);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return willDrop();
     }
 }

@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.core.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -62,6 +62,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -269,17 +270,6 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
         this.keyMap = builder.build();
     }
 
-    @Nullable
-    @Override
-    public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
-        return get(key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(key).orElse(checkNotNull(defaultValue));
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
@@ -295,11 +285,6 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public boolean supports(Key<?> key) {
         return this.getKeys().contains(checkNotNull(key));
-    }
-
-    @Override
-    public boolean supports(BaseValue<?> baseValue) {
-        return supports(baseValue.getKey());
     }
 
     @Override
@@ -349,6 +334,29 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
             }
         }
 
+        return Optional.empty();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Optional<BlockState> withTrait(BlockTrait<?> trait, Object value) {
+        if (value instanceof String) {
+            Comparable foundValue = null;
+            for (Comparable comparable : trait.getPossibleValues()) {
+                if (comparable.toString().equals(value)) {
+                    foundValue = comparable;
+                    break;
+                }
+            }
+            if (foundValue != null) {
+                return Optional.of((BlockState) this.withProperty((IProperty) trait, foundValue));
+            }
+        }
+        if (value instanceof Comparable) {
+            if (this.properties.containsKey(trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
+                return Optional.of((BlockState) this.withProperty((IProperty) trait, (Comparable) value));
+            }
+        }
         return Optional.empty();
     }
 

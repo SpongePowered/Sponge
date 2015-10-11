@@ -25,9 +25,16 @@
 package org.spongepowered.common.interfaces;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.common.configuration.SpongeConfig;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface IMixinWorld {
 
@@ -37,6 +44,21 @@ public interface IMixinWorld {
 
     ImmutableList<GeneratorPopulator> getGeneratorPopulators();
 
+    List<BlockSnapshot> getBlockBreakList();
+
+    boolean capturingTerrainGen();
+
+    Optional<BlockSnapshot> getCurrentTickBlock();
+
+    Optional<Entity> getCurrentTickEntity();
+
+    Optional<TileEntity> getCurrentTickTileEntity();
+
     void updateWorldGenerator();
 
+    void handlePostTickCaptures(Cause cause);
+
+    void setCapturingTerrainGen(boolean flag);
+
+    void setCapturingEntitySpawns(boolean flag);
 }

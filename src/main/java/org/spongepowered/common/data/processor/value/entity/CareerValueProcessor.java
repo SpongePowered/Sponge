@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
+import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -32,7 +33,6 @@ import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -40,45 +40,35 @@ import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 import java.util.Optional;
 
-public class CareerValueProcessor extends AbstractSpongeValueProcessor<Career, Value<Career>> {
+public class CareerValueProcessor extends AbstractSpongeValueProcessor<EntityVillager, Career, Value<Career>> {
 
     public CareerValueProcessor() {
-        super(Keys.CAREER);
+        super(EntityVillager.class, Keys.CAREER);
     }
 
     @Override
     public Value<Career> constructValue(Career defaultValue) {
-        return new SpongeValue<Career>(Keys.CAREER, defaultValue);
-    }
-
-    @Override
-    public Optional<Career> getValueFromContainer(ValueContainer<?> container) {
-        return container instanceof IMixinVillager ? Optional.of(((IMixinVillager) container).getCareer()) : Optional.<Career>empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof IMixinVillager;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Career value) {
-        final ImmutableValue<Career> newValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, value, Careers.ARMORER);
-        if (container instanceof IMixinVillager) {
-            final Career old = ((IMixinVillager) container).getCareer();
-            final ImmutableValue<Career> oldValue = ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.CAREER, old, Careers.ARMORER);
-            try {
-                ((IMixinVillager) container).setCareer(value);
-                return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newValue);
-            }
-        }
-        return DataTransactionBuilder.failResult(ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.ARMORER, value));
+        return new SpongeValue<>(Keys.CAREER, defaultValue);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionBuilder.failNoData();
+    }
+
+    @Override
+    protected boolean set(EntityVillager container, Career value) {
+        ((IMixinVillager) container).setCareer(value);
+        return true;
+    }
+
+    @Override
+    protected Optional<Career> getVal(EntityVillager container) {
+        return Optional.of(((IMixinVillager) container).getCareer());
+    }
+
+    @Override
+    protected ImmutableValue<Career> constructImmutableValue(Career value) {
+        return ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.FARMER, value);
     }
 }

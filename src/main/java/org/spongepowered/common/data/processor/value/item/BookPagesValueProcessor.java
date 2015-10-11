@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import static org.spongepowered.common.item.ItemsHelper.getTagCompound;
+import static org.spongepowered.common.data.util.ItemsHelper.getTagCompound;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
@@ -34,6 +34,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -44,56 +45,39 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import java.util.List;
 import java.util.Optional;
 
-public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<Text>, ListValue<Text>> {
+public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<ItemStack, List<Text>, ListValue<Text>> {
 
     public BookPagesValueProcessor() {
-        super(Keys.BOOK_PAGES);
-
+        super(ItemStack.class, Keys.BOOK_PAGES);
     }
 
     @Override
     protected ListValue<Text> constructValue(List<Text> defaultValue) {
-        return new SpongeListValue<Text>(Keys.BOOK_PAGES, defaultValue);
+        return new SpongeListValue<>(Keys.BOOK_PAGES, defaultValue);
     }
 
     @Override
-    public Optional<List<Text>> getValueFromContainer(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            final ItemStack itemStack = (ItemStack) container;
-            if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_PAGES)) {
-                return Optional.empty();
-            }
-            return Optional.of(NbtDataUtil.getPagesFromNBT(getTagCompound(itemStack)));
-        }
-        return Optional.empty();
+    protected boolean set(ItemStack container, List<Text> value) {
+        NbtDataUtil.setPagesToNBT(container, value);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        if (container instanceof ItemStack) {
-            return ((ItemStack) container).getItem() == Items.writable_book || ((ItemStack) container).getItem() == Items.written_book;
-        } else {
-            return false;
+    protected Optional<List<Text>> getVal(ItemStack container) {
+        if (!container.hasTagCompound() || !container.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_PAGES)) {
+            return Optional.empty();
         }
+        return Optional.of(NbtDataUtil.getPagesFromNBT(getTagCompound(container)));
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, List<Text> value) {
-        final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
-        if (this.supports(container)) {
-            final Optional<List<Text>> oldData = getValueFromContainer(container);
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            if (oldData.isPresent()) {
-                final ImmutableListValue<Text> oldPages =
-                        new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
-                builder.replace(oldPages);
-            }
-            NbtDataUtil.setPagesToNBT((ItemStack) container, value);
-            builder.success(pages);
-            return builder.result(DataTransactionResult.Type.SUCCESS).build();
+    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
+        return new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
+    }
 
-        }
-        return DataTransactionBuilder.failResult(pages);
+    @Override
+    protected boolean supports(ItemStack container) {
+        return container.getItem() == Items.writable_book || container.getItem() == Items.written_book;
     }
 
     @Override
@@ -102,7 +86,7 @@ public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<List<T
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
-                final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<Text>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
+                final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
                 builder.replace(pages);
             }
             NbtDataUtil.removePagesFromNBT((ItemStack) container);

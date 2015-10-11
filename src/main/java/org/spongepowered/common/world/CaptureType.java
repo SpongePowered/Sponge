@@ -22,10 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.world;
 
-public interface GetterFunction<V> {
 
-    V get();
+public enum CaptureType {
+
+    BREAK,
+    FLUID,
+    MODIFY,
+    PLACE,
+    POPULATE
 
 }

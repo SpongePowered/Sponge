@@ -34,12 +34,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgniteableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeIgniteableData extends AbstractData<IgniteableData, ImmutableIgniteableData> implements IgniteableData {
 
@@ -60,12 +57,12 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
 
     @Override
     public MutableBoundedValue<Integer> fireTicks() {
-        return new SpongeBoundedValue<Integer>(Keys.FIRE_TICKS, 10, intComparator(), 1, Integer.MAX_VALUE, this.fireTicks);
+        return new SpongeBoundedValue<>(Keys.FIRE_TICKS, 10, intComparator(), 1, Integer.MAX_VALUE, this.fireTicks);
     }
 
     @Override
     public MutableBoundedValue<Integer> fireDelay() {
-        return new SpongeBoundedValue<Integer>(Keys.FIRE_DAMAGE_DELAY, 20, intComparator(), 0, Integer.MAX_VALUE, this.fireDelay);
+        return new SpongeBoundedValue<>(Keys.FIRE_DAMAGE_DELAY, 20, intComparator(), 0, Integer.MAX_VALUE, this.fireDelay);
     }
 
     @Override
@@ -114,49 +111,13 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FIRE_TICKS, new GetterFunction<Object>() {
+        registerFieldGetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::getFireTicks);
+        registerFieldSetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::setFireTicks);
+        registerKeyValue(Keys.FIRE_TICKS, SpongeIgniteableData.this::fireTicks);
 
-            @Override
-            public Object get() {
-                return getFireTicks();
-            }
-        });
-        registerFieldSetter(Keys.FIRE_TICKS, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setFireTicks(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.FIRE_TICKS, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return fireTicks();
-            }
-        });
-
-        registerFieldGetter(Keys.FIRE_DAMAGE_DELAY, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getFireDelay();
-            }
-        });
-        registerFieldSetter(Keys.FIRE_DAMAGE_DELAY, new SetterFunction<Object>() {
-
-            @Override
-            public void set(Object value) {
-                setFireDelay(((Number) value).intValue());
-            }
-        });
-        registerKeyValue(Keys.FIRE_DAMAGE_DELAY, new GetterFunction<Value<?>>() {
-
-            @Override
-            public Value<?> get() {
-                return fireDelay();
-            }
-        });
+        registerFieldGetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::getFireDelay);
+        registerFieldSetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::setFireDelay);
+        registerKeyValue(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::fireDelay);
     }
 
 }

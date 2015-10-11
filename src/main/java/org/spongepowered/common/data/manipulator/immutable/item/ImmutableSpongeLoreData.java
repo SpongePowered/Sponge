@@ -32,14 +32,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.GetterFunction;
 
 import java.util.List;
 
@@ -59,12 +57,7 @@ public class ImmutableSpongeLoreData extends AbstractImmutableData<ImmutableLore
 
     @Override
     public ImmutableListValue<Text> lore() {
-        return new ImmutableSpongeListValue<Text>(Keys.ITEM_LORE, this.lore);
-    }
-
-    @Override
-    public ImmutableSpongeLoreData copy() {
-        return this;
+        return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, this.lore);
     }
 
     @Override
@@ -89,19 +82,7 @@ public class ImmutableSpongeLoreData extends AbstractImmutableData<ImmutableLore
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_LORE, new GetterFunction<Object>() {
-
-            @Override
-            public Object get() {
-                return getLore();
-            }
-        });
-        registerKeyValue(Keys.ITEM_LORE, new GetterFunction<ImmutableValue<?>>() {
-
-            @Override
-            public ImmutableValue<?> get() {
-                return lore();
-            }
-        });
+        registerFieldGetter(Keys.ITEM_LORE, ImmutableSpongeLoreData.this::getLore);
+        registerKeyValue(Keys.ITEM_LORE, ImmutableSpongeLoreData.this::lore);
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntitySheep;
-import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.entity.living.animal.Sheep;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
@@ -52,12 +51,6 @@ public abstract class MixinEntitySheep extends MixinEntityAnimal implements Shee
         } else {
             this.dataWatcher.updateObject(16, (byte) (b0 & -17));
         }
-    }
-
-
-    @Override
-    public DyeableData getDyeData() {
-        return get(DyeableData.class).get();
     }
 
 }

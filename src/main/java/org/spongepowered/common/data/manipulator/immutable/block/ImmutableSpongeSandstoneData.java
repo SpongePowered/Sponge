@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandstoneData;
 import org.spongepowered.api.data.manipulator.mutable.block.SandstoneData;
 import org.spongepowered.api.data.type.SandstoneType;
+import org.spongepowered.api.data.type.SandstoneTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSandstoneData;
 
@@ -35,7 +36,7 @@ public class ImmutableSpongeSandstoneData extends AbstractImmutableSingleCatalog
     implements ImmutableSandstoneData {
 
     public ImmutableSpongeSandstoneData(SandstoneType value) {
-        super(ImmutableSandstoneData.class, value, Keys.SANDSTONE_TYPE, SpongeSandstoneData.class);
+        super(ImmutableSandstoneData.class, value, SandstoneTypes.DEFAULT, Keys.SANDSTONE_TYPE, SpongeSandstoneData.class);
     }
 
 }

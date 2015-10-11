@@ -46,7 +46,7 @@ public class SpongeScore implements Score {
 
     private UUID uuid = UUID.randomUUID();
 
-    private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<ScoreObjective, net.minecraft.scoreboard.Score>();
+    private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
 
     public SpongeScore(Text name) {
         this.name = name;
@@ -76,7 +76,7 @@ public class SpongeScore implements Score {
 
     @Override
     public Set<Objective> getObjectives() {
-        Set<Objective> objectives = new HashSet<Objective>();
+        Set<Objective> objectives = new HashSet<>();
         for (ScoreObjective objective: this.scores.keySet()) {
             objectives.add(((IMixinScoreObjective) objective).getSpongeObjective());
         }

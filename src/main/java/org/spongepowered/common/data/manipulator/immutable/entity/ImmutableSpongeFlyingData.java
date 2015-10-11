@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,6 +40,11 @@ public class ImmutableSpongeFlyingData extends AbstractImmutableBooleanData<Immu
 
     @Override
     public ImmutableValue<Boolean> flying() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.IS_FLYING, false, this.value);
+        return ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, false, this.value);
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return flying();
     }
 }
