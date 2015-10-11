@@ -35,6 +35,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeElderData extends AbstractImmutableBooleanData<ImmutableElderData, ElderData> implements ImmutableElderData {
 
+    private ImmutableValue<Boolean> elderValue = ImmutableSpongeValue.cachedOf(Keys.ELDER_GUARDIAN, false, this.getValue());
 
     public ImmutableSpongeElderData(boolean value) {
         super(ImmutableElderData.class, value, Keys.ELDER_GUARDIAN, SpongeElderData.class);
@@ -42,6 +43,11 @@ public class ImmutableSpongeElderData extends AbstractImmutableBooleanData<Immut
 
     @Override
     public ImmutableValue<Boolean> elder() {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.ELDER_GUARDIAN, this.getValue(), false);
+        return this.elderValue;
+    }
+
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return elder();
     }
 }

@@ -64,7 +64,7 @@ public class ElderDataProcessor extends AbstractEntitySingleDataProcessor<Entity
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return new ImmutableSpongeValue<>(Keys.ELDER_GUARDIAN, false, value);
+        return ImmutableSpongeValue.cachedOf(Keys.ELDER_GUARDIAN, false, value);
     }
 
     @Override

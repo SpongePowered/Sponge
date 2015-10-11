@@ -37,45 +37,31 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ElderValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
+public class ElderValueProcessor extends AbstractSpongeValueProcessor<EntityGuardian, Boolean, Value<Boolean>> {
 
     public ElderValueProcessor() {
-        super(Keys.ELDER_GUARDIAN);
+        super(EntityGuardian.class, Keys.ELDER_GUARDIAN);
     }
 
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(Keys.ELDER_GUARDIAN, false, defaultValue);
+        return new SpongeValue<>(Keys.ELDER_GUARDIAN, defaultValue);
     }
 
     @Override
-    public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            return Optional.of(((EntityGuardian) container).isElder());
-        }
-        return Optional.empty();
+    protected boolean set(EntityGuardian container, Boolean value) {
+        container.setElder(value);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityGuardian;
+    protected Optional<Boolean> getVal(EntityGuardian container) {
+        return Optional.of(container.isElder());
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue proposedValue = new ImmutableSpongeValue(Keys.ELDER_GUARDIAN, value);
-
-        if (container instanceof EntityGuardian) {
-            final ImmutableValue oldValue = getApiValueFromContainer(container).get().asImmutable();
-
-            try {
-                ((EntityGuardian) container).setElder(value);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(proposedValue);
-            }
-            return DataTransactionBuilder.builder().success(proposedValue).replace(oldValue).result(DataTransactionResult.Type.SUCCESS).build();
-        }
-        return DataTransactionBuilder.failResult(proposedValue);
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.ELDER_GUARDIAN, false, value);
     }
 
     @Override
