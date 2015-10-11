@@ -52,14 +52,14 @@ abstract class SchedulerBase {
 
     /**
      * Gets the timestamp to update the timestamp of a task. This method is task
-     * sensitive to support different timestamp types i.e. wall clock and ticks.
+     * sensitive to support different timestamp types i.e. nanotime and ticks.
      *
      * @param task The task
      * @return Timestamp for the task
      */
     protected long getTimestamp(ScheduledTask task) {
-        // Supports wall clock time by default
-        return System.currentTimeMillis();
+        // Supports nanotime by default
+        return System.nanoTime();
     }
 
     /**

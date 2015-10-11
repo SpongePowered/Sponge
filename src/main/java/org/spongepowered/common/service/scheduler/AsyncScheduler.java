@@ -57,7 +57,7 @@ public class AsyncScheduler extends SchedulerBase {
 
     private void mainLoop() {
         this.executor = Executors.newCachedThreadPool();
-        this.lastProcessingTimestamp = System.currentTimeMillis();
+        this.lastProcessingTimestamp = System.nanoTime();
         while (true) {
             recalibrateMinimumTimeout();
             this.runTick();
@@ -69,7 +69,7 @@ public class AsyncScheduler extends SchedulerBase {
         try {
             Set<Task> tasks = this.getScheduledTasks();
             this.minimumTimeout = Long.MAX_VALUE;
-            long now = System.currentTimeMillis();
+            long now = System.nanoTime();
             for (Task tmpTask : tasks) {
                 ScheduledTask task = (ScheduledTask) tmpTask;
                 // Recalibrate the wait delay for processing tasks before new
@@ -93,7 +93,7 @@ public class AsyncScheduler extends SchedulerBase {
                 }
             }
             if (!tasks.isEmpty()) {
-                long latency = System.currentTimeMillis() - this.lastProcessingTimestamp;
+                long latency = System.nanoTime() - this.lastProcessingTimestamp;
                 this.minimumTimeout -= (latency <= 0) ? 0 : latency;
                 this.minimumTimeout = (this.minimumTimeout < 0) ? 0 : this.minimumTimeout;
             }
@@ -106,7 +106,7 @@ public class AsyncScheduler extends SchedulerBase {
     protected void preTick() {
         this.lock.lock();
         try {
-            this.condition.await(this.minimumTimeout, TimeUnit.MILLISECONDS);
+            this.condition.await(this.minimumTimeout, TimeUnit.NANOSECONDS);
         } catch (InterruptedException ignored) {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
@@ -117,7 +117,7 @@ public class AsyncScheduler extends SchedulerBase {
 
     @Override
     protected void postTick() {
-        this.lastProcessingTimestamp = System.currentTimeMillis();
+        this.lastProcessingTimestamp = System.nanoTime();
     }
 
     @Override

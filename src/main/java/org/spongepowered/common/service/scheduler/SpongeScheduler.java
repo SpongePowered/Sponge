@@ -38,13 +38,15 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SpongeScheduler implements SchedulerService {
 
     private static final SpongeScheduler INSTANCE = new SpongeScheduler();
-    public static final int TICK_DURATION = 50;
+    public static final int TICK_DURATION_MS = 50;
+    public static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS.convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
 
     private final AsyncScheduler asyncScheduler;
     private final SyncScheduler syncScheduler;
@@ -124,7 +126,7 @@ public class SpongeScheduler implements SchedulerService {
 
     @Override
     public int getPreferredTickInterval() {
-        return TICK_DURATION;
+        return TICK_DURATION_MS;
     }
 
     /**
