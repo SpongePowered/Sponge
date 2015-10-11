@@ -32,8 +32,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.Optional;
 

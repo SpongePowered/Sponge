@@ -33,12 +33,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBreathingData> implements BreathingData {
 

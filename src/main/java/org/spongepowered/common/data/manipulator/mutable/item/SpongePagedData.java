@@ -32,14 +32,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.ArrayList;
 import java.util.List;

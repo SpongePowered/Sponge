@@ -35,7 +35,6 @@ import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.processor.data.item.GoldenAppleDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 

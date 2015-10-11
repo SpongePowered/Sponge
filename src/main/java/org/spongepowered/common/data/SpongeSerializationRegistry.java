@@ -208,8 +208,6 @@ import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
 import org.spongepowered.common.data.processor.value.ItemEnchantmentValueProcessor;
 import org.spongepowered.common.data.processor.value.RepresentedItemValueProcessor;
-import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
-import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EntityDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ExperienceFromStartOfLevelValueProcessor;
@@ -238,8 +236,10 @@ import org.spongepowered.common.data.processor.value.item.BookPagesValueProcesso
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntityDisplayNameValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
 

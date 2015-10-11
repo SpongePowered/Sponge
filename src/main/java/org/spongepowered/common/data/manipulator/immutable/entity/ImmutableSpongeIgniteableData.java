@@ -34,11 +34,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.util.GetterFunction;
 
 public class ImmutableSpongeIgniteableData extends AbstractImmutableData<ImmutableIgniteableData, IgniteableData> implements ImmutableIgniteableData {
 

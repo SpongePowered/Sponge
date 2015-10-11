@@ -42,8 +42,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHorseData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData> implements HorseData {
 

@@ -27,10 +27,7 @@ package org.spongepowered.common.data.builder.manipulator.mutable.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -38,10 +35,8 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.util.NbtDataUtil;
 

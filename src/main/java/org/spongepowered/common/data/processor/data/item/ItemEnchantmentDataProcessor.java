@@ -27,11 +27,7 @@ package org.spongepowered.common.data.processor.data.item;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -42,7 +38,6 @@ import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
@@ -51,7 +46,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {

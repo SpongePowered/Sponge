@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.entity;
 
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.flowpowered.math.vector.Vector3d;
