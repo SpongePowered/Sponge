@@ -145,6 +145,7 @@ public class KeyRegistry {
         keyMap.put("book_author", makeSingleKey(Text.class, Value.class, of("BookAuthor")));
         keyMap.put("walking_speed", makeSingleKey(Double.class, Value.class, of("WalkingSpeed")));
         keyMap.put("flying_speed", makeSingleKey(Double.class, Value.class, of("FlyingSpeed")));
+        
    }
 
     private static Map<String, Key<?>> getKeyMap() {
