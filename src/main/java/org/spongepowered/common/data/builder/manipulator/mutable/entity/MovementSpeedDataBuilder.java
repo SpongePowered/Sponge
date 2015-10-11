@@ -30,6 +30,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
@@ -61,9 +62,12 @@ public class MovementSpeedDataBuilder implements DataManipulatorBuilder<Movement
 
     @Override
     public Optional<MovementSpeedData> build(DataView container) throws InvalidDataException {
-        double walkSpeed = getData(container, Keys.WALKING_SPEED);
-        double flySpeed = getData(container, Keys.FLYING_SPEED);
-        MovementSpeedData movementSpeedData = new SpongeMovementSpeedData(walkSpeed, flySpeed);
-        return Optional.of(movementSpeedData);
+            if (container.contains(Keys.WALKING_SPEED.getQuery()) && container.contains(Keys.FLYING_SPEED.getQuery())) {
+                double walkSpeed = getData(container, Keys.WALKING_SPEED);
+                double flySpeed = getData(container, Keys.FLYING_SPEED);
+                MovementSpeedData movementSpeedData = new SpongeMovementSpeedData(walkSpeed, flySpeed);
+                return Optional.of(movementSpeedData);
+            }
+            return Optional.empty();
     }
 }
