@@ -92,7 +92,7 @@ public class WetValueProcessor extends AbstractSpongeValueProcessor<Boolean, Val
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (this.supports(container)) {
-             if (container instanceof ItemStack) {
+            if (container instanceof ItemStack) {
                 ItemStack stack = (ItemStack) container;
                 
                 if (stack.getItem().equals(ItemTypes.SPONGE)) {
