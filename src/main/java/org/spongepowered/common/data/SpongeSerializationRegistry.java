@@ -148,18 +148,7 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDispla
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHorseData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgniteableData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
+import org.spongepowered.common.data.manipulator.immutable.entity.*;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGoldenAppleData;
@@ -423,8 +412,8 @@ public class SpongeSerializationRegistry {
         final MovementSpeedDataProcessor movementSpeedDataProcessor = new MovementSpeedDataProcessor();
         final MovementSpeedDataBuilder movementSpeedDataBuilder = new MovementSpeedDataBuilder();
         service.registerBuilder(MovementSpeedData.class, movementSpeedDataBuilder);
-        dataRegistry.registerDataProcessorAndImpl(MovementSpeedData.class, SpongeMovementSpeedData.class, ImmutableMovementSpeedData.class,
-                ImmutableMovementSpeedData.class, movementSpeedDataProcessor, movementSpeedDataBuilder);
+        dataRegistry.registerDataProcessorAndImplBuilder(MovementSpeedData.class, SpongeMovementSpeedData.class, ImmutableMovementSpeedData.class,
+                ImmutableSpongeMovementSpeedData.class, movementSpeedDataProcessor, movementSpeedDataBuilder);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());

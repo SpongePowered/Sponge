@@ -32,48 +32,41 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Double, MutableBoundedValue<Double>> {
+public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, MutableBoundedValue<Double>> {
 
     public FlyingSpeedValueProcessor() {
-        super(Keys.FLYING_SPEED);
+        super(EntityPlayer.class, Keys.FLYING_SPEED);
     }
 
     @Override
     protected MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<>(this.getKey(), 0.05d, doubleComparator(), 0d, Double.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(this.getKey(), 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE, defaultValue);
     }
 
     @Override
-    public Optional<Double> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            return Optional.of((double) ((EntityPlayer) container).capabilities.getFlySpeed());
-        }
-        return Optional.empty();
+    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityPlayer;
+    protected boolean set(EntityPlayer container, Double value) {
+        container.capabilities.flySpeed = value.floatValue();
+        container.sendPlayerAbilities();
+        return true;
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
-        final ImmutableValue<Double> proposedValue = new ImmutableSpongeValue<>(Keys.FLYING_SPEED, value);
-        if (supports(container)) {
-            final ImmutableValue<Double> newFlyingSpeedValue = new ImmutableSpongeValue<>(Keys.FLYING_SPEED, value);
-            final ImmutableValue<Double> oldFlyingSpeedValue = getApiValueFromContainer(container).get().asImmutable();
-            ((EntityPlayer) container).capabilities.flySpeed = value.floatValue();
-            ((EntityPlayer) container).sendPlayerAbilities();
-            return DataTransactionBuilder.successReplaceResult(oldFlyingSpeedValue, newFlyingSpeedValue);
-        }
-        return DataTransactionBuilder.failResult(proposedValue);
+    protected Optional<Double> getVal(EntityPlayer container) {
+        return Optional.of(((double)container.capabilities.getFlySpeed()));
     }
 
     @Override

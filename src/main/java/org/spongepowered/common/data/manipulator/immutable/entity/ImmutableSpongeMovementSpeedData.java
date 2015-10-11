@@ -78,11 +78,6 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
     }
 
     @Override
-    public ImmutableMovementSpeedData copy() {
-        return this;
-    }
-
-    @Override
     public MovementSpeedData asMutable() {
         return new SpongeMovementSpeedData(walkSpeed, flySpeed);
     }
