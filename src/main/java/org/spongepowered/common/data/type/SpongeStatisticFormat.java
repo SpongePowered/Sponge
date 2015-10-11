@@ -63,19 +63,27 @@ public class SpongeStatisticFormat implements StatisticFormat {
     @Override
     public String format(long value) {
         if (this.id.equals("DISTANCE")) {
-            double d0 = (double) value / 100.0D;
-            double d1 = d0 / 1000.0D;
-            return d1 > 0.5D ? this.decimalFormat.format(d1) + " km" : (d0 > 0.5D ? this.decimalFormat.format(d0) + " m" : value + " cm");
+            if(((value / 100.0D) / 1000.0D) > 0.5D) {
+                return this.decimalFormat.format((value / 100.0D) / 1000.0D) + " km";
+            } else if((value / 100.0D) > 0.5D) {
+                return this.decimalFormat.format(value / 100.0D) + " m";
+            } else {
+                return this.decimalFormat.format(value) + " cm";
+            }
         } else if (this.id.equals("TIME")) {
-            double d0 = (double) value / 20.0D;
-            double d1 = d0 / 60.0D;
-            double d2 = d1 / 60.0D;
-            double d3 = d2 / 24.0D;
-            double d4 = d3 / 365.0D;
-            return d4 > 0.5D ? this.decimalFormat.format(d4) + " y" : (d3 > 0.5D ? this.decimalFormat.format(d3) + " d" :
-                    (d2 > 0.5D ? this.decimalFormat.format(d2) + " h" : (d1 > 0.5D ? this.decimalFormat.format(d1) + " m" : d0 + " s")));
+            if((((((value / 20.0D) / 60.0D) / 60.0D) / 24.0D) / 365.0D) > 0.5D) {
+                return this.decimalFormat.format(((((value / 20.0D) / 60.0D) / 60.0D) / 24.0D) / 365.0D) + " y";
+            } else if(((((value / 20.0D) / 60.0D) / 60.0D) / 24.0D) > 0.5D) {
+                return this.decimalFormat.format((((value / 20.0D) / 60.0D) / 60.0D) / 24.0D) + " d";
+            } else if((((value / 20.0D) / 60.0D) / 60.0D) > 0.5D) {
+                return this.decimalFormat.format(((value / 20.0D) / 60.0D) / 60.0D) + " h";
+            } else if(((value / 20.0D) / 60.0D) > 0.5D) {
+                return this.decimalFormat.format((value / 20.0D) / 60.0D) + " m";
+            } else {
+                return this.decimalFormat.format(value / 20.0D) + " s";
+            }
         } else if (this.id.equals("FRACTIONAL")) {
-            return this.decimalFormat.format((double) value * 0.1D);
+            return this.decimalFormat.format(value * 0.1D);
         } else {
             return this.numberFormat.format(value);
         }

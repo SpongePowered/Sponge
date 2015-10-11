@@ -89,9 +89,6 @@ public class SpongeStatisticGroup implements StatisticGroup {
     @Override
     public Translation getTranslation() {
         switch (this.id) {
-            case "GENERAL":
-            default:
-                return new FixedTranslation("General");
             case "HIDDEN":
                 return new FixedTranslation("Hidden");
             case "HAS_KILLED_ENTITY":
@@ -114,6 +111,9 @@ public class SpongeStatisticGroup implements StatisticGroup {
                 return new FixedTranslation("HasKilledTeam");
             case "KILLED_BY_TEAM":
                 return new FixedTranslation("KilledByTeam");
+            case "GENERAL":
+            default:
+                return new FixedTranslation("General");
         }
     }
 }

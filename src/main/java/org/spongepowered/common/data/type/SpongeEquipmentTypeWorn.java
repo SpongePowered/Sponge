@@ -38,11 +38,13 @@ public class SpongeEquipmentTypeWorn extends SpongeEquipmentType implements Equi
 
     @Override
     public boolean equals(Object obj) {
-        if(super.equals(obj))
+        if (super.equals(obj)) {
             return true;
-        if(obj instanceof SpongeEquipmentTypeWorn) {
-            if(((EquipmentTypeWorn) obj).getId().equals("WORN"))
+        }
+        if (obj instanceof SpongeEquipmentTypeWorn) {
+            if (((EquipmentTypeWorn) obj).getId().equals("WORN")) {
                 return true;
+            }
         }
         return false;
     }

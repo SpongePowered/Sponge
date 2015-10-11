@@ -27,6 +27,7 @@ package org.spongepowered.common.data.type;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 
 public class SpongeEquipmentType implements EquipmentType {
+
     private final String id;
 
     public SpongeEquipmentType(String id) {
@@ -49,13 +50,19 @@ public class SpongeEquipmentType implements EquipmentType {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == this)
+        if (obj == this) {
             return true;
-        if(obj instanceof EquipmentType) {
-            if(((EquipmentType) obj).getId().equals("ANY"))
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof EquipmentType) {
+            if (((EquipmentType) obj).getId().equals("ANY")) {
                 return true;
-            if(((EquipmentType) obj).getId().equals(getId()))
+            }
+            if (((EquipmentType) obj).getId().equals(getId())) {
                 return true;
+            }
         }
         return false;
     }
