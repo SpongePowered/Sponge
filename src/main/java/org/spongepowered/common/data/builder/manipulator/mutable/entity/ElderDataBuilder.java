@@ -41,8 +41,10 @@ public class ElderDataBuilder implements DataManipulatorBuilder<ElderData, Immut
 
     @Override
     public Optional<ElderData> build(DataView container) throws InvalidDataException {
-        Boolean elder = DataUtil.getData(container, Keys.ELDER_GUARDIAN);
-        return Optional.of(new SpongeElderData(elder));
+        if(container.contains(Keys.ELDER_GUARDIAN.getQuery())) {
+            return Optional.of(new SpongeElderData(DataUtil.getData(container, Keys.ELDER_GUARDIAN)));
+        }
+        return Optional.empty();
     }
 
     @Override
