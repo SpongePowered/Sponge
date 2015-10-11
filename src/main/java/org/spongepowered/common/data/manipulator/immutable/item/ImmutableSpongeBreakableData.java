@@ -41,7 +41,7 @@ import java.util.Set;
 
 public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData<BlockType, ImmutableBreakableData, BreakableData> implements ImmutableBreakableData {
 
-	public ImmutableSpongeBreakableData() {
+    public ImmutableSpongeBreakableData() {
         this(ImmutableSet.<BlockType>of());
     }
 
@@ -65,7 +65,7 @@ public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData
     }
 
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public ImmutableSetValue<BlockType> breakable() {
         return (ImmutableSetValue<BlockType>) getValueGetter();
     }

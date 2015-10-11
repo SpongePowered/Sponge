@@ -66,7 +66,7 @@ public class SpongePlaceableData extends AbstractSingleSetData<BlockType, Placea
     }
 
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public SetValue<BlockType> placeable() {
         return (SetValue<BlockType>) getValueGetter();
     }

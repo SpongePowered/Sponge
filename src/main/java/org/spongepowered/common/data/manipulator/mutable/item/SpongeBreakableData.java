@@ -66,7 +66,7 @@ public class SpongeBreakableData extends AbstractSingleSetData<BlockType, Breaka
     }
 
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public SetValue<BlockType> breakable() {
         return (SetValue<BlockType>) getValueGetter();
     }

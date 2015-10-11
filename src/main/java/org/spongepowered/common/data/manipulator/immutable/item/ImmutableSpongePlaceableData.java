@@ -41,7 +41,7 @@ import java.util.Set;
 
 public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData<BlockType, ImmutablePlaceableData, PlaceableData> implements ImmutablePlaceableData {
 
-	public ImmutableSpongePlaceableData() {
+    public ImmutableSpongePlaceableData() {
         this(ImmutableSet.<BlockType>of());
     }
 
@@ -65,7 +65,7 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData
     }
 
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public ImmutableSetValue<BlockType> placeable() {
         return (ImmutableSetValue<BlockType>) getValueGetter();
     }
