@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.stats;
 
+import com.google.common.collect.Lists;
+import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.IStatType;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.IChatComponent;
@@ -39,6 +41,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(net.minecraft.stats.Achievement.class)
@@ -52,7 +55,7 @@ public abstract class MixinAchievement extends StatBase implements Achievement {
     }
 
     public Translation achievement$getDescription() {
-        return new SpongeTranslation("achievement." + this.statId + ".desc");
+        return new SpongeTranslation(this.statId + ".desc");
     }
 
     public Optional<Achievement> achievement$getParent() {
@@ -60,7 +63,14 @@ public abstract class MixinAchievement extends StatBase implements Achievement {
     }
 
     public Collection<Achievement> achievement$getChildren() {
-        return null;
+        List<Achievement> ret = Lists.newArrayList();
+        for (Object obj : AchievementList.achievementList) {
+            net.minecraft.stats.Achievement ach = (net.minecraft.stats.Achievement) obj;
+            if (ach.parentAchievement != null && ach.parentAchievement.equals(this)) {
+                ret.add((Achievement) ach);
+            }
+        }
+        return ret;
     }
 
     public Optional<Statistic> achievement$getSourceStatistic() {
@@ -72,7 +82,7 @@ public abstract class MixinAchievement extends StatBase implements Achievement {
     }
 
     public String achievement$getId() {
-        return "achievement." + this.statId;
+        return this.statId;
     }
 
     public String achievement$getName() {
@@ -80,10 +90,10 @@ public abstract class MixinAchievement extends StatBase implements Achievement {
     }
 
     public Text achievement$toText() {
-        return Texts.of(new SpongeTranslation("achievement." + this.statId));
+        return Texts.of(new SpongeTranslation(this.statId));
     }
 
     public Translation achievement$getTranslation() {
-        return new SpongeTranslation("achievement." + this.statId);
+        return new SpongeTranslation(this.statId);
     }
 }

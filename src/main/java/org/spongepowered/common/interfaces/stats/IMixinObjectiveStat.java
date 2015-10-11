@@ -22,28 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.interfaces.stats;
 
-import net.minecraft.block.BlockQuartz;
-import org.spongepowered.api.data.type.QuartzType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.statistic.Statistic;
 
-@Mixin(BlockQuartz.EnumType.class)
-@Implements(@Interface(iface = QuartzType.class, prefix = "type$"))
-public abstract class MixinEnumQuartzType implements QuartzType {
-
-    @Shadow private String unlocalizedName;
-
-    public String type$getId() {
-        return this.unlocalizedName;
-    }
-
-    @Intrinsic
-    public String type$getName() {
-        return this.unlocalizedName;
-    }
+public interface IMixinObjectiveStat {
+    Statistic getStatistic();
 }

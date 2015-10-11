@@ -22,10 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.stats;
+package org.spongepowered.common.util;
 
-import org.spongepowered.api.statistic.Statistic;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityHorse;
+import org.spongepowered.api.data.DataHolder;
 
-public interface IMixinObjectiveStat {
-    Statistic getStatistic();
+import java.util.function.Predicate;
+
+public class Predicates {
+
+    public static Predicate<DataHolder> rangedAttributePredicate(String name) {
+        return input -> {
+            switch (name) {
+                case "horse.jumpStrength":
+                    return input instanceof EntityHorse;
+                case "zombie.spawnReinforcements":
+                    return input instanceof EntityZombie;
+                default:
+                    return input instanceof EntityLivingBase;
+            }
+        };
+    }
+
 }

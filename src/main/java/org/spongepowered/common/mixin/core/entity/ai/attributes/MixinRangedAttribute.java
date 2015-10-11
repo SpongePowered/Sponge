@@ -24,18 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai.attributes;
 
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.BaseAttribute;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.attribute.Attribute;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.Predicates;
 
 import java.util.function.Predicate;
 
@@ -46,12 +44,12 @@ public abstract class MixinRangedAttribute extends BaseAttribute implements Attr
     @Shadow private double minimumValue;
     @Shadow private double maximumValue;
 
-    protected MixinRangedAttribute(IAttribute p_i45892_1_, String unlocalizedNameIn, double defaultValueIn) {
+    private MixinRangedAttribute(IAttribute p_i45892_1_, String unlocalizedNameIn, double defaultValueIn) {
         super(p_i45892_1_, unlocalizedNameIn, defaultValueIn);
     }
 
     public double attribute$getMinimum() {
-        return this.maximumValue;
+        return this.minimumValue;
     }
 
     public double attribute$getMaximum() {
@@ -59,20 +57,11 @@ public abstract class MixinRangedAttribute extends BaseAttribute implements Attr
     }
 
     public double attribute$getDefaultValue() {
-        return this.getDefaultValue();
+        return super.getDefaultValue();
     }
 
     public Predicate<DataHolder> attribute$getTargets() {
-        return input -> {
-            switch (this.getAttributeUnlocalizedName()) {
-                case "horse.jumpStrength":
-                    return input instanceof EntityHorse;
-                case "zombie.spawnReinforcements":
-                    return input instanceof EntityZombie;
-                default:
-                    return input instanceof EntityLivingBase;
-            }
-        };
+        return Predicates.rangedAttributePredicate(this.getAttributeUnlocalizedName());
     }
 
     public String attribute$getId() {

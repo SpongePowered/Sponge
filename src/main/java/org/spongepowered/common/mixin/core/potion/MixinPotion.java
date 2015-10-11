@@ -26,18 +26,35 @@ package org.spongepowered.common.mixin.core.potion;
 
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.potion.PotionEffectType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
 public abstract class MixinPotion implements PotionEffectType {
 
+    @Shadow public int id;
+    @Shadow private String name;
+
     public boolean potion$isInstant() {
-        return false;
+        return this.id == 6 || this.id == 7;
     }
 
+    public String potion$getId() {
+        return this.name;
+    }
+
+    public String potion$getName() {
+        return this.name;
+    }
+
+    public Translation potion$getTranslation() {
+        return new SpongeTranslation(this.name);
+    }
 }

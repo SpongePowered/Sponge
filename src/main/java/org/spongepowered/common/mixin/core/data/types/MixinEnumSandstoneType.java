@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.block.BlockQuartz;
-import org.spongepowered.api.data.type.QuartzType;
+import net.minecraft.block.BlockSandStone;
+import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockQuartz.EnumType.class)
-@Implements(@Interface(iface = QuartzType.class, prefix = "type$"))
-public abstract class MixinEnumQuartzType implements QuartzType {
+@Mixin(BlockSandStone.EnumType.class)
+@Implements(@Interface(iface = SandstoneType.class, prefix = "type$"))
+public abstract class MixinEnumSandstoneType implements SandstoneType {
 
     @Shadow private String unlocalizedName;
 
@@ -42,7 +41,6 @@ public abstract class MixinEnumQuartzType implements QuartzType {
         return this.unlocalizedName;
     }
 
-    @Intrinsic
     public String type$getName() {
         return this.unlocalizedName;
     }

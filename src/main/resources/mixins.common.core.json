@@ -62,6 +62,7 @@
         "data.types.MixinEnumPrismarineType",
         "data.types.MixinEnumQuartzType",
         "data.types.MixinEnumRailDirection",
+        "data.types.MixinEnumSandstoneType",
         "data.types.MixinEnumShrubType",
         "data.types.MixinEnumSilverfishType",
         "data.types.MixinEnumStoneType",
