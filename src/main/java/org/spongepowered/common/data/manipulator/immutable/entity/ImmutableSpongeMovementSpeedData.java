@@ -44,10 +44,16 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
     private final double walkSpeed;
     private final double flySpeed;
 
+    ImmutableBoundedValue<Double> walkSpeedValue;
+    ImmutableBoundedValue<Double> flyingSpeedValue;
+
+
     public ImmutableSpongeMovementSpeedData(double walkSpeed, double flySpeed) {
         super(ImmutableMovementSpeedData.class);
         this.walkSpeed = walkSpeed;
         this.flySpeed = flySpeed;
+        this.walkSpeedValue = new ImmutableSpongeBoundedValue<>(Keys.WALKING_SPEED, 0.1d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+        this.flyingSpeedValue = new ImmutableSpongeBoundedValue<>(Keys.FLYING_SPEED, 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
         registerGetters();
     }
 
@@ -70,12 +76,12 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
 
     @Override
     public ImmutableBoundedValue<Double> walkSpeed() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.WALKING_SPEED, 0.1d, this.walkSpeed, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+        return walkSpeedValue;
     }
 
     @Override
     public ImmutableBoundedValue<Double> flySpeed() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.FLYING_SPEED, 0.05d, this.flySpeed, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+        return flyingSpeedValue;
     }
 
     @Override
