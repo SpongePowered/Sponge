@@ -34,14 +34,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
 import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
 import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleSetData;
 
 import java.util.List;
 import java.util.Set;
 
-@NonnullByDefault
 public class SpongeBreakableData extends AbstractSingleSetData<BlockType, BreakableData, ImmutableBreakableData> implements BreakableData {
     
     public SpongeBreakableData() {

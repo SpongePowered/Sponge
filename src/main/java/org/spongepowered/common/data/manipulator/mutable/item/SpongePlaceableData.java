@@ -34,14 +34,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
 import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlaceableData;
 import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleSetData;
 
 import java.util.List;
 import java.util.Set;
 
-@NonnullByDefault
 public class SpongePlaceableData extends AbstractSingleSetData<BlockType, PlaceableData, ImmutablePlaceableData> implements PlaceableData {
     
     public SpongePlaceableData() {
