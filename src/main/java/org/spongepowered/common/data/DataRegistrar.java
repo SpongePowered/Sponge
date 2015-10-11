@@ -519,6 +519,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(PlayerCreatedData.class, SpongePlayerCreatedData.class, ImmutablePlayerCreatedData.class,
                 ImmutableSpongePlayerCreatedData.class, playerCreatedDataProcessor);
 
+        final InvisibilityDataProcessor invisibilityDataProcessor = new InvisibilityDataProcessor();
+        dataManager.registerDataProcessorAndImpl(InvisibilityData.class, SpongeInvisibilityData.class, ImmutableInvisibilityData.class,
+                ImmutableSpongeInvisibilityData.class, invisibilityDataProcessor);
+        dataManager.registerValueProcessor(Keys.INVISIBLE, invisibilityDataProcessor);
+        
         final JukeboxDataProcessor jukeboxDataProcessor = new JukeboxDataProcessor();
         dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, jukeboxDataProcessor);
