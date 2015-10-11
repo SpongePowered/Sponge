@@ -64,6 +64,6 @@ public class SignDataBuilder implements DataManipulatorBuilder<SignData, Immutab
         } catch (Exception e) {
             throw new InvalidDataException("Could not deserialize text json lines", e);
         }
-        return Optional.<SignData>of(new SpongeSignData(textLines));
+        return Optional.of(new SpongeSignData(textLines));
     }
 }

@@ -29,7 +29,6 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBigMushro
 import org.spongepowered.api.data.manipulator.mutable.block.BigMushroomData;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BigMushroomTypes;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeBigMushroomData;
 

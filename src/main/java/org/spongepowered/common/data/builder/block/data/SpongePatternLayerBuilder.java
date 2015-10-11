@@ -73,6 +73,6 @@ public class SpongePatternLayerBuilder implements DataBuilder<PatternLayer> {
         if (!colorOptional.isPresent()) {
             throw new InvalidDataException("The provided container has an invalid dye color entry!");
         }
-        return Optional.<PatternLayer>of(new SpongePatternLayer(shapeOptional.get(), colorOptional.get()));
+        return Optional.of(new SpongePatternLayer(shapeOptional.get(), colorOptional.get()));
     }
 }

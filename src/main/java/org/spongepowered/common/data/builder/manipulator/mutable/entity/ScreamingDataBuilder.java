@@ -42,7 +42,7 @@ public class ScreamingDataBuilder implements DataManipulatorBuilder<ScreamingDat
         if (container.contains(Keys.IS_SCREAMING.getQuery())) {
             Optional<Boolean> isScreaming = container.getBoolean(Keys.IS_SCREAMING.getQuery());
             if (isScreaming.isPresent()) {
-                return Optional.<ScreamingData>of(new SpongeScreamingData(isScreaming.get()));
+                return Optional.of(new SpongeScreamingData(isScreaming.get()));
             }
         }
         return Optional.empty();
@@ -56,7 +56,7 @@ public class ScreamingDataBuilder implements DataManipulatorBuilder<ScreamingDat
     @Override
     public Optional<ScreamingData> createFrom(DataHolder dataHolder) {
         if (dataHolder.supports(Keys.IS_SCREAMING)) {
-            return Optional.<ScreamingData>of(new SpongeScreamingData(dataHolder.get(Keys.IS_SCREAMING).get()));
+            return Optional.of(new SpongeScreamingData(dataHolder.get(Keys.IS_SCREAMING).get()));
         }
 
         return Optional.empty();

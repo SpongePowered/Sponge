@@ -30,7 +30,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -87,7 +86,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text2")));
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text3")));
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text4")));
-                return Optional.<SignData>of(new SpongeSignData(texts));
+                return Optional.of(new SpongeSignData(texts));
             }
         }
         return Optional.empty();
@@ -137,7 +136,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
     @Override
     public DataTransactionResult set(DataHolder dataHolder, SignData manipulator, MergeFunction function) {
         if (dataHolder instanceof TileEntitySign) {
-            final Optional<SignData> oldData = ((Sign) dataHolder).get(SignData.class);
+            final Optional<SignData> oldData = dataHolder.get(SignData.class);
             if (oldData.isPresent()) {
                 DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 builder.replace(oldData.get().getValues());
@@ -243,7 +242,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             if (itemStack.hasTagCompound()) {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
                 if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND)) {
-                    return Optional.<SignData>of(new SpongeSignData());
+                    return Optional.of(new SpongeSignData());
                 }
                 final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
                 final String id = tileCompound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
@@ -255,7 +254,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text2")));
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text3")));
                 texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text4")));
-                return Optional.<SignData>of(new SpongeSignData(texts));
+                return Optional.of(new SpongeSignData(texts));
             }
         }
         return Optional.empty();

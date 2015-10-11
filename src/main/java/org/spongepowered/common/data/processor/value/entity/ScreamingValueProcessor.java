@@ -37,10 +37,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolean, Value<Boolean>> {
+public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<EntityEnderman, Boolean, Value<Boolean>> {
 
     public ScreamingValueProcessor() {
-        super(Keys.IS_SCREAMING);
+        super(EntityEnderman.class, Keys.IS_SCREAMING);
     }
 
     @Override
@@ -49,33 +49,19 @@ public class ScreamingValueProcessor extends AbstractSpongeValueProcessor<Boolea
     }
 
     @Override
-    public Optional<Boolean> getValueFromContainer(ValueContainer<?> container) {
-        if (container.supports(Keys.IS_SCREAMING)) {
-            return Optional.of(((EntityEnderman) container).isScreaming());
-        }
-        return Optional.empty();
+    protected boolean set(EntityEnderman container, Boolean value) {
+        container.setScreaming(value);
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityEnderman;
+    protected Optional<Boolean> getVal(EntityEnderman container) {
+        return Optional.of(container.isScreaming());
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Boolean value) {
-        final ImmutableValue proposedValue = new ImmutableSpongeValue(Keys.IS_SCREAMING, value);
-        final ImmutableValue oldValue = getApiValueFromContainer(container).get().asImmutable();
-
-        if (container instanceof EntityEnderman) {
-            try {
-                ((EntityEnderman) container).setScreaming(value);
-            } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(proposedValue);
-            }
-            return DataTransactionBuilder.builder().success(proposedValue).replace(oldValue).result(DataTransactionResult.Type.SUCCESS).build();
-        }
-        return DataTransactionBuilder.failResult(proposedValue);
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, value);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class SkullDataBuilder implements DataManipulatorBuilder<SkullData, Immut
     @Override
     public Optional<SkullData> build(DataView container) throws InvalidDataException {
         if (container.contains(Keys.SKULL_TYPE.getQuery())) {
-            return Optional.<SkullData>of(new SpongeSkullData(
+            return Optional.of(new SpongeSkullData(
                     Sponge.getGame().getRegistry().getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
         }
         return Optional.empty();

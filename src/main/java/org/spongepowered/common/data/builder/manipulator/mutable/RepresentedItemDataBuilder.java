@@ -36,7 +36,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.util.DataUtil;
 
@@ -44,7 +43,11 @@ import java.util.Optional;
 
 public class RepresentedItemDataBuilder implements DataManipulatorBuilder<RepresentedItemData, ImmutableRepresentedItemData> {
 
-    private final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+    private final SerializationService serializationService;
+
+    public RepresentedItemDataBuilder(SerializationService serializationService) {
+        this.serializationService = serializationService;
+    }
 
     @Override
     public Optional<RepresentedItemData> build(DataView container) throws InvalidDataException {
@@ -65,11 +68,11 @@ public class RepresentedItemDataBuilder implements DataManipulatorBuilder<Repres
         if (dataHolder instanceof EntityItemFrame) {
             final net.minecraft.item.ItemStack itemStack = ((EntityItemFrame) dataHolder).getDisplayedItem();
             if (itemStack != null) {
-                return Optional.<RepresentedItemData>of(new SpongeRepresentedItemData(((ItemStack) itemStack).createSnapshot()));
+                return Optional.of(new SpongeRepresentedItemData(((ItemStack) itemStack).createSnapshot()));
             }
         } else if (dataHolder instanceof EntityItem) {
             final net.minecraft.item.ItemStack itemStack = ((EntityItem) dataHolder).getEntityItem();
-            return Optional.<RepresentedItemData>of(new SpongeRepresentedItemData(((ItemStack) itemStack).createSnapshot()));
+            return Optional.of(new SpongeRepresentedItemData(((ItemStack) itemStack).createSnapshot()));
         }
         return Optional.empty();
     }

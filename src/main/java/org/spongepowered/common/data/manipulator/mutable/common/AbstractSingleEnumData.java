@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.common;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataContainer;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.util.ReflectionUtil;
+
+import java.lang.reflect.Modifier;
 
 /**
  * Another abstract helper class further simplifying implementing various
@@ -50,6 +53,8 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataMa
 
     protected AbstractSingleEnumData(Class<M> manipulatorClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends I> immutableClass) {
         super(manipulatorClass, value, usedKey);
+        checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.immutableClass = checkNotNull(immutableClass);
     }
 
@@ -66,7 +71,7 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataMa
     @SuppressWarnings("unchecked")
     @Override
     public M copy() {
-        return (M) (Object) ReflectionUtil.createInstance(this.getClass(), this.getValue());
+        return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue());
     }
 
     @Override

@@ -60,6 +60,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
         return new SpongeAuthorData();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack itemStack, Text value) {
         if (!itemStack.hasTagCompound()) {
@@ -76,7 +77,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
         }
         final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
         final Text author = Texts.json().fromUnchecked(json);
-        return Optional.<Text>of(author);
+        return Optional.of(author);
     }
 
     @Override

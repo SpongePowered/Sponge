@@ -115,19 +115,6 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableMobSpawnerData copy() {
-        return new ImmutableSpongeMobSpawnerData(this.remaining,
-                                                 this.minSpawnDelay,
-                                                 this.maxSpawnDelay,
-                                                 this.count,
-                                                 this.maxNearby,
-                                                 this.playerRange,
-                                                 this.spawnRange,
-                                                 this.nextToSpawn,
-                                                 this.entitiesToSpawn);
-    }
-
-    @Override
     public MobSpawnerData asMutable() {
         return new SpongeMobSpawnerData(this.remaining, this.minSpawnDelay, this.maxSpawnDelay, this.count, this.maxNearby, this.playerRange, this.spawnRange, this.nextToSpawn, this.entitiesToSpawn);
     }

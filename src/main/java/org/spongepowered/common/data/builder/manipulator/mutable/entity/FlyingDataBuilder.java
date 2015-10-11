@@ -59,7 +59,7 @@ public class FlyingDataBuilder implements DataManipulatorBuilder<FlyingData, Imm
             } else {
                 isFlying = ((Entity) dataHolder).isAirBorne;
             }
-            return Optional.<FlyingData>of(new SpongeFlyingData(isFlying));
+            return Optional.of(new SpongeFlyingData(isFlying));
         } else {
             return Optional.empty();
         }

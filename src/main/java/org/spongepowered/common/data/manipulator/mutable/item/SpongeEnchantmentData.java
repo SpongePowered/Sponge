@@ -32,12 +32,9 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmen
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 import java.util.List;
 
@@ -46,12 +43,12 @@ public class SpongeEnchantmentData extends AbstractData<EnchantmentData, Immutab
     private List<ItemEnchantment> enchantments;
 
     public SpongeEnchantmentData() {
-        super(EnchantmentData.class);
-        registerGettersAndSetters();
+        this(Lists.<ItemEnchantment>newArrayList());
     }
 
     public SpongeEnchantmentData(List<ItemEnchantment> enchantments) {
-        this();
+        super(EnchantmentData.class);
+        registerGettersAndSetters();
         this.enchantments = Lists.newArrayList(enchantments);
     }
 

@@ -38,8 +38,6 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.GetterFunction;
-import org.spongepowered.common.util.SetterFunction;
 
 public class SpongeDisplayNameData extends AbstractData<DisplayNameData, ImmutableDisplayNameData> implements DisplayNameData {
 

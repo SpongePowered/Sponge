@@ -34,7 +34,7 @@ public class ComparatorUtil {
 
     /**
      * This will compare two {@link ValueProcessor}s where the higher priority
-     * will compare opposite to the lower prioirty.
+     * will compare opposite to the lower priority.
      */
     public static final Comparator<ValueProcessor<?, ?>> VALUE_PROCESSOR_COMPARATOR =
         (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());

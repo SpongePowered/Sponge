@@ -38,6 +38,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
@@ -86,7 +87,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
         return Optional.of(m);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
         if (supports(dataHolder)) {
@@ -105,6 +106,7 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
                     return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
                 }
             } catch (Exception e) {
+                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) newValue).build();
             }
         }

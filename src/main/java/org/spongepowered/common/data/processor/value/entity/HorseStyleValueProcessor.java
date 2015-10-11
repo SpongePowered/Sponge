@@ -42,10 +42,10 @@ import org.spongepowered.common.entity.SpongeHorseStyle;
 
 import java.util.Optional;
 
-public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<HorseStyle, Value<HorseStyle>> {
+public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<EntityHorse, HorseStyle, Value<HorseStyle>> {
 
     public HorseStyleValueProcessor() {
-        super(Keys.HORSE_STYLE);
+        super(EntityHorse.class, Keys.HORSE_STYLE);
     }
 
     @Override
@@ -54,34 +54,20 @@ public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<Horse
     }
 
     @Override
-    public Optional<HorseStyle> getValueFromContainer(ValueContainer<?> container) {
-        if (this.supports(container)) {
-            return Optional.of(HorseUtils.getHorseStyle((EntityHorse) container));
-        }
-        return Optional.empty();
+    protected boolean set(EntityHorse container, HorseStyle value) {
+        SpongeHorseColor color = (SpongeHorseColor) HorseUtils.getHorseColor(container);
+        container.setHorseVariant(HorseUtils.getInternalVariant(color, (SpongeHorseStyle) value));
+        return true;
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityHorse;
+    protected Optional<HorseStyle> getVal(EntityHorse container) {
+        return Optional.of(HorseUtils.getHorseStyle(container));
     }
 
     @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, HorseStyle value) {
-        ImmutableValue<HorseStyle> newValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, value);
-
-        if (this.supports(container)) {
-            EntityHorse horse = (EntityHorse) container;
-
-            HorseStyle old = HorseUtils.getHorseStyle(horse);
-            SpongeHorseColor color = (SpongeHorseColor) HorseUtils.getHorseColor(horse);
-
-            ImmutableValue<HorseStyle> oldValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, old);
-
-            horse.setHorseVariant(HorseUtils.getInternalVariant(color, (SpongeHorseStyle) value));
-            return DataTransactionBuilder.successReplaceResult(newValue, oldValue);
-        }
-        return DataTransactionBuilder.failResult(newValue);
+    protected ImmutableValue<HorseStyle> constructImmutableValue(HorseStyle value) {
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, value);
     }
 
     @Override

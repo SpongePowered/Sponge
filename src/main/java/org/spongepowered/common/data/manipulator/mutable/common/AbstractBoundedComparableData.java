@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.common;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataContainer;
@@ -35,6 +36,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.util.ReflectionUtil;
 
+import java.lang.reflect.Modifier;
 import java.util.Comparator;
 
 public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
@@ -49,6 +51,8 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
                                          Class<? extends I> immutableClass, T lowerBound, T upperBound) {
         super(manipulatorClass, value, usedKey);
         this.comparator = checkNotNull(comparator);
+        checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.immutableClass = checkNotNull(immutableClass);
         this.lowerBound = checkNotNull(lowerBound);
         this.upperBound = checkNotNull(upperBound);
@@ -62,7 +66,11 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
 
     @Override
     public I asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue(), this.lowerBound, this.upperBound);
+        if (this.comparator.compare(this.upperBound, this.lowerBound) > ImmutableDataCachingUtil.CACHE_LIMIT_FOR_INDIVIDUAL_TYPE) {
+            return ReflectionUtil.createInstance(this.immutableClass, this.getValue(), this.lowerBound, this.upperBound, this.lowerBound);
+        } else {
+            return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue(), this.lowerBound, this.upperBound, this.lowerBound);
+        }
     }
 
     @Override

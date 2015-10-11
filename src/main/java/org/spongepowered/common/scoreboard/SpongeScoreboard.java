@@ -179,6 +179,7 @@ public class SpongeScoreboard implements Scoreboard {
         return Optional.ofNullable(this.teams.get(teamName));
     }
 
+    @SuppressWarnings("deprecation")
     public void addMemberToTeam(Text member, Team team) {
         this.allowRecursion = false;
         if (this.memberTeams.containsKey(member)) {
@@ -191,6 +192,7 @@ public class SpongeScoreboard implements Scoreboard {
         this.allowRecursion = true;
     }
 
+    @SuppressWarnings("deprecation")
     public void removeMemberFromTeam(Text member) {
         if (this.memberTeams.containsKey(member)) {
             for (ScorePlayerTeam scoreTeam : ((SpongeTeam) this.memberTeams.get(member)).getTeams().values()) {

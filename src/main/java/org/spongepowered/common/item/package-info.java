@@ -22,8 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
-
-public interface FieldFunction<T> extends GetterFunction<T>, SetterFunction<T> {
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.item;

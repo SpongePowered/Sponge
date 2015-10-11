@@ -32,30 +32,18 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 import java.util.Optional;
 
-public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValueProcessor<Integer, ImmutableBoundedValue<Integer>> {
+public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, ImmutableBoundedValue<Integer>> {
 
     public ExperienceFromStartOfLevelValueProcessor() {
-        super(Keys.EXPERIENCE_FROM_START_OF_LEVEL);
+        super(EntityPlayer.class, Keys.EXPERIENCE_FROM_START_OF_LEVEL);
     }
 
-    @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            return Optional.of(player.xpBarCap());
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityPlayer;
-    }
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
@@ -69,7 +57,22 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
 
     @Override
     public ImmutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, defaultValue, intComparator(), 0, Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, defaultValue, intComparator(), 0, Integer.MAX_VALUE);
+    }
+
+    @Override
+    protected boolean set(EntityPlayer container, Integer value) {
+        return false;
+    }
+
+    @Override
+    protected Optional<Integer> getVal(EntityPlayer container) {
+        return Optional.of(container.xpBarCap());
+    }
+
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, value, intComparator(), 0, Integer.MAX_VALUE);
     }
 
 }

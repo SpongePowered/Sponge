@@ -32,11 +32,9 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmen
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.util.GetterFunction;
 
 import java.util.List;
 
@@ -59,11 +57,6 @@ public class ImmutableSpongeEnchantmentData extends AbstractImmutableData<Immuta
     @Override
     public ImmutableListValue<ItemEnchantment> enchantments() {
         return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
-    }
-
-    @Override
-    public ImmutableEnchantmentData copy() {
-        return this;
     }
 
     @Override

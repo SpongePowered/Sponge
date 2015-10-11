@@ -65,7 +65,7 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
 
     @Override
     public Optional<GroundLuminanceProperty> getFor(Location<World> location, Direction direction) {
-        // TODO gabziou fix this
+        // TODO gabizou fix this
         return Optional.empty();
     }
 }

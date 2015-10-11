@@ -31,54 +31,19 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<Integer, MutableBoundedValue<Integer>> {
+public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, MutableBoundedValue<Integer>> {
 
     public TotalExperienceValueProcessor() {
-        super(Keys.TOTAL_EXPERIENCE);
-    }
-
-    @Override
-    public Optional<Integer> getValueFromContainer(ValueContainer<?> container) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            return Optional.of(player.experienceTotal);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(ValueContainer<?> container) {
-        return container instanceof EntityPlayer;
-    }
-
-    @Override
-    public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
-            final Integer oldValue = player.experienceTotal;
-            int level = 0;
-            for (int i = value; true; i -= ExperienceHolderUtils.getExpBetweenLevels(level)) {
-                if (i - ExperienceHolderUtils.getExpBetweenLevels(level) <= 0) {
-                    player.experience = (float) i / ExperienceHolderUtils.getExpBetweenLevels(level);
-                    player.experienceLevel = level;
-                    break;
-                }
-                level++;
-            }
-            player.experienceTotal = value;
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, value),
-                    new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, oldValue));
-        }
-
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<Integer>(Keys.TOTAL_EXPERIENCE, value));
+        super(EntityPlayer.class, Keys.TOTAL_EXPERIENCE);
     }
 
     @Override
@@ -88,7 +53,32 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<Integer>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return new SpongeBoundedValue<>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+    }
+
+    @Override
+    protected boolean set(EntityPlayer container, Integer value) {
+        int level = 0;
+        for (int i = value; true; i -= ExperienceHolderUtils.getExpBetweenLevels(level)) {
+            if (i - ExperienceHolderUtils.getExpBetweenLevels(level) <= 0) {
+                container.experience = (float) i / ExperienceHolderUtils.getExpBetweenLevels(level);
+                container.experienceLevel = level;
+                break;
+            }
+            level++;
+        }
+        container.experienceTotal = value;
+        return false;
+    }
+
+    @Override
+    protected Optional<Integer> getVal(EntityPlayer container) {
+        return Optional.of(container.experienceTotal);
+    }
+
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.TOTAL_EXPERIENCE, 0, value, intComparator(), 0, Integer.MAX_VALUE);
     }
 
 }

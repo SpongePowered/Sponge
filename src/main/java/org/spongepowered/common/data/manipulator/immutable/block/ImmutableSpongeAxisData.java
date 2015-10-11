@@ -33,26 +33,16 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleEnumData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeAxisData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeAxisData extends AbstractImmutableSingleEnumData<Axis, ImmutableAxisData, AxisData> implements ImmutableAxisData {
 
     public ImmutableSpongeAxisData(Axis value) {
-        super(ImmutableAxisData.class, checkNotNull(value), Keys.AXIS, SpongeAxisData.class);
+        super(ImmutableAxisData.class, checkNotNull(value), Axis.X, Keys.AXIS, SpongeAxisData.class);
     }
 
     @Override
     public ImmutableValue<Axis> axis() {
-        return ImmutableSpongeValue.cachedOf(Keys.AXIS, Axis.X, this.value);
+        return this.cachedValue;
     }
 
-    @Override
-    public ImmutableValue<Axis> type() {
-        return axis();
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return axis();
-    }
 }
