@@ -40,37 +40,37 @@ import net.minecraft.entity.passive.EntityWolf;
 
 public class EntityWetValueProcessor extends AbstractSpongeValueProcessor<EntityWolf, Boolean, Value<Boolean>> {
 
-	public EntityWetValueProcessor() {
-		super(EntityWolf.class, Keys.IS_WET);
-	}
+    public EntityWetValueProcessor() {
+        super(EntityWolf.class, Keys.IS_WET);
+    }
 
-	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
-		return DataTransactionBuilder.failNoData();
-	}
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionBuilder.failNoData();
+    }
 
-	@Override
-	protected Value<Boolean> constructValue(Boolean defaultValue) {
-		return new SpongeValue<>(Keys.IS_WET, defaultValue);
-	}
+    @Override
+    protected Value<Boolean> constructValue(Boolean defaultValue) {
+        return new SpongeValue<>(Keys.IS_WET, defaultValue);
+    }
 
-	@Override
-	protected boolean set(EntityWolf container, Boolean value) {
-		return false;
-	}
+    @Override
+    protected boolean set(EntityWolf container, Boolean value) {
+        return false;
+    }
 
-	@Override
-	protected Optional<Boolean> getVal(EntityWolf container) {
-		if (this.supports(container)) {
-			return Optional.of(container.isWet());
-		}
+    @Override
+    protected Optional<Boolean> getVal(EntityWolf container) {
+        if (this.supports(container)) {
+            return Optional.of(container.isWet());
+        }
 
-		return Optional.empty();
-	}
+        return Optional.empty();
+    }
 
-	@Override
-	protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-		return ImmutableSpongeValue.cachedOf(Keys.IS_WET, false, value);
-	}
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_WET, false, value);
+    }
 
 }

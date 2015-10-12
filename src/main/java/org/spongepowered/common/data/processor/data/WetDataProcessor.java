@@ -126,7 +126,7 @@ public class WetDataProcessor extends AbstractSpongeDataProcessor<WetData, Immut
                     stack.setItemDamage(0);
                     return DataTransactionBuilder.successNoData();
                 }
-           }
+            }
         }
         return DataTransactionBuilder.failNoData();
     }

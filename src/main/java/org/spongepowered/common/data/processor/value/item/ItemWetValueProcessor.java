@@ -40,58 +40,58 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import net.minecraft.item.ItemStack;
 
 public class ItemWetValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Value<Boolean>> {
-	public ItemWetValueProcessor() {
-		super(ItemStack.class, Keys.IS_WET);
-	}
+    public ItemWetValueProcessor() {
+        super(ItemStack.class, Keys.IS_WET);
+    }
 
-	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
-		if (super.supports(container)) {
-			ItemStack stack = (ItemStack) container;
-			
-			if (this.supports(stack)) {
-				ImmutableValue<Boolean> original = constructImmutableValue(stack.getItemDamage() == 0);
-				ImmutableValue<Boolean> newValue = constructImmutableValue(false);
-				stack.setItemDamage(0);
-				
-				return DataTransactionBuilder.successReplaceResult(original, newValue);
-			}
-		}
-		
-		return DataTransactionBuilder.failNoData();
-	}
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (super.supports(container)) {
+            ItemStack stack = (ItemStack) container;
 
-	@Override
-	protected Value<Boolean> constructValue(Boolean defaultValue) {
-		return new SpongeValue<>(Keys.IS_WET, defaultValue);
-	}
+            if (this.supports(stack)) {
+                ImmutableValue<Boolean> original = constructImmutableValue(stack.getItemDamage() == 0);
+                ImmutableValue<Boolean> newValue = constructImmutableValue(false);
+                stack.setItemDamage(0);
 
-	@Override
-	protected boolean set(ItemStack container, Boolean value) {
-		if (this.supports(container)) {
-			container.setItemDamage(value ? 1 : 0);
-			return true;
-		}
-		return false;
-	}
+                return DataTransactionBuilder.successReplaceResult(original, newValue);
+            }
+        }
 
-	@Override
-	protected Optional<Boolean> getVal(ItemStack container) {
-		if (this.supports(container)) {
-			return Optional.of(container.getItemDamage() == 1);
-		}
-		
-		return Optional.empty();
-	}
+        return DataTransactionBuilder.failNoData();
+    }
 
-	@Override
-	protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-		return ImmutableSpongeValue.cachedOf(Keys.IS_WET, false, value);
-	}
+    @Override
+    protected Value<Boolean> constructValue(Boolean defaultValue) {
+        return new SpongeValue<>(Keys.IS_WET, defaultValue);
+    }
 
-	@Override
-	protected boolean supports(ItemStack container) {
-		return container.getItem().equals(ItemTypes.SPONGE);
-	}
-	
+    @Override
+    protected boolean set(ItemStack container, Boolean value) {
+        if (this.supports(container)) {
+            container.setItemDamage(value ? 1 : 0);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected Optional<Boolean> getVal(ItemStack container) {
+        if (this.supports(container)) {
+            return Optional.of(container.getItemDamage() == 1);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_WET, false, value);
+    }
+
+    @Override
+    protected boolean supports(ItemStack container) {
+        return container.getItem().equals(ItemTypes.SPONGE);
+    }
+
 }
