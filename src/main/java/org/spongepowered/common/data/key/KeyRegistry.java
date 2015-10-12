@@ -148,6 +148,12 @@ public class KeyRegistry {
         keyMap.put("placeable_blocks", makeSetKey(BlockType.class, of("CanPlaceOn")));
         keyMap.put("walking_speed", makeSingleKey(Double.class, Value.class, of("WalkingSpeed")));
         keyMap.put("flying_speed", makeSingleKey(Double.class, Value.class, of("FlyingSpeed")));
+        keyMap.put("slime_size", makeSingleKey(Integer.TYPE, MutableBoundedValue.class, of("SlimeSize")));
+        keyMap.put("is_villager_zombie", makeSingleKey(Boolean.TYPE, Value.class, of("IsVillagerZombie")));
+        keyMap.put("is_playing", makeSingleKey(Boolean.class, Value.class, of("IsPlaying")));
+        keyMap.put("is_sitting", makeSingleKey(Boolean.class, Value.class, of("IsSitting")));
+        keyMap.put("is_sheared", makeSingleKey(Boolean.class, Value.class, of("IsSheared")));
+        keyMap.put("pig_saddle", makeSingleKey(Boolean.class, Value.class, of("IsPigSaddled")));
 
     }
 
