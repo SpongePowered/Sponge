@@ -29,13 +29,15 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 public class SpongeEquipmentType implements EquipmentType {
 
     private final String id;
+    private final String name;
 
-    public SpongeEquipmentType(String id) {
+    public SpongeEquipmentType(String id, String name) {
         this.id = id;
+        this.name = name;
     }
 
     public SpongeEquipmentType() {
-        this("ANY");
+        this("ANY", "none");
     }
 
     @Override
@@ -45,7 +47,7 @@ public class SpongeEquipmentType implements EquipmentType {
 
     @Override
     public String getName() {
-        return this.id;
+        return this.name;
     }
 
     @Override

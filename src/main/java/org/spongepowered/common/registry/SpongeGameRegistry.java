@@ -33,7 +33,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.block.BlockDoublePlant;
@@ -66,8 +65,6 @@ import net.minecraft.item.ItemFishFood;
 import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.stats.AchievementList;
-import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.EnumChatFormatting;
@@ -255,11 +252,9 @@ import org.spongepowered.api.statistic.StatisticFormat;
 import org.spongepowered.api.statistic.StatisticFormats;
 import org.spongepowered.api.statistic.StatisticGroup;
 import org.spongepowered.api.statistic.StatisticGroups;
-import org.spongepowered.api.statistic.Statistics;
 import org.spongepowered.api.statistic.TeamStatistic;
 import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.statistic.achievement.AchievementBuilder;
-import org.spongepowered.api.statistic.achievement.Achievements;
 import org.spongepowered.api.status.Favicon;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
@@ -343,8 +338,6 @@ import org.spongepowered.common.data.type.SpongeOperation;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.type.SpongeSlabType;
 import org.spongepowered.common.data.type.SpongeStairShape;
-import org.spongepowered.common.data.type.SpongeStatisticFormat;
-import org.spongepowered.common.data.type.SpongeStatisticGroup;
 import org.spongepowered.common.data.type.SpongeTreeType;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -364,7 +357,6 @@ import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeGoldenApple;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
-import org.spongepowered.common.interfaces.stats.IMixinObjectiveStat;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.common.rotation.SpongeRotation;
@@ -544,7 +536,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public final Map<String, SlabType> slabTypeMappings = Maps.newHashMap();
     public final Map<String, StairShape> stairShapeMappings = Maps.newHashMap();
     public final Map<String, Hinge> hingeMappings = Maps.newHashMap();
-    public final Map<String, Statistic> statisticMappings = Maps.newHashMap();
     public final Map<String, DisguisedBlockType> disguisedBlockTypeMappings = Maps.newHashMap();
     private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
             .put("dead_bush", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
@@ -593,43 +584,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("golden_apple", new SpongeGoldenApple(0, "GOLDEN_APPLE"))
             .put("enchanted_golden_apple", new SpongeGoldenApple(1, "ENCHANTED_GOLDEN_APPLE"))
             .build();
-
-    public final Map<String, Achievement> achievementMappings = new ImmutableMap.Builder<String, Achievement>()
-            .put("open_inventory", (Achievement) AchievementList.openInventory)
-            .put("mine_wood", (Achievement) AchievementList.mineWood)
-            .put("build_workbench", (Achievement) AchievementList.buildWorkBench)
-            .put("build_pickaxe", (Achievement) AchievementList.buildPickaxe)
-            .put("build_furnace", (Achievement) AchievementList.buildFurnace)
-            .put("acquire_iron", (Achievement) AchievementList.acquireIron)
-            .put("build_hoe", (Achievement) AchievementList.buildHoe)
-            .put("make_bread", (Achievement) AchievementList.makeBread)
-            .put("bake_cake", (Achievement) AchievementList.bakeCake)
-            .put("build_better_pickaxe", (Achievement) AchievementList.buildBetterPickaxe)
-            .put("cook_fish", (Achievement) AchievementList.cookFish)
-            .put("on_a_rail", (Achievement) AchievementList.onARail)
-            .put("build_sword", (Achievement) AchievementList.buildSword)
-            .put("kill_enemy", (Achievement) AchievementList.killEnemy)
-            .put("kill_cow", (Achievement) AchievementList.killCow)
-            .put("fly_pig", (Achievement) AchievementList.flyPig)
-            .put("snipe_skeleton", (Achievement) AchievementList.snipeSkeleton)
-            .put("get_diamonds", (Achievement) AchievementList.diamonds)
-            .put("diamonds_to_you", (Achievement) AchievementList.diamondsToYou)
-            .put("nether_portal", (Achievement) AchievementList.portal)
-            .put("ghast_return", (Achievement) AchievementList.ghast)
-            .put("get_blaze_rod", (Achievement) AchievementList.blazeRod)
-            .put("brew_potion", (Achievement) AchievementList.potion)
-            .put("end_portal", (Achievement) AchievementList.theEnd)
-            .put("the_end", (Achievement) AchievementList.theEnd2)
-            .put("enchantments", (Achievement) AchievementList.enchantments)
-            .put("overkill", (Achievement) AchievementList.overkill)
-            .put("bookcase", (Achievement) AchievementList.bookcase)
-            .put("explore_all_biomes", (Achievement) AchievementList.exploreAllBiomes)
-            .put("spawn_wither", (Achievement) AchievementList.spawnWither)
-            .put("kill_wither", (Achievement) AchievementList.killWither)
-            .put("full_beacon", (Achievement) AchievementList.fullBeacon)
-            .put("breed_cow", (Achievement) AchievementList.breedCow)
-            .put("overpowered", (Achievement) AchievementList.overpowered)
-            .build();
     public final Map<String, QuartzType> quartzTypeMappings = new ImmutableMap.Builder<String, QuartzType>()
             .put("default", (QuartzType) (Object) BlockQuartz.EnumType.DEFAULT)
             .put("chiseled", (QuartzType) (Object) BlockQuartz.EnumType.CHISELED)
@@ -644,12 +598,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("andesite", (StoneType) (Object) BlockStone.EnumType.ANDESITE)
             .put("smooth_andesite", (StoneType) (Object) BlockStone.EnumType.ANDESITE_SMOOTH)
             .build();
-    public final Map<String, StatisticFormat> statisticFormatMappings = new ImmutableMap.Builder<String, StatisticFormat>()
-            .put("count", new SpongeStatisticFormat("COUNT"))
-            .put("distance", new SpongeStatisticFormat("DISTANCE"))
-            .put("fractional", new SpongeStatisticFormat("FRACTIONAL"))
-            .put("time", new SpongeStatisticFormat("TIME"))
-            .build();
     public final Map<String, Attribute> attributeMappings = new ImmutableMap.Builder<String, Attribute>()
             .put("generic_max_health", (Attribute) SharedMonsterAttributes.maxHealth)
             .put("generic_follow_range", (Attribute) SharedMonsterAttributes.followRange)
@@ -660,13 +608,13 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("zombie_spawn_reinforcements", (Attribute) EntityZombie.reinforcementChance)
             .build();
     public final Map<String, EquipmentType> equipmentTypeMappings = new ImmutableMap.Builder<String, EquipmentType>()
-            .put("any", new SpongeEquipmentType("ANY"))
-            .put("equipped", new SpongeEquipmentType("EQUIPPED"))
-            .put("worn", new SpongeEquipmentTypeWorn("WORN"))
-            .put("headwear", new SpongeEquipmentTypeWorn("HEADWEAR"))
-            .put("chestplate", new SpongeEquipmentTypeWorn("CHESTPLATE"))
-            .put("leggings", new SpongeEquipmentTypeWorn("LEGGINGS"))
-            .put("boots", new SpongeEquipmentTypeWorn("BOOTS"))
+            .put("any", new SpongeEquipmentType("ANY", "none"))
+            .put("equipped", new SpongeEquipmentType("EQUIPPED", "none"))
+            .put("worn", new SpongeEquipmentTypeWorn("WORN", "none"))
+            .put("headwear", new SpongeEquipmentTypeWorn("HEADWEAR", "none"))
+            .put("chestplate", new SpongeEquipmentTypeWorn("CHESTPLATE", "none"))
+            .put("leggings", new SpongeEquipmentTypeWorn("LEGGINGS", "none"))
+            .put("boots", new SpongeEquipmentTypeWorn("BOOTS", "none"))
             .build();
     public final Map<String, Operation> operationMappings = new ImmutableMap.Builder<String, Operation>()
             .put("add_amount", new SpongeOperation("ADD_AMOUNT", false))
@@ -676,20 +624,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public final Map<String, PortionType> portionTypeMappings = new ImmutableMap.Builder<String, PortionType>()
             .put("bottom", (PortionType) (Object) BlockDoor.EnumDoorHalf.LOWER)
             .put("top", (PortionType) (Object) BlockDoor.EnumDoorHalf.UPPER)
-            .build();
-    public final Map<String,StatisticGroup> statisticGroupMappings = new ImmutableMap.Builder<String, StatisticGroup>()
-            .put("general", new SpongeStatisticGroup("GENERAL"))
-            .put("hidden", new SpongeStatisticGroup("HIDDEN"))
-            .put("has_killed_entity", new SpongeStatisticGroup("HAS_KILLED_ENTITY"))
-            .put("killed_by_entity", new SpongeStatisticGroup("KILLED_BY_ENTITY"))
-            .put("craft_item", new SpongeStatisticGroup("CRAFT_ITEM"))
-            .put("use_item", new SpongeStatisticGroup("USE_ITEM"))
-            .put("break_item", new SpongeStatisticGroup("BREAK_ITEM"))
-            .put("craft_block", new SpongeStatisticGroup("CRAFT_BLOCK"))
-            .put("use_block", new SpongeStatisticGroup("USE_BLOCK"))
-            .put("mine_block", new SpongeStatisticGroup("MINE_BLOCK"))
-            .put("has_killed_team", new SpongeStatisticGroup("HAS_KILLED_TEAM"))
-            .put("killed_by_team", new SpongeStatisticGroup("KILLED_BY_TEAM"))
             .build();
 
     private final Map<String, Weather> weatherMappings = Maps.newHashMap();
@@ -701,7 +635,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     protected Map<Class<? extends CatalogType>, Map<String, ? extends CatalogType>> catalogTypeMap =
             ImmutableMap.<Class<? extends CatalogType>, Map<String, ? extends CatalogType>>builder()
-                .put(Achievement.class, this.achievementMappings)
+                .put(Achievement.class, ImmutableMap.<String, CatalogType>of()) //TODO
                 .put(Art.class, this.artMappings)
                 .put(Attribute.class, this.attributeMappings)
                 .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
@@ -755,9 +689,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(SlabType.class, this.slabTypeMappings)
                 .put(SoundType.class, this.soundNames)
                 .put(StairShape.class, this.stairShapeMappings)
-                .put(Statistic.class, this.statisticMappings)
-                .put(StatisticFormat.class, this.statisticFormatMappings)
-                .put(StatisticGroup.class, this.statisticGroupMappings)
+                .put(Statistic.class, ImmutableMap.<String, CatalogType>of()) //TODO
+                .put(StatisticFormat.class, ImmutableMap.<String, CatalogType>of()) //TODO
+                .put(StatisticGroup.class, ImmutableMap.<String, CatalogType>of()) //TODO
                 .put(StoneType.class, this.stoneTypeMappings)
                 .put(TextColor.class, textColorMappings)
                 .put(TextStyle.Base.class, textStyleMappings)
@@ -2168,10 +2102,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(GoldenApples.class, this.goldenAppleMappings);
     }
 
-    private void setAchievements() {
-        RegistryHelper.mapFields(Achievements.class, this.achievementMappings);
-    }
-
     private void setLogAxes() {
         RegistryHelper.mapFields(LogAxes.class, this.logAxisMappings);
     }
@@ -2181,65 +2111,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(QuartzTypes.class, this.quartzTypeMappings);
     }
 
-    private void setStatisticMappings() {
-        this.statisticMappings.put("animals_bred", (Statistic) StatList.animalsBredStat);
-        this.statisticMappings.put("armor_cleaned", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.armorCleaned")).getStatistic());
-        this.statisticMappings.put("banner_cleaned", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.bannerCleaned")).getStatistic());
-        this.statisticMappings.put("beacon_interaction", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.beacon)]);
-        this.statisticMappings.put("boat_distance", (Statistic) StatList.distanceByBoatStat);
-        this.statisticMappings.put("brewingstand_interaction", (Statistic) StatList.objectUseStats[Block.getIdFromBlock(Blocks.brewing_stand)]);
-        this.statisticMappings.put("cake_slices_eaten", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.cakeSlicesEaten")).getStatistic());
-        this.statisticMappings.put("cauldron_filled", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.cauldronFilled")).getStatistic());
-        this.statisticMappings.put("cauldron_used", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.cauldronUsed")).getStatistic());
-        this.statisticMappings.put("chest_opened", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.chestOpened")).getStatistic());
-        this.statisticMappings.put("climb_distance", (Statistic) StatList.distanceClimbedStat);
-        this.statisticMappings.put("crafting_table_interaction", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.craftingTableInteraction")).getStatistic());
-        this.statisticMappings.put("crouch_distance", (Statistic) StatList.distanceCrouchedStat);
-        this.statisticMappings.put("damage_dealt", (Statistic) StatList.damageDealtStat);
-        this.statisticMappings.put("damage_taken", (Statistic) StatList.damageTakenStat);
-        this.statisticMappings.put("deaths", (Statistic) StatList.deathsStat);
-        this.statisticMappings.put("dispenser_inspected", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.dispenserInspected")).getStatistic());
-        this.statisticMappings.put("dive_distance", (Statistic) StatList.distanceDoveStat);
-        this.statisticMappings.put("dropper_inspected", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.dropperInspected")).getStatistic());
-        this.statisticMappings.put("enderchest_opened", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.enderchestOpened")).getStatistic());
-        this.statisticMappings.put("fall_distance", (Statistic) StatList.distanceFallenStat);
-        this.statisticMappings.put("fish_caught", (Statistic) StatList.fishCaughtStat);
-        this.statisticMappings.put("flower_potted", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.flowerPotted")).getStatistic());
-        this.statisticMappings.put("furnace_interaction", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.furnaceInteraction")).getStatistic());
-        this.statisticMappings.put("fly_distance", (Statistic) StatList.distanceFlownStat);
-        this.statisticMappings.put("hopper_inspected", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.hopperInspected")).getStatistic());
-        this.statisticMappings.put("horse_distance", (Statistic) StatList.distanceByHorseStat);
-        this.statisticMappings.put("items_dropped", (Statistic) StatList.dropStat);
-        this.statisticMappings.put("items_enchanted", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.itemEnchanted")).getStatistic());
-        this.statisticMappings.put("noteblock_played", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.noteblockPlayed")).getStatistic());
-        this.statisticMappings.put("noteblock_tuned", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.noteblockTuned")).getStatistic());
-        this.statisticMappings.put("jump", (Statistic) StatList.jumpStat);
-        this.statisticMappings.put("junk_fished", (Statistic) StatList.junkFishedStat);
-        this.statisticMappings.put("leave_game", (Statistic) StatList.leaveGameStat);
-        this.statisticMappings.put("minecart_distance", (Statistic) StatList.distanceByMinecartStat);
-        this.statisticMappings.put("mob_kills", (Statistic) StatList.mobKillsStat);
-        this.statisticMappings.put("pig_distance", (Statistic) StatList.distanceByPigStat);
-        this.statisticMappings.put("player_kills", (Statistic) StatList.playerKillsStat);
-        this.statisticMappings.put("time_played", (Statistic) StatList.minutesPlayedStat);
-        this.statisticMappings.put("record_played", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.recordPlayed")).getStatistic());
-        this.statisticMappings.put("sprint_distance", (Statistic) StatList.distanceSprintedStat);
-        this.statisticMappings.put("swim_distance", (Statistic) StatList.distanceSwumStat);
-        this.statisticMappings.put("talked_to_villager", (Statistic) StatList.timesTalkedToVillagerStat);
-        this.statisticMappings.put("time_since_death", (Statistic) StatList.timeSinceDeathStat);
-        this.statisticMappings.put("traded_with_villager", (Statistic) StatList.timesTradedWithVillagerStat);
-        this.statisticMappings.put("trapped_chest_triggered", ((IMixinObjectiveStat) IScoreObjectiveCriteria.INSTANCES.get("stat.trappedChestTriggered")).getStatistic());
-        this.statisticMappings.put("treasure_fished", (Statistic) StatList.treasureFishedStat);
-        this.statisticMappings.put("walk_distance", (Statistic) StatList.distanceWalkedStat);
-
-        RegistryHelper.mapFields(Statistics.class, this.statisticMappings);
-    }
-
     private void setStoneTypeMappings() {
         RegistryHelper.mapFields(StoneTypes.class, this.stoneTypeMappings);
-    }
-
-    private void setStatisticFormatMappings() {
-        RegistryHelper.mapFields(StatisticFormats.class, this.statisticFormatMappings);
     }
 
     private void setAttributeMappings() {
@@ -2256,10 +2129,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setPortionTypeMappings() {
         RegistryHelper.mapFields(PortionTypes.class, this.portionTypeMappings);
-    }
-
-    private void setStatisticGroupMappings() {
-        RegistryHelper.mapFields(StatisticGroups.class, this.statisticGroupMappings);
     }
 
     private void setDoublePlantMappings() {
@@ -2446,16 +2315,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setDamageTypes();
         setDamageSources();
         setGoldenApples();
-        setAchievements();
         setQuartzTypeMappings();
-        //setStatisticMappings();
         setStoneTypeMappings();
-        setStatisticFormatMappings();
         setAttributeMappings();
         setEquipmentTypeMappings();
         setOperationMappings();
         setPortionTypeMappings();
-        setStatisticGroupMappings();
         setLogAxes();
     }
 

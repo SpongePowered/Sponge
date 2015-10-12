@@ -28,12 +28,12 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypeWorn;
 
 public class SpongeEquipmentTypeWorn extends SpongeEquipmentType implements EquipmentTypeWorn {
 
-    public SpongeEquipmentTypeWorn(String id) {
-        super(id);
+    public SpongeEquipmentTypeWorn(String id, String name) {
+        super(id, name);
     }
 
     public SpongeEquipmentTypeWorn() {
-        this("WORN");
+        this("WORN", "none");
     }
 
     @Override
