@@ -299,13 +299,10 @@ import org.spongepowered.common.data.processor.value.entity.TotalExperienceValue
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VillagerZombieValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
-<<<<<<< HEAD
 import org.spongepowered.common.data.processor.value.entity.EntityWetValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemWetValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
-=======
->>>>>>> SpongePowered/master
 import org.spongepowered.common.data.processor.value.item.BookAuthorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BreakableValueProcessor;
