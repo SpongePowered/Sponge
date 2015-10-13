@@ -147,7 +147,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         // spectators are excluded from the sleep tally in vanilla
         // this redirect expands that check to include sleep-ignored players as well
         boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
-        return ignore || entityPlayer.isPlayerFullyAsleep();
+        return ignore || entityPlayer.isSpectator();
     }
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
@@ -165,6 +165,6 @@ public abstract class MixinWorldServer extends MixinWorld {
         // if a player is marked as a spectator areAllPlayersAsleep() breaks its loop and returns false
         // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator
         boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
-        return !ignore && entityPlayer.isPlayerFullyAsleep();
+        return !ignore && entityPlayer.isSpectator();
     }
 }
