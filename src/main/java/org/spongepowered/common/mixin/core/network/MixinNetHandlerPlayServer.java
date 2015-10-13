@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.network;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.flowpowered.math.vector.Vector3d;
-import io.netty.buffer.Unpooled;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
@@ -43,7 +42,6 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
@@ -65,7 +63,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent.ResourcePackStatus;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
@@ -135,16 +132,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     public int getPing() {
         return this.playerEntity.ping;
     }
-
-    /*@Override
-    public void sendCustomPayload(Object plugin, String channel, ChannelBuf dataStream) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public void sendCustomPayload(Object plugin, String channel, byte[] data) {
-        sendPacket(new S3FPacketCustomPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(data))));
-    }*/
 
     /**
      * @Author Zidane
