@@ -49,9 +49,9 @@ public class SpongeItemStackDataBuilder implements DataBuilder<ItemStack> {
     @Override
     public Optional<ItemStack> build(DataView container) throws InvalidDataException {
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
-        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.TYPE);
+        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
         final ItemType itemType = Sponge.getSpongeRegistry().getType(ItemType.class, itemTypeId).get();
-        final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.TYPE);
+        final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
         if (container.contains(DataQueries.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
