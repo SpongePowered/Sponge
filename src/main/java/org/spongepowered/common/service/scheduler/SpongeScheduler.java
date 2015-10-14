@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 public class SpongeScheduler implements SchedulerService {
 
     private static final SpongeScheduler INSTANCE = new SpongeScheduler();
+    public static final int TICK_DURATION = 50;
 
     private final AsyncScheduler asyncScheduler;
     private final SyncScheduler syncScheduler;
@@ -119,6 +120,11 @@ public class SpongeScheduler implements SchedulerService {
         }
 
         return allTasks;
+    }
+
+    @Override
+    public int getPreferredTickInterval() {
+        return TICK_DURATION;
     }
 
     /**

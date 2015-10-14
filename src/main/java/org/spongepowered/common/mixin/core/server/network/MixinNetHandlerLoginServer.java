@@ -100,7 +100,7 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
         MessageSink sink = MessageSinks.toAll();
         ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, (RemoteConnection) this.networkManager, (GameProfile) this.loginGameProfile);
         Sponge.getGame().getEventManager().post(event);
-        if (event != null && event.isCancelled()) {
+        if (event.isCancelled()) {
             this.disconnectClient(Optional.ofNullable(event.getMessage()));
         }
         return event.isCancelled();

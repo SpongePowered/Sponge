@@ -169,6 +169,9 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
     public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
         this.entityType = holder.getType();
         this.worldId = holder.getWorldUniqueId();
+        if (holder.getUniqueId().isPresent()) {
+            this.entityId = holder.getUniqueId().get();
+        }
         this.position = holder.getPosition().toDouble();
         final Optional<Transform<World>> optional = holder.getTransform();
         if (optional.isPresent()) {
@@ -189,6 +192,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
     public SpongeEntitySnapshotBuilder from(net.minecraft.entity.Entity minecraftEntity) {
         this.entityType = ((Entity) minecraftEntity).getType();
         this.worldId = ((Entity) minecraftEntity).getWorld().getUniqueId();
+        this.entityId = minecraftEntity.getUniqueID();
         final Transform<World> transform = ((Entity) minecraftEntity).getTransform();
         this.position = transform.getPosition();
         this.rotation = transform.getRotation();

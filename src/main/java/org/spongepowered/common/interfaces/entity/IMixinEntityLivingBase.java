@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.interfaces.entity;
 
+import net.minecraft.entity.EntityLivingBase;
+import org.spongepowered.api.entity.EntitySnapshot;
+
 public interface IMixinEntityLivingBase {
 
-    double getLastDamage();
+    EntitySnapshot getLastKilledTarget();
 
-    void setLastDamage(double damage);
+    EntityLivingBase getLastActiveTarget();
+
+    double getLastDamage();
 
     int getMaxAir();
 
     void setMaxAir(int max);
+
+    void setLastDamage(double damage);
 }

@@ -47,6 +47,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     @Shadow private int age;
 
     public int lifespan;
+    public float dropChance = 1.0f;
 
     //
     // In the case where a Forge mod sets the delay to MAGIC_INFINITE_PICKUP_DELAY, but a plugin has

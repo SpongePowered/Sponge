@@ -38,6 +38,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.potion.PotionEffect;
@@ -48,7 +49,9 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -64,6 +67,10 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(EntityLivingBase.class)
 public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
+
+    private int maxAir = 300;
+    public EntitySnapshot lastKilledTarget;
+    public EntityLivingBase lastActiveTarget;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -88,8 +95,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract EntityLivingBase getLastAttacker();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
-
-    private int maxAir = 300;
 
     public void setLastAttacker(@Nullable Living lastAttacker) {
         setLastAttacker((EntityLivingBase) lastAttacker);
@@ -287,4 +292,25 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
     }
 
+    @Inject(method = "setRevengeTarget", at = @At("RETURN"))
+    public void onSetRevengeTarget(EntityLivingBase targetEntity, CallbackInfo ci) {
+        if (targetEntity != null) {
+            this.lastActiveTarget = targetEntity;
+        } else {
+            if (this.lastActiveTarget != null && this.lastActiveTarget.getHealth() == 0) {
+                this.lastKilledTarget = ((org.spongepowered.api.entity.Entity)this.lastActiveTarget).createSnapshot();
+            }
+            this.lastActiveTarget = null;
+        }
+    }
+
+    @Override
+    public EntitySnapshot getLastKilledTarget() {
+        return this.lastKilledTarget;
+    }
+
+    @Override
+    public EntityLivingBase getLastActiveTarget() {
+        return this.lastActiveTarget;
+    }
 }
