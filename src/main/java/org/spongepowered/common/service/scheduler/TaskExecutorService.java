@@ -198,7 +198,7 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
         public boolean isCancelled() {
             // It might be externally cancelled, the runnable would never
             // run in that case
-            return this.runnable.isCancelled() || this.task.getState() == ScheduledTask.ScheduledTaskState.CANCELED;
+            return this.runnable.isCancelled() || (this.task.getState() == ScheduledTask.ScheduledTaskState.CANCELED && !this.runnable.isDone());
         }
 
         @Override
