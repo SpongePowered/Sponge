@@ -33,6 +33,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -135,7 +136,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return this.playerEntity.ping;
     }
 
-    @Override
+    /*@Override
     public void sendCustomPayload(Object plugin, String channel, ChannelBuf dataStream) {
         throw new UnsupportedOperationException(); // TODO
     }
@@ -143,7 +144,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Override
     public void sendCustomPayload(Object plugin, String channel, byte[] data) {
         sendPacket(new S3FPacketCustomPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(data))));
-    }
+    }*/
 
     /**
      * @Author Zidane
@@ -430,8 +431,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 ci.cancel();
             }
         } else {
-            this.lastItem = packetIn.getStack() == null ? null : packetIn.getStack().getItem();
-            this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
+            this.lastItem = null;
+            if (packetIn.getStack() != null) {
+                // ignore placement of liquids
+                if (!(packetIn.getStack().getItem() instanceof ItemBucket)) {
+                    this.lastItem = packetIn.getStack().getItem() ;
+                    this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
+                }
+            }
         }
     }
 }

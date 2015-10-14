@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.living;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import org.objectweb.asm.Opcodes;
@@ -115,4 +116,15 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
+    @Inject(method = "setAttackTarget", at = @At("RETURN"))
+    public void onSetAttackTarget(EntityLivingBase targetEntity, CallbackInfo ci) {
+        if (targetEntity != null) {
+            this.lastActiveTarget = targetEntity;
+        } else {
+            if (this.lastActiveTarget != null && this.lastActiveTarget.getHealth() == 0) {
+                this.lastKilledTarget = ((org.spongepowered.api.entity.Entity)this.lastActiveTarget).createSnapshot();
+            }
+            this.lastActiveTarget = null;
+        }
+    }
 }
