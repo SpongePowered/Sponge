@@ -98,18 +98,12 @@ public class KeyRegistry {
         keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
         keyMap.put("fire_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("FireTicks")));
         keyMap.put("fire_damage_delay", makeSingleKey(Integer.class, MutableBoundedValue.class, of("FireDamageDelay")));
-        keyMap.put("food_level", makeSingleKey(Integer.class, Value.class, of("FoodLevel")));
-        keyMap.put("saturation", makeSingleKey(Double.class, Value.class, of("FoodSaturationLevel")));
-        keyMap.put("exhaustion", makeSingleKey(Double.class, Value.class, of("FoodExhaustionLevel")));
-        keyMap.put("max_air", makeSingleKey(Integer.class, Value.class, of("MaxAir")));
-        keyMap.put("remaining_air", makeSingleKey(Integer.class, Value.class, of("RemainingAir")));
         keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
         keyMap.put("is_screaming", makeSingleKey(Boolean.class, Value.class, of("IsScreaming")));
         keyMap.put("shrub_type", makeSingleKey(ShrubType.class, Value.class, of("ShrubType")));
         keyMap.put("plant_type", makeSingleKey(PlantType.class, Value.class, of("PlantType")));
         keyMap.put("tree_type", makeSingleKey(TreeType.class, Value.class, of("TreeType")));
         keyMap.put("log_axis", makeSingleKey(LogAxis.class, Value.class, of("LogAxis")));
-        keyMap.put("axis", makeSingleKey(Axis.class, Value.class, of("Axis")));
         keyMap.put("powered", makeSingleKey(Boolean.class, Value.class, of("Powered")));
         keyMap.put("layer", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Layer")));
         keyMap.put("represented_item", makeSingleKey(ItemStackSnapshot.class, Value.class, of("ItemStackSnapshot")));
