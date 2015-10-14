@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.nbt.NBTTagCompound;
@@ -422,5 +423,16 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public Collection<Property<?, ?>> getApplicableProperties() {
         return ImmutableList.of();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("uniqueId", entityUuid)
+                .add("entityType", entityType)
+                .add("position", position)
+                .add("rotation", rotation)
+                .add("scale", scale)
+                .toString();
     }
 }
