@@ -79,7 +79,7 @@ public abstract class MixinEntityTrackerEntry {
             if (delay == 0) {
                 removeTask.run();
             } else {
-                Sponge.getGame().getScheduler().createTaskBuilder().execute(removeTask).delay(delay).submit(Sponge.getPlugin());
+                Sponge.getGame().getScheduler().createTaskBuilder().execute(removeTask).delayTicks(delay).submit(Sponge.getPlugin());
             }
         }
     }

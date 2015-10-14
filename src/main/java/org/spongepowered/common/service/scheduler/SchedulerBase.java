@@ -171,7 +171,7 @@ abstract class SchedulerBase {
         this.executeTaskRunnable(() -> {
             task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
             try {
-                task.getRunnable().run();
+                task.getConsumer().accept(task);
             } catch (Throwable t) {
                 Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
                         task.getOwner(), t);
@@ -180,7 +180,7 @@ abstract class SchedulerBase {
     }
 
     /**
-     * Actually run the runnable of a task.
+     * Actually run the runnable that will begin the task
      *
      * @param runnable The runnable to run
      */
