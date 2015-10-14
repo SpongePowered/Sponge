@@ -50,8 +50,8 @@ public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnap
     public Optional<ItemStackSnapshot> build(DataView container) throws InvalidDataException {
         final String itemString = getData(container, DataQueries.ITEM_TYPE, String.class);
         final ItemType itemType = Sponge.getSpongeRegistry().getType(ItemType.class, itemString).get();
-        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.TYPE);
-        final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.TYPE);
+        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
+        final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
         final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());

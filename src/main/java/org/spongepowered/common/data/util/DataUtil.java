@@ -59,13 +59,13 @@ public class DataUtil {
         }
     }
 
-    public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) {
+    public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object = dataView.get(key.getQuery()).get();
         return (T) object;
     }
 
-    public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) {
+    public static <T> T getData(final DataView dataView, final Key<?> key, Class<T> clazz) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object = dataView.get(key.getQuery()).get();
         if (clazz.isInstance(object)) {
@@ -75,9 +75,9 @@ public class DataUtil {
         }
     }
 
-    public static <T> T getData(final DataView dataVew, final DataQuery query, Class<T> data) throws InvalidDataException {
-        checkDataExists(dataVew, query);
-        final Object object = dataVew.get(query).get();
+    public static <T> T getData(final DataView dataView, final DataQuery query, Class<T> data) throws InvalidDataException {
+        checkDataExists(dataView, query);
+        final Object object = dataView.get(query).get();
         if (data.isInstance(object)) {
             return (T) object;
         } else {
