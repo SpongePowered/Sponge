@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings("unchecked")
 public final class SpongeDataRegistry implements DataManipulatorRegistry {
@@ -190,7 +191,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         checkArgument(!(processor instanceof DataProcessorDelegate), "Cannot register DataProcessorDelegates!");
         List<DataProcessor<?, ?>> processorList = this.processorMap.get(manipulatorClass);
         if (processorList == null) {
-            processorList = Collections.synchronizedList(Lists.<DataProcessor<?, ?>>newArrayList());
+            processorList = new CopyOnWriteArrayList<>();
             this.processorMap.put(manipulatorClass, processorList);
             this.processorMap.put(implClass, processorList);
         }
@@ -199,9 +200,9 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
         List<DataProcessor<?, ?>> immutableProcessorList = this.immutableProcessorMap.get(immutableDataManipulator);
         if (immutableProcessorList == null) {
-            immutableProcessorList = Collections.synchronizedList(Lists.<DataProcessor<?, ?>>newArrayList());
-            this.immutableProcessorMap.put(immutableDataManipulator, processorList);
-            this.immutableProcessorMap.put(implImClass, processorList);
+            immutableProcessorList = new CopyOnWriteArrayList<>();
+            this.immutableProcessorMap.put(immutableDataManipulator, immutableProcessorList);
+            this.immutableProcessorMap.put(implImClass, immutableProcessorList);
         }
         checkArgument(!immutableProcessorList.contains(processor), "Duplicate DataProcessor Registration!");
         immutableProcessorList.add(processor);
