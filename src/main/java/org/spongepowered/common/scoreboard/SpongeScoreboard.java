@@ -247,7 +247,6 @@ public class SpongeScoreboard implements Scoreboard {
             if (scoreboard.getTeam(team.getName()) != null) {
                 scoreboard.removeTeam(scoreboard.getTeam(team.getName()));
             }
-            //((SpongeTeam) team).addToScoreboard(scoreboard, ((SpongeTeam) team).getTeam(scoreboard));
             ((SpongeTeam) team).addToScoreboard(scoreboard, null);
         }
         this.allowRecursion = true;

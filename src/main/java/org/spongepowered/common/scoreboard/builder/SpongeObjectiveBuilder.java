@@ -27,7 +27,6 @@ package org.spongepowered.common.scoreboard.builder;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.ObjectiveBuilder;
@@ -36,16 +35,16 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class SpongeObjectiveBuilder implements ObjectiveBuilder {
 
     private String name;
     private Text displayName;
     private Criterion criterion;
-    private ObjectiveDisplayMode objectiveDisplayMode = ObjectiveDisplayModes.INTEGER;
-    private Map<String, Score> entries = new HashMap<>();
+    private ObjectiveDisplayMode objectiveDisplayMode;
+
+    public SpongeObjectiveBuilder() {
+        reset();
+    }
 
     @Override
     public ObjectiveBuilder name(String name) {
@@ -81,7 +80,6 @@ public class SpongeObjectiveBuilder implements ObjectiveBuilder {
         this.displayName = null;
         this.criterion = null;
         this.objectiveDisplayMode = ObjectiveDisplayModes.INTEGER;
-        this.entries = new HashMap<>();
         return this;
     }
 

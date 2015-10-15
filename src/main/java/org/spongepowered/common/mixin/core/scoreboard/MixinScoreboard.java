@@ -29,7 +29,6 @@ import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -54,7 +53,6 @@ import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(Scoreboard.class)
@@ -189,7 +187,6 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
         if (shouldEcho()) {
             SpongeTeam spongeTeam = ((IMixinTeam) team).getSpongeTeam();
             if (spongeTeam != null) {
-                Optional<Player> spongePlayer = Sponge.getGame().getServer().getPlayer(name);
                     this.scoreboard.allowRecursion = false;
                     spongeTeam.removeMember(Texts.legacy().from(name));
                     this.scoreboard.allowRecursion = true;

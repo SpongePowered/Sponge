@@ -91,15 +91,8 @@ public class SpongeScore implements Score {
 
     @SuppressWarnings({"deprecation", "unchecked"})
     public void addToScoreObjective(ScoreObjective scoreObjective) {
-        String name = Texts.legacy().to(this.name);
-
-        net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(scoreObjective.theScoreboard, scoreObjective, name);
-        ((IMixinScore) score).setSpongeCreated();
-        ((IMixinScore) score).setSpongeScore(this);
-        score.setScorePoints(this.score);
-        this.scores.put(scoreObjective, score);
-
-        Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = (Map) scoreObjective.theScoreboard.entitiesScoreObjectives.get(name);
+        Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap =
+                (Map<ScoreObjective, net.minecraft.scoreboard.Score>) scoreObjective.theScoreboard.entitiesScoreObjectives.get(this.name);
         if (scoreMap == null) {
             scoreMap = Maps.newHashMap();
         }
@@ -107,6 +100,14 @@ public class SpongeScore implements Score {
         if (scoreMap.containsKey(scoreObjective) && ((IMixinScore) scoreMap.get(scoreObjective)).spongeCreated()) {
             throw new IllegalArgumentException("A score already exists with the name " + this.name);
         }
+
+        String name = Texts.legacy().to(this.name);
+
+        net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(scoreObjective.theScoreboard, scoreObjective, name);
+        ((IMixinScore) score).setSpongeCreated();
+        ((IMixinScore) score).setSpongeScore(this);
+        score.setScorePoints(this.score);
+        this.scores.put(scoreObjective, score);
 
         scoreObjective.theScoreboard.entitiesScoreObjectives.put(name, scoreMap);
 

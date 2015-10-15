@@ -44,14 +44,18 @@ public class SpongeTeamBuilder implements TeamBuilder {
 
     private String name;
     private Text displayName;
-    private TextColor color = TextColors.RESET;
-    private Text prefix = Texts.of();
-    private Text suffix = Texts.of();
-    private boolean allowFriendlyFire = false;
-    private boolean showFriendlyInvisibles = false;
-    private Visibility nameTagVisibility = Visibilities.ALL;
-    private Visibility deathMessageVisibility = Visibilities.ALL;
-    private Set<Text> members = new HashSet<>();
+    private TextColor color;
+    private Text prefix;
+    private Text suffix;
+    private boolean allowFriendlyFire;
+    private boolean showFriendlyInvisibles;
+    private Visibility nameTagVisibility;
+    private Visibility deathMessageVisibility;
+    private Set<Text> members;
+
+    public SpongeTeamBuilder() {
+        reset();
+    }
 
     @Override
     public TeamBuilder name(String name) {
@@ -119,7 +123,17 @@ public class SpongeTeamBuilder implements TeamBuilder {
 
     @Override
     public TeamBuilder reset() {
-        return null;
+        this.name = null;
+        this.displayName = null;
+        this.color = TextColors.RESET;
+        this.prefix = Texts.of();
+        this.suffix = Texts.of();
+        this.allowFriendlyFire = false;
+        this.showFriendlyInvisibles = false;
+        this.nameTagVisibility = Visibilities.ALL;
+        this.deathMessageVisibility = Visibilities.ALL;
+        this.members = new HashSet<>();
+        return this;
     }
 
     @Override
@@ -128,6 +142,6 @@ public class SpongeTeamBuilder implements TeamBuilder {
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
         return new SpongeTeam(this.name, this.displayName, this.color, this.prefix, this.suffix, this.allowFriendlyFire, this.showFriendlyInvisibles,
-                this.nameTagVisibility, this.deathMessageVisibility, new HashSet(this.members));
+                this.nameTagVisibility, this.deathMessageVisibility, new HashSet<>(this.members));
     }
 }

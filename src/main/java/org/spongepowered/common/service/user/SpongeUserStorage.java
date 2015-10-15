@@ -53,7 +53,7 @@ public class SpongeUserStorage implements UserStorage {
 
     @Override
     public Optional<User> get(GameProfile profile) {
-        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(profile, "profile").getUniqueId()));
+        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(checkNotNull(profile, "profile").getUniqueId(), "profile UUID")));
     }
 
     @Override

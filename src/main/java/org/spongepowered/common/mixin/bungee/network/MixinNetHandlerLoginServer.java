@@ -36,13 +36,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 import java.util.UUID;
 
 @Mixin(NetHandlerLoginServer.class)
-public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLoginServer {
+public abstract class MixinNetHandlerLoginServer {
 
     @Shadow private MinecraftServer server;
     @Shadow public NetworkManager networkManager;

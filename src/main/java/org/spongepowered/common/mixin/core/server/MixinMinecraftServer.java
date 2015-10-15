@@ -275,8 +275,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         for (int dim : idList) {
             WorldProvider provider = WorldProvider.getProviderForDimension(dim);
             String worldFolder;
+            String levelName;
             if (dim == 0) {
                 worldFolder = overworldFolder;
+                levelName = worldName;
             } else {
                 worldFolder = Sponge.getSpongeRegistry().getWorldFolder(dim);
                 if (worldFolder != null) {
@@ -288,6 +290,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     worldFolder = ((IMixinWorldProvider) provider).getSaveFolder();
                     Sponge.getSpongeRegistry().registerWorldDimensionId(dim, worldFolder);
                 }
+                levelName = worldFolder;
             }
 
             WorldInfo worldInfo;
@@ -301,7 +304,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 if (dim == 0) {
                     // overworld uses the client set world name
                     if (Sponge.getSpongeRegistry().getWorldProperties(worldFolder).isPresent()) {
-                        worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldFolder).get();
+                        worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(levelName).get();
                     } else {
                         worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldName).get(); // client copied world
                     }
@@ -345,7 +348,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         }
                     }
                 }
-                worldInfo.setWorldName(worldFolder);
+                worldInfo.setWorldName(levelName);
                 newWorldSettings = new WorldSettings(worldInfo);
             }
 
