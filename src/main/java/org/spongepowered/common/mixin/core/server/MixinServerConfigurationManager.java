@@ -87,6 +87,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.event.SpongeImplEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -268,7 +269,8 @@ public abstract class MixinServerConfigurationManager {
 
         chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
 
-        this.func_96456_a((ServerScoreboard) worldserver.getScoreboard(), playerIn);
+
+        player.setScoreboard(((IMixinScoreboard) worldserver.getScoreboard()).getSpongeScoreboard());
 
         for (Object o : playerIn.getActivePotionEffects()) {
             PotionEffect potioneffect = (PotionEffect) o;
