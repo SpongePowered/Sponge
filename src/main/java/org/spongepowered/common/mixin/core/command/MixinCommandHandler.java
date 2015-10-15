@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -33,36 +32,29 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.interfaces.IMixinWorld;
 
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler {
 
-    @Redirect(method = "tryExecute", at = @At(value = "INVOKE", target="Lnet/minecraft/command/ICommand;processCommand(Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V"))
-    public void onExecuteCommand(ICommand command, ICommandSender sender, String[] args) {
-        IMixinWorld world = null;
-        try {
-            if (sender.getEntityWorld() == null) {
-                command.processCommand(sender, args);
-                return;
-            }
-
-            world = (IMixinWorld) sender.getEntityWorld();
+    @Inject(method = "tryExecute", at = @At(value = "HEAD"))
+    public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
+        if (sender.getEntityWorld() != null) {
+            IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             world.setProcessingCaptureCause(true);
-            command.processCommand(sender, args);
+        }
+    }
+
+    @Inject(method = "tryExecute", at = @At(value = "RETURN"))
+    public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
+        if (sender.getEntityWorld() != null) {
+            IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             world.handlePostTickCaptures(Cause.of(command, sender));
             world.setProcessingCaptureCause(false);
-        } catch (Throwable t) {
-            Sponge.getLogger().error("[Command " + command + " issued by " + sender + " caused ]", t);
-            if (world != null) {
-                world.setProcessingCaptureCause(false);
-            }
         }
     }
 
