@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
@@ -35,18 +33,19 @@ import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBeaconData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
-import org.spongepowered.common.interfaces.tileentity.IMixinTileEntityBeacon;
 
 import java.util.Optional;
 
 public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconData> implements BeaconData {
 
-    private final TileEntityBeacon beacon;
+    private final Optional<PotionEffectType> primaryEffect;
+    private final Optional<PotionEffectType> secondaryEffect;
 
-    public SpongeBeaconData(TileEntityBeacon beacon) {
+    public SpongeBeaconData(Optional<PotionEffectType> primaryEffect, Optional<PotionEffectType> secondaryEffect) {
         super(BeaconData.class);
         this.registerGettersAndSetters();
-        this.beacon = beacon;
+        this.primaryEffect = primaryEffect;
+        this.secondaryEffect = secondaryEffect;
     }
 
     @Override
@@ -75,12 +74,12 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
 
     @Override
     public BeaconData copy() {
-        return new SpongeBeaconData(this.beacon);
+        return new SpongeBeaconData(this.primaryEffect, this.secondaryEffect);
     }
 
     @Override
     public ImmutableBeaconData asImmutable() {
-        return new ImmutableSpongeBeaconData(this.beacon);
+        return new ImmutableSpongeBeaconData(this.primaryEffect, this.secondaryEffect);
     }
 
     @Override
@@ -94,7 +93,7 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     public PotionEffectType getPrimaryEffect() {
-        return (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) this.beacon).getPrimaryEffect()];
+        return this.primaryEffect.get();
     }
 
     public void setPrimaryEffect(Optional<PotionEffectType> effectType) {
@@ -102,7 +101,7 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     public PotionEffectType getSecondaryEffect() {
-        return (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) this.beacon).getSecondaryEffect()];
+        return this.secondaryEffect.get();
     }
 
     public void setSecondaryEffect(Optional<PotionEffectType> effectType) {

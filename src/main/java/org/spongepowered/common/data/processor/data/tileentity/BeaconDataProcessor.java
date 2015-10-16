@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
+import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -33,8 +34,10 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeac
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.interfaces.tileentity.IMixinTileEntityBeacon;
 
 import java.util.Optional;
 
@@ -48,8 +51,11 @@ public class BeaconDataProcessor extends AbstractSpongeDataProcessor<BeaconData,
     @Override
     public Optional<BeaconData> from(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntityBeacon) {
-            TileEntityBeacon beacon = (TileEntityBeacon) dataHolder;
-            return Optional.of(new SpongeBeaconData(beacon)); // temp
+            PotionEffectType primary =
+                    (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) dataHolder).getPrimaryEffect()];
+            PotionEffectType secondary =
+                    (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) dataHolder).getSecondaryEffect()];
+            return Optional.of(new SpongeBeaconData(Optional.of(primary), Optional.of(secondary)));
         }
         return Optional.empty();
     }
