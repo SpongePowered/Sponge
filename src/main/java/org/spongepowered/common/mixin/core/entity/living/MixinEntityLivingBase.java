@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.living;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.Entity;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -38,9 +38,13 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.text.Text;
@@ -52,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -86,7 +91,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void removePotionEffect(int id);
     @Shadow public abstract void setCurrentItemOrArmor(int slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
-    @Shadow public abstract void setLastAttacker(Entity entity);
+    @Shadow public abstract void setLastAttacker(net.minecraft.entity.Entity entity);
     @Shadow public abstract boolean isPotionActive(Potion potion);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract float getHealth();
@@ -285,9 +290,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"))
-    public void onDeathSendEntityState(World world, Entity self, byte state) {
+    public void onDeathSendEntityState(World world, net.minecraft.entity.Entity self, byte state) {
         // Don't send the state if this is a human. Fixes ghost items on client.
-        if (!((Entity) (Object) this instanceof EntityHuman)) {
+        if (!((net.minecraft.entity.Entity) (Object) this instanceof EntityHuman)) {
             world.setEntityState(self, state);
         }
     }
@@ -312,5 +317,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public EntityLivingBase getLastActiveTarget() {
         return this.lastActiveTarget;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target="Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;"))
+    public List onCollideWithNearbyEntities(net.minecraft.world.World world, net.minecraft.entity.Entity entity, net.minecraft.util.AxisAlignedBB aabb) {
+        List list = world.getEntitiesWithinAABBExcludingEntity(entity, aabb);
+        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(Sponge.getGame(), Cause.of(this), (List<Entity>)(List<?>)ImmutableList.copyOf(list), (List<Entity>)(List<?>)list, (org.spongepowered.api.world.World) this.worldObj);
+        Sponge.getGame().getEventManager().post(event);
+        if (event.isCancelled()) {
+            list.clear();
+        }
+        return list;
     }
 }
