@@ -302,6 +302,7 @@
         "text.MixinClickEvent",
         "text.MixinHoverEvent",
         "util.MixinPacketThreadUtil",
+        "tileentity.MixinTileEntityBeacon",
         "world.MixinAnvilSaveHandler",
         "world.MixinChunk",
         "world.MixinExplosion",

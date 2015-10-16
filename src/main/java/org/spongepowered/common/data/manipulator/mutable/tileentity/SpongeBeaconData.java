@@ -24,14 +24,17 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
+import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBeaconData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.interfaces.tileentity.IMixinTileEntityBeacon;
 
 public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconData> implements BeaconData {
 
@@ -45,7 +48,8 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
 
     @Override
     protected void registerGettersAndSetters() {
-
+        this.registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, SpongeBeaconData.this::getPrimaryEffect);
+        this.registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, SpongeBeaconData.this::getSecondaryEffect);
     }
 
     @Override
@@ -81,5 +85,13 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     @Override
     public DataContainer toContainer() {
         return null;
+    }
+
+    public PotionEffectType getPrimaryEffect() {
+        return (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) this.beacon).getPrimaryEffect()];
+    }
+
+    public PotionEffectType getSecondaryEffect() {
+        return (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) this.beacon).getSecondaryEffect()];
     }
 }
