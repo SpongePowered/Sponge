@@ -98,7 +98,7 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     public void setPrimaryEffect(Optional<PotionEffectType> effectType) {
-
+        // TODO:
     }
 
     public PotionEffectType getSecondaryEffect() {
@@ -106,6 +106,6 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     public void setSecondaryEffect(Optional<PotionEffectType> effectType) {
-
+        // TODO:
     }
 }

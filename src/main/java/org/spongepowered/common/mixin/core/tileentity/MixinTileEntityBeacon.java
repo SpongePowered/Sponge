@@ -41,7 +41,17 @@ public class MixinTileEntityBeacon implements IMixinTileEntityBeacon {
     }
 
     @Override
+    public void setPrimaryEffect(int primaryEffect) {
+        this.primaryEffect = primaryEffect;
+    }
+
+    @Override
     public int getSecondaryEffect() {
         return this.secondaryEffect;
+    }
+
+    @Override
+    public void setSecondaryEffect(int secondaryEffect) {
+        this.secondaryEffect = secondaryEffect;
     }
 }

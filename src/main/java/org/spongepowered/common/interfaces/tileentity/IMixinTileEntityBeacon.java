@@ -28,5 +28,9 @@ public interface IMixinTileEntityBeacon {
 
     int getPrimaryEffect();
 
+    void setPrimaryEffect(int primaryEffect);
+
     int getSecondaryEffect();
+
+    void setSecondaryEffect(int secondaryEffect);
 }
