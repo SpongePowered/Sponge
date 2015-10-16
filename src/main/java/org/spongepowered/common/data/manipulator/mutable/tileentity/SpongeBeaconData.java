@@ -48,6 +48,10 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
         this.secondaryEffect = secondaryEffect;
     }
 
+    public SpongeBeaconData() {
+        this(Optional.empty(), Optional.empty());
+    }
+
     @Override
     protected void registerGettersAndSetters() {
         this.registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, SpongeBeaconData.this::getPrimaryEffect);
@@ -59,12 +63,12 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
 
     @Override
     public OptionalValue<PotionEffectType> primaryEffect() {
-        return new SpongeOptionalValue<>(Keys.BEACON_PRIMARY_EFFECT, Optional.of(this.getPrimaryEffect()));
+        return new SpongeOptionalValue<>(Keys.BEACON_PRIMARY_EFFECT, this.getPrimaryEffect());
     }
 
     @Override
     public OptionalValue<PotionEffectType> secondaryEffect() {
-        return new SpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, Optional.of(this.getSecondaryEffect()));
+        return new SpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, this.getSecondaryEffect());
     }
 
     @Override
@@ -92,16 +96,16 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
         return null;
     }
 
-    public PotionEffectType getPrimaryEffect() {
-        return this.primaryEffect.get();
+    public Optional<PotionEffectType> getPrimaryEffect() {
+        return this.primaryEffect;
     }
 
     public void setPrimaryEffect(Optional<PotionEffectType> effectType) {
         // TODO:
     }
 
-    public PotionEffectType getSecondaryEffect() {
-        return this.secondaryEffect.get();
+    public Optional<PotionEffectType> getSecondaryEffect() {
+        return this.secondaryEffect;
     }
 
     public void setSecondaryEffect(Optional<PotionEffectType> effectType) {
