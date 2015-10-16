@@ -34,7 +34,10 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBeaconData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.interfaces.tileentity.IMixinTileEntityBeacon;
+
+import java.util.Optional;
 
 public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconData> implements BeaconData {
 
@@ -49,17 +52,20 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     @Override
     protected void registerGettersAndSetters() {
         this.registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, SpongeBeaconData.this::getPrimaryEffect);
+        this.registerFieldSetter(Keys.BEACON_PRIMARY_EFFECT, SpongeBeaconData.this::setPrimaryEffect);
+
         this.registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, SpongeBeaconData.this::getSecondaryEffect);
+        this.registerFieldSetter(Keys.BEACON_SECONDARY_EFFECT, SpongeBeaconData.this::setSecondaryEffect);
     }
 
     @Override
     public OptionalValue<PotionEffectType> primaryEffect() {
-        return null;
+        return new SpongeOptionalValue<>(Keys.BEACON_PRIMARY_EFFECT, Optional.of(this.getPrimaryEffect()));
     }
 
     @Override
     public OptionalValue<PotionEffectType> secondaryEffect() {
-        return null;
+        return new SpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, Optional.of(this.getSecondaryEffect()));
     }
 
     @Override
@@ -91,7 +97,15 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
         return (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) this.beacon).getPrimaryEffect()];
     }
 
+    public void setPrimaryEffect(Optional<PotionEffectType> effectType) {
+
+    }
+
     public PotionEffectType getSecondaryEffect() {
         return (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) this.beacon).getSecondaryEffect()];
+    }
+
+    public void setSecondaryEffect(Optional<PotionEffectType> effectType) {
+
     }
 }
