@@ -50,6 +50,7 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.IntHashMap;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -103,6 +104,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Shadow private MinecraftServer serverController;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);
+    @Shadow private IntHashMap field_147372_n;
 
     private boolean justTeleported = false;
     private Location<World> lastMoveLocation = null;
@@ -428,4 +430,81 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             }
         }
     }
+
+//    @Overwrite
+//    public void processClickWindow(C0EPacketClickWindow packetIn) {
+//        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (INetHandler) this, this.playerEntity.getServerForPlayer());
+//        this.playerEntity.markPlayerActive();
+//
+//        if (this.playerEntity.openContainer.windowId == packetIn.getWindowId() && this.playerEntity.openContainer.getCanCraft(this.playerEntity))
+//        {
+//            if (this.playerEntity.isSpectator())
+//            {
+//                ArrayList arraylist = Lists.newArrayList();
+//
+//                for (int i = 0; i < this.playerEntity.openContainer.inventorySlots.size(); ++i)
+//                {
+//                    arraylist.add(((Slot)this.playerEntity.openContainer.inventorySlots.get(i)).getStack());
+//                }
+//
+//                this.playerEntity.updateCraftingInventory(this.playerEntity.openContainer, arraylist);
+//            }
+//            else
+//            {
+//                ItemStack clientStack = packetIn.getClickedItem();
+//                if (clientStack == null) {
+//                    clientStack = (ItemStack) ItemStackSnapshot.NONE.createStack();
+//                }
+//                ItemStack serverStack = this.playerEntity.openContainer.getSlot(packetIn.getSlotId()).getStack();
+//                if (serverStack == null) {
+//                    serverStack = (ItemStack) ItemStackSnapshot.NONE.createStack();
+//                }
+//
+//                // Let API set the stack before running Vanilla click logic
+//                final Transaction<ItemStackSnapshot> transaction = new Transaction<>(((org.spongepowered.api.item.inventory.ItemStack)
+//                        serverStack).createSnapshot(), ItemStackSnapshot.NONE);
+//                final InteractInventoryEvent.Click event = SpongeEventFactory.createInteractInventoryEventClick(Sponge.getGame(), Cause.of
+//                        (playerEntity), transaction, (org.spongepowered.api.item.inventory.Slot) this.playerEntity.openContainer.getSlot(packetIn
+//                        .getSlotId()));
+//                Sponge.getGame().getEventManager().post(event);
+//                ItemStack pluginStack = (ItemStack) event.getItemStackTransaction().getFinal().createStack();
+//                System.out.println("Client Stack: " + clientStack);
+//                System.out.println("Server Stack: " + serverStack);
+//                System.out.println("Plugin Stack: " + pluginStack);
+//                if (pluginStack.getItem().getUnlocalizedName().equals("none")) {
+//                    pluginStack = null;
+//                }
+//                if (event.getItemStackTransaction().getCustom().isPresent()) {
+//                    this.playerEntity.inventory.setInventorySlotContents(packetIn.getSlotId(), null);
+//                    this.playerEntity.inventory.setItemStack(pluginStack);
+//                }
+//
+//                // Run click logic
+//                ItemStack postLogicStack = this.playerEntity.openContainer.slotClick(packetIn.getSlotId(), packetIn.getUsedButton(), packetIn.getMode
+//                        (), this.playerEntity);
+//                System.out.println("Post Logic Stack: " + postLogicStack);
+//                if (ItemStack.areItemStacksEqual(pluginStack, postLogicStack))
+//                {
+//                    this.playerEntity.playerNetServerHandler.sendPacket(new S32PacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), true));
+//                    this.playerEntity.isChangingQuantityOnly = true;
+//                    this.playerEntity.openContainer.detectAndSendChanges();
+//                    this.playerEntity.updateHeldItem();
+//                    this.playerEntity.isChangingQuantityOnly = false;
+//                } else {
+//                    this.field_147372_n.addKey(this.playerEntity.openContainer.windowId, Short.valueOf(packetIn.getActionNumber()));
+//                    this.playerEntity.playerNetServerHandler.sendPacket(
+//                            new S32PacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), false));
+//                    this.playerEntity.openContainer.setCanCraft(this.playerEntity, false);
+//                    ArrayList arraylist1 = Lists.newArrayList();
+//
+//                    for (int j = 0; j < this.playerEntity.openContainer.inventorySlots.size(); ++j)
+//                    {
+//                        arraylist1.add(((Slot)this.playerEntity.openContainer.inventorySlots.get(j)).getStack());
+//                    }
+//
+//                    this.playerEntity.updateCraftingInventory(this.playerEntity.openContainer, arraylist1);
+//                }
+//            }
+//        }
+//    }
 }

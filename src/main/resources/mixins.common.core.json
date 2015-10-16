@@ -171,6 +171,7 @@
         "item.data.MixinItemPotion",
         "item.inventory.MixinContainer",
         "item.inventory.MixinItemStack",
+        "item.inventory.MixinSlot",
         "item.merchant.MixinMerchantRecipe",
         "network.MixinNetHandlerPlayServer",
         "network.MixinPacketBuffer",

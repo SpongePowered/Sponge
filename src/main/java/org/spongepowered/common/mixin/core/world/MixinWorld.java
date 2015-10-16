@@ -125,7 +125,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.inventory.DropItemEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -964,7 +964,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 }
             }
 
-            Iterator<Entity> iterator = event.getEntities().iterator();
+            // TODO blood fix this
+            final Iterator<Entity> iterator = event instanceof DropItemEvent.Destruct ? ((DropItemEvent.Destruct)event).getEntities().iterator() :
+                            ((DropItemEvent.Dispense)event).getEntities().iterator();
             while (iterator.hasNext()) {
                 Entity entity = iterator.next();
                 boolean invalidSpawn = false;
