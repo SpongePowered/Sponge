@@ -52,7 +52,8 @@ public class BeaconPrimaryEffectValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected boolean set(TileEntityBeacon container, Optional<PotionEffectType> value) {
-        return false;
+        ((IMixinTileEntityBeacon) container).setPrimaryEffect(((Potion) value.get()).getId());
+        return true;
     }
 
     @Override

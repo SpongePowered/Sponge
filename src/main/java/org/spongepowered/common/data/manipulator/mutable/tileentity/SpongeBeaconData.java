@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
@@ -38,8 +39,8 @@ import java.util.Optional;
 
 public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconData> implements BeaconData {
 
-    private final Optional<PotionEffectType> primaryEffect;
-    private final Optional<PotionEffectType> secondaryEffect;
+    private Optional<PotionEffectType> primaryEffect;
+    private Optional<PotionEffectType> secondaryEffect;
 
     public SpongeBeaconData(Optional<PotionEffectType> primaryEffect, Optional<PotionEffectType> secondaryEffect) {
         super(BeaconData.class);
@@ -73,7 +74,9 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
 
     @Override
     public BeaconData clearEffects() {
-        return null;
+        this.primaryEffect = Optional.empty();
+        this.secondaryEffect = Optional.empty();
+        return this;
     }
 
     @Override
@@ -93,7 +96,9 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
 
     @Override
     public DataContainer toContainer() {
-        return null;
+        return new MemoryDataContainer()
+                .set(Keys.BEACON_PRIMARY_EFFECT.getQuery(), this.primaryEffect)
+                .set(Keys.BEACON_SECONDARY_EFFECT.getQuery(), this.secondaryEffect);
     }
 
     public Optional<PotionEffectType> getPrimaryEffect() {
@@ -101,7 +106,7 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     public void setPrimaryEffect(Optional<PotionEffectType> effectType) {
-        // TODO:
+        this.primaryEffect = effectType;
     }
 
     public Optional<PotionEffectType> getSecondaryEffect() {
@@ -109,6 +114,6 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     public void setSecondaryEffect(Optional<PotionEffectType> effectType) {
-        // TODO:
+        this.secondaryEffect = effectType;
     }
 }
