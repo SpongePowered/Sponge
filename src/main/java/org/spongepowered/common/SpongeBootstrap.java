@@ -91,7 +91,7 @@ public final class SpongeBootstrap {
         if (!registerService(SchedulerService.class, SpongeScheduler.getInstance())) {
             throw new ExceptionInInitializerError("Cannot continue with a Non-Sponge Scheduler!");
         }
-        registerService(SerializationService.class, new SpongeSerializationService());
+        registerService(SerializationService.class, SpongeSerializationService.getInstance());
         registerService(PropertyRegistry.class, SpongePropertyRegistry.getInstance());
         registerService(PaginationService.class, new SpongePaginationService());
         if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {

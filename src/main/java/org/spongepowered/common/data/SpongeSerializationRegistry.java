@@ -110,7 +110,6 @@ import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.SpongeItemEnchantmentBuilder;
@@ -277,7 +276,7 @@ public class SpongeSerializationRegistry {
 
     public static void setupSerialization(Game game) {
         KeyRegistry.registerKeys();
-        SpongeSerializationService service = (SpongeSerializationService) game.getServiceManager().provide(SerializationService.class).get();
+        SpongeSerializationService service = SpongeSerializationService.getInstance();
         SpongeDataRegistry dataRegistry = SpongeDataRegistry.getInstance();
         // TileEntities
         service.registerBuilder(Banner.class, new SpongeBannerBuilder(game));

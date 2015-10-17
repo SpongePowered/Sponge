@@ -37,6 +37,7 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         if (!container.contains(BASE) || !container.contains(PATTERNS)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
-        final SerializationService service = this.game.getServiceManager().provide(SerializationService.class).get();
+        final SerializationService service = SpongeSerializationService.getInstance();
 
         final BannerData bannerData = null;
 
