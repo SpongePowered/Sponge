@@ -128,6 +128,11 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         });
         registry.immutableProcessorMap.clear();
 
+        registry.builderMap.values().forEach(builder -> {
+            if (builder instanceof SpongeDataBuilder) {
+                ((SpongeDataBuilder<?, ?>) builder).finalizeRegistration();
+            }
+        });
     }
 
 
@@ -202,9 +207,13 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         immutableProcessorList.add(processor);
         
         SpongeSerializationService service = SpongeSerializationService.getInstance();
-        SpongeDataBuilder<T, I> builder = new SpongeDataBuilder<>(implClass, processor);
-        service.registerBuilderAndImpl(manipulatorClass, implClass, builder);
-        service.registerBuilderAndImpl(immutableDataManipulator, implImClass, new SpongeImmutableDataBuilder<>(implImClass, builder));
+        SpongeDataBuilder<T, I> builder = new SpongeDataBuilder<T, I>(implClass, processor);
+        if (!service.getBuilder(implClass).isPresent()) {
+            service.registerBuilderAndImpl(manipulatorClass, implClass, builder);
+        }
+        if (!service.getBuilder(implImClass).isPresent()) {
+            service.registerBuilderAndImpl(immutableDataManipulator, implImClass, new SpongeImmutableDataBuilder<>(implImClass, builder));
+        }
     }
 
     /**

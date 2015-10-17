@@ -32,23 +32,24 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.util.Optional;
 
 public class SpongeDataBuilder<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataManipulatorBuilder<M, I> {
 
-    private final Class<? extends M> manipulatorClass;
-    private final DataProcessor<M, I> processor;
+    private final Class<? extends M> implClass;
+    private DataProcessor<M, I> processor;
 
-    public SpongeDataBuilder(Class<? extends M> manipulatorClass, DataProcessor<M, I> processor) {
-        this.manipulatorClass = manipulatorClass;
+    public SpongeDataBuilder(Class<? extends M> implClass, DataProcessor<M, I> processor) {
+        this.implClass = implClass;
         this.processor = processor;
     }
 
     @Override
     public M create() {
-        return ReflectionUtil.createInstance(this.manipulatorClass);
+        return ReflectionUtil.createInstance(this.implClass);
     }
 
     @Override
@@ -65,5 +66,10 @@ public class SpongeDataBuilder<M extends DataManipulator<M, I>, I extends Immuta
             container = view.copy();
         }
         return this.processor.fill(container, create());
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void finalizeRegistration() {
+        this.processor = SpongeDataRegistry.getInstance().getProcessor((Class<M>) implClass).get();
     }
 }
