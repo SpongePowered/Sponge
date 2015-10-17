@@ -46,6 +46,10 @@ public class SpongeSerializationService implements SerializationService {
 
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
     private boolean registrationComplete = false;
+    private static final SpongeSerializationService INSTANCE = new SpongeSerializationService();
+
+    private SpongeSerializationService() {
+    }
 
     public void completeRegistration() {
         checkState(!this.registrationComplete);
@@ -87,5 +91,9 @@ public class SpongeSerializationService implements SerializationService {
         } else {
             return Optional.empty();
         }
+    }
+
+    public static SpongeSerializationService getInstance() {
+        return INSTANCE;
     }
 }

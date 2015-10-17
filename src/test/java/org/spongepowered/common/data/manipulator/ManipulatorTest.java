@@ -82,7 +82,7 @@ public class ManipulatorTest {
             SpongeGame mockGame = mock(SpongeGame.class);
 
             final ServiceManager mockServiceManager = mock(ServiceManager.class);
-            final SerializationService serializationService = new SpongeSerializationService();
+            final SerializationService serializationService = SpongeSerializationService.getInstance();
             Mockito.when(mockGame.getServiceManager()).thenReturn(mockServiceManager);
             when(mockServiceManager.provide(SerializationService.class)).thenReturn(Optional.of(serializationService));
             SpongeSerializationRegistry.setupSerialization(mockGame);

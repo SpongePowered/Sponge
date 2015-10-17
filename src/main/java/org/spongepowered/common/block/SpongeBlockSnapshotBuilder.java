@@ -45,11 +45,11 @@ import org.spongepowered.api.service.persistence.SerializationService;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -174,7 +174,7 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
         checkDataExists(container, DataQueries.BLOCK_STATE);
         checkDataExists(container, Location.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+        final SerializationService serializationService = SpongeSerializationService.getInstance();
         // this is unused for now
         final UUID worldUuid = UUID.fromString(container.getString(Location.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);

@@ -22,45 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.manipulator.mutable.entity;
+package org.spongepowered.common.data.builder.manipulator;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
-import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
-import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.SpongeDataRegistry;
 
 import java.util.Optional;
 
-public class GameModeDataBuilder implements DataManipulatorBuilder<GameModeData, ImmutableGameModeData> {
+public class SpongeDataBuilder<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataManipulatorBuilder<M, I> {
 
-    @Override
-    public GameModeData create() {
-        return new SpongeGameModeData();
+    private final Class<? extends M> implClass;
+    final I immutableSingleInstance;
+    private DataProcessor<M, I> processor;
+
+    public SpongeDataBuilder(Class<? extends M> implClass, I immutableSingleInstance, DataProcessor<M, I> processor) {
+        this.implClass = implClass;
+        this.immutableSingleInstance = immutableSingleInstance;
+        this.processor = processor;
     }
 
     @Override
-    public Optional<GameModeData> createFrom(DataHolder dataHolder) {
-        if (dataHolder instanceof EntityPlayerMP) {
-            return Optional.of(new SpongeGameModeData((GameMode) (Object) ((EntityPlayerMP) dataHolder).theItemInWorldManager.getGameType()));
-        }
-        return Optional.empty();
+    public M create() {
+        return this.immutableSingleInstance.asMutable();
     }
 
     @Override
-    public Optional<GameModeData> build(DataView container) throws InvalidDataException {
-        final String modeId = DataUtil.getData(container, Keys.GAME_MODE, String.class);
-        final Optional<GameMode> optional = Sponge.getSpongeRegistry().getType(GameMode.class, modeId);
-        if (optional.isPresent()) {
-            return Optional.of(new SpongeGameModeData(optional.get()));
+    public Optional<M> createFrom(DataHolder dataHolder) {
+        return this.processor.createFrom(dataHolder);
+    }
+
+    @Override
+    public Optional<M> build(DataView view) throws InvalidDataException {
+        DataContainer container;
+        if (view instanceof DataContainer) {
+            container = (DataContainer) view;
+        } else {
+            container = view.copy();
         }
-        return Optional.empty();
+        return this.processor.fill(container, create());
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void finalizeRegistration() {
+        this.processor = SpongeDataRegistry.getInstance().getProcessor((Class<M>) implClass).get();
     }
 }

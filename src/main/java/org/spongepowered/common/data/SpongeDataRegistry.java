@@ -37,11 +37,13 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.data.builder.manipulator.SpongeDataBuilder;
+import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataBuilder;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +127,11 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         });
         registry.immutableProcessorMap.clear();
 
+        registry.builderMap.values().forEach(builder -> {
+            if (builder instanceof SpongeDataBuilder) {
+                ((SpongeDataBuilder<?, ?>) builder).finalizeRegistration();
+            }
+        });
     }
 
 
@@ -157,15 +164,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return Optional.ofNullable(this.immutableBuilderMap.get(checkNotNull(immutable)));
     }
 
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-        registerDataProcessorAndImplBuilder(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-                                        Class<? extends I> implImClass, DataProcessor<T, I> processor, DataManipulatorBuilder<T, I> builder) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        register(manipulatorClass, immutableDataManipulator, builder);
-        register(implClass, implImClass, builder);
-        registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
-    }
-
     /**
      * Registers a {@link DataManipulator} class and the
      * {@link ImmutableDataManipulator} class along with the implemented
@@ -175,20 +173,20 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
      * @param manipulatorClass The manipulator class
      * @param implClass The implemented manipulator class
      * @param immutableDataManipulator The immutable class
-     * @param implImClass The implemented immutable class
+     * @param emptyInstance A default mutable manipulator
      * @param processor The processor
      * @param <T> The type of data manipulator
      * @param <I> The type of immutable data manipulator
      */
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-    registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-                                 Class<? extends I> implImClass, DataProcessor<T, I> processor) {
+    registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<I> immutableDataManipulator,
+                                 T emptyInstance, DataProcessor<T, I> processor) {
         checkState(allowRegistrations, "Registrations are no longer allowed!");
-        checkArgument(!Modifier.isAbstract(implClass.getModifiers()), "The Implemented DataManipulator class cannot be abstract!");
-        checkArgument(!Modifier.isInterface(implClass.getModifiers()), "The Implemented DataManipulator class cannot be an interface!");
-        checkArgument(!Modifier.isAbstract(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
-        checkArgument(!Modifier.isInterface(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
         checkArgument(!(processor instanceof DataProcessorDelegate), "Cannot register DataProcessorDelegates!");
+        
+        Class<? extends T> implClass = (Class<? extends T>) emptyInstance.getClass();
+        Class<? extends I> implImClass = (Class<? extends I>) emptyInstance.asImmutable().getClass();
+        
         List<DataProcessor<?, ?>> processorList = this.processorMap.get(manipulatorClass);
         if (processorList == null) {
             processorList = new CopyOnWriteArrayList<>();
@@ -206,6 +204,15 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         }
         checkArgument(!immutableProcessorList.contains(processor), "Duplicate DataProcessor Registration!");
         immutableProcessorList.add(processor);
+        
+        SpongeSerializationService service = SpongeSerializationService.getInstance();
+        SpongeDataBuilder<T, I> builder = new SpongeDataBuilder<T, I>(implClass, emptyInstance.asImmutable(), processor);
+        if (!service.getBuilder(implClass).isPresent()) {
+            service.registerBuilderAndImpl(manipulatorClass, implClass, builder);
+        }
+        if (!service.getBuilder(implImClass).isPresent()) {
+            service.registerBuilderAndImpl(immutableDataManipulator, implImClass, new SpongeImmutableDataBuilder<>(builder));
+        }
     }
 
     /**

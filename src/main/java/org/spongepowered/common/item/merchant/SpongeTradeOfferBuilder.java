@@ -38,7 +38,7 @@ import org.spongepowered.api.item.merchant.TradeOfferBuilder;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
 import java.util.Optional;
 
@@ -144,7 +144,7 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
                 (EXPERIENCE_QUERY) || !container.contains(MAX_QUERY) || !container.contains(USES_QUERY)) {
             throw new InvalidDataException("Not enough information for constructing a TradeOffer!!");
         }
-        final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+        final SerializationService serializationService = SpongeSerializationService.getInstance();
         final ItemStack firstItem = container.getSerializable(FIRST_QUERY, ItemStack.class, serializationService).get();
         final ItemStack buyingItem = container.getSerializable(BUYING_QUERY, ItemStack.class, serializationService).get();
         final ItemStack secondItem;

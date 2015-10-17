@@ -22,49 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-package org.spongepowered.common.data.builder.manipulator.immutable.block;
-
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
+package org.spongepowered.common.data.builder.manipulator;
 
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataHolder;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
 import java.util.Optional;
 
-public class ImmutableSpongeTreeDataBuilder implements ImmutableDataManipulatorBuilder<ImmutableTreeData, TreeData> {
+public class SpongeImmutableDataBuilder<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>> implements ImmutableDataManipulatorBuilder<I, M> {
 
-    @Override
-    public ImmutableTreeData createImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, TreeTypes.OAK);
+    private final SpongeDataBuilder<M, I> mutableBuilder;
+    
+    public SpongeImmutableDataBuilder(SpongeDataBuilder<M, I> mutableBuilder) {
+        this.mutableBuilder = mutableBuilder;
     }
 
     @Override
-    public Optional<ImmutableTreeData> createFrom(DataHolder dataHolder) {
+    public I createImmutable() {
+        return this.mutableBuilder.immutableSingleInstance;
+    }
+
+    @Override
+    public Optional<I> createFrom(DataHolder dataHolder) {
+        return this.mutableBuilder.createFrom(dataHolder).map(DataManipulator::asImmutable);
+    }
+
+    @Override
+    public Optional<I> createFrom(ImmutableDataHolder<?> dataHolder) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<ImmutableTreeData> createFrom(ImmutableDataHolder<?> dataHolder) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ImmutableTreeData> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, Keys.TREE_TYPE.getQuery());
-        final String treeTypeId = container.getString(Keys.TREE_TYPE.getQuery()).get();
-        final TreeType treeType = Sponge.getSpongeRegistry().getType(TreeType.class, treeTypeId).get();
-        return Optional.of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType));
+    public Optional<I> build(DataView view) throws InvalidDataException {
+        return this.mutableBuilder.build(view).map(DataManipulator::asImmutable);
     }
 }
