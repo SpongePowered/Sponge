@@ -59,8 +59,8 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
         final BeaconData beaconData = null;
-        beaconData.set(Keys.BEACON_PRIMARY_EFFECT, (PotionEffectType) Potion.potionTypes[container.getInt(PRIMARY).get()]);
-        beaconData.set(Keys.BEACON_SECONDARY_EFFECT, (PotionEffectType) Potion.potionTypes[container.getInt(SECONDARY).get()]);
+        beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(PRIMARY).get()]));
+        beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(SECONDARY).get()]));
 
         final Beacon beacon = beaconOptional.get();
         beacon.offer(beaconData);
