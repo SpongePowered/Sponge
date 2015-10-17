@@ -15,6 +15,7 @@
         "block.MixinBlockLeaves",
         "block.MixinBlockLog",
         "block.MixinBlockSnowLayer",
+        "block.MixinBlockSponge",
         "block.MixinBlockState",
         "block.MixinBlockTallGrass",
         "block.properties.MixinPropertyBoolean",
