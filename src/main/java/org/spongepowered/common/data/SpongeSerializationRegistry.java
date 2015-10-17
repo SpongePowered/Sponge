@@ -134,36 +134,6 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder
 import org.spongepowered.common.data.builder.item.SpongeItemStackDataBuilder;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHorseData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgniteableData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePigSaddleData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePlayingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSittingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSlimeData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGoldenAppleData;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlaceableData;
-import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
@@ -311,67 +281,71 @@ public class SpongeSerializationRegistry {
         service.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
 
         // Data Manipulators
-        dataRegistry.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
-                                                         ImmutableSpongeHealthData.class, new HealthDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(IgniteableData.class, SpongeIgniteableData.class, ImmutableIgniteableData.class,
-                                                         ImmutableSpongeIgniteableData.class, new IgniteableDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
-                                                         ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class,
-                                                         new DisplayNameDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
-                                                         ImmutableSpongeCareerData.class, new CareerDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class, ImmutableSignData.class,
-                                                         ImmutableSpongeSignData.class, new SignDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(FlyingData.class, SpongeFlyingData.class, ImmutableFlyingData.class,
-                                                         ImmutableSpongeFlyingData.class, new FlyingDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
-                                                         ImmutableSpongeSkullData.class, new SkullDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
-                                                         ImmutableSpongeVelocityData.class, new VelocityDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(FoodData.class, SpongeFoodData.class, ImmutableFoodData.class,
-                                                         ImmutableSpongeFoodData.class, new FoodDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(BreathingData.class, SpongeBreathingData.class, ImmutableBreathingData.class,
-                                                         ImmutableSpongeBreathingData.class, new BreathingDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
-                                                         ImmutableSpongeGameModeData.class, new GameModeDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(ScreamingData.class, SpongeScreamingData.class, ImmutableScreamingData.class,
-                                                         ImmutableSpongeScreamingData.class, new ScreamingDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
-                                                         ImmutableSpongeRepresentedItemData.class, new RepresentedItemDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(EnchantmentData.class, SpongeEnchantmentData.class, ImmutableEnchantmentData.class,
-                                                         ImmutableSpongeEnchantmentData.class, new ItemEnchantmentDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(LoreData.class, SpongeLoreData.class, ImmutableLoreData.class, ImmutableSpongeLoreData.class,
+        dataRegistry.registerDataProcessorAndImpl(HealthData.class, ImmutableHealthData.class, new SpongeHealthData(),
+                                                         new HealthDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(IgniteableData.class, ImmutableIgniteableData.class,
+                                                         new SpongeIgniteableData(), new IgniteableDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(DisplayNameData.class, ImmutableDisplayNameData.class,
+                                                         new SpongeDisplayNameData(), new DisplayNameDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(CareerData.class, ImmutableCareerData.class, new SpongeCareerData(),
+                                                         new CareerDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(SignData.class, ImmutableSignData.class, new SpongeSignData(),
+                                                         new SignDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(FlyingData.class, ImmutableFlyingData.class, new SpongeFlyingData(),
+                                                         new FlyingDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(SkullData.class, ImmutableSkullData.class, new SpongeSkullData(),
+                                                         new SkullDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(VelocityData.class, ImmutableVelocityData.class,
+                                                         new SpongeVelocityData(), new VelocityDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(FoodData.class, ImmutableFoodData.class, new SpongeFoodData(),
+                                                         new FoodDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(BreathingData.class, ImmutableBreathingData.class,
+                                                         new SpongeBreathingData(), new BreathingDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(GameModeData.class, ImmutableGameModeData.class,
+                                                         new SpongeGameModeData(), new GameModeDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(ScreamingData.class, ImmutableScreamingData.class,
+                                                         new SpongeScreamingData(), new ScreamingDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(RepresentedItemData.class, ImmutableRepresentedItemData.class,
+                                                         new SpongeRepresentedItemData(),
+                                                         new RepresentedItemDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(EnchantmentData.class, ImmutableEnchantmentData.class,
+                                                         new SpongeEnchantmentData(),
+                                                         new ItemEnchantmentDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(LoreData.class, ImmutableLoreData.class, new SpongeLoreData(),
                                                          new ItemLoreDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(PagedData.class, SpongePagedData.class, ImmutablePagedData.class, ImmutableSpongePagedData.class,
+        dataRegistry.registerDataProcessorAndImpl(PagedData.class, ImmutablePagedData.class, new SpongePagedData(),
                                                          new ItemPagedDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(HorseData.class, SpongeHorseData.class, ImmutableHorseData.class,
-                                                         ImmutableSpongeHorseData.class, new HorseDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(SneakingData.class, SpongeSneakingData.class, ImmutableSneakingData.class,
-                                                         ImmutableSpongeSneakingData.class, new SneakingDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(GoldenAppleData.class, SpongeGoldenAppleData.class, ImmutableGoldenAppleData.class,
-                                                         ImmutableSpongeGoldenAppleData.class, new GoldenAppleDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(ExperienceHolderData.class, SpongeExperienceHolderData.class, ImmutableExperienceHolderData.class,
-                                                         ImmutableSpongeExperienceHolderData.class, new ExperienceHolderDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(AuthorData.class, SpongeAuthorData.class, ImmutableAuthorData.class,
-                                                         ImmutableSpongeAuthorData.class, new ItemAuthorDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(BreakableData.class, SpongeBreakableData.class, ImmutableBreakableData.class,
-                                                         ImmutableSpongeBreakableData.class, new BreakableDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(PlaceableData.class, SpongePlaceableData.class, ImmutablePlaceableData.class,
-                                                         ImmutableSpongePlaceableData.class, new PlaceableDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(MovementSpeedData.class, SpongeMovementSpeedData.class, ImmutableMovementSpeedData.class,
-                                                         ImmutableSpongeMovementSpeedData.class, new MovementSpeedDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(SlimeData.class, SpongeSlimeData.class, ImmutableSlimeData.class, ImmutableSpongeSlimeData.class,
+        dataRegistry.registerDataProcessorAndImpl(HorseData.class, ImmutableHorseData.class, new SpongeHorseData(),
+                                                         new HorseDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(SneakingData.class, ImmutableSneakingData.class,
+                                                         new SpongeSneakingData(), new SneakingDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(GoldenAppleData.class, ImmutableGoldenAppleData.class,
+                                                         new SpongeGoldenAppleData(), new GoldenAppleDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(ExperienceHolderData.class, ImmutableExperienceHolderData.class,
+                                                         new SpongeExperienceHolderData(),
+                                                         new ExperienceHolderDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(AuthorData.class, ImmutableAuthorData.class, new SpongeAuthorData(),
+                                                         new ItemAuthorDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(BreakableData.class, ImmutableBreakableData.class,
+                                                         new SpongeBreakableData(), new BreakableDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(PlaceableData.class, ImmutablePlaceableData.class,
+                                                         new SpongePlaceableData(), new PlaceableDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(MovementSpeedData.class, ImmutableMovementSpeedData.class,
+                                                         new SpongeMovementSpeedData(),
+                                                         new MovementSpeedDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(SlimeData.class, ImmutableSlimeData.class, new SpongeSlimeData(),
                                                          new SlimeDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(VillagerZombieData.class, SpongeVillagerZombieData.class, ImmutableVillagerZombieData.class,
-                                                         ImmutableSpongeVillagerZombieData.class, new VillagerZombieProcessor());
-        dataRegistry.registerDataProcessorAndImpl(PlayingData.class, SpongePlayingData.class, ImmutablePlayingData.class,
-                                                         ImmutableSpongePlayingData.class, new PlayingDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(SittingData.class, SpongeSittingData.class, ImmutableSittingData.class,
-                                                         ImmutableSpongeSittingData.class, new SittingDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(ShearedData.class, SpongeShearedData.class, ImmutableShearedData.class,
-                                                         ImmutableSpongeShearedData.class, new ShearedDataProcessor());
-        dataRegistry.registerDataProcessorAndImpl(PigSaddleData.class, SpongePigSaddleData.class, ImmutablePigSaddleData.class,
-                                                         ImmutableSpongePigSaddleData.class, new PigSaddleDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(VillagerZombieData.class, ImmutableVillagerZombieData.class,
+                                                         new SpongeVillagerZombieData(),
+                                                         new VillagerZombieProcessor());
+        dataRegistry.registerDataProcessorAndImpl(PlayingData.class, ImmutablePlayingData.class, new SpongePlayingData(),
+                                                         new PlayingDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(SittingData.class, ImmutableSittingData.class,
+                                                         new SpongeSittingData(), new SittingDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(ShearedData.class, ImmutableShearedData.class,
+                                                         new SpongeShearedData(), new ShearedDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(PigSaddleData.class, ImmutablePigSaddleData.class,
+                                                         new SpongePigSaddleData(), new PigSaddleDataProcessor());
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
