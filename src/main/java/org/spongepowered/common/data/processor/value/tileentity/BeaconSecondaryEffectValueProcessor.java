@@ -26,13 +26,16 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
+import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.interfaces.tileentity.IMixinTileEntityBeacon;
@@ -68,6 +71,17 @@ public class BeaconSecondaryEffectValueProcessor extends AbstractSpongeValueProc
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return null;
+        if (container instanceof TileEntityBeacon) {
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<Optional<PotionEffectType>> oldData = getValueFromContainer(container);
+            if (oldData.isPresent()) {
+                final ImmutableOptionalValue<PotionEffectType> effectType =
+                        new ImmutableSpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, oldData.get());
+                builder.replace(effectType);
+            }
+            ((IMixinTileEntityBeacon) container).setSecondaryEffect(-1);
+            return builder.result(DataTransactionResult.Type.SUCCESS).build();
+        }
+        return DataTransactionBuilder.failNoData();
     }
 }
