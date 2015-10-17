@@ -43,6 +43,7 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
+import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -207,12 +208,13 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         immutableProcessorList.add(processor);
         
         SpongeSerializationService service = SpongeSerializationService.getInstance();
-        SpongeDataBuilder<T, I> builder = new SpongeDataBuilder<T, I>(implClass, processor);
+        SpongeDataBuilder<T, I> builder = new SpongeDataBuilder<T, I>(implClass,
+                ReflectionUtil.createInstance(implImClass), processor);
         if (!service.getBuilder(implClass).isPresent()) {
             service.registerBuilderAndImpl(manipulatorClass, implClass, builder);
         }
         if (!service.getBuilder(implImClass).isPresent()) {
-            service.registerBuilderAndImpl(immutableDataManipulator, implImClass, new SpongeImmutableDataBuilder<>(implImClass, builder));
+            service.registerBuilderAndImpl(immutableDataManipulator, implImClass, new SpongeImmutableDataBuilder<>(builder));
         }
     }
 

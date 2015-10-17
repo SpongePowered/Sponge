@@ -31,23 +31,20 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.util.ReflectionUtil;
 
 import java.util.Optional;
 
 public class SpongeImmutableDataBuilder<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>> implements ImmutableDataManipulatorBuilder<I, M> {
 
-    private final Class<? extends I> immutableManipulatorClass;
     private final SpongeDataBuilder<M, I> mutableBuilder;
     
-    public SpongeImmutableDataBuilder(Class<? extends I> immutableManipulatorClass, SpongeDataBuilder<M, I> mutableBuilder) {
-        this.immutableManipulatorClass = immutableManipulatorClass;
+    public SpongeImmutableDataBuilder(SpongeDataBuilder<M, I> mutableBuilder) {
         this.mutableBuilder = mutableBuilder;
     }
 
     @Override
     public I createImmutable() {
-        return ReflectionUtil.createInstance(this.immutableManipulatorClass);
+        return this.mutableBuilder.immutableSingleInstance;
     }
 
     @Override
