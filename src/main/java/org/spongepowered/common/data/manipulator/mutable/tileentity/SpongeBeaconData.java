@@ -57,9 +57,11 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     protected void registerGettersAndSetters() {
         this.registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, SpongeBeaconData.this::getPrimaryEffect);
         this.registerFieldSetter(Keys.BEACON_PRIMARY_EFFECT, SpongeBeaconData.this::setPrimaryEffect);
+        this.registerKeyValue(Keys.BEACON_PRIMARY_EFFECT, SpongeBeaconData.this::primaryEffect);
 
         this.registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, SpongeBeaconData.this::getSecondaryEffect);
         this.registerFieldSetter(Keys.BEACON_SECONDARY_EFFECT, SpongeBeaconData.this::setSecondaryEffect);
+        this.registerKeyValue(Keys.BEACON_SECONDARY_EFFECT, SpongeBeaconData.this::secondaryEffect);
     }
 
     @Override

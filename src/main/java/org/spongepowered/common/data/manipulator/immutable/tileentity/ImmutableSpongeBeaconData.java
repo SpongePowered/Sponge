@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
@@ -54,7 +55,11 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
 
     @Override
     protected void registerGetters() {
+        this.registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, ImmutableSpongeBeaconData.this::getPrimaryEffect);
+        this.registerKeyValue(Keys.BEACON_PRIMARY_EFFECT, ImmutableSpongeBeaconData.this::primaryEffect);
 
+        this.registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, ImmutableSpongeBeaconData.this::getSecondaryEffect);
+        this.registerKeyValue(Keys.BEACON_SECONDARY_EFFECT, ImmutableSpongeBeaconData.this::secondaryEffect);
     }
 
     @Override
@@ -69,7 +74,7 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
 
     @Override
     public ImmutableBeaconData clearEffects() {
-        return null;
+        return new ImmutableSpongeBeaconData(Optional.empty(), Optional.empty());
     }
 
     @Override
@@ -84,6 +89,16 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
 
     @Override
     public DataContainer toContainer() {
-        return null;
+        return new MemoryDataContainer()
+                .set(Keys.BEACON_PRIMARY_EFFECT.getQuery(), this.primaryEffect)
+                .set(Keys.BEACON_SECONDARY_EFFECT.getQuery(), this.secondaryEffect);
+    }
+
+    public Optional<PotionEffectType> getPrimaryEffect() {
+        return this.primaryEffect;
+    }
+
+    public Optional<PotionEffectType> getSecondaryEffect() {
+        return this.secondaryEffect;
     }
 }
