@@ -128,6 +128,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
                 DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
                     (dataContainer, dataManipulator) -> ((DataProcessor) entry.getValue()).fill(dataContainer, dataManipulator);
                 SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(entry.getValue(), entry.getKey(), function);
+                registry.builderMap.put(entry.getKey(), checkNotNull(builder));
                 serializationService.registerBuilder(entry.getKey(), builder);
             }
         });
@@ -151,6 +152,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
             this.builderMap.put(manipulatorClass, checkNotNull(builder));
             this.immutableBuilderMap.put(checkNotNull(immutableManipulatorClass), builder);
+            SpongeSerializationService.getInstance().registerBuilder((Class<T>) manipulatorClass, builder);
         } else {
             throw new IllegalStateException("Already registered the DataUtil for " + manipulatorClass.getCanonicalName());
         }
