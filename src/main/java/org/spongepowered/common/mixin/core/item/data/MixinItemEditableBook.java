@@ -29,11 +29,12 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.item.MixinItem;
 
 import java.util.List;
 
 @Mixin(ItemEditableBook.class)
-public class MixinItemEditableBook extends MixinItem {
+public abstract class MixinItemEditableBook extends MixinItem {
 
     @Override
     public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {

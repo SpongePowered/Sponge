@@ -28,10 +28,10 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.EnumParticleTypes;
-import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 

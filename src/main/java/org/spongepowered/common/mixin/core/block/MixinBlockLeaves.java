@@ -29,8 +29,8 @@ import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockTransaction;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.DecayBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -57,7 +57,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             new Location<World>((World) worldIn, VecHelper.toVector(pos));
         BlockSnapshot blockOriginal = location.createSnapshot();
         BlockSnapshot blockReplacement = blockOriginal.withState(BlockTypes.AIR.getDefaultState());
-        ImmutableList<BlockTransaction> transactions = new ImmutableList.Builder<BlockTransaction>().add(new BlockTransaction(blockOriginal, blockReplacement)).build();
+        ImmutableList<Transaction<BlockSnapshot>> transactions = new ImmutableList.Builder<Transaction<BlockSnapshot>>().add(new Transaction<BlockSnapshot>(blockOriginal, blockReplacement)).build();
         final DecayBlockEvent event = SpongeEventFactory.createDecayBlockEvent(Sponge.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {

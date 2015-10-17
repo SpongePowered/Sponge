@@ -25,22 +25,22 @@
 package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.item.Item;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.item.ItemBlock;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(net.minecraft.item.ItemBlock.class)
-public abstract class MixinItemBlock extends Item implements ItemBlock {
+public abstract class MixinItemBlock extends MixinItem {
 
-    @Shadow(prefix = "shadow$")
-    public abstract Block shadow$getBlock();
-
-    @Override
-    public BlockType getBlock() {
-        return (BlockType) shadow$getBlock();
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    public void onConstructed(Block block, CallbackInfo ci) {
+        this.blockType = Optional.of((BlockType) block);
     }
+
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -76,5 +77,15 @@ public class RegistryHelper {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static void setFinalStatic(Class clazz, String fieldName, Object newValue) throws NoSuchFieldException, IllegalAccessException {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        Field modifiers = field.getClass().getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        field.set(null, newValue);
     }
 }

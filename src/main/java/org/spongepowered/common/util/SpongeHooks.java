@@ -44,8 +44,8 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTransaction;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -163,7 +163,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(Cause cause, World world, CaptureType type, BlockTransaction transaction) {
+    public static void logBlockAction(Cause cause, World world, CaptureType type, Transaction<BlockSnapshot> transaction) {
         if (world.isRemote) {
             return;
         }
@@ -181,7 +181,7 @@ public class SpongeHooks {
                     world.getWorldInfo().getWorldName(),
                     world.provider.getDimensionId(),
                     transaction.getOriginal().getState(),
-                    transaction.getFinalReplacement().getState());
+                    transaction.getFinal().getState());
             logStack(config);
         }
     }

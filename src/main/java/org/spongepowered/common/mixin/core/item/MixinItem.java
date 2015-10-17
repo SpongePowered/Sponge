@@ -22,21 +22,70 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.data;
+package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.item.IMixinItem;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
+import java.util.Optional;
 
+@NonnullByDefault
 @Mixin(Item.class)
-public abstract class MixinItem implements IMixinItem {
+@Implements(@Interface(iface = ItemType.class, prefix = "item$"))
+public abstract class MixinItem implements ItemType, IMixinItem{
+
+    public Optional<BlockType> blockType = Optional.empty();
+
+    @Shadow
+    public abstract int getItemStackLimit();
+
+    @Shadow
+    public abstract String getUnlocalizedName();
+
+    @Override
+    public String getId() {
+        return Item.itemRegistry.getNameForObject(this).toString();
+    }
+
+    @Override
+    public String getName() {
+        return Item.itemRegistry.getNameForObject(this).toString();
+    }
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getDefaultProperty(Class<T> propertyClass) {
+        return Optional.empty(); // TODO
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(getUnlocalizedName() + ".name");
+    }
+
+    @Override
+    public int getMaxStackQuantity() {
+        return getItemStackLimit();
+    }
+
+    public Optional<BlockType> item$getBlock() {
+        return this.blockType;
+    }
 
     @Override
     public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {

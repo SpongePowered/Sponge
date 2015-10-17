@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item.data;
 
 import net.minecraft.item.ItemPotion;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.item.MixinItem;
 
 @Mixin(ItemPotion.class)
 public abstract class MixinItemPotion extends MixinItem {

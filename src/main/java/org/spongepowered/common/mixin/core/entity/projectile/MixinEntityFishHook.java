@@ -31,6 +31,7 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
@@ -41,7 +42,6 @@ import org.spongepowered.api.event.action.FishingEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.ItemStackTransaction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -151,9 +151,11 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             caughtSnapshot = ((Entity) this.caughtEntity).createSnapshot();
         }
 
-        ItemStackTransaction transaction = null;
+        Transaction<ItemStackSnapshot> transaction = null;
         if (itemStack != null) {
-            transaction = new ItemStackTransaction(((ItemStack) itemStack).createSnapshot());
+            ItemStackSnapshot original = ((ItemStack) itemStack).createSnapshot();
+            ItemStackSnapshot replacement = ((ItemStack) itemStack).createSnapshot();
+            transaction = new Transaction<ItemStackSnapshot>(original, replacement);
         }
 
         FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler), Optional
@@ -176,7 +178,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             }
 
             if (event.getItemStackTransaction().isPresent()) {
-                ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().get().getFinalSnapshot();
+                ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().get().getFinal();
                 EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, (net.minecraft.item.ItemStack) itemSnapshot.createStack());
                 double d1 = this.angler.posX - this.posX;
                 double d3 = this.angler.posY - this.posY;
