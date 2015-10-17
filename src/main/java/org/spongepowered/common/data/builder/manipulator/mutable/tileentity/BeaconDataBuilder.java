@@ -24,13 +24,19 @@
  */
 package org.spongepowered.common.data.builder.manipulator.mutable.tileentity;
 
+import net.minecraft.potion.Potion;
+import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
+import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.interfaces.tileentity.IMixinTileEntityBeacon;
 
 import java.util.Optional;
 
@@ -43,11 +49,27 @@ public class BeaconDataBuilder implements DataManipulatorBuilder<BeaconData, Imm
 
     @Override
     public Optional<BeaconData> createFrom(DataHolder dataHolder) {
-        return null;
+        if (dataHolder instanceof TileEntityBeacon) {
+            Optional<PotionEffectType> primary =
+                    Optional.of(
+                            (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) dataHolder).getPrimaryEffect()]);
+            Optional<PotionEffectType> secondary =
+                    Optional.of(
+                            (PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) dataHolder).getSecondaryEffect()]);
+            return Optional.of(new SpongeBeaconData(primary, secondary));
+        }
+        return Optional.empty();
     }
 
     @Override
     public Optional<BeaconData> build(DataView container) throws InvalidDataException {
-        return null;
+        DataUtil.checkDataExists(container, Keys.BEACON_PRIMARY_EFFECT.getQuery());
+        DataUtil.checkDataExists(container, Keys.BEACON_SECONDARY_EFFECT.getQuery());
+
+        Optional<PotionEffectType> primary =
+                (Optional<PotionEffectType>) container.get(Keys.BEACON_PRIMARY_EFFECT.getQuery()).get();
+        Optional<PotionEffectType> secondary =
+                (Optional<PotionEffectType>) container.get(Keys.BEACON_SECONDARY_EFFECT.getQuery()).get();
+        return Optional.of(new SpongeBeaconData(primary, secondary));
     }
 }
