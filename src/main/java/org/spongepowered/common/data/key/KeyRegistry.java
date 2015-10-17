@@ -37,6 +37,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.data.type.Career;
@@ -213,6 +214,7 @@ public class KeyRegistry {
         keyMap.put("note_pitch", makeSingleKey(NotePitch.class, Value.class, of("Note")));
         keyMap.put("vehicle", makeSingleKey(Entity.class, Value.class, of("Vehicle")));
         keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
+        keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

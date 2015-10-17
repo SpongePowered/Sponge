@@ -73,6 +73,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgentData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableChargedData;
@@ -144,6 +145,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.StoneData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.WallData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
@@ -247,6 +249,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWallData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAgentData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeArtData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeChargedData;
@@ -317,6 +320,7 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeStoneData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWallData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
@@ -386,6 +390,7 @@ import org.spongepowered.common.data.processor.data.block.StoneDataProcessor;
 import org.spongepowered.common.data.processor.data.block.TreeDataProcessor;
 import org.spongepowered.common.data.processor.data.block.WallDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.AgentDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.ArtDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.BreathingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ChargedDataProcessor;
@@ -459,6 +464,7 @@ import org.spongepowered.common.data.processor.value.block.TreeTypeValueProcesso
 import org.spongepowered.common.data.processor.value.block.WallTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.BaseVehicleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CanFlyValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.ArtValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ChargedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ElderValueProcessor;
@@ -861,6 +867,8 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
                 ImmutableSpongeVehicleData.class, vehicleDataProcessor);
 
+        dataRegistry.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
+                new ArtDataProcessor());
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -956,6 +964,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.NOTE_PITCH, new NoteValueProcessor());
         dataRegistry.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.ART, new ArtValueProcessor());
     }
 
 }

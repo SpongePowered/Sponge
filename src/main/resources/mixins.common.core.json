@@ -95,6 +95,7 @@
         "data.types.MixinBlockStoneSlabEnumType",
         "data.types.MixinBlockStoneSlabNewEnumType",
         "data.types.MixinBlockTallGrassEnumType",
+		"data.types.MixinArtType",
         "data.types.MixinBlockWallEnumType",
         "data.types.MixinEnumArt",
         "data.types.MixinEnumBannerPattern",
