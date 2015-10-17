@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
+import com.google.common.collect.ComparisonChain;
+import net.minecraft.potion.Potion;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -93,7 +95,10 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
 
     @Override
     public int compareTo(BeaconData o) {
-        return 0;
+        return ComparisonChain.start()
+                .compare(((Potion) o.primaryEffect().get().get()).getId(), ((Potion) this.primaryEffect.get()).getId())
+                .compare(((Potion) o.secondaryEffect().get().get()).getId(), ((Potion) this.secondaryEffect.get()).getId())
+                .result();
     }
 
     @Override
