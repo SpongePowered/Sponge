@@ -48,6 +48,7 @@
         "data.holders.MixinBlockLever",
         "data.holders.MixinBlockStandingSign",
         "data.holders.MixinBlockWallSign",
+		"data.types.MixinArtType",
         "data.types.MixinBlockWallEnumType",
         "data.types.MixinDirtType",
         "data.types.MixinEnumArt",

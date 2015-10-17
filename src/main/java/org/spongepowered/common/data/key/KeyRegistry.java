@@ -36,6 +36,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
@@ -148,6 +149,7 @@ public class KeyRegistry {
         keyMap.put("is_sitting", makeSingleKey(Boolean.class, Value.class, of("IsSitting")));
         keyMap.put("is_sheared", makeSingleKey(Boolean.class, Value.class, of("IsSheared")));
         keyMap.put("pig_saddle", makeSingleKey(Boolean.class, Value.class, of("IsPigSaddled")));
+        keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
 
     }
 
