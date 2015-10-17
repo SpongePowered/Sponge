@@ -22,4 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.builder.manipulator.mutable.item;
+package org.spongepowered.common.data.util;
+
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
+import org.spongepowered.common.data.DataProcessor;
+
+import java.util.function.Function;
+
+/**
+ * Much like {@link Function} except where two arguments are required for the
+ * function to work. This is primarily used for {@link DataManipulatorBuilder}s
+ * and {@link DataProcessor#fill(DataContainer, DataManipulator)}.
+ *
+ * @param <K> The type of first value of the argument passed in
+ * @param <V> The type of the second value of the argument passed in
+ * @param <T> The return type
+ */
+@FunctionalInterface
+public interface DataFunction<K, V, T> {
+
+    /**
+     * Applies the function with the given arguments to return the given type.
+     *
+     * @param k The first argument
+     * @param v The second argument
+     * @return The returned object
+     */
+    T apply(K k, V v);
+
+}

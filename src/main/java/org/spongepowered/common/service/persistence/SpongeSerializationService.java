@@ -39,13 +39,20 @@ import org.spongepowered.common.configuration.DataSerializableTypeSerializer;
 import java.util.Map;
 import java.util.Optional;
 
-public class SpongeSerializationService implements SerializationService {
+public final class SpongeSerializationService implements SerializationService {
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(DataSerializable.class), new DataSerializableTypeSerializer());
     }
 
+    private static final SpongeSerializationService instance = new SpongeSerializationService();
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
     private boolean registrationComplete = false;
+
+    public static SpongeSerializationService getInstance() {
+        return instance;
+    }
+
+    private SpongeSerializationService() {}
 
     public void completeRegistration() {
         checkState(!this.registrationComplete);

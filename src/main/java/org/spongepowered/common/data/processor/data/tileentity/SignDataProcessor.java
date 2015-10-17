@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -40,10 +43,12 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSign
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -130,7 +135,20 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
 
     @Override
     public Optional<SignData> fill(DataContainer container, SignData signData) {
-        return Optional.empty(); // TODO
+        if (!container.contains(Keys.SIGN_LINES.getQuery())) {
+            return Optional.empty();
+        }
+        checkNotNull(signData);
+        final List<String> lines = container.getStringList(Keys.SIGN_LINES.getQuery()).get();
+        final List<Text> textLines = Lists.newArrayListWithCapacity(4);
+        try {
+            for (int i = 0; i < 4; i++) {
+                textLines.set(i, Texts.json().fromUnchecked(lines.get(i)));
+            }
+        } catch (Exception e) {
+            throw new InvalidDataException("Could not deserialize text json lines", e);
+        }
+        return Optional.of(signData.set(Keys.SIGN_LINES, textLines));
     }
 
     @Override

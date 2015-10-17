@@ -31,15 +31,19 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.util.ComparatorUtil;
+import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -97,6 +101,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         return SpongeDataRegistry.instance;
     }
 
+    @SuppressWarnings("rawtypes")
     public static void finalizeRegistration() {
         allowRegistrations = false;
         final SpongeDataRegistry registry = instance;
@@ -116,6 +121,16 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
             registry.dataProcessorDelegates.put(entry.getKey(), delegate);
         });
         registry.processorMap.clear();
+
+        SpongeSerializationService serializationService = SpongeSerializationService.getInstance();
+        registry.dataProcessorDelegates.entrySet().forEach(entry -> {
+            if (!Modifier.isInterface(entry.getKey().getModifiers()) && !Modifier.isAbstract(entry.getKey().getModifiers())) {
+                DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
+                    (dataContainer, dataManipulator) -> ((DataProcessor) entry.getValue()).fill(dataContainer, dataManipulator);
+                SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(entry.getValue(), entry.getKey(), function);
+                serializationService.registerBuilder(entry.getKey(), builder);
+            }
+        });
         registry.immutableProcessorMap.entrySet().forEach(entry -> {
             ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
             Collections.sort(entry.getValue(), ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
@@ -155,15 +170,6 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
     public Optional<DataManipulatorBuilder<?, ?>> getWildBuilderForImmutable(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
         return Optional.ofNullable(this.immutableBuilderMap.get(checkNotNull(immutable)));
-    }
-
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-        registerDataProcessorAndImplBuilder(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-                                        Class<? extends I> implImClass, DataProcessor<T, I> processor, DataManipulatorBuilder<T, I> builder) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        register(manipulatorClass, immutableDataManipulator, builder);
-        register(implClass, implImClass, builder);
-        registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
     }
 
     /**
