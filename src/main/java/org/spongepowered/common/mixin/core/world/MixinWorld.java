@@ -321,14 +321,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.captureBlockLists.put(CaptureType.PLACE, this.capturedSpongeBlockPlaces);
     }
 
-    @Inject(method = "updateWeatherBody()V", remap = false, at = {
-            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThundering(Z)V"),
-            @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRaining(Z)V")
-    })
-    private void onUpdateWeatherBody(CallbackInfo ci) {
-        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
-    }
-
     @SuppressWarnings("rawtypes")
     @Overwrite
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
@@ -678,7 +670,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
                 if (chunk != null) {
                     IMixinChunk spongeChunk = (IMixinChunk) chunk;
-    
+
                     Optional<User> user = spongeChunk.getBlockPosOwner(pos);
                     if (user.isPresent()) {
                         cause = cause.with(user.get());
@@ -983,7 +975,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             break;
                         }
                     }
-    
+
                     if (invalidSpawn) {
                         iterator.remove();
                         continue;
@@ -1051,7 +1043,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             break;
                         }
                     }
-    
+
                     if (invalidSpawn) {
                         iterator.remove();
                         continue;
@@ -2203,5 +2195,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setRawData(int x, int y, int z, DataView container) throws InvalidDataException {
         // todo
+    }
+
+    @Override
+    public long getWeatherStartTime() {
+        return this.weatherStartTime;
+    }
+
+    @Override
+    public void setWeatherStartTime(long weatherStartTime) {
+        this.weatherStartTime = weatherStartTime;
     }
 }

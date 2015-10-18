@@ -83,4 +83,8 @@ public interface IMixinWorld {
     void setCapturingEntitySpawns(boolean flag);
 
     void setCurrentTickBlock(BlockSnapshot snapshot);
+
+    long getWeatherStartTime();
+
+    void setWeatherStartTime(long weatherStartTime);
 }
