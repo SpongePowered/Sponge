@@ -51,6 +51,7 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemFishFood;
+import net.minecraft.item.ItemFishFood.FishType;
 import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
@@ -471,7 +472,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final List<PotionEffectType> potionList = new ArrayList<>();
     private final List<BiomeType> biomeTypes = new ArrayList<>();
     private final Map<String, SoundType> soundNames = Maps.newHashMap();
-    private final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
+    public final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
     private final WorldGeneratorRegistry worldGeneratorRegistry = new WorldGeneratorRegistry();
     private final Hashtable<Class<? extends WorldProvider>, Integer> classToProviders = new Hashtable<>();
     private final Map<UUID, WorldProperties> worldPropertiesUuidMappings = Maps.newHashMap();
@@ -487,8 +488,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, TreeType> treeTypeMappings = Maps.newHashMap();
     private final Map<String, BannerPatternShape> bannerPatternShapeMappings = Maps.newHashMap();
     public final Map<String, BannerPatternShape> idToBannerPatternShapeMappings = Maps.newHashMap();
-    private final Map<String, Fish> fishMappings = Maps.newHashMap();
-    private final Map<String, CookedFish> cookedFishMappings = Maps.newHashMap();
+    public final Map<String, Fish> fishMappings = Maps.newHashMap();
+    public final Map<String, CookedFish> cookedFishMappings = Maps.newHashMap();
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
     private final Map<String, Art> artMappings = Maps.newHashMap();
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
@@ -1688,14 +1689,18 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             }
         });
 
-        RegistryHelper.mapFields(CookedFishes.class, input -> {
-            Fish fish = (Fish) (Object) ItemFishFood.FishType.valueOf(input);
-            CookedFish cooked = new SpongeCookedFish(input, input, fish); // TODO
-            if (cooked != null) {
-                SpongeGameRegistry.this.cookedFishMappings.put(cooked.getId().toLowerCase(), cooked);
-                return cooked;
-            } else {
-                return null;
+        RegistryHelper.mapFields(CookedFishes.class, new Function<String, CookedFish>() {
+
+            @Override
+            public CookedFish apply(String input) {
+                ItemFishFood.FishType fish = ItemFishFood.FishType.valueOf(input);
+                if (fish != null && fish.canCook()) {
+                    CookedFish cooked = new SpongeCookedFish(input, input, fish);
+                    SpongeGameRegistry.this.cookedFishMappings.put(cooked.getId().toLowerCase(), cooked);
+                    return cooked;
+                } else {
+                    return null;
+                }
             }
         });
     }
