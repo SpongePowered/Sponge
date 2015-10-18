@@ -91,6 +91,9 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         .concurrencyLevel(4)
         .makeMap();
 
+    private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses =
+        new MapMaker().concurrencyLevel(4).makeMap();
+
     private static boolean allowRegistrations = true;
 
     private SpongeDataRegistry() {
@@ -128,6 +131,13 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
                 DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
                     (dataContainer, dataManipulator) -> ((DataProcessor) entry.getValue()).fill(dataContainer, dataManipulator);
                 SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(entry.getValue(), entry.getKey(), function);
+                registry.builderMap.put(entry.getKey(), checkNotNull(builder));
+                serializationService.registerBuilder(entry.getKey(), builder);
+            } else {
+                final Class<? extends DataManipulator<?, ?>> clazz = registry.interfaceToImplDataManipulatorClasses.get(entry.getKey());
+                DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
+                    (dataContainer, dataManipulator) -> ((DataProcessor) entry.getValue()).fill(dataContainer, dataManipulator);
+                SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(entry.getValue(), clazz, function);
                 registry.builderMap.put(entry.getKey(), checkNotNull(builder));
                 serializationService.registerBuilder(entry.getKey(), builder);
             }
@@ -197,6 +207,9 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         checkArgument(!Modifier.isAbstract(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
         checkArgument(!Modifier.isInterface(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
         checkArgument(!(processor instanceof DataProcessorDelegate), "Cannot register DataProcessorDelegates!");
+        if (!this.interfaceToImplDataManipulatorClasses.containsKey(manipulatorClass)) { // we only need to insert it once.
+            this.interfaceToImplDataManipulatorClasses.put(manipulatorClass, implClass);
+        }
         List<DataProcessor<?, ?>> processorList = this.processorMap.get(manipulatorClass);
         if (processorList == null) {
             processorList = new CopyOnWriteArrayList<>();
