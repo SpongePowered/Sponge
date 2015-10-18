@@ -45,6 +45,7 @@ import org.spongepowered.api.block.tileentity.carrier.Dropper;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
@@ -107,6 +108,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableD
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
+import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
@@ -200,6 +202,7 @@ import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotBuilder
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
@@ -262,6 +265,7 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeP
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
@@ -324,6 +328,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableDat
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
+import org.spongepowered.common.data.processor.data.ColoredDataProcessor;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
 import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor;
 import org.spongepowered.common.data.processor.data.SkullDataProcessor;
@@ -527,6 +532,10 @@ public class SpongeSerializationRegistry {
         final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
                 ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
+
+        final ColoredDataProcessor coloredDataProcessor = new ColoredDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ColoredData.class, SpongeColoredData.class,
+                ImmutableColoredData.class, ImmutableSpongeColoredData.class, coloredDataProcessor);
 
         final CareerDataProcessor careerDataProcessor = new CareerDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
