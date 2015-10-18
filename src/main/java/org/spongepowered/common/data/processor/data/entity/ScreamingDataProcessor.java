@@ -24,27 +24,25 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.monster.EntityEnderman;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
-import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.util.Map;
 import java.util.Optional;
 
-public class ScreamingDataProcessor extends AbstractEntityDataProcessor<EntityEnderman, ScreamingData, ImmutableScreamingData> {
+public class ScreamingDataProcessor extends AbstractEntitySingleDataProcessor<EntityEnderman, Boolean, Value<Boolean>, ScreamingData, ImmutableScreamingData> {
 
     public ScreamingDataProcessor() {
-        super(EntityEnderman.class);
+        super(EntityEnderman.class, Keys.IS_SCREAMING);
     }
 
     @Override
@@ -53,29 +51,23 @@ public class ScreamingDataProcessor extends AbstractEntityDataProcessor<EntityEn
     }
 
     @Override
-    protected boolean doesDataExist(EntityEnderman entity) {
+    protected boolean set(EntityEnderman entity, Boolean value) {
+        entity.setScreaming(value);
         return true;
     }
 
     @Override
-    protected boolean set(EntityEnderman entity, Map<Key<?>, Object> keyValues) {
-        entity.setScreaming((Boolean) keyValues.get(Keys.IS_SCREAMING));
-        return true;
+    protected Optional<Boolean> getVal(EntityEnderman entity) {
+        return Optional.of(entity.isScreaming());
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityEnderman entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.IS_SCREAMING, entity.isScreaming());
-    }
-
-    @Override
-    public Optional<ScreamingData> fill(DataContainer container, ScreamingData screamingData) {
-        screamingData.set(Keys.IS_SCREAMING, DataUtil.getData(container, Keys.IS_SCREAMING));
-        return Optional.of(screamingData);
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, value);
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+        return DataTransactionBuilder.failNoData();
     }
 }

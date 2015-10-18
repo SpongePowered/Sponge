@@ -28,12 +28,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.monster.EntityEnderman;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.entity.living.monster.Enderman;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.List;
 import java.util.Optional;
 
 @NonnullByDefault
@@ -56,5 +59,11 @@ public abstract class MixinEntityEnderman extends MixinEntityMob {
 
     public void setScreaming(boolean screaming) {
         this.dataWatcher.updateObject(18, (byte) (screaming ? 1 : 0));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(get(ScreamingData.class).get());
     }
 }
