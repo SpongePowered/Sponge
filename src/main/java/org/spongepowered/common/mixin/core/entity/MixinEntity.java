@@ -46,7 +46,9 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
@@ -737,6 +739,29 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             return (Entity) entity;
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not copy the entity:", e);
+        }
+    }
+
+    @Override
+    public Optional<User> getSpongeCreator() {
+        NBTTagCompound nbt = getSpongeData();
+        if (!nbt.hasKey(NbtDataUtil.SPONGE_ENTITY_CREATOR)) {
+           return Optional.empty();
+        } else {
+            NBTTagCompound creatorNbt = nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            
+            if (!creatorNbt.hasKey("uuid_most") || !creatorNbt.hasKey("uuid_least")) {
+                return Optional.empty();
+            }
+
+            UUID uuid = new UUID(creatorNbt.getLong("uuid_most"), creatorNbt.getLong("uuid_least"));
+            // get player if online
+            EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
+            if (player != null) {
+                return Optional.of((User)player);
+            }
+            // player is not online, get user from storage if one exists
+            return Sponge.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid);
         }
     }
 }

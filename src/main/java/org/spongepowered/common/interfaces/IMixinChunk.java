@@ -24,63 +24,37 @@
  */
 package org.spongepowered.common.interfaces;
 
-import com.google.common.collect.ImmutableList;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.gen.GeneratorPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.common.configuration.SpongeConfig;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface IMixinWorld {
+public interface IMixinChunk {
 
-    SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
+    Cause getCurrentPopulateCause();
 
-    ImmutableList<Populator> getPopulators();
+    Map<Short, Integer> getTrackedShortPlayerPositions();
 
-    ImmutableList<GeneratorPopulator> getGeneratorPopulators();
+    Map<Integer, Integer> getTrackedIntPlayerPositions();
 
-    List<BlockSnapshot> getBlockBreakList();
+    Optional<UUID> getTrackedPlayerUniqueId(BlockPos pos);
 
-    BlockSnapshot createSpongeBlockSnapshot(IBlockState state, BlockPos pos, int updateFlag);
+    Optional<User> getBlockPosOwner(BlockPos pos);
 
-    boolean isWorldSpawnerRunning();
+    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot newBlockSnapshot);
 
-    boolean isChunkSpawnerRunning();
+    void addTrackedBlockPosition(Block block, BlockPos pos, EntityPlayer processingPlayer);
 
-    boolean capturingBlocks();
+    void setTrackedIntPlayerPositions(Map<Integer, Integer> trackedPlayerPositions);
 
-    boolean capturingTerrainGen();
+    void setTrackedShortPlayerPositions(Map<Short, Integer> trackedPlayerPositions);
 
-    boolean processingCaptureCause();
-
-    boolean restoringBlocks();
-
-    Optional<BlockSnapshot> getCurrentTickBlock();
-
-    Optional<Entity> getCurrentTickEntity();
-
-    Optional<TileEntity> getCurrentTickTileEntity();
-
-    void updateWorldGenerator();
-
-    void handlePostTickCaptures(Cause cause);
-
-    void setProcessingCaptureCause(boolean flag);
-
-    void setWorldSpawnerRunning(boolean flag);
-
-    void setChunkSpawnerRunning(boolean flag);
-
-    void setCapturingTerrainGen(boolean flag);
-
-    void setCapturingEntitySpawns(boolean flag);
-
-    void setCurrentTickBlock(BlockSnapshot snapshot);
+    void removeTrackedPlayerPosition(BlockPos pos);
 }

@@ -68,7 +68,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.event.SpongeImplEventFactory;
+import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -372,7 +372,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 world.getWorldInfo().setGameType(this.getGameType());
             }
 
-            Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (World)
+            Sponge.getGame().getEventManager().post(SpongeImplFactory.createLoadWorldEvent(Sponge.getGame(), (World)
                     world));
         }
 
@@ -491,7 +491,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldProvider) world.provider).setDimension(dim);
 
         world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
-        Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (World) world));
+        Sponge.getGame().getEventManager().post(SpongeImplFactory.createLoadWorldEvent(Sponge.getGame(), (World) world));
         if (!isSinglePlayer()) {
             world.getWorldInfo().setGameType(getGameType());
         }

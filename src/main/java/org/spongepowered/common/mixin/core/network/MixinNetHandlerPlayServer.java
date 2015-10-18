@@ -81,7 +81,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.event.SpongeImplEventFactory;
+import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
@@ -360,7 +360,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         sources.add(player);
         MessageSink originalSink = MessageSinks.to(sources);
         ClientConnectionEvent.Disconnect event =
-                SpongeImplEventFactory.createClientConnectionEventDisconnect(Sponge.getGame(), Cause.of(player), message, newMessage,
+                SpongeImplFactory.createClientConnectionEventDisconnect(Sponge.getGame(), Cause.of(player), message, newMessage,
                         originalSink, player.getMessageSink(), player);
         this.tmpQuitMessage = null;
         Sponge.getGame().getEventManager().post(event);

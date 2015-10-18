@@ -22,9 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common;
 
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
+import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -36,7 +43,6 @@ import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
 
 /**
  * Utility that fires events that normally Forge fires at (in spots). Typically
@@ -45,7 +51,7 @@ import org.spongepowered.common.Sponge;
  * called themselves in SpongeVanilla but when it can't really occur, we fix
  * this issue with Sponge by overwriting this class
  */
-public class SpongeImplEventFactory {
+public class SpongeImplFactory {
 
     public static LoadWorldEvent createLoadWorldEvent(Game game, World world) {
         return SpongeEventFactory.createLoadWorldEvent(game, Cause.of(Sponge.getGame().getServer()), world);
@@ -63,4 +69,26 @@ public class SpongeImplEventFactory {
         return SpongeEventFactory.createClientConnectionEventDisconnect(game, cause, originalMessage, message, originalSink, sink, targetEntity);
     }
 
+    public static boolean blockHasTileEntity(Block block, IBlockState state) {
+        return block instanceof BlockContainer;
+    }
+
+    public static int getBlockLightValue(Block block, BlockPos pos, IBlockAccess world) {
+        return block.getLightValue();
+    }
+
+    public static int getBlockLightOpacity(Block block, IBlockAccess world, BlockPos pos) {
+        return block.getLightOpacity();
+    }
+
+    public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+        return true;
+    }
+
+    public static TileEntity createTileEntity(Block block, net.minecraft.world.World world, IBlockState state) {
+        if (block instanceof ITileEntityProvider) {
+            return ((ITileEntityProvider)block).createNewTileEntity(world, block.getMetaFromState(state));
+        }
+        return null;
+    }
 }

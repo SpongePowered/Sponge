@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
@@ -148,5 +149,19 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public Optional<BlockTrait<?>> getTrait(String blockTrait) {
         return getDefaultBlockState().getTrait(blockTrait);
+    }
+
+    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"))
+    public void onDropBlockAsItemWithChance(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
+        if (((IMixinWorld) worldIn).restoringBlocks()) {
+            return;
+        }
+    }
+
+    @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"))
+    private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
+        if (((IMixinWorld) worldIn).restoringBlocks()) {
+            return;
+        }
     }
 }

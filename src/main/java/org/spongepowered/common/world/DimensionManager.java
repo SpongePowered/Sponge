@@ -45,7 +45,7 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.event.SpongeImplEventFactory;
+import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
@@ -295,7 +295,7 @@ public class DimensionManager {
         WorldServer world =
                 (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.theProfiler).init()));
         world.addWorldAccess(new WorldManager(mcServer, world));
-        Sponge.getGame().getEventManager().post(SpongeImplEventFactory.createLoadWorldEvent(Sponge.getGame(), (org.spongepowered.api.world.World) world));
+        Sponge.getGame().getEventManager().post(SpongeImplFactory.createLoadWorldEvent(Sponge.getGame(), (org.spongepowered.api.world.World) world));
         if (!mcServer.isSinglePlayer()) {
             world.getWorldInfo().setGameType(mcServer.getGameType());
         }
