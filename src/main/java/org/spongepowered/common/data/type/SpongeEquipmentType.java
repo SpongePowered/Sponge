@@ -22,39 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+public class SpongeEquipmentType implements EquipmentType {
 
-    @Shadow public int id;
-    @Shadow private String name;
+    private final String id;
+    private final String name;
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public SpongeEquipmentType(String id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
-    public String potion$getId() {
+    public SpongeEquipmentType() {
+        this("ANY", "none");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
         return this.name;
     }
 
-    public String potion$getName() {
-        return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof EquipmentType) {
+            if (((EquipmentType) obj).getId().equals("ANY")) {
+                return true;
+            }
+            if (((EquipmentType) obj).getId().equals(getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

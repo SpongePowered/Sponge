@@ -22,39 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.block.BlockSilverfish;
+import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
-
-    @Shadow public int id;
+@Mixin(BlockSilverfish.EnumType.class)
+@Implements(@Interface(iface = DisguisedBlockType.class, prefix = "type$"))
+public abstract class MixinEnumSilverfishType implements DisguisedBlockType {
     @Shadow private String name;
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
-    }
-
-    public String potion$getId() {
+    public String type$getId() {
         return this.name;
     }
 
-    public String potion$getName() {
+    public String type$getName() {
         return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
     }
 }

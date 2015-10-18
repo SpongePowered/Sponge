@@ -22,39 +22,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.mixin.core.entity.ai.attributes;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.entity.ai.attributes.BaseAttribute;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
+import org.spongepowered.api.attribute.Attribute;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.Predicates;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+import java.util.function.Predicate;
 
-    @Shadow public int id;
-    @Shadow private String name;
+@Mixin(RangedAttribute.class)
+@Implements(@Interface(iface = Attribute.class, prefix = "attribute$"))
+public abstract class MixinRangedAttribute extends BaseAttribute implements Attribute {
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    @Shadow private double minimumValue;
+    @Shadow private double maximumValue;
+
+    private MixinRangedAttribute(IAttribute p_i45892_1_, String unlocalizedNameIn, double defaultValueIn) {
+        super(p_i45892_1_, unlocalizedNameIn, defaultValueIn);
     }
 
-    public String potion$getId() {
-        return this.name;
+    public double attribute$getMinimum() {
+        return this.minimumValue;
     }
 
-    public String potion$getName() {
-        return this.name;
+    public double attribute$getMaximum() {
+        return this.maximumValue;
     }
 
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    public double attribute$getDefaultValue() {
+        return super.getDefaultValue();
+    }
+
+    public Predicate<DataHolder> attribute$getTargets() {
+        return Predicates.rangedAttributePredicate(this.getAttributeUnlocalizedName());
+    }
+
+    public String attribute$getId() {
+        return this.getAttributeUnlocalizedName();
+    }
+
+    public String attribute$getName() {
+        return this.getAttributeUnlocalizedName();
     }
 }

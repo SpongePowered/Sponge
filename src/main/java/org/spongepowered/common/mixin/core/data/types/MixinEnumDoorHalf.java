@@ -22,39 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.block.BlockDoor;
+import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+@Mixin(BlockDoor.EnumDoorHalf.class)
+@Implements(@Interface(iface = PortionType.class, prefix = "type$"))
+public abstract class MixinEnumDoorHalf implements PortionType {
+    @Shadow public abstract String getName();
 
-    @Shadow public int id;
-    @Shadow private String name;
-
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public String type$getId() {
+        return getName();
     }
 
-    public String potion$getId() {
-        return this.name;
-    }
-
-    public String potion$getName() {
-        return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    @Intrinsic
+    public String type$getName() {
+        return getName();
     }
 }

@@ -22,39 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.block.BlockRedstoneComparator;
+import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+@Mixin(BlockRedstoneComparator.Mode.class)
+@Implements(@Interface(iface = ComparatorType.class, prefix = "mode$"))
+public abstract class MixinComparatorMode implements ComparatorType {
 
-    @Shadow public int id;
     @Shadow private String name;
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
-    }
-
-    public String potion$getId() {
+    public String mode$getId() {
         return this.name;
     }
 
-    public String potion$getName() {
+    public String mode$getName() {
         return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
     }
 }

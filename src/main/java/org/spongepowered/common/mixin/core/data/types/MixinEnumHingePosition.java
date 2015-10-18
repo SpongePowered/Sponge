@@ -22,39 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.block.BlockDoor;
+import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+@Mixin(BlockDoor.EnumHingePosition.class)
+@Implements(@Interface(iface = Hinge.class, prefix = "hinge$"))
+public abstract class MixinEnumHingePosition implements Hinge, Cycleable<Hinge> {
 
-    @Shadow public int id;
-    @Shadow private String name;
+    @Shadow public abstract String getName();
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public String hinge$getId() {
+        return this.getName();
     }
 
-    public String potion$getId() {
-        return this.name;
+    @Override
+    public Hinge cycleNext() {
+        return this.getName().equals("left") ? (Hinge) (Object) BlockDoor.EnumHingePosition.RIGHT : (Hinge) (Object) BlockDoor.EnumHingePosition.LEFT;
     }
 
-    public String potion$getName() {
-        return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    @Intrinsic
+    public String hinge$getName() {
+        return this.getName();
     }
 }

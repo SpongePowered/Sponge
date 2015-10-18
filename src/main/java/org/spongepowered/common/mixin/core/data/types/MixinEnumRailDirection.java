@@ -22,39 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.block.BlockRailBase;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+@Mixin(BlockRailBase.EnumRailDirection.class)
+@Implements(@Interface(iface = RailDirection.class, prefix = "rail$"))
+public abstract class MixinEnumRailDirection implements RailDirection, Cycleable<RailDirection> {
 
-    @Shadow public int id;
     @Shadow private String name;
+    @Shadow private int meta;
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
-    }
-
-    public String potion$getId() {
+    public String rail$getId() {
         return this.name;
     }
 
-    public String potion$getName() {
+    public String rail$getName() {
         return this.name;
     }
 
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    @Override
+    public RailDirection cycleNext() {
+        return (RailDirection) (Object) BlockRailBase.EnumRailDirection.byMetadata((this.meta + 1) % 9);
     }
 }

@@ -22,39 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypeWorn;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+public class SpongeEquipmentTypeWorn extends SpongeEquipmentType implements EquipmentTypeWorn {
 
-    @Shadow public int id;
-    @Shadow private String name;
-
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public SpongeEquipmentTypeWorn(String id, String name) {
+        super(id, name);
     }
 
-    public String potion$getId() {
-        return this.name;
+    public SpongeEquipmentTypeWorn() {
+        this("WORN", "none");
     }
 
-    public String potion$getName() {
-        return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    @Override
+    public boolean equals(Object obj) {
+        if (super.equals(obj)) {
+            return true;
+        }
+        if (obj instanceof SpongeEquipmentTypeWorn) {
+            if (((EquipmentTypeWorn) obj).getId().equals("WORN")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

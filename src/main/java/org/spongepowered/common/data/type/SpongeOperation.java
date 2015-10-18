@@ -22,39 +22,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.spongepowered.api.attribute.Operation;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+public class SpongeOperation implements Operation {
+    private final String id;
+    private final boolean immediately;
 
-    @Shadow public int id;
-    @Shadow private String name;
-
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public SpongeOperation(String id, boolean immediately) {
+        this.id = id;
+        this.immediately = immediately;
     }
 
-    public String potion$getId() {
-        return this.name;
+    public SpongeOperation() {
+        this("ADD_AMOUNT", false);
     }
 
-    public String potion$getName() {
-        return this.name;
+    @Override
+    public double getIncrementation(double base, double modifier, double currentValue) {
+        switch (this.id) {
+            case "MULTIPLY_BASE":
+                return base * modifier;
+            case "MULTIPLY":
+                return currentValue * modifier;
+            case "ADD_AMOUNT":
+            default:
+                return currentValue + modifier;
+        }
     }
 
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    @Override
+    public boolean changeValueImmediately() {
+        return this.immediately;
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.id;
+    }
+
+    @Override
+    public int compareTo(Operation o) {
+        return new CompareToBuilder()
+                .append(this.id, o.getId())
+                .build();
     }
 }

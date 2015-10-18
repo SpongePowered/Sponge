@@ -22,39 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.api.data.type.SlabType;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+public class SpongeSlabType implements SlabType {
 
-    @Shadow public int id;
-    @Shadow private String name;
+    private final String id;
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public SpongeSlabType(String id) {
+        this.id = id;
     }
 
-    public String potion$getId() {
-        return this.name;
+    public SpongeSlabType() {
+        this("STONE");
     }
 
-    public String potion$getName() {
-        return this.name;
+    @Override
+    public String getId() {
+        return this.id;
     }
 
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    @Override
+    public String getName() {
+        return this.id;
     }
 }

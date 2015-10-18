@@ -22,39 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.util;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityHorse;
+import org.spongepowered.api.data.DataHolder;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+import java.util.function.Predicate;
 
-    @Shadow public int id;
-    @Shadow private String name;
+public class Predicates {
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public static Predicate<DataHolder> rangedAttributePredicate(String name) {
+        return input -> {
+            switch (name) {
+                case "horse.jumpStrength":
+                    return input instanceof EntityHorse;
+                case "zombie.spawnReinforcements":
+                    return input instanceof EntityZombie;
+                default:
+                    return input instanceof EntityLivingBase;
+            }
+        };
     }
 
-    public String potion$getId() {
-        return this.name;
-    }
-
-    public String potion$getName() {
-        return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
-    }
 }

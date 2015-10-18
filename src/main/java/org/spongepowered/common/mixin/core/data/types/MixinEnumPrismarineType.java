@@ -22,39 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.potion;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.potion.Potion;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.block.BlockPrismarine;
+import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@NonnullByDefault
-@Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+@Mixin(BlockPrismarine.EnumType.class)
+@Implements(@Interface(iface = PrismarineType.class, prefix = "type$"))
+public abstract class MixinEnumPrismarineType implements PrismarineType {
 
-    @Shadow public int id;
-    @Shadow private String name;
+    @Shadow private String unlocalizedName;
 
-    public boolean potion$isInstant() {
-        return this.id == 6 || this.id == 7;
+    public String type$getId() {
+        return this.unlocalizedName;
     }
 
-    public String potion$getId() {
-        return this.name;
-    }
-
-    public String potion$getName() {
-        return this.name;
-    }
-
-    public Translation potion$getTranslation() {
-        return new SpongeTranslation(this.name);
+    public String type$getName() {
+        return this.unlocalizedName;
     }
 }
