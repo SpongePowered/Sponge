@@ -33,7 +33,9 @@ import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.ColorUtil;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,6 +67,7 @@ public class NbtDataUtil {
     public static final String ITEM_DISPLAY = "display";
     public static final String ITEM_DISPLAY_NAME = "name";
     public static final String ITEM_LORE = "Lore";
+    public static final String ITEM_COLOR = "color";
 
     public static final String ITEM_BOOK_PAGES = "pages";
     public static final String ITEM_BOOK_TITLE = "title";
@@ -194,6 +197,31 @@ public class NbtDataUtil {
     public static void setLoreToNBT(ItemStack stack, List<Text> lore) {
         final NBTTagList list =  SpongeTexts.asLegacy(lore);
         stack.getSubCompound(ITEM_DISPLAY, true).setTag(ITEM_LORE, list);
+    }
+
+    public static boolean hasColorFromNBT(ItemStack stack) {
+        return stack.hasTagCompound() &&
+                stack.getTagCompound().hasKey(ITEM_DISPLAY) &&
+                stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
+    }
+
+    public static Optional<Color> getColorFromNBT(NBTTagCompound subCompound) {
+        if (!subCompound.hasKey(ITEM_COLOR)) {
+            return Optional.empty();
+        }
+        return Optional.of(new Color(subCompound.getInteger(ITEM_COLOR)));
+    }
+
+    public static void removeColorFromNBT(ItemStack stack) {
+        if(stack.getSubCompound(ITEM_DISPLAY, false) == null) {
+            return;
+        }
+        stack.getSubCompound(ITEM_DISPLAY, false).removeTag(ITEM_COLOR);
+    }
+
+    public static void setColorToNbt(ItemStack stack, Color color) {
+        final int mojangColor = ColorUtil.javaColorToMojangColor(color);
+        stack.getSubCompound(ITEM_DISPLAY, true).setInteger(ITEM_COLOR, mojangColor);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {

@@ -34,9 +34,9 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.awt.Color;
 
-public class ImmutableSpongeColorData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
+public class ImmutableSpongeColoredData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
 
-    public ImmutableSpongeColorData(Color value) {
+    public ImmutableSpongeColoredData(Color value) {
         super(ImmutableColoredData.class, value, Keys.COLOR);
     }
 
