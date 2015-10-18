@@ -22,41 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable;
+package org.spongepowered.common.data.processor.value;
 
+import net.minecraft.entity.Entity;
+import org.spongepowered.api.data.DataTransactionBuilder;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
-import org.spongepowered.api.data.manipulator.mutable.ColoredData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
-import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.awt.Color;
+import java.util.Optional;
 
-public class ImmutableSpongeColorData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
+public class ColorValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
 
-    public ImmutableSpongeColorData(Color value) {
-        super(ImmutableColoredData.class, value, Keys.COLOR);
+    public ColorValueProcessor() {
+        super(Entity.class, Keys.SHOWS_DISPLAY_NAME);
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return color();
+    public Value<Boolean> constructValue(Boolean defaultValue) {
+        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, false, defaultValue);
     }
 
     @Override
-    public ColoredData asMutable() {
-        return new SpongeColoredData(this.getValue());
+    protected boolean set(Entity container, Boolean value) {
+        container.setAlwaysRenderNameTag(value);
+        return true;
     }
 
     @Override
-    public ImmutableValue<Color> color() {
-        return ImmutableSpongeValue.cachedOf(Keys.COLOR, Color.BLACK, this.value);
+    protected Optional<Boolean> getVal(Entity container) {
+        return Optional.of(container.getAlwaysRenderNameTag());
     }
 
     @Override
-    public int compareTo(ImmutableColoredData o) {
-        return o.get(this.usedKey).get().getRGB() - this.getValue().getRGB();
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, value);
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionBuilder.failNoData();
     }
 }

@@ -22,57 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable;
+package org.spongepowered.common.data.manipulator.immutable;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.awt.Color;
 
-public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, ImmutableColoredData> implements ColoredData {
+public class ImmutableSpongeColoredData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
 
-    public SpongeColoredData() {
-        this(Color.BLACK);
-    }
-
-    public SpongeColoredData(Color value) {
-        super(ColoredData.class, value, Keys.COLOR);
+    public ImmutableSpongeColoredData(Color value) {
+        super(ImmutableColoredData.class, value, Keys.COLOR);
     }
 
     @Override
-    public ColoredData copy() {
-        return new SpongeColoredData(this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
+    protected ImmutableValue<?> getValueGetter() {
         return color();
     }
 
     @Override
-    public ImmutableColoredData asImmutable() {
-        return new ImmutableSpongeColoredData(getValue());
+    public ColoredData asMutable() {
+        return new SpongeColoredData(this.getValue());
     }
 
     @Override
-    public int compareTo(ColoredData o) {
-        return o.get(Keys.COLOR).get().getRGB() - this.getValue().getRGB();
+    public ImmutableValue<Color> color() {
+        return ImmutableSpongeValue.cachedOf(Keys.COLOR, Color.BLACK, this.value);
     }
 
     @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.COLOR.getQuery(), this.getValue().getRGB());
-    }
-
-    @Override
-    public Value<Color> color() {
-        return new SpongeValue<>(Keys.COLOR, Color.BLACK, getValue());
+    public int compareTo(ImmutableColoredData o) {
+        return o.get(this.usedKey).get().getRGB() - this.getValue().getRGB();
     }
 }
