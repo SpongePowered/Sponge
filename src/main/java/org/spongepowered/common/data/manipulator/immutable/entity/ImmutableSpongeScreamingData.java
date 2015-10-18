@@ -32,8 +32,9 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<ImmutableScreamingData, ScreamingData> implements
-        ImmutableScreamingData {
+public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<ImmutableScreamingData, ScreamingData> implements ImmutableScreamingData {
+
+    private final ImmutableValue<Boolean> screamingValue = ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, this.value);
 
     public ImmutableSpongeScreamingData(boolean value) {
         super(ImmutableScreamingData.class, value, Keys.IS_SCREAMING, SpongeScreamingData.class);
@@ -41,7 +42,7 @@ public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<I
 
     @Override
     public ImmutableValue<Boolean> screaming() {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, this.value);
+        return this.screamingValue;
     }
 
     @Override
