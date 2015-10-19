@@ -12,7 +12,7 @@ dependencies {
 }
 
 jar {
-    classifier = 'dev'
+    classifier = 'deobf'
 }
 
 // The version can change until we're done configuring the project, so delay setting the manifest entries until that is final
