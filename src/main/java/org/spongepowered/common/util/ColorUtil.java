@@ -25,33 +25,40 @@
 package org.spongepowered.common.util;
 
 import java.awt.Color;
-import java.util.Map;
+import java.util.Optional;
 
-import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemStack;
 
 public final class ColorUtil {
 
-    /**
-     * Caching to prevent creating more Colors than needed.
-     */
-    private static final Map<EnumDyeColor, Color> ENUM_DYE_COLORS;
-    static {
-        ImmutableMap.Builder<EnumDyeColor, Color> b = ImmutableMap.builder();
-        for (EnumDyeColor color : EnumDyeColor.values()) {
-            b.put(color, ((DyeColor) (Object) color).getColor());
+    public static Optional<Color> getItemStackColor(ItemStack stack) {
+        // Special case for armor: it has a special method
+        final Item item = stack.getItem();
+        if (item instanceof ItemArmor) {
+            final int color = ((ItemArmor) item).getColor(stack);
+            return color == -1 ? Optional.empty() : Optional.of(new Color(color));
         }
-        ENUM_DYE_COLORS = Maps.immutableEnumMap(b.build());
+        return NbtDataUtil.getItemCompound(stack).flatMap(NbtDataUtil::getColorFromNBT);
     }
 
-    public static Color colorFromDyeColor(EnumDyeColor color) {
-        return ENUM_DYE_COLORS.get(color);
+    public static void setItemStackColor(ItemStack stack, Color value) {
+        NbtDataUtil.setColorToNBT(stack, value);
     }
 
-    private ColorUtil() {}
+    /**
+     * N.B This differs from {@link #getItemStackColor(ItemStack)}.isPresent()
+     * because leather armor has a color even without a set color. This returns
+     * {@code true} only if there is a color set on the display tag.
+     */
+    public static boolean hasItemStackColor(ItemStack stack) {
+        return NbtDataUtil.hasColorFromNBT(stack);
+    }
+
+    private ColorUtil() {
+    }
 
 }

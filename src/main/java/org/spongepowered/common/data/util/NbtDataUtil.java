@@ -24,21 +24,24 @@
  */
 package org.spongepowered.common.data.util;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.item.Enchantment;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.text.SpongeTexts;
-
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.text.SpongeTexts;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 
 /**
  * A standard utility class for interacting and manipulating {@link ItemStack}s
@@ -65,6 +68,7 @@ public class NbtDataUtil {
     public static final String ITEM_DISPLAY = "display";
     public static final String ITEM_DISPLAY_NAME = "name";
     public static final String ITEM_LORE = "Lore";
+    public static final String ITEM_COLOR = "color";
 
     public static final String ITEM_BOOK_PAGES = "pages";
     public static final String ITEM_BOOK_TITLE = "title";
@@ -194,6 +198,31 @@ public class NbtDataUtil {
     public static void setLoreToNBT(ItemStack stack, List<Text> lore) {
         final NBTTagList list =  SpongeTexts.asLegacy(lore);
         stack.getSubCompound(ITEM_DISPLAY, true).setTag(ITEM_LORE, list);
+    }
+
+    public static boolean hasColorFromNBT(ItemStack stack) {
+        return !stack.hasTagCompound() ||
+                !stack.getTagCompound().hasKey(ITEM_DISPLAY) ||
+                !stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
+    }
+
+    public static Optional<Color> getColorFromNBT(NBTTagCompound subCompound) {
+        if (!subCompound.hasKey(ITEM_COLOR)) {
+            return Optional.empty();
+        }
+        return Optional.of(new Color(subCompound.getInteger(ITEM_COLOR)));
+    }
+
+    public static void removeColorFromNBT(ItemStack stack) {
+        if(stack.getSubCompound(ITEM_DISPLAY, false) == null) {
+            return;
+        }
+        stack.getSubCompound(ITEM_DISPLAY, false).removeTag(ITEM_COLOR);
+    }
+
+    public static void setColorToNBT(ItemStack stack, Color color) {
+        final int iColor = color.getRGB();
+        stack.getSubCompound(ITEM_DISPLAY, true).setInteger(ITEM_COLOR, iColor);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {

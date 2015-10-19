@@ -22,50 +22,71 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value;
+package org.spongepowered.common.data.processor.value.item;
 
-import net.minecraft.entity.Entity;
+import java.awt.Color;
+import java.util.Optional;
+
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.ColorUtil;
 
-import java.util.Optional;
+import net.minecraft.item.ItemStack;
 
-public class ColorValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class ColorValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Color, Value<Color>> {
 
     public ColorValueProcessor() {
-        super(Entity.class, Keys.SHOWS_DISPLAY_NAME);
+        super(ItemStack.class, Keys.COLOR);
     }
 
     @Override
-    public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, false, defaultValue);
+    public Value<Color> constructValue(Color defaultValue) {
+        return new SpongeValue<>(Keys.COLOR, Color.BLACK, defaultValue);
     }
 
     @Override
-    protected boolean set(Entity container, Boolean value) {
-        container.setAlwaysRenderNameTag(value);
+    protected boolean set(ItemStack container, Color value) {
+        ColorUtil.setItemStackColor(container, value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.getAlwaysRenderNameTag());
+    protected Optional<Color> getVal(ItemStack container) {
+        return ColorUtil.getItemStackColor(container);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, value);
+    protected ImmutableValue<Color> constructImmutableValue(Color value) {
+        return ImmutableSpongeValue.cachedOf(Keys.COLOR, Color.BLACK, value);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (container instanceof ItemStack) {
+            final ItemStack stack = (ItemStack) container;
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<Color> optional = getVal(stack);
+            if (ColorUtil.hasItemStackColor(stack) && optional.isPresent()) {
+                try {
+                    NbtDataUtil.removeColorFromNBT(stack);
+                    return builder.replace(new ImmutableSpongeValue<>(Keys.COLOR, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
+                } catch (Exception e) {
+                    Sponge.getLogger().error("There was an issue removing the color from an itemstack!", e);
+                    return builder.result(DataTransactionResult.Type.ERROR).build();
+                }
+            } else {
+                return builder.result(DataTransactionResult.Type.SUCCESS).build();
+            }
+        }
         return DataTransactionBuilder.failNoData();
     }
 }

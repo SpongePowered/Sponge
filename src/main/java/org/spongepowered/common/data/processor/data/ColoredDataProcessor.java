@@ -39,7 +39,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
@@ -47,57 +47,22 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.ColorUtil;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.EntitySheep;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.IWorldNameable;
 
 public class ColoredDataProcessor extends AbstractSpongeDataProcessor<ColoredData, ImmutableColoredData> {
 
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof EntitySheep || dataHolder instanceof ItemStack || dataHolder instanceof IWorldNameable;
+        return dataHolder instanceof ItemStack;
     }
 
     @Override
     public Optional<ColoredData> from(DataHolder dataHolder) {
-        Color color = null;
-        if (dataHolder instanceof EntitySheep) {
-            color = ColorUtil.colorFromDyeColor(((EntitySheep) dataHolder).getFleeceColor());
-        } else if (dataHolder instanceof ItemStack) {
+        if (dataHolder instanceof ItemStack) {
             final ItemStack stack = (ItemStack) dataHolder;
-            final Item item = stack.getItem();
-            final int meta = stack.getItemDamage();
-            if (item == Items.dye) {
-                // Interpret dyes via "dye damage"
-                color = ColorUtil.colorFromDyeColor(EnumDyeColor.byDyeDamage(meta));
-            } else if (item instanceof ItemBlock) {
-                final Block block = ((ItemBlock) item).getBlock();
-                if (block == Blocks.wool) {
-                    // Interpret wools via metadata
-                    color = ColorUtil.colorFromDyeColor(EnumDyeColor.byMetadata(meta));
-                }
-            } else if (item instanceof ItemArmor) {
-                color = new Color(((ItemArmor) item).getColor(stack));
-            } else if (stack.hasTagCompound()) {
-                final NBTTagCompound tag = stack.getTagCompound();
-                if (tag.hasKey("display", NbtDataUtil.TAG_COMPOUND)) {
-                    final NBTTagCompound display = tag.getCompoundTag("display");
-                    if (display.hasKey("color", NbtDataUtil.TAG_INT)) {
-                        color = new Color(display.getInteger("color"));
-                    }
-                }
-            }
+            return ColorUtil.getItemStackColor(stack).map(SpongeColoredData::new);
         }
-        return Optional.ofNullable(color).map(SpongeColoredData::new);
+        return Optional.empty();
     }
 
     @Override
@@ -132,18 +97,28 @@ public class ColoredDataProcessor extends AbstractSpongeDataProcessor<ColoredDat
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        // color cannot be removed
+        if (dataHolder instanceof ItemStack) {
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<ColoredData> optional = from(dataHolder);
+            final ItemStack stack = (ItemStack) dataHolder;
+            if (ColorUtil.hasItemStackColor(stack) && optional.isPresent()) {
+                try {
+                    NbtDataUtil.removeColorFromNBT(stack);
+                    return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
+                } catch (Exception e) {
+                    Sponge.getLogger().error("There was an issue removing the color from an ItemStack!", e);
+                    return builder.result(DataTransactionResult.Type.ERROR).build();
+                }
+            } else {
+                return builder.result(DataTransactionResult.Type.SUCCESS).build();
+            }
+        }
         return DataTransactionBuilder.failNoData();
     }
 
     @Override
     public Optional<ColoredData> createFrom(DataHolder dataHolder) {
         return from(dataHolder);
-    }
-
-    @Override
-    public boolean supports(EntityType entityType) {
-        return Entity.class.isAssignableFrom(entityType.getEntityClass());
     }
 
 }
