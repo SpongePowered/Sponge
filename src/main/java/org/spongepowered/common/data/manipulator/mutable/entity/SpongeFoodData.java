@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -36,7 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> implements FoodData {
 
@@ -85,18 +82,32 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public MutableBoundedValue<Integer> foodLevel() {
-        return new SpongeBoundedValue<>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, this.foodLevel);
+        return SpongeValueBuilder.boundedBuilder(Keys.FOOD_LEVEL)
+            .defaultValue(20)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(this.foodLevel)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Double> exhaustion() {
-        return new SpongeBoundedValue<>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, (double) this.foodExhaustionLevel);
+        return SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
+            .defaultValue(0D)
+            .minimum(0D)
+            .maximum(Double.MAX_VALUE)
+            .actualValue((double) this.foodExhaustionLevel)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Double> saturation() {
-        return new SpongeBoundedValue<>(Keys.SATURATION, 5.0D, doubleComparator(), 0D, Double.MAX_VALUE,
-                                        (double) this.foodSaturationLevel);
+        return SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
+            .defaultValue(0D)
+            .minimum(0D)
+            .maximum(Double.MAX_VALUE)
+            .actualValue((double) this.foodSaturationLevel)
+            .build();
     }
 
     public int getFoodLevel() {

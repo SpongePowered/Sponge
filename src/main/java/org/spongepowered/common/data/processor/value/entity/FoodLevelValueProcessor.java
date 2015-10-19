@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
@@ -47,7 +48,12 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(Keys.FOOD_LEVEL, 20, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.FOOD_LEVEL)
+            .defaultValue(20)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -63,7 +69,7 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 20, intComparator(), 0, Integer.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
     @Override

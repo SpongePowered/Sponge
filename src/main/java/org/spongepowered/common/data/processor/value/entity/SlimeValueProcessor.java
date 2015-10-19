@@ -29,14 +29,13 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 import net.minecraft.entity.monster.EntitySlime;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
@@ -48,7 +47,13 @@ public class SlimeValueProcessor extends AbstractSpongeValueProcessor<EntitySlim
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(Keys.SLIME_SIZE, defaultValue, intComparator(), 0, Integer.MAX_VALUE);
+        return SpongeValueBuilder.boundedBuilder(Keys.SLIME_SIZE)
+            .comparator(intComparator())
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .defaultValue(0)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -64,7 +69,7 @@ public class SlimeValueProcessor extends AbstractSpongeValueProcessor<EntitySlim
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.SLIME_SIZE, value, 0, intComparator(), 0, Integer.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
     @Override

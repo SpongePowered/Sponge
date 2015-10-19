@@ -29,9 +29,11 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Comparator;
@@ -76,9 +78,16 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
         return with(checkNotNull(checkNotNull(function).apply(get())));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public MutableBoundedValue<E> asMutable() {
-        return new SpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue(), get());
+        return SpongeValueBuilder.boundedBuilder((Key<? extends BoundedValue<E>>) getKey())
+            .defaultValue(getDefault())
+            .minimum(getMinValue())
+            .maximum(getMaxValue())
+            .actualValue(get())
+            .comparator(getComparator())
+            .build();
     }
 
     @Override

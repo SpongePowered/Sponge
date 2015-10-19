@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
 
@@ -57,7 +55,13 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
 
     @Override
     public ImmutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, defaultValue, intComparator(), 0, Integer.MAX_VALUE);
+        return SpongeValueBuilder.boundedBuilder(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
+            .defaultValue(0)
+            .actualValue(defaultValue)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .build()
+            .asImmutable();
     }
 
     @Override
@@ -72,7 +76,7 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, value, intComparator(), 0, Integer.MAX_VALUE);
+        return constructValue(value);
     }
 
 }

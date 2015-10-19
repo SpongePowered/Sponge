@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, LayeredData, ImmutableLayeredData> implements LayeredData {
@@ -43,7 +44,12 @@ public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, La
 
     @Override
     public MutableBoundedValue<Integer> layer() {
-        return new SpongeBoundedValue<>(Keys.LAYER, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
+        return SpongeValueBuilder.boundedBuilder(Keys.LAYER)
+            .defaultValue(0)
+            .minimum(this.lowerBound)
+            .maximum(this.upperBound)
+            .actualValue(this.getValue())
+            .build();
     }
 
     @Override

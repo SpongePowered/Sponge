@@ -24,18 +24,15 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
 
@@ -47,7 +44,12 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(Keys.REMAINING_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_AIR)
+            .defaultValue(300)
+            .minimum(-20)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -62,8 +64,8 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeValue<>(Keys.REMAINING_AIR, 300, value);
+    protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
+        return constructValue(value).asImmutable();
     }
 
     @Override

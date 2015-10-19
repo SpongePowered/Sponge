@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,8 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
 
@@ -61,7 +58,12 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(this.getKey(), 1, intComparator(), 1, Integer.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.FIRE_TICKS)
+            .defaultValue(10)
+            .minimum(1)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -80,7 +82,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.FIRE_TICKS, value, 0, intComparator(), 0, Integer.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
 }

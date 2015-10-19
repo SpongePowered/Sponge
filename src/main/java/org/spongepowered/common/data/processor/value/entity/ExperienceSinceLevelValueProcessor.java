@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,8 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
 
@@ -52,7 +49,12 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(Keys.EXPERIENCE_SINCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.EXPERIENCE_SINCE_LEVEL)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .defaultValue(0)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -71,7 +73,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_FROM_START_OF_LEVEL, value, 0, intComparator(), 0, Integer.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
 }

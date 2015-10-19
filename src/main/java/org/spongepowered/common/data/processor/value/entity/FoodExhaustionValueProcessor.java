@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,8 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
 
@@ -47,7 +44,12 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<>(Keys.EXHAUSTION, 0D, doubleComparator(), 0D, Double.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
+            .defaultValue(0D)
+            .minimum(0D)
+            .maximum(Double.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -63,7 +65,7 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.EXHAUSTION, value, 0D, doubleComparator(), 0D, Double.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
     @Override

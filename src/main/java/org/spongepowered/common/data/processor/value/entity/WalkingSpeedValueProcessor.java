@@ -29,16 +29,12 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 
 public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, MutableBoundedValue<Double>> {
 
@@ -48,12 +44,17 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<>(this.getKey(), 0.1d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.WALKING_SPEED)
+            .defaultValue(0.1D)
+            .minimum(Double.MIN_VALUE)
+            .maximum(Double.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 0.1d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+    protected ImmutableBoundedValue<Double> constructImmutableValue(Double value) {
+        return constructValue(value).asImmutable();
     }
 
     @Override

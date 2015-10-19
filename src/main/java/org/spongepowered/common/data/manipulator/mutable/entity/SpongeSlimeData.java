@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class SpongeSlimeData extends AbstractBoundedComparableData<Integer, SlimeData, ImmutableSlimeData> implements SlimeData {
@@ -47,7 +48,12 @@ public class SpongeSlimeData extends AbstractBoundedComparableData<Integer, Slim
 
     @Override
     public MutableBoundedValue<Integer> size() {
-        return new SpongeBoundedValue<>(Keys.SLIME_SIZE, 0, this.comparator, 0, Integer.MAX_VALUE, this.getValue());
+        return SpongeValueBuilder.boundedBuilder(Keys.SLIME_SIZE)
+            .defaultValue(0)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(this.getValue())
+            .build();
     }
 
     @Override

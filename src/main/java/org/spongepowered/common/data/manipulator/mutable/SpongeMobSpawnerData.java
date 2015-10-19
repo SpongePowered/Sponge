@@ -38,6 +38,7 @@ import org.spongepowered.api.util.weighted.WeightedCollection;
 import org.spongepowered.api.util.weighted.WeightedEntity;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeMobSpawnerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeNextEntityToSpawnValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectionValue;
@@ -78,38 +79,72 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> remainingDelay() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_REMAINING_DELAY, (short) 0, shortComparator(), (short) 0, this.maximumDelay, this.remainingDelay);
+        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
+            .minimum((short) 0)
+            .maximum(this.maximumDelay)
+            .defaultValue((short) 0)
+            .actualValue(this.remainingDelay)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Short> minimumSpawnDelay() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.minimumDelay);
+        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MINIMUM_DELAY)
+            .minimum((short) 0)
+            .maximum(Short.MAX_VALUE)
+            .defaultValue((short) 0)
+            .actualValue(this.minimumDelay)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Short> maximumSpawnDelay() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.maximumDelay);
+        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MAXIMUM_DELAY)
+            .minimum((short) 0)
+            .maximum(Short.MAX_VALUE)
+            .defaultValue((short) 0)
+            .actualValue(this.maximumDelay)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Short> spawnCount() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_SPAWN_COUNT, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.count);
+        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_SPAWN_COUNT)
+            .minimum((short) 0)
+            .maximum(Short.MAX_VALUE)
+            .defaultValue((short) 0)
+            .actualValue(this.count)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Short> maximumNearbyEntities() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE,
-                                        this.maximumEntities);
+        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES)
+            .minimum((short) 0)
+            .maximum(Short.MAX_VALUE)
+            .defaultValue((short) 0)
+            .actualValue(this.maximumEntities)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Short> requiredPlayerRange() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_REQURED_PLAYER_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.playerRange);
+        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_REQURED_PLAYER_RANGE)
+            .minimum((short) 0)
+            .maximum(Short.MAX_VALUE)
+            .defaultValue((short) 0)
+            .actualValue(this.playerRange)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Short> spawnRange() {
-        return new SpongeBoundedValue<>(Keys.SPAWNER_SPAWN_RANGE, (short) 0, shortComparator(), (short) 0, Short.MAX_VALUE, this.spawnRange);
+        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_SPAWN_RANGE)
+            .minimum((short) 0)
+            .maximum(Short.MAX_VALUE)
+            .defaultValue((short) 0)
+            .actualValue(this.spawnRange)
+            .build();
     }
 
     @Override

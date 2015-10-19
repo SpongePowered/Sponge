@@ -32,14 +32,9 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, MutableBoundedValue<Double>> {
 
@@ -49,12 +44,17 @@ public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Enti
 
     @Override
     protected MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<>(this.getKey(), 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.FLYING_SPEED)
+            .defaultValue(0.05d)
+            .minimum(Double.MIN_VALUE)
+            .maximum(Double.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
     protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
     @Override

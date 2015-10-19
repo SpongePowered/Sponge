@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
@@ -53,7 +54,12 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(Keys.TOTAL_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.TOTAL_EXPERIENCE)
+            .defaultValue(0)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -78,7 +84,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.TOTAL_EXPERIENCE, 0, value, intComparator(), 0, Integer.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
 }

@@ -25,9 +25,11 @@
 package org.spongepowered.common.data.value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueBuilder;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MapValue;
@@ -51,6 +53,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 public class SpongeValueBuilder implements ValueBuilder {
+
 
     @Override
     public <E> Value<E> createValue(Key<Value<E>> key, E element) {
@@ -93,17 +96,8 @@ public class SpongeValueBuilder implements ValueBuilder {
     }
 
     @Override
-    public <E> MutableBoundedValue<E> createBoundedValue(Key<MutableBoundedValue<E>> key, E value, Comparator<E> comparator, E minimum, E maximum) {
-        return new SpongeBoundedValue<>(checkNotNull(key, "key"), checkNotNull(value, "value"), checkNotNull(comparator, "comparator"),
-                                        checkNotNull(minimum, "minimum"), checkNotNull(maximum, "maximum"));
-    }
-
-    @Override
-    public <E> MutableBoundedValue<E> createBoundedValue(Key<MutableBoundedValue<E>> key, E value, Comparator<E> comparator, E minimum, E maximum,
-                                                         E defaultElement) {
-        return new SpongeBoundedValue<>(checkNotNull(key, "key"), checkNotNull(defaultElement, "defaultElement"),
-                                        checkNotNull(comparator, "comparator"), checkNotNull(minimum, "minimum"), checkNotNull(maximum, "maximum"),
-                                        checkNotNull(value, "value"));
+    public <E> BoundedValueBuilder<E> createBoundedValueBuilder(Key<MutableBoundedValue<E>> key) {
+        return new SpongeBoundedValueBuilder<>(checkNotNull(key));
     }
 
     @Override
@@ -114,5 +108,74 @@ public class SpongeValueBuilder implements ValueBuilder {
     @Override
     public <E> OptionalValue<E> createOptionalValue(Key<OptionalValue<E>> key, @Nullable E element, E defaultElement) {
         return new SpongeOptionalValue<>(checkNotNull(key, "key"), Optional.of(defaultElement), Optional.ofNullable(element));
+    }
+
+    public static <E> BoundedValueBuilder<E> boundedBuilder(Key<? extends BoundedValue<E>> key) {
+        return new SpongeBoundedValueBuilder<>(checkNotNull(key));
+    }
+
+    public static final class SpongeBoundedValueBuilder<E> implements BoundedValueBuilder<E> {
+
+        private final Key<? extends BoundedValue<E>> key;
+        private Comparator<E> comparator;
+        private E minimum;
+        private E maximum;
+        private E defaultValue;
+        private E value;
+
+        public SpongeBoundedValueBuilder(Key<? extends BoundedValue<E>> key) {
+            this.key = checkNotNull(key);
+        }
+
+        @Override
+        public BoundedValueBuilder<E> comparator(Comparator<E> comparator) {
+            this.comparator = checkNotNull(comparator);
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public BoundedValueBuilder<E> minimum(E minimum) {
+            this.minimum = checkNotNull(minimum);
+            if (this.comparator == null && minimum instanceof Comparable) {
+                this.comparator = (o1, o2) -> ((Comparable<E>) o1).compareTo(o2);
+            }
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public BoundedValueBuilder<E> maximum(E maximum) {
+            this.maximum = checkNotNull(maximum);
+            if (this.comparator == null && maximum instanceof Comparable) {
+                this.comparator = (o1, o2) -> ((Comparable<E>) o1).compareTo(o2);
+            }
+            return this;
+        }
+
+        @Override
+        public BoundedValueBuilder<E> defaultValue(E defaultValue) {
+            this.defaultValue = checkNotNull(defaultValue);
+            return this;
+        }
+
+        @Override
+        public BoundedValueBuilder<E> actualValue(E value) {
+            this.value = checkNotNull(value);
+            return this;
+        }
+
+        @Override
+        public SpongeBoundedValue<E> build() {
+            checkState(this.comparator != null);
+            checkState(this.minimum != null);
+            checkState(this.maximum != null);
+            checkState(this.defaultValue != null);
+            if (this.value == null) {
+                return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum);
+            } else {
+                return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum, this.value);
+            }
+        }
     }
 }

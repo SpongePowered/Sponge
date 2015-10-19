@@ -38,6 +38,7 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
 import java.util.Optional;
 
 public class FishValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Fish, Value<Fish>> {

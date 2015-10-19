@@ -35,8 +35,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
@@ -47,8 +47,14 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
     }
 
     @Override
-    public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<>(Keys.HEALTH, 0D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
+    public MutableBoundedValue<Double> constructValue(Double health) {
+        return SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+            .comparator(doubleComparator())
+            .minimum(0D)
+            .maximum(((Float) Float.MAX_VALUE).doubleValue())
+            .defaultValue(20D)
+            .actualValue(health)
+            .build();
     }
 
     @Override
@@ -62,8 +68,8 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.HEALTH, value, 20D, doubleComparator(), 0D, 20D);
+    protected ImmutableBoundedValue<Double> constructImmutableValue(Double value) {
+        return constructValue(value).asImmutable();
     }
 
     @Override
@@ -71,7 +77,12 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
         if (container instanceof EntityLivingBase) {
             final double health = ((EntityLivingBase) container).getHealth();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            return Optional.<MutableBoundedValue<Double>>of(new SpongeBoundedValue<>(Keys.HEALTH, maxHealth, doubleComparator(), 1D, maxHealth, health));
+            return Optional.of(SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+                .minimum(0D)
+                .maximum(maxHealth)
+                .defaultValue(maxHealth)
+                .actualValue(health)
+                .build());
         }
         return Optional.empty();
     }
@@ -83,14 +94,17 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
-        final ImmutableBoundedValue<Double> proposedValue = new ImmutableSpongeBoundedValue<>(Keys.HEALTH, value, 20D,
-                                                                                              doubleComparator(), 1D,
-                                                                                              (double) Float.MAX_VALUE);
+        final ImmutableBoundedValue<Double> proposedValue = constructImmutableValue(value);
         if (container instanceof EntityLivingBase) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            final ImmutableBoundedValue<Double> newHealthValue = new ImmutableSpongeBoundedValue<>(Keys.HEALTH, value, maxHealth,
-                                                                                                   doubleComparator(), 0D, maxHealth);
+            final ImmutableBoundedValue<Double> newHealthValue = SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+                .defaultValue(maxHealth)
+                .minimum(0D)
+                .maximum(maxHealth)
+                .actualValue(value)
+                .build()
+                .asImmutable();
             final ImmutableBoundedValue<Double> oldHealthValue = getApiValueFromContainer(container).get().asImmutable();
             if (value > maxHealth) {
                 return DataTransactionBuilder.errorResult(newHealthValue);

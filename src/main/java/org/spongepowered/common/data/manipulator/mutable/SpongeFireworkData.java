@@ -38,6 +38,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeFireworkData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
@@ -70,7 +71,12 @@ public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFire
 
     @Override
     public MutableBoundedValue<Integer> flightModifier() {
-        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, intComparator(), 0, Integer.MAX_VALUE, this.flightModifier);
+        return SpongeValueBuilder.boundedBuilder(Keys.FIREWORK_FLIGHT_MODIFIER)
+            .defaultValue(0)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(this.flightModifier)
+            .build();
     }
 
     @Override

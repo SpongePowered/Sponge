@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import java.util.Collections;
-import java.util.Optional;
-
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -41,7 +39,8 @@ import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import net.minecraft.item.ItemStack;
+import java.util.Collections;
+import java.util.Optional;
 
 public class ItemSkullRepresentedPlayerValueProcessor extends AbstractSpongeValueProcessor<ItemStack, GameProfile, Value<GameProfile>> {
 

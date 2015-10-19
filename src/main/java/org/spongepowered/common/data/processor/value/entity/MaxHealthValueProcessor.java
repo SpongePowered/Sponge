@@ -32,9 +32,11 @@ import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
@@ -48,7 +50,12 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return new SpongeBoundedValue<>(Keys.MAX_HEALTH, 20D, doubleComparator(), 1D, Double.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.MAX_HEALTH)
+            .defaultValue(20D)
+            .minimum(1D)
+            .maximum(((Float) Float.MAX_VALUE).doubleValue())
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -63,8 +70,8 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.MAX_HEALTH, value, 20D, doubleComparator(), 1D, Double.MAX_VALUE);
+    protected ImmutableBoundedValue<Double> constructImmutableValue(Double value) {
+        return constructValue(value).asImmutable();
     }
 
     @Override

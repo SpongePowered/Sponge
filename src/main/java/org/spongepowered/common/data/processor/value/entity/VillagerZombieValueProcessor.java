@@ -25,10 +25,8 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -47,7 +45,7 @@ public class VillagerZombieValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<Boolean>(Keys.IS_VILLAGER_ZOMBIE, defaultValue);
+        return new SpongeValue<>(Keys.IS_VILLAGER_ZOMBIE, defaultValue);
     }
 
     @Override

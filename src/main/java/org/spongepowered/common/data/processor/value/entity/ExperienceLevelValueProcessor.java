@@ -24,20 +24,16 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
 
@@ -49,6 +45,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
+        final ImmutableBoundedValue<Integer> newValue = constructImmutableValue(value);
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
             final Integer oldValue = player.experienceLevel;
@@ -59,11 +56,11 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
             player.experienceTotal = totalExp;
             player.experience = 0;
             player.experienceLevel = value;
-            return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.EXPERIENCE_LEVEL, value),
-                                                               new ImmutableSpongeValue<>(Keys.EXPERIENCE_LEVEL, oldValue));
+            final ImmutableBoundedValue<Integer> oldImmutableValue = constructImmutableValue(oldValue);
+            return DataTransactionBuilder.successReplaceResult(newValue, oldImmutableValue);
         }
 
-        return DataTransactionBuilder.failResult(new ImmutableSpongeValue<>(Keys.EXPERIENCE_LEVEL, value));
+        return DataTransactionBuilder.failResult(newValue);
     }
 
     @Override
@@ -73,7 +70,12 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return new SpongeBoundedValue<>(Keys.EXPERIENCE_LEVEL, 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+        return SpongeValueBuilder.boundedBuilder(Keys.EXPERIENCE_LEVEL)
+            .defaultValue(0)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(defaultValue)
+            .build();
     }
 
     @Override
@@ -87,7 +89,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.EXPERIENCE_LEVEL, 0, value, intComparator(), 0, Integer.MAX_VALUE);
+    protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
+        return constructValue(value).asImmutable();
     }
 }

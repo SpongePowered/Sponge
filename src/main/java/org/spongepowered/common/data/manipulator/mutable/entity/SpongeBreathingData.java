@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBreathingData> implements BreathingData {
@@ -80,12 +81,22 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
 
     @Override
     public MutableBoundedValue<Integer> remainingAir() {
-        return new SpongeBoundedValue<>(Keys.MAX_AIR, 300, intComparator(), 0, Integer.MAX_VALUE, this.maxAir);
+        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_AIR)
+            .defaultValue(300)
+            .minimum(-20)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(this.remainingAir)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Integer> maxAir() {
-        return new SpongeBoundedValue<>(Keys.REMAINING_AIR, this.maxAir, intComparator(), -20, this.maxAir, this.remainingAir);
+        return SpongeValueBuilder.boundedBuilder(Keys.MAX_AIR)
+            .defaultValue(this.maxAir)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(this.maxAir)
+            .build();
     }
 
     private int getMaxAir() {

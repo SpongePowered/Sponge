@@ -49,12 +49,12 @@ public class BreakableValueProcessor extends AbstractSpongeValueProcessor<ItemSt
 
     @Override
     public SetValue<BlockType> constructValue(Set<BlockType> defaultValue) {
-        return new SpongeSetValue<BlockType>(Keys.BREAKABLE_BLOCK_TYPES, defaultValue);
+        return new SpongeSetValue<>(Keys.BREAKABLE_BLOCK_TYPES, defaultValue);
     }
     
     @Override
     public ImmutableSetValue<BlockType> constructImmutableValue(Set<BlockType> defaultValue) {
-        return new ImmutableSpongeSetValue<BlockType>(Keys.BREAKABLE_BLOCK_TYPES, defaultValue);
+        return new ImmutableSpongeSetValue<>(Keys.BREAKABLE_BLOCK_TYPES, defaultValue);
     }
 
     @Override

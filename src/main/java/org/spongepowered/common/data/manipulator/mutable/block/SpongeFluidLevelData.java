@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeFluidLevelData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class SpongeFluidLevelData extends AbstractBoundedComparableData<Integer, FluidLevelData, ImmutableFluidLevelData> implements FluidLevelData {
@@ -43,7 +44,12 @@ public class SpongeFluidLevelData extends AbstractBoundedComparableData<Integer,
 
     @Override
     public MutableBoundedValue<Integer> level() {
-        return new SpongeBoundedValue<>(Keys.FLUID_LEVEL, 0, this.comparator, this.lowerBound, this.upperBound, this.getValue());
+        return SpongeValueBuilder.boundedBuilder(Keys.FLUID_LEVEL)
+            .defaultValue(0)
+            .minimum(this.lowerBound)
+            .maximum(this.upperBound)
+            .actualValue(this.getValue())
+            .build();
     }
 
     @Override

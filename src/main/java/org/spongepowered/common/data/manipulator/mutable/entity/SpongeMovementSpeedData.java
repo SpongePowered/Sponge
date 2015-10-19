@@ -33,6 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
@@ -85,22 +86,32 @@ public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, Imm
 
     @Override
     public MutableBoundedValue<Double> walkSpeed() {
-        return new SpongeBoundedValue<>(Keys.WALKING_SPEED, 0.1d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE, this.walkSpeed);
+        return SpongeValueBuilder.boundedBuilder(Keys.WALKING_SPEED)
+            .defaultValue(0.1D)
+            .minimum(Double.MIN_VALUE)
+            .maximum(Double.MAX_VALUE)
+            .actualValue(this.walkSpeed)
+            .build();
     }
 
     @Override
     public MutableBoundedValue<Double> flySpeed() {
-        return new SpongeBoundedValue<>(Keys.FLYING_SPEED, 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE, this.flySpeed);
+        return SpongeValueBuilder.boundedBuilder(Keys.FLYING_SPEED)
+            .defaultValue(0.05D)
+            .minimum(Double.MIN_VALUE)
+            .maximum(Double.MAX_VALUE)
+            .actualValue(this.flySpeed)
+            .build();
     }
 
     @Override
     public MovementSpeedData copy() {
-        return new SpongeMovementSpeedData(walkSpeed, flySpeed);
+        return new SpongeMovementSpeedData(this.walkSpeed, this.flySpeed);
     }
 
     @Override
     public ImmutableMovementSpeedData asImmutable() {
-        return new ImmutableSpongeMovementSpeedData(walkSpeed, flySpeed);
+        return new ImmutableSpongeMovementSpeedData(this.walkSpeed, this.flySpeed);
     }
 
     @Override
