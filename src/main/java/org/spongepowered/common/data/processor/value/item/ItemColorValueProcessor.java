@@ -42,9 +42,9 @@ import org.spongepowered.common.util.ColorUtil;
 
 import net.minecraft.item.ItemStack;
 
-public class ColorValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Color, Value<Color>> {
+public class ItemColorValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Color, Value<Color>> {
 
-    public ColorValueProcessor() {
+    public ItemColorValueProcessor() {
         super(ItemStack.class, Keys.COLOR);
     }
 

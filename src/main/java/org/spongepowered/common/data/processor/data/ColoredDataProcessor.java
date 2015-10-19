@@ -78,8 +78,11 @@ public class ColoredDataProcessor extends AbstractSpongeDataProcessor<ColoredDat
 
     @Override
     public Optional<ColoredData> fill(DataContainer container, ColoredData colorData) {
-        final Color color = DataUtil.getData(container, Keys.COLOR, Color.class);
-        return Optional.of(colorData.set(Keys.COLOR, color));
+        if (container.contains(Keys.COLOR.getQuery())) {
+            final Color color = DataUtil.getData(container, Keys.COLOR, Color.class);
+            return Optional.of(colorData.set(Keys.COLOR, color));
+        }
+        return Optional.empty();
     }
 
     @Override
