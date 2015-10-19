@@ -117,7 +117,8 @@ javadocJar {
 }
 
 task sdkZip(type: Zip) {
-    enabled = project.file("sdk").exists()
+    enabled = false // project.file("sdk").exists()
+    classifier = 'sdk'
 
     from fileTree("sdk");
     rename ".*\\.gitignore", ".gitignore"
