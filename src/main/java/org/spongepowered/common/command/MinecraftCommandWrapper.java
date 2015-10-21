@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.command;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
@@ -218,7 +219,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     public static void setError(Throwable error) {
-        Preconditions.checkNotNull(error);
+        checkNotNull(error);
         Throwable old = commandErrors.get().peek();
         if (old == null) {
             throw new IllegalStateException();
