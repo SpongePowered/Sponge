@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.command;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
@@ -50,6 +52,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -61,7 +65,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
     private static final String TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;
     protected final ICommand command;
-    private static final ThreadLocal<Throwable> commandErrors = new ThreadLocal<>();
+    private static final ThreadLocal<Deque<Throwable>> commandErrors = new ThreadLocal<Deque<Throwable>>() {
+
+        @Override
+        protected Deque<Throwable> initialValue() {
+            return new LinkedList<>();
+        }
+    };
     // This differs from null in that null means "not active".
     private static final Exception noError = new Exception();
 
@@ -121,16 +131,14 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     private boolean tryExecute(CommandHandler handler, ICommandSender mcSender, String[] splitArgs, String arguments) {
-        commandErrors.set(noError);
+        commandErrors.get().push(noError);
         try {
-            boolean success = handler.tryExecute(mcSender, splitArgs, this.command, arguments);
-            Throwable error = commandErrors.get();
+            return handler.tryExecute(mcSender, splitArgs, this.command, arguments);
+        } finally {
+            Throwable error = commandErrors.get().pop();
             if (error != noError) {
                 throw Throwables.propagate(error);
             }
-            return success;
-        } finally {
-            commandErrors.set(null);
         }
     }
 
@@ -209,8 +217,14 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     public static void setError(Throwable error) {
-        if (commandErrors.get() == noError) {
-            commandErrors.set(error);
+        checkNotNull(error);
+        Throwable old = commandErrors.get().peek();
+        if (old == null) {
+            throw new IllegalStateException();
+        }
+        if (old == noError) {
+            commandErrors.get().pop();
+            commandErrors.get().push(error);
         }
     }
 }
