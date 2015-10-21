@@ -69,7 +69,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
         @Override
         protected Deque<Throwable> initialValue() {
-            return new LinkedList<Throwable>();
+            return new LinkedList<>();
         }
     };
     // This differs from null in that null means "not active".
@@ -133,14 +133,12 @@ public class MinecraftCommandWrapper implements CommandCallable {
     private boolean tryExecute(CommandHandler handler, ICommandSender mcSender, String[] splitArgs, String arguments) {
         commandErrors.get().push(noError);
         try {
-            boolean success = handler.tryExecute(mcSender, splitArgs, this.command, arguments);
+            return handler.tryExecute(mcSender, splitArgs, this.command, arguments);
+        } finally {
             Throwable error = commandErrors.get().pop();
             if (error != noError) {
                 throw Throwables.propagate(error);
             }
-            return success;
-        } finally {
-            commandErrors.set(null);
         }
     }
 
