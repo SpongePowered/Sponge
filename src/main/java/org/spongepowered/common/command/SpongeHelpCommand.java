@@ -64,7 +64,7 @@ public class SpongeHelpCommand {
             .executor((src, args) -> {
                 Optional<String> command = args.getOne("command");
                 if (command.isPresent()) {
-                    Optional<? extends CommandMapping> mapping = Sponge.getGame().getCommandDispatcher().get(command.get());
+                    Optional<? extends CommandMapping> mapping = Sponge.getGame().getCommandDispatcher().get(command.get(), src);
                     if (mapping.isPresent()) {
                         CommandCallable callable = mapping.get().getCallable();
                         Optional<? extends Text> desc = callable.getHelp(src);
