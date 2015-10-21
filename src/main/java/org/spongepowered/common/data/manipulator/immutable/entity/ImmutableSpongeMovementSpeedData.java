@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
+import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
+
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -34,10 +36,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<ImmutableMovementSpeedData, MovementSpeedData> implements ImmutableMovementSpeedData  {
 

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,9 +32,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
@@ -48,8 +45,8 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
-            .defaultValue(0D)
+        return SpongeValueBuilder.boundedBuilder(Keys.SATURATION)
+            .defaultValue(DataConstants.DEFAULT_SATURATION)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)
             .actualValue(defaultValue)

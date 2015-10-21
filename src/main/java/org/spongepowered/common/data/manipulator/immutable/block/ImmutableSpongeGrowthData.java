@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.block;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import org.spongepowered.api.data.key.Keys;
@@ -33,25 +32,19 @@ import org.spongepowered.api.data.manipulator.mutable.block.GrowthData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeGrowthData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 public class ImmutableSpongeGrowthData extends AbstractImmutableBoundedComparableData<Integer, ImmutableGrowthData, GrowthData> implements ImmutableGrowthData {
-
-    private final int defaultValue;
 
     public ImmutableSpongeGrowthData(int value, int lowerBound, int upperBound) {
         this(value, lowerBound, upperBound, 0);
     }
 
     public ImmutableSpongeGrowthData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(ImmutableGrowthData.class, value, Keys.GROWTH_STAGE, intComparator(), SpongeGrowthData.class, lowerBound, upperBound);
-        checkArgument(defaultValue >= lowerBound && defaultValue <= upperBound);
-        this.defaultValue = defaultValue;
+        super(ImmutableGrowthData.class, value, Keys.GROWTH_STAGE, intComparator(), SpongeGrowthData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> growthStage() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.GROWTH_STAGE, this.defaultValue, this.value,
-                                                 this.comparator, this.lowerBound, this.upperBound);
+        return getValueGetter();
     }
 }

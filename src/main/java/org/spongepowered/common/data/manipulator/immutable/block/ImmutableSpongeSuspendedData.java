@@ -30,22 +30,17 @@ import org.spongepowered.api.data.manipulator.mutable.block.SuspendedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSuspendedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeSuspendedData extends AbstractImmutableBooleanData<ImmutableSuspendedData, SuspendedData>
     implements ImmutableSuspendedData {
 
     public ImmutableSpongeSuspendedData(boolean value) {
-        super(ImmutableSuspendedData.class, value, Keys.SUSPENDED, SpongeSuspendedData.class);
+        super(ImmutableSuspendedData.class, value, Keys.SUSPENDED, SpongeSuspendedData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> suspended() {
-        return ImmutableSpongeValue.cachedOf(Keys.SUSPENDED, false, this.value);
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return suspended();
-    }
 }

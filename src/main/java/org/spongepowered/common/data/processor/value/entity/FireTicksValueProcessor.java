@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof Entity) {
-            if (((Entity) container).fire > 0) {
+            if (((Entity) container).fire >= DataConstants.MINIMUM_FIRE_TICKS) {
                 final DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 builder.replace(getApiValueFromContainer(container).get().asImmutable());
                 builder.replace(container.getValue(Keys.FIRE_DAMAGE_DELAY).get().asImmutable());
@@ -59,8 +60,8 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return SpongeValueBuilder.boundedBuilder(Keys.FIRE_TICKS)
-            .defaultValue(10)
-            .minimum(1)
+            .defaultValue(DataConstants.DEFAULT_FIRE_TICKS)
+            .minimum(DataConstants.MINIMUM_FIRE_TICKS)
             .maximum(Integer.MAX_VALUE)
             .actualValue(defaultValue)
             .build();

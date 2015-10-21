@@ -35,6 +35,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
@@ -49,7 +50,7 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
 
     @Override
     protected Value<Text> constructValue(Text defaultValue) {
-        return new SpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), defaultValue);
+        return new SpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, defaultValue);
     }
 
     @SuppressWarnings("deprecation")
@@ -77,7 +78,7 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), value);
+        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, value);
     }
 
     @Override

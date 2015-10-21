@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,9 +32,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
@@ -49,7 +46,7 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Entity
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return SpongeValueBuilder.boundedBuilder(Keys.FOOD_LEVEL)
-            .defaultValue(20)
+            .defaultValue(DataConstants.DEFAULT_FOOD_LEVEL)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
             .actualValue(defaultValue)

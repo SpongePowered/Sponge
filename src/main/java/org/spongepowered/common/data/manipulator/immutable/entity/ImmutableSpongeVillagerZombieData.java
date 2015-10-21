@@ -30,25 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeVillagerZombieData extends AbstractImmutableBooleanData<ImmutableVillagerZombieData, VillagerZombieData> implements ImmutableVillagerZombieData {
 
     public ImmutableSpongeVillagerZombieData(boolean value) {
-        super(ImmutableVillagerZombieData.class, value, Keys.IS_VILLAGER_ZOMBIE, SpongeVillagerZombieData.class);
-    }
-
-    public ImmutableSpongeVillagerZombieData() {
-        this(false);
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return this.villagerZombie();
+        super(ImmutableVillagerZombieData.class, value, Keys.IS_VILLAGER_ZOMBIE, SpongeVillagerZombieData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> villagerZombie() {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_VILLAGER_ZOMBIE, false, this.getValue());
+        return getValueGetter();
     }
 }

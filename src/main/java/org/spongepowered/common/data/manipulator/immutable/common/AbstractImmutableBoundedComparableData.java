@@ -31,7 +31,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -57,22 +56,42 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
     protected final Comparator<T> comparator;
     protected final T lowerBound;
     protected final T upperBound;
+    protected final T defaultValue;
+    protected final ImmutableBoundedValue<T> immutableBoundedValue;
 
     protected AbstractImmutableBoundedComparableData(Class<I> immutableClass, T value,
-                                                  Key<? extends BaseValue<T>> usedKey,
-                                                  Comparator<T> comparator, Class<? extends M> mutableClass, T lowerBound, T upperBound) {
+                                                     Key<? extends BaseValue<T>> usedKey,
+                                                     Comparator<T> comparator, Class<? extends M> mutableClass,
+                                                     T lowerBound, T upperBound, T defaultValue) {
         super(immutableClass, value, usedKey);
         this.comparator = comparator;
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
+        checkArgument(comparator.compare(defaultValue, lowerBound) >= 0 && comparator.compare(defaultValue, upperBound) <= 0 );
         this.mutableClass = mutableClass;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
+        this.defaultValue = defaultValue;
+        if (this.comparator.compare(this.upperBound, this.lowerBound) <= ImmutableDataCachingUtil.CACHE_LIMIT_FOR_INDIVIDUAL_TYPE) {
+            this.immutableBoundedValue = ImmutableSpongeBoundedValue.cachedOf(this.usedKey,
+                                                                              this.defaultValue,
+                                                                              this.value,
+                                                                              this.comparator,
+                                                                              this.lowerBound,
+                                                                              this.upperBound);
+        } else {
+            this.immutableBoundedValue = new ImmutableSpongeBoundedValue<T>(this.usedKey,
+                                                                            this.value,
+                                                                            this.defaultValue,
+                                                                            this.comparator,
+                                                                            this.lowerBound,
+                                                                            this.upperBound);
+        }
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return new ImmutableSpongeBoundedValue<>(this.usedKey, this.lowerBound, this.value, this.comparator, this.lowerBound, this.upperBound);
+    protected final ImmutableBoundedValue<T> getValueGetter() {
+        return this.immutableBoundedValue;
     }
 
     @Override

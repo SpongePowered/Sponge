@@ -26,26 +26,21 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-
-import java.util.Comparator;
 
 public class ImmutableSpongeSlimeData extends AbstractImmutableBoundedComparableData<Integer, ImmutableSlimeData, SlimeData> implements ImmutableSlimeData {
 
     protected ImmutableSpongeSlimeData(int value) {
-        super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, intComparator(), SpongeSlimeData.class, 0, Integer.MAX_VALUE);
+        super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, intComparator(), SpongeSlimeData.class, 0, Integer.MAX_VALUE, 0);
     }
 
     @Override
     public ImmutableValue<Integer> size() {
-        return new ImmutableSpongeBoundedValue<>(Keys.SLIME_SIZE, this.getValue(), 0, this.comparator, 0, Integer.MAX_VALUE);
+        return getValueGetter();
     }
 }

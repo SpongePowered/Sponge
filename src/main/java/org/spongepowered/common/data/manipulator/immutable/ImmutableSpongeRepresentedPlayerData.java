@@ -40,6 +40,8 @@ public class ImmutableSpongeRepresentedPlayerData
         extends AbstractImmutableSingleData<GameProfile, ImmutableRepresentedPlayerData, RepresentedPlayerData>
         implements ImmutableRepresentedPlayerData {
 
+    private final ImmutableValue<GameProfile> immutableValue = new ImmutableSpongeValue<>(this.usedKey, SpongeRepresentedPlayerData.NULL_PROFILE, this.value);
+
     public ImmutableSpongeRepresentedPlayerData() {
         this(SpongeRepresentedPlayerData.NULL_PROFILE);
     }
@@ -50,7 +52,7 @@ public class ImmutableSpongeRepresentedPlayerData
 
     @Override
     public ImmutableValue<GameProfile> owner() {
-        return new ImmutableSpongeValue<GameProfile>(this.usedKey, this.value);
+        return this.immutableValue;
     }
 
     @Override

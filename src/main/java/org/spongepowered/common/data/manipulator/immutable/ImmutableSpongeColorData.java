@@ -36,13 +36,15 @@ import java.awt.Color;
 
 public class ImmutableSpongeColorData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
 
+    private final ImmutableValue<Color> immutableValue = new ImmutableSpongeValue<>(Keys.COLOR, Color.BLACK, this.value);
+
     public ImmutableSpongeColorData(Color value) {
         super(ImmutableColoredData.class, value, Keys.COLOR);
     }
 
     @Override
     protected ImmutableValue<?> getValueGetter() {
-        return color();
+        return this.immutableValue;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class ImmutableSpongeColorData extends AbstractImmutableSingleData<Color,
 
     @Override
     public ImmutableValue<Color> color() {
-        return ImmutableSpongeValue.cachedOf(Keys.COLOR, Color.BLACK, this.value);
+        return this.immutableValue;
     }
 
     @Override

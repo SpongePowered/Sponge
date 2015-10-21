@@ -31,7 +31,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.util.ReflectionUtil;
@@ -43,6 +43,7 @@ public abstract class AbstractImmutableSingleMapData<K, V, M extends DataManipul
     extends AbstractImmutableSingleData<Map<K, V>, I, M> {
 
     private final Class<? extends M> mutableClass;
+    private final ImmutableMapValue<K, V> mapValue;
 
     public AbstractImmutableSingleMapData(Class<I> manipulatorClass, Map<K, V> value,
                                           Key<? extends BaseValue<Map<K, V>>> usedKey,
@@ -51,11 +52,12 @@ public abstract class AbstractImmutableSingleMapData<K, V, M extends DataManipul
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.mutableClass = immutableClass;
+        this.mapValue = new ImmutableSpongeMapValue<>(this.usedKey, ImmutableMap.copyOf(this.value));
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return new ImmutableSpongeMapValue<>(this.usedKey, ImmutableMap.copyOf(this.value));
+    protected final ImmutableMapValue<K, V> getValueGetter() {
+        return this.mapValue;
     }
 
     @Override
