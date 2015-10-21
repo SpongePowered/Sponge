@@ -76,6 +76,9 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
 
     @Override
     public Optional<HealthData> fill(DataContainer container, HealthData healthData) {
+        if (!container.contains(Keys.MAX_HEALTH.getQuery()) || !container.contains(Keys.HEALTH.getQuery())) {
+            return Optional.empty();
+        }
         healthData.set(Keys.MAX_HEALTH, getData(container, Keys.MAX_HEALTH));
         healthData.set(Keys.HEALTH, getData(container, Keys.HEALTH));
         return Optional.of(healthData);

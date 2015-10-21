@@ -30,21 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.OpenData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeOpenData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeOpenData extends AbstractImmutableBooleanData<ImmutableOpenData, OpenData> implements ImmutableOpenData {
 
     public ImmutableSpongeOpenData(boolean value) {
-        super(ImmutableOpenData.class, value, Keys.OPEN, SpongeOpenData.class);
+        super(ImmutableOpenData.class, value, Keys.OPEN, SpongeOpenData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> open() {
-        return ImmutableSpongeValue.cachedOf(Keys.OPEN, false, this.value);
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return open();
+        return getValueGetter();
     }
 }

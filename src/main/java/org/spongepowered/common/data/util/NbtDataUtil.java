@@ -47,7 +47,10 @@ import java.util.Optional;
  * data that may be stored on {@link ItemStack}s and/or {@link NBTTagCompound}s
  * used to store information.
  */
-public class NbtDataUtil {
+public final class NbtDataUtil {
+
+    private NbtDataUtil() {
+    }
 
     // These are the various tag compound id's for getting to various places
     public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";

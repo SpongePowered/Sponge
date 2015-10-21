@@ -33,9 +33,9 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -46,7 +46,7 @@ public class ImmutableSpongePagedData extends AbstractImmutableData<ImmutablePag
     private final ImmutableList<Text> pages;
 
     public ImmutableSpongePagedData() {
-        this(ImmutableList.of(Texts.of()));
+        this(ImmutableList.of(DataConstants.EMPTY_TEXT));
     }
 
     public ImmutableSpongePagedData(List<Text> pages) {

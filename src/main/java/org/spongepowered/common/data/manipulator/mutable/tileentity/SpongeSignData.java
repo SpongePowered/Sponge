@@ -36,6 +36,7 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     private final List<Text> lines;
 
     public SpongeSignData() {
-        this(Lists.newArrayList(Texts.of(), Texts.of(), Texts.of(), Texts.of()));
+        this(Lists.newArrayList(DataConstants.EMPTY_TEXT, DataConstants.EMPTY_TEXT, DataConstants.EMPTY_TEXT, DataConstants.EMPTY_TEXT));
     }
 
     public SpongeSignData(List<Text> lines) {

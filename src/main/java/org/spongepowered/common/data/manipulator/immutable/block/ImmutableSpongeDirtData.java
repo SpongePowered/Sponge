@@ -28,14 +28,14 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirtData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirtData;
 import org.spongepowered.api.data.type.DirtType;
-import org.spongepowered.api.data.type.DirtTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirtData;
+import org.spongepowered.common.data.util.DataConstants;
 
 public class ImmutableSpongeDirtData extends AbstractImmutableSingleCatalogData<DirtType, ImmutableDirtData, DirtData> implements ImmutableDirtData {
 
     public ImmutableSpongeDirtData(DirtType value) {
-        super(ImmutableDirtData.class, value, DirtTypes.DIRT, Keys.DIRT_TYPE, SpongeDirtData.class);
+        super(ImmutableDirtData.class, value, DataConstants.DEFAULT_DIRT_TYPE, Keys.DIRT_TYPE, SpongeDirtData.class);
     }
 
 }

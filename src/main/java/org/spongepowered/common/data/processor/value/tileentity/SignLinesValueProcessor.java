@@ -38,6 +38,7 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
@@ -91,7 +92,7 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<TileEn
             }
             try {
                 for (int i = 0; i < 4; i++) {
-                    ((TileEntitySign) container).signText[i] = SpongeTexts.toComponent(Texts.of());
+                    ((TileEntitySign) container).signText[i] = SpongeTexts.toComponent(DataConstants.EMPTY_TEXT);
                 }
                 ((TileEntitySign) container).markDirty();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
