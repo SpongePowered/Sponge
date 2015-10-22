@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -39,6 +40,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
@@ -88,6 +90,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public BlockState getDefaultState() {
         return (BlockState) shadow$getDefaultState();
+    }
+
+    @Override
+    public ItemType getItem() {
+        return (ItemType) Item.getItemFromBlock((Block) (Object) this);
     }
 
     @Override
