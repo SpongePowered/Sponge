@@ -93,8 +93,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public ItemType getItem() {
-        return (ItemType) Item.getItemFromBlock((Block) (Object) this);
+    public Optional<ItemType> getItem() {
+        return Optional.ofNullable((ItemType) Item.getItemFromBlock((Block) (Object) this));
     }
 
     @Override
