@@ -44,13 +44,16 @@ import java.util.Iterator;
 import java.util.Optional;
 
 /**
- * {@link Inventory} {@link Slot} object that contains common logic between mixin
- * Mojang's {@link net.minecraft.inventory.Slot} and the proxies to the inventory-like
- * systems found in {@link net.minecraft.entity.EntityLivingBase}.
+ * {@link Inventory} {@link Slot} object that contains common logic between
+ * mixin Mojang's {@link net.minecraft.inventory.Slot} and the proxies to the
+ * inventory-like systems found in {@link net.minecraft.entity.EntityLivingBase}
+ * .
  */
 @NonnullByDefault
 public interface InventorySlot extends org.spongepowered.api.item.inventory.Slot {
+
     IInventory getNMSInventory();
+
     int getSlotNumber();
 
     @Override
@@ -153,7 +156,8 @@ public interface InventorySlot extends org.spongepowered.api.item.inventory.Slot
 
     @Override
     default void setMaxStackSize(int size) {
-        // TODO Generic slots can't really go over 64...revise for specific slots.
+        // TODO Generic slots can't really go over 64...revise for specific
+        // slots.
     }
 
     @Override

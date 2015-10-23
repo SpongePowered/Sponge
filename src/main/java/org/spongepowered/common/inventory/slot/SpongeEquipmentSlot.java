@@ -34,6 +34,7 @@ import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.api.text.translation.Translatable;
 
 public class SpongeEquipmentSlot extends AbstractInventorySlot implements EquipmentSlot {
+
     private final EquipmentType type;
 
     public SpongeEquipmentSlot(EquipmentType type, IInventory inventory, int index) {
@@ -58,31 +59,38 @@ public class SpongeEquipmentSlot extends AbstractInventorySlot implements Equipm
         return false;
     }
 
-    @Override public <T extends Inventory> T query(Class<?>... types) {
+    @Override
+    public <T extends Inventory> T query(Class<?>... types) {
         return null;
     }
 
-    @Override public <T extends Inventory> T query(ItemType... types) {
+    @Override
+    public <T extends Inventory> T query(ItemType... types) {
         return null;
     }
 
-    @Override public <T extends Inventory> T query(ItemStack... types) {
+    @Override
+    public <T extends Inventory> T query(ItemStack... types) {
         return null;
     }
 
-    @Override public <T extends Inventory> T query(InventoryProperty<?, ?>... props) {
+    @Override
+    public <T extends Inventory> T query(InventoryProperty<?, ?>... props) {
         return null;
     }
 
-    @Override public <T extends Inventory> T query(Translatable... names) {
+    @Override
+    public <T extends Inventory> T query(Translatable... names) {
         return null;
     }
 
-    @Override public <T extends Inventory> T query(String... names) {
+    @Override
+    public <T extends Inventory> T query(String... names) {
         return null;
     }
 
-    @Override public <T extends Inventory> T query(Object... args) {
+    @Override
+    public <T extends Inventory> T query(Object... args) {
         return null;
     }
 }

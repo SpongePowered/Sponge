@@ -75,7 +75,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 @NonnullByDefault
 @Mixin(net.minecraft.item.ItemStack.class)
 public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMixinCustomDataHolder {
@@ -267,6 +266,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
 
+    @SuppressWarnings("rawtypes")
     @Override
     public DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
         @Nullable DataManipulator<?, ?> existingManipulator = null;
@@ -350,6 +350,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         return list;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
         for (DataManipulator<?, ?> manipulator : this.manipulators) {

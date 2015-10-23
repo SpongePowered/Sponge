@@ -31,14 +31,19 @@ import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C09PacketHeldItemChange;
+import net.minecraft.network.play.client.C0EPacketClickWindow;
+import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
@@ -75,6 +80,7 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -83,6 +89,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
@@ -431,80 +439,34 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-//    @Overwrite
-//    public void processClickWindow(C0EPacketClickWindow packetIn) {
-//        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (INetHandler) this, this.playerEntity.getServerForPlayer());
-//        this.playerEntity.markPlayerActive();
-//
-//        if (this.playerEntity.openContainer.windowId == packetIn.getWindowId() && this.playerEntity.openContainer.getCanCraft(this.playerEntity))
-//        {
-//            if (this.playerEntity.isSpectator())
-//            {
-//                ArrayList arraylist = Lists.newArrayList();
-//
-//                for (int i = 0; i < this.playerEntity.openContainer.inventorySlots.size(); ++i)
-//                {
-//                    arraylist.add(((Slot)this.playerEntity.openContainer.inventorySlots.get(i)).getStack());
-//                }
-//
-//                this.playerEntity.updateCraftingInventory(this.playerEntity.openContainer, arraylist);
-//            }
-//            else
-//            {
-//                ItemStack clientStack = packetIn.getClickedItem();
-//                if (clientStack == null) {
-//                    clientStack = (ItemStack) ItemStackSnapshot.NONE.createStack();
-//                }
-//                ItemStack serverStack = this.playerEntity.openContainer.getSlot(packetIn.getSlotId()).getStack();
-//                if (serverStack == null) {
-//                    serverStack = (ItemStack) ItemStackSnapshot.NONE.createStack();
-//                }
-//
-//                // Let API set the stack before running Vanilla click logic
-//                final Transaction<ItemStackSnapshot> transaction = new Transaction<>(((org.spongepowered.api.item.inventory.ItemStack)
-//                        serverStack).createSnapshot(), ItemStackSnapshot.NONE);
-//                final InteractInventoryEvent.Click event = SpongeEventFactory.createInteractInventoryEventClick(Sponge.getGame(), Cause.of
-//                        (playerEntity), transaction, (org.spongepowered.api.item.inventory.Slot) this.playerEntity.openContainer.getSlot(packetIn
-//                        .getSlotId()));
-//                Sponge.getGame().getEventManager().post(event);
-//                ItemStack pluginStack = (ItemStack) event.getItemStackTransaction().getFinal().createStack();
-//                System.out.println("Client Stack: " + clientStack);
-//                System.out.println("Server Stack: " + serverStack);
-//                System.out.println("Plugin Stack: " + pluginStack);
-//                if (pluginStack.getItem().getUnlocalizedName().equals("none")) {
-//                    pluginStack = null;
-//                }
-//                if (event.getItemStackTransaction().getCustom().isPresent()) {
-//                    this.playerEntity.inventory.setInventorySlotContents(packetIn.getSlotId(), null);
-//                    this.playerEntity.inventory.setItemStack(pluginStack);
-//                }
-//
-//                // Run click logic
-//                ItemStack postLogicStack = this.playerEntity.openContainer.slotClick(packetIn.getSlotId(), packetIn.getUsedButton(), packetIn.getMode
-//                        (), this.playerEntity);
-//                System.out.println("Post Logic Stack: " + postLogicStack);
-//                if (ItemStack.areItemStacksEqual(pluginStack, postLogicStack))
-//                {
-//                    this.playerEntity.playerNetServerHandler.sendPacket(new S32PacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), true));
-//                    this.playerEntity.isChangingQuantityOnly = true;
-//                    this.playerEntity.openContainer.detectAndSendChanges();
-//                    this.playerEntity.updateHeldItem();
-//                    this.playerEntity.isChangingQuantityOnly = false;
-//                } else {
-//                    this.field_147372_n.addKey(this.playerEntity.openContainer.windowId, Short.valueOf(packetIn.getActionNumber()));
-//                    this.playerEntity.playerNetServerHandler.sendPacket(
-//                            new S32PacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), false));
-//                    this.playerEntity.openContainer.setCanCraft(this.playerEntity, false);
-//                    ArrayList arraylist1 = Lists.newArrayList();
-//
-//                    for (int j = 0; j < this.playerEntity.openContainer.inventorySlots.size(); ++j)
-//                    {
-//                        arraylist1.add(((Slot)this.playerEntity.openContainer.inventorySlots.get(j)).getStack());
-//                    }
-//
-//                    this.playerEntity.updateCraftingInventory(this.playerEntity.openContainer, arraylist1);
-//                }
-//            }
-//        }
-//    }
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
+    public void onBeforeSlotClick(C0EPacketClickWindow packetIn, CallbackInfo ci) {
+        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
+    }
+
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V", shift = At.Shift.AFTER))
+    public void onAfterSecondUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
+        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
+    }
+
+    @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z", shift = At.Shift.AFTER, ordinal = 1))
+    public void onThirdUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
+        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
+    }
+
+    @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"))
+    public void onProcessCreativeInventoryActionHead(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
+        ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(true);
+    }
+
+    @Inject(method = "processCreativeInventoryAction", at = @At(value = "RETURN"))
+    public void onProcessCreativeInventoryActionReturn(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
+        ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
+    }
+
+    @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
+    public void onGetSlotId(C09PacketHeldItemChange packetIn, CallbackInfo ci) {
+        SpongeCommonEventFactory.callInteractInventoryHeldEvent(this.playerEntity, packetIn);
+        ci.cancel();
+    }
 }

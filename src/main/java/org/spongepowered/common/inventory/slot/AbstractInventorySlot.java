@@ -27,6 +27,7 @@ package org.spongepowered.common.inventory.slot;
 import net.minecraft.inventory.IInventory;
 
 public abstract class AbstractInventorySlot implements InventorySlot {
+
     private final IInventory inventory;
     private final int index;
 

@@ -33,6 +33,7 @@ import org.spongepowered.common.inventory.slot.InventorySlot;
 
 @Mixin(Slot.class)
 public abstract class MixinSlot implements InventorySlot {
+
     @Shadow public IInventory inventory;
     @Shadow public int slotNumber;
 

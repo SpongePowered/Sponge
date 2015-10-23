@@ -52,6 +52,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.configuration.SpongeConfig.WorldConfig;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.world.CaptureType;
@@ -63,6 +64,7 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.management.MBeanServer;
 
@@ -452,5 +454,17 @@ public class SpongeHooks {
             }
         }
         return causedBy;
+    }
+
+    public static void setCreatorEntityNbt(NBTTagCompound nbt, UUID uuid) {
+        if (!nbt.hasKey(NbtDataUtil.SPONGE_ENTITY_CREATOR)) {
+            NBTTagCompound creatorNbt = new NBTTagCompound();
+            creatorNbt.setLong("uuid_least", uuid.getLeastSignificantBits());
+            creatorNbt.setLong("uuid_most", uuid.getMostSignificantBits());
+            nbt.setTag(NbtDataUtil.SPONGE_ENTITY_CREATOR, creatorNbt);
+        } else {
+            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR).setLong("uuid_least", uuid.getLeastSignificantBits());
+            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR).setLong("uuid_most", uuid.getMostSignificantBits());
+        }
     }
 }

@@ -31,6 +31,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -42,22 +43,29 @@ public class MixinPacketThreadUtil {
 
     @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V"))
     public void onProcessPacket(Packet packetIn, INetHandler netHandler) {
-        StaticMixinHelper.processingPacket = packetIn;
         if (netHandler instanceof NetHandlerPlayServer) {
+            StaticMixinHelper.processingPacket = packetIn;
             StaticMixinHelper.processingPlayer = ((NetHandlerPlayServer)netHandler).playerEntity;
+            StaticMixinHelper.lastOpenContainer = StaticMixinHelper.processingPlayer.openContainer;
+            ItemStackSnapshot cursor = StaticMixinHelper.processingPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.processingPlayer.inventory.getItemStack()).createSnapshot();
+            StaticMixinHelper.lastCursor = cursor;
+
             IMixinWorld world = (IMixinWorld)StaticMixinHelper.processingPlayer.worldObj;
             if (StaticMixinHelper.processingPlayer.getHeldItem() != null && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
                 StaticMixinHelper.lastPlayerItem = ItemStack.copyItemStack(StaticMixinHelper.processingPlayer.getHeldItem());
             }
+
             world.setProcessingCaptureCause(true);
             packetIn.processPacket(netHandler);
             ((IMixinWorld)StaticMixinHelper.processingPlayer.worldObj).handlePostTickCaptures(Cause.of(StaticMixinHelper.processingPlayer));
-            StaticMixinHelper.processingPlayer = null;
             world.setProcessingCaptureCause(false);
+            StaticMixinHelper.processingPlayer = null;
+            StaticMixinHelper.processingPacket = null;
+            StaticMixinHelper.lastCursor = null;
+            StaticMixinHelper.lastOpenContainer = null;
         } else { // client
             packetIn.processPacket(netHandler);
         }
-        StaticMixinHelper.processingPacket = null;
     }
 
 }

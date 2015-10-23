@@ -70,6 +70,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
+
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
         this.itemType = itemStack.getItem();
