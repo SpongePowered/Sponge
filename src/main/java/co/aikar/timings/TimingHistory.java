@@ -26,37 +26,31 @@ package co.aikar.timings;
 
 import static co.aikar.timings.TimingsManager.FULL_SERVER_TICK;
 import static co.aikar.timings.TimingsManager.MINUTE_REPORTS;
-import static co.aikar.util.JSONUtil.createObject;
-import static co.aikar.util.JSONUtil.pair;
-import static co.aikar.util.JSONUtil.toArray;
-import static co.aikar.util.JSONUtil.toArrayMapper;
-import static co.aikar.util.JSONUtil.toObjectMapper;
 
-import co.aikar.util.JSONUtil.JSONPair;
+import co.aikar.util.JSONUtil;
 import co.aikar.util.LoadingMap;
 import co.aikar.util.MRUMapCache;
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.entity.SpongeEntityType;
 
+import java.lang.management.ManagementFactory;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public class TimingHistory {
 
-    static int idPool = 1;
-
-    final int id = idPool++;
     public static long lastMinuteTime;
     public static long timedTicks;
     public static long playerTicks;
@@ -64,24 +58,18 @@ public class TimingHistory {
     public static long tileEntityTicks;
     public static long activatedEntityTicks;
     static int worldIdPool = 1;
-    static Map<String, Integer> worldMap = LoadingMap.newHashMap(new Function<String, Integer>() {
-
-        @Override
-        public Integer apply(String input) {
-            return worldIdPool++;
-        }
-    });
+    static Map<String, Integer> worldMap = LoadingMap.newHashMap((input) -> worldIdPool++);
     final long endTime;
     final long startTime;
     final long totalTicks;
-    final long totalTime; // Represents all time spent running the server this
-                          // history
+    // Represents all time spent running the server this history
+    final long totalTime;
     final MinuteReport[] minuteReports;
 
     final TimingHistoryEntry[] entries;
-    final Set<BlockType> tileEntityTypeSet = Sets.newHashSet();
+    final Set<BlockType> blockTypeSet = Sets.newHashSet();
     final Set<EntityType> entityTypeSet = Sets.newHashSet();
-    final Map<Object, Object> worlds;
+    final JsonObject worlds;
 
     TimingHistory() {
         this.endTime = System.currentTimeMillis() / 1000;
@@ -105,62 +93,39 @@ public class TimingHistory {
             this.entries[i++] = new TimingHistoryEntry(handler);
         }
 
-        final Map<EntityType, Counter> entityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.LOADER));
-        final Map<BlockType, Counter> tileEntityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.LOADER));
+        final Map<EntityType, Counter> entityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
+        final Map<BlockType, Counter> tileEntityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
         // Information about all loaded chunks/entities
-        this.worlds = toObjectMapper(Sponge.getGame().getServer().getWorlds(), new Function<World, JSONPair>() {
+        this.worlds = JSONUtil.mapArrayToObject(Sponge.getGame().getServer().getWorlds(), (world) -> {
+            return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
+                entityCounts.clear();
+                tileEntityCounts.clear();
 
-            @Override
-            public JSONPair apply(World world) {
-                return pair(
-                        worldMap.get(world.getName()),
-                        toArrayMapper(world.getLoadedChunks(), new Function<Chunk, Object>() {
+                for (Entity entity : chunk.getEntities()) {
+                    entityCounts.get(entity.getType()).increment();
+                }
 
-                    @Override
-                    public Object apply(Chunk chunk) {
-                        entityCounts.clear();
-                        tileEntityCounts.clear();
+                for (TileEntity tileEntity : chunk.getTileEntities()) {
+                    tileEntityCounts.get(tileEntity.getBlock().getType()).increment();
+                }
 
-                        for (Entity entity : chunk.getEntities()) {
-                            entityCounts.get(entity.getType()).increment();
-                        }
-
-                        for (TileEntity tileEntity : chunk.getTileEntities()) {
-                            tileEntityCounts.get(tileEntity.getBlock().getType()).increment();
-                        }
-
-                        if (tileEntityCounts.isEmpty() && entityCounts.isEmpty()) {
-                            return null;
-                        }
-                        return toArray(
-                                chunk.getPosition().getX(),
-                                chunk.getPosition().getZ(),
-                                toObjectMapper(entityCounts.entrySet(),
-                                        new Function<Map.Entry<EntityType, Counter>, JSONPair>() {
-
-                            @Override
-                            public JSONPair apply(Map.Entry<EntityType, Counter> entry) {
-                                TimingHistory.this.entityTypeSet.add(entry.getKey());
-                                return pair(
-                                        entry.getKey().getId(),
-                                        entry.getValue().count());
-                            }
+                if (tileEntityCounts.isEmpty() && entityCounts.isEmpty()) {
+                    return null;
+                }
+                return JSONUtil.arrayOf(
+                        chunk.getPosition().getX(),
+                        chunk.getPosition().getZ(),
+                        JSONUtil.mapArrayToObject(entityCounts.entrySet(), (entry) -> {
+                            this.entityTypeSet.add(entry.getKey());
+                            return JSONUtil.singleObjectPair(((SpongeEntityType) entry.getKey()).entityTypeId, entry.getValue().count());
                         }),
-                                toObjectMapper(tileEntityCounts.entrySet(),
-                                        new Function<Map.Entry<BlockType, Counter>, JSONPair>() {
-
-                            @Override
-                            public JSONPair apply(Map.Entry<BlockType, Counter> entry) {
-                                TimingHistory.this.tileEntityTypeSet.add(entry.getKey());
-                                return pair(
-                                        String.valueOf(entry.getKey().getId()),
-                                        entry.getValue().count());
-                            }
+                        JSONUtil.mapArrayToObject(tileEntityCounts.entrySet(), (entry) -> {
+                            this.blockTypeSet.add(entry.getKey());
+                            return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) entry.getKey()), entry.getValue().count());
                         }));
-                    }
-                }));
-            }
+            }));
         });
+
     }
 
     public static void resetTicks(boolean fullReset) {
@@ -175,31 +140,16 @@ public class TimingHistory {
         activatedEntityTicks = 0;
     }
 
-    JSONPair export() {
-        return pair(this.id, createObject(
-                pair("s", this.startTime),
-                pair("e", this.endTime),
-                pair("tk", this.totalTicks),
-                pair("tm", this.totalTime),
-                pair("w", this.worlds),
-                pair("h", toArrayMapper(this.entries, new Function<TimingHistoryEntry, Object>() {
-
-                    @Override
-                    public Object apply(TimingHistoryEntry entry) {
-                        TimingData record = entry.data;
-                        if (record.count == 0) {
-                            return null;
-                        }
-                        return entry.export();
-                    }
-                })),
-                pair("mp", toArrayMapper(this.minuteReports, new Function<MinuteReport, Object>() {
-
-                    @Override
-                    public Object apply(MinuteReport input) {
-                        return input.export();
-                    }
-                }))));
+    JsonObject export() {
+        return JSONUtil.objectBuilder()
+                .add("s", this.startTime)
+                .add("e", this.endTime)
+                .add("tk", this.totalTicks)
+                .add("tm", this.totalTime)
+                .add("w", this.worlds)
+                .add("h", JSONUtil.mapArray(this.entries, (entry) -> entry.data.count == 0 ? null : entry.export()))
+                .add("mp", JSONUtil.mapArray(this.minuteReports, MinuteReport::export))
+                .build();
     }
 
     static class MinuteReport {
@@ -210,18 +160,24 @@ public class TimingHistory {
         final PingRecord pingRecord = new PingRecord();
         final TimingData fst = TimingsManager.FULL_SERVER_TICK.minuteData.clone();
         final double tps = 1E9 / (System.nanoTime() - lastMinuteTime) * this.ticksRecord.timed;
+        final double usedMemory = TimingsManager.FULL_SERVER_TICK.avgUsedMemory;
+        final double freeMemory = TimingsManager.FULL_SERVER_TICK.avgFreeMemory;
+        final double loadAvg = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
 
-        public List export() {
-            return toArray(
+        public JsonArray export() {
+            return JSONUtil.arrayOf(
                     this.time,
                     Math.round(this.tps * 100D) / 100D,
                     Math.round(this.pingRecord.avg * 100D) / 100D,
                     this.fst.export(),
-                    toArray(this.ticksRecord.timed,
+                    JSONUtil.arrayOf(this.ticksRecord.timed,
                             this.ticksRecord.player,
                             this.ticksRecord.entity,
                             this.ticksRecord.activatedEntity,
-                            this.ticksRecord.tileEntity));
+                            this.ticksRecord.tileEntity),
+                    this.usedMemory,
+                    this.freeMemory,
+                    this.loadAvg);
         }
     }
 
@@ -260,13 +216,18 @@ public class TimingHistory {
     static class Counter {
 
         int count = 0;
-        @SuppressWarnings("rawtypes") static Function LOADER = new LoadingMap.Feeder<Counter>() {
+        private static final Function<?, Counter> LOADER = new LoadingMap.Feeder<Counter>() {
 
             @Override
             public Counter apply() {
                 return new Counter();
             }
         };
+
+        @SuppressWarnings("unchecked")
+        static <T> Function<T, Counter> loader() {
+            return (Function<T, Counter>) LOADER;
+        }
 
         public int increment() {
             return ++this.count;

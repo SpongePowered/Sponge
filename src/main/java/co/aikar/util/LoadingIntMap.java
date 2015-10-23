@@ -24,8 +24,9 @@
  */
 package co.aikar.util;
 
-import com.google.common.base.Function;
 import gnu.trove.map.hash.TIntObjectHashMap;
+
+import java.util.function.Function;
 
 /**
  * Allows you to pass a Loader function that when a key is accessed that doesn't

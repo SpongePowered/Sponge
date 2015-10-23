@@ -25,9 +25,9 @@
 package co.aikar.timings;
 
 import co.aikar.util.LoadingMap;
-import com.google.common.base.Function;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.command.ImmutableCommandMapping;
 import org.spongepowered.common.Sponge;
 
 import java.util.ArrayDeque;
@@ -40,16 +40,8 @@ import java.util.Optional;
 
 public final class TimingsManager {
 
-    static final long SERVER_START = System.currentTimeMillis() / 1000;
     static final Map<TimingIdentifier, TimingHandler> TIMING_MAP =
-            Collections.synchronizedMap(LoadingMap.newHashMap(
-                    new Function<TimingIdentifier, TimingHandler>() {
-
-                        @Override
-                        public TimingHandler apply(TimingIdentifier id) {
-                            return (id.protect ? new UnsafeTimingHandler(id) : new TimingHandler(id));
-                        }
-                    },
+            Collections.synchronizedMap(LoadingMap.newHashMap((id) -> (id.protect ? new UnsafeTimingHandler(id) : new TimingHandler(id)),
                     256, .5F));
     public static final FullServerTickHandler FULL_SERVER_TICK = new FullServerTickHandler();
     public static final TimingHandler TIMINGS_TICK = SpongeTimingsFactory.ofSafe("Timings Tick", FULL_SERVER_TICK);
@@ -73,7 +65,7 @@ public final class TimingsManager {
     /**
      * Resets all timing data on the next tick
      */
-    static void reset() {
+    public static void reset() {
         needsFullReset = true;
     }
 
@@ -146,28 +138,18 @@ public final class TimingsManager {
         return TIMING_MAP.get(new TimingIdentifier(group, name, parent, protect));
     }
 
-    /**
-     * Due to access restrictions, we need a helper method to get a Command
-     * TimingHandler with String group <p/> Plugins should never call this
-     *
-     * @param pluginName Plugin this command is associated with
-     * @param command Command to get timings for
-     * @return TimingHandler
-     */
-    public static Timing getCommandTiming(String pluginName, String command) {
+    public static Timing getCommandTiming(String pluginName, ImmutableCommandMapping command) {
         Optional<PluginContainer> plugin = Optional.empty();
         if (!("minecraft".equals(pluginName)
                 || "bukkit".equals(pluginName)
                 || "Spigot".equals(pluginName))) {
             plugin = Sponge.getGame().getPluginManager().getPlugin(pluginName);
-            if (!plugin.isPresent()) {
-            }
         }
         if (!plugin.isPresent()) {
-            return SpongeTimingsFactory.ofSafe("Command: " + pluginName + ":" + command);
+            return SpongeTimingsFactory.ofSafe("Command: " + pluginName + ":" + command.getPrimaryAlias());
         }
 
-        return SpongeTimingsFactory.ofSafe(plugin.get(), "Command: " + pluginName + ":" + command);
+        return SpongeTimingsFactory.ofSafe(plugin.get(), "Command: " + pluginName + ":" + command.getPrimaryAlias());
     }
 
 }

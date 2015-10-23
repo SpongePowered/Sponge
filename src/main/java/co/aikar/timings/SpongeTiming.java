@@ -24,7 +24,7 @@
  */
 package co.aikar.timings;
 
-interface SpongeTiming {
+interface SpongeTiming extends Timing {
 
     TimingHandler getTimingHandler();
 }

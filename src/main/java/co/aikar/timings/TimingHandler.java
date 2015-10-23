@@ -29,7 +29,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.Sponge;
 
-class TimingHandler implements Timing, SpongeTiming {
+class TimingHandler implements SpongeTiming {
 
     private static int idPool = 1;
     final int id = idPool++;

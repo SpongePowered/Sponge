@@ -24,19 +24,19 @@
  */
 package co.aikar.timings;
 
-import static co.aikar.util.JSONUtil.toArray;
+import co.aikar.util.JSONUtil;
+import com.google.gson.JsonArray;
 
-import com.google.common.base.Function;
-
-import java.util.List;
+import java.util.function.Function;
 
 /**
- * Lightweight object for tracking timing data
- * <p/>
- * This is broken out to reduce memory usage
+ * Lightweight object for tracking timing data <p/> This is broken out to reduce
+ * memory usage
  */
 class TimingData {
+
     static Function<Integer, TimingData> LOADER = new Function<Integer, TimingData>() {
+
         @Override
         public TimingData apply(Integer input) {
             return new TimingData(input);
@@ -93,15 +93,16 @@ class TimingData {
         return new TimingData(this);
     }
 
-    public List<Number> export() {
-        List<Number> list = toArray(
-            this.id,
-            this.count,
-            this.totalTime);
+    public JsonArray export() {
+        JsonArray array = JSONUtil.arrayOf(
+                this.id,
+                this.count,
+                this.totalTime);
         if (this.lagCount > 0) {
-            list.add(this.lagCount);
-            list.add(this.lagTotalTime);
+            array.addAll(JSONUtil.arrayOf(
+                    this.lagCount,
+                    this.lagTotalTime));
         }
-        return list;
+        return array;
     }
 }

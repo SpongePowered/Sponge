@@ -25,53 +25,54 @@
 package co.aikar.timings;
 
 import static co.aikar.timings.TimingsManager.HISTORY;
-import static co.aikar.util.JSONUtil.appendObjectData;
-import static co.aikar.util.JSONUtil.createObject;
-import static co.aikar.util.JSONUtil.pair;
-import static co.aikar.util.JSONUtil.toArray;
-import static co.aikar.util.JSONUtil.toArrayMapper;
-import static co.aikar.util.JSONUtil.toObjectMapper;
 
 import co.aikar.util.JSONUtil;
-import co.aikar.util.JSONUtil.JSONPair;
-import com.google.common.base.Function;
+import co.aikar.util.JSONUtil.JsonObjectBuilder;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import net.minecraft.block.Block;
 import net.minecraft.server.MinecraftServer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.util.command.source.RconSource;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.entity.SpongeEntityType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
-@SuppressWarnings("rawtypes")
-class TimingsExport extends Thread {
+public class TimingsExport extends Thread {
+
+    // private static final Joiner AUTHOR_LIST_JOINER = Joiner.on(", ");
+    private static final Joiner RUNTIME_FLAG_JOINER = Joiner.on(" ");
+    private static final Joiner CONFIG_PATH_JOINER = Joiner.on(".");
+    // Sponge doesn't have a server-name property
+    private static final String SERVER_NAME = "A Sponge Server";
 
     private final CommandSource sender;
-    private final Map out;
+    private final JsonObject out;
     private final TimingHistory[] history;
 
-    TimingsExport(CommandSource sender, Map out, TimingHistory[] history) {
+    TimingsExport(CommandSource sender, JsonObject out, TimingHistory[] history) {
         super("Timings paste thread");
         this.sender = sender;
         this.out = out;
@@ -83,128 +84,102 @@ class TimingsExport extends Thread {
      *
      * @param sender Who to report to
      */
-    static void reportTimings(CommandSource sender) {
-        Map parent = createObject(
+    public static void reportTimings(CommandSource sender) {
+        JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                pair("version", Sponge.getGame().getPlatform().getVersion()),
-                pair("maxplayers", Sponge.getGame().getServer().getMaxPlayers()),
-                pair("start", TimingsManager.timingStart / 1000),
-                pair("end", System.currentTimeMillis() / 1000),
-                pair("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000));
+                .add("version", Sponge.getGame().getPlatform().getVersion())
+                .add("maxplayers", Sponge.getGame().getServer().getMaxPlayers())
+                .add("start", TimingsManager.timingStart / 1000)
+                .add("end", System.currentTimeMillis() / 1000)
+                .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
-            appendObjectData(parent,
-                    pair("server", Sponge.ECOSYSTEM_NAME),
-                    pair("motd", Sponge.getGame().getServer().getMotd()),
-                    pair("online-mode", Sponge.getGame().getServer().getOnlineMode()),
-                    pair("icon", MinecraftServer.getServer().getServerStatusResponse().getFavicon()));
+            builder.add("server", SERVER_NAME)
+                    .add("motd", Texts.toPlain(Sponge.getGame().getServer().getMotd()))
+                    .add("online-mode", Sponge.getGame().getServer().getOnlineMode())
+                    .add("icon", MinecraftServer.getServer().getServerStatusResponse().getFavicon());
         }
 
         final Runtime runtime = Runtime.getRuntime();
+        RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+        builder.add("system", JSONUtil.objectBuilder()
+                .add("timingcost", getCost())
+                .add("name", System.getProperty("os.name"))
+                .add("version", System.getProperty("os.version"))
+                .add("jvmversion", System.getProperty("java.version"))
+                .add("arch", System.getProperty("os.arch"))
+                .add("maxmem", runtime.maxMemory())
+                .add("cpu", runtime.availableProcessors())
+                .add("runtime", ManagementFactory.getRuntimeMXBean().getUptime())
+                .add("flags", RUNTIME_FLAG_JOINER.join(runtimeBean.getInputArguments()))
+                .add("gc", JSONUtil.mapArrayToObject(ManagementFactory.getGarbageCollectorMXBeans(), (input) -> {
+                    return JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime()));
+                })));
 
-        parent.put("system", createObject(
-                pair("timingcost", getCost()),
-                pair("name", System.getProperty("os.name")),
-                pair("version", System.getProperty("os.version")),
-                pair("arch", System.getProperty("os.arch")),
-                pair("totalmem", runtime.totalMemory()),
-                pair("usedmem", runtime.totalMemory() - runtime.freeMemory()),
-                pair("maxmem", runtime.maxMemory()),
-                pair("cpu", runtime.availableProcessors()),
-                pair("runtime", (System.currentTimeMillis() / 1000) - TimingsManager.SERVER_START)));
-
-        Set<BlockType> tileEntityTypeSet = Sets.newHashSet();
+        Set<BlockType> blockTypeSet = Sets.newHashSet();
         Set<EntityType> entityTypeSet = Sets.newHashSet();
 
         int size = HISTORY.size();
         TimingHistory[] history = new TimingHistory[size + 1];
         int i = 0;
         for (TimingHistory timingHistory : HISTORY) {
-            tileEntityTypeSet.addAll(timingHistory.tileEntityTypeSet);
+            blockTypeSet.addAll(timingHistory.blockTypeSet);
             entityTypeSet.addAll(timingHistory.entityTypeSet);
             history[i++] = timingHistory;
         }
 
         history[i] = new TimingHistory(); // Current snapshot
-        tileEntityTypeSet.addAll(history[i].tileEntityTypeSet);
+        blockTypeSet.addAll(history[i].blockTypeSet);
         entityTypeSet.addAll(history[i].entityTypeSet);
 
-        Map handlers = createObject();
+        JsonObjectBuilder handlersBuilder = JSONUtil.objectBuilder();
         for (TimingIdentifier.TimingGroup group : TimingIdentifier.GROUP_MAP.values()) {
             for (TimingHandler id : group.handlers) {
                 if (!id.timed && !id.isSpecial()) {
                     continue;
                 }
-                handlers.put(id.id, toArray(
+                handlersBuilder.add(id.id, JSONUtil.arrayOf(
                         group.id,
                         id.name));
             }
         }
 
-        parent.put("idmap", createObject(
-                pair("groups", toObjectMapper(
-                        TimingIdentifier.GROUP_MAP.values(), new Function<TimingIdentifier.TimingGroup, JSONPair>() {
-
-                            @Override
-                            public JSONPair apply(TimingIdentifier.TimingGroup group) {
-                                return pair(group.id, group.name);
-                            }
-                        })),
-                pair("handlers", handlers),
-                pair("worlds", toObjectMapper(TimingHistory.worldMap.entrySet(), new Function<Map.Entry<String, Integer>, JSONPair>() {
-
-                    @Override
-                    public JSONPair apply(Map.Entry<String, Integer> input) {
-                        return pair(input.getValue(), input.getKey());
-                    }
-                })),
-                pair("tileentity",
-                        toObjectMapper(tileEntityTypeSet, new Function<BlockType, JSONPair>() {
-
-                            @Override
-                            public JSONPair apply(BlockType input) {
-                                return pair(input.getId(), input.getName());
-                            }
-                        })),
-                pair("entity",
-                        toObjectMapper(entityTypeSet, new Function<EntityType, JSONPair>() {
-
-                            @Override
-                            public JSONPair apply(EntityType input) {
-                                return pair(input.getId(), input.getName());
-                            }
-                        }))));
+        builder.add("idmap", JSONUtil.objectBuilder()
+                .add("groups", JSONUtil.mapArrayToObject(TimingIdentifier.GROUP_MAP.values(), (group) -> {
+                    return JSONUtil.singleObjectPair(group.id, group.name);
+                }))
+                .add("handlers", handlersBuilder)
+                .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) -> {
+                    return JSONUtil.singleObjectPair(entry.getValue(), entry.getKey());
+                }))
+                .add("tileentity", JSONUtil.mapArrayToObject(blockTypeSet, (blockType) -> {
+                    return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) blockType), blockType.getId());
+                }))
+                .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> {
+                    return JSONUtil.singleObjectPair(((SpongeEntityType) entityType).entityTypeId, entityType.getId());
+                })));
 
         // Information about loaded plugins
 
-        parent.put("plugins", toObjectMapper(Sponge.getGame().getPluginManager().getPlugins(),
-                new Function<PluginContainer, JSONPair>() {
-
-                    @Override
-                    public JSONPair apply(PluginContainer plugin) {
-                        return pair(plugin.getName(), createObject(
-                                pair("version", plugin.getVersion())
-                        /*
-                         * TODO More metadata pair("description",
-                         * String.valueOf(plugin.getDescription().getDescription
-                         * ()).trim()), pair("website",
-                         * plugin.getDescription().getWebsite()),
-                         * pair("authors",
-                         * StringUtils.join(plugin.getDescription().getAuthors()
-                         * , ", "))
-                         */
-                        ));
-                    }
-                }));
+        builder.add("plugins", JSONUtil.mapArrayToObject(Sponge.getGame().getPluginManager().getPlugins(), (plugin) -> {
+            // TODO This is only available on Forge
+//            ModMetadata metadata = ((ModContainer) plugin).getMetadata();
+            return JSONUtil.objectBuilder().add(plugin.getName(), JSONUtil.objectBuilder()
+                    .add("version", plugin.getVersion())
+//                    .add("description", metadata.description)
+//                    .add("website", metadata.url)
+//                    .add("authors", AUTHOR_LIST_JOINER.join(metadata.authorList))
+            ).build();
+        }));
 
         // Information on the users Config
 
-        parent.put("config", createObject(
-                pair("sponge", mapAsJSON(Sponge.getGlobalConfig().getRootNode(), null))));
+        builder.add("config", JSONUtil.objectBuilder()
+                .add("sponge", serializeConfigNode(Sponge.getGlobalConfig().getRootNode())));
 
-        new TimingsExport(sender, parent, history).start();
+        new TimingsExport(sender, builder.build(), history).start();
     }
 
-    static long getCost() {
+    public static long getCost() {
         // Benchmark the users System.nanotime() for cost basis
         int passes = 500000;
         TimingHandler SAMPLER1 = SpongeTimingsFactory.ofSafe("Timings Sampler 1");
@@ -239,46 +214,34 @@ class TimingsExport extends Thread {
         return timingsCost;
     }
 
-    private static JsonObject mapAsJSON(ConfigurationNode config, String parentKey) {
-
-        JsonObject object = new JsonObject();
-        for (Entry<Object, ? extends ConfigurationNode> entry : config.getChildrenMap().entrySet()) {
-            String key = (String) entry.getKey();
-            String fullKey = (parentKey != null ? parentKey + "." + key : key);
-            if (fullKey.equals("database") || fullKey.equals("settings.bungeecord-addresses") || TimingsManager.hiddenConfigs.contains(fullKey)) {
-                continue;
+    private static JsonElement serializeConfigNode(ConfigurationNode node) {
+        if (node.hasMapChildren()) {
+            JsonObject object = new JsonObject();
+            for (Entry<Object, ? extends ConfigurationNode> entry : node.getChildrenMap().entrySet()) {
+                String fullPath = CONFIG_PATH_JOINER.join(entry.getValue().getPath());
+                if (fullPath.equals("sponge.sql") || TimingsManager.hiddenConfigs.contains(fullPath)) {
+                    continue;
+                }
+                object.add(entry.getKey().toString(), serializeConfigNode(entry.getValue()));
             }
-            object.add(key, valAsJSON(entry.getValue(), fullKey));
+            return object;
         }
-        return object;
+        if (node.hasListChildren()) {
+            JsonArray array = new JsonArray();
+            for (ConfigurationNode child : node.getChildrenList()) {
+                array.add(serializeConfigNode(child));
+            }
+            return array;
+        }
+        return JSONUtil.toJsonElement(node.getValue());
     }
 
-    private static JsonElement valAsJSON(Object val, final String parentKey) {
-        if (!(val instanceof ConfigurationNode)) {
-            if (val instanceof List) {
-                Iterable<Object> v = (Iterable<Object>) val;
-                return toArrayMapper(v, new Function<Object, Object>() {
-
-                    @Override
-                    public Object apply(Object input) {
-                        return valAsJSON(input, parentKey);
-                    }
-                });
-            } else {
-                return new JsonPrimitive(val.toString());
-            }
-        } else {
-            return mapAsJSON((ConfigurationNode) val, parentKey);
-        }
-    }
-
-    @SuppressWarnings("CallToThreadRun")
     @Override
     public synchronized void start() {
         if (this.sender instanceof RconSource) {
             this.sender.sendMessage(Texts.of(TextColors.RED, "Warning: Timings report done over RCON will cause lag spikes."));
             this.sender.sendMessage(Texts.of(TextColors.RED, "You should use ", TextColors.YELLOW,
-                    "/timings report" + TextColors.RED, " in game or console."));
+                    "/sponge timings report" + TextColors.RED, " in game or console."));
             run();
         } else {
             super.start();
@@ -289,19 +252,13 @@ class TimingsExport extends Thread {
     public void run() {
         this.sender.sendMessage(Texts.of(TextColors.GREEN, "Preparing Timings Report..."));
 
-        this.out.put("data", toObjectMapper(this.history, new Function<TimingHistory, JSONPair>() {
-
-            @Override
-            public JSONPair apply(TimingHistory input) {
-                return input.export();
-            }
-        }));
+        this.out.add("data", JSONUtil.mapArray(this.history, TimingHistory::export));
 
         String response = null;
         try {
             HttpURLConnection con = (HttpURLConnection) new URL("http://timings.aikar.co/post").openConnection();
             con.setDoOutput(true);
-            con.setRequestProperty("User-Agent", "Sponge/" + Sponge.ECOSYSTEM_NAME + "/" + InetAddress.getLocalHost().getHostName());
+            con.setRequestProperty("User-Agent", "Sponge/" + SERVER_NAME + "/" + InetAddress.getLocalHost().getHostName());
             con.setRequestMethod("POST");
             con.setInstanceFollowRedirects(false);
 
@@ -312,7 +269,7 @@ class TimingsExport extends Thread {
                 }
             };
 
-            request.write(JSONUtil.toJsonString(this.out).getBytes("UTF-8"));
+            request.write(JSONUtil.toString(this.out).getBytes("UTF-8"));
             request.close();
 
             response = getResponse(con);
@@ -328,7 +285,7 @@ class TimingsExport extends Thread {
             }
 
             String location = con.getHeaderField("Location");
-            this.sender.sendMessage(Texts.of(TextColors.GREEN, "View Timings Report: " + location));
+            this.sender.sendMessage(Texts.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(location)), location));
             if (!(this.sender instanceof ConsoleSource)) {
                 Sponge.getLogger().info("View Timings Report: " + location);
             }

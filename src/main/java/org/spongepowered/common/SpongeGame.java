@@ -47,9 +47,8 @@ import javax.inject.Singleton;
 @Singleton
 public abstract class SpongeGame implements Game {
 
-    public static final String API_VERSION = Objects.firstNonNull(SpongeGame.class.getPackage().getSpecificationVersion(), "UNKNOWN");
-    public static final String IMPLEMENTATION_VERSION =
-            Objects.firstNonNull(SpongeGame.class.getPackage().getImplementationVersion(), "UNKNOWN");
+    public static final String API_VERSION = Objects.firstNonNull(SpongeGame.class.getPackage().getSpecificationVersion(), "DEV");
+    public static final String IMPLEMENTATION_VERSION = Objects.firstNonNull(SpongeGame.class.getPackage().getImplementationVersion(), "DEV");
 
     public static final MinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
 

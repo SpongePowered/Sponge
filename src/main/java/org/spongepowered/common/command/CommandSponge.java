@@ -33,11 +33,13 @@ import static org.spongepowered.api.util.command.args.GenericArguments.seq;
 import static org.spongepowered.api.util.command.args.GenericArguments.string;
 import static org.spongepowered.api.util.command.args.GenericArguments.world;
 
+import co.aikar.timings.Timings;
+import co.aikar.timings.TimingsExport;
+import co.aikar.timings.TimingsManager;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
@@ -46,6 +48,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.command.CommandCallable;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
@@ -94,6 +97,7 @@ public class CommandSponge {
         nonFlagChildren.register(getAuditCommand(), "audit");
         nonFlagChildren.register(getHeapCommand(), "heap");
         nonFlagChildren.register(getPluginsCommand(), "plugins");
+        nonFlagChildren.register(getTimingsCommand(), "timings");
         flagChildren.register(getChunksCommand(), "chunks");
         flagChildren.register(getConfigCommand(), "config");
         flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
@@ -407,5 +411,79 @@ public class CommandSponge {
                     }
                     return CommandResult.success();
                 }).build();
+    }
+
+    private static CommandCallable getTimingsCommand() {
+        return CommandSpec.builder()
+                .permission("sponge.command.timings")
+                .description(Texts.of("Manages Sponge Timings data to see performance of the server."))
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            TimingsManager.reset();
+                            src.sendMessage(Texts.of("Timings reset"));
+                            return CommandResult.success();
+                        })
+                        .build(), "reset")
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            TimingsExport.reportTimings(src);
+                            return CommandResult.success();
+                        })
+                        .build(), "report", "paste")
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            Timings.setTimingsEnabled(true);
+                            src.sendMessage(Texts.of("Enabled Timings & Reset"));
+                            return CommandResult.success();
+                        })
+                        .build(), "on")
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            Timings.setTimingsEnabled(false);
+                            src.sendMessage(Texts.of("Disabled Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "off")
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            Timings.setVerboseTimingsEnabled(true);
+                            src.sendMessage(Texts.of("Enabled Verbose Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "verbon")
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            Timings.setVerboseTimingsEnabled(false);
+                            src.sendMessage(Texts.of("Disabled Verbose Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "verboff")
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            src.sendMessage(Texts.of("Timings cost: " + TimingsExport.getCost()));
+                            return CommandResult.success();
+                        })
+                        .build(), "cost")
+                .build();
     }
 }

@@ -24,13 +24,11 @@
  */
 package co.aikar.timings;
 
-import static co.aikar.util.JSONUtil.toArrayMapper;
-
-import com.google.common.base.Function;
-
-import java.util.List;
+import co.aikar.util.JSONUtil;
+import com.google.gson.JsonArray;
 
 class TimingHistoryEntry {
+
     final TimingData data;
     final TimingData[] children;
 
@@ -43,17 +41,10 @@ class TimingHistoryEntry {
         }
     }
 
-    List export() {
-        List result = this.data.export();
+    JsonArray export() {
+        JsonArray result = this.data.export();
         if (this.children.length > 0) {
-            result.add(
-                toArrayMapper(this.children, new Function<TimingData, Object>() {
-                    @Override
-                    public Object apply(TimingData child) {
-                        return child.export();
-                    }
-                })
-            );
+            result.add(JSONUtil.mapArray(this.children, TimingData::export));
         }
         return result;
     }

@@ -26,6 +26,8 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.SpongeTimingsFactory;
+import co.aikar.timings.Timings;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableBiMap;
@@ -52,7 +54,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFishFood;
-import net.minecraft.item.ItemFishFood.FishType;
 import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
@@ -2106,6 +2107,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         throw new UnsupportedOperationException();
     }
 
+    private void setTimingsFactory() {
+        RegistryHelper.setFactory(Timings.class, new SpongeTimingsFactory());
+    }
+
     public void preInit() {
         SpongeSerializationRegistry.setupSerialization(Sponge.getGame());
         setupProperties();
@@ -2145,6 +2150,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setDamageSources();
         setGoldenApples();
         setLogAxes();
+        setTimingsFactory();
     }
 
     public void postInit() {

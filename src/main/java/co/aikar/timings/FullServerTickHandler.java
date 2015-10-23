@@ -30,8 +30,12 @@ import static co.aikar.timings.TimingsManager.TIMINGS_TICK;
 import static co.aikar.timings.TimingsManager.TIMING_MAP;
 
 public class FullServerTickHandler extends TimingHandler {
+
     static final TimingIdentifier IDENTITY = new TimingIdentifier("Minecraft", "Full Server Tick", null, false);
     final TimingData minuteData;
+    double avgFreeMemory = -1D;
+    double avgUsedMemory = -1D;
+
     FullServerTickHandler() {
         super(IDENTITY);
         this.minuteData = new TimingData(this.id);
@@ -55,13 +59,30 @@ public class FullServerTickHandler extends TimingHandler {
         if (!this.enabled) {
             return;
         }
+        if (TimingHistory.timedTicks % 20 == 0) {
+            final Runtime runtime = Runtime.getRuntime();
+            double usedMemory = runtime.totalMemory() - runtime.freeMemory();
+            double freeMemory = runtime.maxMemory() - usedMemory;
+            if (this.avgFreeMemory == -1) {
+                this.avgFreeMemory = freeMemory;
+            } else {
+                this.avgFreeMemory = (this.avgFreeMemory * (59 / 60D)) + (freeMemory * (1 / 60D));
+            }
+
+            if (this.avgUsedMemory == -1) {
+                this.avgUsedMemory = usedMemory;
+            } else {
+                this.avgUsedMemory = (this.avgUsedMemory * (59 / 60D)) + (usedMemory * (1 / 60D));
+            }
+        }
 
         long start = System.nanoTime();
         TimingsManager.tick();
         long diff = System.nanoTime() - start;
         CURRENT = TIMINGS_TICK;
         TIMINGS_TICK.addDiff(diff);
-        // addDiff for TIMINGS_TICK incremented this, bring it back down to 1 per tick.
+        // addDiff for TIMINGS_TICK incremented this, bring it back down to 1
+        // per tick.
         this.record.curTickCount--;
         this.minuteData.curTickTotal = this.record.curTickTotal;
         this.minuteData.curTickCount = 1;
@@ -69,7 +90,6 @@ public class FullServerTickHandler extends TimingHandler {
         this.minuteData.processTick(violated);
         TIMINGS_TICK.processTick(violated);
         processTick(violated);
-
 
         if (TimingHistory.timedTicks % 1200 == 0) {
             MINUTE_REPORTS.add(new TimingHistory.MinuteReport());

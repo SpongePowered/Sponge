@@ -24,8 +24,6 @@
  */
 package co.aikar.util;
 
-import com.google.common.base.Function;
-
 import java.lang.reflect.Constructor;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -33,6 +31,9 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 /**
  * Allows you to pass a Loader function that when a key is accessed that doesn't
@@ -253,6 +254,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
         return this.backingMap.containsValue(value);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public V get(Object key) {
         V res = this.backingMap.get(key);
@@ -330,7 +332,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
                 }
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(
-                        valueClass.getName() + " does not have a constructor for " + (keyClass != null ? keyClass.getName() : null));
+                        valueClass.getName() + " does not have a constructor for " + keyClass.getName());
             }
         }
 
@@ -359,13 +361,15 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
      *
      * @param <T>
      */
-    public abstract static class Feeder<T> implements Function<T, T> {
+    public static abstract class Feeder<T> implements Function<Object, T> {
 
         @Override
-        public T apply(Object input) {
+        @Nullable
+        public T apply(@Nullable Object input) {
             return apply();
         }
 
         public abstract T apply();
+
     }
 }

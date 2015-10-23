@@ -43,7 +43,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     private static int historyInterval = -1;
     private static int historyLength = -1;
 
-    private SpongeTimingsFactory() {
+    public SpongeTimingsFactory() {
     }
 
     private static PluginContainer checkPlugin(Object plugin) {

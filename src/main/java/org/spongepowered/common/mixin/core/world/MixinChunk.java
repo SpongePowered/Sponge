@@ -25,28 +25,29 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.user.UserStorage;
@@ -54,7 +55,6 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -75,8 +75,10 @@ import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @NonnullByDefault
@@ -87,15 +89,15 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public Map<Short, Integer> trackedShortBlockPositions = Maps.newHashMap();
     private Cause populateCause;
 
-    private final int NUM_XZ_BITS = 4;
-    private final int NUM_SHORT_Y_BITS = 8;
-    private final int NUM_INT_Y_BITS = 24;
-    private final int Y_SHIFT = NUM_XZ_BITS;
-    private final int Z_SHORT_SHIFT = Y_SHIFT + NUM_SHORT_Y_BITS;
-    private final int Z_INT_SHIFT = Y_SHIFT + NUM_INT_Y_BITS;
-    private final short XZ_MASK = 0xF;
-    private final short Y_SHORT_MASK = 0xFF;
-    private final int Y_INT_MASK = 0xFFFFFF;
+    private static final int NUM_XZ_BITS = 4;
+    private static final int NUM_SHORT_Y_BITS = 8;
+    private static final int NUM_INT_Y_BITS = 24;
+    private static final int Y_SHIFT = NUM_XZ_BITS;
+    private static final int Z_SHORT_SHIFT = Y_SHIFT + NUM_SHORT_Y_BITS;
+    private static final int Z_INT_SHIFT = Y_SHIFT + NUM_INT_Y_BITS;
+    private static final short XZ_MASK = 0xF;
+    private static final short Y_SHORT_MASK = 0xFF;
+    private static final int Y_INT_MASK = 0xFFFFFF;
 
     private static final Vector2i BIOME_SIZE = SpongeChunkLayout.CHUNK_SIZE.toVector2(true);
     private Vector3i chunkPos;
@@ -114,6 +116,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow private ExtendedBlockStorage[] storageArrays;
     @Shadow private int[] precipitationHeightMap;
     @Shadow private int[] heightMap;
+    @Shadow private ClassInheritanceMultiMap[] entityLists;
+    @Shadow private Map<BlockPos, TileEntity> chunkTileEntityMap;
 
     @Shadow public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
@@ -139,14 +143,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
     public void onChunkLoadInject(CallbackInfo ci) {
-        if (!worldObj.isRemote) {
+        if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
         }
     }
 
     @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
     public void onChunkUnloadInject(CallbackInfo ci) {
-        if (!worldObj.isRemote) {
+        if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
         }
     }
@@ -351,15 +355,18 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         {
             if (!this.worldObj.isRemote) {
                 // Only fire block breaks when the block changes.
-                if (currentState.getBlock() != newState.getBlock())
+                if (currentState.getBlock() != newState.getBlock()) {
                     block1.breakBlock(this.worldObj, pos, currentState);
+                }
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-                if (te != null && SpongeImplFactory.shouldRefresh(te, this.worldObj, pos, currentState, newState))
+                if (te != null && SpongeImplFactory.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
                     this.worldObj.removeTileEntity(pos);
+                }
             } else if (SpongeImplFactory.blockHasTileEntity(block1, currentState)) {
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-                if (te != null && SpongeImplFactory.shouldRefresh(te, this.worldObj, pos, currentState, newState))
+                if (te != null && SpongeImplFactory.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
                     this.worldObj.removeTileEntity(pos);
+                }
             }
         }
 
@@ -494,7 +501,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     /**
     * Modifies bits in an integer.
-    * 
+    *
     * @param num Integer to modify
     * @param data Bits of data to add
     * @param which Index of nibble to start at
@@ -543,5 +550,21 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         int y = (serialized >> Y_SHIFT) & Y_INT_MASK;
         int z = this.zPosition * 16 + ((serialized >> Z_INT_SHIFT) & XZ_MASK);
         return new BlockPos(x, y, z);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<Entity> getEntities() {
+        Set<Entity> entities = Sets.newHashSet();
+        for (ClassInheritanceMultiMap entityList : this.entityLists) {
+            entities.addAll(entityList);
+        }
+        return entities;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Override
+    public Collection<org.spongepowered.api.block.tileentity.TileEntity> getTileEntities() {
+        return (Collection) this.chunkTileEntityMap.values();
     }
 }

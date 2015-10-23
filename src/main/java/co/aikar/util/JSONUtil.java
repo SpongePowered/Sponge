@@ -24,137 +24,105 @@
  */
 package co.aikar.util;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
 
 /**
  * Provides Utility methods that assist with generating JSON Objects
  */
 public final class JSONUtil {
 
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     private JSONUtil() {
     }
 
-    /**
-     * Creates a key/value "JSONPair" object
-     *
-     * @param key
-     * @param obj
-     * @return
-     */
-    public static JSONPair pair(String key, Object obj) {
-        return new JSONPair(key, obj);
+    public static JsonArray arrayOf(Object... elements) {
+        return gson.toJsonTree(elements).getAsJsonArray();
     }
 
-    public static JSONPair pair(long key, Object obj) {
-        return new JSONPair(String.valueOf(key), obj);
+    public static JsonObjectBuilder objectBuilder() {
+        return new JsonObjectBuilder();
     }
 
-    /**
-     * Creates a new JSON object from multiple JsonPair key/value pairs
-     *
-     * @param data
-     * @return
-     */
-    public static Map createObject(JSONPair... data) {
-        return appendObjectData(new LinkedHashMap(), data);
+    public static JsonObject singleObjectPair(String key, Object value) {
+        return objectBuilder().add(key, value).build();
     }
 
-    /**
-     * This appends multiple key/value Obj pairs into a JSON Object
-     *
-     * @param parent
-     * @param data
-     * @return
-     */
-    public static Map appendObjectData(Map parent, JSONPair... data) {
-        for (JSONPair JSONPair : data) {
-            parent.put(JSONPair.key, JSONPair.val);
+    public static JsonObject singleObjectPair(int key, Object value) {
+        return objectBuilder().add(key, value).build();
+    }
+
+    public static class JsonObjectBuilder {
+
+        private final Map<String, Object> elements = Maps.newHashMap();
+
+        public JsonObjectBuilder add(int key, Object value) {
+            return add(String.valueOf(key), value);
         }
-        return parent;
+
+        public JsonObjectBuilder add(String key, Object value) {
+            if (value instanceof JsonObjectBuilder) {
+                value = ((JsonObjectBuilder) value).build();
+            }
+            this.elements.put(key, value);
+            return this;
+        }
+
+        public JsonObject build() {
+            return gson.toJsonTree(this.elements).getAsJsonObject();
+        }
     }
 
-    /**
-     * This builds a JSON array from a set of data
-     *
-     * @param data
-     * @return
-     */
-    public static List toArray(Object... data) {
-        return Lists.newArrayList(data);
+    public static <E> JsonArray mapArray(E[] elements, Function<E, Object> function) {
+        return mapArray(Lists.newArrayList(elements), function);
     }
 
-    /**
-     * These help build a single JSON array using a mapper function
-     *
-     * @param collection
-     * @param mapper
-     * @param <E>
-     * @return
-     */
-    public static <E> JsonArray toArrayMapper(E[] collection, Function<E, Object> mapper) {
-        return toArrayMapper(Lists.newArrayList(collection), mapper);
-    }
-
-    public static <E> JsonArray toArrayMapper(Iterable<E> collection, Function<E, Object> mapper) {
-        JsonArray array = new JsonArray();
-        for (E e : collection) {
-            Object object = mapper.apply(e);
-            if (object != null) {
-                array.add(gson.toJsonTree(object));
+    public static <E> JsonArray mapArray(Iterable<E> elements, Function<E, Object> function) {
+        List<Object> list = Lists.newArrayList();
+        for (E element : elements) {
+            Object transformed = function.apply(element);
+            if (transformed != null) {
+                list.add(transformed);
             }
         }
-        return array;
+        return gson.toJsonTree(list).getAsJsonArray();
     }
 
-    /**
-     * These help build a single JSON Object from a collection, using a mapper
-     * function
-     *
-     * @param collection
-     * @param mapper
-     * @param <E>
-     * @return
-     */
-    public static <E> Map toObjectMapper(E[] collection, Function<E, JSONPair> mapper) {
-        return toObjectMapper(Lists.newArrayList(collection), mapper);
+    public static <E> JsonObject mapArrayToObject(E[] array, Function<E, JsonObject> function) {
+        return mapArrayToObject(Lists.newArrayList(array), function);
     }
 
-    public static <E> Map toObjectMapper(Iterable<E> collection, Function<E, JSONPair> mapper) {
-        Map object = Maps.newLinkedHashMap();
-        for (E e : collection) {
-            JSONPair JSONPair = mapper.apply(e);
-            if (JSONPair != null) {
-                object.put(JSONPair.key, JSONPair.val);
+    public static <E> JsonObject mapArrayToObject(Iterable<E> iterable, Function<E, JsonObject> function) {
+        JsonObjectBuilder builder = objectBuilder();
+        for (E element : iterable) {
+            JsonObject obj = function.apply(element);
+            if (obj == null) {
+                continue;
+            }
+            for (Entry<String, JsonElement> entry : obj.entrySet()) {
+                builder.add(entry.getKey(), entry.getValue());
             }
         }
-        return object;
+        return builder.build();
     }
 
-    /**
-     * Simply stores a key and a value, used internally by many methods below.
-     */
-    public static class JSONPair {
-
-        final String key;
-        final Object val;
-
-        JSONPair(String key, Object val) {
-            this.key = key;
-            this.val = val;
-        }
+    public static String toString(JsonElement element) {
+        return gson.toJson(element);
     }
 
-    public static String toJsonString(Object obj) {
-        return gson.toJson(obj);
+    public static JsonElement toJsonElement(Object value) {
+        return gson.toJsonTree(value);
     }
+
 }

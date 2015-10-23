@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
@@ -130,6 +131,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public final TileEntityType getType() {
         return this.tileType;
+    }
+
+    @Override
+    public BlockState getBlock() {
+        return (BlockState) this.worldObj.getBlockState(this.getPos());
     }
 
     /**

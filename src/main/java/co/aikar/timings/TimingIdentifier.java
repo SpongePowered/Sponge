@@ -26,7 +26,6 @@ package co.aikar.timings;
 
 import co.aikar.util.LoadingMap;
 import co.aikar.util.MRUMapCache;
-import com.google.common.base.Function;
 
 import java.util.ArrayDeque;
 import java.util.Map;
@@ -42,13 +41,7 @@ final class TimingIdentifier {
      * Holds all groups. Autoloads on request for a group by name.
      */
     static final Map<String, TimingGroup> GROUP_MAP = MRUMapCache.of(
-            LoadingMap.newIdentityHashMap(new Function<String, TimingGroup>() {
-
-                @Override
-                public TimingGroup apply(String group) {
-                    return new TimingGroup(group);
-                }
-            }, 64));
+            LoadingMap.newIdentityHashMap(TimingGroup::new, 64));
     static final TimingGroup DEFAULT_GROUP = getGroup("Minecraft");
     final String group;
     final String name;
