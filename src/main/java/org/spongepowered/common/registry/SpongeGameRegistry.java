@@ -50,6 +50,7 @@ import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemFishFood;
 import net.minecraft.item.ItemFishFood.FishType;
 import net.minecraft.potion.Potion;
@@ -199,7 +200,9 @@ import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOfferBuilder;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
@@ -377,6 +380,9 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
+
+    public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(0);
+    public static final ItemStack NONE = (ItemStack)new net.minecraft.item.ItemStack(NONE_ITEM);
 
     public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;
     public static net.minecraft.util.DamageSource DAMAGESOURCE_MELTING;
@@ -1946,6 +1952,14 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
+    private void setItemTypes() {
+        try {
+            RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE.createSnapshot());
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
     private void setGoldenApples() {
         RegistryHelper.mapFields(GoldenApples.class, this.goldenAppleMappings);
     }
@@ -2140,6 +2154,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setFishes();
         setEntityTypes();
         setPopulatorTypes();
+        setItemTypes();
         SpongePropertyRegistry.completeRegistration();
         SpongeDataRegistry.finalizeRegistration();
     }

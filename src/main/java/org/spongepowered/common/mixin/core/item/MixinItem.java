@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.item.IMixinItem;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
@@ -60,11 +61,17 @@ public abstract class MixinItem implements ItemType, IMixinItem{
 
     @Override
     public String getId() {
+        if ((Object) this == SpongeGameRegistry.NONE_ITEM) {
+            return "NONE";
+        }
         return Item.itemRegistry.getNameForObject(this).toString();
     }
 
     @Override
     public String getName() {
+        if ((Object) this == SpongeGameRegistry.NONE_ITEM) {
+            return "NONE";
+        }
         return Item.itemRegistry.getNameForObject(this).toString();
     }
 
