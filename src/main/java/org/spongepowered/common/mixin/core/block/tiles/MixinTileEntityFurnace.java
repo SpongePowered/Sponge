@@ -43,6 +43,7 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         container.set(of("BurnTime"), this.getField(0));
+        container.set(of("BurnTimeTotal"), this.getField(1));
         container.set(of("CookTime"), this.getField(3) - this.getField(2));
         container.set(of("CookTimeTotal"), this.getField(3));
         if (this.furnaceCustomName != null) {

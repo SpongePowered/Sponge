@@ -24,13 +24,9 @@
  */
 package org.spongepowered.common.data.key;
 
-import static org.spongepowered.api.data.DataQuery.of;
-import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
+import com.google.common.collect.MapMaker;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.MapMaker;
 
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.block.BlockType;
@@ -68,9 +64,14 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.RegistryHelper;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
+import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
+import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 @SuppressWarnings({"unchecked"})
 public class KeyRegistry {
@@ -162,12 +163,14 @@ public class KeyRegistry {
         keyMap.put("cooked_fish", makeSingleKey(CookedFish.class, Value.class, of("CookedFishType")));
         keyMap.put("fish_type", makeSingleKey(Fish.class, Value.class, of("RawFishType")));
         keyMap.put("represented_player", makeSingleKey(GameProfile.class, Value.class, of("RepresentedPlayer")));
-
+        keyMap.put("passed_burn_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("PassedBurnTime")));
+        keyMap.put("max_burn_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxBurnTime")));
+        keyMap.put("passed_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("PassedCookTime")));
+        keyMap.put("max_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxCookTime")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
         generateKeyMap();
         return keyMap;
     }
-
 }

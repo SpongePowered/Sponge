@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityFurnace;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.DataQuery;
@@ -42,24 +43,37 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<Furnace> build(DataView container) throws InvalidDataException {
-        Optional<Furnace> furnaceOptional = super.build(container);
+        final Optional<Furnace> furnaceOptional = super.build(container);
+
         if (!furnaceOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
+            throw new InvalidDataException("The container had insufficient data to create a Furnace tile entity!");
         }
-        Furnace furnace = furnaceOptional.get();
-        if (container.contains(new DataQuery("CustomName"))) {
-            ((TileEntityFurnace) furnace).setCustomInventoryName(container.getString(new DataQuery("CustomName")).get());
+
+        final Furnace furnace = furnaceOptional.get();
+        final TileEntityFurnace tileEntityFurnace = (TileEntityFurnace) furnace;
+        final DataQuery burnTime = new DataQuery("BurnTime");
+        final DataQuery burnTimeTotal = new DataQuery("BurnTimeTotal");
+        final DataQuery cookTime = new DataQuery("CookTime");
+        final DataQuery cookTimeTotal = new DataQuery("CookTimeTotal");
+        final DataQuery customName = new DataQuery("CustomName");
+
+        if (container.contains(customName)) {
+            tileEntityFurnace.setCustomInventoryName(container.getString(customName).get());
         }
-        if (!container.contains(new DataQuery("BurnTime"))
-                || !container.contains(new DataQuery("CookTime"))
-                || !container.contains(new DataQuery("CookTimeTotal"))) {
-            throw new InvalidDataException("The provided container does not contain the data to make a Hopper!");
+
+        if (!container.contains(burnTime)
+                || !container.contains(burnTimeTotal)
+                || !container.contains(cookTime)
+                || !container.contains(cookTimeTotal)) {
+            throw new InvalidDataException("The provided container does not contain the data to make a Furnace!");
         }
-        // TODO Write FurnaceData
-//        furnace.setRemainingBurnTime(container.getInt(new DataQuery("BurnTime")).get());
-//        furnace.setRemainingCookTime(container.getInt(new DataQuery("CookTime")).get());
-        ((TileEntityFurnace) furnace).setField(3, container.getInt(new DataQuery("CookTimeTotal")).get());
-        ((TileEntityFurnace) furnace).validate();
+
+        tileEntityFurnace.setField(0, container.getInt(burnTime).get());
+        tileEntityFurnace.setField(1, container.getInt(burnTimeTotal).get());
+        tileEntityFurnace.setField(2, container.getInt(cookTime).get());
+        tileEntityFurnace.setField(3, container.getInt(cookTimeTotal).get());
+        tileEntityFurnace.markDirty();
+
         return Optional.of(furnace);
     }
 }

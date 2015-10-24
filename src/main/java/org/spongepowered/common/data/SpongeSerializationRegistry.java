@@ -83,10 +83,11 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppl
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
+import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
@@ -121,6 +122,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -191,6 +193,7 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeG
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlaceableData;
+import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
@@ -229,6 +232,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleD
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
 import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor;
@@ -265,9 +269,10 @@ import org.spongepowered.common.data.processor.data.item.ItemAuthorDataProcessor
 import org.spongepowered.common.data.processor.data.item.ItemEnchantmentDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemLoreDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemPagedDataProcessor;
+import org.spongepowered.common.data.processor.data.item.ItemSkullRepresentedPlayerDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemWetDataProcessor;
 import org.spongepowered.common.data.processor.data.item.PlaceableDataProcessor;
-import org.spongepowered.common.data.processor.data.item.ItemSkullRepresentedPlayerDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.FurnaceDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
@@ -321,10 +326,15 @@ import org.spongepowered.common.data.processor.value.item.ItemSkullRepresentedPl
 import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemWetValueProcessor;
 import org.spongepowered.common.data.processor.value.item.PlaceableValueProcessor;
-import org.spongepowered.common.data.processor.value.tileentity.SkullRepresentedPlayerProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.MaxBurnTimeValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.MaxCookTimeValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.PassedBurnTimeValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.PassedCookTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.SkullRepresentedPlayerProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntityDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
@@ -394,7 +404,7 @@ public class SpongeSerializationRegistry {
         final FlyingDataProcessor flyingDataProcessor = new FlyingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(FlyingData.class, SpongeFlyingData.class, ImmutableFlyingData.class,
                 ImmutableSpongeFlyingData.class, flyingDataProcessor);
-				
+
         final FlyingAbilityDataProcessor flyingAbilityDataProcessor = new FlyingAbilityDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(FlyingAbilityData.class, SpongeFlyingAbilityData.class, ImmutableFlyingAbilityData.class,
                 ImmutableSpongeFlyingAbilityData.class, flyingAbilityDataProcessor);
@@ -509,15 +519,15 @@ public class SpongeSerializationRegistry {
 
         final CoalDataProcessor coalDataProcessor = new CoalDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(CoalData.class, SpongeCoalData.class, ImmutableCoalData.class,
-                                                  ImmutableSpongeCoalData.class, coalDataProcessor);
+                ImmutableSpongeCoalData.class, coalDataProcessor);
 
         final CookedFishDataProcessor cookedFishDataProcessor = new CookedFishDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(CookedFishData.class, SpongeCookedFishData.class, ImmutableCookedFishData.class,
-                                                  ImmutableSpongeCookedFishData.class, cookedFishDataProcessor);
+                ImmutableSpongeCookedFishData.class, cookedFishDataProcessor);
 
         final FishDataProcessor fishDataProcessor = new FishDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(FishData.class, SpongeFishData.class, ImmutableFishData.class,
-                                                  ImmutableSpongeFishData.class, fishDataProcessor);
+                ImmutableSpongeFishData.class, fishDataProcessor);
 
         dataRegistry.registerDataProcessorAndImpl(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class,
                 ImmutableRepresentedPlayerData.class, ImmutableSpongeRepresentedPlayerData.class,
@@ -525,6 +535,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class,
                 ImmutableRepresentedPlayerData.class, ImmutableSpongeRepresentedPlayerData.class,
                 new ItemSkullRepresentedPlayerDataProcessor());
+
+        final FurnaceDataProcessor furnaceDataProcessor = new FurnaceDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(FurnaceData.class, SpongeFurnaceData.class,
+                ImmutableFurnaceData.class, ImmutableSpongeFurnaceData.class, furnaceDataProcessor);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -582,6 +596,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.FISH_TYPE, new FishValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_PLAYER, new SkullRepresentedPlayerProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_PLAYER, new ItemSkullRepresentedPlayerValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.PASSED_BURN_TIME, new PassedBurnTimeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.MAX_BURN_TIME, new MaxBurnTimeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.PASSED_COOK_TIME, new PassedCookTimeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.MAX_COOK_TIME, new MaxCookTimeValueProcessor());
     }
 
 }
