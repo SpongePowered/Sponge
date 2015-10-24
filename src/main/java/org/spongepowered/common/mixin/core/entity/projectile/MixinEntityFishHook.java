@@ -31,6 +31,7 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -40,6 +41,7 @@ import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.FishingEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -108,11 +110,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         )
     public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
         EntitySnapshot fishHookSnapshot = this.createSnapshot();
-        EntitySnapshot hookedEntitySnapshot = ((Entity) entity).createSnapshot();
-        FishingEvent.Hook event = SpongeEventFactory
-                .createFishingEventHook(Sponge.getGame(), Cause.of(this.angler), fishHookSnapshot, (FishHook) this, hookedEntitySnapshot,
-                        Optional.ofNullable(
-                                (Entity) entity), (Entity) entity);
+        FishingEvent.HookEntity event = SpongeEventFactory.createFishingEventHookEntity(Sponge.getGame(), Cause.of(this.angler),
+                this.createSnapshot(), this, (Entity) entity);
         if (!Sponge.getGame().getEventManager().post(event)) {
             if (this.getShooter() instanceof Entity) {
                 DamageSource.causeThrownDamage((net.minecraft.entity.Entity) (Object) this, (net.minecraft.entity.Entity) this.getShooter());
@@ -138,6 +137,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             return 0;
         }
 
+        byte b0 = 0;
+
         net.minecraft.item.ItemStack itemStack = null;
         int exp = 0;
         if (this.ticksCatchable > 0) {
@@ -145,40 +146,34 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             exp = this.rand.nextInt(6) + 1;
         }
 
-        EntitySnapshot fishHookSnapshot = ((FishHook) this).createSnapshot();
-        EntitySnapshot caughtSnapshot = null;
-        if (this.caughtEntity != null) {
-            caughtSnapshot = ((Entity) this.caughtEntity).createSnapshot();
-        }
+        EntitySnapshot fishHookSnapshot = this.createSnapshot();
 
         Transaction<ItemStackSnapshot> transaction = null;
         if (itemStack != null) {
             ItemStackSnapshot original = ((ItemStack) itemStack).createSnapshot();
             ItemStackSnapshot replacement = ((ItemStack) itemStack).createSnapshot();
-            transaction = new Transaction<ItemStackSnapshot>(original, replacement);
+            transaction = new Transaction<>(original, replacement);
+        } else {
+            transaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
         }
 
-        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler), Optional
-                .ofNullable(caughtSnapshot), Optional.ofNullable(
-                (Entity) this.caughtEntity), exp, exp, fishHookSnapshot, (FishHook) this, Optional.ofNullable(transaction), (Player) this.angler);
-        byte b0 = 0;
+        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler), exp, exp, fishHookSnapshot, this, transaction, (Player) this.angler);
         if (!Sponge.getGame().getEventManager().post(event)) {
-            if (event.getCaughtEntity().isPresent()) {
-                this.caughtEntity = (net.minecraft.entity.Entity) event.getCaughtEntity().get();
-
-                double entityitem = this.angler.posX - this.posX;
+            if (this.caughtEntity != null)
+            {
+                double d0 = this.angler.posX - this.posX;
                 double d2 = this.angler.posY - this.posY;
                 double d4 = this.angler.posZ - this.posZ;
-                double d6 = MathHelper.sqrt_double(entityitem * entityitem + d2 * d2 + d4 * d4);
+                double d6 = (double) MathHelper.sqrt_double(d0 * d0 + d2 * d2 + d4 * d4);
                 double d8 = 0.1D;
-                this.caughtEntity.motionX += entityitem * d8;
-                this.caughtEntity.motionY += d2 * d8 + MathHelper.sqrt_double(d6) * 0.08D;
+                this.caughtEntity.motionX += d0 * d8;
+                this.caughtEntity.motionY += d2 * d8 + (double)MathHelper.sqrt_double(d6) * 0.08D;
                 this.caughtEntity.motionZ += d4 * d8;
                 b0 = 3;
             }
 
-            if (event.getItemStackTransaction().isPresent()) {
-                ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().get().getFinal();
+            if (!event.getItemStackTransaction().getFinal().getType().equals(ItemTypes.NONE)) {
+                ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().getFinal();
                 EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, (net.minecraft.item.ItemStack) itemSnapshot.createStack());
                 double d1 = this.angler.posX - this.posX;
                 double d3 = this.angler.posY - this.posY;
@@ -191,7 +186,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 this.worldObj.spawnEntityInWorld(entityitem1);
                 this.angler.worldObj.spawnEntityInWorld(
                         new EntityXPOrb(this.angler.worldObj, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
-                                this.rand.nextInt(6) + 1));
+                                event.getExperience()));
                 b0 = 1;
             }
 

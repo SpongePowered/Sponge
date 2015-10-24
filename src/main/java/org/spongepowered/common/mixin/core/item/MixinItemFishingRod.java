@@ -61,6 +61,7 @@ public abstract class MixinItemFishingRod extends Item {
             if (!player.worldObj.isRemote
                     && Sponge.getGame().getEventManager()
                             .post(SpongeEventFactory.createFishingEventStart(Sponge.getGame(), Cause.of(player), fishHookSnapshot, (FishHook) fishHook))) {
+                player.fishEntity = null;
                 return itemStack;
             }
 
