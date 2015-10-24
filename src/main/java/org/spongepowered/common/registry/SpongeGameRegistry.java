@@ -1952,7 +1952,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
-    private void setItemTypes() {
+    private void setItemNone() {
         try {
             RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE.createSnapshot());
         } catch (Throwable t) {
@@ -2154,7 +2154,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setFishes();
         setEntityTypes();
         setPopulatorTypes();
-        setItemTypes();
+        setItemNone();
         SpongePropertyRegistry.completeRegistration();
         SpongeDataRegistry.finalizeRegistration();
     }
