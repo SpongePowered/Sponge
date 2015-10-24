@@ -67,6 +67,7 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
         entity.motionX = velocity.getX();
         entity.motionY = velocity.getY();
         entity.motionZ = velocity.getZ();
+        entity.velocityChanged = true;
         return true;
     }
 

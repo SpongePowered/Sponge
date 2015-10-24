@@ -54,6 +54,7 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Entity,
         container.motionX = value.getX();
         container.motionY = value.getY();
         container.motionZ = value.getZ();
+        container.velocityChanged = true;
         return true;
     }
 
