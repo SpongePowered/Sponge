@@ -33,6 +33,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.block.BlockDirt;
@@ -373,6 +374,7 @@ import java.util.function.Function;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
+    private static final Map<Class<? extends CatalogType>, CatalogRegistry<?>> catalogRegistries = new MapMaker().concurrencyLevel(4).makeMap();
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
@@ -678,7 +680,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public <T> Optional<T> createBuilderOfType(Class<T> builderClass) {
+    public <T> Optional<T> createBuilder(Class<T> builderClass) {
         return null;
     }
 

@@ -62,7 +62,7 @@ public class SpongePotionEffectBuilder implements DataBuilder<PotionEffect> {
         int amplifier = container.getInt(new DataQuery("Amplifier")).get();
         boolean ambience = container.getBoolean(new DataQuery("Ambience")).get();
         boolean particles = container.getBoolean(new DataQuery("ShowsParticles")).get();
-        PotionEffectBuilder builder = Sponge.getGame().getRegistry().createBuilderOfType(PotionEffectBuilder.class).get();
+        PotionEffectBuilder builder = Sponge.getGame().getRegistry().createBuilder(PotionEffectBuilder.class).get();
 
         return Optional.of(builder.potionType(potionType)
                                   .particles(particles)
