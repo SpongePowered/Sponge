@@ -139,8 +139,14 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             return list;
         } else if (value instanceof Map) {
             NBTTagCompound compound = new NBTTagCompound();
-            for (Map.Entry<DataQuery, Object> entry : ((Map<DataQuery, Object>) value).entrySet()) {
-                compound.setTag(entry.getKey().asString('.'), getBaseFromObject(entry.getValue()));
+            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
+                if (entry.getKey() instanceof DataQuery) {
+                    compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
+                } else if (entry.getKey() instanceof String) {
+                    compound.setTag((String) entry.getKey(), getBaseFromObject(entry.getValue()));
+                } else {
+                    compound.setTag(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
+                }
             }
             return compound;
         } else if (value instanceof DataSerializable) {
