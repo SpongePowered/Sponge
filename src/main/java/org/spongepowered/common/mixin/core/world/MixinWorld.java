@@ -183,6 +183,8 @@ import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -310,7 +312,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             new File(Sponge.getModConfigDirectory() + File.separator + "worlds" + File.separator
                                     + providerName + File.separator
                                     + (providerIn.getDimensionId() == 0 ? "DIM0"
-                                            : Sponge.getSpongeRegistry().getWorldFolder(providerIn.getDimensionId())),
+                                            : DimensionRegistryModule.getInstance().getWorldFolder(providerIn.getDimensionId())),
                                     "world.conf"),
                             Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
@@ -383,7 +385,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
 
                     if (populatorType == null) {
-                        populatorType = (SpongePopulatorType) Sponge.getSpongeRegistry().populatorClassToTypeMappings.get(clazz);
+                        populatorType = (SpongePopulatorType) Sponge.getSpongeRegistry().getTranslated(clazz, PopulatorType.class);
                     }
 
                     if (populatorType != null) {
@@ -1163,9 +1165,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
-        builder.reset();
+        this.builder.reset();
         Location<World> location = new Location<World>((World) this, VecHelper.toVector(pos));
-        builder.blockState((BlockState) state)
+        this.builder.blockState((BlockState) state)
                 .extendedState((BlockState) extended)
                 .worldId(location.getExtent().getUniqueId())
                 .position(location.getBlockPosition());
@@ -1176,10 +1178,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
             te.writeToNBT(nbt);
         }
         if (nbt != null) {
-            builder.unsafeNbt(nbt);
+            this.builder.unsafeNbt(nbt);
         }
 
-        return new SpongeBlockSnapshot(builder, updateFlag);
+        return new SpongeBlockSnapshot(this.builder, updateFlag);
     }
 
     @Override
@@ -1849,7 +1851,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ImmutableList.Builder<Direction> faces = ImmutableList.builder();
         for (EnumFacing facing : EnumFacing.values()) {
             if (this.getStrongPower(pos.offset(facing), facing) > 0) {
-                faces.add(SpongeGameRegistry.directionMap.inverse().get(facing));
+                faces.add(DirectionFacingProvider.getInstance().getKey(facing).get());
             }
         }
         return faces.build();
@@ -1861,7 +1863,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ImmutableList.Builder<Direction> faces = ImmutableList.builder();
         for (EnumFacing facing : EnumFacing.values()) {
             if (this.getRedstonePower(pos.offset(facing), facing) > 0) {
-                faces.add(SpongeGameRegistry.directionMap.inverse().get(facing));
+                faces.add(DirectionFacingProvider.getInstance().getKey(facing).get());
             }
         }
         return faces.build();

@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -57,7 +58,7 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<EntityP
 
     @Override
     protected Value<GameMode> constructValue(GameMode defaultValue) {
-        return new SpongeValue<>(getKey(), defaultValue, GameModes.NOT_SET);
+        return new SpongeValue<>(getKey(), DataConstants.DEFAULT_GAMEMODE, defaultValue);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class GameModeValueProcessor extends AbstractSpongeValueProcessor<EntityP
 
     @Override
     protected ImmutableValue<GameMode> constructImmutableValue(GameMode value) {
-        return ImmutableSpongeValue.cachedOf(getKey(), GameModes.NOT_SET, value);
+        return ImmutableSpongeValue.cachedOf(getKey(), DataConstants.DEFAULT_GAMEMODE, value);
     }
 
     @Override

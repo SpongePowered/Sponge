@@ -63,7 +63,7 @@ import java.util.List;
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
-    private final TileEntityType tileType = Sponge.getSpongeRegistry().tileClassToTypeMappings.get(this.getClass());
+    private final TileEntityType tileType = Sponge.getSpongeRegistry().getTranslated(this.getClass(), TileEntityType.class);
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -72,17 +72,16 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
         final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name);
-        Sponge.getSpongeRegistry().tileClassToTypeMappings.put(clazz, tileEntityType);
-        Sponge.getSpongeRegistry().tileEntityTypeMappings.put(name.toLowerCase(), tileEntityType);
+        Sponge.getSpongeRegistry().registerAdditionalType(TileEntityType.class, tileEntityType);
     }
 
     @Override
     public Location<World> getLocation() {
-        return new Location<World>((World) this.worldObj, VecHelper.toVector(this.getPos()));
+        return new Location<>((World) this.worldObj, VecHelper.toVector(this.getPos()));
     }
 
     @Override

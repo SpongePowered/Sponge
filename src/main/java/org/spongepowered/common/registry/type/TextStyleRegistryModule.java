@@ -22,39 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.registry.type;
 
-import net.minecraft.entity.item.EntityPainting;
-import org.spongepowered.api.data.type.Art;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.text.format.TextStyle;
+import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.common.registry.RegistryModule;
+import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.text.format.SpongeTextStyle;
 
-@NonnullByDefault
-@Mixin(EntityPainting.EnumArt.class)
-public class MixinEnumArt implements Art {
+public final class TextStyleRegistryModule implements RegistryModule {
 
-    @Shadow public String title;
-    @Shadow public int sizeX;
-    @Shadow public int sizeY;
+    @RegisterCatalog(TextStyles.class)
+    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
+        .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
+        .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
+        .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
+        .put("strikethrough", SpongeTextStyle.of(EnumChatFormatting.STRIKETHROUGH))
+        .put("obfuscated", SpongeTextStyle.of(EnumChatFormatting.OBFUSCATED))
+        .put("reset", SpongeTextStyle.of(EnumChatFormatting.RESET))
+        .build();
 
-    @Override
-    public int getHeight() {
-        return this.sizeY;
-    }
-
-    @Override
-    public int getWidth() {
-        return this.sizeX;
-    }
-
-    @Override
-    public String getId() {
-        return this.title; // todo maybe prefix with 'minecraft:'
-    }
-
-    @Override
-    public String getName() {
-        return this.title;
-    }
 }

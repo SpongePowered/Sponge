@@ -74,7 +74,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @SuppressWarnings("unchecked")
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
     public void onSetProfession(int professionId, CallbackInfo ci) {
-        this.profession = ((List<? extends Profession>) Sponge.getGame().getRegistry().getAllOf(Profession.class)).get(professionId);
+//        this.profession = ((List<? extends Profession>) Sponge.getGame().getRegistry().getAllOf(Profession.class)).get(professionId);
     }
 
     @Override

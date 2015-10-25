@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -85,7 +86,7 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<ItemS
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), value);
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, DataConstants.EMPTY_TEXT, value);
     }
 
 }

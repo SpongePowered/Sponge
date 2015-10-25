@@ -30,6 +30,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
@@ -76,6 +78,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract Material getMaterial();
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
+
+    @Inject(method = "registerBlock", at = @At("RETURN"))
+    private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
+        BlockTypeRegistryModule.getInstance().registerFromGameData(location.getResourcePath(), (BlockType) block);
+    }
 
     @Override
     public String getId() {

@@ -35,7 +35,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
+
+import java.util.Optional;
 
 @Mixin(net.minecraft.util.DamageSource.class)
 @Implements(@Interface(iface = DamageSource.class, prefix = "damage$"))
@@ -58,11 +60,11 @@ public abstract class MixinDamageSource {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(String damageTypeIn, CallbackInfo ci) {
-        if (!SpongeGameRegistry.damageSourceToTypeMappings.containsKey(damageTypeIn)) {
-            SpongeGameRegistry.damageSourceToTypeMappings.put(damageTypeIn, DamageTypes.CUSTOM);
+        final Optional<DamageType> damageType = DamageSourceToTypeProvider.getInstance().get(damageTypeIn);
+        if (!damageType.isPresent()) {
+            DamageSourceToTypeProvider.getInstance().addCustom(damageTypeIn);
         }
-
-        this.apiDamageType = SpongeGameRegistry.damageSourceToTypeMappings.get(damageTypeIn);
+        this.apiDamageType = damageType.orElse(DamageTypes.CUSTOM);
     }
 
     @Intrinsic

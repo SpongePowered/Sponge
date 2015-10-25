@@ -35,6 +35,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text, ImmutableAuthorData, AuthorData> implements ImmutableAuthorData {
@@ -43,7 +44,7 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
 
     public ImmutableSpongeAuthorData(Text value) {
         super(ImmutableAuthorData.class, value, Keys.BOOK_AUTHOR);
-        this.author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), value);
+        this.author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, DataConstants.EMPTY_TEXT, value);
     }
 
     @Override

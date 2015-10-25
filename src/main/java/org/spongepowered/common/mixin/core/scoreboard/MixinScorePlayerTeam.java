@@ -44,6 +44,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.type.TextColorsRegistryModule;
+import org.spongepowered.common.registry.type.VisibilityRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.Collection;
@@ -137,7 +139,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     public void setNametagVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setNameTagVisibility(SpongeGameRegistry.enumVisible.get(visibility));
+            this.spongeTeam.setNameTagVisibility(VisibilityRegistryModule.enumVisible.get(visibility));
             this.spongeTeam.allowRecursion = true;
             ci.cancel();
         }
@@ -147,7 +149,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     public void setDeathMessageVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setDeathTextVisibility(SpongeGameRegistry.enumVisible.get(visibility));
+            this.spongeTeam.setDeathTextVisibility(VisibilityRegistryModule.enumVisible.get(visibility));
             this.spongeTeam.allowRecursion = true;
             ci.cancel();
         }
@@ -157,7 +159,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     public void onSetChatFormat(EnumChatFormatting formatting, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setColor(SpongeGameRegistry.enumChatColor.get(formatting));
+            this.spongeTeam.setColor(TextColorsRegistryModule.enumChatColor.get(formatting));
             this.spongeTeam.allowRecursion = true;
             ci.cancel();
         }

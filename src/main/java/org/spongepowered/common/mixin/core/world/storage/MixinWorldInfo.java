@@ -65,6 +65,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
+import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
@@ -590,7 +591,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.keepSpawnLoaded = nbt.getBoolean("keepSpawnLoaded");
         this.loadOnStartup = nbt.getBoolean("loadOnStartup");
         this.isMod = nbt.getBoolean("isMod");
-        for (DimensionType type : Sponge.getSpongeRegistry().dimensionClassMappings.values()) {
+        for (DimensionType type : DimensionRegistryModule.getInstance().dimensionClassMappings.values()) {
             if (type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType"))) {
                 this.dimensionType = type;
             }

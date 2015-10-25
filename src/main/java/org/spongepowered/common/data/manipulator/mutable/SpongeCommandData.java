@@ -40,6 +40,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCommandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -91,7 +92,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
                 .setStoredCommand(this.getStoredCommand())
                 .setSuccessCount(this.getSuccessCount())
                 .shouldTrackOutput(this.tracks)
-                .setLastOutput(this.getLastOutput().orElse(Texts.of()));
+                .setLastOutput(this.getLastOutput().orElse(DataConstants.EMPTY_TEXT));
     }
 
     @Override

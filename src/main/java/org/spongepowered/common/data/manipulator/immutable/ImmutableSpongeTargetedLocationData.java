@@ -46,8 +46,8 @@ public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingle
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return new ImmutableSpongeValue<>(Keys.TARGETED_LOCATION, new Location<>(this.value.getExtent(), Vector3d.ZERO), this.value);
+    protected ImmutableValue<Location<World>> getValueGetter() {
+        return this.immutableValue;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingle
 
     @Override
     public ImmutableValue<Location<World>> target() {
-        return immutableValue;
+        return this.immutableValue;
     }
 
     @Override

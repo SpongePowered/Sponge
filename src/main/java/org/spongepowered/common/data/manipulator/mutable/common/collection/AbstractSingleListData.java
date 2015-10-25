@@ -41,8 +41,8 @@ import org.spongepowered.common.util.ReflectionUtil;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-public abstract class AbstractSingleListData<E, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
-                                                                                                                           AbstractSingleData<List<E>, M, I> {
+public abstract class AbstractSingleListData<E, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+    extends AbstractSingleData<List<E>, M, I> {
 
     private final Class<? extends I> immutableClass;
 
@@ -80,5 +80,11 @@ public abstract class AbstractSingleListData<E, M extends DataManipulator<M, I>,
     @Override
     public I asImmutable() {
         return ReflectionUtil.createInstance(this.immutableClass, getValue());
+    }
+
+    @Override
+    public int compareTo(M o) {
+        final List<E> list = o.get(this.usedKey).get();
+        return Boolean.compare(list.containsAll(this.getValue()), this.getValue().containsAll(list));
     }
 }

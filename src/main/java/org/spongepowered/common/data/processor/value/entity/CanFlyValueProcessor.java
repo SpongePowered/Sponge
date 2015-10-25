@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -50,7 +51,7 @@ public class CanFlyValueProcessor extends AbstractSpongeValueProcessor<EntityPla
 
     @Override
     protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(this.getKey(), defaultValue);
+        return new SpongeValue<>(this.getKey(), DataConstants.CAN_FLY_DEFAULT, defaultValue);
     }
 
     @Override
@@ -67,6 +68,6 @@ public class CanFlyValueProcessor extends AbstractSpongeValueProcessor<EntityPla
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.CAN_FLY, false, value);
+        return ImmutableSpongeValue.cachedOf(Keys.CAN_FLY, DataConstants.CAN_FLY_DEFAULT, value);
     }
 }

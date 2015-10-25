@@ -25,11 +25,13 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemFishFood;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.CookedFish;
+import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -49,22 +51,23 @@ public class CookedFishValueProcessor extends AbstractSpongeValueProcessor<ItemS
 
     @Override
     public boolean supports(ItemStack stack) {
-        return stack.getItem().equals(Items.golden_apple);
+        return stack.getItem().equals(Items.cooked_fish);
     }
 
     @Override
     protected Value<CookedFish> constructValue(CookedFish defaultValue) {
-        return new SpongeValue<CookedFish>(Keys.COOKED_FISH, defaultValue);
+        return new SpongeValue<>(Keys.COOKED_FISH, CookedFishes.COD, defaultValue);
     }
 
     @Override
     protected ImmutableValue<CookedFish> constructImmutableValue(CookedFish defaultValue) {
-        return new ImmutableSpongeValue<CookedFish>(Keys.COOKED_FISH, defaultValue);
+        return new ImmutableSpongeValue<>(Keys.COOKED_FISH, CookedFishes.COD, defaultValue);
     }
 
     @Override
     public Optional<CookedFish> getVal(ItemStack stack) {
-        return Optional.of(Sponge.getSpongeRegistry().cookedFishMappings.get(stack.getMetadata()));
+        final ItemFishFood.FishType fishType = ItemFishFood.FishType.byMetadata(stack.getMetadata());
+        return Sponge.getSpongeRegistry().getType(CookedFish.class, fishType.name());
     }
 
     @Override

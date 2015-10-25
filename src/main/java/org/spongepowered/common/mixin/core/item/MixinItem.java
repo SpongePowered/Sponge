@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -39,8 +40,12 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
@@ -59,9 +64,14 @@ public abstract class MixinItem implements ItemType, IMixinItem{
     @Shadow
     public abstract String getUnlocalizedName();
 
+    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
+    private static void registerMinecraftItem(int id, ResourceLocation name, Item item, CallbackInfo ci) {
+        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
+    }
+
     @Override
     public String getId() {
-        if ((Object) this == SpongeGameRegistry.NONE_ITEM) {
+        if ((Object) this == ItemTypeRegistryModule.NONE_ITEM) {
             return "NONE";
         }
         return Item.itemRegistry.getNameForObject(this).toString();
@@ -69,10 +79,7 @@ public abstract class MixinItem implements ItemType, IMixinItem{
 
     @Override
     public String getName() {
-        if ((Object) this == SpongeGameRegistry.NONE_ITEM) {
-            return "NONE";
-        }
-        return Item.itemRegistry.getNameForObject(this).toString();
+        return getId();
     }
 
     @Override

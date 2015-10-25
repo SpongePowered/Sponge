@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.world;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Objects;
 import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.world.Dimension;
@@ -37,9 +39,9 @@ public class SpongeDimensionType implements DimensionType {
     private Class<? extends WorldProvider> dimensionClass;
 
     public SpongeDimensionType(String name, boolean keepLoaded, Class<? extends WorldProvider> dimensionClass, int id) {
-        this.name = name;
+        this.name = checkNotNull(name);
         this.keepLoaded = keepLoaded;
-        this.dimensionClass = dimensionClass;
+        this.dimensionClass = checkNotNull(dimensionClass, "The dimension class was null! The name was: " + name);
         this.dimensionTypeId = id;
     }
 

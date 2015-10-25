@@ -64,7 +64,8 @@ public class FishValueProcessor extends AbstractSpongeValueProcessor<ItemStack, 
 
     @Override
     public Optional<Fish> getVal(ItemStack stack) {
-        return Optional.of(Sponge.getSpongeRegistry().fishMappings.get(stack.getMetadata()));
+        ItemFishFood.FishType fishType = ItemFishFood.FishType.byItemStack(stack);
+        return Sponge.getSpongeRegistry().getType(Fish.class, fishType.name());
     }
 
     @Override

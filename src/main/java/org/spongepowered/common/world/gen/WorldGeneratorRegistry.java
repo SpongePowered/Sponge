@@ -52,8 +52,7 @@ import java.util.Map;
 public final class WorldGeneratorRegistry {
 
     public static WorldGeneratorRegistry getInstance() {
-        SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
-        return registry.getWorldGeneratorRegistry();
+        return Holder.INSTANCE;
     }
 
     /**
@@ -131,6 +130,12 @@ public final class WorldGeneratorRegistry {
     public void checkAllRegistered(Collection<WorldGeneratorModifier> modifiers) {
         // We simply call toIds, that checks all world generators
         toIds(modifiers);
+    }
+
+    private static final class Holder {
+
+        private static final WorldGeneratorRegistry INSTANCE = new WorldGeneratorRegistry();
+
     }
 
 }

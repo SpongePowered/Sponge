@@ -35,7 +35,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vector3d, ImmutableVelocityData, VelocityData> implements ImmutableVelocityData {
 
-    private final ImmutableSpongeValue<Vector3d> velocityValue = new ImmutableSpongeValue<>(Keys.VELOCITY, new Vector3d(), this.value);
+    private final ImmutableSpongeValue<Vector3d> velocityValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, this.value);
 
     public ImmutableSpongeVelocityData(Vector3d value) {
         super(ImmutableVelocityData.class, value, Keys.VELOCITY);

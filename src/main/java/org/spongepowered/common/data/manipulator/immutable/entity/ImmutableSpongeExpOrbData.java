@@ -35,16 +35,16 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class ImmutableSpongeExpOrbData extends AbstractImmutableBoundedComparableData<Integer, ImmutableExpOrbData, ExpOrbData> implements ImmutableExpOrbData {
 
-	public ImmutableSpongeExpOrbData(int value) {
-		this(value, 0, Integer.MAX_VALUE);
-	}
+    public ImmutableSpongeExpOrbData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
+    }
 
-	public ImmutableSpongeExpOrbData(int value, int minimum, int maximum) {
-		super(ImmutableExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE, intComparator(), SpongeExpOrbData.class, minimum, maximum, 0);
-	}
+    public ImmutableSpongeExpOrbData(int value, int minimum, int maximum) {
+        super(ImmutableExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE, intComparator(), SpongeExpOrbData.class, minimum, maximum, 0);
+    }
 
-	@Override
-	public ImmutableValue<Integer> experience() {
-		return getValueGetter();
-	}
+    @Override
+    public ImmutableValue<Integer> experience() {
+        return getValueGetter();
+    }
 }

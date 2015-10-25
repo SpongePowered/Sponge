@@ -54,6 +54,7 @@ import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
@@ -117,15 +118,19 @@ public final class SpongeBootstrap {
     }
 
     public static void preInitializeRegistry() {
-        ((SpongeGameRegistry) Sponge.getGame().getRegistry()).preInit();
+        Sponge.getSpongeRegistry().preInit();
     }
 
     public static void initializeRegistry() {
-        ((SpongeGameRegistry) Sponge.getGame().getRegistry()).init();
+        Sponge.getSpongeRegistry().init();
     }
 
     public static void postInitializeRegistry() {
-        ((SpongeGameRegistry) Sponge.getGame().getRegistry()).postInit();
+        Sponge.getSpongeRegistry().postInit();
+    }
+
+    public static void preGameRegisterAdditionals() {
+        Sponge.getSpongeRegistry().registerAdditionals();
     }
 
     public static void registerWorlds() {
@@ -163,20 +168,20 @@ public final class SpongeBootstrap {
                     }
                     if (spongeData.hasKey("uuid_most") && spongeData.hasKey("uuid_least")) {
                         UUID uuid = new UUID(spongeData.getLong("uuid_most"), spongeData.getLong("uuid_least"));
-                        Sponge.getSpongeRegistry().registerWorldUniqueId(uuid, child.getName());
+                        DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, child.getName());
                     }
                     if (spongeData.hasKey("dimensionId") && spongeData.getBoolean("enabled")) {
                         int dimension = spongeData.getInteger("dimensionId");
-                        for (Map.Entry<Class<? extends Dimension>, DimensionType> mapEntry : Sponge.getSpongeRegistry().dimensionClassMappings
-                                .entrySet()) {
+                        DimensionRegistryModule.getInstance().dimensionClassMappings.entrySet().forEach(mapEntry -> {
                             if (mapEntry.getKey().getCanonicalName().equalsIgnoreCase(spongeData.getString("dimensionType"))) {
-                                Sponge.getSpongeRegistry().registerWorldDimensionId(dimension, child.getName());
+                                DimensionRegistryModule.getInstance().registerWorldDimensionId(dimension, child.getName());
                                 if (!DimensionManager.isDimensionRegistered(dimension)) {
                                     DimensionManager.registerDimension(dimension,
-                                            ((SpongeDimensionType) mapEntry.getValue()).getDimensionTypeId());
+                                                                       ((SpongeDimensionType) mapEntry.getValue()).getDimensionTypeId());
                                 }
                             }
-                        }
+                        });
+
                     } else {
                         Sponge.getLogger().info("World {} is disabled! Skipping world registration...", child.getName());
                     }

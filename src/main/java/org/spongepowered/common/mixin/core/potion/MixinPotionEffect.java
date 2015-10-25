@@ -42,20 +42,11 @@ import org.spongepowered.asm.mixin.Shadow;
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class MixinPotionEffect implements PotionEffect {
 
-    @Shadow
-    public abstract int getPotionID();
-
-    @Shadow
-    private int duration;
-
-    @Shadow
-    private int amplifier;
-
-    @Shadow
-    private boolean isAmbient;
-
-    @Shadow
-    private boolean showParticles;
+    @Shadow public abstract int getPotionID();
+    @Shadow private int duration;
+    @Shadow private int amplifier;
+    @Shadow private boolean isAmbient;
+    @Shadow private boolean showParticles;
 
     @Override
     public PotionEffectType getType() {

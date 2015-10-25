@@ -31,6 +31,7 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.TextMessageException;
@@ -136,7 +137,7 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
             //System.out.format("Scoreboard: {} Objecite: {} DisplaySlot: ", new Object[] {this.scoreboard, objective,Iterables.get((
             //        (SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot) });
             this.scoreboard.addObjective(((IMixinScoreObjective) objective).getSpongeObjective(),
-                                         Iterables.get(((SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot));
+                                         Iterables.get(Sponge.getSpongeRegistry().getAllOf(DisplaySlot.class), slot));
             this.scoreboard.allowRecursion = true;
             ci.cancel();
         }

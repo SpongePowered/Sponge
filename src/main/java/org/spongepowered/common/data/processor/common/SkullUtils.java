@@ -56,7 +56,7 @@ public class SkullUtils {
     }
 
     public static SkullType getSkullType(int skullType) {
-        return Iterables.get(Sponge.getSpongeRegistry().skullTypeMappings.values(), skullType);
+        return Iterables.get(Sponge.getSpongeRegistry().getAllOf(SkullType.class), skullType);
     }
 
     public static boolean isValidItemStack(Object container) {

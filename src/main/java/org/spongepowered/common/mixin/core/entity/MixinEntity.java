@@ -70,6 +70,8 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.service.persistence.NbtTranslator;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
@@ -89,7 +91,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntity implements Entity, IMixinEntity {
 
     // @formatter:off
-    private EntityType entityType = Sponge.getSpongeRegistry().entityClassToTypeMappings.get(this.getClass());
+    private EntityType entityType = Sponge.getSpongeRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
@@ -393,7 +395,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public boolean transferToWorld(String worldName, Vector3d position) {
-        Optional<WorldProperties> props = Sponge.getSpongeRegistry().getWorldProperties(worldName);
+        Optional<WorldProperties> props = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
         if (props.isPresent()) {
             if (props.get().isEnabled()) {
                 Optional<World> world = Sponge.getGame().getServer().loadWorld(worldName);
@@ -408,7 +410,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public boolean transferToWorld(UUID uuid, Vector3d position) {
-        return transferToWorld(Sponge.getSpongeRegistry().getWorldFolder(uuid), position);
+        return transferToWorld(DimensionRegistryModule.getInstance().getWorldFolder(uuid), position);
     }
 
     @Override

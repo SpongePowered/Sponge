@@ -33,9 +33,9 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -77,22 +77,22 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
 
     @Override
     public ImmutableValue<String> storedCommand() {
-        return storedValue;
+        return this.storedValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> successCount() {
-        return successValue;
+        return this.successValue;
     }
 
     @Override
     public ImmutableValue<Boolean> doesTrackOutput() {
-        return tracksValue;
+        return this.tracksValue;
     }
 
     @Override
     public ImmutableOptionalValue<Text> lastOutput() {
-        return lastOutputValue;
+        return this.lastOutputValue;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
                 .setSuccessCount(this.success)
                 .setStoredCommand(this.storedCommand)
                 .shouldTrackOutput(this.tracks)
-                .setLastOutput(this.lastOutput == null ? Texts.of() : this.lastOutput);
+                .setLastOutput(this.lastOutput == null ? DataConstants.EMPTY_TEXT : this.lastOutput);
     }
 
     @Override
@@ -119,19 +119,19 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
     }
 
     public String getStoredCommand() {
-        return storedCommand;
+        return this.storedCommand;
     }
 
     public int getSuccess() {
-        return success;
+        return this.success;
     }
 
     public boolean getTracks() {
-        return tracks;
+        return this.tracks;
     }
 
     public Text getLastOutput() {
-        return lastOutput;
+        return this.lastOutput;
     }
 
     @Override

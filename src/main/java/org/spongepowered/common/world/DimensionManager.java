@@ -49,6 +49,7 @@ import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
+import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -109,7 +110,7 @@ public class DimensionManager {
                 worldType = worldType.replace("provider", "");
         }
 
-        Sponge.getSpongeRegistry().registerDimensionType(new SpongeDimensionType(worldType, keepLoaded, provider, id));
+        DimensionRegistryModule.getInstance().registerAdditionalCatalog(new SpongeDimensionType(worldType, keepLoaded, provider, id));
         providers.put(id, provider);
         spawnSettings.put(id, keepLoaded);
         return true;

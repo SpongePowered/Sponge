@@ -43,6 +43,7 @@ import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
@@ -114,7 +115,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public DimensionType getType() {
-        return ((SpongeGameRegistry) Sponge.getGame().getRegistry()).dimensionClassMappings.get(this.getClass());
+        return DimensionRegistryModule.getInstance().getForClass(this.getClass());
     }
 
     @Override

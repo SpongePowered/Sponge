@@ -29,15 +29,30 @@ import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+public abstract class MixinPotion {
 
+    @Shadow private String name;
+    @Shadow public abstract boolean isInstant();
+
+    @Intrinsic
     public boolean potion$isInstant() {
-        return false;
+        return this.isInstant();
     }
+
+    public String potion$getId() {
+        return this.name;
+    }
+
+    public String potion$getName() {
+        return this.name;
+    }
+
+    // TODO translation
 
 }

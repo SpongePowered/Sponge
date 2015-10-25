@@ -34,6 +34,7 @@ import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -87,7 +88,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
             SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
-                this.patternLayers.add(new SpongePatternLayer(registry.idToBannerPatternShapeMappings.get(tagCompound.getString("Pattern")),
+                this.patternLayers.add(new SpongePatternLayer(Sponge.getSpongeRegistry().getType(BannerPatternShape.class, tagCompound.getString("Pattern")).get(),
                         registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger("Color")).getName()).get()));
             }
         }

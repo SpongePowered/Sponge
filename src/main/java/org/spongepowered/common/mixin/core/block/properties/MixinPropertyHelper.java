@@ -29,17 +29,24 @@ import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 
 import java.util.function.Predicate;
 
 @Mixin(value = PropertyHelper.class)
-public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>  {
+public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
 
     protected String propertyName;
+    protected String idString;
 
     @Shadow private String name;
     @SuppressWarnings("rawtypes")
     @Shadow private Class valueClass;
+
+    @Override
+    public String getId() {
+        return this.idString;
+    }
 
     @Override
     public String getName() {
@@ -56,4 +63,8 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
         return Functional.predicateIn(getPossibleValues());
     }
 
+    @Override
+    public void setId(String id) {
+        this.idString = id;
+    }
 }

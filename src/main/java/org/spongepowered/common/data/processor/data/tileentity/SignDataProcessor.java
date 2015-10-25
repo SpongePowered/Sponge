@@ -47,6 +47,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -213,7 +214,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             }
             try {
                 for (int i = 0; i < 4; i++) {
-                    ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(Texts.of());
+                    ((TileEntitySign) dataHolder).signText[i] = DataConstants.EMPTY_TEXT_COMPONENT;
                 }
                 ((TileEntitySign) dataHolder).markDirty();
             } catch (Exception e) {

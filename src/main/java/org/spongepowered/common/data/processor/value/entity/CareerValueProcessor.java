@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
@@ -48,7 +49,7 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<EntityVil
 
     @Override
     public Value<Career> constructValue(Career defaultValue) {
-        return new SpongeValue<>(Keys.CAREER, defaultValue);
+        return new SpongeValue<>(Keys.CAREER, DataConstants.CAREER_DEFAULT, defaultValue);
     }
 
     @Override
@@ -69,6 +70,6 @@ public class CareerValueProcessor extends AbstractSpongeValueProcessor<EntityVil
 
     @Override
     protected ImmutableValue<Career> constructImmutableValue(Career value) {
-        return ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.FARMER, value);
+        return ImmutableSpongeValue.cachedOf(Keys.CAREER, DataConstants.CAREER_DEFAULT, value);
     }
 }

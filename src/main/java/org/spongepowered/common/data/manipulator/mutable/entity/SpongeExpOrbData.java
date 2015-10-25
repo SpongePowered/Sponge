@@ -35,21 +35,21 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class SpongeExpOrbData extends AbstractBoundedComparableData<Integer, ExpOrbData, ImmutableExpOrbData> implements ExpOrbData {
 
-	public SpongeExpOrbData() {
-		this(0);
-	}
+    public SpongeExpOrbData() {
+        this(0);
+    }
 
-	public SpongeExpOrbData(int value) {
-		this(value, 0, Integer.MAX_VALUE);
-	}
+    public SpongeExpOrbData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
+    }
 
     // For reflection
-	public SpongeExpOrbData(int value, int minimum, int maximum) {
+    public SpongeExpOrbData(int value, int minimum, int maximum) {
         super(ExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE, intComparator(), ImmutableSpongeExpOrbData.class, minimum, maximum, 0);
     }
 
-	@Override
-	public MutableBoundedValue<Integer> experience() {
-		return getValueGetter();
-	}
+    @Override
+    public MutableBoundedValue<Integer> experience() {
+        return getValueGetter();
+    }
 }

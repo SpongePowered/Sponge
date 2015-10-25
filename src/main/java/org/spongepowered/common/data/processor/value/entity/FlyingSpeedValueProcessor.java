@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Enti
 
     @Override
     protected Value<Double> constructValue(Double value) {
-        return new SpongeValue<>(Keys.FLYING_SPEED, 0.05D, value);
+        return new SpongeValue<>(Keys.FLYING_SPEED, DataConstants.DEFAULT_FLYING_SPEED, value);
     }
 
     @Override

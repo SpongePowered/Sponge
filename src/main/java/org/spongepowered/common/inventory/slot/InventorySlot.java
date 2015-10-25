@@ -29,6 +29,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionBuilder;
@@ -146,7 +147,10 @@ public interface InventorySlot extends org.spongepowered.api.item.inventory.Slot
     @Override
     default boolean contains(ItemType type) {
         return net.minecraft.item.ItemStack.areItemsEqual(getNMSInventory().getStackInSlot(getSlotNumber()),
-                (net.minecraft.item.ItemStack) Sponge.getGame().getRegistry().createItemBuilder().itemType(type).build());
+                (net.minecraft.item.ItemStack) Sponge.getGame().getRegistry()
+                    .createBuilder(ItemStackBuilder.class)
+                    .itemType(type)
+                    .build());
     }
 
     @Override
