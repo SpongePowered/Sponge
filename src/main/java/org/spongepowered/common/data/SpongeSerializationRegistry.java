@@ -115,6 +115,7 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrew
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
+import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
@@ -186,6 +187,7 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandDat
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -288,6 +290,7 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeS
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeNoteData;
+import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeLockableData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
@@ -359,6 +362,7 @@ import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewin
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeNoteData;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.ColoredDataProcessor;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
@@ -421,6 +425,7 @@ import org.spongepowered.common.data.processor.data.item.FishDataProcessor;
 import org.spongepowered.common.data.processor.data.item.GoldenAppleDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemAuthorDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemEnchantmentDataProcessor;
+import org.spongepowered.common.data.processor.data.item.ItemLockableDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemLoreDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemPagedDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemSkullRepresentedPlayerDataProcessor;
@@ -431,6 +436,7 @@ import org.spongepowered.common.data.processor.data.tileentity.BrewingStandDataP
 import org.spongepowered.common.data.processor.data.tileentity.CooldownDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.FurnaceDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.NoteDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.LockableDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
@@ -508,6 +514,7 @@ import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProces
 import org.spongepowered.common.data.processor.value.item.ItemColorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDurabilityValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemLockTokenValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullRepresentedPlayerValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
@@ -525,6 +532,7 @@ import org.spongepowered.common.data.processor.value.tileentity.RemainingBrewTim
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SkullRepresentedPlayerProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntityDisplayNameValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.TileEntityLockTokenValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
@@ -861,7 +869,12 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
                 ImmutableSpongeVehicleData.class, vehicleDataProcessor);
 
-
+        dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class, ImmutableLockableData.class, 
+                ImmutableSpongeLockableData.class, new LockableDataProcessor());
+        
+        dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class, ImmutableLockableData.class, 
+                ImmutableSpongeLockableData.class, new ItemLockableDataProcessor());
+        
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -956,6 +969,8 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.NOTE_PITCH, new NoteValueProcessor());
         dataRegistry.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.LOCK_TOKEN, new TileEntityLockTokenValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.LOCK_TOKEN, new ItemLockTokenValueProcessor());
     }
 
 }

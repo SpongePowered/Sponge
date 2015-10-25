@@ -33,9 +33,12 @@ import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
@@ -45,6 +48,21 @@ import java.util.List;
 public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory {
 
     @Shadow private LockCode code;
+    
+    @Shadow public abstract boolean isLocked();
+    
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        manipulators.add(getLockableData());
+    }
+    
+    private LockableData getLockableData() {
+        if (this.isLocked()) {
+            return new SpongeLockableData(this.code.getLock());
+        } else {
+            return new SpongeLockableData();
+        }
+    }
 
     @Override
     public DataContainer toContainer() {

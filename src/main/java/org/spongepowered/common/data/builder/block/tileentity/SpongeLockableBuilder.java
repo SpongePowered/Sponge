@@ -25,13 +25,18 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.inventory.IInventory;
+import net.minecraft.tileentity.TileEntityLockable;
+import net.minecraft.world.LockCode;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,11 +65,12 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
                     (net.minecraft.item.ItemStack) content.getSerializable(new DataQuery("Item"), ItemStack.class, service).get();
             ((IInventory) lockable).setInventorySlotContents(content.getInt(new DataQuery("Slot")).get(), stack);
         }
-        // TODO
-//        if (container.contains(new DataQuery("Lock"))) {
-//            LockableData lock = new SpongeLocableData
-//            lockable.setLockableData(container.getString(new DataQuery("Lock")).get());
-//        }
+        
+        if (container.contains(new DataQuery(NbtDataUtil.ITEM_LOCK))) {
+            LockableData lock = new SpongeLockableData(container.getString(new DataQuery(NbtDataUtil.ITEM_LOCK)).get());
+            
+            ((TileEntityLockable) lockable).setLockCode(new LockCode(lock.lockToken().get()));
+        }
         return Optional.of((T) lockable);
     }
 }
