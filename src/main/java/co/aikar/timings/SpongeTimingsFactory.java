@@ -30,9 +30,11 @@ import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.configuration.SpongeConfig.TimingsCategory;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 public class SpongeTimingsFactory implements TimingsFactory {
 
@@ -254,4 +256,31 @@ public class SpongeTimingsFactory implements TimingsFactory {
     static TimingHandler ofSafe(String groupName, String name, Timing groupHandler) {
         return TimingsManager.getHandler(groupName, name, groupHandler, false);
     }
+
+    public static void init() {
+        TimingsCategory config = Sponge.getGlobalConfig().getConfig().getTimings();
+        Timings.setVerboseTimingsEnabled(config.isVerbose());
+        Timings.setTimingsEnabled(Sponge.getGlobalConfig().getConfig().getModules().usePluginTimings());
+        Timings.setHistoryInterval(config.getHistoryInterval());
+        Timings.setHistoryLength(config.getHistoryLength());
+
+        Sponge.getLogger().info("Sponge Timings: " + Timings.isTimingsEnabled() +
+                " - Verbose: " + config.isVerbose() +
+                " - Interval: " + timeSummary(Timings.getHistoryInterval() / 20) +
+                " - Length: " + timeSummary(Timings.getHistoryLength() / 20));
+    }
+
+    private static String timeSummary(int seconds) {
+        String time = "";
+        if (seconds > 60 * 60) {
+            time += TimeUnit.SECONDS.toHours(seconds) + "h";
+            seconds /= 60;
+        }
+
+        if (seconds > 0) {
+            time += TimeUnit.SECONDS.toMinutes(seconds) + "m";
+        }
+        return time;
+    }
+
 }

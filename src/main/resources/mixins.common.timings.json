@@ -1,0 +1,10 @@
+{
+    "package": "org.spongepowered.common.mixin.timings",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.TimingsPlugin",
+    "mixins": [
+        "MixinMinecraftServer",
+        "MixinWorld",
+        "MixinWorldServer"
+    ]
+}

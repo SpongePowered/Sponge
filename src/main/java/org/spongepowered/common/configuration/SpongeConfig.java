@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.configuration;
 
-import org.spongepowered.api.util.Functional;
-import org.spongepowered.api.block.BlockTypes;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationOptions;
@@ -43,6 +42,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.util.IpSet;
 
 import java.io.File;
@@ -341,6 +341,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private LoggingCategory logging = new LoggingCategory();
         @Setting
         private WorldCategory world = new WorldCategory();
+        @Setting
+        private TimingsCategory timings = new TimingsCategory();
 
         public BlockTrackingCategory getBlockTracking() {
             return this.blockTracking;
@@ -368,6 +370,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public WorldCategory getWorld() {
             return this.world;
+        }
+
+        public TimingsCategory getTimings() {
+            return this.timings;
         }
     }
 
@@ -741,6 +747,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = MODULE_ENTITY_ACTIVATION_RANGE)
         private boolean pluginEntityActivation = true;
 
+        @Setting("timings")
+        private boolean pluginTimings = true;
+
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
         }
@@ -755,6 +764,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPluginEntityActivation(boolean state) {
             this.pluginEntityActivation = state;
+        }
+
+        public boolean usePluginTimings() {
+            return this.pluginTimings;
+        }
+
+        public void setPluginTimings(boolean state) {
+            this.pluginTimings = state;
         }
     }
 
@@ -792,6 +809,50 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public void setFlowingLavaDecay(boolean flowingLavaDecay) {
             this.flowingLavaDecay = flowingLavaDecay;
         }
+    }
+
+    @ConfigSerializable
+    public static class TimingsCategory extends Category {
+
+        @Setting
+        private boolean verbose = false;
+
+        @Setting("server-name-privacy")
+        private boolean serverNamePrivacy = false;
+
+        @Setting("hidden-config-entries")
+        private List<String> hiddenConfigEntries = Lists.newArrayList("sponge.sql");
+
+        @Setting("history-interval")
+        private int historyInterval = 300;
+
+        @Setting("history-length")
+        private int historyLength = 3600;
+
+        public boolean isVerbose() {
+            return this.verbose;
+        }
+
+        public void setVerbose(boolean verbose) {
+            this.verbose = verbose;
+        }
+
+        public int getHistoryInterval() {
+            return this.historyInterval;
+        }
+
+        public void setHistoryInterval(int historyInterval) {
+            this.historyInterval = historyInterval;
+        }
+
+        public int getHistoryLength() {
+            return this.historyLength;
+        }
+
+        public void setHistoryLength(int historyLength) {
+            this.historyLength = historyLength;
+        }
+
     }
 
     @ConfigSerializable
