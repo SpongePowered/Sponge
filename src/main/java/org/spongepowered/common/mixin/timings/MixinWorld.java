@@ -43,7 +43,7 @@ import java.util.List;
 public class MixinWorld {
 
     // ESS - endStartSection
-    private static final String ESS = "endStartSection(Ljava/lang/String;)V";
+    protected static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
     @Shadow public List<Entity> loadedEntityList;
     @Shadow public List<TileEntity> loadedTileEntityList;

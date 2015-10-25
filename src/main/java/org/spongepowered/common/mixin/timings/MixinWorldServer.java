@@ -34,18 +34,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinWorldServer extends MixinWorld {
 
 
-    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = "endStartSection(Ljava/lang/String;)V", args = "ldc=tickPending") )
+    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickPending") )
     private void onBeginTickBlockUpdate(CallbackInfo ci) {
         this.timings.scheduledBlocks.startTiming();
     }
 
-    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = "endStartSection(Ljava/lang/String;)V", args = "ldc=tickBlocks") )
+    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickBlocks") )
     private void onAfterTickBlockUpdate(CallbackInfo ci) {
         this.timings.scheduledBlocks.stopTiming();
         this.timings.chunkTicks.startTiming();
     }
 
-    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = "endStartSection(Ljava/lang/String;)V", args = "ldc=chunkMap") )
+    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=chunkMap") )
     private void onBeginUpdateBlocks(CallbackInfo ci) {
         this.timings.chunkTicks.stopTiming();
     }
