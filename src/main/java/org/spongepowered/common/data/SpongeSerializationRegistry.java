@@ -54,6 +54,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingAbilityData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingData;
@@ -92,6 +93,7 @@ import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingAbilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
@@ -162,6 +164,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElderData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingAbilityData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingData;
@@ -200,6 +203,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingAbilityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
@@ -236,6 +240,7 @@ import org.spongepowered.common.data.processor.data.SkullDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.BreathingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ElderDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.ExpOrbDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ExperienceHolderDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FlyingAbilityDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FlyingDataProcessor;
@@ -278,6 +283,7 @@ import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor
 import org.spongepowered.common.data.processor.value.entity.ElderValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EntityDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EntityWetValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.ExpOrbValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ExperienceFromStartOfLevelValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ExperienceLevelValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ExperienceSinceLevelValueProcessor;
@@ -526,6 +532,10 @@ public class SpongeSerializationRegistry {
                 ImmutableRepresentedPlayerData.class, ImmutableSpongeRepresentedPlayerData.class,
                 new ItemSkullRepresentedPlayerDataProcessor());
 
+        final ExpOrbDataProcessor expOrbDataProcessor = new ExpOrbDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
+                ImmutableSpongeExpOrbData.class, expOrbDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -582,6 +592,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.FISH_TYPE, new FishValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_PLAYER, new SkullRepresentedPlayerProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_PLAYER, new ItemSkullRepresentedPlayerValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CONTAINED_EXPERIENCE, new ExpOrbValueProcessor());
     }
 
 }

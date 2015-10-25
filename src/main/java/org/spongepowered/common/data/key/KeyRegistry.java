@@ -162,6 +162,7 @@ public class KeyRegistry {
         keyMap.put("cooked_fish", makeSingleKey(CookedFish.class, Value.class, of("CookedFishType")));
         keyMap.put("fish_type", makeSingleKey(Fish.class, Value.class, of("RawFishType")));
         keyMap.put("represented_player", makeSingleKey(GameProfile.class, Value.class, of("RepresentedPlayer")));
+        keyMap.put("contained_experience", makeSingleKey(Integer.class, Value.class, of("ContainedExperience")));
 
     }
 
