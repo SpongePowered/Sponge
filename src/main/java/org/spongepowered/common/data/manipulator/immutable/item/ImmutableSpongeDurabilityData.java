@@ -43,13 +43,13 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 public class ImmutableSpongeDurabilityData extends AbstractImmutableData<ImmutableDurabilityData, DurabilityData> implements ImmutableDurabilityData {
 
     final int durability;
-    final boolean unbreakable;
+    final ImmutableValue<Boolean> unbreakable;
 
     public ImmutableSpongeDurabilityData(int durability, boolean unbreakable) {
         super(ImmutableDurabilityData.class);
         checkArgument(durability >= 0);
         this.durability = durability;
-        this.unbreakable = unbreakable;
+        this.unbreakable = ImmutableSpongeValue.cachedOf(Keys.UNBREAKABLE, false, unbreakable);
         this.registerGetters();
     }
 
@@ -62,7 +62,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
         registerFieldGetter(Keys.ITEM_DURABILITY, () -> this.durability);
         registerKeyValue(Keys.ITEM_DURABILITY, this::durability);
 
-        registerFieldGetter(Keys.UNBREAKABLE, () -> this.unbreakable);
+        registerFieldGetter(Keys.UNBREAKABLE, this.unbreakable::get);
         registerKeyValue(Keys.UNBREAKABLE, this::unbreakable);
     }
 
@@ -73,19 +73,19 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     public ImmutableValue<Boolean> unbreakable() {
-        return new ImmutableSpongeValue<Boolean>(Keys.UNBREAKABLE, false, this.unbreakable);
+        return this.unbreakable;
     }
 
     @Override
     public DurabilityData asMutable() {
-        return new SpongeDurabilityData(this.durability, this.unbreakable);
+        return new SpongeDurabilityData(this.durability, this.unbreakable.get());
     }
 
     @Override
     public int compareTo(ImmutableDurabilityData o) {
         return ComparisonChain.start()
                 .compare(this.durability, o.durability().get().intValue())
-                .compare(this.unbreakable, o.unbreakable().get())
+                .compare(this.unbreakable.get(), o.unbreakable().get())
                 .result();
     }
 
@@ -93,6 +93,6 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(Keys.ITEM_DURABILITY, this.durability)
-                .set(Keys.UNBREAKABLE, this.unbreakable);
+                .set(Keys.UNBREAKABLE, this.unbreakable.get());
     }
 }
