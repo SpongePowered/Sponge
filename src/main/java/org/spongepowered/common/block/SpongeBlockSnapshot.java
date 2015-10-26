@@ -347,7 +347,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        builder.blockState((BlockState) this.blockState)
+        builder.blockState(this.blockState)
             .position(this.pos)
             .worldId(this.worldUniqueId);
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {

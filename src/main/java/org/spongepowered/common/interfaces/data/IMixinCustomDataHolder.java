@@ -35,6 +35,10 @@ import java.util.Optional;
 
 public interface IMixinCustomDataHolder {
 
+    default DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator) {
+        return offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+    }
+
     DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function);
 
     <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass);

@@ -319,4 +319,16 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public Collection<Property<?, ?>> getApplicableProperties() {
         return this.privateStack.getApplicableProperties();
     }
+
+    public int getDamageValue() {
+        return this.damageValue;
+    }
+
+    public Optional<NBTTagCompound> getCompound() {
+        if (this.compound != null) {
+            return Optional.of((NBTTagCompound) this.compound.copy());
+        } else {
+            return Optional.empty();
+        }
+    }
 }

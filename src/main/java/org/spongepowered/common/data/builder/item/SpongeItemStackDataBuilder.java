@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.builder.item;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import net.minecraft.item.Item;
@@ -48,6 +49,11 @@ public class SpongeItemStackDataBuilder implements DataBuilder<ItemStack> {
 
     @Override
     public Optional<ItemStack> build(DataView container) throws InvalidDataException {
+        checkNotNull(container);
+        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT) || !container.contains(
+            DataQueries.ITEM_DAMAGE_VALUE)) {
+            return Optional.empty();
+        }
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
         final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
         final ItemType itemType = Sponge.getSpongeRegistry().getType(ItemType.class, itemTypeId).get();
