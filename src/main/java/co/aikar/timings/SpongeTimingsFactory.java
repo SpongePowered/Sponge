@@ -64,25 +64,6 @@ public class SpongeTimingsFactory implements TimingsFactory {
     }
 
     /**
-     * Returns a Timing object after starting it, useful for Java7
-     * try-with-resources.
-     *
-     * try (Timing ignored = Timings.ofStart(plugin, someName, groupHandler)) {
-     * // timed section }
-     *
-     * @param plugin Plugin to own the Timing
-     * @param name Name of Timing
-     * @param groupHandler Parent handler to mirror .start/stop calls to
-     * @return Timing Handler
-     */
-    @Override
-    public Timing ofStart(Object plugin, String name, Timing groupHandler) {
-        Timing timing = of(plugin, name, groupHandler);
-        timing.startTimingIfSync();
-        return timing;
-    }
-
-    /**
      * Gets whether or not the Spigot Timings system is enabled
      *
      * @return Enabled or not
