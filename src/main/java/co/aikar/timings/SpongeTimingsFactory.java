@@ -50,6 +50,9 @@ public class SpongeTimingsFactory implements TimingsFactory {
 
     public SpongeTimingsFactory() {
         this.moduleEnabled = Sponge.getGlobalConfig().getConfig().getModules().usePluginTimings();
+    }
+
+    public void init() {
         TimingsCategory config = Sponge.getGlobalConfig().getConfig().getTimings();
         setVerboseTimingsEnabled(config.isVerbose());
         setTimingsEnabled(this.moduleEnabled && config.isEnabled());
