@@ -43,7 +43,7 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
 
     public static <T> ImmutableBoundedValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue, Comparator<T>
             comparator, T minimum, T maximum) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, key, actualValue, defaultValue, comparator, minimum, maximum);
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, key, defaultValue, actualValue, comparator, minimum, maximum);
     }
 
     private final Comparator<E> comparator;
