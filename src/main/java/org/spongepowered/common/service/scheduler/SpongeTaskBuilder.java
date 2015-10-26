@@ -40,8 +40,8 @@ public class SpongeTaskBuilder implements TaskBuilder {
     private Consumer<Task> consumer;
     private ScheduledTask.TaskSynchronicity syncType;
     private String name;
-    private long delay;
-    private long interval;
+    private long delay; //nanoseconds or ticks
+    private long interval; //nanoseconds or ticks
     private boolean delayIsTicks;
     private boolean intervalIsTicks;
 
@@ -64,7 +64,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     @Override
     public TaskBuilder delay(long delay, TimeUnit unit) {
         checkArgument(delay >= 0, "Delay cannot be negative");
-        this.delay = checkNotNull(unit, "unit").toMillis(delay);
+        this.delay = checkNotNull(unit, "unit").toNanos(delay);
         this.delayIsTicks = false;
         return this;
     }
@@ -80,7 +80,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     @Override
     public TaskBuilder interval(long interval, TimeUnit unit) {
         checkArgument(interval >= 0, "Interval cannot be negative");
-        this.interval = checkNotNull(unit, "unit").toMillis(interval);
+        this.interval = checkNotNull(unit, "unit").toNanos(interval);
         this.intervalIsTicks = false;
         return this;
     }
@@ -115,8 +115,8 @@ public class SpongeTaskBuilder implements TaskBuilder {
         boolean delayIsTicks = this.delayIsTicks;
         boolean intervalIsTicks = this.intervalIsTicks;
         if (this.syncType == ScheduledTask.TaskSynchronicity.ASYNCHRONOUS) {
-            delay = delayIsTicks ? delay * SpongeScheduler.TICK_DURATION : delay;
-            interval = intervalIsTicks ? interval * SpongeScheduler.TICK_DURATION : interval;
+            delay = delayIsTicks ? delay * SpongeScheduler.TICK_DURATION_NS : delay;
+            interval = intervalIsTicks ? interval * SpongeScheduler.TICK_DURATION_NS : interval;
             delayIsTicks = intervalIsTicks = false;
         }
         ScheduledTask task = new ScheduledTask(this.syncType, this.consumer, name, delay, delayIsTicks, interval, intervalIsTicks, pluginContainer);
