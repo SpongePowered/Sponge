@@ -42,11 +42,11 @@ class TimingData {
             return new TimingData(input);
         }
     };
-    int id;
+    private int id;
     int count = 0;
-    int lagCount = 0;
+    private int lagCount = 0;
     long totalTime = 0;
-    long lagTotalTime = 0;
+    private long lagTotalTime = 0;
 
     int curTickCount = 0;
     int curTickTotal = 0;

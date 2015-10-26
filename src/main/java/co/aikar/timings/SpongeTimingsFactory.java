@@ -36,16 +36,43 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 public class SpongeTimingsFactory implements TimingsFactory {
 
-    private static final int MAX_HISTORY_FRAMES = 12;
+    private final int MAX_HISTORY_FRAMES = 12;
     public final Timing NULL_HANDLER = new NullTimingHandler();
-    static boolean timingsEnabled = false;
-    static boolean verboseEnabled = false;
-    private static int historyInterval = -1;
-    private static int historyLength = -1;
+    private boolean timingsEnabled = false;
+    private boolean verboseEnabled = false;
+    private int historyInterval = -1;
+    private int historyLength = -1;
+    private final boolean moduleEnabled;
 
     public SpongeTimingsFactory() {
+        this.moduleEnabled = Sponge.getGlobalConfig().getConfig().getModules().usePluginTimings();
+        TimingsCategory config = Sponge.getGlobalConfig().getConfig().getTimings();
+        setVerboseTimingsEnabled(config.isVerbose());
+        setTimingsEnabled(this.moduleEnabled && config.isEnabled());
+        setHistoryInterval(config.getHistoryInterval());
+        setHistoryLength(config.getHistoryLength());
+
+        Sponge.getLogger().info("Sponge Timings: " + this.timingsEnabled +
+                " - Verbose: " + this.verboseEnabled +
+                " - Interval: " + timeSummary(this.historyInterval / 20) +
+                " - Length: " + timeSummary(this.historyLength / 20));
+    }
+
+    private static String timeSummary(int seconds) {
+        String time = "";
+        if (seconds > 60 * 60) {
+            time += TimeUnit.SECONDS.toHours(seconds) + "h";
+            seconds /= 60;
+        }
+
+        if (seconds > 0) {
+            time += TimeUnit.SECONDS.toMinutes(seconds) + "m";
+        }
+        return time;
     }
 
     private static PluginContainer checkPlugin(Object plugin) {
@@ -55,7 +82,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     }
 
     @Override
-    public Timing of(Object pluginObj, String name, Timing groupHandler) {
+    public Timing of(Object pluginObj, String name, @Nullable Timing groupHandler) {
         PluginContainer plugin = checkPlugin(pluginObj);
         if (groupHandler == null) {
             groupHandler = ofSafe(plugin.getName(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
@@ -63,110 +90,54 @@ public class SpongeTimingsFactory implements TimingsFactory {
         return TimingsManager.getHandler(plugin.getName(), name, groupHandler, true);
     }
 
-    /**
-     * Gets whether or not the Spigot Timings system is enabled
-     *
-     * @return Enabled or not
-     */
     @Override
     public boolean isTimingsEnabled() {
-        return timingsEnabled;
+        return this.timingsEnabled;
     }
 
-    /**
-     * Sets whether or not the Spigot Timings system should be enabled <p/>
-     * Calling this will reset timing data.
-     *
-     * @param enabled Should timings be reported
-     */
     @Override
     public void setTimingsEnabled(boolean enabled) {
-        timingsEnabled = enabled;
+        if (!this.moduleEnabled) {
+            return;
+        }
+        this.timingsEnabled = enabled;
         reset();
     }
 
-    /**
-     * Gets whether or not the Verbose level of timings is enabled. <p/> When
-     * Verbose is disabled, high-frequency timings will not be available
-     *
-     * @return Enabled or not
-     */
     @Override
     public boolean isVerboseTimingsEnabled() {
-        return timingsEnabled;
+        return this.verboseEnabled;
     }
 
-    /**
-     * Sets whether or not the Timings should monitor at Verbose level. <p/>
-     * When Verbose is disabled, high-frequency timings will not be available.
-     * Calling this will reset timing data.
-     *
-     * @param enabled Should high-frequency timings be reported
-     */
     @Override
     public void setVerboseTimingsEnabled(boolean enabled) {
-        verboseEnabled = enabled;
+        this.verboseEnabled = enabled;
         TimingsManager.needsRecheckEnabled = true;
     }
 
-    /**
-     * Gets the interval between Timing History report generation. <p/> Defaults
-     * to 5 minutes (6000 ticks)
-     *
-     * @return Interval in ticks
-     */
     @Override
     public int getHistoryInterval() {
-        return historyInterval;
+        return this.historyInterval;
     }
 
-    /**
-     * Sets the interval between Timing History report generations. <p/>
-     * Defaults to 5 minutes (6000 ticks)
-     *
-     * This will recheck your history length, so lowering this value will lower
-     * your history length if you need more than 60 history windows.
-     *
-     * @param interval Interval in ticks
-     */
     @Override
     public void setHistoryInterval(int interval) {
-        historyInterval = Math.max(20 * 60, interval);
+        this.historyInterval = Math.max(20 * 60, interval);
         // Recheck the history length with the new Interval
-        if (historyLength != -1) {
-            setHistoryLength(historyLength);
+        if (this.historyLength != -1) {
+            setHistoryLength(this.historyLength);
         }
     }
 
-    /**
-     * Gets how long in ticks Timings history is kept for the server.
-     *
-     * Defaults to 1 hour (72000 ticks)
-     *
-     * @return Duration in Ticks
-     */
     @Override
     public int getHistoryLength() {
-        return historyLength;
+        return this.historyLength;
     }
 
-    /**
-     * Sets how long Timing History reports are kept for the server.
-     *
-     * Defaults to 1 hours(72000 ticks)
-     *
-     * This value is capped at a maximum of getHistoryInterval() *
-     * MAX_HISTORY_FRAMES (12)
-     *
-     * Will not reset Timing Data but may truncate old history if the new length
-     * is less than old length.
-     *
-     * @param length Duration in ticks
-     */
     @Override
     public void setHistoryLength(int length) {
         // Cap at 12 History Frames, 1 hour at 5 minute frames.
-        int maxLength = historyInterval * MAX_HISTORY_FRAMES;
+        int maxLength = this.historyInterval * this.MAX_HISTORY_FRAMES;
         // For special cases of servers with special permission to bypass the
         // max.
         // This max helps keep data file sizes reasonable for processing on
@@ -176,34 +147,25 @@ public class SpongeTimingsFactory implements TimingsFactory {
         if (System.getProperty("timings.bypassMax") != null) {
             maxLength = Integer.MAX_VALUE;
         }
-        historyLength = Math.max(Math.min(maxLength, length), historyInterval);
+        this.historyLength = Math.max(Math.min(maxLength, length), this.historyInterval);
         Queue<TimingHistory> oldQueue = TimingsManager.HISTORY;
         int frames = (getHistoryLength() / getHistoryInterval());
         if (length > maxLength) {
             Sponge.getLogger().warn(
                     "Timings Length too high. Requested " + length + ", max is " + maxLength
-                            + ". To get longer history, you must increase your interval. Set Interval to " + Math.ceil(length / MAX_HISTORY_FRAMES)
+                            + ". To get longer history, you must increase your interval. Set Interval to "
+                            + Math.ceil(length / this.MAX_HISTORY_FRAMES)
                             + " to achieve this length.");
         }
         TimingsManager.HISTORY = EvictingQueue.create(frames);
         TimingsManager.HISTORY.addAll(oldQueue);
     }
 
-    /**
-     * Resets all Timing Data
-     */
     @Override
     public void reset() {
         TimingsManager.reset();
     }
 
-    /**
-     * Generates a report and sends it to the specified command sender.
-     *
-     * If sender is null, ConsoleCommandSender will be used.
-     *
-     * @param sender
-     */
     @Override
     public void generateReport(CommandSource sender) {
         if (sender == null) {
@@ -212,11 +174,9 @@ public class SpongeTimingsFactory implements TimingsFactory {
         TimingsExport.reportTimings(sender);
     }
 
-    /*
-     * ================= Protected API: These are for internal use only in
-     * Bukkit/CraftBukkit These do not have isPrimaryThread() checks in the
-     * startTiming/stopTiming =================
-     */
+    public static long getCost() {
+        return TimingsExport.getCost();
+    }
 
     static TimingHandler ofSafe(String name) {
         return ofSafe(null, name, null);
@@ -236,32 +196,6 @@ public class SpongeTimingsFactory implements TimingsFactory {
 
     static TimingHandler ofSafe(String groupName, String name, Timing groupHandler) {
         return TimingsManager.getHandler(groupName, name, groupHandler, false);
-    }
-
-    public static void init() {
-        TimingsCategory config = Sponge.getGlobalConfig().getConfig().getTimings();
-        Timings.setVerboseTimingsEnabled(config.isVerbose());
-        Timings.setTimingsEnabled(Sponge.getGlobalConfig().getConfig().getModules().usePluginTimings());
-        Timings.setHistoryInterval(config.getHistoryInterval());
-        Timings.setHistoryLength(config.getHistoryLength());
-
-        Sponge.getLogger().info("Sponge Timings: " + Timings.isTimingsEnabled() +
-                " - Verbose: " + config.isVerbose() +
-                " - Interval: " + timeSummary(Timings.getHistoryInterval() / 20) +
-                " - Length: " + timeSummary(Timings.getHistoryLength() / 20));
-    }
-
-    private static String timeSummary(int seconds) {
-        String time = "";
-        if (seconds > 60 * 60) {
-            time += TimeUnit.SECONDS.toHours(seconds) + "h";
-            seconds /= 60;
-        }
-
-        if (seconds > 0) {
-            time += TimeUnit.SECONDS.toMinutes(seconds) + "m";
-        }
-        return time;
     }
 
 }

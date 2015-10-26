@@ -33,9 +33,8 @@ import static org.spongepowered.api.util.command.args.GenericArguments.seq;
 import static org.spongepowered.api.util.command.args.GenericArguments.string;
 import static org.spongepowered.api.util.command.args.GenericArguments.world;
 
+import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import co.aikar.timings.TimingsExport;
-import co.aikar.timings.TimingsManager;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import net.minecraft.world.WorldProvider;
@@ -423,7 +422,7 @@ public class CommandSponge {
                                 src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            TimingsManager.reset();
+                            Timings.reset();
                             src.sendMessage(Texts.of("Timings reset"));
                             return CommandResult.success();
                         })
@@ -434,7 +433,7 @@ public class CommandSponge {
                                 src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            TimingsExport.reportTimings(src);
+                            Timings.generateReport(src);
                             return CommandResult.success();
                         })
                         .build(), "report", "paste")
@@ -480,7 +479,7 @@ public class CommandSponge {
                                 src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            src.sendMessage(Texts.of("Timings cost: " + TimingsExport.getCost()));
+                            src.sendMessage(Texts.of("Timings cost: " + SpongeTimingsFactory.getCost()));
                             return CommandResult.success();
                         })
                         .build(), "cost")

@@ -2109,7 +2109,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private void setTimingsFactory() {
         RegistryHelper.setFactory(Timings.class, new SpongeTimingsFactory());
-        SpongeTimingsFactory.init();
     }
 
     public void preInit() {

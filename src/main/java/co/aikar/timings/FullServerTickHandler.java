@@ -31,7 +31,7 @@ import static co.aikar.timings.TimingsManager.TIMING_MAP;
 
 public class FullServerTickHandler extends TimingHandler {
 
-    static final TimingIdentifier IDENTITY = new TimingIdentifier("Minecraft", "Full Server Tick", null, false);
+    private static final TimingIdentifier IDENTITY = new TimingIdentifier("Minecraft", "Full Server Tick", null, false);
     final TimingData minuteData;
     double avgFreeMemory = -1D;
     double avgUsedMemory = -1D;

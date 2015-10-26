@@ -27,7 +27,7 @@ package co.aikar.timings;
 import co.aikar.util.LoadingMap;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.util.command.ImmutableCommandMapping;
+import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.common.Sponge;
 
 import java.util.ArrayDeque;
@@ -40,9 +40,8 @@ import java.util.Optional;
 
 public final class TimingsManager {
 
-    static final Map<TimingIdentifier, TimingHandler> TIMING_MAP =
-            Collections.synchronizedMap(LoadingMap.newHashMap((id) -> (id.protect ? new UnsafeTimingHandler(id) : new TimingHandler(id)),
-                    256, .5F));
+    static final Map<TimingIdentifier, TimingHandler> TIMING_MAP = Collections.synchronizedMap(
+            LoadingMap.newHashMap((id) -> (id.protect ? new UnsafeTimingHandler(id) : new TimingHandler(id)), 256, .5F));
     public static final FullServerTickHandler FULL_SERVER_TICK = new FullServerTickHandler();
     public static final TimingHandler TIMINGS_TICK = SpongeTimingsFactory.ofSafe("Timings Tick", FULL_SERVER_TICK);
     public static final Timing PLUGIN_GROUP_HANDLER = SpongeTimingsFactory.ofSafe("Plugins");
@@ -65,7 +64,7 @@ public final class TimingsManager {
     /**
      * Resets all timing data on the next tick
      */
-    public static void reset() {
+    static void reset() {
         needsFullReset = true;
     }
 
@@ -74,7 +73,7 @@ public final class TimingsManager {
      * caused TPS loss.
      */
     static void tick() {
-        if (SpongeTimingsFactory.timingsEnabled) {
+        if (Timings.isTimingsEnabled()) {
             boolean violated = FULL_SERVER_TICK.isViolated();
 
             for (TimingHandler handler : HANDLERS) {
@@ -92,7 +91,7 @@ public final class TimingsManager {
     }
 
     static void stopServer() {
-        SpongeTimingsFactory.timingsEnabled = false;
+        Timings.setTimingsEnabled(false);
         recheckEnabled();
     }
 
@@ -138,7 +137,8 @@ public final class TimingsManager {
         return TIMING_MAP.get(new TimingIdentifier(group, name, parent, protect));
     }
 
-    public static Timing getCommandTiming(String pluginName, ImmutableCommandMapping command) {
+    // TODO Revise this
+    public static Timing getCommandTiming(String pluginName, CommandMapping command) {
         Optional<PluginContainer> plugin = Optional.empty();
         if (!("minecraft".equals(pluginName)
                 || "bukkit".equals(pluginName)

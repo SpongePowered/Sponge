@@ -52,7 +52,7 @@ final class TimingIdentifier {
     TimingIdentifier(String group, String name, Timing groupHandler, boolean protect) {
         this.group = group != null ? group.intern() : DEFAULT_GROUP.name;
         this.name = name.intern();
-        this.groupHandler = groupHandler instanceof SpongeTiming ? ((SpongeTiming) groupHandler).getTimingHandler() : null;
+        this.groupHandler = groupHandler instanceof TimingHandler ? (TimingHandler) groupHandler : null;
         this.protect = protect;
         this.hashCode = (31 * this.group.hashCode()) + this.name.hashCode();
     }

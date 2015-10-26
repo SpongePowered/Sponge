@@ -29,25 +29,25 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.Sponge;
 
-class TimingHandler implements SpongeTiming {
+class TimingHandler implements Timing {
 
     private static int idPool = 1;
     final int id = idPool++;
 
     final String name;
-    final boolean verbose;
+    private final boolean verbose;
 
     final TIntObjectHashMap<TimingData> children = new LoadingIntMap<TimingData>(TimingData.LOADER);
 
     final TimingData record;
-    final TimingHandler groupHandler;
+    private final TimingHandler groupHandler;
 
-    long start = 0;
-    int timingDepth = 0;
-    boolean added;
+    private long start = 0;
+    private int timingDepth = 0;
+    private boolean added;
     boolean timed;
     boolean enabled;
-    TimingHandler parent;
+    private TimingHandler parent;
 
     TimingHandler(TimingIdentifier id) {
         if (id.name.startsWith("##")) {
@@ -66,7 +66,7 @@ class TimingHandler implements SpongeTiming {
     }
 
     final void checkEnabled() {
-        this.enabled = SpongeTimingsFactory.timingsEnabled && (!this.verbose || SpongeTimingsFactory.verboseEnabled);
+        this.enabled = Timings.isTimingsEnabled() && (!this.verbose || Timings.isVerboseTimingsEnabled());
     }
 
     void processTick(boolean violated) {
@@ -160,11 +160,6 @@ class TimingHandler implements SpongeTiming {
         this.added = false;
         this.children.clear();
         checkEnabled();
-    }
-
-    @Override
-    public TimingHandler getTimingHandler() {
-        return this;
     }
 
     @Override

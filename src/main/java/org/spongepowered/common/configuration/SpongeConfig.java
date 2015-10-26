@@ -817,6 +817,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting
         private boolean verbose = false;
 
+        @Setting
+        private boolean enabled = true;
+
         @Setting("server-name-privacy")
         private boolean serverNamePrivacy = false;
 
@@ -835,6 +838,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setVerbose(boolean verbose) {
             this.verbose = verbose;
+        }
+
+        public boolean isEnabled() {
+            return this.enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
         }
 
         public int getHistoryInterval() {

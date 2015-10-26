@@ -31,6 +31,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 
 import java.lang.reflect.Method;
 
+// TODO Revise this
 public class TimedEventListener<T extends Event> implements EventListener<T> {
 
     private final EventListener<T> listener;
@@ -58,7 +59,7 @@ public class TimedEventListener<T extends Event> implements EventListener<T> {
 
     @Override
     public void handle(T event) throws Exception {
-        if (!SpongeTimingsFactory.timingsEnabled || !MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+        if (!Timings.isTimingsEnabled() || !MinecraftServer.getServer().isCallingFromMinecraftThread()) {
             this.listener.handle(event);
             return;
         }

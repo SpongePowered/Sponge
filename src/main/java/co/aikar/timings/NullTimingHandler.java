@@ -24,7 +24,7 @@
  */
 package co.aikar.timings;
 
-public final class NullTimingHandler implements SpongeTiming {
+public final class NullTimingHandler implements Timing {
 
     @Override
     public void startTiming() {
@@ -44,11 +44,6 @@ public final class NullTimingHandler implements SpongeTiming {
 
     @Override
     public void abort() {
-    }
-
-    @Override
-    public TimingHandler getTimingHandler() {
-        return null;
     }
 
     @Override

@@ -60,7 +60,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
-public class TimingsExport extends Thread {
+class TimingsExport extends Thread {
 
     // private static final Joiner AUTHOR_LIST_JOINER = Joiner.on(", ");
     private static final Joiner RUNTIME_FLAG_JOINER = Joiner.on(" ");
@@ -84,7 +84,7 @@ public class TimingsExport extends Thread {
      *
      * @param sender Who to report to
      */
-    public static void reportTimings(CommandSource sender) {
+    static void reportTimings(CommandSource sender) {
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
                 .add("version", Sponge.getGame().getPlatform().getVersion())
@@ -179,7 +179,7 @@ public class TimingsExport extends Thread {
         new TimingsExport(sender, builder.build(), history).start();
     }
 
-    public static long getCost() {
+    static long getCost() {
         // Benchmark the users System.nanotime() for cost basis
         int passes = 500000;
         TimingHandler SAMPLER1 = SpongeTimingsFactory.ofSafe("Timings Sampler 1");

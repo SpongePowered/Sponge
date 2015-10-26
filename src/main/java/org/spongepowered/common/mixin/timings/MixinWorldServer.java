@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer extends MixinWorld {
 
+    // ESS - endStartSection
     private static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickPending") )
