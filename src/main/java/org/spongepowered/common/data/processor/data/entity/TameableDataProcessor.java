@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.entity.passive.EntityTameable;

@@ -47,6 +47,7 @@ import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -81,18 +82,10 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
 
     // Processor delegates
 
-    private final Map<Key<? extends BaseValue<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-    private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-
-    private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses =
-        new MapMaker().concurrencyLevel(4).makeMap();
+    private final IdentityHashMap<Key<? extends BaseValue<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new IdentityHashMap<>();
+    private final IdentityHashMap<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =  new IdentityHashMap<>();
+    private final IdentityHashMap<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
+    private final IdentityHashMap<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
 
     private static boolean allowRegistrations = true;
 

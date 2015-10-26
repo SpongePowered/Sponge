@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -33,12 +31,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 

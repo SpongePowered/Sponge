@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import java.util.Collections;
-import java.util.Optional;
-
+import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -37,13 +35,13 @@ import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import net.minecraft.tileentity.TileEntitySkull;
+import java.util.Collections;
+import java.util.Optional;
 
 public class SkullRepresentedPlayerDataProcessor extends
 AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {

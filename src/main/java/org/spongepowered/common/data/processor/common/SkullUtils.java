@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.ListenableFuture;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
@@ -37,14 +39,10 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntitySkull;
+import javax.annotation.Nullable;
 
 public class SkullUtils {
 

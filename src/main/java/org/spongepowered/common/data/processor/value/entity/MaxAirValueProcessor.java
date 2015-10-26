@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -34,8 +32,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
 import java.util.Optional;

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.util;
 
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -35,6 +37,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 
 import java.util.Optional;
@@ -55,8 +58,11 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public boolean supports(DataHolder dataHolder) {
         for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                return true;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::supports")) {
+                timing.startTiming();
+                if (processor.supports(dataHolder)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -70,10 +76,13 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public Optional<M> from(DataHolder dataHolder) {
         for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                final Optional<M> optional = processor.from(dataHolder);
-                if (optional.isPresent()) {
-                    return optional;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::from")) {
+                timing.startTiming();
+                if (processor.supports(dataHolder)) {
+                    final Optional<M> optional = processor.from(dataHolder);
+                    if (optional.isPresent()) {
+                        return optional;
+                    }
                 }
             }
         }
@@ -83,10 +92,13 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
         for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                final Optional<M> optional = processor.fill(dataHolder, manipulator, overlap);
-                if (optional.isPresent()) {
-                    return optional;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::fill")) {
+                timing.startTiming();
+                if (processor.supports(dataHolder)) {
+                    final Optional<M> optional = processor.fill(dataHolder, manipulator, overlap);
+                    if (optional.isPresent()) {
+                        return optional;
+                    }
                 }
             }
         }
@@ -96,9 +108,12 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public Optional<M> fill(DataContainer container, M m) {
         for (DataProcessor<M, I> processor : this.processors) {
-            final Optional<M> optional = processor.fill(container, m);
-            if (optional.isPresent()) {
-                return optional;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::fillDataContainer")) {
+                timing.startTiming();
+                final Optional<M> optional = processor.fill(container, m);
+                if (optional.isPresent()) {
+                    return optional;
+                }
             }
         }
         return Optional.empty();
@@ -107,10 +122,13 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
         for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                final DataTransactionResult result = processor.set(dataHolder, manipulator, function);
-                if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                    return result;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::set")) {
+                timing.startTiming();
+                if (processor.supports(dataHolder)) {
+                    final DataTransactionResult result = processor.set(dataHolder, manipulator, function);
+                    if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
+                        return result;
+                    }
                 }
             }
         }
@@ -120,9 +138,12 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
         for (DataProcessor<M, I> processor : this.processors) {
-            final Optional<I> optional = processor.with(key, value, immutable);
-            if (optional.isPresent()) {
-                return optional;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::withKey")) {
+                timing.startTiming();
+                final Optional<I> optional = processor.with(key, value, immutable);
+                if (optional.isPresent()) {
+                    return optional;
+                }
             }
         }
         return Optional.empty();
@@ -131,10 +152,13 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                final DataTransactionResult result = processor.remove(dataHolder);
-                if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                    return result;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::remove")) {
+                timing.startTiming();
+                if (processor.supports(dataHolder)) {
+                    final DataTransactionResult result = processor.remove(dataHolder);
+                    if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
+                        return result;
+                    }
                 }
             }
         }
@@ -144,10 +168,13 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     @Override
     public Optional<M> createFrom(DataHolder dataHolder) {
         for (DataProcessor<M, I> processor : this.processors) {
-            if (processor.supports(dataHolder)) {
-                final Optional<M> optional = processor.createFrom(dataHolder);
-                if (optional.isPresent()) {
-                    return optional;
+            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::createFrom")) {
+                timing.startTiming();
+                if (processor.supports(dataHolder)) {
+                    final Optional<M> optional = processor.createFrom(dataHolder);
+                    if (optional.isPresent()) {
+                        return optional;
+                    }
                 }
             }
         }

@@ -37,21 +37,23 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-public abstract class SpongeWeightedCollectionValue<E extends WeightedObject<?>, V extends WeightedCollectionValue<E, V, I>,
-    I extends ImmutableWeightedCollectionValue<E, I, V>> extends SpongeCollectionValue<E, WeightedCollection<E>, V, I>
-    implements WeightedCollectionValue<E, V, I> {
+public abstract class SpongeWeightedCollectionValue<Weighted extends WeightedObject<?>, ValueType
+    extends WeightedCollectionValue<Weighted, ValueType, ImmutableType>,
+    ImmutableType extends ImmutableWeightedCollectionValue<Weighted, ImmutableType, ValueType>>
+    extends SpongeCollectionValue<Weighted, WeightedCollection<Weighted>, ValueType, ImmutableType>
+    implements WeightedCollectionValue<Weighted, ValueType, ImmutableType> {
 
-    public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<E>>> key) {
+    public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<Weighted>>> key) {
         super(key, new WeightedCollection<>());
     }
 
-    public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<E>>> key, WeightedCollection<E> actualValue) {
+    public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedCollection<Weighted>>> key, WeightedCollection<Weighted> actualValue) {
         super(key, new WeightedCollection<>(), actualValue);
     }
 
     @Nullable
     @Override
-    public E get(Random random) {
+    public Weighted get(Random random) {
         return this.actualValue.get(checkNotNull(random));
     }
 }
