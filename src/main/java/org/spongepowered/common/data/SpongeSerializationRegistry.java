@@ -53,6 +53,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableChargedData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingAbilityData;
@@ -91,6 +92,7 @@ import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingAbilityData;
@@ -161,6 +163,7 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetDat
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeChargedData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElderData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingAbilityData;
@@ -199,6 +202,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingAbilityData;
@@ -235,6 +239,7 @@ import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor
 import org.spongepowered.common.data.processor.data.SkullDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.BreathingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.ChargedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ElderDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ExperienceHolderDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FlyingAbilityDataProcessor;
@@ -292,6 +297,7 @@ import org.spongepowered.common.data.processor.value.entity.HealthValueProcessor
 import org.spongepowered.common.data.processor.value.entity.HorseColorValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HorseStyleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HorseVariantValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.ChargedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.IsFlyingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.IsShearedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.IsSittingValueProcessor;
@@ -526,6 +532,10 @@ public class SpongeSerializationRegistry {
                 ImmutableRepresentedPlayerData.class, ImmutableSpongeRepresentedPlayerData.class,
                 new ItemSkullRepresentedPlayerDataProcessor());
 
+        final ChargedDataProcessor chargedDataProcessor = new ChargedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ChargedData.class, SpongeChargedData.class, ImmutableChargedData.class,
+                ImmutableSpongeChargedData.class, chargedDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -582,6 +592,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.FISH_TYPE, new FishValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_PLAYER, new SkullRepresentedPlayerProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_PLAYER, new ItemSkullRepresentedPlayerValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CREEPER_CHARGED, new ChargedValueProcessor());
     }
 
 }
