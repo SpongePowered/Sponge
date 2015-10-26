@@ -201,6 +201,7 @@ public class KeyRegistry {
         keyMap.put("double_plant_type", makeSingleKey(DoublePlantType.class, Value.class, of("DoublePlantType")));
         keyMap.put("big_mushroom_type", makeSingleKey(BigMushroomType.class, Value.class, of("BigMushroomType")));
         keyMap.put("ai_enabled", makeSingleKey(Boolean.class, Value.class, of("IsAiEnabled")));
+        keyMap.put("creeper_charged", makeSingleKey(Boolean.class, Value.class, of("IsCreeperCharged")));
 
     }
 

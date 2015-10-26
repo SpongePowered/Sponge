@@ -75,6 +75,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgentData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableChargedData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
@@ -139,6 +140,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.WallData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
@@ -234,6 +236,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAgentData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeChargedData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElderData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
@@ -298,6 +301,7 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeWallData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
@@ -360,6 +364,7 @@ import org.spongepowered.common.data.processor.data.block.WallDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.AgentDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.BreathingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.CareerDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.ChargedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ElderDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ExpOrbDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ExperienceHolderDataProcessor;
@@ -443,6 +448,7 @@ import org.spongepowered.common.data.processor.value.entity.HorseColorValueProce
 import org.spongepowered.common.data.processor.value.entity.HorseStyleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.HorseVariantValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.IsAiEnabledValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.ChargedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.IsFlyingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.IsShearedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.IsSittingValueProcessor;
@@ -789,6 +795,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
                 ImmutableSpongeAgentData.class, agentDataProcessor);
 
+        final ChargedDataProcessor chargedDataProcessor = new ChargedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ChargedData.class, SpongeChargedData.class, ImmutableChargedData.class,
+                ImmutableSpongeChargedData.class, chargedDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -874,6 +884,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.DISGUISED_BLOCK_TYPE, new DisguisedBlockTypeValueProcessor());
         dataRegistry.registerValueProcessor(Keys.COLOR, new ItemColorValueProcessor());
         dataRegistry.registerValueProcessor(Keys.AI_ENABLED, new IsAiEnabledValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CREEPER_CHARGED, new ChargedValueProcessor());
     }
 
 }
