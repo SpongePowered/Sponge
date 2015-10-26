@@ -43,8 +43,9 @@ import java.util.List;
 public class MixinWorld {
 
     // ESS - endStartSection
-    protected static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
+    private static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
+    @Shadow public boolean isRemote;
     @Shadow public List<Entity> loadedEntityList;
     @Shadow public List<TileEntity> loadedTileEntityList;
 
@@ -57,43 +58,57 @@ public class MixinWorld {
 
     @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=remove", shift = At.Shift.AFTER) )
     private void onEntityRemovalBegin(CallbackInfo ci) {
-        this.timings.entityRemoval.startTiming();
+        if (!isRemote) {
+            this.timings.entityRemoval.startTiming();
+        }
     }
 
     @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=regular", shift = At.Shift.AFTER) )
     private void onEntityRemovalEnd(CallbackInfo ci) {
-        this.timings.entityRemoval.stopTiming();
-        TimingHistory.entityTicks += this.loadedEntityList.size();
-        this.timings.entityTick.startTiming();
+        if (!isRemote) {
+            this.timings.entityRemoval.stopTiming();
+            TimingHistory.entityTicks += this.loadedEntityList.size();
+            this.timings.entityTick.startTiming();
+        }
     }
 
     @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;updateEntity(Lnet/minecraft/entity/Entity;)V") )
     private void onBeginEntityTick(CallbackInfo ci) {
-        SpongeTimings.tickEntityTimer.startTiming();
-        // TODO entity.tickTimer.startTiming();
+        if (!isRemote) {
+            SpongeTimings.tickEntityTimer.startTiming();
+            // TODO entity.tickTimer.startTiming();
+        }
     }
 
     @Inject(method = "updateEntities", at = {
             @At(value = "INVOKE", target = "Lnet/minecraft/world/World;updateEntity(Lnet/minecraft/entity/Entity;)V", shift = At.Shift.AFTER),
             @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 1)})
     private void onEndEntityTick(CallbackInfo ci) {
-        SpongeTimings.tickEntityTimer.stopTiming();
-        // TODO entity.tickTimer.stopTiming();
+        if (!isRemote) {
+            SpongeTimings.tickEntityTimer.stopTiming();
+            // TODO entity.tickTimer.stopTiming();
+        }
     }
 
     @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=blockEntities", shift = At.Shift.AFTER) )
     private void onTileEntityTickBegin(CallbackInfo ci) {
-        this.timings.entityTick.stopTiming();
-        // TODO timings.tileEntityTick.startTiming();
+        if (!isRemote) {
+            this.timings.entityTick.stopTiming();
+            // TODO timings.tileEntityTick.startTiming();
+        }
     }
 
     @Inject(method = "updateEntities", at = @At("RETURN") )
     private void addTileEntityTicks(CallbackInfo ci) {
-        TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
+        if (!isRemote) {
+            TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
+        }
     }
 
     @Inject(method = "updateEntityWithOptionalForce", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;ticksExisted:I", opcode = Opcodes.GETFIELD) )
     private void incrementActivatedEntityTicks(CallbackInfo ci) {
-        TimingHistory.activatedEntityTicks++;
+        if (!isRemote) {
+            TimingHistory.activatedEntityTicks++;
+        }
     }
 }

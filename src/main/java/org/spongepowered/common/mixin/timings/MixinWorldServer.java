@@ -33,20 +33,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer extends MixinWorld {
 
+    private static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickPending") )
     private void onBeginTickBlockUpdate(CallbackInfo ci) {
-        this.timings.scheduledBlocks.startTiming();
+        if (!this.isRemote) {
+            this.timings.scheduledBlocks.startTiming();
+        }
     }
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickBlocks") )
     private void onAfterTickBlockUpdate(CallbackInfo ci) {
-        this.timings.scheduledBlocks.stopTiming();
-        this.timings.chunkTicks.startTiming();
+        if (!this.isRemote) {
+            this.timings.scheduledBlocks.stopTiming();
+            this.timings.chunkTicks.startTiming();
+        }
     }
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=chunkMap") )
     private void onBeginUpdateBlocks(CallbackInfo ci) {
-        this.timings.chunkTicks.stopTiming();
+        if (!this.isRemote) {
+            this.timings.chunkTicks.stopTiming();
+        }
     }
 }
