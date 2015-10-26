@@ -60,7 +60,10 @@ public class ItemDurabilityValueProcessor extends AbstractSpongeValueProcessor<I
 
     @Override
     public Optional<Integer> getVal(ItemStack container) {
-        return Optional.of(container.getMaxDamage() - container.getItemDamage());
+        if(container.getItem().isDamageable()) {
+            return Optional.of(container.getMaxDamage() - container.getItemDamage());
+        }
+        return Optional.empty();
     }
 
     @Override

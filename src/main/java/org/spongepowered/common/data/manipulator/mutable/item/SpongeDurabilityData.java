@@ -67,11 +67,8 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
     }
 
     public void setDurability(int durability) {
-        if (durability >= 0) {
-            this.durability = durability;
-        } else {
-            throw new IllegalArgumentException("Invalid value for durability");
-        }
+        checkArgument(durability >= 0, "Durability cannot be less than zero!");
+        this.durability = durability;
     }
 
     @Override
@@ -79,7 +76,6 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
         return SpongeValueBuilder.boundedBuilder(Keys.ITEM_DURABILITY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(60)
                 .actualValue(this.durability)
                 .build();
     }

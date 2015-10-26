@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
@@ -37,18 +36,22 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeDurabilityData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeDurabilityData extends AbstractImmutableData<ImmutableDurabilityData, DurabilityData> implements ImmutableDurabilityData {
 
-    final int durability;
+    final ImmutableBoundedValue<Integer> durability;
     final ImmutableValue<Boolean> unbreakable;
 
     public ImmutableSpongeDurabilityData(int durability, boolean unbreakable) {
         super(ImmutableDurabilityData.class);
         checkArgument(durability >= 0);
-        this.durability = durability;
+        this.durability = SpongeValueBuilder.boundedBuilder(Keys.ITEM_DURABILITY)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .actualValue(durability)
+                .build().asImmutable();
         this.unbreakable = ImmutableSpongeValue.cachedOf(Keys.UNBREAKABLE, false, unbreakable);
         this.registerGetters();
     }
@@ -59,7 +62,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_DURABILITY, () -> this.durability);
+        registerFieldGetter(Keys.ITEM_DURABILITY, this.durability::get);
         registerKeyValue(Keys.ITEM_DURABILITY, this::durability);
 
         registerFieldGetter(Keys.UNBREAKABLE, this.unbreakable::get);
@@ -68,7 +71,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     public ImmutableBoundedValue<Integer> durability() {
-        return new ImmutableSpongeBoundedValue<Integer>(Keys.ITEM_DURABILITY, this.durability, 60, intComparator(), 0, Integer.MAX_VALUE);
+        return this.durability;
     }
 
     @Override
@@ -78,13 +81,13 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     public DurabilityData asMutable() {
-        return new SpongeDurabilityData(this.durability, this.unbreakable.get());
+        return new SpongeDurabilityData(this.durability.get(), this.unbreakable.get());
     }
 
     @Override
     public int compareTo(ImmutableDurabilityData o) {
         return ComparisonChain.start()
-                .compare(this.durability, o.durability().get().intValue())
+                .compare(this.durability.get().intValue(), o.durability().get().intValue())
                 .compare(this.unbreakable.get(), o.unbreakable().get())
                 .result();
     }
@@ -92,7 +95,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(Keys.ITEM_DURABILITY, this.durability)
+                .set(Keys.ITEM_DURABILITY, this.durability.get())
                 .set(Keys.UNBREAKABLE, this.unbreakable.get());
     }
 }
