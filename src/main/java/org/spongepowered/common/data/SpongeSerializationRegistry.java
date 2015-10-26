@@ -101,6 +101,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCoalData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCookedFishData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableDurabilityData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableFishData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppleData;
@@ -166,6 +167,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.CoalData;
 import org.spongepowered.api.data.manipulator.mutable.item.CookedFishData;
+import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.FishData;
 import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
@@ -262,6 +264,7 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeA
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCoalData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCookedFishData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeDurabilityData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeFishData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGoldenAppleData;
@@ -327,6 +330,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCoalData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCookedFishData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeDurabilityData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeFishData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
@@ -390,6 +394,7 @@ import org.spongepowered.common.data.processor.data.entity.WolfWetDataProcessor;
 import org.spongepowered.common.data.processor.data.item.BreakableDataProcessor;
 import org.spongepowered.common.data.processor.data.item.CoalDataProcessor;
 import org.spongepowered.common.data.processor.data.item.CookedFishDataProcessor;
+import org.spongepowered.common.data.processor.data.item.DurabilityDataProcessor;
 import org.spongepowered.common.data.processor.data.item.FishDataProcessor;
 import org.spongepowered.common.data.processor.data.item.GoldenAppleDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemAuthorDataProcessor;
@@ -474,11 +479,13 @@ import org.spongepowered.common.data.processor.value.item.FishValueProcessor;
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemColorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemDurabilityValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullRepresentedPlayerValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemWetValueProcessor;
 import org.spongepowered.common.data.processor.value.item.PlaceableValueProcessor;
+import org.spongepowered.common.data.processor.value.item.UnbreakableValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.MaxBurnTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.MaxCookTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.PassedBurnTimeValueProcessor;
@@ -799,6 +806,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(ChargedData.class, SpongeChargedData.class, ImmutableChargedData.class,
                 ImmutableSpongeChargedData.class, chargedDataProcessor);
 
+        final DurabilityDataProcessor durabilityDataProcessor = new DurabilityDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(DurabilityData.class, SpongeDurabilityData.class, ImmutableDurabilityData.class,
+                ImmutableSpongeDurabilityData.class, durabilityDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -885,6 +896,8 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.COLOR, new ItemColorValueProcessor());
         dataRegistry.registerValueProcessor(Keys.AI_ENABLED, new IsAiEnabledValueProcessor());
         dataRegistry.registerValueProcessor(Keys.CREEPER_CHARGED, new ChargedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.UNBREAKABLE, new UnbreakableValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.ITEM_DURABILITY, new ItemDurabilityValueProcessor());
     }
 
 }

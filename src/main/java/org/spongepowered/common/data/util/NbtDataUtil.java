@@ -79,6 +79,8 @@ public class NbtDataUtil {
 
     public static final String ITEM_SKULL_OWNER = "SkullOwner";
 
+    public static final String ITEM_UNBREAKABLE = "Unbreakable";
+
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
     public static final byte TAG_BYTE = 1;

@@ -203,6 +203,8 @@ public class KeyRegistry {
         keyMap.put("ai_enabled", makeSingleKey(Boolean.class, Value.class, of("IsAiEnabled")));
         keyMap.put("creeper_charged", makeSingleKey(Boolean.class, Value.class, of("IsCreeperCharged")));
 
+        keyMap.put("item_durability", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ItemDurability")));
+        keyMap.put("unbreakable", makeSingleKey(Boolean.class, Value.class, of("Unbreakable")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
