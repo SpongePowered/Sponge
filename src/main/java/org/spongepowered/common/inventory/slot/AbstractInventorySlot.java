@@ -22,31 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.inventory.slot;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.world.gen.SpongePopulatorType;
 
-public class StaticMixinHelper {
+public abstract class AbstractInventorySlot implements InventorySlot {
 
-    public static EntityPlayerMP processingPlayer = null;
-    public static Packet processingPacket = null;
-    public static SpongePopulatorType populator = null;
-    public static ItemStack lastPlayerItem = null;
-    @SuppressWarnings("rawtypes")
-    public static Class lastPopulatorClass = null;
-    public static boolean isFlowerGen = false;
-    public static ItemStackSnapshot lastCursor = null;
-    public static Container lastOpenContainer = null;
-    public static IInventory lastOpenInventory = null;
+    private final IInventory inventory;
+    private final int index;
 
-    @SuppressWarnings({"deprecation", "rawtypes"})
-    public static Class getCallerClass(int level) {
-        return sun.reflect.Reflection.getCallerClass(level);
+    public AbstractInventorySlot(IInventory inventory, int index) {
+        this.inventory = inventory;
+        this.index = index;
+    }
+
+    @Override
+    public IInventory getNMSInventory() {
+        return inventory;
+    }
+
+    @Override
+    public int getSlotNumber() {
+        return index;
     }
 }

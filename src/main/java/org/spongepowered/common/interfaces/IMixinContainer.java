@@ -22,31 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.world.gen.SpongePopulatorType;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
-public class StaticMixinHelper {
+import java.util.List;
 
-    public static EntityPlayerMP processingPlayer = null;
-    public static Packet processingPacket = null;
-    public static SpongePopulatorType populator = null;
-    public static ItemStack lastPlayerItem = null;
-    @SuppressWarnings("rawtypes")
-    public static Class lastPopulatorClass = null;
-    public static boolean isFlowerGen = false;
-    public static ItemStackSnapshot lastCursor = null;
-    public static Container lastOpenContainer = null;
-    public static IInventory lastOpenInventory = null;
+public interface IMixinContainer {
 
-    @SuppressWarnings({"deprecation", "rawtypes"})
-    public static Class getCallerClass(int level) {
-        return sun.reflect.Reflection.getCallerClass(level);
-    }
+    List<SlotTransaction> getCapturedTransactions();
+
+    boolean capturingInventory();
+
+    void setCaptureInventory(boolean flag);
 }

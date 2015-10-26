@@ -22,31 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
+import com.google.common.base.Objects;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.world.gen.SpongePopulatorType;
+import net.minecraft.inventory.Slot;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.inventory.slot.InventorySlot;
 
-public class StaticMixinHelper {
+@Mixin(Slot.class)
+public abstract class MixinSlot implements InventorySlot {
 
-    public static EntityPlayerMP processingPlayer = null;
-    public static Packet processingPacket = null;
-    public static SpongePopulatorType populator = null;
-    public static ItemStack lastPlayerItem = null;
-    @SuppressWarnings("rawtypes")
-    public static Class lastPopulatorClass = null;
-    public static boolean isFlowerGen = false;
-    public static ItemStackSnapshot lastCursor = null;
-    public static Container lastOpenContainer = null;
-    public static IInventory lastOpenInventory = null;
+    @Shadow public IInventory inventory;
+    @Shadow public int slotNumber;
 
-    @SuppressWarnings({"deprecation", "rawtypes"})
-    public static Class getCallerClass(int level) {
-        return sun.reflect.Reflection.getCallerClass(level);
+    @Override
+    public IInventory getNMSInventory() {
+        return inventory;
+    }
+
+    @Override
+    public int getSlotNumber() {
+        return slotNumber;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("parent", inventory)
+                .add("slotNumber", slotNumber)
+                .toString();
     }
 }
