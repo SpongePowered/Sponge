@@ -22,24 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry;
+package org.spongepowered.common.registry.type;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.RegistryModule;
+import org.spongepowered.common.text.chat.SpongeChatType;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Registration {
+public class ChatTypeRegistryModule implements RegistryModule {
 
-    Phase value();
+    private static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
+        .put("chat", new SpongeChatType((byte) 0))
+        .put("system", new SpongeChatType((byte) 1))
+        .put("action_bar", new SpongeChatType((byte) 2))
+        .build();
 
-    enum Phase {
-        PRE_INIT,
-        INIT,
-        POST_INIT,
-        ;
+    @Override
+    public void registerDefaults() {
+        RegistryHelper.mapFields(ChatTypes.class, chatTypeMappings);
     }
-
 }

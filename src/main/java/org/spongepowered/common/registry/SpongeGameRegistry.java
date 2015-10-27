@@ -39,7 +39,6 @@ import com.google.common.reflect.TypeToken;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockFlower;
-import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.BlockWall;
 import net.minecraft.entity.Entity;
@@ -65,9 +64,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -128,8 +124,6 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.Fishes;
-import org.spongepowered.api.data.type.GoldenApple;
-import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
@@ -137,8 +131,6 @@ import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.HorseVariants;
-import org.spongepowered.api.data.type.LogAxes;
-import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.data.type.OcelotType;
@@ -170,13 +162,10 @@ import org.spongepowered.api.data.value.ValueBuilder;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
@@ -192,8 +181,6 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCauseBuilder;
 import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCauseBuilder;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCauseBuilder;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCauseBuilder;
-import org.spongepowered.api.item.Enchantment;
-import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
@@ -247,10 +234,8 @@ import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.WorldBuilder;
@@ -310,7 +295,6 @@ import org.spongepowered.common.data.type.SpongeTreeType;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
-import org.spongepowered.common.effect.sound.SpongeSound;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityMeta;
@@ -322,12 +306,11 @@ import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourc
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
-import org.spongepowered.common.item.SpongeGoldenApple;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.potion.SpongePotionBuilder;
+import org.spongepowered.common.registry.type.RotationRegistryModule;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
-import org.spongepowered.common.rotation.SpongeRotation;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeVisibility;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
@@ -344,7 +327,6 @@ import org.spongepowered.common.text.selector.SpongeSelectorType;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.weather.SpongeWeather;
-import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldBuilder;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
@@ -374,7 +356,7 @@ import java.util.function.Function;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
-    private static final Map<Class<? extends CatalogType>, CatalogRegistry<?>> catalogRegistries = new MapMaker().concurrencyLevel(4).makeMap();
+    private static final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> catalogRegistries = new MapMaker().concurrencyLevel(4).makeMap();
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
@@ -396,30 +378,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static final Map<Team.EnumVisible, SpongeVisibility> enumVisible = Maps.newEnumMap(Team.EnumVisible.class);
     public static final Map<String, DamageType> damageSourceToTypeMappings = Maps.newHashMap();
 
-    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
-            .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
-            .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
-            .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
-            .put("strikethrough", SpongeTextStyle.of(EnumChatFormatting.STRIKETHROUGH))
-            .put("obfuscated", SpongeTextStyle.of(EnumChatFormatting.OBFUSCATED))
-            .put("reset", SpongeTextStyle.of(EnumChatFormatting.RESET))
-            .build();
-    private static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
-            .put("chat", new SpongeChatType((byte) 0))
-            .put("system", new SpongeChatType((byte) 1))
-            .put("action_bar", new SpongeChatType((byte) 2))
-            .build();
-
-    private static final ImmutableMap<String, Rotation> rotationMappings = new ImmutableMap.Builder<String, Rotation>()
-            .put("top", new SpongeRotation(0))
-            .put("top_right", new SpongeRotation(45))
-            .put("right", new SpongeRotation(90))
-            .put("bottom_right", new SpongeRotation(135))
-            .put("bottom", new SpongeRotation(180))
-            .put("bottom_left", new SpongeRotation(225))
-            .put("left", new SpongeRotation(270))
-            .put("top_left", new SpongeRotation(315))
-            .build();
     public static final ImmutableBiMap<Direction, EnumFacing> directionMap = ImmutableBiMap.<Direction, EnumFacing>builder()
             .put(Direction.NORTH, EnumFacing.NORTH)
             .put(Direction.EAST, EnumFacing.EAST)
@@ -427,13 +385,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put(Direction.WEST, EnumFacing.WEST)
             .put(Direction.UP, EnumFacing.UP)
             .put(Direction.DOWN, EnumFacing.DOWN)
-            .build();
-    public static final ImmutableMap<String, GameMode> gameModeMappings = new ImmutableMap.Builder<String, GameMode>()
-            .put("survival", (GameMode) (Object) WorldSettings.GameType.SURVIVAL)
-            .put("creative", (GameMode) (Object) WorldSettings.GameType.CREATIVE)
-            .put("adventure", (GameMode) (Object) WorldSettings.GameType.ADVENTURE)
-            .put("spectator", (GameMode) (Object) WorldSettings.GameType.SPECTATOR)
-            .put("not_set", (GameMode) (Object) WorldSettings.GameType.NOT_SET)
             .build();
     private static final ImmutableMap<String, Difficulty> difficultyMappings = new ImmutableMap.Builder<String, Difficulty>()
             .put("peaceful", (Difficulty) (Object) EnumDifficulty.PEACEFUL)
@@ -465,7 +416,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public final Map<Class<? extends net.minecraft.world.gen.feature.WorldGenerator>, PopulatorType> populatorClassToTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newHashMap();
-    public final Map<String, Enchantment> enchantmentMappings = Maps.newHashMap();
     private final Map<String, Career> careerMappings = Maps.newHashMap();
     private final Map<String, Profession> professionMappings = Maps.newHashMap();
     private final Map<Integer, List<Career>> professionToCareerMappings = Maps.newHashMap();
@@ -475,7 +425,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, ParticleType> particleByName = Maps.newHashMap();
     private final List<PotionEffectType> potionList = new ArrayList<>();
     private final List<BiomeType> biomeTypes = new ArrayList<>();
-    private final Map<String, SoundType> soundNames = Maps.newHashMap();
     public final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
     private final WorldGeneratorRegistry worldGeneratorRegistry = new WorldGeneratorRegistry();
     private final Hashtable<Class<? extends WorldProvider>, Integer> classToProviders = new Hashtable<>();
@@ -524,12 +473,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("pink_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.PINK_TULIP)
             .put("oxeye_daisy", (PlantType) (Object) BlockFlower.EnumFlowerType.OXEYE_DAISY)
             .build();
-    private final Map<String, LogAxis> logAxisMappings = new ImmutableMap.Builder<String, LogAxis>()
-        .put("x", (LogAxis) (Object) BlockLog.EnumAxis.X)
-        .put("y", (LogAxis) (Object) BlockLog.EnumAxis.Y)
-        .put("z", (LogAxis) (Object) BlockLog.EnumAxis.Z)
-        .put("none", (LogAxis) (Object) BlockLog.EnumAxis.NONE)
-        .build();
 
     private final Map<String, WallType> wallTypeMappings = new ImmutableMap.Builder<String, WallType>()
         .put("normal", (WallType) (Object) BlockWall.EnumType.NORMAL)
@@ -541,11 +484,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         .put("coarse_dirt", (DirtType) (Object) BlockDirt.DirtType.COARSE_DIRT)
         .put("podzol", (DirtType) (Object) BlockDirt.DirtType.PODZOL)
         .build();
-
-    public final Map<String, GoldenApple> goldenAppleMappings = new ImmutableMap.Builder<String, GoldenApple>()
-            .put("golden_apple", new SpongeGoldenApple(0, "GOLDEN_APPLE"))
-            .put("enchanted_golden_apple", new SpongeGoldenApple(1, "ENCHANTED_GOLDEN_APPLE"))
-            .build();
 
     private final Map<String, Weather> weatherMappings = Maps.newHashMap();
 
@@ -562,7 +500,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(BiomeType.class, this.biomeTypeMappings)
                 .put(BlockType.class, blockTypeMappings)
                 .put(Career.class, this.careerMappings)
-                .put(ChatType.class, chatTypeMappings)
                 .put(Criterion.class, this.criteriaMap)
                 .put(CookedFish.class, this.cookedFishMappings)
                 .put(ComparatorType.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -573,19 +510,15 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(DisplaySlot.class, this.displaySlotMappings)
                 .put(DoublePlantType.class, this.doublePlantMappings)
                 .put(DyeColor.class, this.dyeColorMappings)
-                .put(Enchantment.class, this.enchantmentMappings)
                 .put(EntityType.class, this.entityTypeMappings)
                 .put(EquipmentType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(FireworkShape.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(Fish.class, this.fishMappings)
-                .put(GameMode.class, gameModeMappings)
-                .put(GoldenApple.class, this.goldenAppleMappings)
                 .put(Hinge.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(HorseColor.class, SpongeEntityConstants.HORSE_COLORS)
                 .put(HorseStyle.class, SpongeEntityConstants.HORSE_STYLES)
                 .put(HorseVariant.class, SpongeEntityConstants.HORSE_VARIANTS)
                 .put(ItemType.class, itemTypeMappings)
-                .put(LogAxis.class, this.logAxisMappings)
                 .put(NotePitch.class, this.notePitchMappings)
                 .put(ObjectiveDisplayMode.class, objectiveDisplayModeMappings)
                 .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
@@ -606,14 +539,12 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(SkeletonType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(SkullType.class, this.skullTypeMappings)
                 .put(SlabType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(SoundType.class, this.soundNames)
                 .put(StairShape.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(Statistic.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(StatisticFormat.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(StatisticGroup.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(TextColor.class, textColorMappings)
-                .put(TextStyle.Base.class, textStyleMappings)
                 .put(TileEntityType.class, this.tileEntityTypeMappings)
                 .put(TreeType.class, this.treeTypeMappings)
                 .put(Visibility.class, visibilityMappings)
@@ -677,11 +608,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             }
             return builder.build();
         }
-    }
-
-    @Override
-    public <T> Optional<T> createBuilder(Class<T> builderClass) {
-        return null;
     }
 
     @Override
@@ -863,7 +789,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<Rotation> getRotationFromDegree(int degrees) {
-        for (Rotation rotation : rotationMappings.values()) {
+        for (Rotation rotation : RotationRegistryModule.rotationMap.values()) {
             if (rotation.getAngle() == degrees) {
                 return Optional.of(rotation);
             }
@@ -978,35 +904,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.particleByName.put(particle.getName(), particle);
     }
 
-    private void setEnchantments() {
-        this.enchantmentMappings.put("protection", (Enchantment) net.minecraft.enchantment.Enchantment.protection);
-        this.enchantmentMappings.put("fire_protection", (Enchantment) net.minecraft.enchantment.Enchantment.fireProtection);
-        this.enchantmentMappings.put("feather_falling", (Enchantment) net.minecraft.enchantment.Enchantment.featherFalling);
-        this.enchantmentMappings.put("blast_protection", (Enchantment) net.minecraft.enchantment.Enchantment.blastProtection);
-        this.enchantmentMappings.put("projectile_protection", (Enchantment) net.minecraft.enchantment.Enchantment.projectileProtection);
-        this.enchantmentMappings.put("respiration", (Enchantment) net.minecraft.enchantment.Enchantment.respiration);
-        this.enchantmentMappings.put("aqua_affinity", (Enchantment) net.minecraft.enchantment.Enchantment.aquaAffinity);
-        this.enchantmentMappings.put("thorns", (Enchantment) net.minecraft.enchantment.Enchantment.thorns);
-        this.enchantmentMappings.put("depth_strider", (Enchantment) net.minecraft.enchantment.Enchantment.depthStrider);
-        this.enchantmentMappings.put("sharpness", (Enchantment) net.minecraft.enchantment.Enchantment.sharpness);
-        this.enchantmentMappings.put("smite", (Enchantment) net.minecraft.enchantment.Enchantment.smite);
-        this.enchantmentMappings.put("bane_of_arthropods", (Enchantment) net.minecraft.enchantment.Enchantment.baneOfArthropods);
-        this.enchantmentMappings.put("knockback", (Enchantment) net.minecraft.enchantment.Enchantment.knockback);
-        this.enchantmentMappings.put("fire_aspect", (Enchantment) net.minecraft.enchantment.Enchantment.fireAspect);
-        this.enchantmentMappings.put("looting", (Enchantment) net.minecraft.enchantment.Enchantment.looting);
-        this.enchantmentMappings.put("efficiency", (Enchantment) net.minecraft.enchantment.Enchantment.efficiency);
-        this.enchantmentMappings.put("silk_touch", (Enchantment) net.minecraft.enchantment.Enchantment.silkTouch);
-        this.enchantmentMappings.put("unbreaking", (Enchantment) net.minecraft.enchantment.Enchantment.unbreaking);
-        this.enchantmentMappings.put("fortune", (Enchantment) net.minecraft.enchantment.Enchantment.fortune);
-        this.enchantmentMappings.put("power", (Enchantment) net.minecraft.enchantment.Enchantment.power);
-        this.enchantmentMappings.put("punch", (Enchantment) net.minecraft.enchantment.Enchantment.punch);
-        this.enchantmentMappings.put("flame", (Enchantment) net.minecraft.enchantment.Enchantment.flame);
-        this.enchantmentMappings.put("infinity", (Enchantment) net.minecraft.enchantment.Enchantment.infinity);
-        this.enchantmentMappings.put("luck_of_the_sea", (Enchantment) net.minecraft.enchantment.Enchantment.luckOfTheSea);
-        this.enchantmentMappings.put("lure", (Enchantment) net.minecraft.enchantment.Enchantment.lure);
-
-        RegistryHelper.mapFields(Enchantments.class, this.enchantmentMappings);
-    }
 
     // Note: This is probably fairly slow, but only needs to be run rarely.
     private void setPotionTypes() {
@@ -1145,45 +1042,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
-    private static void addTextColor(EnumChatFormatting handle, Color color) {
-        SpongeTextColor spongeColor = new SpongeTextColor(handle, color);
-        textColorMappings.put(handle.name().toLowerCase(), spongeColor);
-        enumChatColor.put(handle, spongeColor);
-    }
-
-    private void setTextColors() {
-        addTextColor(EnumChatFormatting.BLACK, Color.BLACK);
-        addTextColor(EnumChatFormatting.DARK_BLUE, new Color(0x0000AA));
-        addTextColor(EnumChatFormatting.DARK_GREEN, new Color(0x00AA00));
-        addTextColor(EnumChatFormatting.DARK_AQUA, new Color(0x00AAAA));
-        addTextColor(EnumChatFormatting.DARK_RED, new Color(0xAA0000));
-        addTextColor(EnumChatFormatting.DARK_PURPLE, new Color(0xAA00AA));
-        addTextColor(EnumChatFormatting.GOLD, new Color(0xFFAA00));
-        addTextColor(EnumChatFormatting.GRAY, new Color(0xAAAAAA));
-        addTextColor(EnumChatFormatting.DARK_GRAY, new Color(0x555555));
-        addTextColor(EnumChatFormatting.BLUE, new Color(0x5555FF));
-        addTextColor(EnumChatFormatting.GREEN, new Color(0x55FF55));
-        addTextColor(EnumChatFormatting.AQUA, new Color(0x00FFFF));
-        addTextColor(EnumChatFormatting.RED, new Color(0xFF5555));
-        addTextColor(EnumChatFormatting.LIGHT_PURPLE, new Color(0xFF55FF));
-        addTextColor(EnumChatFormatting.YELLOW, new Color(0xFFFF55));
-        addTextColor(EnumChatFormatting.WHITE, Color.WHITE);
-        addTextColor(EnumChatFormatting.RESET, Color.WHITE);
-
-        RegistryHelper.mapFields(TextColors.class, textColorMappings);
-        RegistryHelper.mapFields(ChatTypes.class, chatTypeMappings);
-        RegistryHelper.mapFields(TextStyles.class, textStyleMappings);
-    }
-
     private void setCoal() {
         // Because Minecraft doesn't have any enum stuff for this....
         this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL"));
         this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL"));
         RegistryHelper.mapFields(CoalTypes.class, this.coaltypeMappings);
-    }
-
-    private void setRotations() {
-        RegistryHelper.mapFields(Rotations.class, rotationMappings);
     }
 
     private void setWeathers() {
@@ -1282,276 +1145,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         // RegistryHelper.setFactory(Titles.class, new SpongeTitleFactory());
     }
 
-    private void setDimensionTypes() {
-        try {
-            DimensionTypes.class.getDeclaredField("NETHER").set(null, new SpongeDimensionType("nether", true, WorldProviderHell.class, -1));
-            DimensionTypes.class.getDeclaredField("OVERWORLD").set(null, new SpongeDimensionType("overworld", true, WorldProviderSurface.class, 0));
-            DimensionTypes.class.getDeclaredField("END").set(null, new SpongeDimensionType("end", false, WorldProviderEnd.class, 1));
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setGameModes() {
-        RegistryHelper.mapFields(GameModes.class, gameModeMappings);
-    }
-
-    private void setSounds() {
-        final Map<String, String> soundMappings = Maps.newHashMap();
-        soundMappings.put("ambience_cave", "ambient.cave.cave");
-        soundMappings.put("ambience_rain", "ambient.weather.rain");
-        soundMappings.put("ambience_thunder", "ambient.weather.thunder");
-        soundMappings.put("anvil_break", "random.anvil_break");
-        soundMappings.put("anvil_land", "random.anvil_land");
-        soundMappings.put("anvil_use", "random.anvil_use");
-        soundMappings.put("arrow_hit", "random.bowhit");
-        soundMappings.put("burp", "random.burp");
-        soundMappings.put("chest_close", "random.chestclosed");
-        soundMappings.put("chest_open", "random.chestopen");
-        soundMappings.put("click", "random.click");
-        soundMappings.put("door_close", "random.door_close");
-        soundMappings.put("door_open", "random.door_open");
-        soundMappings.put("drink", "random.drink");
-        soundMappings.put("eat", "random.eat");
-        soundMappings.put("explode", "random.explode");
-        soundMappings.put("fall_big", "game.player.hurt.fall.big");
-        soundMappings.put("fall_small", "game.player.hurt.fall.small");
-        soundMappings.put("fire", "fire.fire");
-        soundMappings.put("fire_ignite", "fire.ignite");
-        soundMappings.put("firecharge_use", "item.fireCharge.use");
-        soundMappings.put("fizz", "random.fizz");
-        soundMappings.put("fuse", "game.tnt.primed");
-        soundMappings.put("glass", "dig.glass");
-        soundMappings.put("gui_button", "gui.button.press");
-        soundMappings.put("hurt_flesh", "game.player.hurt");
-        soundMappings.put("item_break", "random.break");
-        soundMappings.put("item_pickup", "random.pop");
-        soundMappings.put("lava", "liquid.lava");
-        soundMappings.put("lava_pop", "liquid.lavapop");
-        soundMappings.put("level_up", "random.levelup");
-        soundMappings.put("minecart_base", "minecart.base");
-        soundMappings.put("minecart_inside", "minecart.inside");
-        soundMappings.put("music_game", "music.game");
-        soundMappings.put("music_creative", "music.game.creative");
-        soundMappings.put("music_end", "music.game.end");
-        soundMappings.put("music_credits", "music.game.end.credits");
-        soundMappings.put("music_dragon", "music.game.end.dragon");
-        soundMappings.put("music_nether", "music.game.nether");
-        soundMappings.put("music_menu", "music.menu");
-        soundMappings.put("note_bass", "note.bass");
-        soundMappings.put("note_piano", "note.harp");
-        soundMappings.put("note_bass_drum", "note.bd");
-        soundMappings.put("note_sticks", "note.hat");
-        soundMappings.put("note_bass_guitar", "note.bassattack");
-        soundMappings.put("note_snare_drum", "note.snare");
-        soundMappings.put("note_pling", "note.pling");
-        soundMappings.put("orb_pickup", "random.orb");
-        soundMappings.put("piston_extend", "tile.piston.out");
-        soundMappings.put("piston_retract", "tile.piston.in");
-        soundMappings.put("portal", "portal.portal");
-        soundMappings.put("portal_travel", "portal.travel");
-        soundMappings.put("portal_trigger", "portal.trigger");
-        soundMappings.put("potion_smash", "game.potion.smash");
-        soundMappings.put("records_11", "records.11");
-        soundMappings.put("records_13", "records.13");
-        soundMappings.put("records_blocks", "records.blocks");
-        soundMappings.put("records_cat", "records.cat");
-        soundMappings.put("records_chirp", "records.chirp");
-        soundMappings.put("records_far", "records.far");
-        soundMappings.put("records_mall", "records.mall");
-        soundMappings.put("records_mellohi", "records.mellohi");
-        soundMappings.put("records_stal", "records.stal");
-        soundMappings.put("records_strad", "records.strad");
-        soundMappings.put("records_wait", "records.wait");
-        soundMappings.put("records_ward", "records.ward");
-        soundMappings.put("shoot_arrow", "random.bow");
-        soundMappings.put("splash", "random.splash");
-        soundMappings.put("splash2", "game.player.swim.splash");
-        soundMappings.put("step_grass", "step.grass");
-        soundMappings.put("step_gravel", "step.gravel");
-        soundMappings.put("step_ladder", "step.ladder");
-        soundMappings.put("step_sand", "step.sand");
-        soundMappings.put("step_snow", "step.snow");
-        soundMappings.put("step_stone", "step.stone");
-        soundMappings.put("step_wood", "step.wood");
-        soundMappings.put("step_wool", "step.cloth");
-        soundMappings.put("swim", "game.player.swim");
-        soundMappings.put("water", "liquid.water");
-        soundMappings.put("wood_click", "random.wood_click");
-        soundMappings.put("bat_death", "mob.bat.death");
-        soundMappings.put("bat_hurt", "mob.bat.hurt");
-        soundMappings.put("bat_idle", "mob.bat.idle");
-        soundMappings.put("bat_loop", "mob.bat.loop");
-        soundMappings.put("bat_takeoff", "mob.bat.takeoff");
-        soundMappings.put("blaze_breath", "mob.blaze.breathe");
-        soundMappings.put("blaze_death", "mob.blaze.death");
-        soundMappings.put("blaze_hit", "mob.blaze.hit");
-        soundMappings.put("cat_hiss", "mob.cat.hiss");
-        soundMappings.put("cat_hit", "mob.cat.hitt");
-        soundMappings.put("cat_meow", "mob.cat.meow");
-        soundMappings.put("cat_purr", "mob.cat.purr");
-        soundMappings.put("cat_purreow", "mob.cat.purreow");
-        soundMappings.put("chicken_idle", "mob.chicken.say");
-        soundMappings.put("chicken_hurt", "mob.chicken.hurt");
-        soundMappings.put("chicken_egg_pop", "mob.chicken.plop");
-        soundMappings.put("chicken_walk", "mob.chicken.step");
-        soundMappings.put("cow_idle", "mob.cow.say");
-        soundMappings.put("cow_hurt", "mob.cow.hurt");
-        soundMappings.put("cow_walk", "mob.cow.step");
-        soundMappings.put("creeper_hiss", "creeper.primed");
-        soundMappings.put("creeper_hit", "mob.creeper.say");
-        soundMappings.put("creeper_death", "mob.creeper.death");
-        soundMappings.put("enderdragon_death", "mob.enderdragon.end");
-        soundMappings.put("enderdragon_growl", "mob.enderdragon.growl");
-        soundMappings.put("enderdragon_hit", "mob.enderdragon.hit");
-        soundMappings.put("enderdragon_wings", "mob.enderdragon.wings");
-        soundMappings.put("enderman_death", "mob.endermen.death");
-        soundMappings.put("enderman_hit", "mob.endermen.hit");
-        soundMappings.put("enderman_idle", "mob.endermen.idle");
-        soundMappings.put("enderman_teleport", "mob.endermen.portal");
-        soundMappings.put("enderman_scream", "mob.endermen.scream");
-        soundMappings.put("enderman_stare", "mob.endermen.stare");
-        soundMappings.put("ghast_scream", "mob.ghast.scream");
-        soundMappings.put("ghast_scream2", "mob.ghast.affectionate_scream");
-        soundMappings.put("ghast_charge", "mob.ghast.charge");
-        soundMappings.put("ghast_death", "mob.ghast.death");
-        soundMappings.put("ghast_fireball", "mob.ghast.fireball");
-        soundMappings.put("ghast_moan", "mob.ghast.moan");
-        soundMappings.put("guardian_idle", "mob.guardian.idle");
-        soundMappings.put("guardian_attack", "mob.guardian.attack");
-        soundMappings.put("guardian_curse", "mob.guardian.curse");
-        soundMappings.put("guardian_flop", "mob.guardian.flop");
-        soundMappings.put("guardian_elder_idle", "mob.guardian.elder.idle");
-        soundMappings.put("guardian_land_idle", "mob.guardian.land.idle");
-        soundMappings.put("guardian_hit", "mob.guardian.hit");
-        soundMappings.put("guardian_elder_hit", "mob.guardian.elder.hit");
-        soundMappings.put("guardian_land_hit", "mob.guardian.land.hit");
-        soundMappings.put("guardian_death", "mob.guardian.death");
-        soundMappings.put("guardian_elder_death", "mob.guardian.elder.death");
-        soundMappings.put("guardian_land_death", "mob.guardian.land.death");
-        soundMappings.put("hostile_death", "game.hostile.die");
-        soundMappings.put("hostile_hurt", "game.hostile.hurt");
-        soundMappings.put("hostile_fall_big", "game.hostile.hurt.fall.big");
-        soundMappings.put("hostile_fall_small", "game.hostile.hurt.fall.small");
-        soundMappings.put("hostile_swim", "game.hostile.swim");
-        soundMappings.put("hostile_splash", "game.hostile.swim.splash");
-        soundMappings.put("irongolem_death", "mob.irongolem.death");
-        soundMappings.put("irongolem_hit", "mob.irongolem.hit");
-        soundMappings.put("irongolem_throw", "mob.irongolem.throw");
-        soundMappings.put("irongolem_walk", "mob.irongolem.walk");
-        soundMappings.put("magmacube_walk", "mob.magmacube.big");
-        soundMappings.put("magmacube_walk2", "mob.magmacube.small");
-        soundMappings.put("magmacube_jump", "mob.magmacube.jump");
-        soundMappings.put("neutral_death", "game.neutral.die");
-        soundMappings.put("neutral_hurt", "game.neutral.hurt");
-        soundMappings.put("neutral_fall_big", "game.neutral.hurt.fall.big");
-        soundMappings.put("neutral_fall_small", "game.neutral.hurt.fall.small");
-        soundMappings.put("neutral_swim", "game.neutral.swim");
-        soundMappings.put("neutral_splash", "game.neutral.swim.splash");
-        soundMappings.put("pig_idle", "mob.pig.say");
-        soundMappings.put("pig_death", "mob.pig.death");
-        soundMappings.put("pig_walk", "mob.pig.step");
-        soundMappings.put("player_death", "game.player.die");
-        soundMappings.put("rabbit_idle", "mob.rabbit.idle");
-        soundMappings.put("rabbit_hurt", "mob.rabbit.hurt");
-        soundMappings.put("rabbit_hop", "mob.rabbit.hop");
-        soundMappings.put("rabbit_death", "mob.rabbit.death");
-        soundMappings.put("sheep_idle", "mob.sheep.say");
-        soundMappings.put("sheep_shear", "mob.sheep.shear");
-        soundMappings.put("sheep_walk", "mob.sheep.step");
-        soundMappings.put("silverfish_hit", "mob.silverfish.hit");
-        soundMappings.put("silverfish_death", "mob.silverfish.kill");
-        soundMappings.put("silverfish_idle", "mob.silverfish.say");
-        soundMappings.put("silverfish_walk", "mob.silverfish.step");
-        soundMappings.put("skeleton_idle", "mob.skeleton.say");
-        soundMappings.put("skeleton_death", "mob.skeleton.death");
-        soundMappings.put("skeleton_hurt", "mob.skeleton.hurt");
-        soundMappings.put("skeleton_walk", "mob.skeleton.step");
-        soundMappings.put("slime_attack", "mob.slime.attack");
-        soundMappings.put("slime_walk", "mob.slime.big");
-        soundMappings.put("slime_walk2", "mob.slime.small");
-        soundMappings.put("spider_idle", "mob.spider.say");
-        soundMappings.put("spider_death", "mob.spider.death");
-        soundMappings.put("spider_walk", "mob.spider.step");
-        soundMappings.put("wither_death", "mob.wither.death");
-        soundMappings.put("wither_hurt", "mob.wither.hurt");
-        soundMappings.put("wither_idle", "mob.wither.idle");
-        soundMappings.put("wither_shoot", "mob.wither.shoot");
-        soundMappings.put("wither_spawn", "mob.wither.spawn");
-        soundMappings.put("wolf_bark", "mob.wolf.bark");
-        soundMappings.put("wolf_death", "mob.wolf.death");
-        soundMappings.put("wolf_growl", "mob.wolf.growl");
-        soundMappings.put("wolf_howl", "mob.wolf.howl");
-        soundMappings.put("wolf_hurt", "mob.wolf.hurt");
-        soundMappings.put("wolf_pant", "mob.wolf.panting");
-        soundMappings.put("wolf_shake", "mob.wolf.shake");
-        soundMappings.put("wolf_walk", "mob.wolf.step");
-        soundMappings.put("wolf_whine", "mob.wolf.whine");
-        soundMappings.put("zombie_metal", "mob.zombie.metal");
-        soundMappings.put("zombie_wood", "mob.zombie.wood");
-        soundMappings.put("zombie_woodbreak", "mob.zombie.woodbreak");
-        soundMappings.put("zombie_idle", "mob.zombie.say");
-        soundMappings.put("zombie_death", "mob.zombie.death");
-        soundMappings.put("zombie_hurt", "mob.zombie.hurt");
-        soundMappings.put("zombie_infect", "mob.zombie.infect");
-        soundMappings.put("zombie_unfect", "mob.zombie.unfect");
-        soundMappings.put("zombie_remedy", "mob.zombie.remedy");
-        soundMappings.put("zombie_walk", "mob.zombie.step");
-        soundMappings.put("zombie_pig_idle", "mob.zombiepig.zpig");
-        soundMappings.put("zombie_pig_angry", "mob.zombiepig.zpigangry");
-        soundMappings.put("zombie_pig_death", "mob.zombiepig.zpigdeath");
-        soundMappings.put("zombie_pig_hurt", "mob.zombiepig.zpighurt");
-        soundMappings.put("dig_wool", "dig.cloth");
-        soundMappings.put("dig_grass", "dig.grass");
-        soundMappings.put("dig_gravel", "dig.gravel");
-        soundMappings.put("dig_sand", "dig.sand");
-        soundMappings.put("dig_snow", "dig.snow");
-        soundMappings.put("dig_stone", "dig.stone");
-        soundMappings.put("dig_wood", "dig.wood");
-        soundMappings.put("firework_blast", "fireworks.blast");
-        soundMappings.put("firework_blast2", "fireworks.blast_far");
-        soundMappings.put("firework_large_blast", "fireworks.largeblast");
-        soundMappings.put("firework_large_blast2", "fireworks.largeblast_far");
-        soundMappings.put("firework_twinkle", "fireworks.twinkle");
-        soundMappings.put("firework_twinkle2", "fireworks.twinkle_far");
-        soundMappings.put("firework_launch", "fireworks.launch");
-        soundMappings.put("successful_hit", "random.successful_hit");
-        soundMappings.put("horse_angry", "mob.horse.angry");
-        soundMappings.put("horse_armor", "mob.horse.armor");
-        soundMappings.put("horse_breathe", "mob.horse.breathe");
-        soundMappings.put("horse_death", "mob.horse.death");
-        soundMappings.put("horse_gallop", "mob.horse.gallop");
-        soundMappings.put("horse_hit", "mob.horse.hit");
-        soundMappings.put("horse_idle", "mob.horse.idle");
-        soundMappings.put("horse_jump", "mob.horse.jump");
-        soundMappings.put("horse_land", "mob.horse.land");
-        soundMappings.put("horse_saddle", "mob.horse.leather");
-        soundMappings.put("horse_soft", "mob.horse.soft");
-        soundMappings.put("horse_wood", "mob.horse.wood");
-        soundMappings.put("donkey_angry", "mob.horse.donkey.angry");
-        soundMappings.put("donkey_death", "mob.horse.donkey.death");
-        soundMappings.put("donkey_hit", "mob.horse.donkey.hit");
-        soundMappings.put("donkey_idle", "mob.horse.donkey.idle");
-        soundMappings.put("horse_skeleton_death", "mob.horse.skeleton.death");
-        soundMappings.put("horse_skeleton_hit", "mob.horse.skeleton.hit");
-        soundMappings.put("horse_skeleton_idle", "mob.horse.skeleton.idle");
-        soundMappings.put("horse_zombie_death", "mob.horse.zombie.death");
-        soundMappings.put("horse_zombie_hit", "mob.horse.zombie.hit");
-        soundMappings.put("horse_zombie_idle", "mob.horse.zombie.idle");
-        soundMappings.put("villager_death", "mob.villager.death");
-        soundMappings.put("villager_haggle", "mob.villager.haggle");
-        soundMappings.put("villager_hit", "mob.villager.hit");
-        soundMappings.put("villager_idle", "mob.villager.idle");
-        soundMappings.put("villager_no", "mob.villager.no");
-        soundMappings.put("villager_yes", "mob.villager.yes");
-
-        RegistryHelper.mapFields(SoundTypes.class, fieldName -> {
-            String soundName = soundMappings.get(fieldName.toLowerCase());
-            SoundType sound = new SpongeSound(soundName);
-            SpongeGameRegistry.this.soundNames.put(soundName, sound);
-            return sound;
-        });
-    }
 
     private void setDifficulties() {
         RegistryHelper.mapFields(Difficulties.class, difficultyMappings);
@@ -1941,15 +1534,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
-    private void setGoldenApples() {
-        RegistryHelper.mapFields(GoldenApples.class, this.goldenAppleMappings);
-    }
-
-    private void setLogAxes() {
-        RegistryHelper.mapFields(LogAxes.class, this.logAxisMappings);
-    }
-
-
     private void setDoublePlantMappings() {
         RegistryHelper.mapFields(DoublePlantTypes.class, this.doublePlantMappings);
     }
@@ -2099,11 +1683,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     public void init() {
-        setDimensionTypes();
-        setEnchantments();
         setCareersAndProfessions();
-        setTextColors();
-        setRotations();
         setWeathers();
         setResourcePackFactory();
         setTextActionFactory();
@@ -2111,8 +1691,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setSelectors();
         setTitleFactory();
         setParticles();
-        setGameModes();
-        setSounds();
         setDifficulties();
         setArts();
         setDyeColors();
@@ -2130,8 +1708,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setGeneratorTypes();
         setDamageTypes();
         setDamageSources();
-        setGoldenApples();
-        setLogAxes();
         setTimingsFactory();
     }
 
