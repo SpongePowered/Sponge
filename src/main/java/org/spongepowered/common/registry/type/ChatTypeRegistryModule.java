@@ -29,11 +29,10 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.text.chat.SpongeChatType;
 
-@Registration(RegistrationPhase.PRE_INIT)
+@Registration
 public class ChatTypeRegistryModule implements RegistryModule {
 
     @RegisterCatalog(ChatTypes.class)

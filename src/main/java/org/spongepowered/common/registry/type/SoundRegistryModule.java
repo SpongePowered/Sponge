@@ -34,14 +34,12 @@ import org.spongepowered.common.effect.sound.SpongeSound;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistrationPhase;
-import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration(RegistrationPhase.PRE_INIT)
+@Registration
 public class SoundRegistryModule implements CatalogRegistryModule<SoundType> {
 
     @RegisterCatalog(SoundTypes.class)

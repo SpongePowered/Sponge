@@ -37,13 +37,12 @@ import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registration(RegistrationPhase.PRE_INIT)
+@Registration
 public class DimensionTypesRegistryModule implements CatalogRegistryModule<DimensionType> {
 
     @RegisterCatalog(DimensionTypes.class)

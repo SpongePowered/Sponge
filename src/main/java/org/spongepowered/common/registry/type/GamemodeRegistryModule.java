@@ -36,13 +36,11 @@ import org.spongepowered.common.registry.AdditionalRegistration;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistrationPhase;
-import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registration(RegistrationPhase.INIT)
+@Registration
 public class GameModeRegistryModule implements CatalogRegistryModule<GameMode> {
 
     @RegisterCatalog(GameModes.class)

@@ -30,11 +30,10 @@ import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.text.format.SpongeTextStyle;
 
-@Registration(RegistrationPhase.PRE_INIT)
+@Registration
 public class TextStyleRegistryModule implements RegistryModule {
 
     @RegisterCatalog(TextStyles.class)
