@@ -50,7 +50,7 @@ public class DurabilityDataProcessor extends AbstractItemDataProcessor<Durabilit
 
     @Override
     public boolean doesDataExist(ItemStack itemStack) {
-        return true;
+        return itemStack.getItem().isDamageable();
     }
 
     @Override
