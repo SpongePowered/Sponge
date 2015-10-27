@@ -33,6 +33,7 @@ import org.spongepowered.common.item.SpongeGoldenApple;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
@@ -40,10 +41,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration(Registration.Phase.PRE_INIT)
-@RegisterCatalog(GoldenApple.class)
+@Registration(RegistrationPhase.PRE_INIT)
 public class GoldenAppleRegistryModule implements CatalogRegistryModule<GoldenApple> {
 
+    @RegisterCatalog(GoldenApples.class)
     private final Map<String, GoldenApple> goldenAppleMap = new HashMap<>();
 
     @Override
@@ -60,7 +61,5 @@ public class GoldenAppleRegistryModule implements CatalogRegistryModule<GoldenAp
     public void registerDefaults() {
         this.goldenAppleMap.put("golden_apple", new SpongeGoldenApple(0, "GOLDEN_APPLE"));
         this.goldenAppleMap.put("enchanted_golden_apple", new SpongeGoldenApple(1, "ENCHANTED_GOLDEN_APPLE"));
-
-        RegistryHelper.mapFields(GoldenApples.class, this.goldenAppleMap);
     }
 }

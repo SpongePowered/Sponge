@@ -36,15 +36,16 @@ import org.spongepowered.common.registry.AdditionalRegistration;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registration(Registration.Phase.INIT)
-@RegisterCatalog(GameMode.class)
+@Registration(RegistrationPhase.INIT)
 public class GameModeRegistryModule implements CatalogRegistryModule<GameMode> {
 
+    @RegisterCatalog(GameModes.class)
     public final BiMap<String, GameMode> gameModeMappings = HashBiMap.create();
 
     @Override
@@ -64,7 +65,6 @@ public class GameModeRegistryModule implements CatalogRegistryModule<GameMode> {
         this.gameModeMappings.put("adventure", (GameMode) (Object) WorldSettings.GameType.ADVENTURE);
         this.gameModeMappings.put("spectator", (GameMode) (Object) WorldSettings.GameType.SPECTATOR);
         this.gameModeMappings.put("not_set", (GameMode) (Object) WorldSettings.GameType.NOT_SET);
-        RegistryHelper.mapFields(GameModes.class, this.gameModeMappings);
     }
 
     @AdditionalRegistration

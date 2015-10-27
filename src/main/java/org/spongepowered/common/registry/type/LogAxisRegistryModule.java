@@ -35,15 +35,15 @@ import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.RegistrationPhase;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registration(Registration.Phase.PRE_INIT)
-@RegisterCatalog(LogAxis.class)
+@Registration(RegistrationPhase.PRE_INIT)
 public class LogAxisRegistryModule implements CatalogRegistryModule<LogAxis> {
 
+    @RegisterCatalog(LogAxes.class)
     private final BiMap<String, LogAxis> logAxisMappings = HashBiMap.create();
 
     @Override
@@ -62,8 +62,6 @@ public class LogAxisRegistryModule implements CatalogRegistryModule<LogAxis> {
         this.logAxisMappings.put("y", (LogAxis) (Object) BlockLog.EnumAxis.Y);
         this.logAxisMappings.put("z", (LogAxis) (Object) BlockLog.EnumAxis.Z);
         this.logAxisMappings.put("none", (LogAxis) (Object) BlockLog.EnumAxis.NONE);
-
-        RegistryHelper.mapFields(LogAxes.class, this.logAxisMappings);
     }
 
 }

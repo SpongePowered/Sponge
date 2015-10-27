@@ -29,14 +29,16 @@ import org.spongepowered.api.effect.sound.SoundType;
 public class SpongeSound implements SoundType {
 
     private final String name;
+    private final String id;
 
-    public SpongeSound(String name) {
+    public SpongeSound(String name, String id) {
         this.name = name;
+        this.id = id;
     }
 
     @Override
     public String getId() {
-        return this.name;
+        return this.id;
     }
 
     @Override

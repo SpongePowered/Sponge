@@ -27,12 +27,16 @@ package org.spongepowered.common.registry.type;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.RegisterCatalog;
+import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.text.chat.SpongeChatType;
 
+@Registration(RegistrationPhase.PRE_INIT)
 public class ChatTypeRegistryModule implements RegistryModule {
 
+    @RegisterCatalog(ChatTypes.class)
     private static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
         .put("chat", new SpongeChatType((byte) 0))
         .put("system", new SpongeChatType((byte) 1))
@@ -41,6 +45,5 @@ public class ChatTypeRegistryModule implements RegistryModule {
 
     @Override
     public void registerDefaults() {
-        RegistryHelper.mapFields(ChatTypes.class, chatTypeMappings);
     }
 }

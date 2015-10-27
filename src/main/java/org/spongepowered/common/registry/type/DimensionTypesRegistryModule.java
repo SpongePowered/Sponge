@@ -24,56 +24,45 @@
  */
 package org.spongepowered.common.registry.type;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldProviderSurface;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.common.registry.AdditionalRegistration;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registration(Registration.Phase.INIT)
-@RegisterCatalog(GameMode.class)
+@Registration(RegistrationPhase.PRE_INIT)
 public class DimensionTypesRegistryModule implements CatalogRegistryModule<DimensionType> {
 
-    public final BiMap<String, GameMode> gameModeMappings = HashBiMap.create();
+    @RegisterCatalog(DimensionTypes.class)
+    public final BiMap<String, DimensionType> dimensionMappings = HashBiMap.create();
 
     @Override
     public Optional<DimensionType> getById(String id) {
-        return Optional.empty();
+        return Optional.ofNullable(this.dimensionMappings.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
     public Collection<DimensionType> getAll() {
-        return ImmutableList.of();
+        return ImmutableList.copyOf(this.dimensionMappings.values());
     }
 
     @Override
     public void registerDefaults() {
-        try {
-            DimensionTypes.class.getDeclaredField("NETHER").set(null, new SpongeDimensionType("nether", true, WorldProviderHell.class, -1));
-            DimensionTypes.class.getDeclaredField("OVERWORLD").set(null, new SpongeDimensionType("overworld", true, WorldProviderSurface.class, 0));
-            DimensionTypes.class.getDeclaredField("END").set(null, new SpongeDimensionType("end", false, WorldProviderEnd.class, 1));
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        RegistryHelper.mapFields(GameModes.class, this.gameModeMappings);
-    }
-
-    @AdditionalRegistration
-    public void registerAdditional() {
-
+        this.dimensionMappings.put("nether", new SpongeDimensionType("nether", true, WorldProviderHell.class, -1));
+        this.dimensionMappings.put("overworld", new SpongeDimensionType("overworld", true, WorldProviderSurface.class, 0));
+        this.dimensionMappings.put("end", new SpongeDimensionType("end", false, WorldProviderEnd.class, 1));
     }
 }

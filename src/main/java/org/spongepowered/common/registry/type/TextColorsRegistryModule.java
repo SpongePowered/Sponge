@@ -29,11 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.util.EnumChatFormatting;
-import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.RegisterCatalog;
+import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
@@ -42,8 +43,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
+@Registration(RegistrationPhase.PRE_INIT)
 public class TextColorsRegistryModule implements CatalogRegistryModule<TextColor> {
 
+    @RegisterCatalog(TextColors.class)
     public static final Map<String, TextColor> textColorMappings = Maps.newHashMap();
     public static final Map<EnumChatFormatting, SpongeTextColor> enumChatColor = Maps.newEnumMap(EnumChatFormatting.class);
 

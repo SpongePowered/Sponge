@@ -34,16 +34,17 @@ import org.spongepowered.common.effect.sound.SpongeSound;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration(Registration.Phase.PRE_INIT)
-@RegisterCatalog(SoundType.class)
+@Registration(RegistrationPhase.PRE_INIT)
 public class SoundRegistryModule implements CatalogRegistryModule<SoundType> {
 
+    @RegisterCatalog(SoundTypes.class)
     private final Map<String, SoundType> soundNames = Maps.newHashMap();
 
     @Override
@@ -296,11 +297,9 @@ public class SoundRegistryModule implements CatalogRegistryModule<SoundType> {
         soundMappings.put("villager_no", "mob.villager.no");
         soundMappings.put("villager_yes", "mob.villager.yes");
 
-        RegistryHelper.mapFields(SoundTypes.class, fieldName -> {
-            String soundName = soundMappings.get(fieldName.toLowerCase());
-            SoundType sound = new SpongeSound(soundName);
-            this.soundNames.put(soundName, sound);
-            return sound;
+        soundMappings.forEach((soundName, soundId) -> {
+            final SoundType soundType = new SpongeSound(soundName, soundId);
+            this.soundNames.put(soundName, soundType);
         });
     }
 

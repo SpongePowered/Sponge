@@ -28,18 +28,16 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.text.format.SpongeTextStyle;
 
-import java.util.Collection;
-import java.util.Optional;
-
-@Registration(Registration.Phase.PRE_INIT)
+@Registration(RegistrationPhase.PRE_INIT)
 public class TextStyleRegistryModule implements RegistryModule {
+
+    @RegisterCatalog(TextStyles.class)
     public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
         .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
         .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
@@ -51,7 +49,5 @@ public class TextStyleRegistryModule implements RegistryModule {
 
     @Override
     public void registerDefaults() {
-        RegistryHelper.mapFields(TextStyles.class, textStyleMappings);
-
     }
 }

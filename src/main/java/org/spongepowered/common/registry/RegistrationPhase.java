@@ -24,28 +24,9 @@
  */
 package org.spongepowered.common.registry;
 
-import org.spongepowered.api.CatalogType;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.Map;
-
-/**
- * An annotation to mark a {@link Map} where it's of type {@code Map<String, CatalogType>}
- * such that it is used with the {@link RegistryHelper} to register the static fields of
- * various pseudo enum classes containing "default" {@link CatalogType}s.
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface RegisterCatalog {
-
-    /**
-     * The class to register the values to.
-     *
-     * @return The class to register the values to
-     */
-    Class<?> value();
-
+public enum RegistrationPhase {
+    PRE_INIT,
+    INIT,
+    POST_INIT,
+    ;
 }

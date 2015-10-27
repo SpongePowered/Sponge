@@ -29,9 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.Enchantments;
+import org.spongepowered.common.registry.AdditionalRegistration;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
@@ -39,10 +41,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration(Registration.Phase.PRE_INIT)
-@RegisterCatalog(Enchantment.class)
+@Registration(RegistrationPhase.PRE_INIT)
 public class EnchantmentRegistryModule implements CatalogRegistryModule<Enchantment> {
 
+    @RegisterCatalog(Enchantments.class)
     private final Map<String, Enchantment> enchantmentMappings = new HashMap<>();
 
     @Override
@@ -82,6 +84,16 @@ public class EnchantmentRegistryModule implements CatalogRegistryModule<Enchantm
         this.enchantmentMappings.put("infinity", (Enchantment) net.minecraft.enchantment.Enchantment.infinity);
         this.enchantmentMappings.put("luck_of_the_sea", (Enchantment) net.minecraft.enchantment.Enchantment.luckOfTheSea);
         this.enchantmentMappings.put("lure", (Enchantment) net.minecraft.enchantment.Enchantment.lure);
-        RegistryHelper.mapFields(Enchantments.class, this.enchantmentMappings);
+    }
+
+    @AdditionalRegistration
+    public void registerAdditional() {
+        for (net.minecraft.enchantment.Enchantment enchantment : net.minecraft.enchantment.Enchantment.enchantmentsList) {
+            if (!this.enchantmentMappings.containsValue((Enchantment) enchantment)) {
+                final String name = enchantment.getName().replace("enchantment.", "");
+                this.enchantmentMappings.put(name.toLowerCase(), (Enchantment) enchantment);
+            }
+        }
+
     }
 }

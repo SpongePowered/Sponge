@@ -33,13 +33,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Registration {
 
-    Phase value();
-
-    enum Phase {
-        PRE_INIT,
-        INIT,
-        POST_INIT,
-        ;
-    }
+    RegistrationPhase value();
 
 }

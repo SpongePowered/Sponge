@@ -31,6 +31,7 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.rotation.SpongeRotation;
 
@@ -38,10 +39,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration(Registration.Phase.PRE_INIT)
-@RegisterCatalog(Rotation.class)
+@Registration(RegistrationPhase.PRE_INIT)
 public class RotationRegistryModule implements CatalogRegistryModule<Rotation> {
 
+    @RegisterCatalog(Rotations.class)
     public static final Map<String, Rotation> rotationMap = ImmutableMap.<String, Rotation>builder()
         .put("top", new SpongeRotation(0))
         .put("top_right", new SpongeRotation(45))
@@ -65,7 +66,6 @@ public class RotationRegistryModule implements CatalogRegistryModule<Rotation> {
 
     @Override
     public void registerDefaults() {
-        RegistryHelper.mapFields(Rotations.class, this.rotationMap);
     }
 
 }

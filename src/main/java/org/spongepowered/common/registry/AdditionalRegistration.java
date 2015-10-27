@@ -33,4 +33,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface AdditionalRegistration {
 
+    RegistrationPhase value() default RegistrationPhase.POST_INIT;
+
 }
