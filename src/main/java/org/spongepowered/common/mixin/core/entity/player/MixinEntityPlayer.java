@@ -131,7 +131,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.capabilities.isFlying = flying;
     }
     
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "isPlayerSleeping"))
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "isPlayerSleeping()Z"))
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             Sponge.getGame().getEventManager().post(SpongeEventFactory.createSleepingEventTick(Sponge.getGame(),
