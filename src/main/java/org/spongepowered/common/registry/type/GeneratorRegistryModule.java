@@ -26,42 +26,45 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.WorldProviderSurface;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
+import com.google.common.collect.Maps;
+import net.minecraft.world.WorldType;
+import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registry;
-import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
+import org.spongepowered.common.world.type.SpongeWorldTypeNether;
+import org.spongepowered.common.world.type.SpongeWorldTypeOverworld;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 @Registry
-public class DimensionTypesRegistryModule implements CatalogRegistryModule<DimensionType> {
+public class GeneratorRegistryModule implements CatalogRegistryModule<GeneratorType> {
 
-    @RegisterCatalog(DimensionTypes.class)
-    public final BiMap<String, DimensionType> dimensionMappings = HashBiMap.create();
+    @RegisterCatalog(GeneratorTypes.class)
+    private final Map<String, GeneratorType> generatorTypeMappings = Maps.newHashMap();
 
     @Override
-    public Optional<DimensionType> getById(String id) {
-        return Optional.ofNullable(this.dimensionMappings.get(checkNotNull(id).toLowerCase()));
+    public Optional<GeneratorType> getById(String id) {
+        return Optional.ofNullable(this.generatorTypeMappings.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
-    public Collection<DimensionType> getAll() {
-        return ImmutableList.copyOf(this.dimensionMappings.values());
+    public Collection<GeneratorType> getAll() {
+        return ImmutableList.copyOf(this.generatorTypeMappings.values());
     }
 
     @Override
     public void registerDefaults() {
-        this.dimensionMappings.put("nether", new SpongeDimensionType("nether", true, WorldProviderHell.class, -1));
-        this.dimensionMappings.put("overworld", new SpongeDimensionType("overworld", true, WorldProviderSurface.class, 0));
-        this.dimensionMappings.put("end", new SpongeDimensionType("end", false, WorldProviderEnd.class, 1));
+        this.generatorTypeMappings.put("default", (GeneratorType) WorldType.DEFAULT);
+        this.generatorTypeMappings.put("flat", (GeneratorType) WorldType.FLAT);
+        this.generatorTypeMappings.put("debug", (GeneratorType) WorldType.DEBUG_WORLD);
+        this.generatorTypeMappings.put("nether", (GeneratorType) new SpongeWorldTypeNether());
+        this.generatorTypeMappings.put("end", (GeneratorType) new SpongeWorldTypeEnd());
+        this.generatorTypeMappings.put("overworld", (GeneratorType) new SpongeWorldTypeOverworld());
     }
 }

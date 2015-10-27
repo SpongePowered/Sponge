@@ -24,44 +24,26 @@
  */
 package org.spongepowered.common.registry.type;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.WorldProviderSurface;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
-import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registry
-public class DimensionTypesRegistryModule implements CatalogRegistryModule<DimensionType> {
-
-    @RegisterCatalog(DimensionTypes.class)
-    public final BiMap<String, DimensionType> dimensionMappings = HashBiMap.create();
+public class ProfessionRegistryModule implements CatalogRegistryModule<Profession> {
 
     @Override
-    public Optional<DimensionType> getById(String id) {
-        return Optional.ofNullable(this.dimensionMappings.get(checkNotNull(id).toLowerCase()));
+    public Optional<Profession> getById(String id) {
+        return null;
     }
 
     @Override
-    public Collection<DimensionType> getAll() {
-        return ImmutableList.copyOf(this.dimensionMappings.values());
+    public Collection<Profession> getAll() {
+        return null;
     }
 
     @Override
     public void registerDefaults() {
-        this.dimensionMappings.put("nether", new SpongeDimensionType("nether", true, WorldProviderHell.class, -1));
-        this.dimensionMappings.put("overworld", new SpongeDimensionType("overworld", true, WorldProviderSurface.class, 0));
-        this.dimensionMappings.put("end", new SpongeDimensionType("end", false, WorldProviderEnd.class, 1));
+
     }
 }

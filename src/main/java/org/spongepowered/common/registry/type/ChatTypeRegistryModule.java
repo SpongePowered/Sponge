@@ -28,11 +28,11 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.Registry;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.text.chat.SpongeChatType;
 
-@Registration
+@Registry
 public class ChatTypeRegistryModule implements RegistryModule {
 
     @RegisterCatalog(ChatTypes.class)

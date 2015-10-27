@@ -31,6 +31,8 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Registration {
+public @interface Registry {
+
+    RegistrationDependency value() default @RegistrationDependency({});
 
 }

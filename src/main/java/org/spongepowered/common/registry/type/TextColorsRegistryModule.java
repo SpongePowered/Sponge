@@ -33,7 +33,7 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.Registry;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
@@ -42,7 +42,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration
+@Registry
 public class TextColorsRegistryModule implements CatalogRegistryModule<TextColor> {
 
     @RegisterCatalog(TextColors.class)

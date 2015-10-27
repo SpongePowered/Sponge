@@ -33,13 +33,13 @@ import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.common.effect.sound.SpongeSound;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.Registry;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration
+@Registry
 public class SoundRegistryModule implements CatalogRegistryModule<SoundType> {
 
     @RegisterCatalog(SoundTypes.class)

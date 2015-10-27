@@ -32,14 +32,14 @@ import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.common.item.SpongeGoldenApple;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.Registry;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration
+@Registry
 public class GoldenAppleRegistryModule implements CatalogRegistryModule<GoldenApple> {
 
     @RegisterCatalog(GoldenApples.class)

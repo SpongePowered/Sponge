@@ -390,21 +390,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     .put("integer", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.INTEGER)
                     .put("hearts", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.HEARTS)
                     .build();
-    private final ImmutableMap<String, DamageType> damageTypeMappings = new ImmutableMap.Builder<String, DamageType>()
-            .put("attack", new SpongeDamageType("attack"))
-            .put("contact", new SpongeDamageType("contact"))
-            .put("custom", new SpongeDamageType("custom"))
-            .put("drown", new SpongeDamageType("drown"))
-            .put("explosive", new SpongeDamageType("explosive"))
-            .put("fall", new SpongeDamageType("fall"))
-            .put("fire", new SpongeDamageType("fire"))
-            .put("generic", new SpongeDamageType("generic"))
-            .put("hunger", new SpongeDamageType("hunger"))
-            .put("magic", new SpongeDamageType("magic"))
-            .put("projectile", new SpongeDamageType("projectile"))
-            .put("suffocate", new SpongeDamageType("suffocate"))
-            .put("void", new SpongeDamageType("void"))
-            .build();
 
     public final Map<Class<? extends net.minecraft.world.gen.feature.WorldGenerator>, PopulatorType> populatorClassToTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
@@ -414,8 +399,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<Integer, List<Career>> professionToCareerMappings = Maps.newHashMap();
     private final Map<String, DimensionType> dimensionTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends Dimension>, DimensionType> dimensionClassMappings = Maps.newHashMap();
-    private final Map<String, SpongeParticleType> particleMappings = Maps.newHashMap();
-    private final Map<String, ParticleType> particleByName = Maps.newHashMap();
     private final List<PotionEffectType> potionList = new ArrayList<>();
     private final List<BiomeType> biomeTypes = new ArrayList<>();
     public final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
@@ -426,7 +409,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<Integer, String> worldFolderDimensionIdMappings = Maps.newHashMap();
     public final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
     public final Map<String, SpongeDisplaySlot> displaySlotMappings = Maps.newLinkedHashMap();
-    public final Map<String, Criterion> criteriaMap = Maps.newHashMap();
     private final Map<String, SelectorType> selectorMappings = Maps.newHashMap();
 
     private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
@@ -480,8 +462,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     private final Map<String, Weather> weatherMappings = Maps.newHashMap();
 
-    private final Map<String, GeneratorType> generatorTypeMappings = Maps.newHashMap();
-
     public static final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
     public static final Map<String, ItemType> itemTypeMappings = Maps.newHashMap();
 
@@ -493,7 +473,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(BiomeType.class, this.biomeTypeMappings)
                 .put(BlockType.class, blockTypeMappings)
                 .put(Career.class, this.careerMappings)
-                .put(Criterion.class, this.criteriaMap)
                 .put(CookedFish.class, this.cookedFishMappings)
                 .put(ComparatorType.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(Difficulty.class, difficultyMappings)
@@ -515,7 +494,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(NotePitch.class, this.notePitchMappings)
                 .put(ObjectiveDisplayMode.class, objectiveDisplayModeMappings)
                 .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
-                .put(ParticleType.class, this.particleByName)
                 .put(PlantType.class, this.plantTypeMappings)
                 .put(PopulatorType.class, this.populatorTypeMappings)
                 .put(PotionEffectType.class, ImmutableMap.<String, CatalogType>of()) // TODO
@@ -544,7 +522,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(WallType.class, this.wallTypeMappings)
                 .put(Weather.class, this.weatherMappings)
                 .put(WorldGeneratorModifier.class, this.worldGeneratorRegistry.viewModifiersMap())
-                .put(GeneratorType.class, this.generatorTypeMappings)
                 .build();
     private final Map<Class<?>, Class<?>> builderMap = ImmutableMap.of(); // TODO
 
@@ -840,64 +817,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return Optional.<Translation>of(new SpongeTranslation(id));
     }
 
-    private void setParticles() {
-        this.addParticleType("explosion_normal", new SpongeParticleType(EnumParticleTypes.EXPLOSION_NORMAL, true));
-        this.addParticleType("explosion_large", new SpongeParticleType.Resizable(EnumParticleTypes.EXPLOSION_LARGE, 1f));
-        this.addParticleType("explosion_huge", new SpongeParticleType(EnumParticleTypes.EXPLOSION_HUGE, false));
-        this.addParticleType("fireworks_spark", new SpongeParticleType(EnumParticleTypes.FIREWORKS_SPARK, true));
-        this.addParticleType("water_bubble", new SpongeParticleType(EnumParticleTypes.WATER_BUBBLE, true));
-        this.addParticleType("water_splash", new SpongeParticleType(EnumParticleTypes.WATER_SPLASH, true));
-        this.addParticleType("water_wake", new SpongeParticleType(EnumParticleTypes.WATER_WAKE, true));
-        this.addParticleType("suspended", new SpongeParticleType(EnumParticleTypes.SUSPENDED, false));
-        this.addParticleType("suspended_depth", new SpongeParticleType(EnumParticleTypes.SUSPENDED_DEPTH, false));
-        this.addParticleType("crit", new SpongeParticleType(EnumParticleTypes.CRIT, true));
-        this.addParticleType("crit_magic", new SpongeParticleType(EnumParticleTypes.CRIT_MAGIC, true));
-        this.addParticleType("smoke_normal", new SpongeParticleType(EnumParticleTypes.SMOKE_NORMAL, true));
-        this.addParticleType("smoke_large", new SpongeParticleType(EnumParticleTypes.SMOKE_LARGE, true));
-        this.addParticleType("spell", new SpongeParticleType(EnumParticleTypes.SPELL, false));
-        this.addParticleType("spell_instant", new SpongeParticleType(EnumParticleTypes.SPELL_INSTANT, false));
-        this.addParticleType("spell_mob", new SpongeParticleType.Colorable(EnumParticleTypes.SPELL_MOB, Color.BLACK));
-        this.addParticleType("spell_mob_ambient", new SpongeParticleType.Colorable(EnumParticleTypes.SPELL_MOB_AMBIENT, Color.BLACK));
-        this.addParticleType("spell_witch", new SpongeParticleType(EnumParticleTypes.SPELL_WITCH, false));
-        this.addParticleType("drip_water", new SpongeParticleType(EnumParticleTypes.DRIP_WATER, false));
-        this.addParticleType("drip_lava", new SpongeParticleType(EnumParticleTypes.DRIP_LAVA, false));
-        this.addParticleType("villager_angry", new SpongeParticleType(EnumParticleTypes.VILLAGER_ANGRY, false));
-        this.addParticleType("villager_happy", new SpongeParticleType(EnumParticleTypes.VILLAGER_HAPPY, true));
-        this.addParticleType("town_aura", new SpongeParticleType(EnumParticleTypes.TOWN_AURA, true));
-        this.addParticleType("note", new SpongeParticleType.Note(EnumParticleTypes.NOTE, 0f));
-        this.addParticleType("portal", new SpongeParticleType(EnumParticleTypes.PORTAL, true));
-        this.addParticleType("enchantment_table", new SpongeParticleType(EnumParticleTypes.ENCHANTMENT_TABLE, true));
-        this.addParticleType("flame", new SpongeParticleType(EnumParticleTypes.FLAME, true));
-        this.addParticleType("lava", new SpongeParticleType(EnumParticleTypes.LAVA, false));
-        this.addParticleType("footstep", new SpongeParticleType(EnumParticleTypes.FOOTSTEP, false));
-        this.addParticleType("cloud", new SpongeParticleType(EnumParticleTypes.CLOUD, true));
-        this.addParticleType("redstone", new SpongeParticleType.Colorable(EnumParticleTypes.REDSTONE, Color.RED));
-        this.addParticleType("snowball", new SpongeParticleType(EnumParticleTypes.SNOWBALL, false));
-        this.addParticleType("snow_shovel", new SpongeParticleType(EnumParticleTypes.SNOW_SHOVEL, true));
-        this.addParticleType("slime", new SpongeParticleType(EnumParticleTypes.SLIME, false));
-        this.addParticleType("heart", new SpongeParticleType(EnumParticleTypes.HEART, false));
-        this.addParticleType("barrier", new SpongeParticleType(EnumParticleTypes.BARRIER, false));
-        this.addParticleType("item_crack",
-                new SpongeParticleType.Material(EnumParticleTypes.ITEM_CRACK, new net.minecraft.item.ItemStack(Blocks.air), true));
-        this.addParticleType("block_crack",
-                new SpongeParticleType.Material(EnumParticleTypes.BLOCK_CRACK, new net.minecraft.item.ItemStack(Blocks.air), true));
-        this.addParticleType("block_dust",
-                new SpongeParticleType.Material(EnumParticleTypes.BLOCK_DUST, new net.minecraft.item.ItemStack(Blocks.air), true));
-        this.addParticleType("water_drop", new SpongeParticleType(EnumParticleTypes.WATER_DROP, false));
-        // Is this particle available to be spawned? It's not registered on the
-        // client though
-        this.addParticleType("item_take", new SpongeParticleType(EnumParticleTypes.ITEM_TAKE, false));
-        this.addParticleType("mob_appearance", new SpongeParticleType(EnumParticleTypes.MOB_APPEARANCE, false));
-
-        RegistryHelper.mapFields(ParticleTypes.class, this.particleMappings);
-    }
-
-    private void addParticleType(String mapping, SpongeParticleType particle) {
-        this.particleMappings.put(mapping, particle);
-        this.particleByName.put(particle.getName(), particle);
-    }
-
-
     // Note: This is probably fairly slow, but only needs to be run rarely.
     private void setPotionTypes() {
         for (Potion potion : Potion.potionTypes) {
@@ -1160,17 +1079,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         SpongeVisibility visibility = new SpongeVisibility(handle);
         SpongeGameRegistry.visibilityMappings.put(name, visibility);
         SpongeGameRegistry.enumVisible.put(handle, visibility);
-    }
-
-    private void setCriteria() {
-        this.criteriaMap.put("dummy", (Criterion) IScoreObjectiveCriteria.DUMMY);
-        this.criteriaMap.put("trigger", (Criterion) IScoreObjectiveCriteria.TRIGGER);
-        this.criteriaMap.put("health", (Criterion) IScoreObjectiveCriteria.health);
-        this.criteriaMap.put("player_kills", (Criterion) IScoreObjectiveCriteria.playerKillCount);
-        this.criteriaMap.put("total_kills", (Criterion) IScoreObjectiveCriteria.totalKillCount);
-        this.criteriaMap.put("deaths", (Criterion) IScoreObjectiveCriteria.deathCount);
-
-        RegistryHelper.mapFields(Criteria.class, this.criteriaMap);
     }
 
     private void setVisibilities() {
@@ -1465,18 +1373,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return new SpongeEntityType(entityId, entityName, Sponge.ECOSYSTEM_NAME, entityClass);
     }
 
-    public void setGeneratorTypes() {
-        this.generatorTypeMappings.put("default", (GeneratorType) WorldType.DEFAULT);
-        this.generatorTypeMappings.put("flat", (GeneratorType) WorldType.FLAT);
-        this.generatorTypeMappings.put("debug", (GeneratorType) WorldType.DEBUG_WORLD);
-        this.generatorTypeMappings.put("nether", (GeneratorType) new SpongeWorldTypeNether());
-        this.generatorTypeMappings.put("end", (GeneratorType) new SpongeWorldTypeEnd());
-        this.generatorTypeMappings.put("overworld", (GeneratorType) new SpongeWorldTypeOverworld());
-        RegistryHelper.mapFields(GeneratorTypes.class, this.generatorTypeMappings);
-    }
-
     public void setDamageTypes() {
-        RegistryHelper.mapFields(DamageTypes.class, this.damageTypeMappings);
         damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
         damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
         damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
@@ -1683,7 +1580,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setTextFactory();
         setSelectors();
         setTitleFactory();
-        setParticles();
         setDifficulties();
         setArts();
         setDyeColors();
@@ -1696,9 +1592,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setShrubTypeMappings();
         setDisplaySlots();
         setVisibilities();
-        setCriteria();
         setObjectiveDisplayModes();
-        setGeneratorTypes();
         setDamageTypes();
         setDamageSources();
         setTimingsFactory();

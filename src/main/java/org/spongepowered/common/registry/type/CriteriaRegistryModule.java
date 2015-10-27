@@ -26,42 +26,42 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.WorldProviderSurface;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
+import com.google.common.collect.Maps;
+import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import org.spongepowered.api.scoreboard.critieria.Criteria;
+import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registry;
-import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 @Registry
-public class DimensionTypesRegistryModule implements CatalogRegistryModule<DimensionType> {
+public class CriteriaRegistryModule implements CatalogRegistryModule<Criterion> {
 
-    @RegisterCatalog(DimensionTypes.class)
-    public final BiMap<String, DimensionType> dimensionMappings = HashBiMap.create();
+    @RegisterCatalog(Criteria.class)
+    public final Map<String, Criterion> criteriaMap = Maps.newHashMap();
 
     @Override
-    public Optional<DimensionType> getById(String id) {
-        return Optional.ofNullable(this.dimensionMappings.get(checkNotNull(id).toLowerCase()));
+    public Optional<Criterion> getById(String id) {
+        return Optional.ofNullable(this.criteriaMap.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
-    public Collection<DimensionType> getAll() {
-        return ImmutableList.copyOf(this.dimensionMappings.values());
+    public Collection<Criterion> getAll() {
+        return ImmutableList.copyOf(this.criteriaMap.values());
     }
 
     @Override
     public void registerDefaults() {
-        this.dimensionMappings.put("nether", new SpongeDimensionType("nether", true, WorldProviderHell.class, -1));
-        this.dimensionMappings.put("overworld", new SpongeDimensionType("overworld", true, WorldProviderSurface.class, 0));
-        this.dimensionMappings.put("end", new SpongeDimensionType("end", false, WorldProviderEnd.class, 1));
+        this.criteriaMap.put("dummy", (Criterion) IScoreObjectiveCriteria.DUMMY);
+        this.criteriaMap.put("trigger", (Criterion) IScoreObjectiveCriteria.TRIGGER);
+        this.criteriaMap.put("health", (Criterion) IScoreObjectiveCriteria.health);
+        this.criteriaMap.put("player_kills", (Criterion) IScoreObjectiveCriteria.playerKillCount);
+        this.criteriaMap.put("total_kills", (Criterion) IScoreObjectiveCriteria.totalKillCount);
+        this.criteriaMap.put("deaths", (Criterion) IScoreObjectiveCriteria.deathCount);
     }
 }

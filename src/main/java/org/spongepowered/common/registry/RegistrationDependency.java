@@ -22,31 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type;
+package org.spongepowered.common.registry;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.EnumChatFormatting;
-import org.spongepowered.api.text.format.TextStyle;
-import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
-import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.text.format.SpongeTextStyle;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Registry
-public class TextStyleRegistryModule implements RegistryModule {
+/**
+ * Declares the registry being dependent on another registry to have completed initial registration
+ * of values before this one can continue.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface RegistrationDependency {
 
-    @RegisterCatalog(TextStyles.class)
-    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
-        .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
-        .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
-        .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
-        .put("strikethrough", SpongeTextStyle.of(EnumChatFormatting.STRIKETHROUGH))
-        .put("obfuscated", SpongeTextStyle.of(EnumChatFormatting.OBFUSCATED))
-        .put("reset", SpongeTextStyle.of(EnumChatFormatting.RESET))
-        .build();
+    Class<?>[] value();
 
-    @Override
-    public void registerDefaults() {
-    }
 }

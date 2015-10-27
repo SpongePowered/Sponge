@@ -26,42 +26,50 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.WorldProviderSurface;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
+import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
 import org.spongepowered.common.registry.Registry;
-import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.util.Collection;
 import java.util.Optional;
 
 @Registry
-public class DimensionTypesRegistryModule implements CatalogRegistryModule<DimensionType> {
+public class DamageTypeRegistryModule implements CatalogRegistryModule<DamageType> {
 
-    @RegisterCatalog(DimensionTypes.class)
-    public final BiMap<String, DimensionType> dimensionMappings = HashBiMap.create();
+    @RegisterCatalog(DamageTypes.class)
+    private final ImmutableMap<String, DamageType> damageTypeMappings = new ImmutableMap.Builder<String, DamageType>()
+        .put("attack", new SpongeDamageType("attack"))
+        .put("contact", new SpongeDamageType("contact"))
+        .put("custom", new SpongeDamageType("custom"))
+        .put("drown", new SpongeDamageType("drown"))
+        .put("explosive", new SpongeDamageType("explosive"))
+        .put("fall", new SpongeDamageType("fall"))
+        .put("fire", new SpongeDamageType("fire"))
+        .put("generic", new SpongeDamageType("generic"))
+        .put("hunger", new SpongeDamageType("hunger"))
+        .put("magic", new SpongeDamageType("magic"))
+        .put("projectile", new SpongeDamageType("projectile"))
+        .put("suffocate", new SpongeDamageType("suffocate"))
+        .put("void", new SpongeDamageType("void"))
+        .build();
 
     @Override
-    public Optional<DimensionType> getById(String id) {
-        return Optional.ofNullable(this.dimensionMappings.get(checkNotNull(id).toLowerCase()));
+    public Optional<DamageType> getById(String id) {
+        return Optional.ofNullable(this.damageTypeMappings.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
-    public Collection<DimensionType> getAll() {
-        return ImmutableList.copyOf(this.dimensionMappings.values());
+    public Collection<DamageType> getAll() {
+        return ImmutableList.copyOf(this.damageTypeMappings.values());
     }
 
     @Override
     public void registerDefaults() {
-        this.dimensionMappings.put("nether", new SpongeDimensionType("nether", true, WorldProviderHell.class, -1));
-        this.dimensionMappings.put("overworld", new SpongeDimensionType("overworld", true, WorldProviderSurface.class, 0));
-        this.dimensionMappings.put("end", new SpongeDimensionType("end", false, WorldProviderEnd.class, 1));
+
     }
 }

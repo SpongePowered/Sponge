@@ -32,14 +32,14 @@ import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.common.registry.AdditionalRegistration;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registration;
+import org.spongepowered.common.registry.Registry;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Registration
+@Registry
 public class EnchantmentRegistryModule implements CatalogRegistryModule<Enchantment> {
 
     @RegisterCatalog(Enchantments.class)
@@ -87,6 +87,9 @@ public class EnchantmentRegistryModule implements CatalogRegistryModule<Enchantm
     @AdditionalRegistration
     public void registerAdditional() {
         for (net.minecraft.enchantment.Enchantment enchantment : net.minecraft.enchantment.Enchantment.enchantmentsList) {
+            if (enchantment == null) {
+                continue;
+            }
             if (!this.enchantmentMappings.containsValue((Enchantment) enchantment)) {
                 final String name = enchantment.getName().replace("enchantment.", "");
                 this.enchantmentMappings.put(name.toLowerCase(), (Enchantment) enchantment);
