@@ -41,15 +41,16 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeDurabilityData extends AbstractImmutableData<ImmutableDurabilityData, DurabilityData> implements ImmutableDurabilityData {
 
-    final ImmutableBoundedValue<Integer> durability;
-    final ImmutableValue<Boolean> unbreakable;
+    private final ImmutableBoundedValue<Integer> durability;
+    private final ImmutableValue<Boolean> unbreakable;
 
-    public ImmutableSpongeDurabilityData(int durability, boolean unbreakable) {
+    public ImmutableSpongeDurabilityData(int defaultDurability, int durability, boolean unbreakable) {
         super(ImmutableDurabilityData.class);
         checkArgument(durability >= 0);
         this.durability = SpongeValueBuilder.boundedBuilder(Keys.ITEM_DURABILITY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
+                .defaultValue(defaultDurability)
                 .actualValue(durability)
                 .build().asImmutable();
         this.unbreakable = ImmutableSpongeValue.cachedOf(Keys.UNBREAKABLE, false, unbreakable);
@@ -57,7 +58,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
     }
 
     public ImmutableSpongeDurabilityData() {
-        this(60, false);
+        this(60, 60, false);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     public DurabilityData asMutable() {
-        return new SpongeDurabilityData(this.durability.get(), this.unbreakable.get());
+        return new SpongeDurabilityData(this.durability.getDefault(), this.durability.get(), this.unbreakable.get());
     }
 
     @Override
