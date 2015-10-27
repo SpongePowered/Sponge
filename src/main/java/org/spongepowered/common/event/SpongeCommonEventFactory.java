@@ -126,7 +126,7 @@ public class SpongeCommonEventFactory {
             if (event.getCursorTransaction().getCustom().isPresent()) {
                 ItemStack cursor =
                         event.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                : (net.minecraft.item.ItemStack) event.getCursorTransaction().getOriginal()
+                                : (net.minecraft.item.ItemStack) event.getCursorTransaction().getFinal()
                                         .createStack();
                 player.inventory.setItemStack(cursor);
                 player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
@@ -158,7 +158,7 @@ public class SpongeCommonEventFactory {
                 if (event.getCursorTransaction().getCustom().isPresent()) {
                     ItemStack cursor =
                             event.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                    : (net.minecraft.item.ItemStack) event.getCursorTransaction().getOriginal()
+                                    : (net.minecraft.item.ItemStack) event.getCursorTransaction().getFinal()
                                             .createStack();
                     player.inventory.setItemStack(cursor);
                     player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
@@ -192,7 +192,7 @@ public class SpongeCommonEventFactory {
                 if (event.getCursorTransaction().getCustom().isPresent()) {
                     ItemStack cursor =
                             event.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                    : (net.minecraft.item.ItemStack) event.getCursorTransaction().getOriginal()
+                                    : (net.minecraft.item.ItemStack) event.getCursorTransaction().getFinal()
                                             .createStack();
                     player.inventory.setItemStack(cursor);
                     player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
@@ -274,7 +274,7 @@ public class SpongeCommonEventFactory {
             if (((ClickInventoryEvent) event).getCursorTransaction().getCustom().isPresent()) {
                 ItemStack cursor =
                         ((ClickInventoryEvent) event).getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                : (net.minecraft.item.ItemStack) ((ClickInventoryEvent) event).getCursorTransaction().getOriginal()
+                                : (net.minecraft.item.ItemStack) ((ClickInventoryEvent) event).getCursorTransaction().getFinal()
                                         .createStack();
                 player.inventory.setItemStack(cursor);
                 player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
@@ -443,7 +443,7 @@ public class SpongeCommonEventFactory {
             if (((InteractInventoryEvent) clickEvent).getCursorTransaction().getCustom().isPresent()) {
                 ItemStack cursor =
                         ((InteractInventoryEvent) clickEvent).getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                : (net.minecraft.item.ItemStack) ((InteractInventoryEvent) clickEvent).getCursorTransaction().getOriginal()
+                                : (net.minecraft.item.ItemStack) ((InteractInventoryEvent) clickEvent).getCursorTransaction().getFinal()
                                         .createStack();
                 player.inventory.setItemStack(cursor);
                 player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));

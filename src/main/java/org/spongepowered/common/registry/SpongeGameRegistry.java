@@ -382,7 +382,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
 
-    public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(0);
+    public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
     public static final ItemStack NONE = (ItemStack)new net.minecraft.item.ItemStack(NONE_ITEM);
 
     public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;

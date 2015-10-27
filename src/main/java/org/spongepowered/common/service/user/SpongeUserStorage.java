@@ -39,6 +39,8 @@ import java.util.UUID;
 
 public class SpongeUserStorage implements UserStorage {
 
+    public static final String FAKEPLAYER_UUID = "41C82C87-7AfB-4024-BA57-13D2C99CAE77";
+
     @Override
     public Optional<User> get(UUID uniqueId) {
         return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(uniqueId, "uniqueId")));
@@ -58,6 +60,13 @@ public class SpongeUserStorage implements UserStorage {
 
     @Override
     public User getOrCreate(GameProfile profile) {
+        if (profile.getUniqueId() == null) {
+            String name = profile.getName();
+            // Use Forge's FakePlayer UUID
+            UUID uuid = UUID.fromString(FAKEPLAYER_UUID);
+            profile = (GameProfile) new com.mojang.authlib.GameProfile(uuid, name);
+        }
+
         Optional<User> user = get(profile);
         if (user.isPresent()) {
             return user.get();
