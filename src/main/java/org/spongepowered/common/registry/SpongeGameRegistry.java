@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.SpongeTimingsFactory;
@@ -345,6 +346,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
@@ -465,65 +467,19 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
     public static final Map<String, ItemType> itemTypeMappings = Maps.newHashMap();
 
-    protected Map<Class<? extends CatalogType>, Map<String, ? extends CatalogType>> catalogTypeMap =
-            ImmutableMap.<Class<? extends CatalogType>, Map<String, ? extends CatalogType>>builder()
-                .put(Achievement.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(Art.class, this.artMappings)
-                .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
-                .put(BiomeType.class, this.biomeTypeMappings)
-                .put(BlockType.class, blockTypeMappings)
-                .put(Career.class, this.careerMappings)
-                .put(CookedFish.class, this.cookedFishMappings)
-                .put(ComparatorType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(Difficulty.class, difficultyMappings)
-                .put(DimensionType.class, this.dimensionTypeMappings)
-                .put(DirtType.class, this.dirtTypeMappings)
-                .put(DisguisedBlockType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(DisplaySlot.class, this.displaySlotMappings)
-                .put(DoublePlantType.class, this.doublePlantMappings)
-                .put(DyeColor.class, this.dyeColorMappings)
-                .put(EntityType.class, this.entityTypeMappings)
-                .put(EquipmentType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(FireworkShape.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(Fish.class, this.fishMappings)
-                .put(Hinge.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(HorseColor.class, SpongeEntityConstants.HORSE_COLORS)
-                .put(HorseStyle.class, SpongeEntityConstants.HORSE_STYLES)
-                .put(HorseVariant.class, SpongeEntityConstants.HORSE_VARIANTS)
-                .put(ItemType.class, itemTypeMappings)
-                .put(NotePitch.class, this.notePitchMappings)
-                .put(ObjectiveDisplayMode.class, objectiveDisplayModeMappings)
-                .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
-                .put(PlantType.class, this.plantTypeMappings)
-                .put(PopulatorType.class, this.populatorTypeMappings)
-                .put(PotionEffectType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(PortionType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(PrismarineType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(Profession.class, this.professionMappings)
-                .put(QuartzType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(RabbitType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(RailDirection.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(Rotation.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(SandstoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(ShrubType.class, this.shrubTypeMappings)
-                .put(SelectorType.class, this.selectorMappings)
-                .put(SkeletonType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(SkullType.class, this.skullTypeMappings)
-                .put(SlabType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(StairShape.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(Statistic.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(StatisticFormat.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(StatisticGroup.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(StoneType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(TextColor.class, textColorMappings)
-                .put(TileEntityType.class, this.tileEntityTypeMappings)
-                .put(TreeType.class, this.treeTypeMappings)
-                .put(Visibility.class, visibilityMappings)
-                .put(WallType.class, this.wallTypeMappings)
-                .put(Weather.class, this.weatherMappings)
-                .put(WorldGeneratorModifier.class, this.worldGeneratorRegistry.viewModifiersMap())
-                .build();
-    private final Map<Class<?>, Class<?>> builderMap = ImmutableMap.of(); // TODO
+    private final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> catalogRegistryMap = new ConcurrentHashMap<>();
+
+    /**
+     * Registers the {@link CatalogRegistryModule} for handling the registry stuffs.
+     *
+     * @param catalogClass
+     * @param registryModule
+     * @param <T>
+     */
+    public <T extends CatalogType> void registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
+        checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
+        this.catalogRegistryMap.put(catalogClass, registryModule);
+    }
 
     public Optional<PotionEffectType> getPotion(String id) {
         return Optional.ofNullable((PotionEffectType) Potion.getPotionFromResourceLocation(id));
@@ -552,32 +508,28 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Optional<T> getType(Class<T> typeClass, String id) {
-        Map<String, ? extends CatalogType> tempMap = this.catalogTypeMap.get(checkNotNull(typeClass, "null type class"));
-        if (tempMap == null) {
+        CatalogRegistryModule<T> registryModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(typeClass);
+        if (registryModule == null) {
             return Optional.empty();
         } else {
-            T type = (T) tempMap.get(id.toLowerCase());
-            if (type == null) {
-                return Optional.empty();
-            } else {
-                return Optional.of(type);
-            }
+            return registryModule.getById(id);
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
-        Map<String, ? extends CatalogType> tempMap = this.catalogTypeMap.get(checkNotNull(typeClass, "null type class"));
-        if (tempMap == null) {
+        CatalogRegistryModule<T> registryModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(typeClass);
+        if (registryModule == null) {
             return Collections.emptyList();
         } else {
-            ImmutableList.Builder<T> builder = ImmutableList.builder();
-            for (Map.Entry<String, ? extends CatalogType> entry : tempMap.entrySet()) {
-                builder.add((T) entry.getValue());
-            }
-            return builder.build();
+            return registryModule.getAll();
         }
+    }
+
+    @Override
+    public <T> Optional<T> createBuilder(Class<T> builderClass) {
+        return Optional.empty(); // todo handle this with registrymodules or something.
     }
 
     @Override
