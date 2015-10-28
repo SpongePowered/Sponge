@@ -55,6 +55,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -167,6 +168,7 @@ public class KeyRegistry {
         keyMap.put("max_burn_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxBurnTime")));
         keyMap.put("passed_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("PassedCookTime")));
         keyMap.put("max_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxCookTime")));
+        keyMap.put("spawnable_entity_type", makeSingleKey(EntityType.class, Value.class, of("SpawnableEntityType")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
