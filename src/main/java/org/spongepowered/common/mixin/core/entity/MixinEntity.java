@@ -40,6 +40,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -689,21 +690,21 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = new MemoryDataContainer()
             .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
-            .set(Location.WORLD_ID, transform.getExtent().getUniqueId().toString())
+            .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
             .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
-                .set(Location.POSITION_X, transform.getPosition().getX())
-                .set(Location.POSITION_Y, transform.getPosition().getY())
-                .set(Location.POSITION_Z, transform.getPosition().getZ())
+                .set(Queries.POSITION_X, transform.getPosition().getX())
+                .set(Queries.POSITION_Y, transform.getPosition().getY())
+                .set(Queries.POSITION_Z, transform.getPosition().getZ())
             .getContainer()
             .createView(DataQueries.ENTITY_ROTATION)
-                .set(Location.POSITION_X, transform.getRotation().getX())
-                .set(Location.POSITION_Y, transform.getRotation().getY())
-                .set(Location.POSITION_Z, transform.getRotation().getZ())
+                .set(Queries.POSITION_X, transform.getRotation().getX())
+                .set(Queries.POSITION_Y, transform.getRotation().getY())
+                .set(Queries.POSITION_Z, transform.getRotation().getZ())
             .getContainer()
             .createView(DataQueries.ENTITY_SCALE)
-                .set(Location.POSITION_X, transform.getScale().getX())
-                .set(Location.POSITION_Y, transform.getScale().getY())
-                .set(Location.POSITION_Z, transform.getScale().getZ())
+                .set(Queries.POSITION_X, transform.getScale().getX())
+                .set(Queries.POSITION_Y, transform.getScale().getY())
+                .set(Queries.POSITION_Z, transform.getScale().getZ())
             .getContainer()
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
             .set(DataQueries.UNSAFE_NBT, unsafeNbt);

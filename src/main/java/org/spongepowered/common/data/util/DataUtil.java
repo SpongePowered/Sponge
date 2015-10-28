@@ -33,6 +33,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
@@ -157,10 +158,10 @@ public class DataUtil {
     }
 
     public static Location<World> getLocation(DataView view, boolean castToInt) {
-        final UUID worldUuid = UUID.fromString(view.getString(Location.WORLD_ID).get());
-        final double x = view.getDouble(Location.POSITION_X).get();
-        final double y = view.getDouble(Location.POSITION_Y).get();
-        final double z = view.getDouble(Location.POSITION_Z).get();
+        final UUID worldUuid = UUID.fromString(view.getString(Queries.WORLD_ID).get());
+        final double x = view.getDouble(Queries.POSITION_X).get();
+        final double y = view.getDouble(Queries.POSITION_Y).get();
+        final double z = view.getDouble(Queries.POSITION_Z).get();
         if (castToInt) {
             return new Location<>(Sponge.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
         } else {
@@ -176,9 +177,9 @@ public class DataUtil {
     public static Vector3i getPosition3i(DataView view, DataQuery query) {
         checkDataExists(view, DataQueries.SNAPSHOT_WORLD_POSITION);
         final DataView internal = view.getView(DataQueries.SNAPSHOT_WORLD_POSITION).get();
-        final int x = internal.getInt(Location.POSITION_X).get();
-        final int y = internal.getInt(Location.POSITION_Y).get();
-        final int z = internal.getInt(Location.POSITION_Z).get();
+        final int x = internal.getInt(Queries.POSITION_X).get();
+        final int y = internal.getInt(Queries.POSITION_Y).get();
+        final int z = internal.getInt(Queries.POSITION_Z).get();
         return new Vector3i(x, y, z);
     }
 
@@ -189,9 +190,9 @@ public class DataUtil {
     public static Vector3d getPosition3d(DataView view, DataQuery query) {
         checkDataExists(view, query);
         final DataView internal = view.getView(query).get();
-        final double x = internal.getDouble(Location.POSITION_X).get();
-        final double y = internal.getDouble(Location.POSITION_Y).get();
-        final double z = internal.getDouble(Location.POSITION_Z).get();
+        final double x = internal.getDouble(Queries.POSITION_X).get();
+        final double y = internal.getDouble(Queries.POSITION_Y).get();
+        final double z = internal.getDouble(Queries.POSITION_Z).get();
         return new Vector3d(x, y, z);
     }
 

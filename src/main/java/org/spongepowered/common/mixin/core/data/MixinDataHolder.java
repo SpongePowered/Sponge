@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import net.minecraft.entity.Entity;
@@ -55,8 +56,7 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "getData")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataGetManipulator.startTiming()) {
             final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildProcessor(containerClass);
             if (optional.isPresent()) {
                 return (Optional<T>) optional.get().from(this);
@@ -68,8 +68,7 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "getOrCreate")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataGetOrCreateManipulator.startTiming()) {
             final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildProcessor(containerClass);
             if (optional.isPresent()) {
                 return (Optional<T>) optional.get().createFrom(this);
@@ -82,8 +81,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "supports")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataSupportsManipulator.startTiming()) {
             final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildProcessor(holderClass);
             return optional.isPresent() && optional.get().supports(this);
         }
@@ -91,8 +89,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "offerKey")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataOfferKey.startTiming()) {
             final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = SpongeDataRegistry.getInstance().getBaseValueProcessor(key);
             if (optional.isPresent()) {
                 return optional.get().offerToStore(this, value);
@@ -106,8 +103,7 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "offerManipulator")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataOfferManipulator.startTiming()) {
             final Optional<DataProcessor> optional = SpongeDataRegistry.getInstance().getWildDataProcessor(valueContainer.getClass());
             if (optional.isPresent()) {
                 return optional.get().set(this, valueContainer, checkNotNull(function));
@@ -120,8 +116,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> valueContainers) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "offerManipulators")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataOfferMultiManipulators.startTiming()) {
             DataTransactionBuilder builder = DataTransactionBuilder.builder();
             for (DataManipulator<?, ?> manipulator : valueContainers) {
                 final DataTransactionResult result = offer(manipulator);
@@ -151,8 +146,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "removeManipulator")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataRemoveManipulator.startTiming()) {
             final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildProcessor(containerClass);
             if (optional.isPresent()) {
                 return optional.get().remove(this);
@@ -165,8 +159,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult remove(Key<?> key) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "removeKey")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataRemoveKey.startTiming()) {
             final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(key));
             if (optional.isPresent()) {
                 return optional.get().removeFrom(this);
@@ -179,8 +172,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult undo(DataTransactionResult result) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "undo")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataOfferManipulator.startTiming()) {
             if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
                 return DataTransactionBuilder.successNoData();
             }
@@ -202,8 +194,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "getKey")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataGetByKey.startTiming()) {
             final Optional<ValueProcessor<E, ? extends BaseValue<E>>>
                 optional =
                 SpongeDataRegistry.getInstance().getBaseValueProcessor(checkNotNull(key));
@@ -216,8 +207,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "getValue")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataGetValue.startTiming()) {
             final Optional<ValueProcessor<E, V>> optional = SpongeDataRegistry.getInstance().getValueProcessor(checkNotNull(key));
             if (optional.isPresent()) {
                 return optional.get().getApiValueFromContainer(this);
@@ -228,8 +218,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public boolean supports(Key<?> key) {
-        try (Timing timing = Timings.ofStart(Sponge.getPlugin(), "supportsKey")) {
-            timing.startTiming();
+        try (Timing timing = SpongeTimings.dataSupprtsKey.startTiming()) {
             final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(key));
             return optional.isPresent() && optional.get().supports(this);
         }

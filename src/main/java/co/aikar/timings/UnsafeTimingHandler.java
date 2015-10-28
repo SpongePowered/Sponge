@@ -39,9 +39,10 @@ class UnsafeTimingHandler extends TimingHandler {
     }
 
     @Override
-    public void startTiming() {
+    public TimingHandler startTiming() {
         checkThread();
         super.startTiming();
+        return this;
     }
 
     @Override

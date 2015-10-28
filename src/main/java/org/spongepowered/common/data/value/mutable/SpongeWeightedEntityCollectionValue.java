@@ -31,37 +31,40 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedEntityCollectionValue;
 import org.spongepowered.api.data.value.mutable.WeightedEntityCollectionValue;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.weighted.WeightedCollection;
-import org.spongepowered.api.util.weighted.WeightedEntity;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedEntityCollectionValue;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectionValue<WeightedEntity, WeightedEntityCollectionValue,
+public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectionValue<WeightedSerializableObject<EntitySnapshot>, WeightedEntityCollectionValue,
     ImmutableWeightedEntityCollectionValue> implements WeightedEntityCollectionValue {
 
-    public SpongeWeightedEntityCollectionValue(Key<? extends BaseValue<WeightedCollection<WeightedEntity>>> key) {
+    public SpongeWeightedEntityCollectionValue(Key<? extends BaseValue<WeightedCollection<WeightedSerializableObject<EntitySnapshot>>>> key) {
         super(key);
     }
 
-    public SpongeWeightedEntityCollectionValue(Key<? extends BaseValue<WeightedCollection<WeightedEntity>>> key,
-                                               WeightedCollection<WeightedEntity> actualValue) {
+    public SpongeWeightedEntityCollectionValue(Key<? extends BaseValue<WeightedCollection<WeightedSerializableObject<EntitySnapshot>>>> key,
+                                               WeightedCollection<WeightedSerializableObject<EntitySnapshot>> actualValue) {
         super(key, actualValue);
     }
 
     @Override
-    public WeightedEntityCollectionValue filter(Predicate<? super WeightedEntity> predicate) {
-        final WeightedCollection<WeightedEntity> collection =
+    public WeightedEntityCollectionValue filter(Predicate<? super WeightedSerializableObject<EntitySnapshot>> predicate) {
+        final WeightedCollection<WeightedSerializableObject<EntitySnapshot>> collection =
             this.actualValue.stream().filter(entity -> checkNotNull(predicate).test(entity))
                 .collect(Collectors.toCollection(WeightedCollection::new));
         return new SpongeWeightedEntityCollectionValue(getKey(), collection);
     }
 
     @Override
-    public WeightedCollection<WeightedEntity> getAll() {
+    public WeightedCollection<WeightedSerializableObject<EntitySnapshot>> getAll() {
         return this.actualValue.stream().collect(Collectors.toCollection(WeightedCollection::new));
     }
 
@@ -72,6 +75,9 @@ public class SpongeWeightedEntityCollectionValue extends SpongeWeightedCollectio
 
     @Override
     public WeightedEntityCollectionValue add(EntityType entityType, Collection<DataManipulator<?, ?>> entityData) {
-        return add(new WeightedEntity(checkNotNull(entityType), 1, checkNotNull(entityData)));
+        final EntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
+        builder.type(entityType);
+        entityData.forEach(builder::add);
+        return add(new WeightedSerializableObject<>(builder.build(), 1));
     }
 }

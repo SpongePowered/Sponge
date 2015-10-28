@@ -54,6 +54,20 @@ public final class SpongeTimings {
     public static final Timing antiXrayUpdateTimer = SpongeTimingsFactory.ofSafe("anti-xray - update");
     public static final Timing antiXrayObfuscateTimer = SpongeTimingsFactory.ofSafe("anti-xray - obfuscate");
 
+    public static final Timing dataGetManipulator = SpongeTimingsFactory.ofSafe("## getManipulator");
+    public static final Timing dataGetOrCreateManipulator = SpongeTimingsFactory.ofSafe("## getOrCreateManipulator");
+    public static final Timing dataOfferManipulator = SpongeTimingsFactory.ofSafe("## offerData");
+    public static final Timing dataOfferMultiManipulators = SpongeTimingsFactory.ofSafe("## offerManipulators");
+    public static final Timing dataRemoveManipulator = SpongeTimingsFactory.ofSafe("## removeManipulator");
+    public static final Timing dataSupportsManipulator = SpongeTimingsFactory.ofSafe("## supportsManipulator");
+    public static final Timing dataOfferKey = SpongeTimingsFactory.ofSafe("## offerKey");
+    public static final Timing dataGetByKey = SpongeTimingsFactory.ofSafe("## getKey");
+    public static final Timing dataGetValue = SpongeTimingsFactory.ofSafe("## getValue");
+    public static final Timing dataSupprtsKey = SpongeTimingsFactory.ofSafe("## supportsKey");
+    public static final Timing dataRemoveKey = SpongeTimingsFactory.ofSafe("## removeKey");
+
+
+
     private SpongeTimings() {
     }
 

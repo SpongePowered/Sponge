@@ -34,12 +34,12 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.WeightedEntityCollectionValue;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.util.weighted.WeightedCollection;
-import org.spongepowered.api.util.weighted.WeightedEntity;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeMobSpawnerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeNextEntityToSpawnValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectionValue;
 
@@ -52,13 +52,13 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     private short maximumEntities;
     private short playerRange;
     private short spawnRange;
-    private WeightedEntity nextEntityToSpawn;
-    private WeightedCollection<WeightedEntity> entities;
+    private WeightedSerializableObject<EntitySnapshot> nextEntityToSpawn;
+    private WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entities;
 
     public SpongeMobSpawnerData(short remainingDelay, short minimumDelay, short maximumDelay, short count,
                                 short maximumEntities, short playerRange, short spawnRange,
-                                WeightedEntity nextEntityToSpawn,
-                                WeightedCollection<WeightedEntity> entities) {
+                                WeightedSerializableObject<EntitySnapshot> nextEntityToSpawn,
+                                WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entities) {
         super(MobSpawnerData.class);
         this.remainingDelay = remainingDelay;
         this.minimumDelay = minimumDelay;

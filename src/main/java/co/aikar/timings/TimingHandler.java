@@ -97,12 +97,13 @@ class TimingHandler implements Timing {
     }
 
     @Override
-    public void startTiming() {
+    public TimingHandler startTiming() {
         if (this.enabled && ++this.timingDepth == 1) {
             this.start = System.nanoTime();
             this.parent = TimingsManager.CURRENT;
             TimingsManager.CURRENT = this;
         }
+        return this;
     }
 
     @Override

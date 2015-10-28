@@ -62,7 +62,7 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     }
 
     @Override
-    public ImmutableSetValue<E> with(E... elements) {
+    public ImmutableSetValue<E> withElement(E elements) {
         return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 

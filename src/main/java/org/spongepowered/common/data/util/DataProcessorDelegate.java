@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.util;
 
+import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
-import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 
@@ -44,10 +45,14 @@ import java.util.Optional;
 
 public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
 
-    private final ImmutableList<DataProcessor<M, I>> processors;
+    private final ImmutableList<Tuple<DataProcessor<M, I>, Timing>> processors;
 
     public DataProcessorDelegate(ImmutableList<DataProcessor<M, I>> processors) {
-        this.processors = processors;
+        ImmutableList.Builder<Tuple<DataProcessor<M, I>, Timing>> builder = ImmutableList.builder();
+        for (DataProcessor<M, I> processor : processors) {
+            builder.add(new Tuple<>(processor, SpongeTimingsFactory.ofSafe(Sponge.getPlugin(), processor.getClass().getCanonicalName())));
+        }
+        this.processors = builder.build();
     }
 
     @Override
@@ -57,13 +62,13 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public boolean supports(DataHolder dataHolder) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::supports")) {
-                timing.startTiming();
-                if (processor.supports(dataHolder)) {
-                    return true;
-                }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            if (tuple.getFirst().supports(dataHolder)) {
+                tuple.getSecond().stopTiming();
+                return true;
             }
+            tuple.getSecond().stopTiming();
         }
         return false;
     }
@@ -75,45 +80,46 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public Optional<M> from(DataHolder dataHolder) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::from")) {
-                timing.startTiming();
-                if (processor.supports(dataHolder)) {
-                    final Optional<M> optional = processor.from(dataHolder);
-                    if (optional.isPresent()) {
-                        return optional;
-                    }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            if (tuple.getFirst().supports(dataHolder)) {
+                final Optional<M> optional = tuple.getFirst().from(dataHolder);
+                tuple.getSecond().stopTiming();
+                if (optional.isPresent()) {
+                    return optional;
                 }
             }
+            tuple.getSecond().stopTiming();
+
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::fill")) {
-                timing.startTiming();
-                if (processor.supports(dataHolder)) {
-                    final Optional<M> optional = processor.fill(dataHolder, manipulator, overlap);
-                    if (optional.isPresent()) {
-                        return optional;
-                    }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            if (tuple.getFirst().supports(dataHolder)) {
+                final Optional<M> optional = tuple.getFirst().fill(dataHolder, manipulator, overlap);
+                tuple.getSecond().stopTiming();
+                if (optional.isPresent()) {
+                    return optional;
                 }
             }
+            tuple.getSecond().stopTiming();
+
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<M> fill(DataContainer container, M m) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::fillDataContainer")) {
-                timing.startTiming();
-                final Optional<M> optional = processor.fill(container, m);
-                if (optional.isPresent()) {
-                    return optional;
-                }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            final Optional<M> optional = tuple.getFirst().fill(container, m);
+            tuple.getSecond().stopTiming();
+            if (optional.isPresent()) {
+                return optional;
             }
         }
         return Optional.empty();
@@ -121,29 +127,29 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::set")) {
-                timing.startTiming();
-                if (processor.supports(dataHolder)) {
-                    final DataTransactionResult result = processor.set(dataHolder, manipulator, function);
-                    if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                        return result;
-                    }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            if (tuple.getFirst().supports(dataHolder)) {
+                final DataTransactionResult result = tuple.getFirst().set(dataHolder, manipulator, function);
+                if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
+                    tuple.getSecond().stopTiming();
+                    return result;
                 }
             }
+            tuple.getSecond().stopTiming();
         }
         return DataTransactionBuilder.failNoData();
     }
 
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::withKey")) {
-                timing.startTiming();
-                final Optional<I> optional = processor.with(key, value, immutable);
-                if (optional.isPresent()) {
-                    return optional;
-                }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            final Optional<I> optional = tuple.getFirst().with(key, value, immutable);
+            tuple.getSecond().stopTiming();
+            if (optional.isPresent()) {
+                return optional;
+
             }
         }
         return Optional.empty();
@@ -151,32 +157,33 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::remove")) {
-                timing.startTiming();
-                if (processor.supports(dataHolder)) {
-                    final DataTransactionResult result = processor.remove(dataHolder);
-                    if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                        return result;
-                    }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            if (tuple.getFirst().supports(dataHolder)) {
+                final DataTransactionResult result = tuple.getFirst().remove(dataHolder);
+                tuple.getSecond().stopTiming();
+                if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
+                    return result;
                 }
             }
+            tuple.getSecond().stopTiming();
+
         }
         return DataTransactionBuilder.failNoData();
     }
 
     @Override
     public Optional<M> createFrom(DataHolder dataHolder) {
-        for (DataProcessor<M, I> processor : this.processors) {
-            try (Timing timing = Timings.of(Sponge.getPlugin(), processor.getClass().getCanonicalName() + "::createFrom")) {
-                timing.startTiming();
-                if (processor.supports(dataHolder)) {
-                    final Optional<M> optional = processor.createFrom(dataHolder);
-                    if (optional.isPresent()) {
-                        return optional;
-                    }
+        for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
+            tuple.getSecond().startTiming();
+            if (tuple.getFirst().supports(dataHolder)) {
+                final Optional<M> optional = tuple.getFirst().createFrom(dataHolder);
+                tuple.getSecond().stopTiming();
+                if (optional.isPresent()) {
+                    return optional;
                 }
             }
+            tuple.getSecond().stopTiming();
         }
         return Optional.empty();
     }
