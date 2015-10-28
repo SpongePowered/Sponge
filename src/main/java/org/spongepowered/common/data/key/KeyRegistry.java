@@ -74,6 +74,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -202,9 +203,9 @@ public class KeyRegistry {
         keyMap.put("big_mushroom_type", makeSingleKey(BigMushroomType.class, Value.class, of("BigMushroomType")));
         keyMap.put("ai_enabled", makeSingleKey(Boolean.class, Value.class, of("IsAiEnabled")));
         keyMap.put("creeper_charged", makeSingleKey(Boolean.class, Value.class, of("IsCreeperCharged")));
-
         keyMap.put("item_durability", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ItemDurability")));
         keyMap.put("unbreakable", makeSingleKey(Boolean.class, Value.class, of("Unbreakable")));
+        keyMap.put("spawnable_entity_type", makeSingleKey(EntityType.class, Value.class, of("SpawnableEntityType")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
