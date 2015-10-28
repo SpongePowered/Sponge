@@ -75,11 +75,6 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.GameRegistry;
-import org.spongepowered.api.attribute.Attribute;
-import org.spongepowered.api.attribute.AttributeBuilder;
-import org.spongepowered.api.attribute.AttributeCalculator;
-import org.spongepowered.api.attribute.AttributeModifierBuilder;
-import org.spongepowered.api.attribute.Operation;
 import org.spongepowered.api.block.BlockSnapshotBuilder;
 import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
@@ -561,7 +556,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             ImmutableMap.<Class<? extends CatalogType>, Map<String, ? extends CatalogType>>builder()
                 .put(Achievement.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(Art.class, this.artMappings)
-                .put(Attribute.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(BannerPatternShape.class, this.bannerPatternShapeMappings)
                 .put(BiomeType.class, this.biomeTypeMappings)
                 .put(BlockType.class, blockTypeMappings)
@@ -593,7 +587,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(NotePitch.class, this.notePitchMappings)
                 .put(ObjectiveDisplayMode.class, objectiveDisplayModeMappings)
                 .put(OcelotType.class, SpongeEntityConstants.OCELOT_TYPES)
-                .put(Operation.class, ImmutableMap.<String, CatalogType>of()) // TODO
                 .put(ParticleType.class, this.particleByName)
                 .put(PlantType.class, this.plantTypeMappings)
                 .put(PopulatorType.class, this.populatorTypeMappings)
@@ -752,16 +745,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public AchievementBuilder createAchievementBuilder() {
         return null;
-    }
-
-    @Override
-    public AttributeModifierBuilder createAttributeModifierBuilder() {
-        return null;
-    }
-
-    @Override
-    public AttributeBuilder createAttributeBuilder() {
-        return null; // TODO
     }
 
     @Override
@@ -929,11 +912,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     @Override
     public ImmutableDataRegistry getImmutableDataRegistry() {
         return SpongeImmutableRegistry.getInstance();
-    }
-
-    @Override
-    public AttributeCalculator getAttributeCalculator() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
