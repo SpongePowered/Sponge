@@ -1,20 +1,19 @@
 // Gradle plugins
 buildscript {
     repositories {
-        jcenter()
         maven {
-            name = 'forge'
-            url = 'http://files.minecraftforge.net/maven'
+            name = 'plugins'
+            url = 'https://plugins.gradle.org/m2'
         }
         maven {
             name = 'minecrell'
-            url = 'http://repo.minecrell.net/snapshots'
+            url = 'http://repo.minecrell.net/releases'
         }
     }
 
     dependencies {
         // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
-        classpath 'net.minecrell:VanillaGradle:4.0-SNAPSHOT'
+        classpath 'net.minecrell:VanillaGradle:2.0.2_1'
         classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
             exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
