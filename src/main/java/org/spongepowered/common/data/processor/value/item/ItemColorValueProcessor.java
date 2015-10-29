@@ -75,7 +75,7 @@ public class ItemColorValueProcessor extends AbstractSpongeValueProcessor<ItemSt
             final ItemStack stack = (ItemStack) container;
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<Color> optional = getVal(stack);
-            if (ColorUtil.hasItemStackColor(stack) && optional.isPresent()) {
+            if (ColorUtil.hasNbtColor(stack) && optional.isPresent()) {
                 try {
                     NbtDataUtil.removeColorFromNBT(stack);
                     return builder.replace(new ImmutableSpongeValue<>(Keys.COLOR, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();

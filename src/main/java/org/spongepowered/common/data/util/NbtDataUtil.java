@@ -218,7 +218,7 @@ public class NbtDataUtil {
         stack.getSubCompound(ITEM_DISPLAY, false).removeTag(ITEM_COLOR);
     }
 
-    public static void setColorToNBT(ItemStack stack, Color color) {
+    public static void setColorToNbt(ItemStack stack, Color color) {
         final int iColor = color.getRGB();
         stack.getSubCompound(ITEM_DISPLAY, true).setInteger(ITEM_COLOR, iColor);
     }

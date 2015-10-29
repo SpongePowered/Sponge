@@ -47,16 +47,16 @@ import net.minecraft.item.ItemStack;
 public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color, Value<Color>, ColoredData, ImmutableColoredData> {
 
     public ColoredDataProcessor() {
-        super(stack -> ColorUtil.getItemStackColor(stack).isPresent(), Keys.COLOR);
+        super(ColorUtil::hasColor, Keys.COLOR);
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final Optional<ColoredData> optional = from(dataHolder);
             final ItemStack stack = (ItemStack) dataHolder;
-            if (ColorUtil.hasItemStackColor(stack) && optional.isPresent()) {
+            if (ColorUtil.hasNbtColor(stack) && optional.isPresent()) {
+                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 try {
                     NbtDataUtil.removeColorFromNBT(stack);
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
@@ -65,7 +65,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
-                return builder.result(DataTransactionResult.Type.SUCCESS).build();
+                return DataTransactionBuilder.successNoData();
             }
         }
         return DataTransactionBuilder.failNoData();

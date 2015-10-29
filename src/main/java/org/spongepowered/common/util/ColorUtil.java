@@ -32,6 +32,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemArmor.ArmorMaterial;
 
 public final class ColorUtil {
 
@@ -46,16 +47,23 @@ public final class ColorUtil {
     }
 
     public static void setItemStackColor(ItemStack stack, Color value) {
-        NbtDataUtil.setColorToNBT(stack, value);
+        NbtDataUtil.setColorToNbt(stack, value);
     }
 
     /**
-     * N.B This differs from {@link #getItemStackColor(ItemStack)}.isPresent()
+     * N.B This differs from {@link #hasColor(ItemStack)}
      * because leather armor has a color even without a set color. This returns
      * {@code true} only if there is a color set on the display tag.
      */
-    public static boolean hasItemStackColor(ItemStack stack) {
+    public static boolean hasNbtColor(ItemStack stack) {
         return NbtDataUtil.hasColorFromNBT(stack);
+    }
+    
+    public static boolean hasColor(ItemStack stack) {
+        final Item item = stack.getItem();
+        return hasNbtColor(stack) ||
+                (item instanceof ItemArmor &&
+                        ((ItemArmor) item).getArmorMaterial() == ArmorMaterial.LEATHER);
     }
 
     private ColorUtil() {
