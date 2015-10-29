@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.awt.Color;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -39,63 +40,25 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.ColorUtil;
 
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 
-public class ColoredDataProcessor extends AbstractSpongeDataProcessor<ColoredData, ImmutableColoredData> {
+public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color, Value<Color>, ColoredData, ImmutableColoredData> {
 
-    @Override
-    public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof ItemStack;
-    }
-
-    @Override
-    public Optional<ColoredData> from(DataHolder dataHolder) {
-        if (dataHolder instanceof ItemStack) {
-            final ItemStack stack = (ItemStack) dataHolder;
-            return ColorUtil.getItemStackColor(stack).map(SpongeColoredData::new);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ColoredData> fill(DataHolder dataHolder, ColoredData manipulator, MergeFunction overlap) {
-        if (supports(dataHolder)) {
-            final ColoredData data = from(dataHolder).orElse(null);
-            final ColoredData newData = checkNotNull(overlap.merge(checkNotNull(manipulator), data));
-            final Color color = newData.color().get();
-            return Optional.of(manipulator.set(Keys.COLOR, color));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ColoredData> fill(DataContainer container, ColoredData colorData) {
-        if (container.contains(Keys.COLOR.getQuery())) {
-            final Color color = DataUtil.getData(container, Keys.COLOR, Color.class);
-            return Optional.of(colorData.set(Keys.COLOR, color));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, ColoredData manipulator, MergeFunction function) {
-        return DataTransactionBuilder.failResult(manipulator.getValues());
-    }
-
-    @Override
-    public Optional<ImmutableColoredData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableColoredData immutable) {
-        if (key == Keys.COLOR) {
-            return Optional.of(new ImmutableSpongeColoredData((Color) value));
-        }
-        return Optional.empty();
+    protected ColoredDataProcessor() {
+        super(stack -> ColorUtil.getItemStackColor(stack).isPresent(), Keys.COLOR);
     }
 
     @Override
@@ -120,8 +83,25 @@ public class ColoredDataProcessor extends AbstractSpongeDataProcessor<ColoredDat
     }
 
     @Override
-    public Optional<ColoredData> createFrom(DataHolder dataHolder) {
-        return from(dataHolder);
+    protected boolean set(ItemStack itemStack, Color value) {
+        ColorUtil.setItemStackColor(itemStack, value);
+        return true;
+    }
+
+    @Override
+    protected Optional<Color> getVal(ItemStack itemStack) {
+        return ColorUtil.getItemStackColor(itemStack);
+    }
+
+    @Override
+    protected ImmutableValue<Color> constructImmutableValue(Color value) {
+        return null;
+    }
+
+    @Override
+    protected ColoredData createManipulator() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
