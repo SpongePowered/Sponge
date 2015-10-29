@@ -460,6 +460,7 @@ import org.spongepowered.common.data.processor.value.item.CoalValueProcessor;
 import org.spongepowered.common.data.processor.value.item.CookedFishValueProcessor;
 import org.spongepowered.common.data.processor.value.item.FishValueProcessor;
 import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemColorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullRepresentedPlayerValueProcessor;
@@ -861,6 +862,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.DOUBLE_PLANT_TYPE, new DoublePlantTypeValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BIG_MUSHROOM_TYPE, new BigMushroomTypeValueProcessor());
         dataRegistry.registerValueProcessor(Keys.DISGUISED_BLOCK_TYPE, new DisguisedBlockTypeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.COLOR, new ItemColorValueProcessor());
     }
 
 }
