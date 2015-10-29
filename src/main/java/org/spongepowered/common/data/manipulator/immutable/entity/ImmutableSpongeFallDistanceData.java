@@ -29,6 +29,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallDist
 import org.spongepowered.api.data.manipulator.mutable.entity.FallDistanceData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallDistanceData;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 
@@ -48,7 +49,7 @@ public class ImmutableSpongeFallDistanceData extends AbstractImmutableBoundedCom
     }
 
     public ImmutableSpongeFallDistanceData(float fallDistance) {
-        super(ImmutableFallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), FallDistanceData.class, 0F, Float.MAX_VALUE);
+        super(ImmutableFallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), SpongeFallDistanceData.class, 0F, Float.MAX_VALUE);
     }
 
 
