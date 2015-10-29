@@ -24,40 +24,29 @@
  */
 package org.spongepowered.common.data.processor.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.awt.Color;
 import java.util.Optional;
-import java.util.function.Predicate;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.ColorUtil;
 
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 
 public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color, Value<Color>, ColoredData, ImmutableColoredData> {
 
-    protected ColoredDataProcessor() {
+    public ColoredDataProcessor() {
         super(stack -> ColorUtil.getItemStackColor(stack).isPresent(), Keys.COLOR);
     }
 
@@ -95,13 +84,12 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
 
     @Override
     protected ImmutableValue<Color> constructImmutableValue(Color value) {
-        return null;
+        return new ImmutableSpongeValue<>(Keys.COLOR, value);
     }
 
     @Override
     protected ColoredData createManipulator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new SpongeColoredData();
     }
 
 }
