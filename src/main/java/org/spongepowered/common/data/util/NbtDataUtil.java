@@ -199,9 +199,9 @@ public class NbtDataUtil {
     }
 
     public static boolean hasColorFromNBT(ItemStack stack) {
-        return !stack.hasTagCompound() ||
-                !stack.getTagCompound().hasKey(ITEM_DISPLAY) ||
-                !stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
+        return stack.hasTagCompound() &&
+                stack.getTagCompound().hasKey(ITEM_DISPLAY) &&
+                stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
     }
 
     public static Optional<Color> getColorFromNBT(NBTTagCompound subCompound) {
