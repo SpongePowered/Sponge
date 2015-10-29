@@ -24,24 +24,22 @@
  */
 package org.spongepowered.common.data.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.text.SpongeTexts;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.item.Enchantment;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.text.SpongeTexts;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 
 /**
  * A standard utility class for interacting and manipulating {@link ItemStack}s
