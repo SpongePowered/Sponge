@@ -111,6 +111,8 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
+import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
+import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
@@ -176,9 +178,11 @@ import org.spongepowered.api.data.manipulator.mutable.item.FishData;
 import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.item.SpawnableData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -213,6 +217,7 @@ import org.spongepowered.common.data.builder.manipulator.immutable.block.Immutab
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCooldownData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
@@ -346,6 +351,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSpawnableData;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.ColoredDataProcessor;
@@ -415,6 +421,7 @@ import org.spongepowered.common.data.processor.data.item.ItemWetDataProcessor;
 import org.spongepowered.common.data.processor.data.item.PlaceableDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.BrewingStandDataProcessor;
 import org.spongepowered.common.data.processor.data.item.SpawnableDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.CooldownDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.FurnaceDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
@@ -498,6 +505,7 @@ import org.spongepowered.common.data.processor.value.item.ItemWetValueProcessor;
 import org.spongepowered.common.data.processor.value.item.PlaceableValueProcessor;
 import org.spongepowered.common.data.processor.value.item.UnbreakableValueProcessor;
 import org.spongepowered.common.data.processor.value.item.SpawnableEntityTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.CooldownValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.MaxBurnTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.MaxCookTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.PassedBurnTimeValueProcessor;
@@ -830,6 +838,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(FallDistanceData.class, SpongeFallDistanceData.class,
                 ImmutableFallDistanceData.class, ImmutableSpongeFallDistanceData.class, fallDistanceDataProcessor);
 
+        final CooldownDataProcessor cooldownDataProcessor = new CooldownDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(CooldownData.class, SpongeCooldownData.class, ImmutableCooldownData.class,
+                ImmutableSpongeCooldownData.class, cooldownDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -920,6 +932,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.ITEM_DURABILITY, new ItemDurabilityValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SPAWNABLE_ENTITY_TYPE, new SpawnableEntityTypeValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FALL_DISTANCE, new FallDistanceValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.COOLDOWN, new CooldownValueProcessor());
     }
 
 }

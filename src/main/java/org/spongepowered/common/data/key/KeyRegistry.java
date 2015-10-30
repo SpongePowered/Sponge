@@ -207,6 +207,7 @@ public class KeyRegistry {
         keyMap.put("unbreakable", makeSingleKey(Boolean.class, Value.class, of("Unbreakable")));
         keyMap.put("spawnable_entity_type", makeSingleKey(EntityType.class, Value.class, of("SpawnableEntityType")));
         keyMap.put("fall_distance", makeSingleKey(Float.class, MutableBoundedValue.class, of("FallDistance")));
+        keyMap.put("cooldown", makeSingleKey(Integer.class, Value.class, of("Cooldown")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
