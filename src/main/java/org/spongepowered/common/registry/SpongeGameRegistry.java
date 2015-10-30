@@ -29,10 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -47,12 +44,9 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
-import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFishFood;
 import net.minecraft.potion.Potion;
@@ -62,12 +56,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeGenBase;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameDictionary;
@@ -106,63 +96,37 @@ import org.spongepowered.api.data.property.item.FoodRestorationProperty;
 import org.spongepowered.api.data.property.item.HarvestingProperty;
 import org.spongepowered.api.data.property.item.SaturationProperty;
 import org.spongepowered.api.data.property.item.UseLimitProperty;
-import org.spongepowered.api.data.type.Art;
-import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.data.type.CoalType;
-import org.spongepowered.api.data.type.CoalTypes;
-import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.api.data.type.DirtType;
-import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.Fishes;
-import org.spongepowered.api.data.type.Hinge;
-import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
-import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
-import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
-import org.spongepowered.api.data.type.QuartzType;
-import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
-import org.spongepowered.api.data.type.RailDirection;
-import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
-import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.data.type.SkullType;
-import org.spongepowered.api.data.type.SkullTypes;
-import org.spongepowered.api.data.type.SlabType;
-import org.spongepowered.api.data.type.StairShape;
-import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.ValueBuilder;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -183,25 +147,20 @@ import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCauseBuilde
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCauseBuilder;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCauseBuilder;
 import org.spongepowered.api.item.FireworkEffectBuilder;
-import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOfferBuilder;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.potion.PotionEffectBuilder;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.potion.PotionEffectTypes;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.resourcepack.ResourcePacks;
 import org.spongepowered.api.scoreboard.ScoreboardBuilder;
 import org.spongepowered.api.scoreboard.TeamBuilder;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.api.scoreboard.critieria.Criteria;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.ObjectiveBuilder;
@@ -212,33 +171,17 @@ import org.spongepowered.api.statistic.EntityStatistic;
 import org.spongepowered.api.statistic.ItemStatistic;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticBuilder;
-import org.spongepowered.api.statistic.StatisticFormat;
 import org.spongepowered.api.statistic.StatisticGroup;
 import org.spongepowered.api.statistic.TeamStatistic;
-import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.statistic.achievement.AchievementBuilder;
 import org.spongepowered.api.status.Favicon;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.selector.ArgumentHolder;
-import org.spongepowered.api.text.selector.ArgumentType;
-import org.spongepowered.api.text.selector.ArgumentTypes;
-import org.spongepowered.api.text.selector.SelectorType;
-import org.spongepowered.api.text.selector.SelectorTypes;
-import org.spongepowered.api.text.selector.Selectors;
-import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.WorldBuilder;
-import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.BiomeTypes;
-import org.spongepowered.api.world.difficulty.Difficulties;
-import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.ExplosionBuilder;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -248,7 +191,6 @@ import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
@@ -286,8 +228,6 @@ import org.spongepowered.common.data.property.store.item.SaturationPropertyStore
 import org.spongepowered.common.data.property.store.item.UseLimitPropertyStore;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.data.type.SpongeSkullType;
-import org.spongepowered.common.data.type.SpongeTreeType;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
@@ -299,38 +239,25 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
-import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.potion.SpongePotionBuilder;
 import org.spongepowered.common.registry.type.RotationRegistryModule;
-import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeVisibility;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.status.SpongeFavicon;
-import org.spongepowered.common.text.SpongeTextFactory;
 import org.spongepowered.common.text.format.SpongeTextColor;
-import org.spongepowered.common.text.selector.SpongeArgumentHolder;
-import org.spongepowered.common.text.selector.SpongeSelectorFactory;
-import org.spongepowered.common.text.selector.SpongeSelectorType;
-import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.weather.SpongeWeather;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldBuilder;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
-import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
-import org.spongepowered.common.world.type.SpongeWorldTypeNether;
-import org.spongepowered.common.world.type.SpongeWorldTypeOverworld;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -362,8 +289,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;
     public static net.minecraft.util.DamageSource DAMAGESOURCE_MELTING;
 
-    private final Map<String, BiomeType> biomeTypeMappings = Maps.newHashMap();
-
     public static final Map<Class<? extends WorldProvider>, SpongeConfig<SpongeConfig.DimensionConfig>> dimensionConfigs = Maps.newHashMap();
 
     public static final Map<String, TextColor> textColorMappings = Maps.newHashMap();
@@ -381,12 +306,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put(Direction.UP, EnumFacing.UP)
             .put(Direction.DOWN, EnumFacing.DOWN)
             .build();
-    private static final ImmutableMap<String, Difficulty> difficultyMappings = new ImmutableMap.Builder<String, Difficulty>()
-            .put("peaceful", (Difficulty) (Object) EnumDifficulty.PEACEFUL)
-            .put("easy", (Difficulty) (Object) EnumDifficulty.EASY)
-            .put("normal", (Difficulty) (Object) EnumDifficulty.NORMAL)
-            .put("hard", (Difficulty) (Object) EnumDifficulty.HARD)
-            .build();
     private static final ImmutableMap<String, ObjectiveDisplayMode> objectiveDisplayModeMappings =
             new ImmutableMap.Builder<String, ObjectiveDisplayMode>()
                     .put("integer", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.INTEGER)
@@ -402,8 +321,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<String, DimensionType> dimensionTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends Dimension>, DimensionType> dimensionClassMappings = Maps.newHashMap();
     private final List<PotionEffectType> potionList = new ArrayList<>();
-    private final List<BiomeType> biomeTypes = new ArrayList<>();
-    public final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
     private final WorldGeneratorRegistry worldGeneratorRegistry = new WorldGeneratorRegistry();
     private final Hashtable<Class<? extends WorldProvider>, Integer> classToProviders = new Hashtable<>();
     private final Map<UUID, WorldProperties> worldPropertiesUuidMappings = Maps.newHashMap();
@@ -411,7 +328,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<Integer, String> worldFolderDimensionIdMappings = Maps.newHashMap();
     public final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
     public final Map<String, SpongeDisplaySlot> displaySlotMappings = Maps.newLinkedHashMap();
-    private final Map<String, SelectorType> selectorMappings = Maps.newHashMap();
 
     private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
     public final Map<String, SkullType> skullTypeMappings = Maps.newLinkedHashMap();
@@ -420,8 +336,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public final Map<String, BannerPatternShape> idToBannerPatternShapeMappings = Maps.newHashMap();
     public final Map<String, Fish> fishMappings = Maps.newHashMap();
     public final Map<String, CookedFish> cookedFishMappings = Maps.newHashMap();
-    private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
-    private final Map<String, Art> artMappings = Maps.newHashMap();
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
     protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
     public final Map<String, TileEntityType> tileEntityTypeMappings = Maps.newHashMap();
@@ -490,19 +404,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             id = "minecraft:" + id;
         }
         return Optional.ofNullable((EntityType) this.entityTypeMappings.get(id));
-    }
-
-    public Optional<BiomeType> getBiome(String id) {
-        for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
-            if (biome != null && biome.biomeName.equalsIgnoreCase(id)) {
-                return Optional.of((BiomeType) biome);
-            }
-        }
-        return Optional.empty();
-    }
-
-    public List<BiomeType> getBiomes() {
-        return ImmutableList.copyOf(this.biomeTypes);
     }
 
     @SuppressWarnings("unchecked")
@@ -648,10 +549,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return this.professionToCareerMappings.get(((SpongeEntityMeta) profession).type);
     }
 
-    public List<DimensionType> getDimensionTypes() {
-        return ImmutableList.copyOf(this.dimensionTypeMappings.values());
-    }
-
     public void registerDimensionType(DimensionType type) {
         this.dimensionTypeMappings.put(type.getName(), type);
         this.dimensionClassMappings.put(type.getDimensionClass(), type);
@@ -782,79 +679,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         });
     }
 
-    private void setBiomeTypes() {
-        BiomeGenBase[] biomeArray = BiomeGenBase.getBiomeGenArray();
-        for (BiomeGenBase biome : biomeArray) {
-            if (biome != null) {
-                this.biomeTypes.add((BiomeType) biome);
-            }
-        }
-
-        this.biomeTypeMappings.put("ocean", (BiomeType) BiomeGenBase.ocean);
-        this.biomeTypeMappings.put("plains", (BiomeType) BiomeGenBase.plains);
-        this.biomeTypeMappings.put("desert", (BiomeType) BiomeGenBase.desert);
-        this.biomeTypeMappings.put("extreme_hills", (BiomeType) BiomeGenBase.extremeHills);
-        this.biomeTypeMappings.put("forest", (BiomeType) BiomeGenBase.forest);
-        this.biomeTypeMappings.put("taiga", (BiomeType) BiomeGenBase.taiga);
-        this.biomeTypeMappings.put("swampland", (BiomeType) BiomeGenBase.swampland);
-        this.biomeTypeMappings.put("river", (BiomeType) BiomeGenBase.river);
-        this.biomeTypeMappings.put("hell", (BiomeType) BiomeGenBase.hell);
-        this.biomeTypeMappings.put("sky", (BiomeType) BiomeGenBase.sky);
-        this.biomeTypeMappings.put("frozen_ocean", (BiomeType) BiomeGenBase.frozenOcean);
-        this.biomeTypeMappings.put("frozen_river", (BiomeType) BiomeGenBase.frozenRiver);
-        this.biomeTypeMappings.put("ice_plains", (BiomeType) BiomeGenBase.icePlains);
-        this.biomeTypeMappings.put("ice_mountains", (BiomeType) BiomeGenBase.iceMountains);
-        this.biomeTypeMappings.put("mushroom_island", (BiomeType) BiomeGenBase.mushroomIsland);
-        this.biomeTypeMappings.put("mushroom_island_shore", (BiomeType) BiomeGenBase.mushroomIslandShore);
-        this.biomeTypeMappings.put("beach", (BiomeType) BiomeGenBase.beach);
-        this.biomeTypeMappings.put("desert_hills", (BiomeType) BiomeGenBase.desertHills);
-        this.biomeTypeMappings.put("forest_hills", (BiomeType) BiomeGenBase.forestHills);
-        this.biomeTypeMappings.put("taiga_hills", (BiomeType) BiomeGenBase.taigaHills);
-        this.biomeTypeMappings.put("extreme_hills_edge", (BiomeType) BiomeGenBase.extremeHillsEdge);
-        this.biomeTypeMappings.put("jungle", (BiomeType) BiomeGenBase.jungle);
-        this.biomeTypeMappings.put("jungle_hills", (BiomeType) BiomeGenBase.jungleHills);
-        this.biomeTypeMappings.put("jungle_edge", (BiomeType) BiomeGenBase.jungleEdge);
-        this.biomeTypeMappings.put("deep_ocean", (BiomeType) BiomeGenBase.deepOcean);
-        this.biomeTypeMappings.put("stone_beach", (BiomeType) BiomeGenBase.stoneBeach);
-        this.biomeTypeMappings.put("cold_beach", (BiomeType) BiomeGenBase.coldBeach);
-        this.biomeTypeMappings.put("birch_forest", (BiomeType) BiomeGenBase.birchForest);
-        this.biomeTypeMappings.put("birch_forest_hills", (BiomeType) BiomeGenBase.birchForestHills);
-        this.biomeTypeMappings.put("roofed_forest", (BiomeType) BiomeGenBase.roofedForest);
-        this.biomeTypeMappings.put("cold_taiga", (BiomeType) BiomeGenBase.coldTaiga);
-        this.biomeTypeMappings.put("cold_taiga_hills", (BiomeType) BiomeGenBase.coldTaigaHills);
-        this.biomeTypeMappings.put("mega_taiga", (BiomeType) BiomeGenBase.megaTaiga);
-        this.biomeTypeMappings.put("mega_taiga_hills", (BiomeType) BiomeGenBase.megaTaigaHills);
-        this.biomeTypeMappings.put("extreme_hills_plus", (BiomeType) BiomeGenBase.extremeHillsPlus);
-        this.biomeTypeMappings.put("savanna", (BiomeType) BiomeGenBase.savanna);
-        this.biomeTypeMappings.put("savanna_plateau", (BiomeType) BiomeGenBase.savannaPlateau);
-        this.biomeTypeMappings.put("mesa", (BiomeType) BiomeGenBase.mesa);
-        this.biomeTypeMappings.put("mesa_plateau_forest", (BiomeType) BiomeGenBase.mesaPlateau_F);
-        this.biomeTypeMappings.put("mesa_plateau", (BiomeType) BiomeGenBase.mesaPlateau);
-        this.biomeTypeMappings.put("sunflower_plains", (BiomeType) biomeArray[BiomeGenBase.plains.biomeID + 128]);
-        this.biomeTypeMappings.put("desert_mountains", (BiomeType) biomeArray[BiomeGenBase.desert.biomeID + 128]);
-        this.biomeTypeMappings.put("flower_forest", (BiomeType) biomeArray[BiomeGenBase.forest.biomeID + 128]);
-        this.biomeTypeMappings.put("taiga_mountains", (BiomeType) biomeArray[BiomeGenBase.taiga.biomeID + 128]);
-        this.biomeTypeMappings.put("swampland_mountains", (BiomeType) biomeArray[BiomeGenBase.swampland.biomeID + 128]);
-        this.biomeTypeMappings.put("ice_plains_spikes", (BiomeType) biomeArray[BiomeGenBase.icePlains.biomeID + 128]);
-        this.biomeTypeMappings.put("jungle_mountains", (BiomeType) biomeArray[BiomeGenBase.jungle.biomeID + 128]);
-        this.biomeTypeMappings.put("jungle_edge_mountains", (BiomeType) biomeArray[BiomeGenBase.jungleEdge.biomeID + 128]);
-        this.biomeTypeMappings.put("cold_taiga_mountains", (BiomeType) biomeArray[BiomeGenBase.coldTaiga.biomeID + 128]);
-        this.biomeTypeMappings.put("savanna_mountains", (BiomeType) biomeArray[BiomeGenBase.savanna.biomeID + 128]);
-        this.biomeTypeMappings.put("savanna_plateau_mountains", (BiomeType) biomeArray[BiomeGenBase.savannaPlateau.biomeID + 128]);
-        this.biomeTypeMappings.put("mesa_bryce", (BiomeType) biomeArray[BiomeGenBase.mesa.biomeID + 128]);
-        this.biomeTypeMappings.put("mesa_plateau_forest_mountains", (BiomeType) biomeArray[BiomeGenBase.mesaPlateau_F.biomeID + 128]);
-        this.biomeTypeMappings.put("mesa_plateau_mountains", (BiomeType) biomeArray[BiomeGenBase.mesaPlateau.biomeID + 128]);
-        this.biomeTypeMappings.put("birch_forest_mountains", (BiomeType) biomeArray[BiomeGenBase.birchForest.biomeID + 128]);
-        this.biomeTypeMappings.put("birch_forest_hills_mountains", (BiomeType) biomeArray[BiomeGenBase.birchForestHills.biomeID + 128]);
-        this.biomeTypeMappings.put("roofed_forest_mountains", (BiomeType) biomeArray[BiomeGenBase.roofedForest.biomeID + 128]);
-        this.biomeTypeMappings.put("mega_spruce_taiga", (BiomeType) biomeArray[BiomeGenBase.megaTaiga.biomeID + 128]);
-        this.biomeTypeMappings.put("extreme_hills_mountains", (BiomeType) biomeArray[BiomeGenBase.extremeHills.biomeID + 128]);
-        this.biomeTypeMappings.put("extreme_hills_plus_mountains", (BiomeType) biomeArray[BiomeGenBase.extremeHillsPlus.biomeID + 128]);
-        this.biomeTypeMappings.put("mega_spruce_taiga_hills", (BiomeType) biomeArray[BiomeGenBase.megaTaigaHills.biomeID + 128]);
-
-        RegistryHelper.mapFields(BiomeTypes.class, this.biomeTypeMappings);
-    }
-
     private void setCareersAndProfessions() {
         try {
             Professions.class.getDeclaredField("FARMER").set(null, new SpongeProfession(0, "farmer"));
@@ -906,112 +730,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
-    private void setCoal() {
-        // Because Minecraft doesn't have any enum stuff for this....
-        this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL"));
-        this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL"));
-        RegistryHelper.mapFields(CoalTypes.class, this.coaltypeMappings);
-    }
-
-    private void setWeathers() {
-        RegistryHelper.mapFields(Weathers.class, fieldName -> {
-            final Weather weather = new SpongeWeather(fieldName);
-            SpongeGameRegistry.this.weatherMappings.put(fieldName.toLowerCase(), weather);
-            return weather;
-        });
-    }
-
-    private void setResourcePackFactory() {
-        RegistryHelper.setFactory(ResourcePacks.class, new SpongeResourcePackFactory());
-    }
-
-    private void setTextActionFactory() {
-        // RegistryHelper.setFactory(TextActions.class, new
-        // SpongeTextActionFactory());
-    }
-
-    private void setTextFactory() {
-        RegistryHelper.setFactory(Texts.class, new SpongeTextFactory());
-        RegistryHelper.setFactory(MessageSinks.class, SpongeMessageSinkFactory.INSTANCE);
-    }
-
-    private void setSelectors() {
-        this.selectorMappings.put("all_players", new SpongeSelectorType("a"));
-        this.selectorMappings.put("all_entities", new SpongeSelectorType("e"));
-        this.selectorMappings.put("nearest_player", new SpongeSelectorType("p"));
-        this.selectorMappings.put("random", new SpongeSelectorType("r"));
-        RegistryHelper.mapFields(SelectorTypes.class, this.selectorMappings);
-        SpongeSelectorFactory factory = new SpongeSelectorFactory();
-        Map<String, ArgumentHolder<?>> argMappings = Maps.newHashMap();
-        // POSITION
-        ArgumentType<Integer> x = factory.createArgumentType("x", Integer.class);
-        ArgumentType<Integer> y = factory.createArgumentType("y", Integer.class);
-        ArgumentType<Integer> z = factory.createArgumentType("z", Integer.class);
-        ArgumentHolder.Vector3<Vector3i, Integer> position = new SpongeArgumentHolder.SpongeVector3<>(x, y, z, Vector3i.class);
-        argMappings.put("position", position);
-
-        // RADIUS
-        ArgumentType<Integer> rmin = factory.createArgumentType("rm", Integer.class);
-        ArgumentType<Integer> rmax = factory.createArgumentType("r", Integer.class);
-        ArgumentHolder.Limit<ArgumentType<Integer>> radius = new SpongeArgumentHolder.SpongeLimit<>(rmin, rmax);
-        argMappings.put("radius", radius);
-
-        // GAME_MODE
-        argMappings.put("game_mode", factory.createArgumentType("m", GameMode.class));
-
-        // COUNT
-        argMappings.put("count", factory.createArgumentType("c", Integer.class));
-
-        // LEVEL
-        ArgumentType<Integer> lmin = factory.createArgumentType("lm", Integer.class);
-        ArgumentType<Integer> lmax = factory.createArgumentType("l", Integer.class);
-        ArgumentHolder.Limit<ArgumentType<Integer>> level = new SpongeArgumentHolder.SpongeLimit<>(lmin, lmax);
-        argMappings.put("level", level);
-
-        // TEAM
-        argMappings.put("team", factory.createInvertibleArgumentType("team", Integer.class,
-                org.spongepowered.api.scoreboard.Team.class.getName()));
-
-        // NAME
-        argMappings.put("name", factory.createInvertibleArgumentType("name", String.class));
-
-        // DIMENSION
-        ArgumentType<Integer> dx = factory.createArgumentType("dx", Integer.class);
-        ArgumentType<Integer> dy = factory.createArgumentType("dy", Integer.class);
-        ArgumentType<Integer> dz = factory.createArgumentType("dz", Integer.class);
-        ArgumentHolder.Vector3<Vector3i, Integer> dimension =
-            new SpongeArgumentHolder.SpongeVector3<>(dx, dy, dz, Vector3i.class);
-        argMappings.put("dimension", dimension);
-
-        // ROTATION
-        ArgumentType<Double> rotxmin = factory.createArgumentType("rxm", Double.class);
-        ArgumentType<Double> rotymin = factory.createArgumentType("rym", Double.class);
-        ArgumentType<Double> rotzmin = factory.createArgumentType("rzm", Double.class);
-        ArgumentHolder.Vector3<Vector3d, Double> rotmin =
-            new SpongeArgumentHolder.SpongeVector3<>(rotxmin, rotymin, rotzmin, Vector3d.class);
-        ArgumentType<Double> rotxmax = factory.createArgumentType("rx", Double.class);
-        ArgumentType<Double> rotymax = factory.createArgumentType("ry", Double.class);
-        ArgumentType<Double> rotzmax = factory.createArgumentType("rz", Double.class);
-        ArgumentHolder.Vector3<Vector3d, Double> rotmax =
-            new SpongeArgumentHolder.SpongeVector3<>(rotxmax, rotymax, rotzmax, Vector3d.class);
-        ArgumentHolder.Limit<ArgumentHolder.Vector3<Vector3d, Double>> rot =
-            new SpongeArgumentHolder.SpongeLimit<>(rotmin, rotmax);
-        argMappings.put("rotation", rot);
-
-        // ENTITY_TYPE
-        argMappings.put("entity_type", factory.createInvertibleArgumentType("type", EntityType.class));
-
-        RegistryHelper.mapFields(ArgumentTypes.class, argMappings);
-        RegistryHelper.setFactory(Selectors.class, factory);
-    }
-
     private void setTitleFactory() {
         // RegistryHelper.setFactory(Titles.class, new SpongeTitleFactory());
-    }
-
-
-    private void setDifficulties() {
-        RegistryHelper.mapFields(Difficulties.class, difficultyMappings);
     }
 
     private void setDisplaySlots() {
@@ -1086,22 +806,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         });
     }
 
-    private void setSkullTypes() {
-        RegistryHelper.mapFields(SkullTypes.class, input -> {
-            SkullType skullType = new SpongeSkullType((byte) SpongeGameRegistry.this.skullTypeMappings.size(), input);
-            SpongeGameRegistry.this.skullTypeMappings.put(input.toLowerCase(), skullType);
-            return skullType;
-        });
-    }
-
-    private void setTreeTypes() {
-        RegistryHelper.mapFields(TreeTypes.class, input -> {
-            TreeType treeType = new SpongeTreeType((byte) SpongeGameRegistry.this.treeTypeMappings.size(), input);
-            SpongeGameRegistry.this.treeTypeMappings.put(input.toLowerCase(), treeType);
-            return treeType;
-        });
-    }
-
     private void setBannerPatternShapes() {
         RegistryHelper.mapFields(BannerPatternShapes.class, input -> {
             BannerPatternShape bannerPattern = (BannerPatternShape) (Object) TileEntityBanner.EnumBannerPattern.valueOf(input);
@@ -1135,22 +839,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                     return null;
                 }
             }
-        });
-    }
-
-    private void setDyeColors() {
-        RegistryHelper.mapFields(DyeColors.class, input -> {
-            DyeColor dyeColor = (DyeColor) (Object) EnumDyeColor.valueOf(input);
-            SpongeGameRegistry.this.dyeColorMappings.put(dyeColor.getName().toLowerCase(), dyeColor);
-            return dyeColor;
-        });
-    }
-
-    private void setArts() {
-        RegistryHelper.mapFields(Arts.class, fieldName -> {
-            Art art = (Art) (Object) EntityPainting.EnumArt.valueOf(fieldName);
-            SpongeGameRegistry.this.artMappings.put(art.getName().toLowerCase(), art);
-            return art;
         });
     }
 
@@ -1341,7 +1029,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         damageSourceToTypeMappings.put("magic", DamageTypes.MAGIC);
         damageSourceToTypeMappings.put("mob", DamageTypes.ATTACK);
         damageSourceToTypeMappings.put("onfire", DamageTypes.FIRE);
-        damageSourceToTypeMappings.put("outofworld", DamageTypes.CONTACT);
+        damageSourceToTypeMappings.put("outofworld", DamageTypes.VOID);
         damageSourceToTypeMappings.put("player", DamageTypes.ATTACK);
         damageSourceToTypeMappings.put("starve", DamageTypes.HUNGER);
         damageSourceToTypeMappings.put("thorns", DamageTypes.MAGIC);
@@ -1526,17 +1214,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     public void init() {
         setCareersAndProfessions();
-        setWeathers();
-        setResourcePackFactory();
-        setTextActionFactory();
-        setTextFactory();
-        setSelectors();
         setTitleFactory();
-        setDifficulties();
-        setArts();
-        setDyeColors();
-        setSkullTypes();
-        setTreeTypes();
         setNotePitches();
         setBannerPatternShapes();
         setFlowerMappings();
@@ -1552,8 +1230,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     public void postInit() {
         setPotionTypes();
-        setBiomeTypes();
-        setCoal();
         setFishes();
         setEntityTypes();
         setPopulatorTypes();
