@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
-import co.aikar.timings.Timings;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -41,7 +40,6 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
@@ -218,7 +216,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public boolean supports(Key<?> key) {
-        try (Timing timing = SpongeTimings.dataSupprtsKey.startTiming()) {
+        try (Timing timing = SpongeTimings.dataSupportsKey.startTiming()) {
             final Optional<ValueProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getWildValueProcessor(checkNotNull(key));
             return optional.isPresent() && optional.get().supports(this);
         }

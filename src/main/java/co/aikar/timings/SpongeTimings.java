@@ -63,7 +63,7 @@ public final class SpongeTimings {
     public static final Timing dataOfferKey = SpongeTimingsFactory.ofSafe("## offerKey");
     public static final Timing dataGetByKey = SpongeTimingsFactory.ofSafe("## getKey");
     public static final Timing dataGetValue = SpongeTimingsFactory.ofSafe("## getValue");
-    public static final Timing dataSupprtsKey = SpongeTimingsFactory.ofSafe("## supportsKey");
+    public static final Timing dataSupportsKey = SpongeTimingsFactory.ofSafe("## supportsKey");
     public static final Timing dataRemoveKey = SpongeTimingsFactory.ofSafe("## removeKey");
 
 
