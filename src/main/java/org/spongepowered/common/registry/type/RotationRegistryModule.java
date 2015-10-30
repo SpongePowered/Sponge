@@ -30,14 +30,12 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 import org.spongepowered.common.rotation.SpongeRotation;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registry
 public class RotationRegistryModule implements CatalogRegistryModule<Rotation> {
 
     @RegisterCatalog(Rotations.class)
@@ -60,10 +58,6 @@ public class RotationRegistryModule implements CatalogRegistryModule<Rotation> {
     @Override
     public Collection<Rotation> getAll() {
         return ImmutableList.copyOf(rotationMap.values());
-    }
-
-    @Override
-    public void registerDefaults() {
     }
 
 }

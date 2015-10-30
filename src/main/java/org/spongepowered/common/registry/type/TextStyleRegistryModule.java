@@ -29,11 +29,9 @@ import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.text.format.SpongeTextStyle;
 
-@Registry
 public class TextStyleRegistryModule implements RegistryModule {
 
     @RegisterCatalog(TextStyles.class)
@@ -46,7 +44,4 @@ public class TextStyleRegistryModule implements RegistryModule {
         .put("reset", SpongeTextStyle.of(EnumChatFormatting.RESET))
         .build();
 
-    @Override
-    public void registerDefaults() {
-    }
 }

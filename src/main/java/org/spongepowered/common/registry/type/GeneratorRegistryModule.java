@@ -33,7 +33,6 @@ import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
 import org.spongepowered.common.world.type.SpongeWorldTypeNether;
 import org.spongepowered.common.world.type.SpongeWorldTypeOverworld;
@@ -42,7 +41,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registry
 public class GeneratorRegistryModule implements CatalogRegistryModule<GeneratorType> {
 
     @RegisterCatalog(GeneratorTypes.class)

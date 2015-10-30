@@ -34,14 +34,12 @@ import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.registry.AdditionalRegistration;
 import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.Registry;
 
 import java.awt.Color;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registry
 public class ParticleRegistryModule implements CatalogRegistryModule<ParticleType> {
 
     private final Map<String, SpongeParticleType> particleMappings = Maps.newHashMap();

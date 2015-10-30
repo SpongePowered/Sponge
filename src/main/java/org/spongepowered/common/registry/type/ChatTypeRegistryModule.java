@@ -28,11 +28,9 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.text.chat.SpongeChatType;
 
-@Registry
 public class ChatTypeRegistryModule implements RegistryModule {
 
     @RegisterCatalog(ChatTypes.class)
@@ -42,7 +40,4 @@ public class ChatTypeRegistryModule implements RegistryModule {
         .put("action_bar", new SpongeChatType((byte) 2))
         .build();
 
-    @Override
-    public void registerDefaults() {
-    }
 }

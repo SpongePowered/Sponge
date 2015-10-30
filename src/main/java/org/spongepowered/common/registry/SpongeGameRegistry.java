@@ -528,8 +528,8 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public <T> Optional<T> createBuilder(Class<T> builderClass) {
-        return Optional.empty(); // todo handle this with registrymodules or something.
+    public <T> Optional<T> createBuilderOfType(Class<T> builderClass) {
+        return Optional.empty();
     }
 
     @Override

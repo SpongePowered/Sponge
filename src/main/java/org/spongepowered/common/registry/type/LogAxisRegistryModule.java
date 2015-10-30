@@ -34,12 +34,10 @@ import org.spongepowered.api.data.type.LogAxes;
 import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registry
 public class LogAxisRegistryModule implements CatalogRegistryModule<LogAxis> {
 
     @RegisterCatalog(LogAxes.class)

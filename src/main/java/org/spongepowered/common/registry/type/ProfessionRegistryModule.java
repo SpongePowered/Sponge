@@ -42,8 +42,4 @@ public class ProfessionRegistryModule implements CatalogRegistryModule<Professio
         return null;
     }
 
-    @Override
-    public void registerDefaults() {
-
-    }
 }

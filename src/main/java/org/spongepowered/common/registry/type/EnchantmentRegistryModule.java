@@ -32,14 +32,12 @@ import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.common.registry.AdditionalRegistration;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Registry
 public class EnchantmentRegistryModule implements CatalogRegistryModule<Enchantment> {
 
     @RegisterCatalog(Enchantments.class)

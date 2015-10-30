@@ -33,12 +33,10 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Registry
 public class DamageTypeRegistryModule implements CatalogRegistryModule<DamageType> {
 
     @RegisterCatalog(DamageTypes.class)
@@ -68,8 +66,4 @@ public class DamageTypeRegistryModule implements CatalogRegistryModule<DamageTyp
         return ImmutableList.copyOf(this.damageTypeMappings.values());
     }
 
-    @Override
-    public void registerDefaults() {
-
-    }
 }

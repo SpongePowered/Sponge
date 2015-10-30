@@ -33,13 +33,11 @@ import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegisterCatalog;
-import org.spongepowered.common.registry.Registry;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@Registry
 public class CriteriaRegistryModule implements CatalogRegistryModule<Criterion> {
 
     @RegisterCatalog(Criteria.class)

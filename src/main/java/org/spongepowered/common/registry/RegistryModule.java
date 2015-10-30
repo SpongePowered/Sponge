@@ -26,6 +26,6 @@ package org.spongepowered.common.registry;
 
 public interface RegistryModule {
 
-    void registerDefaults();
+    default void registerDefaults() { }
 
 }
