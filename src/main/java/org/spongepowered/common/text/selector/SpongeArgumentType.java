@@ -32,6 +32,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.registry.type.EntityTypeRegistryModule;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
     static {
         converters.put(String.class.getName(), Function.<String>identity());
         converters.put(EntityType.class.getName(),
-                       (Function<String, EntityType>) input -> Sponge.getSpongeRegistry().getEntity(input.toLowerCase()).orElse(null));
+                       (Function<String, EntityType>) input -> EntityTypeRegistryModule.getInstance().getById(input.toLowerCase()).orElse(null));
     }
 
     @SuppressWarnings("unchecked")

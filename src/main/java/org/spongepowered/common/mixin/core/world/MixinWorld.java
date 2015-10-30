@@ -182,6 +182,7 @@ import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -1845,7 +1846,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ImmutableList.Builder<Direction> faces = ImmutableList.builder();
         for (EnumFacing facing : EnumFacing.values()) {
             if (this.getStrongPower(pos.offset(facing), facing) > 0) {
-                faces.add(SpongeGameRegistry.directionMap.inverse().get(facing));
+                faces.add(DirectionFacingProvider.getInstance().getKey(facing).get());
             }
         }
         return faces.build();
@@ -1857,7 +1858,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ImmutableList.Builder<Direction> faces = ImmutableList.builder();
         for (EnumFacing facing : EnumFacing.values()) {
             if (this.getRedstonePower(pos.offset(facing), facing) > 0) {
-                faces.add(SpongeGameRegistry.directionMap.inverse().get(facing));
+                faces.add(DirectionFacingProvider.getInstance().getKey(facing).get());
             }
         }
         return faces.build();

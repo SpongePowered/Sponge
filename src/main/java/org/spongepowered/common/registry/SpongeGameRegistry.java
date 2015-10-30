@@ -29,33 +29,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
-import net.minecraft.block.BlockDirt;
-import net.minecraft.block.BlockDoublePlant;
-import net.minecraft.block.BlockFlower;
-import net.minecraft.block.BlockTallGrass;
-import net.minecraft.block.BlockWall;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.boss.EntityDragonPart;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.effect.EntityWeatherEffect;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityEgg;
-import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemFishFood;
-import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSettings;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
@@ -69,83 +52,21 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
-import org.spongepowered.api.data.property.PropertyRegistry;
-import org.spongepowered.api.data.property.block.BlastResistanceProperty;
-import org.spongepowered.api.data.property.block.GravityAffectedProperty;
-import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
-import org.spongepowered.api.data.property.block.HardnessProperty;
-import org.spongepowered.api.data.property.block.HeldItemProperty;
-import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
-import org.spongepowered.api.data.property.block.LightEmissionProperty;
-import org.spongepowered.api.data.property.block.MatterProperty;
-import org.spongepowered.api.data.property.block.PassableProperty;
-import org.spongepowered.api.data.property.block.PoweredProperty;
-import org.spongepowered.api.data.property.block.ReplaceableProperty;
-import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
-import org.spongepowered.api.data.property.block.StatisticsTrackedProperty;
-import org.spongepowered.api.data.property.block.TemperatureProperty;
-import org.spongepowered.api.data.property.block.UnbreakableProperty;
-import org.spongepowered.api.data.property.entity.EyeHeightProperty;
-import org.spongepowered.api.data.property.entity.EyeLocationProperty;
-import org.spongepowered.api.data.property.item.ApplicableEffectProperty;
-import org.spongepowered.api.data.property.item.BurningFuelProperty;
-import org.spongepowered.api.data.property.item.DamageAbsorptionProperty;
-import org.spongepowered.api.data.property.item.EfficiencyProperty;
-import org.spongepowered.api.data.property.item.EquipmentProperty;
-import org.spongepowered.api.data.property.item.FoodRestorationProperty;
-import org.spongepowered.api.data.property.item.HarvestingProperty;
-import org.spongepowered.api.data.property.item.SaturationProperty;
-import org.spongepowered.api.data.property.item.UseLimitProperty;
-import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.data.type.CookedFish;
-import org.spongepowered.api.data.type.CookedFishes;
-import org.spongepowered.api.data.type.DirtType;
-import org.spongepowered.api.data.type.DoublePlantType;
-import org.spongepowered.api.data.type.DoublePlantTypes;
-import org.spongepowered.api.data.type.Fish;
-import org.spongepowered.api.data.type.Fishes;
-import org.spongepowered.api.data.type.HorseColors;
-import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.HorseVariants;
-import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.type.OcelotTypes;
-import org.spongepowered.api.data.type.PlantType;
-import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
-import org.spongepowered.api.data.type.RabbitTypes;
-import org.spongepowered.api.data.type.ShrubType;
-import org.spongepowered.api.data.type.ShrubTypes;
-import org.spongepowered.api.data.type.SkeletonTypes;
-import org.spongepowered.api.data.type.SkullType;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.ValueBuilder;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSourceBuilder;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSourceBuilder;
-import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSourceBuilder;
-import org.spongepowered.api.event.cause.entity.damage.source.ProjectileDamageSourceBuilder;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCauseBuilder;
-import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCauseBuilder;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCauseBuilder;
-import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCauseBuilder;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCauseBuilder;
-import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCauseBuilder;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -154,8 +75,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOfferBuilder;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.potion.PotionEffectBuilder;
-import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.potion.PotionEffectTypes;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.ScoreboardBuilder;
 import org.spongepowered.api.scoreboard.TeamBuilder;
@@ -173,11 +92,9 @@ import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticBuilder;
 import org.spongepowered.api.statistic.StatisticGroup;
 import org.spongepowered.api.statistic.TeamStatistic;
-import org.spongepowered.api.statistic.achievement.AchievementBuilder;
 import org.spongepowered.api.status.Favicon;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
@@ -190,7 +107,6 @@ import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
@@ -200,44 +116,13 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
-import org.spongepowered.common.data.property.store.block.BlastResistancePropertyStore;
-import org.spongepowered.common.data.property.store.block.GravityAffectedPropertyStore;
-import org.spongepowered.common.data.property.store.block.GroundLuminancePropertyStore;
-import org.spongepowered.common.data.property.store.block.HardnessPropertyStore;
-import org.spongepowered.common.data.property.store.block.HeldItemPropertyStore;
-import org.spongepowered.common.data.property.store.block.IndirectlyPoweredPropertyStore;
-import org.spongepowered.common.data.property.store.block.LightEmissionPropertyStore;
-import org.spongepowered.common.data.property.store.block.MatterPropertyStore;
-import org.spongepowered.common.data.property.store.block.PassablePropertyStore;
-import org.spongepowered.common.data.property.store.block.PoweredPropertyStore;
-import org.spongepowered.common.data.property.store.block.ReplaceablePropertyStore;
-import org.spongepowered.common.data.property.store.block.SkyLuminancePropertyStore;
-import org.spongepowered.common.data.property.store.block.StatisticsTrackedPropertyStore;
-import org.spongepowered.common.data.property.store.block.TemperaturePropertyStore;
-import org.spongepowered.common.data.property.store.block.UnbreakablePropertyStore;
-import org.spongepowered.common.data.property.store.entity.EyeHeightPropertyStore;
-import org.spongepowered.common.data.property.store.entity.EyeLocationPropertyStore;
-import org.spongepowered.common.data.property.store.item.ApplicableEffectPropertyStore;
-import org.spongepowered.common.data.property.store.item.BurningFuelPropertyStore;
-import org.spongepowered.common.data.property.store.item.DamageAbsorptionPropertyStore;
-import org.spongepowered.common.data.property.store.item.EfficiencyPropertyStore;
-import org.spongepowered.common.data.property.store.item.EquipmentPropertyStore;
-import org.spongepowered.common.data.property.store.item.FoodRestorationPropertyStore;
-import org.spongepowered.common.data.property.store.item.HarvestingPropertyStore;
-import org.spongepowered.common.data.property.store.item.SaturationPropertyStore;
-import org.spongepowered.common.data.property.store.item.UseLimitPropertyStore;
-import org.spongepowered.common.data.type.SpongeCookedFish;
-import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.entity.SpongeCareer;
-import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.SpongeProfession;
-import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeFireworkBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -269,12 +154,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
@@ -298,14 +184,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public static final Map<Team.EnumVisible, SpongeVisibility> enumVisible = Maps.newEnumMap(Team.EnumVisible.class);
     public static final Map<String, DamageType> damageSourceToTypeMappings = Maps.newHashMap();
 
-    public static final ImmutableBiMap<Direction, EnumFacing> directionMap = ImmutableBiMap.<Direction, EnumFacing>builder()
-            .put(Direction.NORTH, EnumFacing.NORTH)
-            .put(Direction.EAST, EnumFacing.EAST)
-            .put(Direction.SOUTH, EnumFacing.SOUTH)
-            .put(Direction.WEST, EnumFacing.WEST)
-            .put(Direction.UP, EnumFacing.UP)
-            .put(Direction.DOWN, EnumFacing.DOWN)
-            .build();
     private static final ImmutableMap<String, ObjectiveDisplayMode> objectiveDisplayModeMappings =
             new ImmutableMap.Builder<String, ObjectiveDisplayMode>()
                     .put("integer", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.INTEGER)
@@ -320,7 +198,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<Integer, List<Career>> professionToCareerMappings = Maps.newHashMap();
     private final Map<String, DimensionType> dimensionTypeMappings = Maps.newHashMap();
     public final Map<Class<? extends Dimension>, DimensionType> dimensionClassMappings = Maps.newHashMap();
-    private final List<PotionEffectType> potionList = new ArrayList<>();
     private final WorldGeneratorRegistry worldGeneratorRegistry = new WorldGeneratorRegistry();
     private final Hashtable<Class<? extends WorldProvider>, Integer> classToProviders = new Hashtable<>();
     private final Map<UUID, WorldProperties> worldPropertiesUuidMappings = Maps.newHashMap();
@@ -329,59 +206,34 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     public final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
     public final Map<String, SpongeDisplaySlot> displaySlotMappings = Maps.newLinkedHashMap();
 
-    private final Map<String, NotePitch> notePitchMappings = Maps.newHashMap();
-    public final Map<String, SkullType> skullTypeMappings = Maps.newLinkedHashMap();
-    private final Map<String, TreeType> treeTypeMappings = Maps.newHashMap();
-    private final Map<String, BannerPatternShape> bannerPatternShapeMappings = Maps.newHashMap();
-    public final Map<String, BannerPatternShape> idToBannerPatternShapeMappings = Maps.newHashMap();
-    public final Map<String, Fish> fishMappings = Maps.newHashMap();
-    public final Map<String, CookedFish> cookedFishMappings = Maps.newHashMap();
-    protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
     protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
     public final Map<String, TileEntityType> tileEntityTypeMappings = Maps.newHashMap();
-    private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
-            .put("dead_bush", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
-            .put("tall_grass", (ShrubType) (Object) BlockTallGrass.EnumType.GRASS)
-            .put("fern", (ShrubType) (Object) BlockTallGrass.EnumType.FERN)
-            .build();
-    private final Map<String, DoublePlantType> doublePlantMappings = new ImmutableMap.Builder<String, DoublePlantType>()
-            .put("sunflower", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.SUNFLOWER)
-            .put("syringa", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.SYRINGA)
-            .put("grass", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.GRASS)
-            .put("fern", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.FERN)
-            .put("rose", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.ROSE)
-            .put("paeonia", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.PAEONIA)
-            .build();
-    private final Map<String, PlantType> plantTypeMappings = new ImmutableMap.Builder<String, PlantType>()
-            .put("dandelion", (PlantType) (Object) BlockFlower.EnumFlowerType.DANDELION)
-            .put("poppy", (PlantType) (Object) BlockFlower.EnumFlowerType.POPPY)
-            .put("blue_orchid", (PlantType) (Object) BlockFlower.EnumFlowerType.BLUE_ORCHID)
-            .put("allium", (PlantType) (Object) BlockFlower.EnumFlowerType.ALLIUM)
-            .put("houstonia", (PlantType) (Object) BlockFlower.EnumFlowerType.HOUSTONIA)
-            .put("red_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.RED_TULIP)
-            .put("orange_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.ORANGE_TULIP)
-            .put("white_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.WHITE_TULIP)
-            .put("pink_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.PINK_TULIP)
-            .put("oxeye_daisy", (PlantType) (Object) BlockFlower.EnumFlowerType.OXEYE_DAISY)
-            .build();
-
-    private final Map<String, WallType> wallTypeMappings = new ImmutableMap.Builder<String, WallType>()
-        .put("normal", (WallType) (Object) BlockWall.EnumType.NORMAL)
-        .put("mossy", (WallType) (Object) BlockWall.EnumType.MOSSY)
-        .build();
-
-    private final Map<String, DirtType> dirtTypeMappings = new ImmutableMap.Builder<String, DirtType>()
-        .put("dirt", (DirtType) (Object) BlockDirt.DirtType.DIRT)
-        .put("coarse_dirt", (DirtType) (Object) BlockDirt.DirtType.COARSE_DIRT)
-        .put("podzol", (DirtType) (Object) BlockDirt.DirtType.PODZOL)
-        .build();
-
-    private final Map<String, Weather> weatherMappings = Maps.newHashMap();
 
     public static final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
     public static final Map<String, ItemType> itemTypeMappings = Maps.newHashMap();
 
-    private final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> catalogRegistryMap = new ConcurrentHashMap<>();
+    protected final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> catalogRegistryMap = new IdentityHashMap<>();
+
+    private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
+
+    public SpongeGameRegistry() {
+        registerBuilderSupplier(ItemStackBuilder.class, SpongeItemStackBuilder::new);
+        registerBuilderSupplier(TradeOfferBuilder.class, SpongeTradeOfferBuilder::new);
+        registerBuilderSupplier(FireworkEffectBuilder.class, SpongeFireworkBuilder::new);
+        registerBuilderSupplier(PotionEffectBuilder.class, SpongePotionBuilder::new);
+        registerBuilderSupplier(ObjectiveBuilder.class, SpongeObjectiveBuilder::new);
+        registerBuilderSupplier(TeamBuilder.class, SpongeTeamBuilder::new);
+        registerBuilderSupplier(ScoreboardBuilder.class, SpongeScoreboardBuilder::new);
+        registerBuilderSupplier(StatisticBuilder.class, () -> {throw new UnsupportedOperationException();});
+        registerBuilderSupplier(WorldBuilder.class, SpongeWorldBuilder::new);
+        registerBuilderSupplier(ExplosionBuilder.class, SpongeExplosionBuilder::new);
+        registerBuilderSupplier(ValueBuilder.class, SpongeValueBuilder::new);
+        registerBuilderSupplier(BlockStateBuilder.class, SpongeBlockStateBuilder::new);
+        registerBuilderSupplier(BlockSnapshotBuilder.class, SpongeBlockSnapshotBuilder::new);
+        registerBuilderSupplier(EntitySnapshotBuilder.class, SpongeEntitySnapshotBuilder::new);
+        registerBuilderSupplier(BlockDamageSourceBuilder.class, SpongeBlockDamageSourceBuilder::new);
+
+    }
 
     /**
      * Registers the {@link CatalogRegistryModule} for handling the registry stuffs.
@@ -395,15 +247,10 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         this.catalogRegistryMap.put(catalogClass, registryModule);
     }
 
-    public Optional<PotionEffectType> getPotion(String id) {
-        return Optional.ofNullable((PotionEffectType) Potion.getPotionFromResourceLocation(id));
-    }
-
-    public Optional<EntityType> getEntity(String id) {
-        if (!id.contains(":")) {
-            id = "minecraft:" + id;
-        }
-        return Optional.ofNullable((EntityType) this.entityTypeMappings.get(id));
+    public <T> SpongeGameRegistry registerBuilderSupplier(Class<T> builderClass, Supplier<? extends T> supplier) {
+        checkArgument(!this.builderSupplierMap.containsKey(builderClass), "Already registered a builder supplier!");
+        this.builderSupplierMap.put(builderClass, supplier);
+        return this;
     }
 
     @SuppressWarnings("unchecked")
@@ -428,89 +275,14 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<T> createBuilderOfType(Class<T> builderClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public ItemStackBuilder createItemBuilder() {
-        return new SpongeItemStackBuilder();
-    }
-
-    @Override
-    public TradeOfferBuilder createTradeOfferBuilder() {
-        return new SpongeTradeOfferBuilder();
-    }
-
-    @Override
-    public FireworkEffectBuilder createFireworkEffectBuilder() {
-        return new SpongeFireworkBuilder();
-    }
-
-    @Override
-    public PotionEffectBuilder createPotionEffectBuilder() {
-        return new SpongePotionBuilder();
-    }
-
-    @Override
-    public ObjectiveBuilder createObjectiveBuilder() {
-        return new SpongeObjectiveBuilder();
-    }
-
-    @Override
-    public TeamBuilder createTeamBuilder() {
-        return new SpongeTeamBuilder();
-    }
-
-    @Override
-    public ScoreboardBuilder createScoreboardBuilder() {
-        return new SpongeScoreboardBuilder();
-    }
-
-    @Override
-    public StatisticBuilder createStatisticBuilder() {
-        return null;
-    }
-
-    @Override
-    public StatisticBuilder.EntityStatisticBuilder createEntityStatisticBuilder() {
-        return null;
-    }
-
-    @Override
-    public StatisticBuilder.BlockStatisticBuilder createBlockStatisticBuilder() {
-        return null;
-    }
-
-    @Override
-    public StatisticBuilder.ItemStatisticBuilder createItemStatisticBuilder() {
-        return null;
-    }
-
-    @Override
-    public StatisticBuilder.TeamStatisticBuilder createTeamStatisticBuilder() {
-        return null;
-    }
-
-    @Override
-    public AchievementBuilder createAchievementBuilder() {
-        return null;
-    }
-
-    @Override
-    public WorldBuilder createWorldBuilder() {
-        return new SpongeWorldBuilder();
-    }
-
-    @Override
-    public ExplosionBuilder createExplosionBuilder() {
-        return new SpongeExplosionBuilder();
-    }
-
-    @Override
-    public ValueBuilder createValueBuilder() {
-        return new SpongeValueBuilder();
+        if (!this.builderSupplierMap.containsKey(builderClass)) {
+            return Optional.empty();
+        } else {
+            return Optional.of((T) this.builderSupplierMap.get(builderClass).get());
+        }
     }
 
     @Override
@@ -666,19 +438,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         return Optional.<Translation>of(new SpongeTranslation(id));
     }
 
-    // Note: This is probably fairly slow, but only needs to be run rarely.
-    private void setPotionTypes() {
-        for (Potion potion : Potion.potionTypes) {
-            if (potion != null) {
-                PotionEffectType potionEffectType = (PotionEffectType) potion;
-                this.potionList.add(potionEffectType);
-            }
-        }
-        RegistryHelper.mapFields(PotionEffectTypes.class, fieldName -> {
-            return getPotion(fieldName.toLowerCase()).get();
-        });
-    }
-
     private void setCareersAndProfessions() {
         try {
             Professions.class.getDeclaredField("FARMER").set(null, new SpongeProfession(0, "farmer"));
@@ -762,86 +521,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(Visibilities.class, SpongeGameRegistry.visibilityMappings);
     }
 
-    private void setupProperties() {
-        final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
-
-        // Blocks
-        propertyRegistry.register(BlastResistanceProperty.class, new BlastResistancePropertyStore());
-        propertyRegistry.register(GravityAffectedProperty.class, new GravityAffectedPropertyStore());
-        propertyRegistry.register(GroundLuminanceProperty.class, new GroundLuminancePropertyStore());
-        propertyRegistry.register(HardnessProperty.class, new HardnessPropertyStore());
-        propertyRegistry.register(HeldItemProperty.class, new HeldItemPropertyStore());
-        propertyRegistry.register(IndirectlyPoweredProperty.class, new IndirectlyPoweredPropertyStore());
-        propertyRegistry.register(LightEmissionProperty.class, new LightEmissionPropertyStore());
-        propertyRegistry.register(MatterProperty.class, new MatterPropertyStore());
-        propertyRegistry.register(PassableProperty.class, new PassablePropertyStore());
-        propertyRegistry.register(PoweredProperty.class, new PoweredPropertyStore());
-        propertyRegistry.register(ReplaceableProperty.class, new ReplaceablePropertyStore());
-        propertyRegistry.register(SkyLuminanceProperty.class, new SkyLuminancePropertyStore());
-        propertyRegistry.register(StatisticsTrackedProperty.class, new StatisticsTrackedPropertyStore());
-        propertyRegistry.register(TemperatureProperty.class, new TemperaturePropertyStore());
-        propertyRegistry.register(UnbreakableProperty.class, new UnbreakablePropertyStore());
-
-        // Items
-        propertyRegistry.register(ApplicableEffectProperty.class, new ApplicableEffectPropertyStore());
-        propertyRegistry.register(BurningFuelProperty.class, new BurningFuelPropertyStore());
-        propertyRegistry.register(DamageAbsorptionProperty.class, new DamageAbsorptionPropertyStore());
-        propertyRegistry.register(EfficiencyProperty.class, new EfficiencyPropertyStore());
-        propertyRegistry.register(EquipmentProperty.class, new EquipmentPropertyStore());
-        propertyRegistry.register(FoodRestorationProperty.class, new FoodRestorationPropertyStore());
-        propertyRegistry.register(HarvestingProperty.class, new HarvestingPropertyStore());
-        propertyRegistry.register(SaturationProperty.class, new SaturationPropertyStore());
-        propertyRegistry.register(UseLimitProperty.class, new UseLimitPropertyStore());
-
-        // Entities
-        propertyRegistry.register(EyeLocationProperty.class, new EyeLocationPropertyStore());
-        propertyRegistry.register(EyeHeightProperty.class, new EyeHeightPropertyStore());
-    }
-
-    private void setNotePitches() {
-        RegistryHelper.mapFields(NotePitches.class, input -> {
-            NotePitch pitch = new SpongeNotePitch((byte) SpongeGameRegistry.this.notePitchMappings.size(), input);
-            SpongeGameRegistry.this.notePitchMappings.put(input.toLowerCase(), pitch);
-            return pitch;
-        });
-    }
-
-    private void setBannerPatternShapes() {
-        RegistryHelper.mapFields(BannerPatternShapes.class, input -> {
-            BannerPatternShape bannerPattern = (BannerPatternShape) (Object) TileEntityBanner.EnumBannerPattern.valueOf(input);
-            SpongeGameRegistry.this.bannerPatternShapeMappings.put(bannerPattern.getName().toLowerCase(), bannerPattern);
-            SpongeGameRegistry.this.idToBannerPatternShapeMappings.put(bannerPattern.getId().toLowerCase(), bannerPattern);
-            return bannerPattern;
-        });
-    }
-
-    private void setFishes() {
-        RegistryHelper.mapFields(Fishes.class, input -> {
-            Fish fish = (Fish) (Object) ItemFishFood.FishType.valueOf(input);
-            if (fish != null) {
-                SpongeGameRegistry.this.fishMappings.put(fish.getId().toLowerCase(), fish);
-                return fish;
-            } else {
-                return null;
-            }
-        });
-
-        RegistryHelper.mapFields(CookedFishes.class, new Function<String, CookedFish>() {
-
-            @Override
-            public CookedFish apply(String input) {
-                ItemFishFood.FishType fish = ItemFishFood.FishType.valueOf(input);
-                if (fish != null && fish.canCook()) {
-                    CookedFish cooked = new SpongeCookedFish(input, input, fish);
-                    SpongeGameRegistry.this.cookedFishMappings.put(cooked.getId().toLowerCase(), cooked);
-                    return cooked;
-                } else {
-                    return null;
-                }
-            }
-        });
-    }
-
     private void setObjectiveDisplayModes() {
         RegistryHelper.mapFields(ObjectiveDisplayModes.class, SpongeGameRegistry.objectiveDisplayModeMappings);
     }
@@ -903,116 +582,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         });
     }
 
-    private void setEntityTypes() {
-        // internal mapping of our EntityTypes to actual MC names
-        this.entityTypeMappings.put("item", newEntityTypeFromName("Item"));
-        this.entityTypeMappings.put("experience_orb", newEntityTypeFromName("XPOrb"));
-        this.entityTypeMappings.put("leash_hitch", newEntityTypeFromName("LeashKnot"));
-        this.entityTypeMappings.put("painting", newEntityTypeFromName("Painting"));
-        this.entityTypeMappings.put("arrow", newEntityTypeFromName("Arrow"));
-        this.entityTypeMappings.put("snowball", newEntityTypeFromName("Snowball"));
-        this.entityTypeMappings.put("fireball", newEntityTypeFromName("LargeFireball", "Fireball"));
-        this.entityTypeMappings.put("small_fireball", newEntityTypeFromName("SmallFireball"));
-        this.entityTypeMappings.put("ender_pearl", newEntityTypeFromName("ThrownEnderpearl"));
-        this.entityTypeMappings.put("eye_of_ender", newEntityTypeFromName("EyeOfEnderSignal"));
-        this.entityTypeMappings.put("splash_potion", newEntityTypeFromName("ThrownPotion"));
-        this.entityTypeMappings.put("thrown_exp_bottle", newEntityTypeFromName("ThrownExpBottle"));
-        this.entityTypeMappings.put("item_frame", newEntityTypeFromName("ItemFrame"));
-        this.entityTypeMappings.put("wither_skull", newEntityTypeFromName("WitherSkull"));
-        this.entityTypeMappings.put("primed_tnt", newEntityTypeFromName("PrimedTnt"));
-        this.entityTypeMappings.put("falling_block", newEntityTypeFromName("FallingSand"));
-        this.entityTypeMappings.put("firework", newEntityTypeFromName("FireworksRocketEntity"));
-        this.entityTypeMappings.put("armor_stand", newEntityTypeFromName("ArmorStand"));
-        this.entityTypeMappings.put("boat", newEntityTypeFromName("Boat"));
-        this.entityTypeMappings.put("rideable_minecart", newEntityTypeFromName("MinecartRideable"));
-        this.entityTypeMappings.put("chested_minecart", newEntityTypeFromName("MinecartChest"));
-        this.entityTypeMappings.put("furnace_minecart", newEntityTypeFromName("MinecartFurnace"));
-        this.entityTypeMappings.put("tnt_minecart", newEntityTypeFromName("MinecartTnt", "MinecartTNT"));
-        this.entityTypeMappings.put("hopper_minecart", newEntityTypeFromName("MinecartHopper"));
-        this.entityTypeMappings.put("mob_spawner_minecart", newEntityTypeFromName("MinecartSpawner"));
-        this.entityTypeMappings.put("commandblock_minecart", newEntityTypeFromName("MinecartCommandBlock"));
-        this.entityTypeMappings.put("creeper", newEntityTypeFromName("Creeper"));
-        this.entityTypeMappings.put("skeleton", newEntityTypeFromName("Skeleton"));
-        this.entityTypeMappings.put("spider", newEntityTypeFromName("Spider"));
-        this.entityTypeMappings.put("giant", newEntityTypeFromName("Giant"));
-        this.entityTypeMappings.put("zombie", newEntityTypeFromName("Zombie"));
-        this.entityTypeMappings.put("slime", newEntityTypeFromName("Slime"));
-        this.entityTypeMappings.put("ghast", newEntityTypeFromName("Ghast"));
-        this.entityTypeMappings.put("pig_zombie", newEntityTypeFromName("PigZombie"));
-        this.entityTypeMappings.put("enderman", newEntityTypeFromName("Enderman"));
-        this.entityTypeMappings.put("cave_spider", newEntityTypeFromName("CaveSpider"));
-        this.entityTypeMappings.put("silverfish", newEntityTypeFromName("Silverfish"));
-        this.entityTypeMappings.put("blaze", newEntityTypeFromName("Blaze"));
-        this.entityTypeMappings.put("magma_cube", newEntityTypeFromName("LavaSlime"));
-        this.entityTypeMappings.put("ender_dragon", newEntityTypeFromName("EnderDragon"));
-        this.entityTypeMappings.put("wither", newEntityTypeFromName("WitherBoss"));
-        this.entityTypeMappings.put("bat", newEntityTypeFromName("Bat"));
-        this.entityTypeMappings.put("witch", newEntityTypeFromName("Witch"));
-        this.entityTypeMappings.put("endermite", newEntityTypeFromName("Endermite"));
-        this.entityTypeMappings.put("guardian", newEntityTypeFromName("Guardian"));
-        this.entityTypeMappings.put("pig", newEntityTypeFromName("Pig"));
-        this.entityTypeMappings.put("sheep", newEntityTypeFromName("Sheep"));
-        this.entityTypeMappings.put("cow", newEntityTypeFromName("Cow"));
-        this.entityTypeMappings.put("chicken", newEntityTypeFromName("Chicken"));
-        this.entityTypeMappings.put("squid", newEntityTypeFromName("Squid"));
-        this.entityTypeMappings.put("wolf", newEntityTypeFromName("Wolf"));
-        this.entityTypeMappings.put("mushroom_cow", newEntityTypeFromName("MushroomCow"));
-        this.entityTypeMappings.put("snowman", newEntityTypeFromName("SnowMan"));
-        this.entityTypeMappings.put("ocelot", newEntityTypeFromName("Ozelot"));
-        this.entityTypeMappings.put("iron_golem", newEntityTypeFromName("VillagerGolem"));
-        this.entityTypeMappings.put("horse", newEntityTypeFromName("EntityHorse"));
-        this.entityTypeMappings.put("rabbit", newEntityTypeFromName("Rabbit"));
-        this.entityTypeMappings.put("villager", newEntityTypeFromName("Villager"));
-        this.entityTypeMappings.put("ender_crystal", newEntityTypeFromName("EnderCrystal"));
-        this.entityTypeMappings.put("egg", new SpongeEntityType(-1, "Egg", EntityEgg.class));
-        this.entityTypeMappings.put("fishing_hook", new SpongeEntityType(-2, "FishingHook", EntityFishHook.class));
-        this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "Lightning", EntityLightningBolt.class));
-        this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class));
-        this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class));
-        this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class));
-        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", -7));
-
-        RegistryHelper.mapFields(EntityTypes.class, fieldName -> {
-            if (fieldName.equals("UNKNOWN")) {
-                // TODO Something for Unknown?
-                return null;
-            }
-            EntityType entityType = SpongeGameRegistry.this.entityTypeMappings.get(fieldName.toLowerCase());
-            SpongeGameRegistry.this.entityClassToTypeMappings
-                    .put(((SpongeEntityType) entityType).entityClass, entityType);
-            // remove old mapping
-            SpongeGameRegistry.this.entityTypeMappings.remove(fieldName.toLowerCase());
-            // add new mapping with minecraft id
-            SpongeGameRegistry.this.entityTypeMappings.put(((SpongeEntityType) entityType).getId(), entityType);
-            return entityType;
-        });
-
-        RegistryHelper.mapFields(SkeletonTypes.class, SpongeEntityConstants.SKELETON_TYPES);
-        RegistryHelper.mapFields(HorseColors.class, SpongeEntityConstants.HORSE_COLORS);
-        RegistryHelper.mapFields(HorseVariants.class, SpongeEntityConstants.HORSE_VARIANTS);
-        RegistryHelper.mapFields(HorseStyles.class, SpongeEntityConstants.HORSE_STYLES);
-        RegistryHelper.mapFields(OcelotTypes.class, SpongeEntityConstants.OCELOT_TYPES);
-        RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);
-    }
-
-    @SuppressWarnings("unchecked")
-    private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        return new SpongeEntityType((Integer) EntityList.stringToIDMapping.get(mcName), spongeName,
-                (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName));
-    }
-
-    private SpongeEntityType newEntityTypeFromName(String name) {
-        return newEntityTypeFromName(name, name);
-    }
-
-    @SuppressWarnings("unchecked")
-    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId) {
-        String entityFullName = String.format("%s.%s", Sponge.ECOSYSTEM_NAME, entityName);
-        EntityList.classToStringMapping.put(entityClass, entityFullName);
-        EntityList.stringToClassMapping.put(entityFullName, entityClass);
-        return new SpongeEntityType(entityId, entityName, Sponge.ECOSYSTEM_NAME, entityClass);
-    }
-
     public void setDamageTypes() {
         damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
         damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
@@ -1062,18 +631,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         } catch (Throwable t) {
             t.printStackTrace();
         }
-    }
-
-    private void setDoublePlantMappings() {
-        RegistryHelper.mapFields(DoublePlantTypes.class, this.doublePlantMappings);
-    }
-
-    private void setFlowerMappings() {
-        RegistryHelper.mapFields(PlantTypes.class, this.plantTypeMappings);
-    }
-
-    private void setShrubTypeMappings() {
-        RegistryHelper.mapFields(ShrubTypes.class, this.shrubTypeMappings);
     }
 
     @Override
@@ -1127,77 +684,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public BlockStateBuilder createBlockStateBuilder() {
-        return new SpongeBlockStateBuilder();
-    }
-
-    @Override
-    public BlockSnapshotBuilder createBlockSnapshotBuilder() {
-        return new SpongeBlockSnapshotBuilder();
-    }
-
-    @Override
-    public EntitySnapshotBuilder createEntitySnapshotBuilder() {
-        return new SpongeEntitySnapshotBuilder();
-    }
-
-    @Override
     public GameDictionary getGameDictionary() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public BlockDamageSourceBuilder createBlockDamageSourceBuilder() {
-        return new SpongeBlockDamageSourceBuilder();
-    }
-
-    @Override
-    public DamageSourceBuilder createDamageSourceBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public EntityDamageSourceBuilder createEntityDamageSourceBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FallingBlockDamageSourceBuilder createFallingBlockDamageSourceBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ProjectileDamageSourceBuilder createProjectileDamageSourceBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public SpawnCauseBuilder createSpawnCauseBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public BlockSpawnCauseBuilder createBlockSpawnCauseBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public EntitySpawnCauseBuilder createEntitySpawnCauseBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public BreedingSpawnCauseBuilder createBreedingSpawnCauseBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public MobSpawnerSpawnCauseBuilder createMobSpawnerSpawnCauseBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public WeatherSpawnCauseBuilder createWeatherSpawnCauseBuilder() {
         throw new UnsupportedOperationException();
     }
 
@@ -1209,17 +696,11 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     public void preInit() {
         SpongeSerializationRegistry.setupSerialization(Sponge.getGame());
-        setupProperties();
     }
 
     public void init() {
         setCareersAndProfessions();
         setTitleFactory();
-        setNotePitches();
-        setBannerPatternShapes();
-        setFlowerMappings();
-        setDoublePlantMappings();
-        setShrubTypeMappings();
         setDisplaySlots();
         setVisibilities();
         setObjectiveDisplayModes();
@@ -1229,9 +710,6 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     public void postInit() {
-        setPotionTypes();
-        setFishes();
-        setEntityTypes();
         setPopulatorTypes();
         setItemNone();
         SpongePropertyRegistry.completeRegistration();
