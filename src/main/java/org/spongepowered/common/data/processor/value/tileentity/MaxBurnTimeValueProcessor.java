@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.tileentity;
 
 import net.minecraft.tileentity.TileEntityFurnace;
-
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;

@@ -38,6 +38,7 @@ import org.spongepowered.api.block.BlockSnapshotBuilder;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -172,11 +173,11 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public Optional<BlockSnapshot> build(DataView container) throws InvalidDataException {
         checkDataExists(container, DataQueries.BLOCK_STATE);
-        checkDataExists(container, Location.WORLD_ID);
+        checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
         // this is unused for now
-        final UUID worldUuid = UUID.fromString(container.getString(Location.WORLD_ID).get());
+        final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationService).get();

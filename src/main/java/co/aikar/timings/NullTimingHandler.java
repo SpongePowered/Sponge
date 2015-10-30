@@ -27,7 +27,8 @@ package co.aikar.timings;
 public final class NullTimingHandler implements Timing {
 
     @Override
-    public void startTiming() {
+    public Timing startTiming() {
+        return this;
     }
 
     @Override

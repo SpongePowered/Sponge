@@ -25,9 +25,7 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import com.google.common.collect.Maps;
-
 import net.minecraft.tileentity.TileEntityFurnace;
-
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;

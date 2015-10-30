@@ -33,8 +33,9 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedEntityCollectionValue;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.util.weighted.WeightedCollection;
-import org.spongepowered.api.util.weighted.WeightedEntity;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -50,12 +51,12 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     private final short maxNearby;
     private final short playerRange;
     private final short spawnRange;
-    private final WeightedEntity nextToSpawn;
-    private final WeightedCollection<WeightedEntity> entitiesToSpawn;
+    private final WeightedSerializableObject<EntitySnapshot> nextToSpawn;
+    private final WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entitiesToSpawn;
 
     public ImmutableSpongeMobSpawnerData(short remaining, short minSpawnDelay, short maxSpawnDelay, short count, short maxNearby,
-                                         short playerRange, short spawnRange, WeightedEntity nextToSpawn,
-                                         WeightedCollection<WeightedEntity> entitiesToSpawn) {
+                                         short playerRange, short spawnRange, WeightedSerializableObject<EntitySnapshot> nextToSpawn,
+                                         WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entitiesToSpawn) {
         super(ImmutableMobSpawnerData.class);
         this.remaining = remaining;
         this.minSpawnDelay = minSpawnDelay;

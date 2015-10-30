@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import static org.spongepowered.common.data.util.DataUtil.getData;
+
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -40,8 +41,6 @@ import org.spongepowered.common.data.processor.common.AbstractEntityDataProcesso
 
 import java.util.Map;
 import java.util.Optional;
-
-import static org.spongepowered.common.data.util.DataUtil.getData;
 
 public class MovementSpeedDataProcessor extends AbstractEntityDataProcessor<EntityPlayer, MovementSpeedData, ImmutableMovementSpeedData> {
 

@@ -68,7 +68,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     }
 
     @Override
-    public ImmutablePatternListValue with(PatternLayer... elements) {
+    public ImmutablePatternListValue withElement(PatternLayer elements) {
         return new ImmutableSpongePatternListValue(getKey(), ImmutableList.<PatternLayer>builder().addAll(this.actualValue).add(elements).build());
     }
 
@@ -152,7 +152,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
 
     @Override
     public ImmutablePatternListValue with(BannerPatternShape patternShape, DyeColor color) {
-        return with(new SpongePatternLayer(patternShape, color));
+        return withElement(new SpongePatternLayer(patternShape, color));
     }
 
     @Override

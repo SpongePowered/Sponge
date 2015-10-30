@@ -41,6 +41,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
@@ -181,11 +182,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.extraData);
         final DataContainer container = new MemoryDataContainer()
-            .set(Location.WORLD_ID, this.worldUniqueId.toString())
+            .set(Queries.WORLD_ID, this.worldUniqueId.toString())
             .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
-                .set(Location.POSITION_X, this.pos.getX())
-                .set(Location.POSITION_Y, this.pos.getY())
-                .set(Location.POSITION_Z, this.pos.getZ())
+                .set(Queries.POSITION_X, this.pos.getX())
+                .set(Queries.POSITION_Y, this.pos.getY())
+                .set(Queries.POSITION_Z, this.pos.getZ())
             .getContainer()
             .set(DataQueries.BLOCK_STATE, this.blockState);
         if (this.compound != null) {

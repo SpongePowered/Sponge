@@ -24,105 +24,15 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntity;
-
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.Sponge;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+public abstract class AbstractTileEntityDataProcessor<Tile extends TileEntity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+    extends AbstractMultiDataSingleTargetProcessor<Tile, M, I> {
 
-public abstract class AbstractTileEntityDataProcessor<E extends TileEntity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractMultiDataProcessor<M, I> {
-
-    private final Class<E> tileEntityClass;
-
-    protected AbstractTileEntityDataProcessor(Class<E> tileEntityClass) {
-        this.tileEntityClass = checkNotNull(tileEntityClass);
-    }
-
-    protected boolean supports(E tileEntity) {
-        return true;
-    }
-
-    protected abstract boolean doesDataExist(E tileEntity);
-
-    protected abstract boolean set(E tileEntity, Map<Key<?>, Object> keyValues);
-
-    protected abstract Map<Key<?>, ?> getValues(E tileEntity);
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean supports(DataHolder dataHolder) {
-        return this.tileEntityClass.isInstance(dataHolder) && supports((E) dataHolder);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<M> from(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
-            return Optional.empty();
-        } else {
-            if (doesDataExist((E) dataHolder)) {
-                final M manipulator = createManipulator();
-                final Map<Key<?>, ?> keyValues = getValues((E) dataHolder);
-                for (Map.Entry<Key<?>, ?> entry : keyValues.entrySet()) {
-                    manipulator.set((Key) entry.getKey(), entry.getValue());
-                }
-                return Optional.of(manipulator);
-            }
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
-        if (supports(dataHolder)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
-            final Optional<M> old = from(dataHolder);
-            final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
-            final Map<Key<?>, Object> map = Maps.newHashMap();
-            final Set<ImmutableValue<?>> newValues = merged.getValues();
-            for (ImmutableValue<?> value : newValues) {
-                map.put(value.getKey(), value.get());
-            }
-            try {
-                if (set((E) dataHolder, map)) {
-                    if (old.isPresent()) {
-                        builder.replace(old.get().getValues());
-                    }
-
-                    return builder.result(DataTransactionResult.Type.SUCCESS).success(newValues).build();
-                } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).reject(newValues).build();
-                }
-            } catch (Exception e) {
-                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
-                return builder.result(DataTransactionResult.Type.ERROR).reject(newValues).build();
-            }
-        }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
-        if (immutable.supports(key)) {
-            return Optional.of((I) immutable.asMutable().set((Key) key, value).asImmutable());
-        }
-        return Optional.empty();
+    protected AbstractTileEntityDataProcessor(Class<Tile> tileEntityClass) {
+        super(tileEntityClass);
     }
 
 }

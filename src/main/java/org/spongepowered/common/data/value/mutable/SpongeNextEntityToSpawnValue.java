@@ -24,34 +24,36 @@
  */
 package org.spongepowered.common.data.value.mutable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.util.weighted.WeightedEntity;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeEntityToSpawnValue;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-public class SpongeNextEntityToSpawnValue extends SpongeValue<WeightedEntity> implements MobSpawnerData.NextEntityToSpawnValue {
+public class SpongeNextEntityToSpawnValue extends SpongeValue<WeightedSerializableObject<EntitySnapshot>> implements MobSpawnerData.NextEntityToSpawnValue {
 
-    public SpongeNextEntityToSpawnValue(WeightedEntity actualValue) {
-        super(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedEntity(EntityTypes.CREEPER, 1), actualValue);
+    public SpongeNextEntityToSpawnValue(WeightedSerializableObject<EntitySnapshot> actualValue) {
+        super(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedSerializableObject<>(new SpongeEntitySnapshotBuilder().type(EntityTypes.CREEPER).build(), 1), actualValue);
     }
 
     @Override
     public MobSpawnerData.NextEntityToSpawnValue set(EntityType type, @Nullable Collection<DataManipulator<?, ?>> additionalProperties) {
-        if (additionalProperties == null) {
-            set(new WeightedEntity(checkNotNull(type), 1));
-        } else {
-            set(new WeightedEntity(checkNotNull(type), 1, additionalProperties));
+        final EntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
+        builder.type(type);
+        if (additionalProperties != null) {
+            additionalProperties.forEach(builder::add);
         }
+        set(new WeightedSerializableObject<>(builder.build(), 1));
         return this;
     }
 

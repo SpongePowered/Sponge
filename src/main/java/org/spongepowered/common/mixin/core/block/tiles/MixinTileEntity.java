@@ -35,6 +35,7 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -87,10 +88,10 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer()
-            .set(Location.WORLD_ID, ((World) this.worldObj).getUniqueId().toString())
-            .set(Location.POSITION_X, this.getPos().getX())
-            .set(Location.POSITION_Y, this.getPos().getY())
-            .set(Location.POSITION_Z, this.getPos().getZ())
+            .set(Queries.WORLD_ID, ((World) this.worldObj).getUniqueId().toString())
+            .set(Queries.POSITION_X, this.getPos().getX())
+            .set(Queries.POSITION_Y, this.getPos().getY())
+            .set(Queries.POSITION_Z, this.getPos().getZ())
             .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getId());
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
@@ -105,10 +106,10 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public boolean validateRawData(DataContainer container) {
-        return container.contains(Location.WORLD_ID)
-            && container.contains(Location.POSITION_X)
-            && container.contains(Location.POSITION_Y)
-            && container.contains(Location.POSITION_Z)
+        return container.contains(Queries.WORLD_ID)
+            && container.contains(Queries.POSITION_X)
+            && container.contains(Queries.POSITION_Y)
+            && container.contains(Queries.POSITION_Z)
             && container.contains(DataQueries.BLOCK_ENTITY_TILE_TYPE)
             && container.contains(DataQueries.UNSAFE_NBT);
     }

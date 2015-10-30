@@ -44,13 +44,14 @@ public class FullServerTickHandler extends TimingHandler {
     }
 
     @Override
-    public void startTiming() {
+    public TimingHandler startTiming() {
         if (TimingsManager.needsFullReset) {
             TimingsManager.resetTimings();
         } else if (TimingsManager.needsRecheckEnabled) {
             TimingsManager.recheckEnabled();
         }
         super.startTiming();
+        return this;
     }
 
     @Override

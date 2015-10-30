@@ -38,28 +38,30 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
-public abstract class SpongeCollectionValue<E, V extends Collection<E>, I extends CollectionValue<E, V, I, L>,
-    L extends ImmutableCollectionValue<E, V, L, I>> extends SpongeValue<V> implements CollectionValue<E, V, I, L> {
+public abstract class SpongeCollectionValue<Element, CollectionType extends Collection<Element>,
+    CollectionValueType extends CollectionValue<Element, CollectionType, CollectionValueType, ImmutableType>,
+    ImmutableType extends ImmutableCollectionValue<Element, CollectionType, ImmutableType, CollectionValueType>>
+    extends SpongeValue<CollectionType> implements CollectionValue<Element, CollectionType, CollectionValueType, ImmutableType> {
 
 
-    public SpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue) {
+    public SpongeCollectionValue(Key<? extends BaseValue<CollectionType>> key, CollectionType defaultValue) {
         super(key, defaultValue);
     }
 
-    public SpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue, V actualValue) {
+    public SpongeCollectionValue(Key<? extends BaseValue<CollectionType>> key, CollectionType defaultValue, CollectionType actualValue) {
         super(key, defaultValue, actualValue);
     }
 
     @Override
-    public I set(V value) {
+    public CollectionValueType set(CollectionType value) {
         this.actualValue = checkNotNull(value);
-        return (I) this;
+        return (CollectionValueType) this;
     }
 
     @Override
-    public I transform(Function<V, V> function) {
+    public CollectionValueType transform(Function<CollectionType, CollectionType> function) {
         this.actualValue = checkNotNull(function).apply(this.actualValue);
-        return (I) this;
+        return (CollectionValueType) this;
     }
 
     @Override
@@ -73,50 +75,50 @@ public abstract class SpongeCollectionValue<E, V extends Collection<E>, I extend
     }
 
     @Override
-    public I add(E element) {
+    public CollectionValueType add(Element element) {
         this.actualValue.add(checkNotNull(element));
-        return (I) this;
+        return (CollectionValueType) this;
     }
 
     @Override
-    public I addAll(Iterable<E> elements) {
-        for (E element : checkNotNull(elements)) {
+    public CollectionValueType addAll(Iterable<Element> elements) {
+        for (Element element : checkNotNull(elements)) {
             this.actualValue.add(checkNotNull(element));
         }
-        return (I) this;
+        return (CollectionValueType) this;
     }
 
     @Override
-    public I remove(E element) {
+    public CollectionValueType remove(Element element) {
         this.actualValue.remove(checkNotNull(element));
-        return (I) this;
+        return (CollectionValueType) this;
     }
 
     @Override
-    public I removeAll(Iterable<E> elements) {
-        for (E element : elements) {
+    public CollectionValueType removeAll(Iterable<Element> elements) {
+        for (Element element : elements) {
             this.actualValue.remove(checkNotNull(element));
         }
-        return (I) this;
+        return (CollectionValueType) this;
     }
 
     @Override
-    public I removeAll(Predicate<E> predicate) {
-        for (Iterator<E> iterator = this.actualValue.iterator(); iterator.hasNext(); ) {
+    public CollectionValueType removeAll(Predicate<Element> predicate) {
+        for (Iterator<Element> iterator = this.actualValue.iterator(); iterator.hasNext(); ) {
             if (checkNotNull(predicate).test(iterator.next())) {
                 iterator.remove();
             }
         }
-        return (I) this;
+        return (CollectionValueType) this;
     }
 
     @Override
-    public boolean contains(E element) {
+    public boolean contains(Element element) {
         return this.actualValue.contains(checkNotNull(element));
     }
 
     @Override
-    public boolean containsAll(Collection<E> iterable) {
+    public boolean containsAll(Collection<Element> iterable) {
         return this.actualValue.containsAll(iterable);
     }
 
@@ -126,15 +128,15 @@ public abstract class SpongeCollectionValue<E, V extends Collection<E>, I extend
     }
 
     @Override
-    public abstract L asImmutable();
+    public abstract ImmutableType asImmutable();
 
     @Override
-    public Optional<V> getDirect() {
+    public Optional<CollectionType> getDirect() {
         return Optional.of(this.actualValue);
     }
 
     @Override
-    public Iterator<E> iterator() {
+    public Iterator<Element> iterator() {
         return this.actualValue.iterator();
     }
 }

@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.entity.Entity;
@@ -41,7 +42,6 @@ import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.DataProcessor;
@@ -232,11 +232,11 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
 
     @Override
     public Optional<EntitySnapshot> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, Location.WORLD_ID);
+        checkDataExists(container, Queries.WORLD_ID);
         checkDataExists(container, DataQueries.SNAPSHOT_WORLD_POSITION);
         reset();
         try {
-            this.worldId = UUID.fromString(container.getString(Location.WORLD_ID).get());
+            this.worldId = UUID.fromString(container.getString(Queries.WORLD_ID).get());
             this.position = DataUtil.getPosition3d(container);
             this.rotation = DataUtil.getPosition3d(container, DataQueries.ENTITY_ROTATION);
             this.scale = DataUtil.getPosition3d(container, DataQueries.ENTITY_SCALE);

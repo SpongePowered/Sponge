@@ -181,11 +181,11 @@ public class SpongeTimingsFactory implements TimingsFactory {
         return TimingsExport.getCost();
     }
 
-    static TimingHandler ofSafe(String name) {
+    public static TimingHandler ofSafe(String name) {
         return ofSafe(null, name, null);
     }
 
-    static Timing ofSafe(PluginContainer plugin, String name) {
+    public static Timing ofSafe(PluginContainer plugin, String name) {
         Timing pluginHandler = null;
         if (plugin != null) {
             pluginHandler = ofSafe(plugin.getName(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
@@ -193,11 +193,11 @@ public class SpongeTimingsFactory implements TimingsFactory {
         return ofSafe(plugin != null ? plugin.getName() : "Minecraft - Invalid Plugin", name, pluginHandler);
     }
 
-    static TimingHandler ofSafe(String name, Timing groupHandler) {
+    public static TimingHandler ofSafe(String name, Timing groupHandler) {
         return ofSafe(null, name, groupHandler);
     }
 
-    static TimingHandler ofSafe(String groupName, String name, Timing groupHandler) {
+    public static TimingHandler ofSafe(String groupName, String name, Timing groupHandler) {
         return TimingsManager.getHandler(groupName, name, groupHandler, false);
     }
 

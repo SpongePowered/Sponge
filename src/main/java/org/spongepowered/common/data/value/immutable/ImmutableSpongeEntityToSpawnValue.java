@@ -30,31 +30,34 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.util.weighted.WeightedEntity;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.value.mutable.SpongeNextEntityToSpawnValue;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 import java.util.Collection;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class ImmutableSpongeEntityToSpawnValue extends ImmutableSpongeValue<WeightedEntity> implements
+public class ImmutableSpongeEntityToSpawnValue extends ImmutableSpongeValue<WeightedSerializableObject<EntitySnapshot>> implements
                                                                                             ImmutableMobSpawnerData.ImmutableNextEntityToSpawnValue {
 
-    public ImmutableSpongeEntityToSpawnValue(WeightedEntity actualValue) {
-        super(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedEntity(EntityTypes.CREEPER, 1), actualValue);
+    public ImmutableSpongeEntityToSpawnValue(WeightedSerializableObject<EntitySnapshot> actualValue) {
+        super(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedSerializableObject<>(new SpongeEntitySnapshotBuilder().type(EntityTypes.CREEPER).build(), 1), actualValue);
     }
 
     @Override
-    public ImmutableSpongeEntityToSpawnValue with(WeightedEntity value) {
+    public ImmutableSpongeEntityToSpawnValue with(WeightedSerializableObject<EntitySnapshot> value) {
         return new ImmutableSpongeEntityToSpawnValue(checkNotNull(value));
     }
 
     @Override
-    public ImmutableSpongeEntityToSpawnValue transform(Function<WeightedEntity, WeightedEntity> function) {
-        final WeightedEntity value = checkNotNull(function).apply(get());
+    public ImmutableSpongeEntityToSpawnValue transform(Function<WeightedSerializableObject<EntitySnapshot>, WeightedSerializableObject<EntitySnapshot>> function) {
+        final WeightedSerializableObject<EntitySnapshot> value = checkNotNull(function).apply(get());
         return new ImmutableSpongeEntityToSpawnValue(checkNotNull(value));
     }
 
@@ -66,10 +69,12 @@ public class ImmutableSpongeEntityToSpawnValue extends ImmutableSpongeValue<Weig
     @Override
     public ImmutableMobSpawnerData.ImmutableNextEntityToSpawnValue with(EntityType type,
                                                                         @Nullable Collection<DataManipulator<?, ?>> additionalProperties) {
-        if (additionalProperties == null) {
-            return new ImmutableSpongeEntityToSpawnValue(new WeightedEntity(checkNotNull(type), 1));
-        } else {
-            return new ImmutableSpongeEntityToSpawnValue(new WeightedEntity(checkNotNull(type), 1, additionalProperties));
+        final EntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
+        builder.type(type);
+        if (additionalProperties != null) {
+            additionalProperties.forEach(builder::add);
         }
+
+        return new ImmutableSpongeEntityToSpawnValue(new WeightedSerializableObject<>(builder.build(), 1));
     }
 }

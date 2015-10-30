@@ -38,6 +38,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
@@ -150,22 +151,22 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.manipulators);
         final DataContainer container = new MemoryDataContainer()
-            .set(Location.WORLD_ID, this.worldUuid.toString())
+            .set(Queries.WORLD_ID, this.worldUuid.toString())
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
             .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
-                .set(Location.POSITION_X, this.position.getX())
-                .set(Location.POSITION_Y, this.position.getY())
-                .set(Location.POSITION_Z, this.position.getZ())
+                .set(Queries.POSITION_X, this.position.getX())
+                .set(Queries.POSITION_Y, this.position.getY())
+                .set(Queries.POSITION_Z, this.position.getZ())
             .getContainer()
             .createView(DataQueries.ENTITY_ROTATION)
-                .set(Location.POSITION_X, this.rotation.getX())
-                .set(Location.POSITION_Y, this.rotation.getY())
-                .set(Location.POSITION_Z, this.rotation.getZ())
+                .set(Queries.POSITION_X, this.rotation.getX())
+                .set(Queries.POSITION_Y, this.rotation.getY())
+                .set(Queries.POSITION_Z, this.rotation.getZ())
             .getContainer()
             .createView(DataQueries.ENTITY_SCALE)
-                .set(Location.POSITION_X, this.scale.getX())
-                .set(Location.POSITION_Y, this.scale.getY())
-                .set(Location.POSITION_Z, this.scale.getZ())
+                .set(Queries.POSITION_X, this.scale.getX())
+                .set(Queries.POSITION_Y, this.scale.getY())
+                .set(Queries.POSITION_Z, this.scale.getZ())
             .getContainer()
             .set(DataQueries.DATA_MANIPULATORS, dataList);
 

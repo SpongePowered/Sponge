@@ -65,7 +65,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
     }
 
     @Override
-    public ImmutableListValue<E> with(E... elements) {
+    public ImmutableListValue<E> withElement(E elements) {
         return new ImmutableSpongeListValue<>(getKey(), ImmutableList.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 

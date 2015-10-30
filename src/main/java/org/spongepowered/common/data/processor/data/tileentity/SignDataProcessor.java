@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -48,7 +47,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
