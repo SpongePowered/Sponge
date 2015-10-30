@@ -30,21 +30,17 @@ import org.spongepowered.api.data.manipulator.mutable.block.DisarmedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDisarmedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.util.DataConstants;
 
 public class ImmutableSpongeDisarmedData extends AbstractImmutableBooleanData<ImmutableDisarmedData, DisarmedData> implements ImmutableDisarmedData {
 
     public ImmutableSpongeDisarmedData(boolean value) {
-        super(ImmutableDisarmedData.class, value, Keys.DISARMED, SpongeDisarmedData.class);
+        super(ImmutableDisarmedData.class, value, Keys.DISARMED, SpongeDisarmedData.class, DataConstants.DEFAULT_DISARMED);
     }
 
     @Override
     public ImmutableValue<Boolean> disarmed() {
-        return ImmutableSpongeValue.cachedOf(Keys.DISARMED, true, this.value);
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return disarmed();
-    }
 }

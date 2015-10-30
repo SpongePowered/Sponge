@@ -30,21 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.block.InWallData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeInWallData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeInWallData extends AbstractImmutableBooleanData<ImmutableInWallData, InWallData> implements ImmutableInWallData {
 
     public ImmutableSpongeInWallData(boolean value) {
-        super(ImmutableInWallData.class, value, Keys.IN_WALL, SpongeInWallData.class);
+        super(ImmutableInWallData.class, value, Keys.IN_WALL, SpongeInWallData.class, true);
     }
 
     @Override
     public ImmutableValue<Boolean> inWall() {
-        return ImmutableSpongeValue.cachedOf(Keys.IN_WALL, true, this.value);
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return inWall();
-    }
 }

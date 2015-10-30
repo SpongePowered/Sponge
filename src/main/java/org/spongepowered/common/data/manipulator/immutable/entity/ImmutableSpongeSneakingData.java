@@ -30,21 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeSneakingData extends AbstractImmutableBooleanData<ImmutableSneakingData, SneakingData> implements ImmutableSneakingData {
 
     public ImmutableSpongeSneakingData(boolean sneaking) {
-        super(ImmutableSneakingData.class, sneaking, Keys.IS_SNEAKING, SpongeSneakingData.class);
+        super(ImmutableSneakingData.class, sneaking, Keys.IS_SNEAKING, SpongeSneakingData.class, false);
     }
     
     @Override
     public ImmutableValue<Boolean> sneaking() {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, this.value);
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return sneaking();
-    }
 }

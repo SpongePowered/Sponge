@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Enti
     @Override
     protected MutableBoundedValue<Double> constructValue(Double defaultValue) {
         return SpongeValueBuilder.boundedBuilder(Keys.FLYING_SPEED)
-            .defaultValue(0.05d)
+            .defaultValue(DataConstants.DEFAULT_FLYING_SPEED)
             .minimum(Double.MIN_VALUE)
             .maximum(Double.MAX_VALUE)
             .actualValue(defaultValue)

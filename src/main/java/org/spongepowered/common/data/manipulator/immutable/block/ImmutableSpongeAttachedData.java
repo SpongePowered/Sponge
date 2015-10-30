@@ -30,23 +30,17 @@ import org.spongepowered.api.data.manipulator.mutable.block.AttachedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeAttachedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.util.DataConstants;
 
 public class ImmutableSpongeAttachedData extends AbstractImmutableBooleanData<ImmutableAttachedData, AttachedData> implements ImmutableAttachedData {
 
-    private final ImmutableValue<Boolean> attachedValue = ImmutableSpongeValue.cachedOf(Keys.ATTACHED, false, this.getValue());
-
     public ImmutableSpongeAttachedData(boolean attached) {
-        super(ImmutableAttachedData.class, attached, Keys.ATTACHED, SpongeAttachedData.class);
+        super(ImmutableAttachedData.class, attached, Keys.ATTACHED, SpongeAttachedData.class, DataConstants.DEFAULT_ATTACHED);
     }
 
     @Override
     public ImmutableValue<Boolean> attached() {
-        return this.attachedValue;
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return attached();
-    }
 }

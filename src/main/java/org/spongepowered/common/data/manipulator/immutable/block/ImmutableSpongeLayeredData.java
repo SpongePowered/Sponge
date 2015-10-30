@@ -32,16 +32,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeLayeredData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 public class ImmutableSpongeLayeredData extends AbstractImmutableBoundedComparableData<Integer, ImmutableLayeredData, LayeredData> implements ImmutableLayeredData {
 
     public ImmutableSpongeLayeredData(int value, int lowerBound, int upperBound) {
-        super(ImmutableLayeredData.class, value, Keys.LAYER, intComparator(), SpongeLayeredData.class, lowerBound, upperBound);
+        super(ImmutableLayeredData.class, value, Keys.LAYER, intComparator(), SpongeLayeredData.class, lowerBound, upperBound, 0);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> layer() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.LAYER, 0, this.value, this.comparator, this.lowerBound, this.upperBound);
+        return getValueGetter();
     }
 }

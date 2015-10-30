@@ -31,7 +31,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 import org.spongepowered.common.util.ReflectionUtil;
@@ -43,8 +43,9 @@ public abstract class AbstractImmutableSingleSetData<E, I extends ImmutableDataM
     extends AbstractImmutableSingleData<Set<E>, I, M> {
 
     private final Class<? extends M> mutableClass;
+    private final ImmutableSetValue<E> immutableSetValue = new ImmutableSpongeSetValue<>(this.usedKey, ImmutableSet.copyOf(this.value));
 
-    public AbstractImmutableSingleSetData(Class<I> manipulatorClass, Set<E> value,
+    protected AbstractImmutableSingleSetData(Class<I> manipulatorClass, Set<E> value,
                                           Key<? extends BaseValue<Set<E>>> usedKey,
                                           Class<? extends M> mutableClass) {
         super(manipulatorClass, ImmutableSet.copyOf(value), usedKey);
@@ -54,8 +55,8 @@ public abstract class AbstractImmutableSingleSetData<E, I extends ImmutableDataM
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return new ImmutableSpongeSetValue<>(this.usedKey, ImmutableSet.copyOf(this.value));
+    protected final ImmutableSetValue<E> getValueGetter() {
+        return this.immutableSetValue;
     }
 
     @Override

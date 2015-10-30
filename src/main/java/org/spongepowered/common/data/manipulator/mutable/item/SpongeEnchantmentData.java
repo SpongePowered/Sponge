@@ -34,63 +34,30 @@ import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 
-public class SpongeEnchantmentData extends AbstractData<EnchantmentData, ImmutableEnchantmentData> implements EnchantmentData {
-
-    private List<ItemEnchantment> enchantments;
+public class SpongeEnchantmentData extends AbstractSingleListData<ItemEnchantment, EnchantmentData, ImmutableEnchantmentData> implements EnchantmentData {
 
     public SpongeEnchantmentData() {
         this(Lists.<ItemEnchantment>newArrayList());
     }
 
     public SpongeEnchantmentData(List<ItemEnchantment> enchantments) {
-        super(EnchantmentData.class);
-        registerGettersAndSetters();
-        this.enchantments = Lists.newArrayList(enchantments);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.this::getEnchantments);
-        registerFieldSetter(Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.this::setEnchantments);
-        registerKeyValue(Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.this::enchantments);
+        super(EnchantmentData.class, enchantments, Keys.ITEM_ENCHANTMENTS, ImmutableSpongeEnchantmentData.class);
     }
 
     @Override
     public ListValue<ItemEnchantment> enchantments() {
-        return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, this.enchantments);
-    }
-
-    @Override
-    public EnchantmentData copy() {
-        return new SpongeEnchantmentData(this.enchantments);
-    }
-
-    @Override
-    public ImmutableEnchantmentData asImmutable() {
-        return new ImmutableSpongeEnchantmentData(this.enchantments);
-    }
-
-    @Override
-    public int compareTo(EnchantmentData o) {
-        return 0;
+        return getValueGetter();
     }
 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-            .set(Keys.ITEM_ENCHANTMENTS.getQuery(), this.enchantments);
+            .set(Keys.ITEM_ENCHANTMENTS.getQuery(), this.getValue());
     }
 
-    public List<ItemEnchantment> getEnchantments() {
-        return Lists.newArrayList(this.enchantments);
-    }
-
-    public void setEnchantments(List<ItemEnchantment> enchantments) {
-        this.enchantments = Lists.newArrayList(enchantments);
-    }
 }

@@ -44,7 +44,7 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
     protected final Key<? extends BaseValue<T>> usedKey;
     protected final T value;
 
-    public AbstractImmutableSingleData(Class<I> immutableClass, T value, Key<? extends BaseValue<T>> usedKey) {
+    protected AbstractImmutableSingleData(Class<I> immutableClass, T value, Key<? extends BaseValue<T>> usedKey) {
         super(immutableClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey, "Hey, the key provided is null! Please make sure it is registered!");

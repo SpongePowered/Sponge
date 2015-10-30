@@ -28,26 +28,18 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeElderData extends AbstractImmutableBooleanData<ImmutableElderData, ElderData> implements ImmutableElderData {
 
-    private final ImmutableValue<Boolean> elderValue = ImmutableSpongeValue.cachedOf(Keys.ELDER_GUARDIAN, false, this.getValue());
-
     public ImmutableSpongeElderData(boolean value) {
-        super(ImmutableElderData.class, value, Keys.ELDER_GUARDIAN, SpongeElderData.class);
+        super(ImmutableElderData.class, value, Keys.ELDER_GUARDIAN, SpongeElderData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> elder() {
-        return this.elderValue;
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return elder();
-    }
 }

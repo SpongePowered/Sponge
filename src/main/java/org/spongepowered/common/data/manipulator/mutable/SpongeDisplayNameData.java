@@ -37,6 +37,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeDisplayNameData extends AbstractData<DisplayNameData, ImmutableDisplayNameData> implements DisplayNameData {
@@ -45,7 +46,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     private boolean displays = false;
 
     public SpongeDisplayNameData() {
-        this(Texts.of(), false);
+        this(DataConstants.EMPTY_TEXT, false);
     }
 
     public SpongeDisplayNameData(Text displayName) {
@@ -61,7 +62,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
 
     @Override
     public Value<Text> displayName() {
-        return new SpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), this.displayName);
+        return new SpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, this.displayName);
     }
 
     @Override

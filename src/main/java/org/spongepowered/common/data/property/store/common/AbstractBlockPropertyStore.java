@@ -36,6 +36,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.Optional;
 
@@ -100,6 +101,6 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     @Override
     public Optional<T> getFor(Location<World> location, Direction direction) {
         return getForDirection(((net.minecraft.world.World) location.getExtent()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
-                               SpongeGameRegistry.directionMap.get(direction));
+                               DirectionFacingProvider.getInstance().get(direction).get());
     }
 }

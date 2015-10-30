@@ -36,7 +36,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -48,7 +50,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Value<Text> constructValue(Text defaultValue) {
-        return null;
+        return new SpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, defaultValue);
     }
 
     @SuppressWarnings("deprecation")
@@ -70,7 +72,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), value);
+        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, value);
     }
 
     @Override
