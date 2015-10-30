@@ -36,6 +36,7 @@ public class StaticMixinHelper {
 
     public static EntityPlayerMP processingPlayer = null;
     public static Packet processingPacket = null;
+    public static boolean processingInternalForgeEvent = false;
     public static SpongePopulatorType populator = null;
     public static ItemStack lastPlayerItem = null;
     @SuppressWarnings("rawtypes")
