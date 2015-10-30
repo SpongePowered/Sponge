@@ -29,6 +29,7 @@ import static org.spongepowered.common.data.util.DataUtil.getData;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -62,7 +63,11 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
     @Override
     protected boolean set(EntityLivingBase entity, Map<Key<?>, Object> keyValues) {
         entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(((Double) keyValues.get(Keys.MAX_HEALTH)).floatValue());
-        entity.setHealth(((Double) keyValues.get(Keys.HEALTH)).floatValue());
+        float health = ((Double) keyValues.get(Keys.HEALTH)).floatValue();
+        entity.setHealth(health);
+        if (health == 0) {
+            entity.onDeath(DamageSource.generic);
+        }
         return true;
     }
 
