@@ -30,15 +30,14 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBucket;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
@@ -48,12 +47,14 @@ import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.ItemInWorldManager;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.world.WorldServer;
@@ -268,7 +269,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Redirect(method = "processChatMessage", at = @At(value = "INVOKE", target = "org.apache.commons.lang3.StringUtils.normalizeSpace"
             + "(Ljava/lang/String;)Ljava/lang/String;", remap = false))
-    public String dontNormalizeStringBecauseSomeMojangDevSucks(String input) {
+    public String onNormalizeSpace(String input) {
         return input;
     }
 
@@ -422,21 +423,26 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         // If the time between packets is small enough, and the 'signature' similar, we discard the
         // second one. This sadly has to remain until Mojang makes their packets saner. :(
         //  -- Grum
-        if (packetIn.getPlacedBlockDirection() == 255) {
-            if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
-                this.lastPacket = null;
-                ci.cancel();
-            }
-        } else {
-            this.lastItem = null;
-            if (packetIn.getStack() != null) {
-                // ignore placement of liquids
-                if (!(packetIn.getStack().getItem() instanceof ItemBucket)) {
-                    this.lastItem = packetIn.getStack().getItem() ;
-                    this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
+        if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+            if (packetIn.getPlacedBlockDirection() == 255) {
+                if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
+                    this.lastPacket = null;
+                    ci.cancel();
                 }
+            } else {
+                this.lastItem = packetIn.getStack() == null ? null : packetIn.getStack().getItem();
+                this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
             }
         }
+    }
+    
+    @Redirect(method = "processPlayerBlockPlacement", at = @At(value = "INVOKE", target="Lnet/minecraft/server/management/ItemInWorldManager;activateBlockOrUseItem(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Z"))
+    public boolean onActivateBlockOrUseItem(ItemInWorldManager itemManager, EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+        boolean result = itemManager.activateBlockOrUseItem(player, worldIn, stack, pos, side, hitX, hitY, hitZ);
+        if (stack != null && !result) {
+            itemManager.tryUseItem(player, worldIn, stack);
+        }
+        return result;
     }
 
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))

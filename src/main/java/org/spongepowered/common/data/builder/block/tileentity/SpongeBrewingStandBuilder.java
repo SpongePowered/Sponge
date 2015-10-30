@@ -29,7 +29,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
 import java.util.Optional;
@@ -44,7 +44,6 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Optional<BrewingStand> build(DataView container) throws InvalidDataException {
         Optional<BrewingStand> beaconOptional = super.build(container);
         if (!beaconOptional.isPresent()) {
@@ -61,7 +60,7 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             ((TileEntityBrewingStand) beacon).setName(container.getString(NAME_QUERY).get());
         }
 
-        final BrewingData brewingData = this.game.getRegistry().getManipulatorRegistry().getBuilder(BrewingData.class).get().create();
+        final BrewingStandData brewingData = this.game.getRegistry().getManipulatorRegistry().getBuilder(BrewingStandData.class).get().create();
         brewingData.remainingBrewingTime().set(container.getInt(BREW_TIME_QUERY).get());
         beacon.offer(brewingData);
 
