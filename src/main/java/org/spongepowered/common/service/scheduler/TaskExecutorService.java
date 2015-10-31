@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.scheduler;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SpongeExecutorService;
 import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.service.scheduler.TaskBuilder;
@@ -45,9 +46,9 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
 
     private final Supplier<TaskBuilder> taskBuilderProvider;
     private final SchedulerBase scheduler;
-    private final Object plugin;
+    private final PluginContainer plugin;
 
-    protected TaskExecutorService(Supplier<TaskBuilder> taskBuilderProvider, SchedulerBase scheduler, Object plugin) {
+    protected TaskExecutorService(Supplier<TaskBuilder> taskBuilderProvider, SchedulerBase scheduler, PluginContainer plugin) {
         this.taskBuilderProvider = taskBuilderProvider;
         this.scheduler = scheduler;
         this.plugin = plugin;
