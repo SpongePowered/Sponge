@@ -45,26 +45,26 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
 
     @Override
     public Optional<BrewingStand> build(DataView container) throws InvalidDataException {
-        Optional<BrewingStand> beaconOptional = super.build(container);
-        if (!beaconOptional.isPresent()) {
+        Optional<BrewingStand> brewingStandOptional = super.build(container);
+        if (!brewingStandOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
         }
         if (!container.contains(BREW_TIME_QUERY)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
 
-        final BrewingStand beacon = beaconOptional.get();
+        final BrewingStand brewingStand = brewingStandOptional.get();
 
         // Have to consider custom names as an option
         if (container.contains(NAME_QUERY)) {
-            ((TileEntityBrewingStand) beacon).setName(container.getString(NAME_QUERY).get());
+            ((TileEntityBrewingStand) brewingStand).setName(container.getString(NAME_QUERY).get());
         }
 
         final BrewingStandData brewingData = this.game.getRegistry().getManipulatorRegistry().getBuilder(BrewingStandData.class).get().create();
-        brewingData.remainingBrewingTime().set(container.getInt(BREW_TIME_QUERY).get());
-        beacon.offer(brewingData);
+        brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
+        brewingStand.offer(brewingData);
 
-        ((TileEntityBrewingStand) beacon).validate();
-        return Optional.of(beacon);
+        ((TileEntityBrewingStand) brewingStand).validate();
+        return Optional.of(brewingStand);
     }
 }

@@ -84,6 +84,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppl
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
+import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
@@ -124,6 +125,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -196,6 +198,7 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeG
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlaceableData;
+import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
@@ -236,6 +239,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleD
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
@@ -277,6 +281,7 @@ import org.spongepowered.common.data.processor.data.item.ItemPagedDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemSkullRepresentedPlayerDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemWetDataProcessor;
 import org.spongepowered.common.data.processor.data.item.PlaceableDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.BrewingStandDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.FurnaceDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
@@ -336,11 +341,11 @@ import org.spongepowered.common.data.processor.value.tileentity.MaxBurnTimeValue
 import org.spongepowered.common.data.processor.value.tileentity.MaxCookTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.PassedBurnTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.PassedCookTimeValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.RemainingBrewTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SignLinesValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.SkullRepresentedPlayerProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntityDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.service.persistence.SpongeSerializationService;
 
@@ -550,6 +555,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
                 ImmutableSpongeExpOrbData.class, expOrbDataProcessor);
 
+        final BrewingStandDataProcessor brewingStandDataProcessor = new BrewingStandDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(BrewingStandData.class, SpongeBrewingStandData.class, ImmutableBrewingStandData.class,
+                ImmutableSpongeBrewingStandData.class, brewingStandDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -611,6 +620,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.PASSED_COOK_TIME, new PassedCookTimeValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_COOK_TIME, new MaxCookTimeValueProcessor());
         dataRegistry.registerValueProcessor(Keys.CONTAINED_EXPERIENCE, new ExpOrbValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.REMAINING_BREW_TIME, new RemainingBrewTimeValueProcessor());
     }
 
 }

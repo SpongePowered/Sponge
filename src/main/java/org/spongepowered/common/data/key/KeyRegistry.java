@@ -168,7 +168,7 @@ public class KeyRegistry {
         keyMap.put("passed_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("PassedCookTime")));
         keyMap.put("max_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxCookTime")));
         keyMap.put("contained_experience", makeSingleKey(Integer.class, Value.class, of("ContainedExperience")));
-
+        keyMap.put("remaining_brew_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("RemainingBrewTime")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
