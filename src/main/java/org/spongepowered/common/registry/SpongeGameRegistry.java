@@ -217,6 +217,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
 
     public SpongeGameRegistry() {
+        // todo delegate to exterior registration. maybe DefaultRegistry?
         registerBuilderSupplier(ItemStackBuilder.class, SpongeItemStackBuilder::new);
         registerBuilderSupplier(TradeOfferBuilder.class, SpongeTradeOfferBuilder::new);
         registerBuilderSupplier(FireworkEffectBuilder.class, SpongeFireworkBuilder::new);
