@@ -22,25 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.data.processor.value.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import net.minecraft.block.BlockSandStone;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandstoneData;
-import org.spongepowered.api.data.manipulator.mutable.block.SandstoneData;
 import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.SandstoneTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandstoneData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.data.processor.common.AbstractCatalogDataValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeSandstoneData extends AbstractSingleCatalogData<SandstoneType, SandstoneData, ImmutableSandstoneData> implements SandstoneData {
+public class SandstoneTypeValueProcessor extends AbstractCatalogDataValueProcessor<SandstoneType, Value<SandstoneType>> {
 
-    public SpongeSandstoneData(SandstoneType variant) {
-        super(SandstoneData.class, checkNotNull(variant), Keys.SANDSTONE_TYPE, ImmutableSpongeSandstoneData.class);
+    public SandstoneTypeValueProcessor() {
+        super(Keys.SANDSTONE_TYPE);
     }
 
-    public SpongeSandstoneData() {
-        this(SandstoneTypes.DEFAULT);
+    protected boolean supports(ItemStack container) {
+        return container.getItem() == ItemTypes.SANDSTONE || container.getItem() == ItemTypes.SANDSTONE_STAIRS;
+    }
+
+    @Override
+    protected SandstoneType getFromMeta(int meta) {
+        return (SandstoneType) (Object) BlockSandStone.EnumType.byMetadata(meta);
+    }
+
+    @Override
+    protected int setToMeta(SandstoneType type) {
+        return ((BlockSandStone.EnumType) (Object) type).getMetadata();
+    }
+
+    @Override
+    protected Value<SandstoneType> constructValue(SandstoneType defaultValue) {
+        return new SpongeValue<>(Keys.SANDSTONE_TYPE, SandstoneTypes.DEFAULT, defaultValue);
     }
 }

@@ -22,25 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.mixin.core.data.types;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import net.minecraft.block.BlockQuartz;
+import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableInstrumentData;
-import org.spongepowered.api.data.manipulator.mutable.block.InstrumentData;
-import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.data.type.InstrumentTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeInstrumentData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+@Mixin(BlockQuartz.EnumType.class)
+@Implements(@Interface(iface = QuartzType.class, prefix = "shadow$"))
+public abstract class MixinBlockQuartzEnumType {
 
-public class SpongeInstrumentData extends AbstractSingleCatalogData<InstrumentType, InstrumentData, ImmutableInstrumentData> implements InstrumentData {
+    @Shadow public abstract String getName();
 
-    public SpongeInstrumentData(InstrumentType variant) {
-        super(InstrumentData.class, checkNotNull(variant), Keys.INSTRUMENT_TYPE, ImmutableSpongeInstrumentData.class);
+    public String shadow$getId() {
+        return getName();
     }
 
-    public SpongeInstrumentData() {
-        this(InstrumentTypes.HARP);
+    @Intrinsic
+    public String shadow$getName() {
+        return getName();
     }
 }

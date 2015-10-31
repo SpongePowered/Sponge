@@ -22,28 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockTallGrass;
-import org.spongepowered.api.data.type.ShrubType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStairShapeData;
+import org.spongepowered.api.data.manipulator.mutable.block.StairShapeData;
+import org.spongepowered.api.data.type.StairShape;
+import org.spongepowered.api.data.type.StairShapes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeStairShapeData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
 
-@Mixin(BlockTallGrass.EnumType.class)
-@Implements(@Interface(iface = ShrubType.class, prefix = "shrub$"))
-public abstract class MixinEnumShrubType implements ShrubType {
+public class StairShapeDataProcessor extends
+        AbstractBlockOnlyCatalogDataProcessor<StairShape, Value<StairShape>, StairShapeData, ImmutableStairShapeData> {
 
-    @Shadow private String name;
-
-    public String shrub$getId() {
-        return this.name; // todo maybe prefix with "minecraft"?
+    public StairShapeDataProcessor() {
+        super(Keys.STAIR_SHAPE);
     }
 
-    @Intrinsic
-    public String shrub$getName() {
-        return this.name;
+    @Override
+    public StairShapeData createManipulator() {
+        return new SpongeStairShapeData();
+    }
+
+    @Override
+    protected StairShape getDefaultValue() {
+        return StairShapes.STRAIGHT;
     }
 }

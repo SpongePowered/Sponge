@@ -48,7 +48,7 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
      * @return The cached immutable value
      */
     public static <T> ImmutableValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actualValue);
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, actualValue, defaultValue);
     }
 
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {

@@ -22,25 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRailDirectionData;
+import org.spongepowered.api.data.manipulator.mutable.block.RailDirectionData;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.RailDirections;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeRailDirectionData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class RailDirectionDataProcessor extends
+        AbstractBlockOnlyCatalogDataProcessor<RailDirection, Value<RailDirection>, RailDirectionData, ImmutableRailDirectionData> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public RailDirectionDataProcessor() {
+        super(Keys.RAIL_DIRECTION);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Override
+    public RailDirectionData createManipulator() {
+        return new SpongeRailDirectionData();
+    }
+
+    @Override
+    protected RailDirection getDefaultValue() {
+        return RailDirections.NORTH_SOUTH;
     }
 }

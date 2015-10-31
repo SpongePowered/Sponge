@@ -25,60 +25,54 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockFlower;
+import net.minecraft.block.BlockStoneBrick;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
-import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBrickData;
+import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePlantData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeBrickData;
 
 import java.util.Optional;
 
-@Mixin(BlockFlower.class)
-public abstract class MixinBlockFlower extends MixinBlock {
+@Mixin(BlockStoneBrick.class)
+public abstract class MixinBlockStoneBrick extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getFlowerTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getStoneBrickTypeFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutablePlantData.class.isAssignableFrom(immutable);
+        return ImmutableBrickData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutablePlantData) {
-            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) ((ImmutablePlantData) manipulator).type().get();
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
-                return Optional.empty();
-            }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        if (manipulator instanceof ImmutableBrickData) {
+            final BlockStoneBrick.EnumType stoneBrickType = (BlockStoneBrick.EnumType) (Object) ((ImmutableBrickData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockStoneBrick.VARIANT, stoneBrickType));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
-        if (key.equals(Keys.PLANT_TYPE)) {
-            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) value;
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
-                return Optional.empty();
-            }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        if (key.equals(Keys.BRICK_TYPE)) {
+            final BlockStoneBrick.EnumType stoneBrickType = (BlockStoneBrick.EnumType) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockStoneBrick.VARIANT, stoneBrickType));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutablePlantData getFlowerTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePlantData.class,
-                                                       (PlantType) blockState.getValue(((BlockFlower) blockState.getBlock()).getTypeProperty()));
+    private ImmutableBrickData getStoneBrickTypeFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBrickData.class,
+                (BrickType) blockState.getValue(BlockStoneBrick.VARIANT));
     }
 }

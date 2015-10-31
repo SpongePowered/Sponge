@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.block.BlockDirt;
-import org.spongepowered.api.data.type.DirtType;
+import net.minecraft.block.BlockPlanks;
+import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockDirt.DirtType.class)
-@Implements(@Interface(iface = DirtType.class, prefix = "shadow$"))
-public abstract class MixinDirtType {
+@Mixin(BlockPlanks.EnumType.class)
+@Implements(@Interface(iface = TreeType.class, prefix = "shadow$"))
+public abstract class MixinBlockPlanksEnumType {
 
     @Shadow public abstract String getName();
 

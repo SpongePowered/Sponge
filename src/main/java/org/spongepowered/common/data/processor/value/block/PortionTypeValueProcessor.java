@@ -22,29 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.data.processor.value.block;
 
-import net.minecraft.block.BlockDoublePlant;
-import org.spongepowered.api.data.type.DoublePlantType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@Mixin(BlockDoublePlant.EnumPlantType.class)
-@Implements(@Interface(iface = DoublePlantType.class, prefix = "double$"))
-public abstract class MixinEnumDoublePlant {
+public class PortionTypeValueProcessor extends AbstractBlockOnlyCatalogDataValueProcessor<PortionType, Value<PortionType>> {
 
-    @Shadow private String unlocalizedName;
-    @Shadow private String name;
-
-    public String double$getId() {
-        return this.unlocalizedName;
+    public PortionTypeValueProcessor() {
+        super(Keys.PORTION_TYPE);
     }
 
-    @Intrinsic
-    public String double$getName() {
-        return this.name;
+    @Override
+    protected Value<PortionType> constructValue(PortionType defaultValue) {
+        return new SpongeValue<>(Keys.PORTION_TYPE, PortionTypes.BOTTOM, defaultValue);
     }
+
 }

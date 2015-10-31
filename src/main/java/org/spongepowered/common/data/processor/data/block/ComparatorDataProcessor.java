@@ -22,28 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockFlower;
-import org.spongepowered.api.data.type.PlantType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableComparatorData;
+import org.spongepowered.api.data.manipulator.mutable.block.ComparatorData;
+import org.spongepowered.api.data.type.ComparatorType;
+import org.spongepowered.api.data.type.ComparatorTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeComparatorData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
 
-@Mixin(BlockFlower.EnumFlowerType.class)
-@Implements(@Interface(iface = PlantType.class, prefix = "shadow$"))
-public abstract class MixinEnumFlowerType {
+public class ComparatorDataProcessor extends
+        AbstractBlockOnlyCatalogDataProcessor<ComparatorType, Value<ComparatorType>, ComparatorData, ImmutableComparatorData> {
 
-    @Shadow public abstract String getName();
-
-    public String getId() {
-        return shadow$getName();
+    public ComparatorDataProcessor() {
+        super(Keys.COMPARATOR_TYPE);
     }
 
-    @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    @Override
+    public ComparatorData createManipulator() {
+        return new SpongeComparatorData();
+    }
+
+    @Override
+    protected ComparatorType getDefaultValue() {
+        return ComparatorTypes.COMPARE;
     }
 }

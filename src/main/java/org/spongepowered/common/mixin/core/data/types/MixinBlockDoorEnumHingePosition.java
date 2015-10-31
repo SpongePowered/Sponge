@@ -22,25 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.mixin.core.data.types;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import net.minecraft.block.BlockDoor;
+import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.Hinges;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+@Mixin(BlockDoor.EnumHingePosition.class)
+@Implements(@Interface(iface = Hinge.class, prefix = "shadow$"))
+public abstract class MixinBlockDoorEnumHingePosition {
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+    @Shadow
+    public abstract String getName();
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public String shadow$getId() {
+        return getName();
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Intrinsic
+    public String shadow$getName() {
+        return getName();
+    }
+
+    public Hinge cycleNext() {
+        if (this.equals(Hinges.LEFT)) {
+            return Hinges.RIGHT;
+        } else {
+            return Hinges.LEFT;
+        }
     }
 }
