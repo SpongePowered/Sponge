@@ -69,6 +69,7 @@ import javax.annotation.Nullable;
 public class SpongeBlockSnapshot implements BlockSnapshot {
 
     private final BlockState blockState;
+    private final BlockState extendedState;
     private final UUID worldUniqueId;
     private final Vector3i pos;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
@@ -85,6 +86,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
+        this.extendedState = builder.extendedState;
         this.worldUniqueId = checkNotNull(builder.worldUuid);
         this.pos = checkNotNull(builder.coords);
         this.extraData = builder.manipulators == null ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
@@ -106,6 +108,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public BlockState getState() {
         return this.blockState;
+    }
+
+    @Override
+    public BlockState getExtendedState() {
+        return this.extendedState;
     }
 
     @Override
@@ -188,7 +195,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 .set(Queries.POSITION_Y, this.pos.getY())
                 .set(Queries.POSITION_Z, this.pos.getZ())
             .getContainer()
-            .set(DataQueries.BLOCK_STATE, this.blockState);
+            .set(DataQueries.BLOCK_STATE, this.blockState)
+            .set(DataQueries.BLOCK_EXTENDED_STATE, this.extendedState);
         if (this.compound != null) {
             container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
@@ -349,6 +357,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.blockState(this.blockState)
+            .extendedState(this.extendedState)
             .position(this.pos)
             .worldId(this.worldUniqueId);
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
@@ -371,6 +380,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 .add("worldUniqueId", this.worldUniqueId)
                 .add("position", this.pos)
                 .add("blockState", this.blockState)
+                .add("extendedState", this.extendedState)
                 .toString();
     }
 

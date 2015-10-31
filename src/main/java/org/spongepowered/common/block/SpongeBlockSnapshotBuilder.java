@@ -62,6 +62,7 @@ import javax.annotation.Nullable;
 public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
 
     BlockState blockState;
+    BlockState extendedState;
     UUID worldUuid;
     Vector3i coords;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
@@ -82,6 +83,11 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public SpongeBlockSnapshotBuilder blockState(BlockState blockState) {
         this.blockState = checkNotNull(blockState);
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder extendedState(BlockState extendedState) {
+        this.extendedState = checkNotNull(extendedState);
         return this;
     }
 
@@ -166,13 +172,16 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public BlockSnapshot build() {
         checkState(this.blockState != null);
+        if (this.extendedState == null) {
+            this.extendedState = this.blockState;
+        }
         return new SpongeBlockSnapshot(this);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<BlockSnapshot> build(DataView container) throws InvalidDataException {
         checkDataExists(container, DataQueries.BLOCK_STATE);
+        checkDataExists(container, DataQueries.BLOCK_EXTENDED_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
@@ -181,7 +190,9 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationService).get();
+        final BlockState extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, serializationService).get();
         builder.blockState(blockState)
+            .extendedState(extendedState)
             .position(coordinate)
             .worldId(worldUuid);
         Optional<DataView> unsafeCompound = container.getView(DataQueries.UNSAFE_NBT);

@@ -52,7 +52,7 @@ public interface IMixinWorld {
 
     List<Entity> getCapturedEntityItems();
 
-    BlockSnapshot createSpongeBlockSnapshot(IBlockState state, BlockPos pos, int updateFlag);
+    BlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
     boolean isWorldSpawnerRunning();
 
