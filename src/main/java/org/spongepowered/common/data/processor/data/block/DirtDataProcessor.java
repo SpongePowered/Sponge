@@ -22,25 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.data.processor.data.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import net.minecraft.block.BlockDirt;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirtData;
+import org.spongepowered.api.data.manipulator.mutable.block.DirtData;
+import org.spongepowered.api.data.type.DirtType;
+import org.spongepowered.api.data.type.DirtTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirtData;
+import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class DirtDataProcessor extends AbstractCatalogDataProcessor<DirtType, Value<DirtType>, DirtData, ImmutableDirtData> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public DirtDataProcessor() {
+        super(Keys.DIRT_TYPE, input -> input.getItem() == ItemTypes.DIRT);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Override
+    protected int setToMeta(DirtType value) {
+        return ((BlockDirt.DirtType) (Object) value).getMetadata();
+    }
+
+    @Override
+    protected DirtType getFromMeta(int meta) {
+        return (DirtType) (Object) BlockDirt.DirtType.byMetadata(meta);
+    }
+
+    @Override
+    public DirtData createManipulator() {
+        return new SpongeDirtData();
+    }
+
+    @Override
+    protected DirtType getDefaultValue() {
+        return DirtTypes.DIRT;
     }
 }

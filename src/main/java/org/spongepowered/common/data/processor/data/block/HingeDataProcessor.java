@@ -22,25 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableHingeData;
+import org.spongepowered.api.data.manipulator.mutable.block.HingeData;
+import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.Hinges;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeHingeData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class HingeDataProcessor extends AbstractBlockOnlyCatalogDataProcessor<Hinge, Value<Hinge>, HingeData, ImmutableHingeData> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public HingeDataProcessor() {
+        super(Keys.HINGE_POSITION);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Override
+    public HingeData createManipulator() {
+        return new SpongeHingeData();
+    }
+
+    @Override
+    protected Hinge getDefaultValue() {
+        return Hinges.LEFT;
     }
 }

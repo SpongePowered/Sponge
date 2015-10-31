@@ -22,25 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.data.processor.value.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import net.minecraft.block.BlockStone;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.type.StoneType;
+import org.spongepowered.api.data.type.StoneTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.data.processor.common.AbstractCatalogDataValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class StoneTypeValueProcessor extends AbstractCatalogDataValueProcessor<StoneType, Value<StoneType>> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public StoneTypeValueProcessor() {
+        super(Keys.STONE_TYPE);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    protected boolean supports(ItemStack container) {
+        return container.getItem() == ItemTypes.STONE || container.getItem() == ItemTypes.STONE_STAIRS;
+    }
+
+    @Override
+    protected StoneType getFromMeta(int meta) {
+        return (StoneType) (Object) BlockStone.EnumType.byMetadata(meta);
+    }
+
+    @Override
+    protected int setToMeta(StoneType type) {
+        return ((BlockStone.EnumType) (Object) type).getMetadata();
+    }
+
+    @Override
+    protected Value<StoneType> constructValue(StoneType defaultValue) {
+        return new SpongeValue<>(Keys.STONE_TYPE, StoneTypes.STONE, defaultValue);
     }
 }

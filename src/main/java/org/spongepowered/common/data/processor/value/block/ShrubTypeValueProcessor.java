@@ -22,25 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.data.processor.value.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import net.minecraft.block.BlockTallGrass;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.ShrubTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.data.processor.common.AbstractCatalogDataValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class ShrubTypeValueProcessor extends
+        AbstractCatalogDataValueProcessor<ShrubType, Value<ShrubType>> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public ShrubTypeValueProcessor() {
+        super(Keys.SHRUB_TYPE);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Override
+    protected boolean supports(ItemStack container) {
+        return container.getItem() == ItemTypes.TALLGRASS;
     }
+
+    @Override
+    protected Value<ShrubType> constructValue(ShrubType defaultValue) {
+        return new SpongeValue<>(Keys.SHRUB_TYPE, ShrubTypes.TALL_GRASS, defaultValue);
+    }
+
+    @Override
+    protected ShrubType getFromMeta(int meta) {
+        return (ShrubType) (Object) BlockTallGrass.EnumType.byMetadata(meta);
+    }
+
+    @Override
+    protected int setToMeta(ShrubType type) {
+        return ((BlockTallGrass.EnumType) (Object) type).getMeta();
+    }
+
 }

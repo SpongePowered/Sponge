@@ -25,60 +25,53 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockFlower;
+import net.minecraft.block.BlockDirt;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
-import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirtData;
+import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePlantData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirtData;
 
 import java.util.Optional;
 
-@Mixin(BlockFlower.class)
-public abstract class MixinBlockFlower extends MixinBlock {
+@Mixin(BlockDirt.class)
+public abstract class MixinBlockDirt extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getFlowerTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirtTypeFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutablePlantData.class.isAssignableFrom(immutable);
+        return ImmutableDirtData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutablePlantData) {
-            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) ((ImmutablePlantData) manipulator).type().get();
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
-                return Optional.empty();
-            }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        if (manipulator instanceof ImmutableDirtData) {
+            final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) (Object) ((ImmutableDirtData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
-        if (key.equals(Keys.PLANT_TYPE)) {
-            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) value;
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
-                return Optional.empty();
-            }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        if (key.equals(Keys.DIRT_TYPE)) {
+            final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutablePlantData getFlowerTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePlantData.class,
-                                                       (PlantType) blockState.getValue(((BlockFlower) blockState.getBlock()).getTypeProperty()));
+    private ImmutableDirtData getDirtTypeFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) blockState.getValue(BlockDirt.VARIANT));
     }
 }
