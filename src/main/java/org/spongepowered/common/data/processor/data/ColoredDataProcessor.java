@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data;
 
-import java.awt.Color;
-import java.util.Optional;
-
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,7 +40,8 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.ColorUtil;
 
-import net.minecraft.item.ItemStack;
+import java.awt.Color;
+import java.util.Optional;
 
 public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color, Value<Color>, ColoredData, ImmutableColoredData> {
 
@@ -51,11 +50,16 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
     }
 
     @Override
+    protected boolean supports(ItemStack stack) {
+        return ColorUtil.hasColor(stack);
+    }
+
+    @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        if (dataHolder instanceof ItemStack) {
+        if (supports(dataHolder)) {
             final Optional<ColoredData> optional = from(dataHolder);
             final ItemStack stack = (ItemStack) dataHolder;
-            if (ColorUtil.hasNbtColor(stack) && optional.isPresent()) {
+            if (ColorUtil.hasColorInNbt(stack) && optional.isPresent()) {
                 final DataTransactionBuilder builder = DataTransactionBuilder.builder();
                 try {
                     NbtDataUtil.removeColorFromNBT(stack);
@@ -65,7 +69,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
-                return DataTransactionBuilder.successNoData();
+                return DataTransactionBuilder.failNoData();
             }
         }
         return DataTransactionBuilder.failNoData();
@@ -73,12 +77,18 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
 
     @Override
     protected boolean set(ItemStack itemStack, Color value) {
+        if (!this.supports(itemStack)) {
+            return false;
+        }
         ColorUtil.setItemStackColor(itemStack, value);
         return true;
     }
 
     @Override
     protected Optional<Color> getVal(ItemStack itemStack) {
+        if (!this.supports(itemStack)) {
+            return Optional.empty();
+        }
         return ColorUtil.getItemStackColor(itemStack);
     }
 

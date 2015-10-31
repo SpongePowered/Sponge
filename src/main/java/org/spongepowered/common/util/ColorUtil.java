@@ -55,15 +55,14 @@ public final class ColorUtil {
      * because leather armor has a color even without a set color. This returns
      * {@code true} only if there is a color set on the display tag.
      */
-    public static boolean hasNbtColor(ItemStack stack) {
+    public static boolean hasColorInNbt(ItemStack stack) {
         return NbtDataUtil.hasColorFromNBT(stack);
     }
     
     public static boolean hasColor(ItemStack stack) {
         final Item item = stack.getItem();
-        return hasNbtColor(stack) ||
-                (item instanceof ItemArmor &&
-                        ((ItemArmor) item).getArmorMaterial() == ArmorMaterial.LEATHER);
+        return item instanceof ItemArmor &&
+                        ((ItemArmor) item).getArmorMaterial() == ArmorMaterial.LEATHER;
     }
 
     private ColorUtil() {
