@@ -22,25 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionData;
+import org.spongepowered.api.data.manipulator.mutable.block.PortionData;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongePortionData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class PortionDataProcessor extends AbstractBlockOnlyCatalogDataProcessor<PortionType, Value<PortionType>, PortionData, ImmutablePortionData> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public PortionDataProcessor() {
+        super(Keys.PORTION_TYPE);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Override
+    public PortionData createManipulator() {
+        return new SpongePortionData();
+    }
+
+    @Override
+    protected PortionType getDefaultValue() {
+        return PortionTypes.BOTTOM;
     }
 }

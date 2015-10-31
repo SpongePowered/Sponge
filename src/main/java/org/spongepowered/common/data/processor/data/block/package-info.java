@@ -22,25 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
-
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
-    }
-
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.processor.data.block;

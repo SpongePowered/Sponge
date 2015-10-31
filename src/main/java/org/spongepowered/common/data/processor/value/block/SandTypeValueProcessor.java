@@ -22,25 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.data.processor.value.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import net.minecraft.block.BlockSand;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.type.SandType;
+import org.spongepowered.api.data.type.SandTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.data.processor.common.AbstractCatalogDataValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class SandTypeValueProcessor extends AbstractCatalogDataValueProcessor<SandType, Value<SandType>> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public SandTypeValueProcessor() {
+        super(Keys.SAND_TYPE);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    protected boolean supports(ItemStack container) {
+        return container.getItem() == ItemTypes.SAND;
+    }
+
+    @Override
+    protected SandType getFromMeta(int meta) {
+        return (SandType) (Object) BlockSand.EnumType.byMetadata(meta);
+    }
+
+    @Override
+    protected int setToMeta(SandType type) {
+        return ((BlockSand.EnumType) (Object) type).getMetadata();
+    }
+
+    @Override
+    protected Value<SandType> constructValue(SandType defaultValue) {
+        return new SpongeValue<>(Keys.SAND_TYPE, SandTypes.NORMAL, defaultValue);
     }
 }

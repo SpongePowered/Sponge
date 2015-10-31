@@ -25,60 +25,53 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockFlower;
+import net.minecraft.block.BlockWall;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
-import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
+import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePlantData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWallData;
 
 import java.util.Optional;
 
-@Mixin(BlockFlower.class)
-public abstract class MixinBlockFlower extends MixinBlock {
+@Mixin(BlockWall.class)
+public abstract class MixinBlockWall extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getFlowerTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getWallTypeFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutablePlantData.class.isAssignableFrom(immutable);
+        return ImmutableWallData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutablePlantData) {
-            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) ((ImmutablePlantData) manipulator).type().get();
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
-                return Optional.empty();
-            }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        if (manipulator instanceof ImmutableWallData) {
+            final BlockWall.EnumType wallType = (BlockWall.EnumType) (Object) ((ImmutableWallData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockWall.VARIANT, wallType));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
-        if (key.equals(Keys.PLANT_TYPE)) {
-            final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) value;
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
-                return Optional.empty();
-            }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+        if (key.equals(Keys.WALL_TYPE)) {
+            final BlockWall.EnumType wallType = (BlockWall.EnumType) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockWall.VARIANT, wallType));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutablePlantData getFlowerTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePlantData.class,
-                                                       (PlantType) blockState.getValue(((BlockFlower) blockState.getBlock()).getTypeProperty()));
+    private ImmutableWallData getWallTypeFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) blockState.getValue(BlockWall.VARIANT));
     }
 }

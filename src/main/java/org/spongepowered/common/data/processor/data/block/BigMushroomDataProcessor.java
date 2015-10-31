@@ -22,25 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBigMushroomData;
+import org.spongepowered.api.data.manipulator.mutable.block.BigMushroomData;
+import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BigMushroomTypes;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeBigMushroomData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class BigMushroomDataProcessor extends
+        AbstractBlockOnlyCatalogDataProcessor<BigMushroomType, Value<BigMushroomType>, BigMushroomData, ImmutableBigMushroomData> {
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    public BigMushroomDataProcessor() {
+        super(Keys.BIG_MUSHROOM_TYPE);
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Override
+    public BigMushroomData createManipulator() {
+        return new SpongeBigMushroomData();
+    }
+
+    @Override
+    protected BigMushroomType getDefaultValue() {
+        return BigMushroomTypes.ALL_INSIDE;
     }
 }

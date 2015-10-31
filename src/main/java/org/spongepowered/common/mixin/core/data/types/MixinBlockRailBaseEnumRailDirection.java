@@ -22,25 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
+package org.spongepowered.common.mixin.core.data.types;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import net.minecraft.block.BlockRailBase;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+@Mixin(BlockRailBase.EnumRailDirection.class)
+@Implements(@Interface(iface = RailDirection.class, prefix = "shadow$"))
+public abstract class MixinBlockRailBaseEnumRailDirection {
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+    @Shadow
+    public abstract String getName();
 
-    public SpongeTreeData(TreeType variant) {
-        super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
+    @Shadow
+    public abstract int getMetadata();
+
+    public String shadow$getId() {
+        return getName();
     }
 
-    public SpongeTreeData() {
-        this(TreeTypes.OAK);
+    @Intrinsic
+    public String shadow$getName() {
+        return getName();
+    }
+
+    public RailDirection cycleNext() {
+        int meta = getMetadata();
+        if (meta == 9) {
+            meta = 0;
+        } else {
+            meta++;
+        }
+        return (RailDirection) (Object) BlockRailBase.EnumRailDirection.byMetadata(meta);
     }
 }

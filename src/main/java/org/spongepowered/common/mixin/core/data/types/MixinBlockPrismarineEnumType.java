@@ -22,50 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.core.data.types;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.data.type.TreeType;
+import net.minecraft.block.BlockPrismarine;
+import org.spongepowered.api.data.type.PrismarineType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public class SpongeTreeType implements TreeType {
+@Mixin(BlockPrismarine.EnumType.class)
+@Implements(@Interface(iface = PrismarineType.class, prefix = "shadow$"))
+public abstract class MixinBlockPrismarineEnumType {
 
-    private final byte id;
-    private final String name;
+    @Shadow public abstract String getName();
 
-    public SpongeTreeType(byte id, String name) {
-        this.id = id;
-        this.name = name;
+    public String shadow$getId() {
+        return getName();
     }
 
-    @Override
-    public String getId() {
-        return this.name; //TODO;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-    
-    public byte getByteId() {
-        return this.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeTreeType other = (SpongeTreeType) obj;
-        return Objects.equal(this.id, other.id)
-               && Objects.equal(this.name, other.name);
+    @Intrinsic
+    public String shadow$getName() {
+        return getName();
     }
 }
