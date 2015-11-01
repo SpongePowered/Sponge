@@ -62,6 +62,7 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<TileEn
             container.signText[i] = SpongeTexts.toComponent(value.get(i));
         }
         container.markDirty();
+        container.getWorld().markBlockForUpdate(container.getPos());
         return true;
     }
 
