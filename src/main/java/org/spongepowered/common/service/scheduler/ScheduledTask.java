@@ -157,6 +157,21 @@ public class ScheduledTask implements Task {
         return this.timestamp;
     }
 
+    /**
+     * Returns a timestamp after which the next execution will take place.
+     * Should only be compared to
+     * {@link SchedulerBase#getTimestamp(ScheduledTask)}.
+     *
+     * @return The next execution timestamp
+     */
+    long nextExecutionTimestamp() {
+        if (this.state.isActive) {
+            return this.timestamp + this.period;
+        } else {
+            return this.timestamp + this.offset;
+        }
+    }
+
     void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }

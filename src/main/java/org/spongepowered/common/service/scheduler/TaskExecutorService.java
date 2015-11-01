@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.scheduler;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SpongeExecutorService;
@@ -165,13 +166,10 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
             // Since these tasks are scheduled through
             // SchedulerExecutionService, they are
             // always nanotime-based, not tick-based.
-            long elapsedTimeNs = this.scheduler.getTimestamp(this.task) - this.task.getTimestamp();
-            if (this.task.getState() == ScheduledTask.ScheduledTaskState.RUNNING) {
-                //Use the interval to determine the current delay
-                return unit.convert(this.task.period - elapsedTimeNs, TimeUnit.NANOSECONDS);
-            } else {
-                return unit.convert(this.task.offset - elapsedTimeNs, TimeUnit.NANOSECONDS);
-            }
+            return unit.convert(
+                    this.task.nextExecutionTimestamp() - this.scheduler.getTimestamp(this.task),
+                    TimeUnit.NANOSECONDS
+            );
         }
 
         @Override
@@ -181,6 +179,17 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
             if (other == this) {
                 return 0;
             }
+
+            // If we are considering other sponge tasks, we can order by
+            // their internal tasks
+            if (other instanceof SpongeTaskFuture) {
+                ScheduledTask otherTask = ((SpongeTaskFuture) other).task;
+                return ComparisonChain.start()
+                        .compare(this.task.nextExecutionTimestamp(), otherTask.nextExecutionTimestamp())
+                        .compare(this.task.getUniqueId(), otherTask.getUniqueId())
+                        .result();
+            }
+
             return Long.compare(this.getDelay(TimeUnit.NANOSECONDS), other.getDelay(TimeUnit.NANOSECONDS));
         }
 
