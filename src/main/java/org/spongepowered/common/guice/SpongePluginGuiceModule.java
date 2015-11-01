@@ -178,7 +178,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public SpongeExecutorService get() {
-            return this.schedulerService.createSyncExecutor(this.container.getInstance());
+            return this.schedulerService.createSyncExecutor(this.container);
         }
 
     }
@@ -196,7 +196,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public SpongeExecutorService get() {
-            return this.schedulerService.createAsyncExecutor(this.container.getInstance());
+            return this.schedulerService.createAsyncExecutor(this.container);
         }
 
     }
