@@ -201,6 +201,7 @@ public class KeyRegistry {
         keyMap.put("wall_type", makeSingleKey(WallType.class, Value.class, of("WallType")));
         keyMap.put("double_plant_type", makeSingleKey(DoublePlantType.class, Value.class, of("DoublePlantType")));
         keyMap.put("big_mushroom_type", makeSingleKey(BigMushroomType.class, Value.class, of("BigMushroomType")));
+
     }
 
     private static Map<String, Key<?>> getKeyMap() {
