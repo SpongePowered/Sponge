@@ -32,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.util.BlockPos;
 import net.minecraft.village.VillageCollection;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -112,7 +113,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(state, pos, 0);
+        this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.randomTick(worldIn, pos, state, rand);
         handlePostTickCaptures(Cause.of(this.currentTickBlock));
         this.currentTickBlock = null;
@@ -127,7 +128,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(state, pos, 0);
+        this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.updateTick(worldIn, pos, state, rand);
         handlePostTickCaptures(Cause.of(this.currentTickBlock));
         this.currentTickBlock = null;
@@ -143,7 +144,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(state, pos, 0);
+        this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.updateTick(worldIn, pos, state, rand);
         handlePostTickCaptures(Cause.of(this.currentTickBlock));
         this.currentTickBlock = null;
@@ -155,7 +156,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(currentState, event.getPosition(), 3);
+        this.currentTickBlock = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, event.getPosition()), event.getPosition(), 3);
         boolean result = fireBlockEvent(event);
         this.handlePostTickCaptures(Cause.of(this.currentTickBlock));
         this.currentTickBlock = null;

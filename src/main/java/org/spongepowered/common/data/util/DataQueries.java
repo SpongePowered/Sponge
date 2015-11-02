@@ -42,6 +42,7 @@ public final class DataQueries {
 
     // Blocks
     public static final DataQuery BLOCK_STATE = of("BlockState");
+    public static final DataQuery BLOCK_EXTENDED_STATE = of("BlockExtendedState");
     public static final DataQuery BLOCK_TYPE = of("BlockType");
     public static final DataQuery BLOCK_STATE_UNSAFE_META = of("UnsafeMeta");
 

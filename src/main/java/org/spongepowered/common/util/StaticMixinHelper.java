@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -37,6 +38,8 @@ public class StaticMixinHelper {
     public static EntityPlayerMP processingPlayer = null;
     public static Packet processingPacket = null;
     public static boolean processingInternalForgeEvent = false;
+    // Set before firing an internal Forge BlockBreak event to handle extended blockstate
+    public static IBlockState breakEventExtendedState = null;
     public static SpongePopulatorType populator = null;
     public static ItemStack lastPlayerItem = null;
     @SuppressWarnings("rawtypes")

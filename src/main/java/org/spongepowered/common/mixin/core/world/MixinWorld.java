@@ -79,6 +79,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -358,7 +359,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (block == Blocks.air) {
                     ((IMixinChunk) chunk).removeTrackedPlayerPosition(pos);
                 }
-                originalBlockSnapshot = createSpongeBlockSnapshot(currentState, pos, flags);
+                originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
                 // black magic to track populators
                 Class clazz = StaticMixinHelper.getCallerClass(3);
@@ -464,7 +465,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(state, pos, 0);
+        this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.updateTick(worldIn, pos, state, rand);
         handlePostTickCaptures(Cause.of(this.currentTickBlock));
         this.currentTickBlock = null;
@@ -761,7 +762,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     BlockSnapshot blockSnapshot = iterator.next();
                     BlockPos pos = VecHelper.toBlockPos(blockSnapshot.getPosition());
                     IBlockState currentState = getBlockState(pos);
-                    builder.add(new Transaction<BlockSnapshot>(blockSnapshot, createSpongeBlockSnapshot(currentState, pos, 0)));
+                    builder.add(new Transaction<BlockSnapshot>(blockSnapshot, createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, 0)));
                     iterator.remove();
                 }
                 blockTransactions = builder.build();
@@ -1128,7 +1129,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             if (newState != null && !SpongeImplFactory.blockHasTileEntity(newState.getBlock(), newState)) {
-                this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, pos, updateFlag);
+                this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, (IBlockAccess) this, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
                 if (this.capturedOnBlockAddedItems.size() > 0) {
                     Cause blockCause = Cause.of(this.currentTickOnBlockAdded);
@@ -1159,10 +1160,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, BlockPos pos, int updateFlag) {
+    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
         builder.reset();
         Location<World> location = new Location<World>((World) this, VecHelper.toVector(pos));
         builder.blockState((BlockState) state)
+                .extendedState((BlockState) extended)
                 .worldId(location.getExtent().getUniqueId())
                 .position(location.getBlockPosition());
         net.minecraft.tileentity.TileEntity te = getTileEntity(pos);

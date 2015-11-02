@@ -24,32 +24,51 @@
  */
 package org.spongepowered.common.data.key;
 
-import com.google.common.collect.MapMaker;
+import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
+import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
+import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
-
+import com.google.common.collect.MapMaker;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.CoalType;
+import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DisguisedBlockType;
+import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.GoldenApple;
+import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.LogAxis;
+import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PrismarineType;
+import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.SandType;
+import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.data.type.SlabType;
+import org.spongepowered.api.data.type.StairShape;
+import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
@@ -64,14 +83,9 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.RegistryHelper;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.spongepowered.api.data.DataQuery.of;
-import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 @SuppressWarnings({"unchecked"})
 public class KeyRegistry {
@@ -168,6 +182,25 @@ public class KeyRegistry {
         keyMap.put("passed_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("PassedCookTime")));
         keyMap.put("max_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxCookTime")));
         keyMap.put("cooldown", makeSingleKey(Integer.class, Value.class, of("Cooldown")));
+        keyMap.put("contained_experience", makeSingleKey(Integer.class, Value.class, of("ContainedExperience")));
+        keyMap.put("remaining_brew_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("RemainingBrewTime")));
+        keyMap.put("stone_type", makeSingleKey(StoneType.class, Value.class, of("StoneType")));
+        keyMap.put("prismarine_type", makeSingleKey(PrismarineType.class, Value.class, of("PrismarineType")));
+        keyMap.put("brick_type", makeSingleKey(BrickType.class, Value.class, of("BrickType")));
+        keyMap.put("quartz_type", makeSingleKey(QuartzType.class, Value.class, of("QuartzType")));
+        keyMap.put("sand_type", makeSingleKey(SandType.class, Value.class, of("SandType")));
+        keyMap.put("sandstone_type", makeSingleKey(SandstoneType.class, Value.class, of("SandstoneType")));
+        keyMap.put("slab_type", makeSingleKey(SlabType.class, Value.class, of("SlabType")));
+        keyMap.put("sandstone_type", makeSingleKey(SandstoneType.class, Value.class, of("SandstoneType")));
+        keyMap.put("comparator_type", makeSingleKey(ComparatorType.class, Value.class, of("ComparatorType")));
+        keyMap.put("hinge_position", makeSingleKey(Hinge.class, Value.class, of("HingePosition")));
+        keyMap.put("piston_type", makeSingleKey(PistonType.class, Value.class, of("PistonType")));
+        keyMap.put("portion_type", makeSingleKey(PortionType.class, Value.class, of("PortionType")));
+        keyMap.put("rail_direction", makeSingleKey(RailDirection.class, Value.class, of("RailDirection")));
+        keyMap.put("stair_shape", makeSingleKey(StairShape.class, Value.class, of("StairShape")));
+        keyMap.put("wall_type", makeSingleKey(WallType.class, Value.class, of("WallType")));
+        keyMap.put("double_plant_type", makeSingleKey(DoublePlantType.class, Value.class, of("DoublePlantType")));
+        keyMap.put("big_mushroom_type", makeSingleKey(BigMushroomType.class, Value.class, of("BigMushroomType")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

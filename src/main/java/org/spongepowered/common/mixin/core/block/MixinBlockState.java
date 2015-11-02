@@ -57,6 +57,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
@@ -82,6 +83,11 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public BlockType getType() {
         return (BlockType) getBlock();
+    }
+
+    @Override
+    public BlockState withExtendedProperties(Location<World> location) {
+        return (BlockState) this.block.getActualState(this, (net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location.getBlockPosition())); 
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

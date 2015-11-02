@@ -31,12 +31,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandstone
 import org.spongepowered.api.data.manipulator.mutable.block.SandstoneData;
 import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.SandstoneTypes;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandstoneData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
 public class SpongeSandstoneData extends AbstractSingleCatalogData<SandstoneType, SandstoneData, ImmutableSandstoneData> implements SandstoneData {
 
     public SpongeSandstoneData(SandstoneType variant) {
-        super(SandstoneData.class, checkNotNull(variant), Keys.SANDSTONE_TYPE, ImmutableSandstoneData.class);
+        super(SandstoneData.class, checkNotNull(variant), Keys.SANDSTONE_TYPE, ImmutableSpongeSandstoneData.class);
     }
 
     public SpongeSandstoneData() {

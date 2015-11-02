@@ -29,7 +29,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
 import java.util.Optional;
@@ -44,28 +44,27 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Optional<BrewingStand> build(DataView container) throws InvalidDataException {
-        Optional<BrewingStand> beaconOptional = super.build(container);
-        if (!beaconOptional.isPresent()) {
+        Optional<BrewingStand> brewingStandOptional = super.build(container);
+        if (!brewingStandOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
         }
         if (!container.contains(BREW_TIME_QUERY)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
 
-        final BrewingStand beacon = beaconOptional.get();
+        final BrewingStand brewingStand = brewingStandOptional.get();
 
         // Have to consider custom names as an option
         if (container.contains(NAME_QUERY)) {
-            ((TileEntityBrewingStand) beacon).setName(container.getString(NAME_QUERY).get());
+            ((TileEntityBrewingStand) brewingStand).setName(container.getString(NAME_QUERY).get());
         }
 
-        final BrewingData brewingData = this.game.getRegistry().getManipulatorRegistry().getBuilder(BrewingData.class).get().create();
-        brewingData.remainingBrewingTime().set(container.getInt(BREW_TIME_QUERY).get());
-        beacon.offer(brewingData);
+        final BrewingStandData brewingData = this.game.getRegistry().getManipulatorRegistry().getBuilder(BrewingStandData.class).get().create();
+        brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
+        brewingStand.offer(brewingData);
 
-        ((TileEntityBrewingStand) beacon).validate();
-        return Optional.of(beacon);
+        ((TileEntityBrewingStand) brewingStand).validate();
+        return Optional.of(brewingStand);
     }
 }

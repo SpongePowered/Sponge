@@ -36,8 +36,11 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 public class ImmutableSpongeCooldownData extends AbstractImmutableSingleData<Integer, ImmutableCooldownData, CooldownData>
         implements ImmutableCooldownData {
 
+    private final ImmutableValue<Integer> cooldown;
+
     public ImmutableSpongeCooldownData(int value) {
         super(ImmutableCooldownData.class, value, Keys.COOLDOWN);
+        this.cooldown = ImmutableSpongeValue.cachedOf(Keys.COOLDOWN, -1, value);
     }
 
     public ImmutableSpongeCooldownData() {
@@ -56,7 +59,7 @@ public class ImmutableSpongeCooldownData extends AbstractImmutableSingleData<Int
 
     @Override
     public ImmutableValue<Integer> cooldown() {
-        return ImmutableSpongeValue.cachedOf(Keys.COOLDOWN, -1, this.getValue());
+        return this.cooldown;
     }
 
     @Override

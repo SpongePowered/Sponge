@@ -22,21 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.block;
-
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableInstrumentData;
-import org.spongepowered.api.data.manipulator.mutable.block.InstrumentData;
-import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.data.type.InstrumentTypes;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeInstrumentData;
-
-public class ImmutableSpongeInstrumentData extends AbstractImmutableSingleCatalogData<InstrumentType, ImmutableInstrumentData, InstrumentData> implements
-                                                                                                                                               ImmutableInstrumentData {
-
-    public ImmutableSpongeInstrumentData(InstrumentType value) {
-        super(ImmutableInstrumentData.class, value, InstrumentTypes.HARP, Keys.INSTRUMENT_TYPE, SpongeInstrumentData.class);
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.processor.value.block;
