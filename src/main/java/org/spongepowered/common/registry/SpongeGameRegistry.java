@@ -312,6 +312,7 @@ import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
+import org.spongepowered.common.data.processor.common.NoteUtils;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.property.store.block.BlastResistancePropertyStore;
 import org.spongepowered.common.data.property.store.block.GravityAffectedPropertyStore;
@@ -406,6 +407,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class SpongeGameRegistry implements GameRegistry {
 
@@ -1792,11 +1794,15 @@ public abstract class SpongeGameRegistry implements GameRegistry {
     }
 
     private void setNotePitches() {
-        RegistryHelper.mapFields(NotePitches.class, input -> {
-            NotePitch pitch = new SpongeNotePitch((byte) SpongeGameRegistry.this.notePitchMappings.size(), input);
-            SpongeGameRegistry.this.notePitchMappings.put(input.toLowerCase(), pitch);
-            return pitch;
-        });
+        this.notePitchMappings.putAll(
+                NoteUtils.pitchMappings.values()
+                .stream()
+                .collect(Collectors.toMap(
+                        note -> note.getId().toLowerCase(),
+                        Function.identity())
+                ));
+
+        RegistryHelper.mapFields(NotePitches.class, this.notePitchMappings);
     }
 
     private void setSkullTypes() {
