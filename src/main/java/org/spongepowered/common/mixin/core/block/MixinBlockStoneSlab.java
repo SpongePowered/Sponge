@@ -47,7 +47,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import java.util.Optional;
 
 @Mixin(value = {BlockStoneSlabNew.class, BlockStoneSlab.class})
-public abstract class MixinBlockSlab extends MixinBlock {
+public abstract class MixinBlockStoneSlab extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {

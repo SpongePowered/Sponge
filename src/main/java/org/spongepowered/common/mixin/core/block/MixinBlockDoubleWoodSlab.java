@@ -25,38 +25,30 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockDoubleStoneSlab;
-import net.minecraft.block.BlockDoubleStoneSlabNew;
-import net.minecraft.block.BlockStoneSlab;
-import net.minecraft.block.BlockStoneSlabNew;
+import net.minecraft.block.BlockDoubleWoodSlab;
+import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
-import org.spongepowered.api.data.type.SlabType;
-import org.spongepowered.api.data.type.SlabTypes;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
+import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
-@Mixin(value = {BlockDoubleStoneSlabNew.class, BlockDoubleStoneSlab.class})
-public abstract class MixinBlockDoubleStoneSlab extends MixinBlockStoneSlab {
+@Mixin(BlockDoubleWoodSlab.class)
+public abstract class MixinBlockDoubleWoodSlab extends MixinBlockWoodSlab {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getSlabTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeTypeFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableSlabData.class.isAssignableFrom(immutable);
+        return ImmutableTreeData.class.isAssignableFrom(immutable);
     }
 
-    private ImmutableSlabData getSlabTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSlabData.class,
-                blockState.getBlock() instanceof BlockStoneSlab
-                        ? (SlabType) blockState.getValue(BlockStoneSlab.VARIANT)
-                        : blockState.getBlock() instanceof BlockStoneSlabNew
-                                ? (SlabType) blockState.getValue(BlockStoneSlabNew.VARIANT)
-                                : SlabTypes.COBBLESTONE);
+    private ImmutableTreeData getTreeTypeFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) blockState.getValue(BlockPlanks.VARIANT));
     }
 }
