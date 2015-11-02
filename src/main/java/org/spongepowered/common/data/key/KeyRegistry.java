@@ -54,6 +54,7 @@ import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.LogAxis;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PortionType;
@@ -208,6 +209,7 @@ public class KeyRegistry {
         keyMap.put("spawnable_entity_type", makeSingleKey(EntityType.class, Value.class, of("SpawnableEntityType")));
         keyMap.put("fall_distance", makeSingleKey(Float.class, MutableBoundedValue.class, of("FallDistance")));
         keyMap.put("cooldown", makeSingleKey(Integer.class, Value.class, of("Cooldown")));
+        keyMap.put("note_pitch", makeSingleKey(NotePitch.class, Value.class, of("Note")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.type;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.common.data.processor.common.NoteUtils;
 
 public class SpongeNotePitch implements NotePitch {
 
@@ -53,7 +54,7 @@ public class SpongeNotePitch implements NotePitch {
 
     @Override
     public NotePitch cycleNext() {
-        return null;
+        return NoteUtils.getNext(this);
     }
 
     @Override
