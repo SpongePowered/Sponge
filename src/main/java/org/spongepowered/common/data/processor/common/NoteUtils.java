@@ -46,4 +46,9 @@ public class NoteUtils {
         return ((SpongeNotePitch) note).getByteId();
     }
 
+    public static NotePitch getNext(NotePitch note) {
+        byte value = (byte) (((SpongeNotePitch) note).getByteId() + 1);
+        return getPitch(value); // Ensure wrapping at edge
+    }
+
 }
