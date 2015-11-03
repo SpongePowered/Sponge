@@ -181,6 +181,7 @@ public class KeyRegistry {
         keyMap.put("max_burn_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxBurnTime")));
         keyMap.put("passed_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("PassedCookTime")));
         keyMap.put("max_cook_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("MaxCookTime")));
+        keyMap.put("cooldown", makeSingleKey(Integer.class, Value.class, of("Cooldown")));
         keyMap.put("contained_experience", makeSingleKey(Integer.class, Value.class, of("ContainedExperience")));
         keyMap.put("remaining_brew_time", makeSingleKey(Integer.class, MutableBoundedValue.class, of("RemainingBrewTime")));
         keyMap.put("stone_type", makeSingleKey(StoneType.class, Value.class, of("StoneType")));
