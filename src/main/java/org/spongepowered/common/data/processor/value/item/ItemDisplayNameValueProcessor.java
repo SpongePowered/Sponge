@@ -72,6 +72,9 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     protected Optional<Text> getVal(ItemStack container) {
         if (container.getItem() == Items.written_book) {
             final NBTTagCompound mainCompound = container.getTagCompound();
+            if (mainCompound == null) {
+                return Optional.empty(); // Basically, this book wasn't initialized properly.
+            }
             final String titleString = mainCompound.getString(NbtDataUtil.ITEM_BOOK_TITLE);
             return Optional.of(Texts.legacy().fromUnchecked(titleString));
         }

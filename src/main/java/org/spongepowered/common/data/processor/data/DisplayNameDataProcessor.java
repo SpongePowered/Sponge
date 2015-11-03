@@ -70,6 +70,9 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
         } else if (dataHolder instanceof ItemStack) {
             if (((ItemStack) dataHolder).getItem() == Items.written_book) {
                 final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
+                if (mainCompound == null) {
+                    return Optional.empty(); // The book wasn't initialized.
+                }
                 final String titleString = mainCompound.getString("title");
                 final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(titleString));
                 return Optional.of(data);
