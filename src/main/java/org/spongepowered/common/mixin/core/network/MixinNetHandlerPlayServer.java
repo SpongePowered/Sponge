@@ -472,7 +472,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
     public void onGetSlotId(C09PacketHeldItemChange packetIn, CallbackInfo ci) {
-        SpongeCommonEventFactory.callInteractInventoryHeldEvent(this.playerEntity, packetIn);
+        SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
         ci.cancel();
     }
 }

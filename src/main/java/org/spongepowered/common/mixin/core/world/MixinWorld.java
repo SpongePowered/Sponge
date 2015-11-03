@@ -994,11 +994,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Handle player deaths
             if (cause.first(Player.class).isPresent()) {
                 EntityPlayerMP player = (EntityPlayerMP) cause.first(Player.class).get();
-                if (player.getHealth() <= 0 && (player.theItemInWorldManager.getGameType() != GameType.CREATIVE)
-                        && !player.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
+                if (player.getHealth() <= 0 && !player.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
                     player.inventory.clear();
                 } else if (player.getHealth() <= 0) {
-                    // don't drop anything if creative or keepInventory
+                    // don't drop anything if keepInventory is enabled
                     this.capturedEntityItems.clear();
                 }
             }

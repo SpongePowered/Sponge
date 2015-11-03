@@ -43,11 +43,11 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.item.inventory.AffectSlotEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
-import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.World;
@@ -87,7 +87,7 @@ public class SpongeCommonEventFactory {
 
     // Create Sponge Events
 
-    public static InteractInventoryEvent.Held callInteractInventoryHeldEvent(EntityPlayerMP player,
+    public static ChangeInventoryEvent.Held callChangeInventoryHeldEvent(EntityPlayerMP player,
             C09PacketHeldItemChange packetIn) {
         net.minecraft.item.ItemStack currentItem = player.getCurrentEquippedItem();
         ItemStackSnapshot originalSnapshot =
@@ -98,13 +98,8 @@ public class SpongeCommonEventFactory {
         Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
         SlotTransaction transaction = new SlotTransaction((org.spongepowered.api.item.inventory.Slot) slot, originalSnapshot, newSnapshot);
         ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(transaction).build();
-        ItemStackSnapshot newCursor =
-                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
-                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<ItemStackSnapshot>(StaticMixinHelper.lastCursor, newCursor);
-        InteractInventoryEvent.Held event =
-                SpongeEventFactory.createInteractInventoryEventHeld(Sponge.getGame(), Cause.of(player), cursorTransaction,
-                        (Container) player.inventoryContainer, transactions);
+        ChangeInventoryEvent.Held event =
+                SpongeEventFactory.createChangeInventoryEventHeld(Sponge.getGame(), Cause.of(player), (Inventory) player.inventoryContainer, transactions);
         Sponge.getGame().getEventManager().post(event);
 
         if (event.isCancelled()) {
@@ -120,16 +115,6 @@ public class SpongeCommonEventFactory {
                     player.playerNetServerHandler
                             .sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, currentSlot.slotNumber, customStack));
                 }
-            }
-
-            // Custom cursor
-            if (event.getCursorTransaction().getCustom().isPresent()) {
-                ItemStack cursor =
-                        event.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                : (net.minecraft.item.ItemStack) event.getCursorTransaction().getFinal()
-                                        .createStack();
-                player.inventory.setItemStack(cursor);
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
             }
 
             player.inventory.currentItem = packetIn.getSlotId();
@@ -290,7 +275,7 @@ public class SpongeCommonEventFactory {
                 player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<ItemStackSnapshot>(StaticMixinHelper.lastCursor, newCursor);
-        AffectSlotEvent clickEvent = null;
+        ClickInventoryEvent clickEvent = null;
         // Handle empty slot clicks
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
@@ -361,7 +346,7 @@ public class SpongeCommonEventFactory {
             }
         } else if (packetIn.getMode() == MODE_HOTBAR) {
             clickEvent =
-                    SpongeEventFactory.createInteractInventoryEventNumberPress(Sponge.getGame(), cause, cursorTransaction,
+                    SpongeEventFactory.createClickInventoryEventNumberPress(Sponge.getGame(), cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) player.openContainer,
                             ((IMixinContainer) player.openContainer).getCapturedTransactions(), packetIn.getUsedButton());
         } else if (packetIn.getMode() == MODE_DROP) {
@@ -409,8 +394,8 @@ public class SpongeCommonEventFactory {
 
             // Restore cursor
             ItemStack cursor =
-                    ((InteractInventoryEvent) clickEvent).getCursorTransaction().getOriginal() == ItemStackSnapshot.NONE ? null
-                            : (net.minecraft.item.ItemStack) ((InteractInventoryEvent) clickEvent).getCursorTransaction().getOriginal()
+                    clickEvent.getCursorTransaction().getOriginal() == ItemStackSnapshot.NONE ? null
+                            : (net.minecraft.item.ItemStack)  clickEvent.getCursorTransaction().getOriginal()
                                     .createStack();
             player.inventory.setItemStack(cursor);
             player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
@@ -440,10 +425,10 @@ public class SpongeCommonEventFactory {
             }
 
             // Custom cursor
-            if (((InteractInventoryEvent) clickEvent).getCursorTransaction().getCustom().isPresent()) {
+            if (clickEvent.getCursorTransaction().getCustom().isPresent()) {
                 ItemStack cursor =
-                        ((InteractInventoryEvent) clickEvent).getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                : (net.minecraft.item.ItemStack) ((InteractInventoryEvent) clickEvent).getCursorTransaction().getFinal()
+                        clickEvent.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
+                                : (net.minecraft.item.ItemStack) clickEvent.getCursorTransaction().getFinal()
                                         .createStack();
                 player.inventory.setItemStack(cursor);
                 player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
