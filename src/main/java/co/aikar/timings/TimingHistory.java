@@ -74,7 +74,7 @@ public class TimingHistory {
     TimingHistory() {
         this.endTime = System.currentTimeMillis() / 1000;
         this.startTime = TimingsManager.historyStart / 1000;
-        if (timedTicks % 1200 != 0) {
+        if (timedTicks % 1200 != 0 || MINUTE_REPORTS.isEmpty()) {
             this.minuteReports = MINUTE_REPORTS.toArray(new MinuteReport[MINUTE_REPORTS.size() + 1]);
             this.minuteReports[this.minuteReports.length - 1] = new MinuteReport();
         } else {
@@ -102,6 +102,10 @@ public class TimingHistory {
                 tileEntityCounts.clear();
 
                 for (Entity entity : chunk.getEntities()) {
+                    if (entity.getType() == null) {
+                        Sponge.getLogger().error("Entity is not registered {}", entity);
+                        continue;
+                    }
                     entityCounts.get(entity.getType()).increment();
                 }
 

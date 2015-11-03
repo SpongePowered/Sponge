@@ -56,6 +56,10 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
         return new S3FPacketCustomPayload("REGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
+    protected static S3FPacketCustomPayload getUnregPacket(String channelName) {
+        return new S3FPacketCustomPayload("UNREGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
+    }
+
     public static ChannelBuf toChannelBuf(ByteBuf buf) {
         return (ChannelBuf) (buf instanceof PacketBuffer ? buf : new PacketBuffer(buf));
     }

@@ -303,8 +303,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                                 new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
                 if (dim == 0) {
                     // overworld uses the client set world name
-                    if (Sponge.getSpongeRegistry().getWorldProperties(levelName).isPresent()) {
-                        worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(levelName).get();
+                    if (Sponge.getSpongeRegistry().getWorldProperties(worldFolder).isPresent()) {
+                        worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldFolder).get();
                     } else {
                         worldInfo = (WorldInfo)Sponge.getSpongeRegistry().getWorldProperties(worldName).get(); // client copied world
                     }

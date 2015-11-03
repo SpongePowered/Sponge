@@ -78,7 +78,7 @@
         "data.types.MixinBlockFlowerEnumFlowerType",
         "data.types.MixinBlockHugeMushroomEnumType",
         "data.types.MixinBlockPistonExtensionEnumPistonType",
-        "data.types.mixinBlockPlanksEnumType",
+        "data.types.MixinBlockPlanksEnumType",
         "data.types.MixinBlockPrismarineEnumType",
         "data.types.MixinBlockQuartzEnumType",
         "data.types.MixinBlockRailBaseEnumRailDirection",
