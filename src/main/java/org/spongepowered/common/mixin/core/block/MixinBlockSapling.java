@@ -38,6 +38,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStoneData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
 import java.util.Optional;
 
@@ -72,7 +73,7 @@ public abstract class MixinBlockSapling extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableStoneData getTreeTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStoneData.class, (TreeType) blockState.getValue(BlockSapling.TYPE));
+    private ImmutableSpongeTreeData getTreeTypeFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) blockState.getValue(BlockSapling.TYPE));
     }
 }
