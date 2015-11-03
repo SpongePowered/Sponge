@@ -960,7 +960,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 StaticMixinHelper.lastPlayerItem));
     }
 
-    private void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions, boolean destructItems) {
+    @Override
+    public void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions, boolean destructItems) {
         Iterator<Entity> iter = entities.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<EntitySnapshot>();
         while (iter.hasNext()) {
@@ -992,13 +993,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (!(Sponge.getGame().getEventManager().post(event))) {
             // Handle player deaths
-            if (cause.first(Player.class).isPresent()) {
-                EntityPlayerMP player = (EntityPlayerMP) cause.first(Player.class).get();
-                if (player.getHealth() <= 0 && !player.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
-                    player.inventory.clear();
-                } else if (player.getHealth() <= 0) {
-                    // don't drop anything if keepInventory is enabled
-                    this.capturedEntityItems.clear();
+            for (Player causePlayer : cause.allOf(Player.class)) {
+                EntityPlayerMP playermp = (EntityPlayerMP) causePlayer;
+                if (playermp.getHealth() <= 0 || playermp.isDead) {
+                    if (!playermp.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
+                        playermp.inventory.clear();
+                    } else {
+                        // don't drop anything if keepInventory is enabled
+                        this.capturedEntityItems.clear();
+                    }
                 }
             }
 

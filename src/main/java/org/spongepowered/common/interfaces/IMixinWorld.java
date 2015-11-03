@@ -29,6 +29,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
@@ -75,6 +76,8 @@ public interface IMixinWorld {
     void updateWorldGenerator();
 
     void handlePostTickCaptures(Cause cause);
+
+    void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions, boolean destructItems);
 
     void setProcessingCaptureCause(boolean flag);
 
