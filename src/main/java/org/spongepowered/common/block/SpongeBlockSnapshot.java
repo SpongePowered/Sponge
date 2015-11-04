@@ -195,8 +195,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 .set(Queries.POSITION_Y, this.pos.getY())
                 .set(Queries.POSITION_Z, this.pos.getZ())
             .getContainer()
-            .set(DataQueries.BLOCK_STATE, this.blockState)
-            .set(DataQueries.BLOCK_EXTENDED_STATE, this.extendedState);
+            .set(DataQueries.BLOCK_STATE, this.blockState);
+
+        if (this.blockState != this.extendedState) {
+            container.set(DataQueries.BLOCK_EXTENDED_STATE, this.extendedState);
+        }
         if (this.compound != null) {
             container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
@@ -245,6 +248,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return Optional.empty();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Optional<BlockSnapshot> with(BaseValue<?> value) {
         return with((Key) value.getKey(), value.get());
@@ -353,7 +357,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return this.compound == null ? Optional.<NBTTagCompound>empty() : Optional.of((NBTTagCompound) this.compound.copy());
     }
 
-
+    @SuppressWarnings("rawtypes")
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.blockState(this.blockState)

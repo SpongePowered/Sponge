@@ -181,7 +181,6 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
     @Override
     public Optional<BlockSnapshot> build(DataView container) throws InvalidDataException {
         checkDataExists(container, DataQueries.BLOCK_STATE);
-        checkDataExists(container, DataQueries.BLOCK_EXTENDED_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
@@ -190,7 +189,13 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationService).get();
-        final BlockState extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, serializationService).get();
+        BlockState extendedState = null;
+        if (container.contains(DataQueries.BLOCK_EXTENDED_STATE)) {
+            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, serializationService).get();
+        } else {
+            extendedState = blockState;
+        }
+
         builder.blockState(blockState)
             .extendedState(extendedState)
             .position(coordinate)
