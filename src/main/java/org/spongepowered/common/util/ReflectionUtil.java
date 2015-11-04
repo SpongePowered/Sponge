@@ -95,9 +95,11 @@ public final class ReflectionUtil {
             final Class<?>[] paramTypes = ctor.getParameterTypes();
             if (paramTypes.length != args.length) {
                 for (Object object : args) {
-                    if (object.getClass().isArray()) {
-                        final Object[] objects = deconstructArray(args).toArray();
-                        return findConstructor(objectClass, objects);
+                    if (object != null) { // hahahah
+                        if (object.getClass().isArray()) {
+                            final Object[] objects = deconstructArray(args).toArray();
+                            return findConstructor(objectClass, objects);
+                        }
                     }
                 }
                 continue; // we haven't found the right constructor
@@ -117,6 +119,9 @@ public final class ReflectionUtil {
     private static List<Object> deconstructArray(Object[] objects) {
         final List<Object> list = new ArrayList<>();
         for (Object object : objects) {
+            if (object == null) {
+                list.add(null);
+            }
             if (object.getClass().isArray()) {
                 list.addAll(deconstructArray((Object[]) object));
             } else {
