@@ -35,7 +35,7 @@ import org.spongepowered.api.item.FireworkShapes;
 import java.awt.Color;
 import java.util.List;
 
-public class SpongeFireworkBuilder implements FireworkEffectBuilder {
+public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
 
     private boolean trail = false;
     private boolean flicker = false;
@@ -93,7 +93,7 @@ public class SpongeFireworkBuilder implements FireworkEffectBuilder {
         for (Color color : colors) {
             this.fades.add(new Color(color.getRGB()));
         }
-        return null;
+        return this;
     }
 
     @Override
@@ -107,13 +107,13 @@ public class SpongeFireworkBuilder implements FireworkEffectBuilder {
 
     @Override
     public FireworkEffectBuilder shape(FireworkShape shape) {
-        checkNotNull(shape);
+        this.shape = checkNotNull(shape);
         return this;
     }
 
     @Override
     public FireworkEffect build() {
-        return new SpongeFireworkMeta(this.flicker, this.trail, this.colors, this.fades, this.shape);
+        return new SpongeFireworkEffect(this.flicker, this.trail, this.colors, this.fades, this.shape);
     }
 
     @Override

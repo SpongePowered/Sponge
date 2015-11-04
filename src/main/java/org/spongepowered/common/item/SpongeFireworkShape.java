@@ -22,3 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package org.spongepowered.common.item;
+
+import org.spongepowered.api.item.FireworkShape;
+
+public class SpongeFireworkShape implements FireworkShape {
+
+    private final byte id;
+    private final String name;
+
+    public SpongeFireworkShape(byte id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public String getId() {
+        return this.name;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+}

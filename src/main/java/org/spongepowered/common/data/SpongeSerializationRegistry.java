@@ -47,6 +47,8 @@ import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkEffectData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
@@ -120,6 +122,8 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNote
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.FireworkEffectData;
+import org.spongepowered.api.data.manipulator.mutable.FireworkRocketData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
@@ -194,10 +198,12 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.data.builder.SpongeFireworkEffectDataBuilder;
 import org.spongepowered.common.data.builder.SpongeItemEnchantmentBuilder;
 import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeBannerBuilder;
@@ -225,6 +231,8 @@ import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCooldownData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeFireworkEffectData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeFireworkRocketData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
@@ -297,6 +305,8 @@ import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableS
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkRocketData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
@@ -370,6 +380,8 @@ import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeNoteDa
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.ColoredDataProcessor;
 import org.spongepowered.common.data.processor.data.DisplayNameDataProcessor;
+import org.spongepowered.common.data.processor.data.FireworkEffectDataProcessor;
+import org.spongepowered.common.data.processor.data.FireworkRocketDataProcessor;
 import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor;
 import org.spongepowered.common.data.processor.data.SkullDataProcessor;
 import org.spongepowered.common.data.processor.data.block.BigMushroomDataProcessor;
@@ -475,6 +487,8 @@ import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor
 import org.spongepowered.common.data.processor.value.entity.ChargedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ElderValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EntityDisplayNameValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.EntityFireworkEffectsValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.EntityFireworkRocketValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.EntityWetValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ExpOrbValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ExperienceFromStartOfLevelValueProcessor;
@@ -522,6 +536,8 @@ import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProces
 import org.spongepowered.common.data.processor.value.item.ItemColorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDurabilityValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemFireworkEffectsValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemFireworkRocketValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullRepresentedPlayerValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
@@ -583,6 +599,7 @@ public class SpongeSerializationRegistry {
         service.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
         service.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
                 new ImmutableItemEnchantmentDataBuilder());
+        service.registerBuilder(FireworkEffect.class, new SpongeFireworkEffectDataBuilder());
 
         // Data Manipulators
 
@@ -889,6 +906,14 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
                 ImmutableSpongeTargetLivingData.class, targetLivingDataProcessor);
 
+        final FireworkEffectDataProcessor fireworkEffectDataProcessor = new FireworkEffectDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(FireworkEffectData.class, SpongeFireworkEffectData.class,
+                ImmutableFireworkEffectData.class, ImmutableSpongeFireworkEffectData.class, fireworkEffectDataProcessor);
+
+        final FireworkRocketDataProcessor fireworkRocketDataProcessor = new FireworkRocketDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(FireworkRocketData.class, SpongeFireworkRocketData.class,
+                ImmutableFireworkRocketData.class, ImmutableSpongeFireworkRocketData.class, fireworkRocketDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -986,6 +1011,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.ART, new ArtValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TARGETS, new WitherTargetsValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TARGETS, new TargetsValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.FIREWORK_EFFECTS, new EntityFireworkEffectsValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.FIREWORK_EFFECTS, new ItemFireworkEffectsValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new EntityFireworkRocketValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new ItemFireworkRocketValueProcessor());
     }
 
 }

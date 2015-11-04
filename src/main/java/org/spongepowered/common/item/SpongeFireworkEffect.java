@@ -26,9 +26,11 @@ package org.spongepowered.common.item;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
@@ -36,7 +38,13 @@ import org.spongepowered.api.item.FireworkShape;
 import java.awt.Color;
 import java.util.List;
 
-public class SpongeFireworkMeta implements FireworkEffect {
+public class SpongeFireworkEffect implements FireworkEffect {
+
+    public static final DataQuery TYPE = of("Type");
+    public static final DataQuery COLORS = of("Colors");
+    public static final DataQuery FADES = of("Fades");
+    public static final DataQuery TRAILS = of("Trails");
+    public static final DataQuery FLICKERS = of("Flickers");
 
     private final boolean flicker;
     private final boolean trails;
@@ -44,7 +52,7 @@ public class SpongeFireworkMeta implements FireworkEffect {
     private final ImmutableList<Color> fades;
     private final FireworkShape shape;
 
-    SpongeFireworkMeta(boolean flicker, boolean trails, Iterable<Color> colors, Iterable<Color> fades, FireworkShape shape) {
+    SpongeFireworkEffect(boolean flicker, boolean trails, Iterable<Color> colors, Iterable<Color> fades, FireworkShape shape) {
         this.flicker = flicker;
         this.trails = trails;
         this.colors = ImmutableList.copyOf(colors);
@@ -88,10 +96,21 @@ public class SpongeFireworkMeta implements FireworkEffect {
             fades.add(color.getRGB());
         }
         return new MemoryDataContainer()
-                .set(of("Type"), this.shape.getId())
-                .set(of("Colors"), colors)
-                .set(of("Fades"), fades)
-                .set(of("Trails"), this.trails)
-                .set(of("Flickers"), this.flicker);
+                .set(TYPE, this.shape.getId())
+                .set(COLORS, colors)
+                .set(FADES, fades)
+                .set(TRAILS, this.trails)
+                .set(FLICKERS, this.flicker);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("shape", this.shape)
+                .add("trails", this.trails)
+                .add("flickers", this.flicker)
+                .add("colors", this.colors)
+                .add("fades", this.fades)
+                .toString();
     }
 }
