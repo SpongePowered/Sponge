@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
@@ -39,6 +40,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
@@ -52,12 +54,19 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinScoreboardSaveData;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
+import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
@@ -65,6 +74,8 @@ import java.util.TreeSet;
 @NonnullByDefault
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer extends MixinWorld {
+
+    private Map<BlockPos, User> trackedBlockEvents = Maps.newHashMap();
 
     @Shadow public abstract void updateBlockTick(BlockPos p_175654_1_, Block p_175654_2_, int p_175654_3_, int p_175654_4_);
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
@@ -151,16 +162,64 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.processingCaptureCause = false;
     }
 
+    @Inject(method = "addBlockEvent", at = @At(value = "HEAD"))
+    public void onAddBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
+        if (StaticMixinHelper.packetPlayer != null) {
+            // Add player to block event position
+            if (isBlockLoaded(pos)) {
+                IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
+                Optional<User> owner = spongeChunk.getBlockOwner(pos);
+                Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
+                if (notifier.isPresent()) {
+                    spongeChunk.addTrackedBlockPosition(blockIn, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+                    this.trackedBlockEvents.put(pos, notifier.get());
+                } else if (owner.isPresent()) {
+                    spongeChunk.addTrackedBlockPosition(blockIn, pos, owner.get(), PlayerTracker.Type.NOTIFIER);
+                    this.trackedBlockEvents.put(pos, owner.get());
+                }
+            }
+        } else {
+            BlockPos sourcePos = null;
+            if (this.currentTickBlock != null) {
+                sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
+            } else if (this.currentTickOnBlockAdded != null) {
+                sourcePos = VecHelper.toBlockPos(this.currentTickOnBlockAdded.getPosition());
+            } else if (this.currentTickTileEntity != null) {
+                sourcePos = ((net.minecraft.tileentity.TileEntity) this.currentTickTileEntity).getPos();
+            }
+            if (sourcePos != null && isBlockLoaded(sourcePos)) {
+                IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(sourcePos);
+                Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
+                Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
+                if (notifier.isPresent()) {
+                    spongeChunk.addTrackedBlockPosition(blockIn, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+                    this.trackedBlockEvents.put(pos, notifier.get());
+                } else if (owner.isPresent()) {
+                    spongeChunk.addTrackedBlockPosition(blockIn, pos, owner.get(), PlayerTracker.Type.NOTIFIER);
+                    this.trackedBlockEvents.put(pos, owner.get());
+                }
+            }
+        }
+    }
+
     // special handling for Pistons since they use their own event system
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         this.processingCaptureCause = true;
         this.currentTickBlock = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, event.getPosition()), event.getPosition(), 3);
+        Cause cause = Cause.of(this.currentTickBlock);
+        if (trackedBlockEvents.get(event.getPosition()) != null) {
+            User user = trackedBlockEvents.get(event.getPosition());
+            cause = cause.with(user);
+            StaticMixinHelper.blockEventUser = user;
+        }
         boolean result = fireBlockEvent(event);
-        this.handlePostTickCaptures(Cause.of(this.currentTickBlock));
+        this.handlePostTickCaptures(cause);
+        StaticMixinHelper.blockEventUser = null;
         this.currentTickBlock = null;
         this.processingCaptureCause = false;
+        this.trackedBlockEvents.remove(event.getPosition());
         return result;
     }
 
@@ -189,6 +248,12 @@ public abstract class MixinWorldServer extends MixinWorld {
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         sbu.setPriority(priority);
         ((IMixinBlockUpdate) sbu).setWorld((WorldServer) (Object) this);
+        // Pistons, Beacons, Notes, Comparators etc. schedule block updates so we must track these positions
+        if (this.currentTickBlock != null) {
+            BlockPos pos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
+            SpongeHooks.tryToTrackBlock((net.minecraft.world.World)(Object) this, this.currentTickBlock, pos, sbu.getBlock(), sbu.position, PlayerTracker.Type.NOTIFIER);
+        }
+
         this.tmpScheduledObj = sbu;
     }
 

@@ -48,7 +48,7 @@ public interface IMixinEntity {
 
     boolean getDefaultActivationState();
 
-    Optional<User> getSpongeCreator();
+    Optional<User> getTrackedPlayer(String nbtKey);
 
     void setActivatedTick(long tick);
 

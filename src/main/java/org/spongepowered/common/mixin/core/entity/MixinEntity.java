@@ -746,12 +746,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public Optional<User> getSpongeCreator() {
+    public Optional<User> getTrackedPlayer(String nbtKey) {
         NBTTagCompound nbt = getSpongeData();
-        if (!nbt.hasKey(NbtDataUtil.SPONGE_ENTITY_CREATOR)) {
+        if (!nbt.hasKey(nbtKey)) {
            return Optional.empty();
         } else {
-            NBTTagCompound creatorNbt = nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
             
             if (!creatorNbt.hasKey("uuid_most") || !creatorNbt.hasKey("uuid_least")) {
                 return Optional.empty();

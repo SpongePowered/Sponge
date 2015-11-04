@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 
 import java.util.Map;
@@ -54,20 +55,32 @@ public class MixinAnvilChunkLoader {
             trackedNbt.setTag(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, positions);
             compound.setTag(NbtDataUtil.SPONGE_DATA, trackedNbt);
 
-            for (Map.Entry<Short, Integer> mapEntry : chunk.getTrackedShortPlayerPositions().entrySet()) {
+            for (Map.Entry<Short, PlayerTracker> mapEntry : chunk.getTrackedShortPlayerPositions().entrySet()) {
                 Short pos = mapEntry.getKey();
-                Integer uuidIndex = mapEntry.getValue();
+                Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
+                Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                valueNbt.setInteger("uuid", uuidIndex);
+                if (ownerUniqueIdIndex != -1) {
+                    valueNbt.setInteger("owner", ownerUniqueIdIndex);
+                }
+                if (notifierUniqueIdIndex != -1) {
+                    valueNbt.setInteger("notifier", notifierUniqueIdIndex);
+                }
                 valueNbt.setShort("pos", pos);
                 positions.appendTag(valueNbt);
             }
 
-            for (Map.Entry<Integer, Integer> mapEntry : chunk.getTrackedIntPlayerPositions().entrySet()) {
+            for (Map.Entry<Integer, PlayerTracker> mapEntry : chunk.getTrackedIntPlayerPositions().entrySet()) {
                 Integer pos = mapEntry.getKey();
-                Integer uuidIndex = mapEntry.getValue();
+                Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
+                Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                valueNbt.setInteger("uuid", uuidIndex);
+                if (ownerUniqueIdIndex != -1) {
+                    valueNbt.setInteger("owner", ownerUniqueIdIndex);
+                }
+                if (notifierUniqueIdIndex != -1) {
+                    valueNbt.setInteger("notifier", notifierUniqueIdIndex);
+                }
                 valueNbt.setInteger("ipos", pos);
                 positions.appendTag(valueNbt);
             }
@@ -77,16 +90,29 @@ public class MixinAnvilChunkLoader {
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     public void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX, int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
         if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            Map<Integer, Integer> trackedIntPlayerPositions = Maps.newHashMap();
-            Map<Short, Integer> trackedShortPlayerPositions = Maps.newHashMap();
+            Map<Integer, PlayerTracker> trackedIntPlayerPositions = Maps.newHashMap();
+            Map<Short, PlayerTracker> trackedShortPlayerPositions = Maps.newHashMap();
             NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
             IMixinChunk chunk = (IMixinChunk) chunkIn;
             for (int i = 0; i < positions.tagCount(); i++) {
                 NBTTagCompound valueNbt = positions.getCompoundTagAt(i);
-                if (valueNbt.hasKey("pos")) {
-                    trackedShortPlayerPositions.put(valueNbt.getShort("pos"), valueNbt.getInteger("uuid"));
-                } else {
-                    trackedIntPlayerPositions.put(valueNbt.getInteger("ipos"), valueNbt.getInteger("uuid"));
+                boolean isShortPos = valueNbt.hasKey("pos");
+                PlayerTracker tracker = new PlayerTracker();
+                if (valueNbt.hasKey("owner")) {
+                    tracker.ownerIndex = valueNbt.getInteger("owner");
+                } else if (valueNbt.hasKey("uuid")) { // Migrate old data, remove in future
+                    tracker.ownerIndex = valueNbt.getInteger("uuid");
+                }
+                if (valueNbt.hasKey("notifier")) {
+                    tracker.notifierIndex = valueNbt.getInteger("notifier");
+                }
+
+                if (tracker.notifierIndex != -1 || tracker.ownerIndex != -1) {
+                    if (isShortPos) {
+                        trackedShortPlayerPositions.put(valueNbt.getShort("pos"), tracker);
+                    } else {
+                        trackedIntPlayerPositions.put(valueNbt.getInteger("ipos"), tracker);
+                    }
                 }
             }
             chunk.setTrackedIntPlayerPositions(trackedIntPlayerPositions);

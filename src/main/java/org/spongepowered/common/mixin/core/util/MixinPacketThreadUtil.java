@@ -45,21 +45,21 @@ public class MixinPacketThreadUtil {
     public void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.processingPacket = packetIn;
-            StaticMixinHelper.processingPlayer = ((NetHandlerPlayServer)netHandler).playerEntity;
-            StaticMixinHelper.lastOpenContainer = StaticMixinHelper.processingPlayer.openContainer;
-            ItemStackSnapshot cursor = StaticMixinHelper.processingPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.processingPlayer.inventory.getItemStack()).createSnapshot();
+            StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer)netHandler).playerEntity;
+            StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
+            ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory.getItemStack()).createSnapshot();
             StaticMixinHelper.lastCursor = cursor;
 
-            IMixinWorld world = (IMixinWorld)StaticMixinHelper.processingPlayer.worldObj;
-            if (StaticMixinHelper.processingPlayer.getHeldItem() != null && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
-                StaticMixinHelper.lastPlayerItem = ItemStack.copyItemStack(StaticMixinHelper.processingPlayer.getHeldItem());
+            IMixinWorld world = (IMixinWorld)StaticMixinHelper.packetPlayer.worldObj;
+            if (StaticMixinHelper.packetPlayer.getHeldItem() != null && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
+                StaticMixinHelper.lastPlayerItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
             world.setProcessingCaptureCause(true);
             packetIn.processPacket(netHandler);
-            ((IMixinWorld)StaticMixinHelper.processingPlayer.worldObj).handlePostTickCaptures(Cause.of(StaticMixinHelper.processingPlayer));
+            ((IMixinWorld)StaticMixinHelper.packetPlayer.worldObj).handlePostTickCaptures(Cause.of(StaticMixinHelper.packetPlayer));
             world.setProcessingCaptureCause(false);
-            StaticMixinHelper.processingPlayer = null;
+            StaticMixinHelper.packetPlayer = null;
             StaticMixinHelper.processingPacket = null;
             StaticMixinHelper.lastCursor = null;
             StaticMixinHelper.lastOpenContainer = null;

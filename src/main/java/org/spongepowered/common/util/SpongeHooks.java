@@ -25,10 +25,12 @@
 package org.spongepowered.common.util;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Predicate;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,6 +38,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
@@ -53,8 +56,11 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.configuration.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.world.CaptureType;
 
 import java.io.File;
@@ -142,7 +148,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockTrack(World world, Block block, BlockPos pos, EntityPlayer player, boolean allowed) {
+    public static void logBlockTrack(World world, Block block, BlockPos pos, User user, boolean allowed) {
         if (world.isRemote) {
             return;
         }
@@ -150,14 +156,14 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
-                    player.getCommandSenderName(),
+                    user.getName(),
                     world.getWorldInfo().getWorldName() + "(" + world.provider.getDimensionId() + ")",
                     ((BlockType)block).getId(),
                     pos);
             logStack(config);
         } else if (config.getConfig().getLogging().blockTrackLogging() && !allowed) {
             logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][World: {1}][DimId: {2}][Block: {3}][Pos: {4}]",
-                    player.getCommandSenderName(),
+                    user.getName(),
                     world.getWorldInfo().getWorldName(),
                     world.provider.getDimensionId(),
                     ((BlockType)block).getId(),
@@ -465,6 +471,86 @@ public class SpongeHooks {
         } else {
             nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR).setLong("uuid_least", uuid.getLeastSignificantBits());
             nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR).setLong("uuid_most", uuid.getMostSignificantBits());
+        }
+    }
+
+    public static void setNotifierEntityNbt(NBTTagCompound nbt, UUID uuid) {
+        if (!nbt.hasKey(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)) {
+            NBTTagCompound creatorNbt = new NBTTagCompound();
+            creatorNbt.setLong("uuid_least", uuid.getLeastSignificantBits());
+            creatorNbt.setLong("uuid_most", uuid.getMostSignificantBits());
+            nbt.setTag(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, creatorNbt);
+        } else {
+            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).setLong("uuid_least", uuid.getLeastSignificantBits());
+            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).setLong("uuid_most", uuid.getMostSignificantBits());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<EntityHanging> findHangingEntities(World worldIn, BlockPos pos) {
+        List<EntityHanging> list = worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, new BlockPos(pos.getX(), pos.getY(), pos.getZ())).expand(1.1D, 1.1D, 1.1D), new Predicate<EntityHanging>() {
+            @Override
+            public boolean apply(EntityHanging entityIn) {
+                if (entityIn == null) {
+                    return false;
+                }
+
+                BlockPos entityPos = entityIn.getPosition();
+                // Hanging Neighbor Entity
+                if (entityPos.equals(pos.add(0, 1, 0))) {
+                    return true;
+                }
+
+                // Check around source block
+                EnumFacing entityFacing = entityIn.getHorizontalFacing();
+
+                switch(entityFacing) {
+                    case NORTH:
+                        return entityPos.equals(pos.add(StaticMixinHelper.HANGING_OFFSET_NORTH));
+                    case SOUTH:
+                        return entityIn.getPosition().equals(pos.add(StaticMixinHelper.HANGING_OFFSET_SOUTH));
+                    case WEST:
+                        return entityIn.getPosition().equals(pos.add(StaticMixinHelper.HANGING_OFFSET_WEST));
+                    case EAST:
+                        return entityIn.getPosition().equals(pos.add(StaticMixinHelper.HANGING_OFFSET_EAST));
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        return list;
+    }
+
+    public static Optional<User> tryToTrackBlock(World world, Object source, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {
+        if (!world.isBlockLoaded(sourcePos)) {
+            return Optional.empty();
+        }
+
+        IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(sourcePos);
+        if (spongeChunk != null) {
+            Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
+            Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
+            if (notifier.isPresent()) {
+                if (!world.isBlockLoaded(targetPos)) {
+                    return Optional.empty();
+                }
+
+                spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(targetPos);
+                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, notifier.get(), type);
+                return notifier;
+            } else if (owner.isPresent()) {
+                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, owner.get(), type);
+                return owner;
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static void tryToTrackBlockAndEntity(World world, Object source, Entity entity, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {
+        Optional<User> user = tryToTrackBlock(world, source, sourcePos, targetBlock, targetPos, type);
+        if (user.isPresent()) {
+            setCreatorEntityNbt(((IMixinEntity) entity).getSpongeData(), user.get().getUniqueId());
         }
     }
 }

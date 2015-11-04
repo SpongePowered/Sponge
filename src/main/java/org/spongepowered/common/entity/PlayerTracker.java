@@ -22,40 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.entity;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.common.entity.PlayerTracker;
+public class PlayerTracker {
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+    public static enum Type {
+        OWNER,
+        NOTIFIER
+    }
 
-public interface IMixinChunk {
+    public int ownerIndex;
+    public int notifierIndex;
 
-    Cause getCurrentPopulateCause();
+    public PlayerTracker() {
+        this.ownerIndex = -1;
+        this.notifierIndex = -1;
+    }
 
-    Map<Short, PlayerTracker> getTrackedShortPlayerPositions();
+    public PlayerTracker(int index, Type type) {
+        if (type == Type.OWNER) {
+            this.ownerIndex = index;
+            this.notifierIndex = -1;
+        } else {
+            this.notifierIndex = index;
+            this.ownerIndex = -1;
+        }
+    }
 
-    Map<Integer, PlayerTracker> getTrackedIntPlayerPositions();
-
-    Optional<UUID> getTrackedPlayerUniqueId(BlockPos pos);
-
-    Optional<User> getBlockOwner(BlockPos pos);
-
-    Optional<User> getBlockNotifier(BlockPos pos);
-
-    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot newBlockSnapshot);
-
-    void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType);
-
-    void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPlayerPositions);
-
-    void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPlayerPositions);
-
+    public void setNotifier(int notifierIndex) {
+        this.notifierIndex = notifierIndex;
+    }
 }

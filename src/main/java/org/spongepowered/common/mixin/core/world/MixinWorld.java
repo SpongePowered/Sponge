@@ -38,6 +38,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragonPart;
@@ -46,6 +48,7 @@ import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.entity.item.EntityTNTPrimed;
@@ -61,6 +64,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
+import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
@@ -77,6 +81,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ReportedException;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
@@ -96,6 +101,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -126,13 +132,17 @@ import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -172,8 +182,10 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinWorld;
@@ -201,7 +213,6 @@ import org.spongepowered.common.world.gen.SpongePopulatorType;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -279,8 +290,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean checkLight(BlockPos pos);
     @Shadow public abstract void markBlockForUpdate(BlockPos pos);
+    //@Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
-    @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
+    @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
@@ -330,6 +342,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.captureBlockLists.put(CaptureType.PLACE, this.capturedSpongeBlockPlaces);
     }
 
+    /**
+     * @author bloodmc
+     *
+     * Purpose: Rewritten to support capturing blocks
+     */
     @SuppressWarnings("rawtypes")
     @Overwrite
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
@@ -351,16 +368,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Don't capture if we are restoring blocks
             if (!this.isRemote && !this.restoringBlocks) {
-                if (StaticMixinHelper.processingPacket instanceof C08PacketPlayerBlockPlacement) {
-                    IMixinChunk spongeChunk = (IMixinChunk) chunk;
-                    if (block != currentState.getBlock()) { // Place
-                        spongeChunk.addTrackedBlockPosition(block, pos, StaticMixinHelper.processingPlayer);
-                    }
-                }
-                // remove block position if broken
-                if (block == Blocks.air) {
-                    ((IMixinChunk) chunk).removeTrackedPlayerPosition(pos);
-                }
+                IMixinChunk spongeChunk = (IMixinChunk) chunk;
+
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
                 // black magic to track populators
@@ -428,8 +437,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     this.theProfiler.endSection();
                 }
 
-                // Don't notify clients or update physics while capturing
-                // blockstates
+                // Don't notify clients or update physics while capturing blockstates
                 if (originalBlockSnapshot == null) {
                     // Modularize client and physic updates
                     markAndNotifyNeighbors(pos, chunk, iblockstate1, newState, flags);
@@ -506,7 +514,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V") )
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
-        if (this.isRemote || this.currentTickEntity != null || StaticMixinHelper.processingPlayer != null) {
+        if (this.isRemote || this.currentTickEntity != null || StaticMixinHelper.packetPlayer != null) {
             entity.onUpdate();
             return;
         }
@@ -519,6 +527,27 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = false;
     }
 
+    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
+    public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
+        MessageSink sink = MessageSinks.toNone();
+        MessageSink originalSink = MessageSinks.toNone();
+        Text originalMessage = Texts.of();
+        Text message = Texts.of();
+
+        if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
+
+            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Sponge.getGame(),Cause.of(this), originalMessage, message, originalSink, sink, (Entity) entityIn);
+            Sponge.getGame().getEventManager().post(event);
+            Text returned = Texts.format(event.getMessage());
+            event.getSink().sendMessage(returned);
+        }
+    }
+
+    /**
+     * @author bloodmc
+     *
+     * Purpose: Redirects vanilla method to our method which includes a cause.
+     */
     @Overwrite
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
         return spawnEntity((Entity) entity, Cause.of(this));
@@ -562,6 +591,23 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             if (!flag && this.processingCaptureCause) {
+                BlockSnapshot tickBlock = null;
+                if (this.currentTickBlock != null) {
+                    tickBlock = this.currentTickBlock;
+                } else if (this.currentTickOnBlockAdded != null) {
+                    tickBlock = this.currentTickOnBlockAdded;
+                }
+                if (tickBlock != null) {
+                    BlockPos sourcePos = VecHelper.toBlockPos(tickBlock.getPosition());
+                    Block targetBlock = getBlockState(entityIn.getPosition()).getBlock();
+                    SpongeHooks.tryToTrackBlockAndEntity((net.minecraft.world.World)(Object) this, tickBlock, entityIn, sourcePos, targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
+                }
+                if (this.currentTickEntity != null) {
+                    Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                    if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
+                        SpongeHooks.setCreatorEntityNbt(((IMixinEntity) entityIn).getSpongeData(), creator.get().getUniqueId());
+                    }
+                }
                 if (entityIn instanceof EntityItem) {
                     if (this.currentTickOnBlockAdded != null) {
                         this.capturedOnBlockAddedItems.add((Item) entityIn);
@@ -666,12 +712,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockBreaks.size() == 0
                 && this.capturedSpongeBlockModifications.size() == 0 && this.capturedSpongeBlockPlaces.size() == 0
                 && this.capturedSpongeBlockFluids.size() == 0 && this.capturedSpongePopulators.size() == 0
-                && StaticMixinHelper.processingPlayer == null) {
+                && StaticMixinHelper.packetPlayer == null) {
             return; // nothing was captured, return
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
-        EntityPlayerMP player = StaticMixinHelper.processingPlayer;
+        EntityPlayerMP player = StaticMixinHelper.packetPlayer;
         Packet packetIn = StaticMixinHelper.processingPacket;
         List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<Transaction<BlockSnapshot>>();
         boolean destructDrop = false;
@@ -692,9 +738,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (chunk != null) {
                     IMixinChunk spongeChunk = (IMixinChunk) chunk;
 
-                    Optional<User> user = spongeChunk.getBlockPosOwner(pos);
-                    if (user.isPresent()) {
-                        cause = cause.with(user.get());
+                    Optional<User> owner = spongeChunk.getBlockOwner(pos);
+                    Optional<User> interactUser = spongeChunk.getBlockNotifier(pos);
+                    if (owner.isPresent()) {
+                        cause = cause.with(owner.get());
+                    }
+                    if (interactUser.isPresent()) {
+                        if (!cause.all().contains(interactUser.get())) {
+                            Cause newCause = Cause.of(interactUser.get());
+                            cause = newCause.with(cause.all());
+                        }
                     }
                 }
             } else if (cause.first(Entity.class).isPresent()) {
@@ -705,8 +758,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         cause = cause.with(tameable.getOwnerEntity());
                     }
                 } else {
-                    if (((IMixinEntity) entity).getSpongeCreator().isPresent()) {
-                        cause = cause.with(((IMixinEntity) entity).getSpongeCreator().get());
+                    Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                    if (owner.isPresent()) {
+                        cause = cause.with(owner.get());
                     }
                 }
             }
@@ -771,19 +825,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (blockTransactions.size() > 0) {
                     ChangeBlockEvent event = null;
-                    // Check for tracked user at pos of first transaction
-                    if (!cause.first(User.class).isPresent()) {
-                        Transaction<BlockSnapshot> blockTransaction = blockTransactions.get(0);
-                        Optional<Chunk> chunk = this.getChunk(blockTransaction.getOriginal().getPosition());
-                        if (chunk.isPresent()) {
-                            IMixinChunk spongeChunk = (IMixinChunk) chunk.get();
-                            BlockPos pos = VecHelper.toBlockPos(blockTransaction.getOriginal().getPosition());
-                            Optional<User> user = spongeChunk.getBlockPosOwner(pos);
-                            if (user.isPresent()) {
-                                cause = cause.with(user);
-                            }
-                        }
-                    }
 
                     if (captureType == CaptureType.BREAK) {
                         if (player != null && packetIn instanceof C07PacketPlayerDigging) {
@@ -814,15 +855,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         packet = (C08PacketPlayerBlockPlacement) packetIn;
                     }
 
-                    for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-                        if (!transaction.isValid()) {
-                            this.restoringBlocks = true;
-                            transaction.getOriginal().restore(true, false);
-                            this.restoringBlocks = false;
-                            invalidTransactions.add(transaction);
-                        }
-                    }
-
                     if (event.isCancelled()) {
                         // Restore original blocks
                         for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
@@ -838,6 +870,39 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         this.capturedEntityItems.clear();
                         return;
                     } else {
+                        for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+                            if (!transaction.isValid()) {
+                                this.restoringBlocks = true;
+                                transaction.getOriginal().restore(true, false);
+                                this.restoringBlocks = false;
+                                invalidTransactions.add(transaction);
+                            } else {
+                                if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
+                                     BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                                     for (EntityHanging hanging : SpongeHooks.findHangingEntities(world, pos)) {
+                                         if (hanging != null) {
+                                             if (hanging instanceof EntityItemFrame) {
+                                                 EntityItemFrame itemFrame = (EntityItemFrame) hanging;
+                                                 net.minecraft.entity.Entity dropCause = null;
+                                                 if (cause.root().get() instanceof net.minecraft.entity.Entity) {
+                                                     dropCause = (net.minecraft.entity.Entity) cause.root().get();
+                                                 }
+
+                                                 itemFrame.dropItemOrSelf(dropCause, true);
+                                                 itemFrame.setDead();
+                                             }
+                                         }
+                                     }
+                                 }
+
+                                if (captureType == CaptureType.PLACE && player != null && transaction.getOriginal().getState().getType() == BlockTypes.AIR) {
+                                    BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
+                                    IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
+                                    spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos, (User) player, PlayerTracker.Type.OWNER);
+                                }
+                            }
+                        }
+
                         if (invalidTransactions.size() > 0) {
                             handlePostPlayerBlockEvent(captureType, player, world, invalidTransactions);
                         }
@@ -899,6 +964,25 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     cause = cause.with(player);
                 }
                 destructDrop = true;
+            }
+        }
+
+        // Handle Player Entity destruct
+        if (player != null && packetIn instanceof C02PacketUseEntity) {
+            C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
+            if (packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
+                net.minecraft.entity.Entity entity = packet.getEntityFromWorld((net.minecraft.world.World)(Object) this);
+                if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
+                    Player spongePlayer = (Player) player;
+                    MessageSink originalSink = spongePlayer.getMessageSink();
+                    MessageSink sink = spongePlayer.getMessageSink();
+
+                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Sponge.getGame(), cause, Texts.of(), Texts.of(), originalSink, sink, (Entity) entity);
+                    Sponge.getGame().getEventManager().post(event);
+                    Text returned = Texts.format(event.getMessage());
+                    event.getSink().sendMessage(returned);
+                    StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
+                }
             }
         }
 
@@ -974,7 +1058,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), user.getUniqueId());
             } else if (cause.first(Entity.class).isPresent()) {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
-                Optional<User> owner = spongeEntity.getSpongeCreator();
+                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent()) {
                     if (!cause.all().contains(owner.get())) {
                         cause = cause.with(owner.get());
@@ -1037,8 +1121,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 iterator.remove();
             }
         } else {
-            if (StaticMixinHelper.processingPlayer != null) {
-                sendItemChangeToPlayer(StaticMixinHelper.processingPlayer);
+            if (StaticMixinHelper.packetPlayer != null) {
+                sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
             }
             this.capturedEntityItems.clear();
         }
@@ -1055,7 +1139,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), user.getUniqueId());
             } else if (cause.first(Entity.class).isPresent()) {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
-                Optional<User> owner = spongeEntity.getSpongeCreator();
+                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent()) {
                     if (!cause.all().contains(owner.get())) {
                         cause = cause.with(owner.get());
@@ -1161,6 +1245,138 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
         }
+    }
+
+    /**
+     * @author bloodmc - November 15th, 2015
+     *
+     * Purpose: Rewritten to pass the source block position.
+     */
+    @Overwrite
+    public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
+        this.notifyBlockOfStateChange(pos.west(), blockType, pos);
+        this.notifyBlockOfStateChange(pos.east(), blockType, pos);
+        this.notifyBlockOfStateChange(pos.down(), blockType, pos);
+        this.notifyBlockOfStateChange(pos.up(), blockType, pos);
+        this.notifyBlockOfStateChange(pos.north(), blockType, pos);
+        this.notifyBlockOfStateChange(pos.south(), blockType, pos);
+    }
+
+    /**
+     * @author bloodmc - November 15th, 2015
+     *
+     * Purpose: Rewritten to pass the source block position.
+     */
+    @Overwrite
+    public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
+        if (skipSide != EnumFacing.WEST) {
+            this.notifyBlockOfStateChange(pos.west(), blockType, pos);
+        }
+
+        if (skipSide != EnumFacing.EAST) {
+            this.notifyBlockOfStateChange(pos.east(), blockType, pos);
+        }
+
+        if (skipSide != EnumFacing.DOWN) {
+            this.notifyBlockOfStateChange(pos.down(), blockType, pos);
+        }
+
+        if (skipSide != EnumFacing.UP) {
+            this.notifyBlockOfStateChange(pos.up(), blockType, pos);
+        }
+
+        if (skipSide != EnumFacing.NORTH) {
+            this.notifyBlockOfStateChange(pos.north(), blockType, pos);
+        }
+
+        if (skipSide != EnumFacing.SOUTH) {
+            this.notifyBlockOfStateChange(pos.south(), blockType, pos);
+        }
+    }
+
+    /**
+     * @author bloodmc - November 15th, 2015
+     *
+     * Purpose: Redirect's vanilla method to ours that includes source block 
+     * position.
+     */
+    @Overwrite
+    public void notifyBlockOfStateChange(BlockPos notifyPos, final Block blockIn) {
+        this.notifyBlockOfStateChange(notifyPos, blockIn, null);
+    }
+
+    @Override
+    public void notifyBlockOfStateChange(BlockPos notifyPos, final Block sourceBlock, BlockPos sourcePos) {
+        if (!this.isRemote) {
+            IBlockState iblockstate = this.getBlockState(notifyPos);
+
+            try {
+                if (!this.isRemote) {
+                    if (StaticMixinHelper.packetPlayer != null) {
+                        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(notifyPos);
+                        if (spongeChunk != null) {
+                            spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, (User)StaticMixinHelper.packetPlayer, PlayerTracker.Type.NOTIFIER);
+                        }
+                    } else {
+                        Object source = null;
+                        if (this.currentTickBlock != null) {
+                            source = this.currentTickBlock;
+                            sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
+                        } else if (this.currentTickOnBlockAdded != null) {
+                            source = this.currentTickOnBlockAdded;
+                            sourcePos = VecHelper.toBlockPos(this.currentTickOnBlockAdded.getPosition());
+                        } else if (this.currentTickTileEntity != null) {
+                            source = this.currentTickTileEntity;
+                            sourcePos = ((net.minecraft.tileentity.TileEntity)this.currentTickTileEntity).getPos();
+                        } else if (this.currentTickEntity != null) { // Falling Blocks
+                            IMixinEntity spongeEntity = (IMixinEntity) this.currentTickEntity;
+                            sourcePos = ((net.minecraft.entity.Entity)this.currentTickEntity).getPosition();
+                            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                            Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                            if (notifier.isPresent()) {
+                                IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(notifyPos);
+                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+                            } else if (owner.isPresent()) {
+                                IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(notifyPos);
+                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, owner.get(), PlayerTracker.Type.NOTIFIER);
+                            }
+                        }
+
+                        if (source != null) {
+                            SpongeHooks.tryToTrackBlock((net.minecraft.world.World)(Object) this, source, sourcePos, iblockstate.getBlock(), notifyPos, PlayerTracker.Type.NOTIFIER);
+                        }
+                    }
+                }
+
+                iblockstate.getBlock().onNeighborBlockChange((net.minecraft.world.World)(Object) this, notifyPos, iblockstate, sourceBlock);
+            } catch (Throwable throwable) {
+                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
+                CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
+                // TODO
+                /*crashreportcategory.addCrashSectionCallable("Source block type", new Callable()
+                {
+                    public String call() {
+                        try {
+                            return String.format("ID #%d (%s // %s)", new Object[] {Integer.valueOf(Block.getIdFromBlock(blockIn)), blockIn.getUnlocalizedName(), blockIn.getClass().getCanonicalName()});
+                        } catch (Throwable throwable1) {
+                            return "ID #" + Block.getIdFromBlock(blockIn);
+                        }
+                    }
+                });*/
+                CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, iblockstate);
+                throw new ReportedException(crashreport);
+            }
+        }
+    }
+
+    /**
+     * @author bloodmc - November 15th, 2015
+     *
+     * Purpose: Used to track comparators when they update levels.
+     */
+    @Overwrite
+    public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
+        SpongeImplFactory.updateComparatorOutputLevel((net.minecraft.world.World)(Object) this, pos, blockIn);
     }
 
     @Override

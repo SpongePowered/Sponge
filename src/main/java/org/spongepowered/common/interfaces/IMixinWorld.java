@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -94,4 +95,7 @@ public interface IMixinWorld {
     long getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);
+
+    void notifyBlockOfStateChange(BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos);
+
 }

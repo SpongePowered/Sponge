@@ -24,18 +24,34 @@
  */
 package org.spongepowered.common.util;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 
+import java.util.Arrays;
+
 public class StaticMixinHelper {
 
-    public static EntityPlayerMP processingPlayer = null;
+    public static final ImmutableList<EnumFacing> VALID_HANGING_FACES = ImmutableList.copyOf(Arrays.asList(EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST));
+    public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
+    public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
+    public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
+    public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
+    public static final BlockPos HANGING_NEIGHBOR_OFFSET_EAST = new BlockPos(1, 1, 0);
+    public static final BlockPos HANGING_NEIGHBOR_OFFSET_WEST = new BlockPos(-1, 1, 0);
+    public static final BlockPos HANGING_NEIGHBOR_OFFSET_NORTH = new BlockPos(0, 1, -1);
+    public static final BlockPos HANGING_NEIGHBOR_OFFSET_SOUTH = new BlockPos(0, 1, 1);
+    public static EntityPlayerMP packetPlayer = null;
+    public static User blockEventUser = null;
     public static Packet processingPacket = null;
     public static boolean processingInternalForgeEvent = false;
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
@@ -48,6 +64,7 @@ public class StaticMixinHelper {
     public static ItemStackSnapshot lastCursor = null;
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
+    public static int lastDestroyedEntityId = -1;
 
     @SuppressWarnings({"deprecation", "rawtypes"})
     public static Class getCallerClass(int level) {

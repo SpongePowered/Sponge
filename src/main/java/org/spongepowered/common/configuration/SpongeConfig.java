@@ -122,6 +122,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     // BLOCK TRACKING BLACKLIST
     public static final String BLOCK_TRACKING = "block-tracking";
     public static final String BLOCK_TRACKING_BLACKLIST = "block-blacklist";
+    public static final String BLOCK_TRACKING_ENABLED = "enabled";
 
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
@@ -787,8 +788,19 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class BlockTrackingCategory extends Category {
 
+        @Setting(value = BLOCK_TRACKING_ENABLED, comment = "If enabled, adds player tracking support for block positions. Note: This should only be disabled if you do not care who caused a block to change.")
+        private boolean enabled = true;
+
         @Setting(value = BLOCK_TRACKING_BLACKLIST, comment = "Add block ids you wish to blacklist for player block placement tracking.")
         private List<String> blockBlacklist = new ArrayList<String>();
+
+        public boolean isEnabled() {
+            return this.enabled;
+        }
+
+        public void setEnabled(boolean flag) {
+            this.enabled = flag;
+        }
 
         public List<String> getBlockBlacklist() {
             return this.blockBlacklist;

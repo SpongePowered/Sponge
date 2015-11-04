@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
@@ -51,9 +52,12 @@ import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
@@ -67,10 +71,25 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
+    @Shadow private int blockMetadata;
+    @Shadow protected BlockPos pos;
 
-    @Shadow public abstract void markDirty();
     @Shadow public abstract BlockPos getPos();
+    @Shadow public abstract Block getBlockType();
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract void markDirty();
+
+    @Inject(method = "markDirty", at = @At(value = "HEAD"))
+    public void onMarkDirty(CallbackInfo ci) {
+        if (this.worldObj != null && !this.worldObj.isRemote) {
+            IMixinWorld world = (IMixinWorld) this.worldObj;
+            // This handles transfers to this TE from a source such as a Hopper
+            if (world.getCurrentTickTileEntity().isPresent() && this != world.getCurrentTickTileEntity().get()) {
+                net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) world.getCurrentTickTileEntity().get();
+                SpongeHooks.tryToTrackBlock(te.getWorld(), te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);
+            }
+        }
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))

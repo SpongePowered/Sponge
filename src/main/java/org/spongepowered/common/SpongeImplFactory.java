@@ -29,8 +29,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.Transform;
@@ -43,6 +45,8 @@ import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.World;
+
+import java.util.Iterator;
 
 /**
  * Utility that fires events that normally Forge fires at (in spots). Typically
@@ -90,5 +94,31 @@ public class SpongeImplFactory {
             return ((ITileEntityProvider)block).createNewTileEntity(world, block.getMetaFromState(state));
         }
         return null;
+    }
+
+    // TODO - Determine if this is still needed
+    @SuppressWarnings("unchecked")
+    public static void updateComparatorOutputLevel(net.minecraft.world.World world, BlockPos pos, Block blockIn) {
+        Iterator<EnumFacing> iterator = EnumFacing.Plane.HORIZONTAL.iterator();
+
+        while (iterator.hasNext()) {
+            EnumFacing enumfacing = iterator.next();
+            BlockPos blockpos1 = pos.offset(enumfacing);
+
+            if (world.isBlockLoaded(blockpos1)) {
+                IBlockState iblockstate = world.getBlockState(blockpos1);
+
+                if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
+                    iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
+                } else if (iblockstate.getBlock().isNormalCube()) {
+                    blockpos1 = blockpos1.offset(enumfacing);
+                    iblockstate = world.getBlockState(blockpos1);
+
+                    if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
+                        iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
+                    }
+                }
+            }
+        }
     }
 }

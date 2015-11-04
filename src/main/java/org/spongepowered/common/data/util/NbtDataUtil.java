@@ -101,6 +101,7 @@ public final class NbtDataUtil {
     // These are Sponge's NBT tag keys
     public static final String SPONGE_DATA = "SpongeData";
     public static final String SPONGE_ENTITY_CREATOR = "Creator";
+    public static final String SPONGE_ENTITY_NOTIFIER = "Notifier";
     public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
     public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
     public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
