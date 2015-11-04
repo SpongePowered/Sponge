@@ -213,6 +213,7 @@ public class KeyRegistry {
         keyMap.put("note_pitch", makeSingleKey(NotePitch.class, Value.class, of("Note")));
         keyMap.put("vehicle", makeSingleKey(Entity.class, Value.class, of("Vehicle")));
         keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
+        keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

@@ -78,6 +78,8 @@ public class NbtDataUtil {
     public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
 
     public static final String ITEM_SKULL_OWNER = "SkullOwner";
+    
+    public static final String ITEM_LOCK = "Lock";
 
     public static final String ITEM_UNBREAKABLE = "Unbreakable";
 
