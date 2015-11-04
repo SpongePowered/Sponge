@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
@@ -94,6 +95,23 @@ public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFire
                 .result();
     }
 
+    public List<FireworkEffect> getFireworkEffects() {
+        return fireworkEffects;
+    }
+
+    public void setFireworkEffects(List<FireworkEffect> effects) {
+        Preconditions.checkNotNull(effects).forEach(Preconditions::checkNotNull);
+        this.fireworkEffects = effects;
+    }
+
+    public int getFlightModifier() {
+        return flightModifier;
+    }
+
+    public void setFlightModifier(int flightModifier) {
+        this.flightModifier = flightModifier;
+    }
+
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
@@ -103,6 +121,13 @@ public class SpongeFireworkData extends AbstractData<FireworkData, ImmutableFire
 
     @Override
     protected void registerGettersAndSetters() {
-        // TODO
+        registerFieldGetter(Keys.FIREWORK_EFFECTS, SpongeFireworkData.this::getFireworkEffects);
+        registerFieldGetter(Keys.FIREWORK_FLIGHT_MODIFIER, SpongeFireworkData.this::getFlightModifier);
+
+        registerFieldSetter(Keys.FIREWORK_EFFECTS, SpongeFireworkData.this::setFireworkEffects);
+        registerFieldSetter(Keys.FIREWORK_FLIGHT_MODIFIER, SpongeFireworkData.this::setFlightModifier);
+
+        registerKeyValue(Keys.FIREWORK_EFFECTS, SpongeFireworkData.this::effects);
+        registerKeyValue(Keys.FIREWORK_FLIGHT_MODIFIER, SpongeFireworkData.this::flightModifier);
     }
 }

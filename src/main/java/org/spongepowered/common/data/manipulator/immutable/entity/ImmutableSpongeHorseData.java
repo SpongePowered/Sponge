@@ -47,11 +47,20 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     private final HorseStyle horseStyle;
     private final HorseVariant horseVariant;
 
+    private final ImmutableValue<HorseColor> colorValue;
+    private final ImmutableValue<HorseStyle> styleValue;
+    private final ImmutableValue<HorseVariant> variantValue;
+
     public ImmutableSpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, HorseVariant horseVariant) {
         super(ImmutableHorseData.class);
         this.horseColor = horseColor;
         this.horseStyle = horseStyle;
         this.horseVariant = horseVariant;
+
+        colorValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
+        styleValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
+        variantValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, this.horseVariant);
+
         registerGetters();
     }
 
@@ -69,17 +78,17 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
 
     @Override
     public ImmutableValue<HorseColor> color() {
-        return ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
+        return colorValue;
     }
 
     @Override
     public ImmutableValue<HorseStyle> style() {
-        return ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
+        return styleValue;
     }
 
     @Override
     public ImmutableValue<HorseVariant> variant() {
-        return ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, this.horseVariant);
+        return variantValue;
     }
 
     @Override

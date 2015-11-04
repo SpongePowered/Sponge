@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -33,6 +36,7 @@ import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.WeightedEntityCollectionValue;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.weighted.WeightedCollection;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeMobSpawnerData;
@@ -40,6 +44,7 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeNextEntityToSpawnValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectionValue;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, ImmutableMobSpawnerData> implements MobSpawnerData {
 
@@ -65,13 +70,16 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         this.maximumEntities = maximumEntities;
         this.playerRange = playerRange;
         this.spawnRange = spawnRange;
-        this.nextEntityToSpawn = nextEntityToSpawn;
+        this.nextEntityToSpawn = checkNotNull(nextEntityToSpawn);
+        checkNotNull(entities).forEach(Preconditions::checkNotNull);
         this.entities = entities;
         registerGettersAndSetters();
     }
 
     public SpongeMobSpawnerData() {
-        super(MobSpawnerData.class);
+        this((short) 20, (short) 200, (short) 800, (short) 4, (short) 6, (short) 16, (short) 4,
+                new WeightedSerializableObject<>(new SpongeEntitySnapshotBuilder().type(EntityTypes.PIG).build(), 1),
+                new WeightedCollection<>());
     }
 
 
@@ -80,7 +88,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
             .minimum((short) 0)
             .maximum(this.maximumDelay)
-            .defaultValue((short) 0)
+            .defaultValue((short) 20)
             .actualValue(this.remainingDelay)
             .build();
     }
@@ -90,7 +98,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MINIMUM_DELAY)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue((short) 0)
+            .defaultValue((short) 200)
             .actualValue(this.minimumDelay)
             .build();
     }
@@ -98,9 +106,9 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     @Override
     public MutableBoundedValue<Short> maximumSpawnDelay() {
         return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MAXIMUM_DELAY)
-            .minimum((short) 0)
+            .minimum((short) 1)
             .maximum(Short.MAX_VALUE)
-            .defaultValue((short) 0)
+            .defaultValue((short) 800)
             .actualValue(this.maximumDelay)
             .build();
     }
@@ -110,7 +118,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_SPAWN_COUNT)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue((short) 0)
+            .defaultValue((short) 4)
             .actualValue(this.count)
             .build();
     }
@@ -120,7 +128,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue((short) 0)
+            .defaultValue((short) 6)
             .actualValue(this.maximumEntities)
             .build();
     }
@@ -130,7 +138,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_REQURED_PLAYER_RANGE)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue((short) 0)
+            .defaultValue((short) 16)
             .actualValue(this.playerRange)
             .build();
     }
@@ -140,7 +148,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_SPAWN_RANGE)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue((short) 0)
+            .defaultValue((short) 4)
             .actualValue(this.spawnRange)
             .build();
     }
@@ -195,8 +203,109 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     }
 
+    public short getRemainingDelay() {
+        return remainingDelay;
+    }
+
+    public void setRemainingDelay(short remainingDelay) {
+        this.remainingDelay = remainingDelay;
+    }
+
+    public short getMinimumDelay() {
+        return minimumDelay;
+    }
+
+    public void setMinimumDelay(short minimumDelay) {
+        this.minimumDelay = minimumDelay;
+    }
+
+    public short getMaximumDelay() {
+        return maximumDelay;
+    }
+
+    public void setMaximumDelay(short maximumDelay) {
+        this.maximumDelay = maximumDelay;
+    }
+
+    public short getCount() {
+        return count;
+    }
+
+    public void setCount(short count) {
+        this.count = count;
+    }
+
+    public short getMaximumEntities() {
+        return maximumEntities;
+    }
+
+    public void setMaximumEntities(short maximumEntities) {
+        this.maximumEntities = maximumEntities;
+    }
+
+    public short getPlayerRange() {
+        return playerRange;
+    }
+
+    public void setPlayerRange(short playerRange) {
+        this.playerRange = playerRange;
+    }
+
+    public short getSpawnRange() {
+        return spawnRange;
+    }
+
+    public void setSpawnRange(short spawnRange) {
+        this.spawnRange = spawnRange;
+    }
+
+    public WeightedSerializableObject<EntitySnapshot> getNextEntityToSpawn() {
+        return nextEntityToSpawn;
+    }
+
+    public void setNextEntityToSpawn(WeightedSerializableObject<EntitySnapshot> nextEntityToSpawn) {
+        this.nextEntityToSpawn = checkNotNull(nextEntityToSpawn);
+    }
+
+    public WeightedCollection<WeightedSerializableObject<EntitySnapshot>> getEntities() {
+        return entities;
+    }
+
+    public void setEntities(WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entities) {
+        checkNotNull(entities).forEach(Preconditions::checkNotNull);
+        this.entities = entities;
+    }
+
     @Override
     protected void registerGettersAndSetters() {
-        // TODO
+        registerKeyValue(Keys.SPAWNER_REMAINING_DELAY, SpongeMobSpawnerData.this::remainingDelay);
+        registerKeyValue(Keys.SPAWNER_MINIMUM_DELAY, SpongeMobSpawnerData.this::minimumSpawnDelay);
+        registerKeyValue(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::maximumSpawnDelay);
+        registerKeyValue(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::spawnCount);
+        registerKeyValue(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::maximumNearbyEntities);
+        registerKeyValue(Keys.SPAWNER_REQURED_PLAYER_RANGE, SpongeMobSpawnerData.this::requiredPlayerRange);
+        registerKeyValue(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::spawnRange);
+        registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::nextEntityToSpawn);
+        registerKeyValue(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::possibleEntitiesToSpawn);
+
+        registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, SpongeMobSpawnerData.this::getRemainingDelay);
+        registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, SpongeMobSpawnerData.this::getMinimumDelay);
+        registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::getMaximumDelay);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::getCount);
+        registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::getMaximumEntities);
+        registerFieldGetter(Keys.SPAWNER_REQURED_PLAYER_RANGE, SpongeMobSpawnerData.this::getPlayerRange);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::getSpawnRange);
+        registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::getNextEntityToSpawn);
+        registerFieldGetter(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::getEntities);
+
+        registerFieldSetter(Keys.SPAWNER_REMAINING_DELAY, SpongeMobSpawnerData.this::setRemainingDelay);
+        registerFieldSetter(Keys.SPAWNER_MINIMUM_DELAY, SpongeMobSpawnerData.this::setMinimumDelay);
+        registerFieldSetter(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::setMaximumDelay);
+        registerFieldSetter(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::setCount);
+        registerFieldSetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::setMaximumEntities);
+        registerFieldSetter(Keys.SPAWNER_REQURED_PLAYER_RANGE, SpongeMobSpawnerData.this::setPlayerRange);
+        registerFieldSetter(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::setSpawnRange);
+        registerFieldSetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::setNextEntityToSpawn);
+        registerFieldSetter(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::setEntities);
     }
 }

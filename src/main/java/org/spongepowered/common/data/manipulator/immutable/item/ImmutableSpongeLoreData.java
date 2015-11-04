@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Booleans;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -34,55 +33,29 @@ import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
+import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
-public class ImmutableSpongeLoreData extends AbstractImmutableData<ImmutableLoreData, LoreData> implements ImmutableLoreData {
-
-    private final ImmutableList<Text> lore;
+public class ImmutableSpongeLoreData extends AbstractImmutableSingleListData<Text, ImmutableLoreData, LoreData> implements ImmutableLoreData {
 
     public ImmutableSpongeLoreData() {
         this(ImmutableList.of(Texts.of()));
     }
 
     public ImmutableSpongeLoreData(List<Text> lore) {
-        super(ImmutableLoreData.class);
-        this.lore = ImmutableList.copyOf(lore);
-        registerGetters();
+        super(ImmutableLoreData.class, lore, Keys.ITEM_LORE, SpongeLoreData.class);
     }
 
     @Override
     public ImmutableListValue<Text> lore() {
-        return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, this.lore);
-    }
-
-    @Override
-    public LoreData asMutable() {
-        return new SpongeLoreData(this.lore);
-    }
-
-    @Override
-    public int compareTo(ImmutableLoreData o) {
-        return Booleans.compare(o.lore().containsAll(this.lore),
-                this.lore.containsAll(o.lore().get()));
+        return getValueGetter();
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.ITEM_LORE.getQuery(), SpongeTexts.asJson(this.lore));
-    }
-
-    public List<Text> getLore() {
-        return this.lore;
-    }
-
-    @Override
-    protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_LORE, ImmutableSpongeLoreData.this::getLore);
-        registerKeyValue(Keys.ITEM_LORE, ImmutableSpongeLoreData.this::lore);
+        return new MemoryDataContainer().set(Keys.ITEM_LORE.getQuery(), SpongeTexts.asJson(this.getValue()));
     }
 }

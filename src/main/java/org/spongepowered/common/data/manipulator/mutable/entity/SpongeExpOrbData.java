@@ -24,56 +24,32 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExpOrbData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
-public class SpongeExpOrbData extends AbstractSingleData<Integer, ExpOrbData, ImmutableExpOrbData> implements ExpOrbData {
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
-    public SpongeExpOrbData(Integer value) {
-        super(ExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE);
+public class SpongeExpOrbData extends AbstractBoundedComparableData<Integer, ExpOrbData, ImmutableExpOrbData> implements ExpOrbData {
+
+	public SpongeExpOrbData() {
+		this(0);
+	}
+
+	public SpongeExpOrbData(int value) {
+		this(value, 0, Integer.MAX_VALUE);
+	}
+
+    // For reflection
+	public SpongeExpOrbData(int value, int minimum, int maximum) {
+        super(ExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE, intComparator(), ImmutableSpongeExpOrbData.class, minimum, maximum, 0);
     }
 
-    public SpongeExpOrbData() {
-        this(0);
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return experience();
-    }
-
-    @Override
-    public ExpOrbData copy() {
-        return new SpongeExpOrbData(this.getValue());
-    }
-
-    @Override
-    public ImmutableExpOrbData asImmutable() {
-        return new ImmutableSpongeExpOrbData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(ExpOrbData o) {
-        return o.experience().get().compareTo(this.getValue());
-    }
-
-    @Override
-    public Value<Integer> experience() {
-        return new SpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, this.getValue());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.CONTAINED_EXPERIENCE, this.getValue());
-    }
-
+	@Override
+	public MutableBoundedValue<Integer> experience() {
+		return getValueGetter();
+	}
 }

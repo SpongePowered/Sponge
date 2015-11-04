@@ -36,29 +36,49 @@ import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class ImmutableSpongeIgniteableData extends AbstractImmutableData<ImmutableIgniteableData, IgniteableData> implements ImmutableIgniteableData {
 
     private final int fireTicks;
     private final int fireDelay;
 
+    private final ImmutableBoundedValue<Integer> fireTicksValue;
+    private final ImmutableBoundedValue<Integer> fireDelayValue;
+
     public ImmutableSpongeIgniteableData(int fireTicks, int fireDelay) {
         super(ImmutableIgniteableData.class);
         checkArgument(fireTicks > 0);
         this.fireTicks = fireTicks;
         this.fireDelay = fireDelay;
+
+        fireTicksValue = SpongeValueBuilder.boundedBuilder(Keys.FIRE_TICKS)
+                .actualValue(this.fireTicks)
+                .defaultValue(1)
+                .minimum(1)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
+        fireDelayValue = SpongeValueBuilder.boundedBuilder(Keys.FIRE_DAMAGE_DELAY)
+                .actualValue(this.fireDelay)
+                .defaultValue(20)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
         registerGetters();
     }
 
     @Override
     public ImmutableBoundedValue<Integer> fireTicks() {
-        return new ImmutableSpongeBoundedValue<>(Keys.FIRE_TICKS, this.fireTicks, 1, intComparator(), 1, Integer.MAX_VALUE);
+        return fireTicksValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> fireDelay() {
-        return new ImmutableSpongeBoundedValue<>(Keys.FIRE_DAMAGE_DELAY, this.fireDelay, 20, intComparator(), 0, Integer.MAX_VALUE);
+        return fireDelayValue;
     }
 
     @Override

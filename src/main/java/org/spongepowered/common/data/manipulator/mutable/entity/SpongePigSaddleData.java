@@ -30,12 +30,11 @@ import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePigSaddleData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongePigSaddleData extends AbstractBooleanData<PigSaddleData, ImmutablePigSaddleData> implements PigSaddleData  {
 
     public SpongePigSaddleData(boolean value) {
-        super(PigSaddleData.class, value, Keys.PIG_SADDLE, ImmutableSpongePigSaddleData.class);
+        super(PigSaddleData.class, value, Keys.PIG_SADDLE, ImmutableSpongePigSaddleData.class, false);
     }
 
     public SpongePigSaddleData() {
@@ -43,12 +42,7 @@ public class SpongePigSaddleData extends AbstractBooleanData<PigSaddleData, Immu
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return saddle();
-    }
-
-    @Override
     public Value<Boolean> saddle() {
-        return new SpongeValue<>(Keys.PIG_SADDLE, false, this.getValue());
+        return getValueGetter();
     }
 }

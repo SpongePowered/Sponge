@@ -30,10 +30,10 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, ImmutableMovementSpeedData> implements MovementSpeedData {
 
@@ -48,7 +48,7 @@ public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, Imm
     }
 
     public SpongeMovementSpeedData() {
-        this(0.1d, 0.05d);
+        this(0.7D, 0.05D);
     }
 
     public double getWalkSpeed() {
@@ -82,23 +82,13 @@ public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, Imm
     }
 
     @Override
-    public MutableBoundedValue<Double> walkSpeed() {
-        return SpongeValueBuilder.boundedBuilder(Keys.WALKING_SPEED)
-            .defaultValue(0.1D)
-            .minimum(Double.MIN_VALUE)
-            .maximum(Double.MAX_VALUE)
-            .actualValue(this.walkSpeed)
-            .build();
+    public Value<Double> walkSpeed() {
+        return new SpongeValue<>(Keys.WALKING_SPEED, 0.7D, this.walkSpeed);
     }
 
     @Override
-    public MutableBoundedValue<Double> flySpeed() {
-        return SpongeValueBuilder.boundedBuilder(Keys.FLYING_SPEED)
-            .defaultValue(0.05D)
-            .minimum(Double.MIN_VALUE)
-            .maximum(Double.MAX_VALUE)
-            .actualValue(this.flySpeed)
-            .build();
+    public Value<Double> flySpeed() {
+        return new SpongeValue<>(Keys.FLYING_SPEED, 0.05D, this.flySpeed);
     }
 
     @Override

@@ -35,12 +35,14 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vector3d, ImmutableVelocityData, VelocityData> implements ImmutableVelocityData {
 
+    private final ImmutableSpongeValue<Vector3d> velocityValue = new ImmutableSpongeValue<>(Keys.VELOCITY, new Vector3d(), this.value);
+
     public ImmutableSpongeVelocityData(Vector3d value) {
         super(ImmutableVelocityData.class, value, Keys.VELOCITY);
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected ImmutableValue<Vector3d> getValueGetter() {
         return velocity();
     }
 
@@ -51,7 +53,7 @@ public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vec
 
     @Override
     public ImmutableValue<Vector3d> velocity() {
-        return new ImmutableSpongeValue<>(Keys.VELOCITY, new Vector3d(), this.value);
+        return this.velocityValue;
     }
 
     @Override

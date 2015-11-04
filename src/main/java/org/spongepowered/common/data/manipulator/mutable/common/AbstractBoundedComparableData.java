@@ -33,7 +33,9 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -46,9 +48,10 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
     protected final Comparator<T> comparator;
     protected final T lowerBound;
     protected final T upperBound;
+    protected final T defaultValue;
 
     protected AbstractBoundedComparableData(Class<M> manipulatorClass, T value, Key<? extends BaseValue<T>> usedKey, Comparator<T> comparator,
-                                         Class<? extends I> immutableClass, T lowerBound, T upperBound) {
+                                         Class<? extends I> immutableClass, T lowerBound, T upperBound, T defaultValue) {
         super(manipulatorClass, value, usedKey);
         this.comparator = checkNotNull(comparator);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
@@ -56,12 +59,18 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
         this.immutableClass = checkNotNull(immutableClass);
         this.lowerBound = checkNotNull(lowerBound);
         this.upperBound = checkNotNull(upperBound);
+        this.defaultValue = checkNotNull(defaultValue);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public M copy() {
         return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue(), this.lowerBound, this.upperBound);
+    }
+
+    @Override
+    protected MutableBoundedValue<T> getValueGetter() {
+        return new SpongeBoundedValue<>(this.usedKey, this.defaultValue, this.comparator, this.lowerBound, this.upperBound, this.getValue());
     }
 
     @Override

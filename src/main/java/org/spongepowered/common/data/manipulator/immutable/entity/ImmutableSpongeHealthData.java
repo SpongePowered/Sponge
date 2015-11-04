@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHealthData, HealthData> implements ImmutableHealthData {
@@ -42,21 +43,41 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
     private final double health;
     private final double maxHealth;
 
+    private final ImmutableBoundedValue<Double> healthValue;
+    private final ImmutableBoundedValue<Double> maxHealthValue;
+
     public ImmutableSpongeHealthData(double health, double maxHealth) {
         super(ImmutableHealthData.class);
         this.health = health;
         this.maxHealth = maxHealth;
+
+        healthValue = SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+                .actualValue(this.health)
+                .defaultValue(this.maxHealth)
+                .minimum(0D)
+                .maximum(this.maxHealth)
+                .build()
+                .asImmutable();
+
+        maxHealthValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_HEALTH)
+                .actualValue(this.maxHealth)
+                .defaultValue(20D)
+                .minimum(0D)
+                .maximum((double) Float.MAX_VALUE)
+                .build()
+                .asImmutable();
+
         registerGetters();
     }
 
     @Override
     public ImmutableBoundedValue<Double> health() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.HEALTH, this.health, this.maxHealth, doubleComparator(), 0D, this.maxHealth);
+        return healthValue;
     }
 
     @Override
     public ImmutableBoundedValue<Double> maxHealth() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.HEALTH, this.maxHealth, this.maxHealth, doubleComparator(), 0D, (double) Float.MAX_VALUE);
+        return maxHealthValue;
     }
 
     @Override

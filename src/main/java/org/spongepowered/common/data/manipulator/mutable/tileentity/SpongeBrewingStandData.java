@@ -24,64 +24,31 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import com.google.common.collect.ComparisonChain;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBrewingStandData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
+import org.spongepowered.common.data.util.ComparatorUtil;
 
-public class SpongeBrewingStandData extends AbstractSingleData<Integer, BrewingStandData, ImmutableBrewingStandData> implements BrewingStandData {
-
-    public SpongeBrewingStandData(Integer value) {
-        super(BrewingStandData.class, value, Keys.REMAINING_BREW_TIME);
-    }
+public class SpongeBrewingStandData extends AbstractBoundedComparableData<Integer, BrewingStandData, ImmutableBrewingStandData> implements BrewingStandData {
 
     public SpongeBrewingStandData() {
-        this(0);
+        this(400);
     }
 
-    @Override
-    protected Value<?> getValueGetter() {
-        return this.remainingBrewTime();
+    public SpongeBrewingStandData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
     }
 
-    @Override
-    public BrewingStandData copy() {
-        return new SpongeBrewingStandData(this.getValue());
-    }
-
-    @Override
-    public ImmutableBrewingStandData asImmutable() {
-        return new ImmutableSpongeBrewingStandData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(BrewingStandData o) {
-        return ComparisonChain
-                .start()
-                .compare(o.remainingBrewTime().get(), this.getValue())
-                .result();
+    // For reflection
+    public SpongeBrewingStandData(int value, int minimum, int maximum) {
+        super(BrewingStandData.class, value, Keys.REMAINING_BREW_TIME, ComparatorUtil.intComparator(), ImmutableSpongeBrewingStandData.class, minimum, maximum, 400);
     }
 
     @Override
     public MutableBoundedValue<Integer> remainingBrewTime() {
-        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_BREW_TIME)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(400)
-                .actualValue(this.getValue())
-                .build();
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer()
-                .set(Keys.REMAINING_BREW_TIME, this.getValue());
+        return getValueGetter();
     }
 }

@@ -45,35 +45,48 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
 
     private final ImmutableSet<Direction> directions;
 
+    private final ImmutableSetValue<Direction> directionsValue;
+    private final ImmutableValue<Boolean> northValue;
+    private final ImmutableValue<Boolean> southValue;
+    private final ImmutableValue<Boolean> eastValue;
+    private final ImmutableValue<Boolean> westValue;
+
     public ImmutableSpongeConnectedDirectionData(Set<Direction> directions) {
         super(ImmutableConnectedDirectionData.class);
         this.directions = Sets.immutableEnumSet(directions);
+
+        this.directionsValue = new ImmutableSpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.directions);
+        this.northValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));
+        this.southValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_SOUTH, false, this.directions.contains(Direction.SOUTH));
+        this.eastValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_EAST, false, this.directions.contains(Direction.EAST));
+        this.westValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_WEST, false, this.directions.contains(Direction.WEST));
+
         registerGetters();
     }
 
     @Override
     public ImmutableSetValue<Direction> connectedDirections() {
-        return new ImmutableSpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.directions);
+        return directionsValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedNorth() {
-        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));
+        return northValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedSouth() {
-        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_SOUTH, false, this.directions.contains(Direction.SOUTH));
+        return southValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedEast() {
-        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_EAST, false, this.directions.contains(Direction.EAST));
+        return eastValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedWest() {
-        return ImmutableSpongeValue.cachedOf(Keys.CONNECTED_WEST, false, this.directions.contains(Direction.WEST));
+        return westValue;
     }
 
     @Override
@@ -96,8 +109,38 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
             .set(Keys.CONNECTED_WEST.getQuery(), this.directions.contains(Direction.WEST));
     }
 
+    private Set<Direction> getDirections() {
+        return directions;
+    }
+
+    private boolean isNorth() {
+        return this.directions.contains(Direction.NORTH);
+    }
+
+    private boolean isSouth() {
+        return this.directions.contains(Direction.SOUTH);
+    }
+
+    private boolean isEast() {
+        return this.directions.contains(Direction.EAST);
+    }
+
+    private boolean isWest() {
+        return this.directions.contains(Direction.WEST);
+    }
+
     @Override
     protected void registerGetters() {
-        // TODO
+        registerKeyValue(Keys.CONNECTED_DIRECTIONS, ImmutableSpongeConnectedDirectionData.this::connectedDirections);
+        registerKeyValue(Keys.CONNECTED_NORTH, ImmutableSpongeConnectedDirectionData.this::connectedNorth);
+        registerKeyValue(Keys.CONNECTED_SOUTH, ImmutableSpongeConnectedDirectionData.this::connectedSouth);
+        registerKeyValue(Keys.CONNECTED_EAST, ImmutableSpongeConnectedDirectionData.this::connectedEast);
+        registerKeyValue(Keys.CONNECTED_WEST, ImmutableSpongeConnectedDirectionData.this::connectedWest);
+
+        registerFieldGetter(Keys.CONNECTED_DIRECTIONS, ImmutableSpongeConnectedDirectionData.this::getDirections);
+        registerFieldGetter(Keys.CONNECTED_NORTH, ImmutableSpongeConnectedDirectionData.this::isNorth);
+        registerFieldGetter(Keys.CONNECTED_SOUTH, ImmutableSpongeConnectedDirectionData.this::isSouth);
+        registerFieldGetter(Keys.CONNECTED_EAST, ImmutableSpongeConnectedDirectionData.this::isEast);
+        registerFieldGetter(Keys.CONNECTED_WEST, ImmutableSpongeConnectedDirectionData.this::isWest);
     }
 }

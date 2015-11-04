@@ -30,21 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.DropData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDropData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeDropData extends AbstractBooleanData<DropData, ImmutableDropData> implements DropData {
 
     public SpongeDropData(boolean value) {
-        super(DropData.class, value, Keys.SHOULD_DROP, ImmutableSpongeDropData.class);
+        super(DropData.class, value, Keys.SHOULD_DROP, ImmutableSpongeDropData.class, false);
     }
 
     @Override
     public Value<Boolean> willDrop() {
-        return new SpongeValue<>(Keys.SHOULD_DROP, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return willDrop();
+        return getValueGetter();
     }
 }

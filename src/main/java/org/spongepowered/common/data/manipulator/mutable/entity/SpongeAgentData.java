@@ -35,7 +35,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SpongeAgentData extends AbstractBooleanData<AgentData, ImmutableAgentData> implements AgentData {
 
     public SpongeAgentData(Boolean value) {
-        super(AgentData.class, value, Keys.AI_ENABLED, ImmutableSpongeAgentData.class);
+        super(AgentData.class, value, Keys.AI_ENABLED, ImmutableSpongeAgentData.class, true);
     }
 
     public SpongeAgentData() {
@@ -43,12 +43,7 @@ public class SpongeAgentData extends AbstractBooleanData<AgentData, ImmutableAge
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return aiEnabled();
-    }
-
-    @Override
     public Value<Boolean> aiEnabled() {
-        return new SpongeValue<>(Keys.AI_ENABLED, true, getValue());
+        return getValueGetter();
     }
 }

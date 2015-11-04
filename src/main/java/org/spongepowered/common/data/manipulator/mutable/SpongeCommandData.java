@@ -33,12 +33,14 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableCommandData;
 import org.spongepowered.api.data.manipulator.mutable.CommandData;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCommandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -64,8 +66,13 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     @Override
-    public Value<Integer> successCount() {
-        return new SpongeValue<>(Keys.SUCCESS_COUNT, getSuccessCount());
+    public MutableBoundedValue<Integer> successCount() {
+        return SpongeValueBuilder.boundedBuilder(Keys.SUCCESS_COUNT)
+                .actualValue(this.success)
+                .defaultValue(0)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build();
     }
 
     @Override

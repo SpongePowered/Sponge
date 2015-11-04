@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
@@ -33,12 +31,11 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleEnumData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeDirectionalData extends AbstractSingleEnumData<Direction, DirectionalData, ImmutableDirectionalData> implements DirectionalData {
 
     public SpongeDirectionalData(Direction direction) {
-        super(DirectionalData.class, checkNotNull(direction), Keys.DIRECTION, ImmutableSpongeDirectionalData.class);
+        super(DirectionalData.class, direction, Keys.DIRECTION, ImmutableSpongeDirectionalData.class, Direction.NORTH);
     }
 
     public SpongeDirectionalData() {
@@ -47,11 +44,6 @@ public class SpongeDirectionalData extends AbstractSingleEnumData<Direction, Dir
 
     @Override
     public Value<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return direction();
+        return getValueGetter();
     }
 }

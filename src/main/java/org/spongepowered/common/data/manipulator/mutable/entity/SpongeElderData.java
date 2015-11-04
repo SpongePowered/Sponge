@@ -30,7 +30,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElderData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeElderData extends AbstractBooleanData<ElderData, ImmutableElderData> implements ElderData {
 
@@ -39,16 +38,11 @@ public class SpongeElderData extends AbstractBooleanData<ElderData, ImmutableEld
     }
 
     public SpongeElderData(boolean value) {
-        super(ElderData.class, value, Keys.ELDER_GUARDIAN, ImmutableSpongeElderData.class);
+        super(ElderData.class, value, Keys.ELDER_GUARDIAN, ImmutableSpongeElderData.class, false);
     }
 
     @Override
     public Value<Boolean> elder() {
-        return new SpongeValue<>(Keys.ELDER_GUARDIAN, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return elder();
+        return getValueGetter();
     }
 }

@@ -30,12 +30,11 @@ import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeVillagerZombieData extends AbstractBooleanData<VillagerZombieData, ImmutableVillagerZombieData> implements VillagerZombieData {
 
     public SpongeVillagerZombieData(boolean value) {
-        super(VillagerZombieData.class, value, Keys.IS_VILLAGER_ZOMBIE, ImmutableSpongeVillagerZombieData.class);
+        super(VillagerZombieData.class, value, Keys.IS_VILLAGER_ZOMBIE, ImmutableSpongeVillagerZombieData.class, false);
     }
 
     public SpongeVillagerZombieData() {
@@ -43,12 +42,7 @@ public class SpongeVillagerZombieData extends AbstractBooleanData<VillagerZombie
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return this.villagerZombie();
-    }
-
-    @Override
     public Value<Boolean> villagerZombie() {
-        return new SpongeValue<Boolean>(Keys.IS_VILLAGER_ZOMBIE, false, this.getValue());
+        return getValueGetter();
     }
 }

@@ -33,13 +33,13 @@ import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
-import org.spongepowered.common.data.util.ComparatorUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class ImmutableSpongeBreathingData extends AbstractImmutableData<ImmutableBreathingData, BreathingData> implements ImmutableBreathingData {
 
     private final int maxAir;
     private final int remainingAir;
+
     private final ImmutableBoundedValue<Integer> remainingAirValue;
     private final ImmutableBoundedValue<Integer> maxAirValue;
 
@@ -47,18 +47,23 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
         super(ImmutableBreathingData.class);
         this.maxAir = maxAir;
         this.remainingAir = remainingAir;
-        this.remainingAirValue = new ImmutableSpongeBoundedValue<>(Keys.REMAINING_AIR,
-                                                                   this.remainingAir,
-                                                                   this.maxAir,
-                                                                   ComparatorUtil.intComparator(),
-                                                                   -20,
-                                                                   this.maxAir);
-        this.maxAirValue = new ImmutableSpongeBoundedValue<>(Keys.MAX_AIR,
-                                                             this.maxAir,
-                                                             300,
-                                                             ComparatorUtil.intComparator(),
-                                                             0,
-                                                             Integer.MAX_VALUE);
+
+        remainingAirValue = SpongeValueBuilder.boundedBuilder(Keys.REMAINING_AIR)
+                .actualValue(remainingAir)
+                .defaultValue(this.maxAir)
+                .minimum(-20)
+                .maximum(this.maxAir)
+                .build()
+                .asImmutable();
+
+        maxAirValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_AIR)
+                .actualValue(this.maxAir)
+                .defaultValue(300)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
         registerGetters();
     }
 

@@ -30,10 +30,8 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRedstonePoweredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class SpongeRedstonePoweredData extends AbstractBoundedComparableData<Integer, RedstonePoweredData, ImmutableRedstonePoweredData>
     implements RedstonePoweredData {
@@ -43,21 +41,15 @@ public class SpongeRedstonePoweredData extends AbstractBoundedComparableData<Int
     }
 
     public SpongeRedstonePoweredData(int value) {
-        super(RedstonePoweredData.class, value, Keys.MOISTURE, intComparator(), ImmutableSpongeRedstonePoweredData.class, 0, 15);
+        this(value, 0, 15);
+    }
+
+    public SpongeRedstonePoweredData(int value, int minimum, int maximum) {
+        super(RedstonePoweredData.class, value, Keys.MOISTURE, intComparator(), ImmutableSpongeRedstonePoweredData.class, minimum, maximum, 0);
     }
 
     @Override
     public MutableBoundedValue<Integer> power() {
-        return SpongeValueBuilder.boundedBuilder(Keys.POWER)
-            .defaultValue(0)
-            .minimum(0)
-            .maximum(15)
-            .actualValue(this.getValue())
-            .build();
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return power();
+        return getValueGetter();
     }
 }

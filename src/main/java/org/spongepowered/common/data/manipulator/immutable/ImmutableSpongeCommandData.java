@@ -29,12 +29,14 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableCommandData;
 import org.spongepowered.api.data.manipulator.mutable.CommandData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -47,33 +49,50 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
     private final boolean tracks;
     private final Text lastOutput;
 
+    private final ImmutableValue<String> storedValue;
+    private final ImmutableBoundedValue<Integer> successValue;
+    private final ImmutableValue<Boolean> tracksValue;
+    private final ImmutableOptionalValue<Text> lastOutputValue;
+
     public ImmutableSpongeCommandData(String storedCommand, int success, boolean tracks, Text lastOutput) {
         super(ImmutableCommandData.class);
         this.storedCommand = storedCommand;
         this.success = success;
         this.tracks = tracks;
         this.lastOutput = lastOutput;
+
+        this.storedValue = new ImmutableSpongeValue<>(Keys.COMMAND, this.storedCommand);
+        this.successValue = SpongeValueBuilder.boundedBuilder(Keys.SUCCESS_COUNT)
+                .actualValue(this.success)
+                .defaultValue(0)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+        this.tracksValue = ImmutableSpongeValue.cachedOf(Keys.TRACKS_OUTPUT, false, this.tracks);
+        this.lastOutputValue = new ImmutableSpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
+
         registerGetters();
     }
 
     @Override
     public ImmutableValue<String> storedCommand() {
-        return new ImmutableSpongeValue<>(Keys.COMMAND, this.storedCommand);
+        return storedValue;
     }
 
     @Override
-    public ImmutableValue<Integer> successCount() {
-        return new ImmutableSpongeValue<>(Keys.SUCCESS_COUNT, this.success);
+    public ImmutableBoundedValue<Integer> successCount() {
+        return successValue;
     }
 
     @Override
     public ImmutableValue<Boolean> doesTrackOutput() {
-        return new ImmutableSpongeValue<>(Keys.TRACKS_OUTPUT, this.tracks);
+        return tracksValue;
     }
 
     @Override
     public ImmutableOptionalValue<Text> lastOutput() {
-        return new ImmutableSpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
+        return lastOutputValue;
     }
 
     @Override
@@ -99,8 +118,32 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
         return 0;
     }
 
+    public String getStoredCommand() {
+        return storedCommand;
+    }
+
+    public int getSuccess() {
+        return success;
+    }
+
+    public boolean getTracks() {
+        return tracks;
+    }
+
+    public Text getLastOutput() {
+        return lastOutput;
+    }
+
     @Override
     protected void registerGetters() {
-        // TODO
+        registerKeyValue(Keys.COMMAND, ImmutableSpongeCommandData.this::storedCommand);
+        registerKeyValue(Keys.SUCCESS_COUNT, ImmutableSpongeCommandData.this::successCount);
+        registerKeyValue(Keys.TRACKS_OUTPUT, ImmutableSpongeCommandData.this::doesTrackOutput);
+        registerKeyValue(Keys.LAST_COMMAND_OUTPUT, ImmutableSpongeCommandData.this::lastOutput);
+
+        registerFieldGetter(Keys.COMMAND, ImmutableSpongeCommandData.this::getStoredCommand);
+        registerFieldGetter(Keys.SUCCESS_COUNT, ImmutableSpongeCommandData.this::getSuccess);
+        registerFieldGetter(Keys.TRACKS_OUTPUT, ImmutableSpongeCommandData.this::getTracks);
+        registerFieldGetter(Keys.LAST_COMMAND_OUTPUT, ImmutableSpongeCommandData.this::getLastOutput);
     }
 }
