@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
 
@@ -67,6 +68,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
     @Shadow private BlockPos spawnChunk;
+    @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -127,5 +129,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     public void setFlying(boolean flying) {
         this.capabilities.isFlying = flying;
+    }
+    
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
+    public boolean onIsPlayerSleeping(EntityPlayer self) {
+        if (self.isPlayerSleeping()) {
+            Sponge.getGame().getEventManager().post(SpongeEventFactory.createSleepingEventTick(Sponge.getGame(),
+                    Cause.of(this), this.getWorld().createSnapshot(VecHelper.toVector(this.playerLocation)), this));
+            return true;
+        }
+        return false;
     }
 }
