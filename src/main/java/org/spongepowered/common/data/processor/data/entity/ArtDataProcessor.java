@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import java.util.Optional;
-
+import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -38,9 +37,10 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.util.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import net.minecraft.entity.item.EntityPainting;
+import java.util.Optional;
 
 public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPainting, Art, Value<Art>, ArtData, ImmutableArtData> {
 
@@ -53,10 +53,12 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
         return DataTransactionBuilder.failNoData();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected boolean set(EntityPainting entity, Art value) {
-        entity.art = (EntityPainting.EnumArt) (Object) value;
-        // TODO Figure out how to force re-render of the entity
+        if (!entity.worldObj.isRemote) {
+            EntityUtil.refreshPainting(entity, (EntityPainting.EnumArt) (Object) value);
+        }
         return true;
     }
 

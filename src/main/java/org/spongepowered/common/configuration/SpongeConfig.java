@@ -92,6 +92,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String ENTITY_ACTIVATION_RANGE_AMBIENT = "ambient-activation-range";
     public static final String ENTITY_ACTIVATION_RANGE_MISC = "misc-activation-range";
     public static final String ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY = "human-player-list-remove-delay";
+    public static final String ENTITY_PAINTING_RESPAWN_DELAY = "entity-painting-respawn-delay";
 
     // BUNGEECORD
     public static final String BUNGEECORD_IP_FORWARDING = "ip-forwarding";
@@ -486,6 +487,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY,
                 comment = "Number of ticks before the fake player entry of a human is removed from the tab list (range of 0 to 100 ticks).")
         private int humanPlayerListRemoveDelay = 10;
+        @Setting(value = ENTITY_PAINTING_RESPAWN_DELAY,
+                comment = "Number of ticks before a painting is respawned on clients when their art is changed")
+        private int paintingRespawnDelaly = 2;
 
         public int getMaxBoundingBoxSize() {
             return this.maxBoundingBoxSize;
@@ -533,6 +537,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setHumanPlayerListRemoveDelay(int delay) {
             this.humanPlayerListRemoveDelay = Math.max(0, Math.min(delay, 100));
+        }
+
+        public int getPaintingRespawnDelaly() {
+            return this.paintingRespawnDelaly;
+        }
+
+        public void setPaintingRespawnDelaly(int paintingRespawnDelaly) {
+            this.paintingRespawnDelaly = Math.min(paintingRespawnDelaly, 1);
         }
     }
 

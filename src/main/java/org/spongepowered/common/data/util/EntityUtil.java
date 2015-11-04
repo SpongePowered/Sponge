@@ -25,10 +25,24 @@
 package org.spongepowered.common.data.util;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S10PacketSpawnPainting;
+import net.minecraft.network.play.server.S13PacketDestroyEntities;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.common.Sponge;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
 public final class EntityUtil {
+
     private EntityUtil() {
     }
 
@@ -67,6 +81,30 @@ public final class EntityUtil {
         }
 
         return (org.spongepowered.api.entity.Entity) baseVehicle;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
+        final EntityTracker paintingTracker = ((WorldServer) painting.worldObj).getEntityTracker();
+        EntityTrackerEntry paintingEntry = (EntityTrackerEntry) paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
+        List<EntityPlayerMP> playerMPs = new ArrayList<>();
+        for (EntityPlayerMP player : (Set<EntityPlayerMP>) paintingEntry.trackingPlayers) {
+            S13PacketDestroyEntities packet = new S13PacketDestroyEntities(painting.getEntityId());
+            player.playerNetServerHandler.sendPacket(packet);
+            playerMPs.add(player);
+        }
+        painting.art = art;
+        painting.func_174859_a(painting.facingDirection);
+        for (EntityPlayerMP playerMP : playerMPs) {
+            Sponge.getGame().getScheduler().createTaskBuilder()
+                .delayTicks(Sponge.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
+                .execute(() -> {
+                    final S10PacketSpawnPainting packet = new S10PacketSpawnPainting(painting);
+                    playerMP.playerNetServerHandler.sendPacket(packet);
+                })
+                .submit(Sponge.getPlugin());
+        }
+        return true;
     }
 
 }
