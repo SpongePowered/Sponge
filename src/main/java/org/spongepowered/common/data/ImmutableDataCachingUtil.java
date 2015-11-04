@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.Sponge;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -82,9 +83,11 @@ public final class ImmutableDataCachingUtil {
                     try {
                         return createUnsafeInstance(immutableClass, args);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                        Sponge.getLogger().error("Could not construct an ImmutableDataManipulator: " + immutableClass.getCanonicalName(), e);
+                        Sponge.getLogger().error("Could not construct an ImmutableDataManipulator: " + immutableClass.getCanonicalName() + " with the args: "
+                                                 + Arrays.toString(args), e);
                     }
-                    throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName());
+                    throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName() + " with the args: "
+                                                            + Arrays.toString(args));
             });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName(), e);

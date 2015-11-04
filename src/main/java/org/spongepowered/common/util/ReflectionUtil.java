@@ -35,7 +35,9 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A handy utility for doing some neat things with generics and reflection.
@@ -55,7 +57,13 @@ public final class ReflectionUtil {
         if (args == null) {
             args = new Object[] {null};
         }
-        return findConstructor(objectClass, args).newInstance(args);
+        final Constructor<T>tConstructor = findConstructor(objectClass, args);
+        try {
+            return tConstructor.newInstance(args);
+        } catch (Exception e) {
+            final Object[] deconstructedArgs = deconstructArray(args).toArray();
+            return tConstructor.newInstance(deconstructedArgs);
+        }
     }
 
     public static <T> T createInstance(final Class<T> objectClass, Object... args) {
@@ -86,6 +94,12 @@ public final class ReflectionUtil {
         for (final Constructor<?> ctor : ctors) {
             final Class<?>[] paramTypes = ctor.getParameterTypes();
             if (paramTypes.length != args.length) {
+                for (Object object : args) {
+                    if (object.getClass().isArray()) {
+                        final Object[] objects = deconstructArray(args).toArray();
+                        return findConstructor(objectClass, objects);
+                    }
+                }
                 continue; // we haven't found the right constructor
             }
             for (int i = 0; i < paramTypes.length; i++) {
@@ -98,6 +112,18 @@ public final class ReflectionUtil {
             return (Constructor<T>) ctor;
         }
         throw new IllegalArgumentException("Applicable constructor not found!");
+    }
+
+    private static List<Object> deconstructArray(Object[] objects) {
+        final List<Object> list = new ArrayList<>();
+        for (Object object : objects) {
+            if (object.getClass().isArray()) {
+                list.addAll(deconstructArray((Object[]) object));
+            } else {
+                list.add(object);
+            }
+        }
+        return list;
     }
 
 }

@@ -76,7 +76,8 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
         if (value instanceof Integer && ((Integer) upperBound) - ((Integer) lowerBound) <= ImmutableDataCachingUtil.CACHE_LIMIT_FOR_INDIVIDUAL_TYPE) {
             this.immutableBoundedValue = ImmutableSpongeBoundedValue.cachedOf(this.usedKey,
                                                                               this.defaultValue,
-                                                                              this.value, this.comparator,
+                                                                              this.value,
+                                                                              this.comparator,
                                                                               this.lowerBound,
                                                                               this.upperBound);
         } else {
