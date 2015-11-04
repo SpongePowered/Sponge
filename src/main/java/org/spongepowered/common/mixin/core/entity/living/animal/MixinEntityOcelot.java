@@ -56,6 +56,8 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
     public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
         if (currentItemStack != null) {
             this.currentItemStack = currentItemStack.copy();
+        } else {
+            this.currentItemStack = null;
         }
     }
 
