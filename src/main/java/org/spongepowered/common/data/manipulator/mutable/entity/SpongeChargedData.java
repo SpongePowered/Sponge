@@ -35,7 +35,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SpongeChargedData extends AbstractBooleanData<ChargedData, ImmutableChargedData> implements ChargedData {
 
     public SpongeChargedData(Boolean value) {
-        super(ChargedData.class, value, Keys.CREEPER_CHARGED, ImmutableSpongeChargedData.class);
+        super(ChargedData.class, value, Keys.CREEPER_CHARGED, ImmutableSpongeChargedData.class, false);
     }
 
     public SpongeChargedData() {
@@ -43,13 +43,8 @@ public class SpongeChargedData extends AbstractBooleanData<ChargedData, Immutabl
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return charged();
-    }
-
-    @Override
     public Value<Boolean> charged() {
-        return new SpongeValue<>(Keys.CREEPER_CHARGED, false, this.getValue());
+        return getValueGetter();
     }
 
 }

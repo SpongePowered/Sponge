@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
@@ -37,52 +33,20 @@ import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTradeOfferData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
 
 import java.util.List;
 
-public class SpongeTradeOfferData extends AbstractData<TradeOfferData, ImmutableTradeOfferData> implements TradeOfferData {
-
-    public static final DataQuery OFFERS = of("Offers");
+public class SpongeTradeOfferData extends AbstractSingleListData<TradeOffer, TradeOfferData, ImmutableTradeOfferData> implements TradeOfferData {
 
     private List<TradeOffer> offers = Lists.newArrayList();
 
     public SpongeTradeOfferData() {
-        super(TradeOfferData.class);
+        this(Lists.newArrayList());
     }
 
     public SpongeTradeOfferData(List<TradeOffer> tradeOffers) {
-        super(TradeOfferData.class);
-        this.offers.addAll(tradeOffers);
-        registerGettersAndSetters();
-    }
-
-    public List<TradeOffer> getOffers() {
-        return this.offers;
-    }
-
-    public TradeOfferData setOffers(List<TradeOffer> offers) {
-        this.offers.clear();
-        for (TradeOffer offer : offers) {
-            this.offers.add(checkNotNull(offer));
-        }
-        return this;
-    }
-
-    public TradeOfferData addOffer(TradeOffer offer) {
-        this.offers.add(checkNotNull(offer));
-        return this;
-    }
-
-    @Override
-    public TradeOfferData copy() {
-        return new SpongeTradeOfferData(this.offers);
-    }
-
-    @Override
-    public ImmutableTradeOfferData asImmutable() {
-        return new ImmutableSpongeTradeOfferData(this.offers);
+        super(TradeOfferData.class, tradeOffers, Keys.TRADE_OFFERS, ImmutableSpongeTradeOfferData.class);
     }
 
     @Override
@@ -92,16 +56,11 @@ public class SpongeTradeOfferData extends AbstractData<TradeOfferData, Immutable
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(OFFERS, this.offers);
+        return new MemoryDataContainer().set(Keys.TRADE_OFFERS.getQuery(), this.offers);
     }
 
     @Override
     public ListValue<TradeOffer> tradeOffers() {
-        return new SpongeListValue<>(Keys.TRADE_OFFERS, this.offers);
-    }
-
-    @Override
-    protected void registerGettersAndSetters() {
-        // TODO
+        return getValueGetter();
     }
 }

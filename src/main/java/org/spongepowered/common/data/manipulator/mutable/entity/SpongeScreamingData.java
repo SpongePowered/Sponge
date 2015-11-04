@@ -30,7 +30,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeScreamingData extends AbstractBooleanData<ScreamingData, ImmutableScreamingData> implements ScreamingData {
 
@@ -39,16 +38,11 @@ public class SpongeScreamingData extends AbstractBooleanData<ScreamingData, Immu
     }
 
     public SpongeScreamingData(boolean value) {
-        super(ScreamingData.class, value, Keys.IS_SCREAMING, ImmutableSpongeScreamingData.class);
+        super(ScreamingData.class, value, Keys.IS_SCREAMING, ImmutableSpongeScreamingData.class, false);
     }
 
     @Override
     public Value<Boolean> screaming() {
-        return new SpongeValue<>(Keys.IS_SCREAMING, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return screaming();
+        return getValueGetter();
     }
 }

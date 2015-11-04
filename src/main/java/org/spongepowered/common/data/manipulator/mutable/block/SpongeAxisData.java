@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.mutable.block.AxisData;
@@ -33,12 +31,11 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleEnumData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeAxisData extends AbstractSingleEnumData<Axis, AxisData, ImmutableAxisData> implements AxisData {
 
     public SpongeAxisData(Axis axis) {
-        super(AxisData.class, checkNotNull(axis), Keys.AXIS, ImmutableSpongeAxisData.class);
+        super(AxisData.class, axis, Keys.AXIS, ImmutableSpongeAxisData.class, Axis.X);
     }
 
     public SpongeAxisData() {
@@ -46,12 +43,7 @@ public class SpongeAxisData extends AbstractSingleEnumData<Axis, AxisData, Immut
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return type();
-    }
-
-    @Override
     public Value<Axis> type() {
-        return new SpongeValue<>(Keys.AXIS, getValue());
+        return getValueGetter();
     }
 }

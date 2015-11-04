@@ -41,21 +41,11 @@ public class SpongeFallDistanceData extends AbstractBoundedComparableData<Float,
     }
 
     public SpongeFallDistanceData(float fallDistance) {
-        super(FallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), ImmutableSpongeFallDistanceData.class, 0F, Float.MAX_VALUE);
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return this.fallDistance();
+        super(FallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), ImmutableSpongeFallDistanceData.class, 0F, Float.MAX_VALUE, 0F);
     }
 
     @Override
     public MutableBoundedValue<Float> fallDistance() {
-        return SpongeValueBuilder.boundedBuilder(Keys.FALL_DISTANCE)
-                .actualValue(this.getValue())
-                .defaultValue(0F)
-                .minimum(0F)
-                .maximum(Float.MAX_VALUE)
-                .build();
+        return getValueGetter();
     }
 }

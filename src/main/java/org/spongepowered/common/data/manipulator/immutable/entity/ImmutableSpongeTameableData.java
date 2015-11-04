@@ -43,6 +43,8 @@ import javax.annotation.Nullable;
 
 public class ImmutableSpongeTameableData extends AbstractImmutableData<ImmutableTameableData, TameableData> implements ImmutableTameableData {
 
+    //TODO: Wat
+
     //Lazily initialized, do not use directly, use create & createValue factory methods instead.
     @Nullable private static ImmutableSpongeTameableData empty = null;
     @Nullable private static ImmutableSpongeOptionalValue<UUID> emptyValue = null;

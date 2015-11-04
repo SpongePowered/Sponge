@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Booleans;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -34,56 +33,29 @@ import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
+import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
-public class ImmutableSpongePagedData extends AbstractImmutableData<ImmutablePagedData, PagedData> implements ImmutablePagedData {
-
-    private final ImmutableList<Text> pages;
+public class ImmutableSpongePagedData extends AbstractImmutableSingleListData<Text, ImmutablePagedData, PagedData> implements ImmutablePagedData {
 
     public ImmutableSpongePagedData() {
         this(ImmutableList.of(Texts.of()));
     }
 
     public ImmutableSpongePagedData(List<Text> pages) {
-        super(ImmutablePagedData.class);
-        this.pages = ImmutableList.copyOf(pages);
-        registerGetters();
+        super(ImmutablePagedData.class, pages, Keys.BOOK_PAGES, SpongePagedData.class);
     }
 
     @Override
     public ImmutableListValue<Text> pages() {
-        return new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, this.pages);
-    }
-
-    @Override
-    public PagedData asMutable() {
-        return new SpongePagedData(this.pages);
-    }
-
-    @Override
-    public int compareTo(ImmutablePagedData o) {
-        return Booleans.compare(o.pages().containsAll(this.pages),
-                this.pages.containsAll(o.pages().get()));
+        return getValueGetter();
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.pages));
+        return new MemoryDataContainer().set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.getValue()));
     }
-
-    public List<Text> getPages() {
-        return this.pages;
-    }
-
-    @Override
-    protected void registerGetters() {
-        registerFieldGetter(Keys.BOOK_PAGES, ImmutableSpongePagedData.this::getPages);
-        registerKeyValue(Keys.BOOK_PAGES, ImmutableSpongePagedData.this::pages);
-    }
-
 }

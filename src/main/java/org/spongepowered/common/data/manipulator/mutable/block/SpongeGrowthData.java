@@ -30,33 +30,25 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.manipulator.mutable.block.GrowthData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class SpongeGrowthData extends AbstractBoundedComparableData<Integer, GrowthData, ImmutableGrowthData> implements GrowthData {
 
     public SpongeGrowthData() {
-        this(0, 0, 1);
+        this(0);
+    }
+
+    public SpongeGrowthData(int value) {
+        this(value, 0, 1);
     }
 
     public SpongeGrowthData(int value, int lowerBound, int upperBound) {
-        super(GrowthData.class, value, Keys.GROWTH_STAGE, intComparator(), ImmutableSpongeGrowthData.class, lowerBound, upperBound);
+        super(GrowthData.class, value, Keys.GROWTH_STAGE, intComparator(), ImmutableSpongeGrowthData.class, lowerBound, upperBound, 0);
     }
 
     @Override
     public MutableBoundedValue<Integer> growthStage() {
-        return SpongeValueBuilder.boundedBuilder(Keys.FLUID_LEVEL)
-            .defaultValue(0)
-            .minimum(this.lowerBound)
-            .maximum(this.upperBound)
-            .actualValue(this.getValue())
-            .build();
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return growthStage();
+        return getValueGetter();
     }
 }

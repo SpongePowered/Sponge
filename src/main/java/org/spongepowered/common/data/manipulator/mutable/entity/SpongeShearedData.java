@@ -30,12 +30,11 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeShearedData extends AbstractBooleanData<ShearedData, ImmutableShearedData> implements ShearedData {
 
     public SpongeShearedData(boolean value) {
-        super(ShearedData.class, value, Keys.IS_SHEARED, ImmutableSpongeShearedData.class);
+        super(ShearedData.class, value, Keys.IS_SHEARED, ImmutableSpongeShearedData.class, false);
     }
 
     public SpongeShearedData() {
@@ -43,12 +42,7 @@ public class SpongeShearedData extends AbstractBooleanData<ShearedData, Immutabl
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return sheared();
-    }
-
-    @Override
     public Value<Boolean> sheared() {
-        return new SpongeValue<>(Keys.IS_SHEARED, false, this.getValue());
+        return getValueGetter();
     }
 }

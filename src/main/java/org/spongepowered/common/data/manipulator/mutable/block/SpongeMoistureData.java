@@ -30,29 +30,25 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeMoistureData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class SpongeMoistureData extends AbstractBoundedComparableData<Integer, MoistureData, ImmutableMoistureData> implements MoistureData {
 
+    public SpongeMoistureData() {
+        this(0);
+    }
+
+    public SpongeMoistureData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
+    }
+
     public SpongeMoistureData(int value, int lowerBound, int upperBound) {
-        super(MoistureData.class, value, Keys.MOISTURE, intComparator(), ImmutableSpongeMoistureData.class, lowerBound, upperBound);
+        super(MoistureData.class, value, Keys.MOISTURE, intComparator(), ImmutableSpongeMoistureData.class, lowerBound, upperBound, 0);
     }
 
     @Override
     public MutableBoundedValue<Integer> moisture() {
-        return SpongeValueBuilder.boundedBuilder(Keys.MOISTURE)
-            .defaultValue(0)
-            .minimum(this.lowerBound)
-            .maximum(this.upperBound)
-            .actualValue(this.getValue())
-            .build();
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return moisture();
+        return getValueGetter();
     }
 }

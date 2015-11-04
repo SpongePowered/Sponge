@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
+import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -41,31 +42,41 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
     private final Text displayName;
     private final boolean displays;
 
+    private final ImmutableValue<Text> nameValue;
+    private final ImmutableValue<Boolean> displaysValue;
+
     public ImmutableSpongeDisplayNameData(Text displayName, boolean displays) {
         super(ImmutableDisplayNameData.class);
         this.displayName = displayName;
         this.displays = displays;
+
+        this.nameValue = new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, this.displayName);
+        this.displaysValue = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, this.displays);
+
         registerGetters();
     }
 
     @Override
     public ImmutableValue<Text> displayName() {
-        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, this.displayName);
+        return nameValue;
     }
 
     @Override
     public ImmutableValue<Boolean> customNameVisible() {
-        return ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, this.displays);
+        return displaysValue;
     }
 
     @Override
     public DisplayNameData asMutable() {
-        return new SpongeDisplayNameData(this.displayName).setDisplays(this.displays);
+        return new SpongeDisplayNameData(this.displayName, this.displays);
     }
 
     @Override
     public int compareTo(ImmutableDisplayNameData o) {
-        return 0;
+        return ComparisonChain.start()
+                .compare(Texts.json().to(o.get(Keys.DISPLAY_NAME).get()), Texts.json().to(this.displayName))
+                .compare(o.get(Keys.SHOWS_DISPLAY_NAME).get(), this.displays)
+                .result();
     }
 
     @Override

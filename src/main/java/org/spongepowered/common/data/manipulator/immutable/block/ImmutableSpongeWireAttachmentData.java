@@ -47,34 +47,47 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     private final ImmutableMap<Direction, WireAttachmentType> wireAttachmentMap;
 
+    private final ImmutableMapValue<Direction, WireAttachmentType> wireAttachmentsValue;
+    private final ImmutableValue<WireAttachmentType> northValue;
+    private final ImmutableValue<WireAttachmentType> southValue;
+    private final ImmutableValue<WireAttachmentType> eastValue;
+    private final ImmutableValue<WireAttachmentType> westValue;
+
     public ImmutableSpongeWireAttachmentData(Map<Direction, WireAttachmentType> wireAttachmentMap) {
         super(ImmutableWireAttachmentData.class);
         this.wireAttachmentMap = ImmutableMap.copyOf(wireAttachmentMap);
+
+        this.wireAttachmentsValue = new ImmutableSpongeMapValue<Direction, WireAttachmentType>(Keys.WIRE_ATTACHMENTS, wireAttachmentMap);
+        this.northValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_NORTH, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.NORTH));
+        this.southValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_SOUTH, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.SOUTH));
+        this.eastValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_EAST, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.EAST));
+        this.westValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_WEST, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.WEST));
+
     }
 
     @Override
     public ImmutableMapValue<Direction, WireAttachmentType> wireAttachments() {
-        return new ImmutableSpongeMapValue<>(Keys.WIRE_ATTACHMENTS, this.wireAttachmentMap);
+        return wireAttachmentsValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentNorth() {
-        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_NORTH, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.NORTH));
+        return northValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentSouth() {
-        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_SOUTH, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.SOUTH));
+        return southValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentEast() {
-        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_EAST, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.EAST));
+        return eastValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentWest() {
-        return ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_WEST, WireAttachmentTypes.NONE, this.wireAttachmentMap.get(Direction.WEST));
+        return westValue;
     }
 
     @Override
@@ -102,8 +115,38 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
             .set(Keys.WIRE_ATTACHMENT_WEST.getQuery(), this.wireAttachmentMap.get(Direction.WEST).getId());
     }
 
+    public ImmutableMap<Direction, WireAttachmentType> getWireAttachmentMap() {
+        return wireAttachmentMap;
+    }
+
+    private WireAttachmentType getNorth() {
+        return this.wireAttachmentMap.get(Direction.NORTH);
+    }
+
+    private WireAttachmentType getSouth() {
+        return this.wireAttachmentMap.get(Direction.SOUTH);
+    }
+
+    private WireAttachmentType getEast() {
+        return this.wireAttachmentMap.get(Direction.EAST);
+    }
+
+    private WireAttachmentType getWest() {
+        return this.wireAttachmentMap.get(Direction.WEST);
+    }
+
     @Override
     protected void registerGetters() {
-        // TODO
+        registerKeyValue(Keys.WIRE_ATTACHMENTS, ImmutableSpongeWireAttachmentData.this::wireAttachments);
+        registerKeyValue(Keys.WIRE_ATTACHMENT_NORTH, ImmutableSpongeWireAttachmentData.this::wireAttachmentNorth);
+        registerKeyValue(Keys.WIRE_ATTACHMENT_SOUTH, ImmutableSpongeWireAttachmentData.this::wireAttachmentSouth);
+        registerKeyValue(Keys.WIRE_ATTACHMENT_EAST, ImmutableSpongeWireAttachmentData.this::wireAttachmentEast);
+        registerKeyValue(Keys.WIRE_ATTACHMENT_WEST, ImmutableSpongeWireAttachmentData.this::wireAttachmentWest);
+
+        registerFieldGetter(Keys.WIRE_ATTACHMENTS, ImmutableSpongeWireAttachmentData.this::getWireAttachmentMap);
+        registerFieldGetter(Keys.WIRE_ATTACHMENT_NORTH, ImmutableSpongeWireAttachmentData.this::getNorth);
+        registerFieldGetter(Keys.WIRE_ATTACHMENT_SOUTH, ImmutableSpongeWireAttachmentData.this::getSouth);
+        registerFieldGetter(Keys.WIRE_ATTACHMENT_EAST, ImmutableSpongeWireAttachmentData.this::getEast);
+        registerFieldGetter(Keys.WIRE_ATTACHMENT_WEST, ImmutableSpongeWireAttachmentData.this::getWest);
     }
 }

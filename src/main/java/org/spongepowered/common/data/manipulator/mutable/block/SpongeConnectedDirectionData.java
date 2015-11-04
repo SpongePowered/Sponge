@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.block;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -92,11 +95,88 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer(); // todo
+        return new MemoryDataContainer()
+                .set(Keys.CONNECTED_DIRECTIONS.getQuery(), this.connectedDirections)
+                .set(Keys.CONNECTED_NORTH.getQuery(), this.connectedDirections.contains(Direction.NORTH))
+                .set(Keys.CONNECTED_SOUTH.getQuery(), this.connectedDirections.contains(Direction.SOUTH))
+                .set(Keys.CONNECTED_EAST.getQuery(), this.connectedDirections.contains(Direction.EAST))
+                .set(Keys.CONNECTED_WEST.getQuery(), this.connectedDirections.contains(Direction.WEST));
+    }
+
+    private Set<Direction> getDirections() {
+        return connectedDirections;
+    }
+
+    private boolean isNorth() {
+        return connectedDirections.contains(Direction.NORTH);
+    }
+
+    private boolean isSouth() {
+        return connectedDirections.contains(Direction.SOUTH);
+    }
+
+    private boolean isEast() {
+        return connectedDirections.contains(Direction.EAST);
+    }
+
+    private boolean isWest() {
+        return connectedDirections.contains(Direction.WEST);
+    }
+
+    private void setDirections(Set<Direction> directions) {
+        this.connectedDirections = EnumSet.copyOf(checkNotNull(directions));
+    }
+
+    private void setNorth(Boolean north) {
+        if(checkNotNull(north)) {
+            this.connectedDirections.add(Direction.NORTH);
+        } else {
+            this.connectedDirections.remove(Direction.NORTH);
+        }
+    }
+
+    private void setSouth(Boolean south) {
+        if(checkNotNull(south)) {
+            this.connectedDirections.add(Direction.SOUTH);
+        } else {
+            this.connectedDirections.remove(Direction.SOUTH);
+        }
+    }
+
+    private void setEast(Boolean east) {
+        if(checkNotNull(east)) {
+            this.connectedDirections.add(Direction.EAST);
+        } else {
+            this.connectedDirections.remove(Direction.EAST);
+        }
+    }
+
+    private void setWest(Boolean west) {
+        if(checkNotNull(west)) {
+            this.connectedDirections.add(Direction.WEST);
+        } else {
+            this.connectedDirections.remove(Direction.WEST);
+        }
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        // TODO
+        registerKeyValue(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::connectedDirections);
+        registerKeyValue(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::connectedNorth);
+        registerKeyValue(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::connectedSouth);
+        registerKeyValue(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::connectedEast);
+        registerKeyValue(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::connectedWest);
+
+        registerFieldGetter(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::getDirections);
+        registerFieldGetter(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::isNorth);
+        registerFieldGetter(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::isSouth);
+        registerFieldGetter(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::isEast);
+        registerFieldGetter(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::isWest);
+
+        registerFieldSetter(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::setDirections);
+        registerFieldSetter(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::setNorth);
+        registerFieldSetter(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::setSouth);
+        registerFieldSetter(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::setEast);
+        registerFieldSetter(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::setWest);
     }
 }

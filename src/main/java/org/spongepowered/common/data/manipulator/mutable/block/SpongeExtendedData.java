@@ -30,21 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.ExtendedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeExtendedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeExtendedData extends AbstractBooleanData<ExtendedData, ImmutableExtendedData> implements ExtendedData {
 
     public SpongeExtendedData(boolean value) {
-        super(ExtendedData.class, value, Keys.EXTENDED, ImmutableSpongeExtendedData.class);
+        super(ExtendedData.class, value, Keys.EXTENDED, ImmutableSpongeExtendedData.class, false);
     }
 
     @Override
     public Value<Boolean> extended() {
-        return new SpongeValue<>(Keys.EXTENDED, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return extended();
+        return getValueGetter();
     }
 }

@@ -30,12 +30,11 @@ import org.spongepowered.api.data.manipulator.mutable.block.AttachedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAttachedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeAttachedData extends AbstractBooleanData<AttachedData, ImmutableAttachedData> implements AttachedData {
 
     public SpongeAttachedData(boolean attached) {
-        super(AttachedData.class, attached, Keys.ATTACHED, ImmutableSpongeAttachedData.class);
+        super(AttachedData.class, attached, Keys.ATTACHED, ImmutableSpongeAttachedData.class, false);
     }
 
     public SpongeAttachedData() {
@@ -44,11 +43,6 @@ public class SpongeAttachedData extends AbstractBooleanData<AttachedData, Immuta
 
     @Override
     public Value<Boolean> attached() {
-        return new SpongeValue<>(Keys.ATTACHED, false, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return attached();
+        return getValueGetter();
     }
 }

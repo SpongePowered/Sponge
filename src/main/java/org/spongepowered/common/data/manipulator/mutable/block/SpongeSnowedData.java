@@ -30,21 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.SnowedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSnowedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeSnowedData extends AbstractBooleanData<SnowedData, ImmutableSnowedData> implements SnowedData {
 
     public SpongeSnowedData(boolean value) {
-        super(SnowedData.class, value, Keys.SNOWED, ImmutableSpongeSnowedData.class);
+        super(SnowedData.class, value, Keys.SNOWED, ImmutableSpongeSnowedData.class, false);
     }
 
     @Override
     public Value<Boolean> hasSnow() {
-        return new SpongeValue<>(Keys.SNOWED, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return hasSnow();
+        return getValueGetter();
     }
 }

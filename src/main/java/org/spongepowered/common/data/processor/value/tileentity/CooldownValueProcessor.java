@@ -30,21 +30,27 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 import java.util.Optional;
 
-public class CooldownValueProcessor extends AbstractSpongeValueProcessor<TileEntityHopper, Integer, Value<Integer>> {
+public class CooldownValueProcessor extends AbstractSpongeValueProcessor<TileEntityHopper, Integer, MutableBoundedValue<Integer>> {
 
     public CooldownValueProcessor() {
         super(TileEntityHopper.class, Keys.COOLDOWN);
     }
 
     @Override
-    public Value<Integer> constructValue(Integer defaultValue) {
-        return new SpongeValueBuilder().createValue(Keys.COOLDOWN, defaultValue, -1);
+    public MutableBoundedValue<Integer> constructValue(Integer value) {
+        return SpongeValueBuilder.boundedBuilder(Keys.COOLDOWN)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .defaultValue(0)
+                .actualValue(value)
+                .build();
     }
 
     @Override

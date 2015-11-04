@@ -30,12 +30,11 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FlyingAbilityData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingAbilityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeFlyingAbilityData extends AbstractBooleanData<FlyingAbilityData, ImmutableFlyingAbilityData> implements FlyingAbilityData {
 
     public SpongeFlyingAbilityData(boolean value) {
-        super(FlyingAbilityData.class, value, Keys.CAN_FLY, ImmutableSpongeFlyingAbilityData.class);
+        super(FlyingAbilityData.class, value, Keys.CAN_FLY, ImmutableSpongeFlyingAbilityData.class, false);
     }
 
     public SpongeFlyingAbilityData() {
@@ -43,13 +42,8 @@ public class SpongeFlyingAbilityData extends AbstractBooleanData<FlyingAbilityDa
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return canFly();
-    }
-
-    @Override
     public Value<Boolean> canFly() {
-        return new SpongeValue<>(Keys.CAN_FLY, false, this.getValue());
+        return getValueGetter();
     }
 
 }

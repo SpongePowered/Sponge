@@ -30,21 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.InWallData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeInWallData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeInWallData extends AbstractBooleanData<InWallData, ImmutableInWallData> implements InWallData {
 
     public SpongeInWallData(boolean value) {
-        super(InWallData.class, value, Keys.IN_WALL, ImmutableSpongeInWallData.class);
+        super(InWallData.class, value, Keys.IN_WALL, ImmutableSpongeInWallData.class, false);
     }
 
     @Override
     public Value<Boolean> inWall() {
-        return new SpongeValue<>(Keys.IN_WALL, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return inWall();
+        return getValueGetter();
     }
 }

@@ -40,14 +40,14 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 public abstract class AbstractImmutableSingleListData<E, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
-    extends AbstractImmutableSingleData<List<E>, I, M> {
+        extends AbstractImmutableSingleData<List<E>, I, M> {
 
     private final Class<? extends M> mutable;
     private final ImmutableListValue<E> listValue;
 
-    public AbstractImmutableSingleListData(Class<I> manipulatorClass, List<E> value,
-                                           Key<? extends BaseValue<List<E>>> usedKey,
-                                           Class<? extends M> mutableClass) {
+    protected AbstractImmutableSingleListData(Class<I> manipulatorClass, List<E> value,
+                                              Key<? extends BaseValue<List<E>>> usedKey,
+                                              Class<? extends M> mutableClass) {
         super(manipulatorClass, ImmutableList.copyOf(value), usedKey);
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");

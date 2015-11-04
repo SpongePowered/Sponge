@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.manipulator.immutable;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocationData;
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
@@ -37,6 +38,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingleData<Location<World>, ImmutableTargetedLocationData, TargetedLocationData>
     implements ImmutableTargetedLocationData {
+
+    private final ImmutableValue<Location<World>> immutableValue = new ImmutableSpongeValue<>(Keys.TARGETED_LOCATION, this.value);
 
     public ImmutableSpongeTargetedLocationData(Location<World> value) {
         super(ImmutableTargetedLocationData.class, value, Keys.TARGETED_LOCATION);
@@ -54,11 +57,14 @@ public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingle
 
     @Override
     public ImmutableValue<Location<World>> target() {
-        return new ImmutableSpongeValue<>(Keys.TARGETED_LOCATION, this.value);
+        return immutableValue;
     }
 
     @Override
     public int compareTo(ImmutableTargetedLocationData o) {
-        return 0;
+        return ComparisonChain.start()
+                .compare(o.get(Keys.TARGETED_LOCATION).get().getPosition(), this.getValue().getPosition())
+                .compare(o.get(Keys.TARGETED_LOCATION).get().getExtent().getName(), this.getValue().getExtent().getName())
+                .result();
     }
 }
