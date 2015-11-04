@@ -257,7 +257,7 @@ public class NbtDataUtil {
 
     public static List<ItemEnchantment> getItemEnchantments(ItemStack itemStack) {
         if (!itemStack.isItemEnchanted()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         final List<ItemEnchantment> enchantments = Lists.newArrayList();
         final NBTTagList list = itemStack.getEnchantmentTagList();

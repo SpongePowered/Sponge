@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.shortComparator;
-
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;

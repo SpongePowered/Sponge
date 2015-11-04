@@ -41,7 +41,7 @@ import org.spongepowered.common.data.value.SpongeValueBuilder;
 public class SpongeDurabilityData extends AbstractData<DurabilityData, ImmutableDurabilityData> implements DurabilityData {
 
     private int durability;
-    private int defaultDurability;
+    private final int defaultDurability;
     private boolean unbreakable;
 
     public SpongeDurabilityData() {

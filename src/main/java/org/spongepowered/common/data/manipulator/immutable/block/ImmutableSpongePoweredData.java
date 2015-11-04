@@ -30,21 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.block.PoweredData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePoweredData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongePoweredData extends AbstractImmutableBooleanData<ImmutablePoweredData, PoweredData> implements ImmutablePoweredData {
 
     public ImmutableSpongePoweredData(boolean value) {
-        super(ImmutablePoweredData.class, value, Keys.POWERED, SpongePoweredData.class);
+        super(ImmutablePoweredData.class, value, Keys.POWERED, SpongePoweredData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> powered() {
-        return ImmutableSpongeValue.cachedOf(Keys.POWERED, false, this.value);
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return powered();
-    }
 }

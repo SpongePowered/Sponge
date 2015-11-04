@@ -30,22 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeSittingData extends AbstractImmutableBooleanData<ImmutableSittingData, SittingData> implements ImmutableSittingData {
 
     public ImmutableSpongeSittingData(boolean value) {
-        super(ImmutableSittingData.class, value, Keys.IS_SITTING, SpongeSittingData.class);
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return sitting();
+        super(ImmutableSittingData.class, value, Keys.IS_SITTING, SpongeSittingData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> sitting() {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_SITTING, false, this.value);
+        return getValueGetter();
     }
 
 }

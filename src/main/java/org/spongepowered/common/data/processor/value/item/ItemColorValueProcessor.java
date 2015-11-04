@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import java.awt.Color;
-import java.util.Optional;
-
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -40,7 +38,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.ColorUtil;
 
-import net.minecraft.item.ItemStack;
+import java.awt.Color;
+import java.util.Optional;
 
 public class ItemColorValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Color, Value<Color>> {
 

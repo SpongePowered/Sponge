@@ -30,25 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeChargedData extends AbstractImmutableBooleanData<ImmutableChargedData, ChargedData> implements ImmutableChargedData {
 
-    private final ImmutableValue<Boolean> cachedValue;
-
-    public ImmutableSpongeChargedData(Boolean value) {
-        super(ImmutableChargedData.class, value, Keys.CREEPER_CHARGED, SpongeChargedData.class);
-        this.cachedValue = ImmutableSpongeValue.cachedOf(Keys.CREEPER_CHARGED, false, this.value);
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return charged();
+    public ImmutableSpongeChargedData(boolean value) {
+        super(ImmutableChargedData.class, value, Keys.CREEPER_CHARGED, SpongeChargedData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> charged() {
-        return this.cachedValue;
+        return getValueGetter();
     }
 
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.common.primitives.Booleans;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
@@ -38,6 +37,7 @@ import org.spongepowered.common.data.manipulator.immutable.common.collection.Abs
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData<BlockType, ImmutablePlaceableData, PlaceableData> implements ImmutablePlaceableData {
 
@@ -57,16 +57,16 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData
 
     @Override
     public DataContainer toContainer() {
-        Set<String> placeableIds = Sets.newHashSetWithExpectedSize(getValue().size());
-        for (BlockType placeable : getValue()) {
-            placeableIds.add(placeable.getId());
-        }
-        return new MemoryDataContainer().set(Keys.PLACEABLE_BLOCKS.getQuery(), placeableIds);
+        return new MemoryDataContainer()
+            .set(Keys.PLACEABLE_BLOCKS.getQuery(), getValue()
+                .stream()
+                .map(BlockType::getId)
+                .collect(Collectors.toList()));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public ImmutableSetValue<BlockType> placeable() {
-        return (ImmutableSetValue<BlockType>) getValueGetter();
+        return getValueGetter();
     }
 }

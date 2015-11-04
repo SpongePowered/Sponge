@@ -30,22 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeAgentData extends AbstractImmutableBooleanData<ImmutableAgentData, AgentData> implements ImmutableAgentData {
 
     public ImmutableSpongeAgentData(Boolean value) {
-        super(ImmutableAgentData.class, value, Keys.AI_ENABLED, SpongeAgentData.class);
+        super(ImmutableAgentData.class, value, Keys.AI_ENABLED, SpongeAgentData.class, true);
     }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return aiEnabled();
-    }
-
     @Override
     public ImmutableValue<Boolean> aiEnabled() {
-        return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, this.value);
+        return getValueGetter();
     }
 
 }

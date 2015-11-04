@@ -31,30 +31,21 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallDistanceData;
 import org.spongepowered.common.data.util.ComparatorUtil;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class ImmutableSpongeFallDistanceData extends AbstractImmutableBoundedComparableData<Float, ImmutableFallDistanceData, FallDistanceData>
         implements ImmutableFallDistanceData {
-
-    private final ImmutableBoundedValue<Float> fallDistanceValue = SpongeValueBuilder.boundedBuilder(Keys.FALL_DISTANCE)
-            .actualValue(this.value)
-            .defaultValue(0F)
-            .minimum(0F)
-            .maximum(Float.MAX_VALUE)
-            .build()
-            .asImmutable();
 
     public ImmutableSpongeFallDistanceData() {
         this(0);
     }
 
     public ImmutableSpongeFallDistanceData(float fallDistance) {
-        super(ImmutableFallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), SpongeFallDistanceData.class, 0F, Float.MAX_VALUE);
+        super(ImmutableFallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), SpongeFallDistanceData.class, 0F, Float.MAX_VALUE, 0F);
     }
 
 
     @Override
     public ImmutableBoundedValue<Float> fallDistance() {
-        return fallDistanceValue;
+        return this.getValueGetter();
     }
 }

@@ -44,12 +44,12 @@ public class DisguisedBlockDataProcessor extends
 
     @Override
     protected int setToMeta(DisguisedBlockType value) {
-        return ((BlockSilverfish.EnumType) (Object) value).getMetadata();
+        return ((BlockSilverfish.EnumType) value).getMetadata();
     }
 
     @Override
     protected DisguisedBlockType getFromMeta(int meta) {
-        return (DisguisedBlockType) (Object) BlockSilverfish.EnumType.byMetadata(meta);
+        return (DisguisedBlockType) BlockSilverfish.EnumType.byMetadata(meta);
     }
 
     @Override

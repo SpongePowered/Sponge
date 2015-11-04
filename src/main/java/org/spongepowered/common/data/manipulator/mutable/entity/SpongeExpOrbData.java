@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -33,8 +35,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class SpongeExpOrbData extends AbstractSingleData<Integer, ExpOrbData, ImmutableExpOrbData> implements ExpOrbData {
 

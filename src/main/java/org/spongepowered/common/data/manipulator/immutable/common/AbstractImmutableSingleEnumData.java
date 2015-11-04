@@ -43,7 +43,7 @@ public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I exten
 
     private final Class<? extends M> mutableClass;
     private final E defaultValue;
-    protected final ImmutableValue<E> cachedValue;
+    private final ImmutableValue<E> cachedValue;
 
     public AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
@@ -54,13 +54,13 @@ public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I exten
         this.cachedValue = ImmutableSpongeValue.cachedOf(this.usedKey, this.defaultValue, this.value);
     }
 
-    public ImmutableValue<E> type() {
+    public final ImmutableValue<E> type() {
         return this.cachedValue;
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return type();
+    protected final ImmutableValue<E> getValueGetter() {
+        return this.cachedValue;
     }
 
     @Override

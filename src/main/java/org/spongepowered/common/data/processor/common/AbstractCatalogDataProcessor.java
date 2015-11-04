@@ -69,7 +69,7 @@ public abstract class AbstractCatalogDataProcessor<T, V extends BaseValue<T>, M 
 
     @Override
     protected ImmutableValue<T> constructImmutableValue(T value) {
-        return ImmutableSpongeValue.cachedOf(key, getDefaultValue(), value);
+        return ImmutableSpongeValue.cachedOf(this.key, getDefaultValue(), value);
     }
 
 }

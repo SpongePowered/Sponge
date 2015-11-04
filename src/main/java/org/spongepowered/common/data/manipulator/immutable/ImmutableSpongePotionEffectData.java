@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
 import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
@@ -32,7 +31,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
 
@@ -45,7 +43,7 @@ public class ImmutableSpongePotionEffectData extends AbstractImmutableSingleList
 
     @Override
     public ImmutableListValue<PotionEffect> effects() {
-        return new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, ImmutableList.copyOf(this.value));
+        return getValueGetter();
     }
 
 }

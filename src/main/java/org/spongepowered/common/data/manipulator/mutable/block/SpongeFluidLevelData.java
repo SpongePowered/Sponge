@@ -34,7 +34,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeFluidLevelData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class SpongeFluidLevelData extends AbstractBoundedComparableData<Integer, FluidLevelData, ImmutableFluidLevelData> implements FluidLevelData {
 

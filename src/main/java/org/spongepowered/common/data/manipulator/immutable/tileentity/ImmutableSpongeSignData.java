@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -34,49 +32,30 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
+import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ImmutableSpongeSignData extends AbstractImmutableData<ImmutableSignData, SignData> implements ImmutableSignData {
-
-    private final ImmutableList<Text> lines;
-    private final ImmutableListValue<Text> linesValues;
+public class ImmutableSpongeSignData extends AbstractImmutableSingleListData<Text, ImmutableSignData, SignData> implements ImmutableSignData {
 
     public ImmutableSpongeSignData(List<Text> lines) {
-        super(ImmutableSignData.class);
-        this.lines = ImmutableList.copyOf(lines);
-        this.linesValues = new ImmutableSpongeListValue<>(Keys.SIGN_LINES, this.lines);
-        registerGetters();
+        super(ImmutableSignData.class, lines, Keys.SIGN_LINES, SpongeSignData.class);
     }
 
     @Override
     public ImmutableListValue<Text> lines() {
-        return this.linesValues;
-    }
-
-    @Override
-    public SignData asMutable() {
-        return new SpongeSignData(Lists.newArrayList(this.lines));
+        return this.getValueGetter();
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
-        jsonLines.addAll(this.lines.stream().map(line -> Texts.json().to(line)).collect(Collectors.toList()));
-        return new MemoryDataContainer().set(Keys.SIGN_LINES.getQuery(), jsonLines);
+        return new MemoryDataContainer()
+            .set(Keys.SIGN_LINES.getQuery(), this.getValue()
+                .stream()
+                .map(line -> Texts.json().to(line))
+                .collect(Collectors.toList()));
     }
 
-    @Override
-    public int compareTo(ImmutableSignData o) {
-        return 0;
-    }
-
-    @Override
-    protected void registerGetters() {
-
-    }
 }

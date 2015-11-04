@@ -31,7 +31,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.util.ReflectionUtil;
@@ -43,6 +43,7 @@ public abstract class AbstractImmutableSingleListData<E, I extends ImmutableData
     extends AbstractImmutableSingleData<List<E>, I, M> {
 
     private final Class<? extends M> mutable;
+    private final ImmutableListValue<E> listValue;
 
     public AbstractImmutableSingleListData(Class<I> manipulatorClass, List<E> value,
                                            Key<? extends BaseValue<List<E>>> usedKey,
@@ -51,11 +52,12 @@ public abstract class AbstractImmutableSingleListData<E, I extends ImmutableData
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.mutable = mutableClass;
+        this.listValue = new ImmutableSpongeListValue<>(this.usedKey, ImmutableList.copyOf(this.value));
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return new ImmutableSpongeListValue<>(this.usedKey, ImmutableList.copyOf(this.value));
+    protected final ImmutableListValue<E> getValueGetter() {
+        return this.listValue;
     }
 
     @Override
@@ -65,6 +67,7 @@ public abstract class AbstractImmutableSingleListData<E, I extends ImmutableData
 
     @Override
     public int compareTo(I o) {
-        return 0;
+        final List<E> list = o.get(this.usedKey).get();
+        return Boolean.compare(list.containsAll(this.getValue()), this.getValue().containsAll(list));
     }
 }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
@@ -33,11 +35,9 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 public class ImmutableSpongeExpOrbData extends AbstractImmutableSingleData<Integer, ImmutableExpOrbData, ExpOrbData> implements ImmutableExpOrbData {
 
-    ImmutableBoundedValue<Integer> cachedValue;
+    final ImmutableBoundedValue<Integer> cachedValue;
 
     public ImmutableSpongeExpOrbData(Integer value) {
         super(ImmutableExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE);
@@ -56,7 +56,7 @@ public class ImmutableSpongeExpOrbData extends AbstractImmutableSingleData<Integ
 
     @Override
     public ImmutableValue<Integer> experience() {
-        return cachedValue;
+        return this.cachedValue;
     }
 
     @Override

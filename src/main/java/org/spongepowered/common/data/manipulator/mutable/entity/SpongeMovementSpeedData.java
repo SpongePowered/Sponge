@@ -34,9 +34,6 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 
 public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, ImmutableMovementSpeedData> implements MovementSpeedData {
 

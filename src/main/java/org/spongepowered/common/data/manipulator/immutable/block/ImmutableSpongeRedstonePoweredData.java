@@ -32,16 +32,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableBoundedComparableData<Integer, ImmutableRedstonePoweredData, RedstonePoweredData> implements ImmutableRedstonePoweredData {
 
     public ImmutableSpongeRedstonePoweredData(int value, int lowerBound, int upperBound) {
-        super(ImmutableRedstonePoweredData.class, value, Keys.POWER, intComparator(), SpongeRedstonePoweredData.class, lowerBound, upperBound);
+        super(ImmutableRedstonePoweredData.class, value, Keys.POWER, intComparator(), SpongeRedstonePoweredData.class, lowerBound, upperBound, 0);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> power() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.POWER, 0, this.value, this.comparator, 0, 15);
+        return getValueGetter();
     }
 }

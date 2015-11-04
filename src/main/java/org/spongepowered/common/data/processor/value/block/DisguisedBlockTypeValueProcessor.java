@@ -46,12 +46,12 @@ public class DisguisedBlockTypeValueProcessor extends AbstractCatalogDataValuePr
 
     @Override
     protected DisguisedBlockType getFromMeta(int meta) {
-        return (DisguisedBlockType) (Object) BlockSilverfish.EnumType.byMetadata(meta);
+        return (DisguisedBlockType) BlockSilverfish.EnumType.byMetadata(meta);
     }
 
     @Override
     protected int setToMeta(DisguisedBlockType type) {
-        return ((BlockSilverfish.EnumType) (Object) type).getMetadata();
+        return ((BlockSilverfish.EnumType) type).getMetadata();
     }
 
     @Override

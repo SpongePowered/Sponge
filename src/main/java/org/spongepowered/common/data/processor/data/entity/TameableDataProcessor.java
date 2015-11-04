@@ -58,7 +58,7 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
 
     @Override
     public Optional<TameableData> from(DataHolder dataHolder) {
-        if(dataHolder instanceof EntityTameable) {
+        if (dataHolder instanceof EntityTameable) {
             final Optional<UUID> uuidOptional = getTamer(((EntityTameable) dataHolder));
             return Optional.<TameableData>of(new SpongeTameableData(uuidOptional.orElse(null)));
         } else {
@@ -68,8 +68,10 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
 
     @Override
     public Optional<TameableData> fill(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
-        if(dataHolder instanceof EntityTameable) {
-            final TameableData merged = checkNotNull(overlap, "MergeFunction cannot be null!").merge(checkNotNull(manipulator).copy(), from(dataHolder).orElse(null));
+        if (dataHolder instanceof EntityTameable) {
+            final TameableData
+                merged =
+                checkNotNull(overlap, "MergeFunction cannot be null!").merge(checkNotNull(manipulator).copy(), from(dataHolder).orElse(null));
             manipulator.set(Keys.TAMED_OWNER, merged.owner().get());
             return Optional.of(manipulator);
         }
@@ -92,12 +94,14 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
-        if(dataHolder instanceof EntityTameable) {
+        if (dataHolder instanceof EntityTameable) {
             final EntityTameable entityTameable = (EntityTameable) dataHolder;
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final String sPrevTamer = entityTameable.getOwnerId();
             final Optional<UUID> prevTamer = TameableDataProcessor.asUUID(sPrevTamer);
-            final TameableData newdata = checkNotNull(overlap, "MergeFunction must not be null").merge(from(dataHolder).orElse(null), checkNotNull(manipulator));
+            final TameableData
+                newdata =
+                checkNotNull(overlap, "MergeFunction must not be null").merge(from(dataHolder).orElse(null), checkNotNull(manipulator));
             final ImmutableSpongeOptionalValue<UUID> prevValue = ImmutableSpongeTameableData.createValue(prevTamer);
             final ImmutableValue<Optional<UUID>> newValue = newdata.owner().asImmutable();
             try {
@@ -130,7 +134,7 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
 
     @Override
     public Optional<TameableData> createFrom(DataHolder dataHolder) {
-        if(dataHolder instanceof EntityTameable) {
+        if (dataHolder instanceof EntityTameable) {
             final Optional<UUID> uuidOptional = getTamer((EntityTameable) dataHolder);
             return Optional.<TameableData>of(new SpongeTameableData(uuidOptional.orElse(null)));
         }
@@ -138,27 +142,27 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
     }
 
     public static String asString(final Optional<UUID> uuidOptional) {
-        if(uuidOptional.isPresent()) {
-            UUIDTypeAdapter.fromUUID(uuidOptional.get());
+        if (uuidOptional.isPresent()) {
+            return UUIDTypeAdapter.fromUUID(uuidOptional.get());
         }
         return "";
     }
 
     public static Optional<UUID> getTamer(@Nullable final EntityTameable tameable) {
-        if(tameable == null) {
+        if (tameable == null) {
             return Optional.empty();
         }
         return asUUID(tameable.getOwnerId());
     }
 
     public static Optional<UUID> asUUID(@Nullable final String sUUID) {
-        if(sUUID == null) {
+        if (sUUID == null) {
             return Optional.empty();
         }
         @Nullable UUID uuid;
         try {
             uuid = UUIDTypeAdapter.fromString(sUUID);
-        } catch(final RuntimeException ignored) {
+        } catch (final RuntimeException ignored) {
             uuid = null;
         }
         return Optional.ofNullable(uuid);

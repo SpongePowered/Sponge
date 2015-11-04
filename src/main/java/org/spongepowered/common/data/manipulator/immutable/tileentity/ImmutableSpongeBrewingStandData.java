@@ -24,57 +24,24 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import com.google.common.collect.ComparisonChain;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
-public class ImmutableSpongeBrewingStandData extends AbstractImmutableSingleData<Integer, ImmutableBrewingStandData, BrewingStandData> implements
+public class ImmutableSpongeBrewingStandData extends AbstractImmutableBoundedComparableData<Integer, ImmutableBrewingStandData, BrewingStandData>
+    implements
         ImmutableBrewingStandData {
 
     public ImmutableSpongeBrewingStandData(Integer value) {
-        super(ImmutableBrewingStandData.class, value, Keys.REMAINING_BREW_TIME);
-    }
-
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return this.remainingBrewTime();
-    }
-
-    @Override
-    public BrewingStandData asMutable() {
-        return new SpongeBrewingStandData(this.getValue());
+        super(ImmutableBrewingStandData.class, value, Keys.REMAINING_BREW_TIME, Integer::compare, SpongeBrewingStandData.class, 0, Integer.MAX_VALUE, 400);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> remainingBrewTime() {
-        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_BREW_TIME)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(400)
-                .actualValue(this.getValue())
-                .build()
-                .asImmutable();
+        return getValueGetter();
     }
 
-    @Override
-    public int compareTo(ImmutableBrewingStandData o) {
-        return ComparisonChain
-                .start()
-                .compare(o.remainingBrewTime().get(), this.getValue())
-                .result();
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer()
-                .set(Keys.REMAINING_BREW_TIME, this.getValue());
-    }
 }

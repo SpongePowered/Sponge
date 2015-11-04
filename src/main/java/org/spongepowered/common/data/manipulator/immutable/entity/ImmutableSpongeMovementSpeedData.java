@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
+import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
+
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -35,17 +37,13 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<ImmutableMovementSpeedData, MovementSpeedData> implements ImmutableMovementSpeedData  {
 
     private final double walkSpeed;
     private final double flySpeed;
 
-    ImmutableBoundedValue<Double> walkSpeedValue;
-    ImmutableBoundedValue<Double> flyingSpeedValue;
+    final ImmutableBoundedValue<Double> walkSpeedValue;
+    final ImmutableBoundedValue<Double> flyingSpeedValue;
 
 
     public ImmutableSpongeMovementSpeedData(double walkSpeed, double flySpeed) {
@@ -76,17 +74,17 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
 
     @Override
     public ImmutableBoundedValue<Double> walkSpeed() {
-        return walkSpeedValue;
+        return this.walkSpeedValue;
     }
 
     @Override
     public ImmutableBoundedValue<Double> flySpeed() {
-        return flyingSpeedValue;
+        return this.flyingSpeedValue;
     }
 
     @Override
     public MovementSpeedData asMutable() {
-        return new SpongeMovementSpeedData(walkSpeed, flySpeed);
+        return new SpongeMovementSpeedData(this.walkSpeed, this.flySpeed);
     }
 
     @Override

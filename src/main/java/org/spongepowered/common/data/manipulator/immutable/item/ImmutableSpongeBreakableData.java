@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.common.primitives.Booleans;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
@@ -38,6 +37,7 @@ import org.spongepowered.common.data.manipulator.immutable.common.collection.Abs
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData<BlockType, ImmutableBreakableData, BreakableData> implements ImmutableBreakableData {
 
@@ -57,16 +57,16 @@ public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData
 
     @Override
     public DataContainer toContainer() {
-        Set<String> breakableIds = Sets.newHashSetWithExpectedSize(getValue().size());
-        for (BlockType breakable : getValue()) {
-            breakableIds.add(breakable.getId());
-        }
-        return new MemoryDataContainer().set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), breakableIds);
+        return new MemoryDataContainer()
+            .set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), getValue()
+                .stream()
+                .map(BlockType::getId)
+                .collect(Collectors.toList()));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public ImmutableSetValue<BlockType> breakable() {
-        return (ImmutableSetValue<BlockType>) getValueGetter();
+        return getValueGetter();
     }
 }

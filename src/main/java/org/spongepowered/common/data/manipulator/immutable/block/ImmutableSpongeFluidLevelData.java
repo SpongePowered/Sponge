@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.block;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import org.spongepowered.api.data.key.Keys;
@@ -33,21 +32,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.FluidLevelData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeFluidLevelData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 public class ImmutableSpongeFluidLevelData extends AbstractImmutableBoundedComparableData<Integer, ImmutableFluidLevelData, FluidLevelData> implements ImmutableFluidLevelData {
 
-    private final int defaultValue;
-
     public ImmutableSpongeFluidLevelData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(ImmutableFluidLevelData.class, value, Keys.FLUID_LEVEL, intComparator(), SpongeFluidLevelData.class, lowerBound, upperBound);
-        checkArgument(defaultValue >= lowerBound && defaultValue <= upperBound);
-        this.defaultValue = defaultValue;
+        super(ImmutableFluidLevelData.class, value, Keys.FLUID_LEVEL, intComparator(), SpongeFluidLevelData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> level() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.FLUID_LEVEL, this.defaultValue, this.value, this.comparator,
-                                                 this.lowerBound, this.upperBound);
+        return getValueGetter();
     }
 }

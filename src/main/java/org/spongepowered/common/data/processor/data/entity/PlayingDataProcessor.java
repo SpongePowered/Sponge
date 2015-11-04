@@ -59,7 +59,7 @@ public class PlayingDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(key, false, value);
+        return ImmutableSpongeValue.cachedOf(this.key, false, value);
     }
 
     @Override

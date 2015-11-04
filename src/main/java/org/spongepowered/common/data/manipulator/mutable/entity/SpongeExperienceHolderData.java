@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -38,8 +36,6 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderData, ImmutableExperienceHolderData> implements ExperienceHolderData {
 

@@ -44,6 +44,7 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
 
     private final Class<? extends M> mutableClass;
     private final E defaultValue;
+    private final ImmutableValue<E> immutableValue;
 
     public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
@@ -51,6 +52,7 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.mutableClass = checkNotNull(mutableClass);
         this.defaultValue = checkNotNull(defaultValue, "The default value was null! This is unacceptable! Maybe the value was not registered?");
+        this.immutableValue = ImmutableSpongeValue.cachedOf(this.usedKey, this.defaultValue, this.value);
     }
 
     @Override
@@ -59,8 +61,8 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return type();
+    protected ImmutableValue<E> getValueGetter() {
+        return this.immutableValue;
     }
 
     @Override
@@ -75,6 +77,6 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
 
     @Override
     public ImmutableValue<E> type() {
-        return ImmutableSpongeValue.cachedOf(this.usedKey, this.defaultValue, this.value);
+        return this.immutableValue;
     }
 }

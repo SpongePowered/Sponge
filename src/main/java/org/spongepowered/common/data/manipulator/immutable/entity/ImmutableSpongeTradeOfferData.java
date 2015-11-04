@@ -24,55 +24,26 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
+import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTradeOfferData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
 
-public class ImmutableSpongeTradeOfferData extends AbstractImmutableData<ImmutableTradeOfferData, TradeOfferData> implements ImmutableTradeOfferData {
-
-    private final ImmutableList<TradeOffer> offers;
+public class ImmutableSpongeTradeOfferData extends AbstractImmutableSingleListData<TradeOffer, ImmutableTradeOfferData, TradeOfferData>
+    implements ImmutableTradeOfferData {
 
     public ImmutableSpongeTradeOfferData(List<TradeOffer> offers) {
-        super(ImmutableTradeOfferData.class);
-        this.offers = ImmutableList.copyOf(checkNotNull(offers));
+        super(ImmutableTradeOfferData.class, offers, Keys.TRADE_OFFERS, SpongeTradeOfferData.class);
         registerGetters();
     }
 
     @Override
     public ImmutableListValue<TradeOffer> tradeOffers() {
-        return new ImmutableSpongeListValue<>(Keys.TRADE_OFFERS, this.offers);
-    }
-
-    @Override
-    public TradeOfferData asMutable() {
-        return new SpongeTradeOfferData(this.offers);
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer()
-            .set(Keys.TRADE_OFFERS.getQuery(), this.offers);
-    }
-
-    @Override
-    public int compareTo(ImmutableTradeOfferData o) {
-        return 0;
-    }
-
-    @Override
-    protected void registerGetters() {
-        // TODO
+        return getValueGetter();
     }
 }

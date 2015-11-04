@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.tileentity.TileEntityNote;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;

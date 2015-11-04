@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import java.util.UUID;
-
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -37,6 +35,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.UUID;
 
 public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile, RepresentedPlayerData, ImmutableRepresentedPlayerData>
         implements RepresentedPlayerData {

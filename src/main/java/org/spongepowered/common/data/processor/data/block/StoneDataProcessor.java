@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import org.spongepowered.api.data.type.StoneTypes;
-
 import net.minecraft.block.BlockStone;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData;
 import org.spongepowered.api.data.manipulator.mutable.block.StoneData;
 import org.spongepowered.api.data.type.StoneType;
+import org.spongepowered.api.data.type.StoneTypes;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeStoneData;

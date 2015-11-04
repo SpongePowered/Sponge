@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+
 import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
@@ -39,8 +41,6 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
 
 import java.util.Optional;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class ExpOrbDataProcessor extends AbstractEntitySingleDataProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
 

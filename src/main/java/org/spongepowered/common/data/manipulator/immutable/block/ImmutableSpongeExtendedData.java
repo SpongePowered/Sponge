@@ -30,21 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.block.ExtendedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeExtendedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeExtendedData extends AbstractImmutableBooleanData<ImmutableExtendedData, ExtendedData> implements ImmutableExtendedData {
 
     public ImmutableSpongeExtendedData(boolean value) {
-        super(ImmutableExtendedData.class, value, Keys.EXTENDED, SpongeExtendedData.class);
+        super(ImmutableExtendedData.class, value, Keys.EXTENDED, SpongeExtendedData.class, false);
     }
 
     @Override
     public ImmutableValue<Boolean> extended() {
-        return ImmutableSpongeValue.cachedOf(Keys.EXTENDED, false, this.value);
+        return getValueGetter();
     }
 
-    @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return extended();
-    }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
 import com.google.common.collect.ComparisonChain;
-
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;

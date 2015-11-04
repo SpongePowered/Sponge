@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
@@ -39,7 +37,6 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeFireworkData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
