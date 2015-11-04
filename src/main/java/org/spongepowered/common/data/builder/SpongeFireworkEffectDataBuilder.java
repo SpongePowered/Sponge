@@ -25,14 +25,17 @@
 package org.spongepowered.common.data.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.item.SpongeFireworkEffect.COLORS;
+import static org.spongepowered.common.item.SpongeFireworkEffect.FADES;
+import static org.spongepowered.common.item.SpongeFireworkEffect.FLICKERS;
+import static org.spongepowered.common.item.SpongeFireworkEffect.TRAILS;
+import static org.spongepowered.common.item.SpongeFireworkEffect.TYPE;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
-import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.common.Sponge;
@@ -42,13 +45,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class SpongeFireworkDataBuilder implements DataBuilder<FireworkEffect> {
-
-    private static final DataQuery TYPE = new DataQuery("Type");
-    private static final DataQuery COLORS = new DataQuery("Colors");
-    private static final DataQuery FADES = new DataQuery("Fades");
-    private static final DataQuery TRAILS = new DataQuery("Trails");
-    private static final DataQuery FLICKERS = new DataQuery("Flickers");
+public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffect> {
 
     @Override
     public Optional<FireworkEffect> build(DataView container) throws InvalidDataException {
@@ -61,20 +58,26 @@ public class SpongeFireworkDataBuilder implements DataBuilder<FireworkEffect> {
             throw new InvalidDataException("The container does not have data pertaining to FireworkEffect!");
         }
         String type = container.getString(TYPE).get();
-        FireworkShape shape = FireworkShapes.BALL; // TODO, need to add getFireworkShape to GameRegistry...
+        Optional<FireworkShape> oShape = Sponge.getGame().getRegistry().getType(FireworkShape.class, type);
+        if(!oShape.isPresent()) throw new InvalidDataException("The container has an invalid type; " + type);
+
         List<Integer> intColors = container.getIntegerList(COLORS).get();
         List<Color> colors = Lists.newArrayList();
         colors.addAll(intColors.stream().map(Color::new).collect(Collectors.toList()));
+
         List<Integer> intFades = container.getIntegerList(FADES).get();
         List<Color> fades = Lists.newArrayList();
         fades.addAll(intFades.stream().map(Color::new).collect(Collectors.toList()));
+
         boolean trails = container.getBoolean(TRAILS).get();
         boolean flickers = container.getBoolean(FLICKERS).get();
+
         FireworkEffectBuilder builder = Sponge.getGame().getRegistry().createBuilderOfType(FireworkEffectBuilder.class).get();
         return Optional.of(builder.colors(colors)
                 .fades(fades)
                 .flicker(flickers)
                 .trail(trails)
+                .shape(oShape.get())
                 .build());
     }
 }

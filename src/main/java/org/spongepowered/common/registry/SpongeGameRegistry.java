@@ -232,6 +232,7 @@ import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackBuilder;
@@ -312,6 +313,7 @@ import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
+import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.processor.common.NoteUtils;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.property.store.block.BlastResistancePropertyStore;
@@ -341,7 +343,6 @@ import org.spongepowered.common.data.property.store.item.HarvestingPropertyStore
 import org.spongepowered.common.data.property.store.item.SaturationPropertyStore;
 import org.spongepowered.common.data.property.store.item.UseLimitPropertyStore;
 import org.spongepowered.common.data.type.SpongeCookedFish;
-import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -357,7 +358,7 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.item.SpongeCoalType;
-import org.spongepowered.common.item.SpongeFireworkBuilder;
+import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeGoldenApple;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
@@ -691,7 +692,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("outher_left", (StairShape) (Object) BlockStairs.EnumShape.OUTER_LEFT)
             .put("outher_right", (StairShape) (Object) BlockStairs.EnumShape.OUTER_RIGHT)
             .build();
-    
+
     private final Map<String, BigMushroomType> bigMushroomTypeMappings = new ImmutableMap.Builder<String, BigMushroomType>()
             .put("center", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.CENTER)
             .put("all_inside", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.ALL_INSIDE)
@@ -707,12 +708,14 @@ public abstract class SpongeGameRegistry implements GameRegistry {
             .put("stem", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.STEM)
             .put("west", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.WEST)
             .build();
-    
+
+    private final Map<String, FireworkShape> fireworkShapeMappings = Maps.newHashMap();
+
     private final Map<String, Weather> weatherMappings = Maps.newHashMap();
 
     private final Map<String, GeneratorType> generatorTypeMappings = Maps.newHashMap();
-
     public static final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
+
     public static final Map<String, ItemType> itemTypeMappings = Maps.newHashMap();
 
     protected Map<Class<? extends CatalogType>, Map<String, ? extends CatalogType>> catalogTypeMap =
@@ -737,7 +740,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
                 .put(Enchantment.class, this.enchantmentMappings)
                 .put(EntityType.class, this.entityTypeMappings)
                 .put(EquipmentType.class, ImmutableMap.<String, CatalogType>of()) // TODO
-                .put(FireworkShape.class, ImmutableMap.<String, CatalogType>of()) // TODO
+                .put(FireworkShape.class, this.fireworkShapeMappings)
                 .put(Fish.class, this.fishMappings)
                 .put(GameMode.class, gameModeMappings)
                 .put(GoldenApple.class, this.goldenAppleMappings)
@@ -857,7 +860,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public FireworkEffectBuilder createFireworkEffectBuilder() {
-        return new SpongeFireworkBuilder();
+        return new SpongeFireworkEffectBuilder();
     }
 
     @Override
@@ -2190,6 +2193,18 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         RegistryHelper.mapFields(BigMushroomTypes.class, this.bigMushroomTypeMappings);
     }
 
+    private void setFireworkShapes() {
+        this.fireworkShapeMappings.putAll(
+                FireworkUtils.shapeMapping.values()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                shape -> shape.getId().toLowerCase(),
+                                Function.identity())
+                        ));
+
+        RegistryHelper.mapFields(FireworkShapes.class, this.fireworkShapeMappings);
+    }
+
     @Override
     public Optional<EntityStatistic> getEntityStatistic(StatisticGroup statisticGroup, EntityType entityType) {
         throw new UnsupportedOperationException(); // TODO
@@ -2378,6 +2393,7 @@ public abstract class SpongeGameRegistry implements GameRegistry {
         setStairShapes();
         setWallTypes();
         setBigMushroomTypes();
+        setFireworkShapes();
     }
 
     public void postInit() {
