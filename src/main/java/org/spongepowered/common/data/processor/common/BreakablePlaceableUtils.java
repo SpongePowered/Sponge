@@ -68,7 +68,7 @@ public final class BreakablePlaceableUtils {
     }
 
     public static Optional<Set<BlockType>> get(ItemStack stack, String nbtKey) {
-    	NBTTagCompound tag = stack.getTagCompound();
+        NBTTagCompound tag = stack.getTagCompound();
         if (tag == null) {
             return Optional.empty();
         }

@@ -37,30 +37,30 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class ImmutableSpongeExpOrbData extends AbstractImmutableSingleData<Integer, ImmutableExpOrbData, ExpOrbData> implements ImmutableExpOrbData {
 
-	ImmutableBoundedValue<Integer> cachedValue;
+    ImmutableBoundedValue<Integer> cachedValue;
 
-	public ImmutableSpongeExpOrbData(Integer value) {
-		super(ImmutableExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE);
-		this.cachedValue = new ImmutableSpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, this.value, 0, intComparator(), 0, Integer.MAX_VALUE);
-	}
+    public ImmutableSpongeExpOrbData(Integer value) {
+        super(ImmutableExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE);
+        this.cachedValue = new ImmutableSpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, this.value, 0, intComparator(), 0, Integer.MAX_VALUE);
+    }
 
-	@Override
-	protected ImmutableValue<?> getValueGetter() {
-		return experience();
-	}
+    @Override
+    protected ImmutableValue<?> getValueGetter() {
+        return experience();
+    }
 
-	@Override
-	public ExpOrbData asMutable() {
-		return new SpongeExpOrbData(getValue());
-	}
+    @Override
+    public ExpOrbData asMutable() {
+        return new SpongeExpOrbData(getValue());
+    }
 
-	@Override
-	public ImmutableValue<Integer> experience() {
-		return cachedValue;
-	}
+    @Override
+    public ImmutableValue<Integer> experience() {
+        return cachedValue;
+    }
 
-	@Override
-	public int compareTo(ImmutableExpOrbData o) {
-		return o.experience().get().compareTo(this.value);
-	}
+    @Override
+    public int compareTo(ImmutableExpOrbData o) {
+        return o.experience().get().compareTo(this.value);
+    }
 }

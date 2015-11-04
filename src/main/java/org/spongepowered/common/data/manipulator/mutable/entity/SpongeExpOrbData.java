@@ -38,42 +38,42 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class SpongeExpOrbData extends AbstractSingleData<Integer, ExpOrbData, ImmutableExpOrbData> implements ExpOrbData {
 
-	public SpongeExpOrbData(Integer value) {
-		super(ExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE);
-	}
+    public SpongeExpOrbData(Integer value) {
+        super(ExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE);
+    }
 
-	public SpongeExpOrbData() {
-		this(0);
-	}
+    public SpongeExpOrbData() {
+        this(0);
+    }
 
-	@Override
-	protected Value<?> getValueGetter() {
-		return experience();
-	}
+    @Override
+    protected Value<?> getValueGetter() {
+        return experience();
+    }
 
-	@Override
-	public ExpOrbData copy() {
-		return new SpongeExpOrbData(this.getValue());
-	}
+    @Override
+    public ExpOrbData copy() {
+        return new SpongeExpOrbData(this.getValue());
+    }
 
-	@Override
-	public ImmutableExpOrbData asImmutable() {
-		return new ImmutableSpongeExpOrbData(this.getValue());
-	}
+    @Override
+    public ImmutableExpOrbData asImmutable() {
+        return new ImmutableSpongeExpOrbData(this.getValue());
+    }
 
-	@Override
-	public int compareTo(ExpOrbData o) {
-		return o.experience().get().compareTo(this.getValue());
-	}
+    @Override
+    public int compareTo(ExpOrbData o) {
+        return o.experience().get().compareTo(this.getValue());
+    }
 
-	@Override
-	public Value<Integer> experience() {
-		return new SpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, this.getValue());
-	}
+    @Override
+    public Value<Integer> experience() {
+        return new SpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, 0, intComparator(), 0, Integer.MAX_VALUE, this.getValue());
+    }
 
-	@Override
-	public DataContainer toContainer() {
-		return new MemoryDataContainer().set(Keys.CONTAINED_EXPERIENCE, this.getValue());
-	}
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(Keys.CONTAINED_EXPERIENCE, this.getValue());
+    }
 
 }

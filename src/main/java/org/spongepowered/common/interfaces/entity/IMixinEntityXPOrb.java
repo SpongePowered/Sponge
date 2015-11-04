@@ -26,8 +26,8 @@ package org.spongepowered.common.interfaces.entity;
 
 public interface IMixinEntityXPOrb {
 
-	int getExperience();
+    int getExperience();
 
-	public void setExperience(int experience);
+    public void setExperience(int experience);
 
 }

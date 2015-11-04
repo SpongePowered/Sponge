@@ -42,34 +42,34 @@ import java.util.Optional;
 
 public class AgentDataProcessor extends AbstractEntitySingleDataProcessor<EntityLiving, Boolean, Value<Boolean>, AgentData, ImmutableAgentData> {
 
-	public AgentDataProcessor() {
-		super(EntityLiving.class, Keys.AI_ENABLED);
-	}
+    public AgentDataProcessor() {
+        super(EntityLiving.class, Keys.AI_ENABLED);
+    }
 
-	@Override
-	protected boolean set(EntityLiving entity, Boolean value) {
-		entity.setNoAI(!value);
-		return true;
-	}
+    @Override
+    protected boolean set(EntityLiving entity, Boolean value) {
+        entity.setNoAI(!value);
+        return true;
+    }
 
-	@Override
-	protected Optional<Boolean> getVal(EntityLiving entity) {
-		return Optional.of(!entity.isAIDisabled());
-	}
+    @Override
+    protected Optional<Boolean> getVal(EntityLiving entity) {
+        return Optional.of(!entity.isAIDisabled());
+    }
 
-	@Override
-	protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-		return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, value);
-	}
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, value);
+    }
 
-	@Override
-	protected AgentData createManipulator() {
-		return new SpongeAgentData();
-	}
+    @Override
+    protected AgentData createManipulator() {
+        return new SpongeAgentData();
+    }
 
-	@Override
-	public DataTransactionResult remove(DataHolder dataHolder) {
-		return DataTransactionBuilder.failNoData();
-	}
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionBuilder.failNoData();
+    }
 
 }

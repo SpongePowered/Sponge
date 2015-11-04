@@ -44,33 +44,33 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class ExpOrbDataProcessor extends AbstractEntitySingleDataProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
 
-	public ExpOrbDataProcessor() {
-		super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
-	}
+    public ExpOrbDataProcessor() {
+        super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
+    }
 
-	@Override
-	protected boolean set(EntityXPOrb entity, Integer value) {
-		((IMixinEntityXPOrb) entity).setExperience(value);
-		return true;
-	}
+    @Override
+    protected boolean set(EntityXPOrb entity, Integer value) {
+        ((IMixinEntityXPOrb) entity).setExperience(value);
+        return true;
+    }
 
-	@Override
-	protected Optional<Integer> getVal(EntityXPOrb entity) {
-		return Optional.of(((IMixinEntityXPOrb) entity).getExperience());
-	}
+    @Override
+    protected Optional<Integer> getVal(EntityXPOrb entity) {
+        return Optional.of(((IMixinEntityXPOrb) entity).getExperience());
+    }
 
-	@Override
-	protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-		return new ImmutableSpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, value, 0, intComparator(), 0, Integer.MAX_VALUE);
-	}
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, value, 0, intComparator(), 0, Integer.MAX_VALUE);
+    }
 
-	@Override
-	protected ExpOrbData createManipulator() {
-		return new SpongeExpOrbData();
-	}
+    @Override
+    protected ExpOrbData createManipulator() {
+        return new SpongeExpOrbData();
+    }
 
-	@Override
-	public DataTransactionResult remove(DataHolder dataHolder) {
-		return DataTransactionBuilder.failNoData();
-	}
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionBuilder.failNoData();
+    }
 }

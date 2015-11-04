@@ -42,34 +42,34 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class ExpOrbValueProcessor extends AbstractSpongeValueProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>> {
 
-	public ExpOrbValueProcessor() {
-		super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
-	}
+    public ExpOrbValueProcessor() {
+        super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
+    }
 
-	@Override
-	protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-		return new SpongeBoundedValue<>(this.getKey(), 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
-	}
+    @Override
+    protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+        return new SpongeBoundedValue<>(this.getKey(), 0, intComparator(), 0, Integer.MAX_VALUE, defaultValue);
+    }
 
-	@Override
-	protected boolean set(EntityXPOrb container, Integer value) {
-		((IMixinEntityXPOrb) container).setExperience(value);
-		return true;
-	}
+    @Override
+    protected boolean set(EntityXPOrb container, Integer value) {
+        ((IMixinEntityXPOrb) container).setExperience(value);
+        return true;
+    }
 
-	@Override
-	protected Optional<Integer> getVal(EntityXPOrb container) {
-		return Optional.of(((IMixinEntityXPOrb) container).getExperience());
-	}
+    @Override
+    protected Optional<Integer> getVal(EntityXPOrb container) {
+        return Optional.of(((IMixinEntityXPOrb) container).getExperience());
+    }
 
-	@Override
-	protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-		return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 0, intComparator(), 0, Integer.MAX_VALUE);
-	}
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeBoundedValue<>(this.getKey(), value, 0, intComparator(), 0, Integer.MAX_VALUE);
+    }
 
-	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
-		return DataTransactionBuilder.failNoData();
-	}
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionBuilder.failNoData();
+    }
 
 }

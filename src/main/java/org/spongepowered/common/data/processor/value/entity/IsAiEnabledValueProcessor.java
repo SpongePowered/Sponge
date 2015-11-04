@@ -39,33 +39,33 @@ import java.util.Optional;
 
 public class IsAiEnabledValueProcessor extends AbstractSpongeValueProcessor<EntityLiving, Boolean, Value<Boolean>> {
 
-	public IsAiEnabledValueProcessor() {
-		super(EntityLiving.class, Keys.AI_ENABLED);
-	}
+    public IsAiEnabledValueProcessor() {
+        super(EntityLiving.class, Keys.AI_ENABLED);
+    }
 
-	@Override
-	protected Value<Boolean> constructValue(Boolean defaultValue) {
-		return new SpongeValue<>(Keys.AI_ENABLED, true, defaultValue);
-	}
+    @Override
+    protected Value<Boolean> constructValue(Boolean defaultValue) {
+        return new SpongeValue<>(Keys.AI_ENABLED, true, defaultValue);
+    }
 
-	@Override
-	protected boolean set(EntityLiving container, Boolean value) {
-		container.setNoAI(!value);
-		return true;
-	}
+    @Override
+    protected boolean set(EntityLiving container, Boolean value) {
+        container.setNoAI(!value);
+        return true;
+    }
 
-	@Override
-	protected Optional<Boolean> getVal(EntityLiving container) {
-		return Optional.of(!container.isAIDisabled());
-	}
+    @Override
+    protected Optional<Boolean> getVal(EntityLiving container) {
+        return Optional.of(!container.isAIDisabled());
+    }
 
-	@Override
-	protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-		return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, value);
-	}
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, value);
+    }
 
-	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
-		return DataTransactionBuilder.failNoData();
-	}
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionBuilder.failNoData();
+    }
 }
