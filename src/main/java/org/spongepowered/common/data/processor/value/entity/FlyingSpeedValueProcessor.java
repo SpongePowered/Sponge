@@ -30,26 +30,21 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, MutableBoundedValue<Double>> {
+public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, Value<Double>> {
 
     public FlyingSpeedValueProcessor() {
         super(EntityPlayer.class, Keys.FLYING_SPEED);
     }
 
     @Override
-    protected MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.FLYING_SPEED)
-            .defaultValue(0.05d)
-            .minimum(Double.MIN_VALUE)
-            .maximum(Double.MAX_VALUE)
-            .actualValue(defaultValue)
-            .build();
+    protected Value<Double> constructValue(Double value) {
+        return new SpongeValue<>(Keys.FLYING_SPEED, 0.05D, value);
     }
 
     @Override

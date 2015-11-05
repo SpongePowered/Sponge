@@ -145,6 +145,9 @@ public class KeyRegistry {
         keyMap.put("spawner_minimum_delay", makeSingleKey(Short.class, MutableBoundedValue.class, of("SpawnerMinimumDelay")));
         keyMap.put("connected_directions", makeSetKey(Direction.class, of("ConnectedDirections")));
         keyMap.put("connected_north", makeSingleKey(Boolean.class, Value.class, of("ConnectedNorth")));
+        keyMap.put("connected_south", makeSingleKey(Boolean.class, Value.class, of("ConnectedSouth")));
+        keyMap.put("connected_east", makeSingleKey(Boolean.class, Value.class, of("ConnectedEast")));
+        keyMap.put("connected_west", makeSingleKey(Boolean.class, Value.class, of("ConnectedWest")));
         keyMap.put("direction", makeSingleKey(Direction.class, Value.class, of("Direction")));
         keyMap.put("dirt_type", makeSingleKey(DirtType.class, Value.class, of("DirtType")));
         keyMap.put("disguised_block_type", makeSingleKey(DisguisedBlockType.class, Value.class, of("DisguisedBlockType")));

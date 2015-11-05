@@ -28,41 +28,27 @@ import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
+import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeCooldownData extends AbstractImmutableSingleData<Integer, ImmutableCooldownData, CooldownData>
+public class ImmutableSpongeCooldownData extends AbstractImmutableBoundedComparableData<Integer, ImmutableCooldownData, CooldownData>
         implements ImmutableCooldownData {
 
     public ImmutableSpongeCooldownData(int value) {
-        super(ImmutableCooldownData.class, value, Keys.COOLDOWN);
+        super(ImmutableCooldownData.class, value, Keys.COOLDOWN, ComparatorUtil.intComparator(), SpongeCooldownData.class, 0, Integer.MAX_VALUE, 0);
     }
 
     public ImmutableSpongeCooldownData() {
-        this(-1);
+        this(0);
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return cooldown();
-    }
-
-    @Override
-    public CooldownData asMutable() {
-        return new SpongeCooldownData(this.getValue());
-    }
-
-    @Override
-    public ImmutableValue<Integer> cooldown() {
-        return ImmutableSpongeValue.cachedOf(Keys.COOLDOWN, -1, this.getValue());
-    }
-
-    @Override
-    public int compareTo(ImmutableCooldownData o) {
-        return ComparisonChain.start()
-                .compare(this.getValue(), o.cooldown().get())
-                .result();
+    public ImmutableBoundedValue<Integer> cooldown() {
+        return getValueGetter();
     }
 }

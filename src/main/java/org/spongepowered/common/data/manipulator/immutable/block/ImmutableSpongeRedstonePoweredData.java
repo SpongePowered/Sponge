@@ -35,6 +35,10 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePow
 
 public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableBoundedComparableData<Integer, ImmutableRedstonePoweredData, RedstonePoweredData> implements ImmutableRedstonePoweredData {
 
+    public ImmutableSpongeRedstonePoweredData(int value) {
+        this(value, 0, 15);
+    }
+
     public ImmutableSpongeRedstonePoweredData(int value, int lowerBound, int upperBound) {
         super(ImmutableRedstonePoweredData.class, value, Keys.POWER, intComparator(), SpongeRedstonePoweredData.class, lowerBound, upperBound, 0);
     }

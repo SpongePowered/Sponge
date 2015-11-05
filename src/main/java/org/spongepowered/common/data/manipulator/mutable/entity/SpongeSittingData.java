@@ -30,12 +30,11 @@ import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSittingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeSittingData extends AbstractBooleanData<SittingData, ImmutableSittingData> implements SittingData {
 
     public SpongeSittingData(boolean value) {
-        super(SittingData.class, value, Keys.IS_SITTING, ImmutableSpongeSittingData.class);
+        super(SittingData.class, value, Keys.IS_SITTING, ImmutableSpongeSittingData.class, false);
     }
 
     public SpongeSittingData() {
@@ -43,13 +42,8 @@ public class SpongeSittingData extends AbstractBooleanData<SittingData, Immutabl
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return sitting();
-    }
-
-    @Override
     public Value<Boolean> sitting() {
-        return new SpongeValue<>(Keys.IS_SITTING, false, this.getValue());
+        return getValueGetter();
     }
 
 }

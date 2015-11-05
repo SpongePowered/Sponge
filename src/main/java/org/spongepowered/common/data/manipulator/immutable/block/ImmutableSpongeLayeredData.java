@@ -35,6 +35,10 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeLayeredData
 
 public class ImmutableSpongeLayeredData extends AbstractImmutableBoundedComparableData<Integer, ImmutableLayeredData, LayeredData> implements ImmutableLayeredData {
 
+    public ImmutableSpongeLayeredData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
+    }
+
     public ImmutableSpongeLayeredData(int value, int lowerBound, int upperBound) {
         super(ImmutableLayeredData.class, value, Keys.LAYER, intComparator(), SpongeLayeredData.class, lowerBound, upperBound, 0);
     }

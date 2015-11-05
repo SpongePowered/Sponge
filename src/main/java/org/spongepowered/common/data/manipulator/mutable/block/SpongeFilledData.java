@@ -30,21 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.block.FilledData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeFilledData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeFilledData extends AbstractBooleanData<FilledData, ImmutableFilledData> implements FilledData {
 
     public SpongeFilledData(boolean value) {
-        super(FilledData.class, value, Keys.FILLED, ImmutableSpongeFilledData.class);
+        super(FilledData.class, value, Keys.FILLED, ImmutableSpongeFilledData.class, false);
     }
 
     @Override
     public Value<Boolean> filled() {
-        return new SpongeValue<>(Keys.FILLED, this.getValue());
+        return getValueGetter();
     }
 
-    @Override
-    protected Value<?> getValueGetter() {
-        return filled();
-    }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -33,49 +32,29 @@ import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongePotionEffectData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
 
 import java.util.List;
 
-public class SpongePotionEffectData extends AbstractData<PotionEffectData, ImmutablePotionEffectData> implements PotionEffectData {
-
-    private List<PotionEffect> effects;
+public class SpongePotionEffectData extends AbstractSingleListData<PotionEffect, PotionEffectData, ImmutablePotionEffectData> implements PotionEffectData {
 
     public SpongePotionEffectData(List<PotionEffect> effects) {
-        super(PotionEffectData.class);
-        this.effects = Lists.newArrayList(effects);
-        registerGettersAndSetters();
+        super(PotionEffectData.class, effects, Keys.POTION_EFFECTS, ImmutableSpongePotionEffectData.class);
     }
 
     @Override
     public ListValue<PotionEffect> effects() {
-        return new SpongeListValue<>(Keys.POTION_EFFECTS, this.effects);
-    }
-
-    @Override
-    public PotionEffectData copy() {
-        return new SpongePotionEffectData(this.effects);
-    }
-
-    @Override
-    public ImmutablePotionEffectData asImmutable() {
-        return new ImmutableSpongePotionEffectData(this.effects);
+        return getValueGetter();
     }
 
     @Override
     public int compareTo(PotionEffectData o) {
-        return 0;
+        return 0; //TODO
     }
 
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-            .set(Keys.POTION_EFFECTS.getQuery(), this.effects);
-    }
-
-    @Override
-    protected void registerGettersAndSetters() {
-        // TODO
+            .set(Keys.POTION_EFFECTS.getQuery(), this.getValue());
     }
 }

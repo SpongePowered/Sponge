@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.shortComparator;
+import static org.spongepowered.common.data.value.SpongeValueBuilder.boundedBuilder;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -34,13 +36,14 @@ import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedEntityCollectionValue;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.weighted.WeightedCollection;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeEntityToSpawnValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedEntityCollectionValue;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<ImmutableMobSpawnerData, MobSpawnerData> implements ImmutableMobSpawnerData {
 
@@ -54,6 +57,22 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     private final WeightedSerializableObject<EntitySnapshot> nextToSpawn;
     private final WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entitiesToSpawn;
 
+    private final ImmutableBoundedValue<Short> remainingValue;
+    private final ImmutableBoundedValue<Short> minValue;
+    private final ImmutableBoundedValue<Short> maxValue;
+    private final ImmutableBoundedValue<Short> countValue;
+    private final ImmutableBoundedValue<Short> nearbyValue;
+    private final ImmutableBoundedValue<Short> playerRangeValue;
+    private final ImmutableBoundedValue<Short> spawnRangeValue;
+    private final ImmutableNextEntityToSpawnValue nextValue;
+    private final ImmutableWeightedEntityCollectionValue toSpawnValue;
+
+    public ImmutableSpongeMobSpawnerData() {
+        this((short) 20, (short) 200, (short) 800, (short) 4, (short) 6, (short) 16, (short) 4,
+                new WeightedSerializableObject<>(new SpongeEntitySnapshotBuilder().type(EntityTypes.PIG).build(), 1),
+                new WeightedCollection<>());
+    }
+
     public ImmutableSpongeMobSpawnerData(short remaining, short minSpawnDelay, short maxSpawnDelay, short count, short maxNearby,
                                          short playerRange, short spawnRange, WeightedSerializableObject<EntitySnapshot> nextToSpawn,
                                          WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entitiesToSpawn) {
@@ -65,54 +84,143 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
         this.maxNearby = maxNearby;
         this.playerRange = playerRange;
         this.spawnRange = spawnRange;
-        this.nextToSpawn = nextToSpawn;
-        this.entitiesToSpawn = entitiesToSpawn;
+        this.nextToSpawn = Preconditions.checkNotNull(nextToSpawn);
+        this.entitiesToSpawn = Preconditions.checkNotNull(entitiesToSpawn);
+
+        this.remainingValue = boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
+                .defaultValue((short) 20)
+                .minimum((short) 0)
+                .maximum(Short.MAX_VALUE)
+                .actualValue(remaining)
+                .build()
+                .asImmutable();
+        this.minValue = boundedBuilder(Keys.SPAWNER_MINIMUM_DELAY)
+                .defaultValue((short) 200)
+                .minimum((short) 0)
+                .maximum(Short.MAX_VALUE)
+                .actualValue(minSpawnDelay)
+                .build()
+                .asImmutable();
+        this.maxValue = boundedBuilder(Keys.SPAWNER_MAXIMUM_DELAY)
+                .defaultValue((short) 800)
+                .minimum((short) 1)
+                .maximum(Short.MAX_VALUE)
+                .actualValue(maxSpawnDelay)
+                .build()
+                .asImmutable();
+        this.countValue = boundedBuilder(Keys.SPAWNER_SPAWN_COUNT)
+                .defaultValue((short) 4)
+                .minimum((short) 0)
+                .maximum(Short.MAX_VALUE)
+                .actualValue(count)
+                .build()
+                .asImmutable();
+        this.nearbyValue = boundedBuilder(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES)
+                .defaultValue((short) 6)
+                .minimum((short) 0)
+                .maximum(Short.MAX_VALUE)
+                .actualValue(maxNearby)
+                .build()
+                .asImmutable();
+        this.playerRangeValue = boundedBuilder(Keys.SPAWNER_REQURED_PLAYER_RANGE)
+                .defaultValue((short) 16)
+                .minimum((short) 0)
+                .maximum(Short.MAX_VALUE)
+                .actualValue(playerRange)
+                .build()
+                .asImmutable();
+        this.spawnRangeValue = boundedBuilder(Keys.SPAWNER_SPAWN_RANGE)
+                .defaultValue((short) 4)
+                .minimum((short) 0)
+                .maximum(Short.MAX_VALUE)
+                .actualValue(spawnRange)
+                .build()
+                .asImmutable();
+        this.nextValue = new ImmutableSpongeEntityToSpawnValue(this.nextToSpawn);
+        this.toSpawnValue = new ImmutableSpongeWeightedEntityCollectionValue(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);
+
         registerGetters();
     }
 
     @Override
     public ImmutableBoundedValue<Short> remainingDelay() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_REMAINING_DELAY, (short) 0, this.remaining, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return remainingValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> minimumSpawnDelay() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MINIMUM_DELAY, (short) 0, this.minSpawnDelay, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return minValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> maximumSpawnDelay() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MAXIMUM_DELAY, (short) 0, this.maxSpawnDelay, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return maxValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> spawnCount() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_SPAWN_COUNT, (short) 0, this.count, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return countValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> maximumNearbyEntities() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) 0, this.maxNearby, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return nearbyValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> requiredPlayerRange() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_REQURED_PLAYER_RANGE, (short) 0, this.playerRange, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return playerRangeValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> spawnRange() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.SPAWNER_SPAWN_RANGE, (short) 0, this.spawnRange, shortComparator(), (short) 0, Short.MAX_VALUE);
+        return spawnRangeValue;
     }
 
     @Override
     public ImmutableNextEntityToSpawnValue nextEntityToSpawn() {
-        return new ImmutableSpongeEntityToSpawnValue(this.nextToSpawn);
+        return nextValue;
     }
 
     @Override
     public ImmutableWeightedEntityCollectionValue possibleEntitiesToSpawn() {
-        return new ImmutableSpongeWeightedEntityCollectionValue(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);
+        return toSpawnValue;
+    }
+
+    public short getRemaining() {
+        return remaining;
+    }
+
+    public short getMinSpawnDelay() {
+        return minSpawnDelay;
+    }
+
+    public short getMaxSpawnDelay() {
+        return maxSpawnDelay;
+    }
+
+    public short getCount() {
+        return count;
+    }
+
+    public short getMaxNearby() {
+        return maxNearby;
+    }
+
+    public short getPlayerRange() {
+        return playerRange;
+    }
+
+    public short getSpawnRange() {
+        return spawnRange;
+    }
+
+    public WeightedSerializableObject<EntitySnapshot> getNextToSpawn() {
+        return nextToSpawn;
+    }
+
+    public WeightedCollection<WeightedSerializableObject<EntitySnapshot>> getEntitiesToSpawn() {
+        return entitiesToSpawn;
     }
 
     @Override
@@ -122,7 +230,15 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     public int compareTo(ImmutableMobSpawnerData o) {
-        return 0;
+        return ComparisonChain.start()
+                .compare(o.remainingDelay().get().intValue(), this.remaining)
+                .compare(o.minimumSpawnDelay().get().intValue(), this.minSpawnDelay)
+                .compare(o.maximumSpawnDelay().get().intValue(), this.maxSpawnDelay)
+                .compare(o.maximumNearbyEntities().get().intValue(), this.maxNearby)
+                .compare(o.spawnCount().get().intValue(), this.count)
+                .compare(o.requiredPlayerRange().get().intValue(), this.playerRange)
+                .compare(o.spawnRange().get().intValue(), this.spawnRange)
+                .result();
     }
 
     @Override
@@ -141,6 +257,25 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     protected void registerGetters() {
-        // TODO
+        registerKeyValue(Keys.SPAWNER_REMAINING_DELAY, ImmutableSpongeMobSpawnerData.this::remainingDelay);
+        registerKeyValue(Keys.SPAWNER_MINIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::minimumSpawnDelay);
+        registerKeyValue(Keys.SPAWNER_MAXIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::maximumSpawnDelay);
+        registerKeyValue(Keys.SPAWNER_SPAWN_COUNT, ImmutableSpongeMobSpawnerData.this::spawnCount);
+        registerKeyValue(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, ImmutableSpongeMobSpawnerData.this::maximumNearbyEntities);
+        registerKeyValue(Keys.SPAWNER_REQURED_PLAYER_RANGE, ImmutableSpongeMobSpawnerData.this::requiredPlayerRange);
+        registerKeyValue(Keys.SPAWNER_SPAWN_RANGE, ImmutableSpongeMobSpawnerData.this::spawnRange);
+        registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, ImmutableSpongeMobSpawnerData.this::nextEntityToSpawn);
+        registerKeyValue(Keys.SPAWNER_ENTITIES, ImmutableSpongeMobSpawnerData.this::possibleEntitiesToSpawn);
+
+        registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, ImmutableSpongeMobSpawnerData.this::getRemaining);
+        registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::getMinSpawnDelay);
+        registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::getMaxSpawnDelay);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, ImmutableSpongeMobSpawnerData.this::getCount);
+        registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, ImmutableSpongeMobSpawnerData.this::getMaxNearby);
+        registerFieldGetter(Keys.SPAWNER_REQURED_PLAYER_RANGE, ImmutableSpongeMobSpawnerData.this::getPlayerRange);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, ImmutableSpongeMobSpawnerData.this::getSpawnRange);
+        registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, ImmutableSpongeMobSpawnerData.this::getNextToSpawn);
+        registerFieldGetter(Keys.SPAWNER_ENTITIES, ImmutableSpongeMobSpawnerData.this::getEntitiesToSpawn);
+
     }
 }

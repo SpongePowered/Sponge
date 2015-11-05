@@ -33,7 +33,9 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -50,12 +52,14 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataMa
         extends AbstractSingleData<E, M, I> {
 
     private final Class<? extends I> immutableClass;
+    private final E defaultValue;
 
-    protected AbstractSingleEnumData(Class<M> manipulatorClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends I> immutableClass) {
+    protected AbstractSingleEnumData(Class<M> manipulatorClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends I> immutableClass, E defaultValue) {
         super(manipulatorClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.immutableClass = checkNotNull(immutableClass);
+        this.defaultValue = checkNotNull(defaultValue);
     }
 
     @Override
@@ -79,4 +83,8 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataMa
         return ImmutableDataCachingUtil.getManipulator(this.immutableClass, getValue());
     }
 
+    @Override
+    protected Value<E> getValueGetter() {
+        return new SpongeValue<E>(this.usedKey, this.defaultValue, this.getValue());
+    }
 }

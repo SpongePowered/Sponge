@@ -25,13 +25,15 @@
 package org.spongepowered.common.data.manipulator.mutable.common.collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.util.ReflectionUtil;
@@ -60,11 +62,12 @@ public abstract class AbstractSingleListData<E, M extends DataManipulator<M, I>,
 
     @Override
     public M setValue(List<E> value) {
+        checkNotNull(value).forEach(Preconditions::checkNotNull);
         return super.setValue(Lists.newArrayList(value));
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected ListValue<E> getValueGetter() {
         return new SpongeListValue<>(this.usedKey, getValue());
     }
 

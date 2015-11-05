@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -37,7 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.List;
@@ -47,21 +45,34 @@ public class ImmutableSpongeFireworkData extends AbstractImmutableData<Immutable
     private final ImmutableList<FireworkEffect> fireworkEffects;
     private final int modifier;
 
+    private final ImmutableListValue<FireworkEffect> effectsValue;
+    private final ImmutableBoundedValue<Integer> modifierValue;
+
     public ImmutableSpongeFireworkData(List<FireworkEffect> effects, int flightModifier) {
         super(ImmutableFireworkData.class);
         this.fireworkEffects = ImmutableList.copyOf(effects);
         this.modifier = flightModifier;
+
+        this.effectsValue = new ImmutableSpongeListValue<>(Keys.FIREWORK_EFFECTS, this.fireworkEffects);
+        this.modifierValue = SpongeValueBuilder.boundedBuilder(Keys.FIREWORK_FLIGHT_MODIFIER)
+                .actualValue(this.modifier)
+                .defaultValue(0)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
         registerGetters();
     }
 
     @Override
     public ImmutableListValue<FireworkEffect> effects() {
-        return new ImmutableSpongeListValue<>(Keys.FIREWORK_EFFECTS, this.fireworkEffects);
+        return effectsValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> flightModifier() {
-        return new ImmutableSpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, 0, intComparator(), Integer.MAX_VALUE, this.modifier);
+        return modifierValue;
     }
 
     @Override
@@ -81,8 +92,20 @@ public class ImmutableSpongeFireworkData extends AbstractImmutableData<Immutable
             .set(Keys.FIREWORK_FLIGHT_MODIFIER, this.modifier);
     }
 
+    public ImmutableList<FireworkEffect> getFireworkEffects() {
+        return fireworkEffects;
+    }
+
+    public int getModifier() {
+        return modifier;
+    }
+
     @Override
     protected void registerGetters() {
-        // TODO
+        registerFieldGetter(Keys.FIREWORK_EFFECTS, ImmutableSpongeFireworkData.this::getFireworkEffects);
+        registerFieldGetter(Keys.FIREWORK_FLIGHT_MODIFIER, ImmutableSpongeFireworkData.this::getModifier);
+
+        registerKeyValue(Keys.FIREWORK_EFFECTS, ImmutableSpongeFireworkData.this::effects);
+        registerKeyValue(Keys.FIREWORK_FLIGHT_MODIFIER, ImmutableSpongeFireworkData.this::flightModifier);
     }
 }

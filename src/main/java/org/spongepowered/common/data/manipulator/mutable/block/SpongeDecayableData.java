@@ -30,12 +30,11 @@ import org.spongepowered.api.data.manipulator.mutable.block.DecayableData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeDecayableData extends AbstractBooleanData<DecayableData, ImmutableDecayableData> implements DecayableData {
 
     public SpongeDecayableData(boolean decayable) {
-        super(DecayableData.class, decayable, Keys.DECAYABLE, ImmutableSpongeDecayableData.class);
+        super(DecayableData.class, decayable, Keys.DECAYABLE, ImmutableSpongeDecayableData.class, false);
     }
 
     public SpongeDecayableData() {
@@ -44,11 +43,6 @@ public class SpongeDecayableData extends AbstractBooleanData<DecayableData, Immu
 
     @Override
     public Value<Boolean> decayable() {
-        return new SpongeValue<>(Keys.DECAYABLE, true, getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return decayable();
+        return getValueGetter();
     }
 }

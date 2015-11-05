@@ -36,13 +36,15 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeRepresentedItemData extends AbstractImmutableSingleData<ItemStackSnapshot, ImmutableRepresentedItemData, RepresentedItemData> implements ImmutableRepresentedItemData {
 
+    private final ImmutableValue<ItemStackSnapshot> immutableValue = new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, this.value);
+
     public ImmutableSpongeRepresentedItemData(ItemStackSnapshot itemStack) {
         super(ImmutableRepresentedItemData.class, itemStack, Keys.REPRESENTED_ITEM);
     }
 
     @Override
     public ImmutableValue<ItemStackSnapshot> item() {
-        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, this.value);
+        return immutableValue;
     }
 
     @Override

@@ -30,33 +30,25 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class SpongeSlimeData extends AbstractBoundedComparableData<Integer, SlimeData, ImmutableSlimeData> implements SlimeData {
-
-    public SpongeSlimeData(int value) {
-        super(SlimeData.class, value, Keys.SLIME_SIZE, intComparator(), ImmutableSpongeSlimeData.class, 0, Integer.MAX_VALUE);
-    }
 
     public SpongeSlimeData() {
         this(0);
     }
 
-    @Override
-    public MutableBoundedValue<Integer> size() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SLIME_SIZE)
-            .defaultValue(0)
-            .minimum(0)
-            .maximum(Integer.MAX_VALUE)
-            .actualValue(this.getValue())
-            .build();
+    public SpongeSlimeData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
+    }
+
+    public SpongeSlimeData(int value, int minimum, int maximum) {
+        super(SlimeData.class, value, Keys.SLIME_SIZE, intComparator(), ImmutableSpongeSlimeData.class, minimum, maximum, 0);
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return this.size();
+    public MutableBoundedValue<Integer> size() {
+        return getValueGetter();
     }
 }

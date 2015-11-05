@@ -30,21 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.OccupiedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOccupiedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeOccupiedData extends AbstractBooleanData<OccupiedData, ImmutableOccupiedData> implements OccupiedData {
 
     public SpongeOccupiedData(boolean value) {
-        super(OccupiedData.class, value, Keys.OCCUPIED, ImmutableSpongeOccupiedData.class);
+        super(OccupiedData.class, value, Keys.OCCUPIED, ImmutableSpongeOccupiedData.class, false);
     }
 
     @Override
     public Value<Boolean> occupied() {
-        return new SpongeValue<>(Keys.OCCUPIED, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return occupied();
+        return getValueGetter();
     }
 }

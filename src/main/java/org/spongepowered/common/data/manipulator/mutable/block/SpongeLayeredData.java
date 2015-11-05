@@ -30,29 +30,25 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
 import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, LayeredData, ImmutableLayeredData> implements LayeredData {
 
+    public SpongeLayeredData() {
+        this(0);
+    }
+
+    public SpongeLayeredData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
+    }
+
     public SpongeLayeredData(int value, int lowerBound, int upperBound) {
-        super(LayeredData.class, value, Keys.LAYER, intComparator(), ImmutableSpongeLayeredData.class, lowerBound, upperBound);
+        super(LayeredData.class, value, Keys.LAYER, intComparator(), ImmutableSpongeLayeredData.class, lowerBound, upperBound, 0);
     }
 
     @Override
     public MutableBoundedValue<Integer> layer() {
-        return SpongeValueBuilder.boundedBuilder(Keys.LAYER)
-            .defaultValue(0)
-            .minimum(this.lowerBound)
-            .maximum(this.upperBound)
-            .actualValue(this.getValue())
-            .build();
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return layer();
+        return getValueGetter();
     }
 }

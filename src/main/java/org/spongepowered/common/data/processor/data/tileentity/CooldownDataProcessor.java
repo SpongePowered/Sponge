@@ -31,16 +31,19 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
+import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
 public class CooldownDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntityHopper, Integer, Value<Integer>, CooldownData, ImmutableCooldownData> {
+        extends AbstractTileEntitySingleDataProcessor<TileEntityHopper, Integer, MutableBoundedValue<Integer>, CooldownData, ImmutableCooldownData> {
 
     public CooldownDataProcessor() {
         super(TileEntityHopper.class, Keys.COOLDOWN);
@@ -58,8 +61,14 @@ public class CooldownDataProcessor
     }
 
     @Override
-    public ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return ImmutableSpongeValue.cachedOf(Keys.COOLDOWN, -1, value);
+    public ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
+        return SpongeValueBuilder.boundedBuilder(Keys.COOLDOWN)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .defaultValue(0)
+                .actualValue(value)
+                .build()
+                .asImmutable();
     }
 
     @Override

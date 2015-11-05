@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+import static org.spongepowered.common.data.value.SpongeValueBuilder.boundedBuilder;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
@@ -36,7 +36,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<ImmutableExperienceHolderData, ExperienceHolderData> implements
         ImmutableExperienceHolderData {
@@ -46,12 +45,50 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
     private final int expSinceLevel;
     private final int expBetweenLevels;
 
+    private final ImmutableBoundedValue<Integer> levelValue;
+    private final ImmutableBoundedValue<Integer> totalExpValue;
+    private final ImmutableBoundedValue<Integer> expSinceLevelValue;
+    private final ImmutableBoundedValue<Integer> expBetweenLevelsValue;
+
     public ImmutableSpongeExperienceHolderData(int level, int totalExp, int expSinceLevel) {
         super(ImmutableExperienceHolderData.class);
         this.level = level;
         this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(level);
         this.totalExp = totalExp;
         this.expSinceLevel = expSinceLevel;
+
+        this.levelValue = boundedBuilder(Keys.EXPERIENCE_LEVEL)
+                .actualValue(this.level)
+                .defaultValue(0)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
+        this.totalExpValue = boundedBuilder(Keys.TOTAL_EXPERIENCE)
+                .actualValue(this.totalExp)
+                .defaultValue(0)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
+        this.expSinceLevelValue = boundedBuilder(Keys.EXPERIENCE_SINCE_LEVEL)
+                .actualValue(this.expSinceLevel)
+                .defaultValue(0)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
+        this.expBetweenLevelsValue = boundedBuilder(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
+                .actualValue(this.expBetweenLevels)
+                .defaultValue(this.expBetweenLevels)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .build()
+                .asImmutable();
+
         registerGetters();
     }
 
@@ -79,24 +116,22 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
 
     @Override
     public ImmutableBoundedValue<Integer> level() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.EXPERIENCE_LEVEL, 0, this.level, intComparator(), 0, Integer.MAX_VALUE);
+        return levelValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> totalExperience() {
-        return new ImmutableSpongeBoundedValue<>(Keys.TOTAL_EXPERIENCE, this.totalExp, 0, intComparator(), 0, Integer.MAX_VALUE);
+        return totalExpValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> experienceSinceLevel() {
-        return new ImmutableSpongeBoundedValue<>(Keys.EXPERIENCE_SINCE_LEVEL, this.expSinceLevel, 0, intComparator(), 0,
-                                                 Integer.MAX_VALUE);
+        return expSinceLevelValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> experienceBetweenLevels() {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.EXPERIENCE_FROM_START_OF_LEVEL, this.expBetweenLevels,
-                this.expBetweenLevels, intComparator(), 0, Integer.MAX_VALUE);
+        return expBetweenLevelsValue;
     }
 
     public int getLevel() {

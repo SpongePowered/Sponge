@@ -30,29 +30,25 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableFluidLevelData;
 import org.spongepowered.api.data.manipulator.mutable.block.FluidLevelData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeFluidLevelData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
 
 public class SpongeFluidLevelData extends AbstractBoundedComparableData<Integer, FluidLevelData, ImmutableFluidLevelData> implements FluidLevelData {
 
-    public SpongeFluidLevelData(Integer value, Integer lowerBound, Integer upperBound) {
-        super(FluidLevelData.class, value, Keys.FLUID_LEVEL, intComparator(), ImmutableSpongeFluidLevelData.class, lowerBound, upperBound);
+    public SpongeFluidLevelData() {
+        this(0);
+    }
+
+    public SpongeFluidLevelData(int value) {
+        this(value, 0, Integer.MAX_VALUE);
+    }
+
+    public SpongeFluidLevelData(int value, int lowerBound, int upperBound) {
+        super(FluidLevelData.class, value, Keys.FLUID_LEVEL, intComparator(), ImmutableSpongeFluidLevelData.class, lowerBound, upperBound, 0);
     }
 
     @Override
     public MutableBoundedValue<Integer> level() {
-        return SpongeValueBuilder.boundedBuilder(Keys.FLUID_LEVEL)
-            .defaultValue(0)
-            .minimum(this.lowerBound)
-            .maximum(this.upperBound)
-            .actualValue(this.getValue())
-            .build();
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return level();
+        return getValueGetter();
     }
 }

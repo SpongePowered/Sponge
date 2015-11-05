@@ -67,7 +67,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
     @Override
     public MutableBoundedValue<Double> maxHealth() {
         return SpongeValueBuilder.boundedBuilder(Keys.MAX_HEALTH)
-            .defaultValue(this.maxHealth)
+            .defaultValue(20D)
             .minimum(0D)
             .maximum((double) Float.MAX_VALUE)
             .actualValue(this.maxHealth)

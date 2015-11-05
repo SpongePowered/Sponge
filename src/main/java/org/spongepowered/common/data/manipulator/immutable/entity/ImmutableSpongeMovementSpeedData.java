@@ -24,34 +24,33 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<ImmutableMovementSpeedData, MovementSpeedData> implements ImmutableMovementSpeedData  {
 
     private final double walkSpeed;
     private final double flySpeed;
 
-    final ImmutableBoundedValue<Double> walkSpeedValue;
-    final ImmutableBoundedValue<Double> flyingSpeedValue;
+    private final ImmutableValue<Double> walkSpeedValue;
+    private final ImmutableValue<Double> flyingSpeedValue;
 
 
     public ImmutableSpongeMovementSpeedData(double walkSpeed, double flySpeed) {
         super(ImmutableMovementSpeedData.class);
         this.walkSpeed = walkSpeed;
         this.flySpeed = flySpeed;
-        this.walkSpeedValue = new ImmutableSpongeBoundedValue<>(Keys.WALKING_SPEED, 0.1d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
-        this.flyingSpeedValue = new ImmutableSpongeBoundedValue<>(Keys.FLYING_SPEED, 0.05d, doubleComparator(), Double.MIN_VALUE, Double.MAX_VALUE);
+        this.walkSpeedValue = new ImmutableSpongeValue<>(Keys.WALKING_SPEED, 0.7D, this.walkSpeed);
+        this.flyingSpeedValue = new ImmutableSpongeValue<>(Keys.FLYING_SPEED, 0.05D, this.flySpeed);
+
         registerGetters();
     }
 
@@ -73,12 +72,12 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
     }
 
     @Override
-    public ImmutableBoundedValue<Double> walkSpeed() {
+    public ImmutableValue<Double> walkSpeed() {
         return this.walkSpeedValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Double> flySpeed() {
+    public ImmutableValue<Double> flySpeed() {
         return this.flyingSpeedValue;
     }
 

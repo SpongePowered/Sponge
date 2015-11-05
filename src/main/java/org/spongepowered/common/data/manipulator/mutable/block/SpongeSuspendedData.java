@@ -30,21 +30,15 @@ import org.spongepowered.api.data.manipulator.mutable.block.SuspendedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSuspendedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeSuspendedData extends AbstractBooleanData<SuspendedData, ImmutableSuspendedData> implements SuspendedData {
 
     public SpongeSuspendedData(boolean value) {
-        super(SuspendedData.class, value, Keys.SUSPENDED, ImmutableSpongeSuspendedData.class);
+        super(SuspendedData.class, value, Keys.SUSPENDED, ImmutableSpongeSuspendedData.class, false);
     }
 
     @Override
     public Value<Boolean> suspended() {
-        return new SpongeValue<>(Keys.SUSPENDED, this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return suspended();
+        return getValueGetter();
     }
 }

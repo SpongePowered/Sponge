@@ -24,57 +24,26 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import com.google.common.collect.ComparisonChain;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCooldownData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
+import org.spongepowered.common.data.util.ComparatorUtil;
 
-public class SpongeCooldownData extends AbstractSingleData<Integer, CooldownData, ImmutableCooldownData> implements CooldownData {
+public class SpongeCooldownData extends AbstractBoundedComparableData<Integer, CooldownData, ImmutableCooldownData> implements CooldownData {
 
     public SpongeCooldownData(int value) {
-        super(CooldownData.class, value, Keys.COOLDOWN);
+        super(CooldownData.class, value, Keys.COOLDOWN, ComparatorUtil.intComparator(), ImmutableSpongeCooldownData.class, 0, Integer.MAX_VALUE, 0);
     }
 
     public SpongeCooldownData() {
-        this(-1);
+        this(0);
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return cooldown();
-    }
-
-    @Override
-    public CooldownData copy() {
-        return new SpongeCooldownData(this.getValue());
-    }
-
-    @Override
-    public ImmutableCooldownData asImmutable() {
-        return new ImmutableSpongeCooldownData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(CooldownData o) {
-        return ComparisonChain.start()
-                .compare(this.getValue(), o.cooldown().get())
-                .result();
-    }
-
-    @Override
-    public Value<Integer> cooldown() {
-        return new SpongeValue<Integer>(Keys.COOLDOWN, -1, this.getValue());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer()
-                .set(Keys.COOLDOWN, this.getValue());
+    public MutableBoundedValue<Integer> cooldown() {
+        return getValueGetter();
     }
 }
