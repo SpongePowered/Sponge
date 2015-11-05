@@ -121,6 +121,7 @@ public final class ReflectionUtil {
         for (Object object : objects) {
             if (object == null) {
                 list.add(null);
+                continue;
             }
             if (object.getClass().isArray()) {
                 list.addAll(deconstructArray((Object[]) object));
