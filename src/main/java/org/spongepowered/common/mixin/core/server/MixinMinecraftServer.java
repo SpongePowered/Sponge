@@ -264,6 +264,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         initiateShutdown();
     }
 
+    @Inject(method = "stopServer()V", at = @At("HEAD"))
+    public void onServerStopping(CallbackInfo ci) {
+        ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
+    }
+
     @Overwrite
     protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generator) {
         this.convertMapIfNeeded(overworldFolder);
