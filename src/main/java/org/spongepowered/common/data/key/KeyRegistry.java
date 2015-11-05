@@ -32,6 +32,7 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.GameProfile;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -221,6 +222,8 @@ public class KeyRegistry {
         keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
         keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
         keyMap.put("targets", makeSingleKey(Living.class, ListValue.class, of("Targets")));
+        keyMap.put("represented_block", makeSingleKey(BlockState.class, Value.class, of("RepresentedBlock")));
+        keyMap.put("offset", makeSingleKey(Integer.class, Value.class, of("BlockOffset")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

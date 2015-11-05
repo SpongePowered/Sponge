@@ -1,0 +1,89 @@
+package org.spongepowered.common.data.processor.data.entity;
+
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityMinecart;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionBuilder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
+import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
+import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.service.persistence.SpongeSerializationService;
+
+import java.util.Map;
+import java.util.Optional;
+
+public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<EntityMinecart, MinecartBlockData, ImmutableMinecartBlockData> {
+
+    public MinecartBlockDataProcessor() {
+        super(EntityMinecart.class);
+    }
+
+    @Override
+    protected boolean doesDataExist(EntityMinecart entity) {
+        return entity.hasDisplayTile();
+    }
+
+    @Override
+    protected boolean set(EntityMinecart entity, Map<Key<?>, Object> keyValues) {
+        BlockState type = (BlockState) keyValues.get(Keys.REPRESENTED_BLOCK);
+        int offset = (Integer) keyValues.get(Keys.OFFSET);
+
+        entity.setDisplayTileOffset(offset);
+        entity.func_174899_a((IBlockState) type);
+
+        return true;
+    }
+
+    @Override
+    protected Map<Key<?>, ?> getValues(EntityMinecart entity) {
+        BlockState state = (BlockState) entity.getDisplayTile();
+        int offset = entity.getDisplayTileOffset();
+        return ImmutableMap.of(Keys.REPRESENTED_BLOCK, state, Keys.OFFSET, offset);
+    }
+
+    @Override
+    protected MinecartBlockData createManipulator() {
+        return new SpongeMinecartBlockData();
+    }
+
+    @Override
+    public Optional<MinecartBlockData> fill(DataContainer container, MinecartBlockData data) {
+        if(!container.contains(Keys.REPRESENTED_BLOCK.getQuery())
+            || !container.contains(Keys.OFFSET.getQuery())) {
+            return Optional.empty();
+        }
+
+        BlockState block = container.getSerializable(Keys.REPRESENTED_BLOCK.getQuery(), BlockState.class, SpongeSerializationService.getInstance()).get();
+        int offset = container.getInt(Keys.OFFSET.getQuery()).get();
+
+        data.set(Keys.REPRESENTED_BLOCK, block);
+        data.set(Keys.OFFSET, offset);
+
+        return Optional.of(data);
+    }
+
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        if(dataHolder instanceof EntityMinecart) {
+            EntityMinecart cart = (EntityMinecart) dataHolder;
+            DataTransactionBuilder builder = DataTransactionBuilder.builder().result(DataTransactionResult.Type.SUCCESS);
+            if(cart.hasDisplayTile()) {
+                ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
+                ImmutableValue<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.getDisplayTileOffset());
+                cart.setHasDisplayTile(false);
+                builder.replace(block).replace(offset);
+            }
+            return builder.build();
+        }
+        return DataTransactionBuilder.failNoData();
+    }
+}
