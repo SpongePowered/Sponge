@@ -36,7 +36,7 @@ public class ImmutableSpongeLockableData extends AbstractImmutableSingleData<Str
 
     private final ImmutableValue<String> valueObj;
     
-	public ImmutableSpongeLockableData(String value) {
+    public ImmutableSpongeLockableData(String value) {
         super(ImmutableLockableData.class, value, Keys.LOCK_TOKEN);
         this.valueObj = new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", this.value);
     }
@@ -46,19 +46,19 @@ public class ImmutableSpongeLockableData extends AbstractImmutableSingleData<Str
         return this.valueObj;
     }
 
-	@Override
-	public int compareTo(ImmutableLockableData o) {
-		return this.value.compareTo(o.lockToken().get());
-	}
+    @Override
+    public int compareTo(ImmutableLockableData o) {
+        return this.value.compareTo(o.lockToken().get());
+    }
 
-	@Override
-	protected ImmutableValue<String> getValueGetter() {
-		return this.valueObj;
-	}
+    @Override
+    protected ImmutableValue<String> getValueGetter() {
+        return this.valueObj;
+    }
 
-	@Override
-	public LockableData asMutable() {
-		return new SpongeLockableData(this.value);
-	}
+    @Override
+    public LockableData asMutable() {
+        return new SpongeLockableData(this.value);
+    }
 
 }

@@ -37,10 +37,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SpongeLockableData extends AbstractSingleData<String, LockableData, ImmutableLockableData> implements LockableData {
 
     public SpongeLockableData() {
-    	this("");
+        this("");
     }
-	
-	public SpongeLockableData(String value) {
+    
+    public SpongeLockableData(String value) {
         super(LockableData.class, value, Keys.LOCK_TOKEN);
     }
 
@@ -49,29 +49,29 @@ public class SpongeLockableData extends AbstractSingleData<String, LockableData,
         return this.getValueGetter();
     }
 
-	@Override
-	public int compareTo(LockableData o) {
-		return this.getValue().compareTo(o.lockToken().get());
-	}
+    @Override
+    public int compareTo(LockableData o) {
+        return this.getValue().compareTo(o.lockToken().get());
+    }
 
-	@Override
-	protected Value<String> getValueGetter() {
-		return new SpongeValue<String>(Keys.LOCK_TOKEN, "", this.getValue());
-	}
+    @Override
+    protected Value<String> getValueGetter() {
+        return new SpongeValue<String>(Keys.LOCK_TOKEN, "", this.getValue());
+    }
 
-	@Override
-	public ImmutableLockableData asImmutable() {
-		return new ImmutableSpongeLockableData(this.getValue());
-	}
+    @Override
+    public ImmutableLockableData asImmutable() {
+        return new ImmutableSpongeLockableData(this.getValue());
+    }
 
-	@Override
-	public LockableData copy() {
-		return new SpongeLockableData(this.getValue());
-	}
+    @Override
+    public LockableData copy() {
+        return new SpongeLockableData(this.getValue());
+    }
 
-	@Override
-	public DataContainer toContainer() {
-		return new MemoryDataContainer().set(Keys.LOCK_TOKEN, this.getValue());
-	}
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer().set(Keys.LOCK_TOKEN, this.getValue());
+    }
 
 }

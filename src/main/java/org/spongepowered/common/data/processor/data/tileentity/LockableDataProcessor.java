@@ -18,42 +18,42 @@ import java.util.Optional;
 
 public final class LockableDataProcessor extends AbstractSingleDataSingleTargetProcessor<ILockableContainer, String, Value<String>, LockableData, ImmutableLockableData> {
 
-	public LockableDataProcessor() {
-		super(Keys.LOCK_TOKEN, ILockableContainer.class);
-	}
+    public LockableDataProcessor() {
+        super(Keys.LOCK_TOKEN, ILockableContainer.class);
+    }
 
-	@Override
-	public DataTransactionResult remove(DataHolder dataHolder) {
-		if (dataHolder instanceof ILockableContainer) {
-			set((ILockableContainer) dataHolder, "");
-			return DataTransactionBuilder.successNoData();
-		}
-		return DataTransactionBuilder.failNoData();
-	}
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        if (dataHolder instanceof ILockableContainer) {
+            set((ILockableContainer) dataHolder, "");
+            return DataTransactionBuilder.successNoData();
+        }
+        return DataTransactionBuilder.failNoData();
+    }
 
-	@Override
-	protected boolean set(ILockableContainer entity, String value) {
-		entity.setLockCode(value.length() == 0 ? LockCode.EMPTY_CODE : new LockCode(value));
-		return true;
-	}
+    @Override
+    protected boolean set(ILockableContainer entity, String value) {
+        entity.setLockCode(value.length() == 0 ? LockCode.EMPTY_CODE : new LockCode(value));
+        return true;
+    }
 
-	@Override
-	protected Optional<String> getVal(ILockableContainer entity) {
-		LockCode code = entity.getLockCode();
-		if (code.isEmpty()) {
-			return Optional.empty();
-		}
-		return Optional.of(code.getLock());
-	}
+    @Override
+    protected Optional<String> getVal(ILockableContainer entity) {
+        LockCode code = entity.getLockCode();
+        if (code.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(code.getLock());
+    }
 
-	@Override
-	protected ImmutableValue<String> constructImmutableValue(String value) {
-		return new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", value);
-	}
+    @Override
+    protected ImmutableValue<String> constructImmutableValue(String value) {
+        return new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", value);
+    }
 
-	@Override
-	protected LockableData createManipulator() {
-		return new SpongeLockableData();
-	}
+    @Override
+    protected LockableData createManipulator() {
+        return new SpongeLockableData();
+    }
 
 }
