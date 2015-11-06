@@ -887,7 +887,7 @@ public class SpongeSerializationRegistry {
                 new ArtDataProcessor());
         
         dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
-        		ImmutableLockableData.class, ImmutableSpongeLockableData.class, new LockableDataProcessor());
+                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new LockableDataProcessor());
 
         final WitherTargetLivingDataProcessor witherTargetLivingDataProcessor = new WitherTargetLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
