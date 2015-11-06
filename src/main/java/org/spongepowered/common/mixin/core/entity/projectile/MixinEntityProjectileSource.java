@@ -22,23 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.entity.projectile;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.tileentity.TileEntityDispenser;
-import org.spongepowered.api.block.tileentity.carrier.Dispenser;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 
 import java.util.Optional;
 
-@NonnullByDefault
-@Mixin(TileEntityDispenser.class)
-public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser {
+@Mixin({EntityBlaze.class, EntityGhast.class, EntityHuman.class, EntityPlayerMP.class, EntitySkeleton.class, EntityWitch.class, EntityWither.class})
+public abstract class MixinEntityProjectileSource extends EntityLivingBase implements ProjectileSource {
+
+    public MixinEntityProjectileSource() {
+        super(null);
+    }
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {

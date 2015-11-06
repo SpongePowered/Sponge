@@ -224,4 +224,14 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     private static final class Holder {
         private static final EntityTypeRegistryModule INSTANCE = new EntityTypeRegistryModule();
     }
+
+    public Optional<EntityType> getEntity(Class<? extends org.spongepowered.api.entity.Entity> entityClass) {
+        for (EntityType type : this.entityTypeMappings.values()) {
+            if (entityClass.isAssignableFrom(type.getEntityClass())) {
+                return Optional.of(type);
+            }
+        }
+        return Optional.empty();
+    }
+
 }

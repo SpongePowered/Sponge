@@ -51,7 +51,7 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
     // EntityLivingBase.moveEntityWithHeading sets y-velocity at this value when
     // entity is at rest. Value is -0.08 * 0.9800000190734863. See
     // https://github.com/SpongePowered/SpongeCommon/issues/149#issuecomment-158832297
-    public static final float ENTITY_REST_Y_VEL = -0.0784000015258789F;
+    public static final double ENTITY_REST_Y_VEL = -0.0784000015258789D;
 
     public VelocityDataProcessor() {
         super(Entity.class);

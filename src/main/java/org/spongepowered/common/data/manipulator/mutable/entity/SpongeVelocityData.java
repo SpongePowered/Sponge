@@ -78,6 +78,6 @@ public class SpongeVelocityData extends AbstractSingleData<Vector3d, VelocityDat
 
     @Override
     public Value<Vector3d> velocity() {
-        return new SpongeValue<>(Keys.VELOCITY, new Vector3d(), this.getValue());
+        return new SpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, this.getValue());
     }
 }

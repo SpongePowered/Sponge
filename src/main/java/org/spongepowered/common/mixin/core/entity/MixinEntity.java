@@ -475,16 +475,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return this.entityUniqueID;
     }
 
-    public Vector3d getVelocity() {
-        return new Vector3d(this.motionX, this.motionY, this.motionZ);
-    }
-
-    public void setVelocity(Vector3d velocity) {
-        this.motionX = velocity.getX();
-        this.motionY = velocity.getY();
-        this.motionZ = velocity.getZ();
-    }
-
     public Entity getBaseVehicle() {
         if (this.ridingEntity == null) {
             return this;

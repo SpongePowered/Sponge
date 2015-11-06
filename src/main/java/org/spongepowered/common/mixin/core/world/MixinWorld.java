@@ -1669,6 +1669,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             entity = (Entity) new EntityLightningBolt(world, x, y, z);
         } else if (entityClass.isAssignableFrom(EntityEnderPearl.class)) {
             EntityArmorStand tempEntity = new EntityArmorStand(world, x, y, z);
+            tempEntity.posY -= tempEntity.getEyeHeight();
             entity = (Entity) new EntityEnderPearl(world, tempEntity);
             ((EnderPearl) entity).setShooter(ProjectileSource.UNKNOWN);
         }
