@@ -221,6 +221,7 @@ public class KeyRegistry {
         keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
         keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
         keyMap.put("targets", makeSingleKey(Living.class, ListValue.class, of("Targets")));
+        keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

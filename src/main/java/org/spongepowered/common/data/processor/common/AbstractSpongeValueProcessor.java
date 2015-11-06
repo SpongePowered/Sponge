@@ -52,10 +52,10 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
      * Builds a {@link Value} of the type produced by this processor from an
      * input, actual value.
      *
-     * @param defaultValue The actual value
+     * @param actualValue The actual value
      * @return The constructed {@link Value}
      */
-    protected abstract V constructValue(E defaultValue);
+    protected abstract V constructValue(E actualValue);
 
     protected abstract boolean set(C container, E value);
 

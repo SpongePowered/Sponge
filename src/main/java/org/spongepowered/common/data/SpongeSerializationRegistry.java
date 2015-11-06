@@ -116,6 +116,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableD
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
+import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
@@ -189,6 +190,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.SpawnableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -293,6 +295,7 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeP
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeSpawnableData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
+import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeLockableData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeNoteData;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
@@ -366,6 +369,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeSpawnableDat
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeNoteData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.data.ColoredDataProcessor;
@@ -441,6 +445,7 @@ import org.spongepowered.common.data.processor.data.item.SpawnableDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.BrewingStandDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.CooldownDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.FurnaceDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.LockableDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.NoteDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
@@ -880,6 +885,9 @@ public class SpongeSerializationRegistry {
 
         dataRegistry.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
                 new ArtDataProcessor());
+        
+        dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
+        		ImmutableLockableData.class, ImmutableSpongeLockableData.class, new LockableDataProcessor());
 
         final WitherTargetLivingDataProcessor witherTargetLivingDataProcessor = new WitherTargetLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
