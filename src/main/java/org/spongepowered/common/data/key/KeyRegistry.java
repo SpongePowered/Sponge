@@ -251,6 +251,7 @@ public class KeyRegistry {
         keyMap.put("skeleton_type", makeSingleKey(SkeletonType.class, Value.class, of("SkeletonType")));
         keyMap.put("ocelot_type", makeSingleKey(OcelotType.class, Value.class, of("OcelotType")));
         keyMap.put("rabbit_type", makeSingleKey(RabbitType.class, Value.class, of("RabbitType")));
+        keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
