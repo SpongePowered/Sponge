@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
@@ -33,12 +32,9 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,8 +43,6 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
 import org.spongepowered.common.util.VecHelper;
-
-import java.util.List;
 
 @NonnullByDefault
 @Mixin(EntityPlayer.class)
@@ -70,18 +64,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos spawnChunk;
     @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target="Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;"))
-    public List onGetEntitiesWithinAABB(net.minecraft.world.World world, net.minecraft.entity.Entity entity, net.minecraft.util.AxisAlignedBB aabb) {
-        List list = world.getEntitiesWithinAABBExcludingEntity(entity, aabb);
-        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(Sponge.getGame(), Cause.of(this), (List<Entity>)(List<?>)ImmutableList.copyOf(list), (List<Entity>)(List<?>)list, (World) this.worldObj);
-        Sponge.getGame().getEventManager().post(event);
-        if (event.isCancelled()) {
-            list.clear();
-        }
-        return list;
-    }
 
     // utility method for getting the total experience at an arbitrary level
     // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()

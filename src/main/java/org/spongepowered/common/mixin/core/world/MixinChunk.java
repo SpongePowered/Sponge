@@ -26,16 +26,19 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ClassInheritanceMultiMap;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -47,9 +50,10 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -66,6 +70,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
@@ -76,6 +81,7 @@ import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -105,7 +111,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private Vector3i blockMax;
     private Vector2i biomeMin;
     private Vector2i biomeMax;
-    private ChunkCoordIntPair chunkCoordIntPair;
 
     @Shadow private World worldObj;
     @Shadow public int xPosition;
@@ -138,7 +143,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         this.blockMax = this.blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
         this.biomeMin = this.blockMin.toVector2(true);
         this.biomeMax = this.blockMax.toVector2(true);
-        this.chunkCoordIntPair = new ChunkCoordIntPair(x, z);
     }
 
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
@@ -290,7 +294,41 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
     }
 
-    @Override
+    @SuppressWarnings({"unchecked"})
+    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
+    public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_, CallbackInfo ci) {
+        if (listToFill.size() == 0) {
+            return;
+        }
+
+        CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, entityIn, listToFill);
+        if (event == null) {
+            return;
+        } else if (event.isCancelled()) {
+            listToFill.clear();
+        } else {
+            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
+    public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_, CallbackInfo ci) {
+        if (listToFill.size() == 0) {
+            return;
+        }
+
+        CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, null, listToFill);
+        if (event == null) {
+            return;
+        } else if (event.isCancelled()) {
+            listToFill.clear();
+        } else {
+            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
+        }
+    }
+
+        @Override
     public Cause getCurrentPopulateCause() {
         return this.populateCause;
     }
@@ -554,8 +592,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Entity> getEntities() {
-        Set<Entity> entities = Sets.newHashSet();
+    public Collection<org.spongepowered.api.entity.Entity> getEntities() {
+        Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
         for (ClassInheritanceMultiMap entityList : this.entityLists) {
             entities.addAll(entityList);
         }

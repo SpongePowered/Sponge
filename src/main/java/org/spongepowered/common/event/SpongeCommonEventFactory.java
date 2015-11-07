@@ -43,6 +43,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
@@ -59,6 +60,8 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 public class SpongeCommonEventFactory {
 
@@ -436,5 +439,31 @@ public class SpongeCommonEventFactory {
         }
 
         ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, net.minecraft.entity.Entity sourceEntity, List<net.minecraft.entity.Entity> entities) {
+        Cause cause = null;
+        if (sourceEntity != null) {
+            cause = Cause.of(sourceEntity);
+        } else {
+            IMixinWorld spongeWorld = (IMixinWorld) world;
+            if (spongeWorld.getCurrentTickTileEntity().isPresent()) {
+                cause = Cause.of(spongeWorld.getCurrentTickTileEntity().get());
+            } else if (spongeWorld.getCurrentTickBlock().isPresent()) {
+                cause = Cause.of(spongeWorld.getCurrentTickBlock().get());
+            } else if (spongeWorld.getCurrentTickEntity().isPresent()) {
+                cause = Cause.of(spongeWorld.getCurrentTickEntity().get());
+            }
+
+            if (cause == null) {
+                return null;
+            }
+        }
+
+        ImmutableList<org.spongepowered.api.entity.Entity> originalEntities = ImmutableList.copyOf((List<org.spongepowered.api.entity.Entity>)(List<?>) entities);
+        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(Sponge.getGame(), cause, originalEntities, (List<org.spongepowered.api.entity.Entity>)(List<?>) entities, (org.spongepowered.api.world.World) world);
+        Sponge.getGame().getEventManager().post(event);
+        return event;
     }
 }
