@@ -217,11 +217,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         List<Packet> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            double dx = this.posX - position.getX();
-            double dy = this.posY - position.getY();
-            double dz = this.posZ - position.getZ();
-
-            if (dx * dx + dy * dy + dz * dz < radius * radius) {
+            if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
                 for (Packet packet : packets) {
                     this.playerNetServerHandler.sendPacket(packet);
                 }
