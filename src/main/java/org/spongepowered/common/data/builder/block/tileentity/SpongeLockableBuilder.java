@@ -27,8 +27,10 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
@@ -60,11 +62,9 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
                     (net.minecraft.item.ItemStack) content.getSerializable(new DataQuery("Item"), ItemStack.class, service).get();
             ((IInventory) lockable).setInventorySlotContents(content.getInt(new DataQuery("Slot")).get(), stack);
         }
-        // TODO
-//        if (container.contains(new DataQuery("Lock"))) {
-//            LockableData lock = new SpongeLocableData
-//            lockable.setLockableData(container.getString(new DataQuery("Lock")).get());
-//        }
+        if (container.contains(Keys.LOCK_TOKEN.getQuery())) {
+            ((DataHolder) lockable).offer(Keys.LOCK_TOKEN, container.getString(Keys.LOCK_TOKEN.getQuery()).get());
+        }
         return Optional.of((T) lockable);
     }
 }
