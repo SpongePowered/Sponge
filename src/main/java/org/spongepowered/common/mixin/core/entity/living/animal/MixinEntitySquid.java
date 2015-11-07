@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.entity.living.animal;
 import net.minecraft.entity.passive.EntitySquid;
 import org.spongepowered.api.entity.living.Squid;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
+import org.spongepowered.common.mixin.core.entity.passive.MixinEntityWaterMob;
 
 @Mixin(EntitySquid.class)
-public abstract class MixinEntitySquid extends MixinEntityLiving implements Squid {
+public abstract class MixinEntitySquid extends MixinEntityWaterMob implements Squid {
 
 }

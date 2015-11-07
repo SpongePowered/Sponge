@@ -26,66 +26,68 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityWither;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetLivingData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetLivingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class TargetLivingDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityLiving, List<Living>, ImmutableListValue<Living>, TargetLivingData, ImmutableTargetLivingData> {
-
-    public static int MAX_TARGET_INDEX = 0;
+public class TargetLivingDataProcessor extends AbstractEntitySingleDataProcessor<EntityLiving, Living, Value<Living>, TargetLivingData,
+        ImmutableTargetLivingData> {
 
     public TargetLivingDataProcessor() {
-        super(EntityLiving.class, Keys.TARGETS);
+        super(EntityLiving.class, Keys.TARGET);
     }
 
     @Override
-    protected boolean set(EntityLiving entity, List<Living> value) {
-        boolean hasSet = false;
-        for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            entity.setAttackTarget(value.size() > i ? ((EntityLivingBase) value.get(i)) : null);
-            hasSet = true;
+    protected boolean set(EntityLiving entity, Living value) {
+        if (!supports(entity) || entity instanceof EntityWither || !entity.canAttackClass(value.getClass())) {
+            return false;
         }
-        return hasSet;
+        entity.setAttackTarget((EntityLivingBase) value);
+        return true;
     }
 
     @Override
-    protected Optional<List<Living>> getVal(EntityLiving entity) {
-        List<Living> values = new ArrayList<>();
-        for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            EntityLivingBase id = entity.getAttackTarget();
-            if (id != null) {
-                values.add((Living) id);
-            }
-        }
-        return Optional.of(values);
+    protected Optional<Living> getVal(EntityLiving entity) {
+        return Optional.ofNullable((Living) entity.getAttackTarget());
     }
 
     @Override
-    protected ImmutableValue<List<Living>> constructImmutableValue(List<Living> value) {
-        return new ImmutableSpongeValue<>(Keys.TARGETS, new ArrayList<>(), value);
+    protected ImmutableValue<Living> constructImmutableValue(Living value) {
+        return new ImmutableSpongeValue<>(Keys.TARGET, value);
     }
 
     @Override
     protected TargetLivingData createManipulator() {
-        return new SpongeTargetLivingData(new ArrayList<>(), MAX_TARGET_INDEX + 1);
+        return new SpongeTargetLivingData(null);
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.failNoData();
+        if (!supports(dataHolder) || dataHolder instanceof EntityWither) {
+            return DataTransactionBuilder.failNoData();
+        }
+
+        final Optional<Living> current = dataHolder.get(Keys.TARGET);
+        DataTransactionResult result;
+        if (current.isPresent()) {
+            result = DataTransactionBuilder.builder().replace(constructImmutableValue(current.get())).build();
+            ((EntityLiving) dataHolder).setAttackTarget(null);
+        } else {
+            result = DataTransactionBuilder.successNoData();
+        }
+
+        return result;
     }
 }

@@ -24,65 +24,67 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityWither;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.data.value.immutable.common.ImmutableSpongeEntityValue;
+import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class TargetsValueProcessor extends AbstractSpongeValueProcessor<EntityLiving, List<Living>, ImmutableListValue<Living>> {
+public class TargetValueProcessor extends AbstractSpongeValueProcessor<EntityLiving, Living, Value<Living>> {
 
-    public TargetsValueProcessor() {
-        super(EntityLiving.class, Keys.TARGETS);
-    }
-
-    private static int MAX_TARGET_INDEX = 1;
-
-    @Override
-    protected ImmutableListValue<Living> constructValue(List<Living> defaultValue) {
-        return new ImmutableSpongeListValue<>(Keys.TARGETS, ImmutableList.copyOf(defaultValue));
+    public TargetValueProcessor() {
+        super(EntityLiving.class, Keys.TARGET);
     }
 
     @Override
-    protected boolean set(EntityLiving container, List<Living> value) {
-        boolean hasSet = false;
-        for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            container.setAttackTarget(value.size() > i ? ((EntityLivingBase) value.get(i)) : null);
-            hasSet = true;
+    protected Value<Living> constructValue(Living defaultValue) {
+        return new SpongeEntityValue<>(Keys.TARGET, defaultValue);
+    }
+
+    @Override
+    protected boolean set(EntityLiving container, Living value) {
+        if (!supports(container) || container instanceof EntityWither || !container.canAttackClass(value.getClass())) {
+            return false;
         }
-        return hasSet;
+
+        container.setAttackTarget((EntityLivingBase) value);
+        return true;
     }
 
     @Override
-    protected Optional<List<Living>> getVal(EntityLiving container) {
-        List<Living> values = new ArrayList<>();
-        for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            EntityLivingBase id = container.getAttackTarget();
-            if (id != null) {
-                values.add((Living) id);
-            }
-        }
-        return Optional.of(values);
+    protected Optional<Living> getVal(EntityLiving container) {
+        return Optional.ofNullable((Living) container.getAttackTarget());
     }
 
     @Override
-    protected ImmutableValue<List<Living>> constructImmutableValue(List<Living> value) {
-        return constructValue(value);
+    protected ImmutableValue<Living> constructImmutableValue(Living value) {
+        return new ImmutableSpongeEntityValue<>(Keys.TARGET, value);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        if (!supports(container) || container instanceof EntityWither) {
+            return DataTransactionBuilder.failNoData();
+        }
+
+        final Optional<Living> current = container.get(Keys.TARGET);
+        DataTransactionResult result;
+        if (current.isPresent()) {
+            result = DataTransactionBuilder.builder().replace(constructImmutableValue(current.get())).build();
+            ((EntityLiving) container).setAttackTarget(null);
+        } else {
+            result = DataTransactionBuilder.successNoData();
+        }
+        return result;
     }
 }

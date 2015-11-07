@@ -24,35 +24,44 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetLivingData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetLivingData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+public class SpongeTargetLivingData extends AbstractSingleData<Living, TargetLivingData, ImmutableTargetLivingData> implements TargetLivingData {
 
-public class SpongeTargetLivingData extends AbstractSingleListData<Living, TargetLivingData, ImmutableTargetLivingData> implements TargetLivingData {
-
-    public SpongeTargetLivingData(List<Living> targets, int targetCount) {
-        super(TargetLivingData.class, targets, Keys.TARGETS, ImmutableSpongeTargetLivingData.class);
-
-        checkArgument(targets.size() <= targetCount,
-                "The amount of targets is limited to " + String.valueOf(targetCount));
-    }
+    private final Value<Living> value;
 
     public SpongeTargetLivingData() {
-        this(new ArrayList<>(), 1);
+        super(TargetLivingData.class, null, Keys.TARGET);
+        this.value = new SpongeEntityValue<>(Keys.TARGET, null);
+    }
+
+    public SpongeTargetLivingData(Living target) {
+        super(TargetLivingData.class, target, Keys.TARGET);
+        this.value = new SpongeEntityValue<>(Keys.TARGET, target);
+    }
+
+    @Override
+    public Value<Living> getValueGetter() {
+        return this.value;
+    }
+
+    @Override
+    public TargetLivingData copy() {
+        return new SpongeTargetLivingData(getValue());
+    }
+
+    @Override
+    public ImmutableTargetLivingData asImmutable() {
+        return new ImmutableSpongeTargetLivingData(getValue());
     }
 
     @Override
@@ -61,14 +70,12 @@ public class SpongeTargetLivingData extends AbstractSingleListData<Living, Targe
     }
 
     @Override
-    public ImmutableListValue<Living> targets() {
-        return new ImmutableSpongeListValue<>(Keys.TARGETS, ImmutableList.copyOf(this.getValue()));
+    public Value<Living> target() {
+        return this.value;
     }
 
     @Override
     public DataContainer toContainer() {
-        List<String> entityUuids = getValue().stream().map(living -> living.getUniqueId().toString()).collect(Collectors.toList());
-        return new MemoryDataContainer()
-                .set(Keys.TARGETS.getQuery(), entityUuids);
+        return new MemoryDataContainer().set(Keys.TARGET.getQuery(), getValue().getUniqueId());
     }
 }

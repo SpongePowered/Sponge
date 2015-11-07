@@ -29,9 +29,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.entity.living.Human;
+import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Villager;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +48,6 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(EntityVillager.class)
 public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager {
 
@@ -111,13 +109,13 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     }
 
     @Override
-    public Optional<Human> getCustomer() {
-        return Optional.ofNullable((Human) this.shadow$getCustomer());
+    public Optional<Humanoid> getCustomer() {
+        return Optional.ofNullable((Humanoid) this.shadow$getCustomer());
     }
 
     @Override
-    public void setCustomer(@Nullable Human human) {
-        this.setCustomer((EntityPlayer) human);
+    public void setCustomer(@Nullable Humanoid humanoid) {
+        this.setCustomer((EntityPlayer) humanoid);
     }
 
 }

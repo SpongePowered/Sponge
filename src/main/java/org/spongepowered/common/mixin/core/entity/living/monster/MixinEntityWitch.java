@@ -28,20 +28,9 @@ import net.minecraft.entity.monster.EntityWitch;
 import org.spongepowered.api.entity.living.monster.Witch;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
 @Mixin(EntityWitch.class)
 public abstract class MixinEntityWitch extends MixinEntityMob implements Witch {
-
-    @Shadow public abstract boolean getAggressive();
-
-    public boolean isAggressive() {
-        return this.getAggressive();
-    }
-
-    public void setAggressive(boolean aggressive) {
-        this.dataWatcher.updateObject(21, (byte) (aggressive ? 1 : 0));
-    }
 
 }

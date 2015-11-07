@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
 @Mixin(EntityBat.class)
-public abstract class MixinEntityBat extends MixinEntityLiving implements Bat {
+public abstract class MixinEntityBat extends MixinEntityCreature implements Bat {
 
     @Shadow public abstract boolean getIsBatHanging();
     @Shadow public abstract void setIsBatHanging(boolean hanging);

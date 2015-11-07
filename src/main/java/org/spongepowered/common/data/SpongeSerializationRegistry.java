@@ -102,7 +102,6 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderDat
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallDistanceData;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingAbilityData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
@@ -121,6 +120,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeDat
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetMultipleLivingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
@@ -199,7 +199,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FallDistanceData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingAbilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
@@ -218,6 +217,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetLivingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TargetMultipleLivingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
@@ -359,7 +359,6 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFallDistanceData;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFallingBlockData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingAbilityData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlyingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
@@ -378,6 +377,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetLivingData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetMultipleLivingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVehicleData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
@@ -455,7 +455,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallDistanceData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallingBlockData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingAbilityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
@@ -474,6 +473,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetLivingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetMultipleLivingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
@@ -550,7 +550,6 @@ import org.spongepowered.common.data.processor.data.entity.ElderDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ExpOrbDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ExperienceHolderDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FallDistanceDataProcessor;
-import org.spongepowered.common.data.processor.data.entity.FallingBlockDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FlyingAbilityDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FlyingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.FoodDataProcessor;
@@ -691,7 +690,7 @@ import org.spongepowered.common.data.processor.value.entity.ScreamingValueProces
 import org.spongepowered.common.data.processor.value.entity.SlimeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TameableOwnerValueProcessor;
-import org.spongepowered.common.data.processor.value.entity.TargetsValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.TargetValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TotalExperienceValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VehicleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
@@ -1179,8 +1178,8 @@ public class SpongeSerializationRegistry {
                 new ArtDataProcessor());
 
         final WitherTargetLivingDataProcessor witherTargetLivingDataProcessor = new WitherTargetLivingDataProcessor();
-        dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
-                ImmutableSpongeTargetLivingData.class, witherTargetLivingDataProcessor);
+        dataRegistry.registerDataProcessorAndImpl(TargetMultipleLivingData.class, SpongeTargetMultipleLivingData.class, ImmutableTargetMultipleLivingData.class,
+                ImmutableSpongeTargetMultipleLivingData.class, witherTargetLivingDataProcessor);
 
         final TargetLivingDataProcessor targetLivingDataProcessor = new TargetLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
@@ -1305,8 +1304,8 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ART, new ArtValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.TARGET, new TargetValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TARGETS, new WitherTargetsValueProcessor());
-        dataRegistry.registerValueProcessor(Keys.TARGETS, new TargetsValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIREWORK_EFFECTS, new EntityFireworkEffectsValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIREWORK_EFFECTS, new ItemFireworkEffectsValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new EntityFireworkRocketValueProcessor());
