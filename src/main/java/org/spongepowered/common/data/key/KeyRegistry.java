@@ -73,11 +73,13 @@ import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -218,6 +220,7 @@ public class KeyRegistry {
         keyMap.put("vehicle", makeSingleKey(Entity.class, Value.class, of("Vehicle")));
         keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
         keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
+        keyMap.put("targets", makeSingleKey(Living.class, ListValue.class, of("Targets")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
