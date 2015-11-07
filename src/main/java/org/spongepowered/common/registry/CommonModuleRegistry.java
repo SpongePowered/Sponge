@@ -76,6 +76,15 @@ import org.spongepowered.api.effect.particle.ResizableParticle;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.ai.GoalType;
+import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -117,6 +126,13 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.entity.ai.SpongeAttackLivingAIBuilder;
+import org.spongepowered.common.entity.ai.SpongeAvoidEntityAIBuilder;
+import org.spongepowered.common.entity.ai.SpongeRunAroundLikeCrazyAIBuilder;
+import org.spongepowered.common.entity.ai.SpongeSwimmingAIBuilder;
+import org.spongepowered.common.entity.ai.SpongeWanderAIBuilder;
+import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
+import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.event.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
@@ -131,6 +147,7 @@ import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.SelectorFactoryModule;
 import org.spongepowered.common.registry.factory.TextFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
+import org.spongepowered.common.registry.type.AITaskTypeModule;
 import org.spongepowered.common.registry.type.ArgumentRegistryModule;
 import org.spongepowered.common.registry.type.ArtRegistryModule;
 import org.spongepowered.common.registry.type.BannerPatternShapeRegistryModule;
@@ -160,6 +177,7 @@ import org.spongepowered.common.registry.type.FireworkShapeRegistryModule;
 import org.spongepowered.common.registry.type.FishRegistryModule;
 import org.spongepowered.common.registry.type.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.GeneratorRegistryModule;
+import org.spongepowered.common.registry.type.GoalTypeModule;
 import org.spongepowered.common.registry.type.GoldenAppleRegistryModule;
 import org.spongepowered.common.registry.type.HingeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -269,12 +287,20 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ColoredParticle.Builder.class, SpongeParticleEffectBuilder.BuilderColorable::new)
             .registerBuilderSupplier(NoteParticle.Builder.class, SpongeParticleEffectBuilder.BuilderNote::new)
             .registerBuilderSupplier(ItemParticle.Builder.class, SpongeParticleEffectBuilder.BuilderMaterial::new)
-            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new);
+            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new)
+            .registerBuilderSupplier(WanderAITask.Builder.class, SpongeWanderAIBuilder::new)
+            .registerBuilderSupplier(AvoidEntityAITask.Builder.class, SpongeAvoidEntityAIBuilder::new)
+            .registerBuilderSupplier(RunAroundLikeCrazyAITask.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
+            .registerBuilderSupplier(SwimmingAITask.Builder.class, SpongeSwimmingAIBuilder::new)
+            .registerBuilderSupplier(WatchClosestAITask.Builder.class, SpongeWatchClosestAIBuilder::new)
+            .registerBuilderSupplier(FindNearestAttackableTargetAITask.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
+            .registerBuilderSupplier(AttackLivingAITask.Builder.class, SpongeAttackLivingAIBuilder::new);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
+            .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
             .registerModule(Art.class, new ArtRegistryModule())
             .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
             .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
@@ -306,6 +332,7 @@ public final class CommonModuleRegistry {
             .registerModule(Fish.class, new FishRegistryModule())
             .registerModule(GameMode.class, new GameModeRegistryModule())
             .registerModule(GeneratorType.class, new GeneratorRegistryModule())
+            .registerModule(GoalType.class, GoalTypeModule.getInstance())
             .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
             .registerModule(Hinge.class, new HingeRegistryModule())
             .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
@@ -345,8 +372,7 @@ public final class CommonModuleRegistry {
             .registerModule(Weather.class, new WeatherRegistryModule());
     }
 
-    private CommonModuleRegistry() {
-    }
+    private CommonModuleRegistry() { }
 
     private static final class Holder {
 

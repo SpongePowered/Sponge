@@ -22,53 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.entity;
+package org.spongepowered.common.data.processor.value.entity;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TargetLivingData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetLivingData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class WitherTargetLivingDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityWither, List<Living>, ImmutableListValue<Living>, TargetLivingData, ImmutableTargetLivingData> {
+public class TargetMultipleLivingValueProcessor extends AbstractSpongeValueProcessor<EntityWither, List<Living>, ImmutableListValue<Living>>  {
 
-    public static int MAX_TARGET_INDEX = 2;
-
-    public WitherTargetLivingDataProcessor() {
+    public TargetMultipleLivingValueProcessor() {
         super(EntityWither.class, Keys.TARGETS);
     }
 
+    private static int MAX_TARGET_INDEX = 3;
+
     @Override
-    protected boolean set(EntityWither entity, List<Living> value) {
+    protected ImmutableListValue<Living> constructValue(List<Living> defaultValue) {
+        return new ImmutableSpongeListValue<>(Keys.TARGETS, ImmutableList.copyOf(defaultValue));
+    }
+
+    @Override
+    protected boolean set(EntityWither container, List<Living> value) {
         boolean hasSet = false;
         for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            entity.updateWatchedTargetId(i, value.size() > i ? ((EntityLivingBase) value.get(i)).getEntityId() : 0);
+            container.updateWatchedTargetId(i, value.size() > i ? ((EntityLivingBase) value.get(i)).getEntityId() : 0);
             hasSet = true;
         }
         return hasSet;
     }
 
     @Override
-    protected Optional<List<Living>> getVal(EntityWither entity) {
+    protected Optional<List<Living>> getVal(EntityWither container) {
         List<Living> values = new ArrayList<>();
         for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            int id = entity.getWatchedTargetId(i);
+            int id = container.getWatchedTargetId(i);
             if (id > 0) {
-                values.add((Living) entity.getEntityWorld().getEntityByID(id));
+                values.add((Living) container.getEntityWorld().getEntityByID(id));
             }
         }
         return Optional.of(values);
@@ -76,16 +78,11 @@ public class WitherTargetLivingDataProcessor extends
 
     @Override
     protected ImmutableValue<List<Living>> constructImmutableValue(List<Living> value) {
-        return new ImmutableSpongeValue<>(Keys.TARGETS, new ArrayList<>(), value);
+        return constructValue(value);
     }
 
     @Override
-    protected TargetLivingData createManipulator() {
-        return new SpongeTargetLivingData(new ArrayList<>(), MAX_TARGET_INDEX + 1);
-    }
-
-    @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionBuilder.failNoData();
     }
 }

@@ -33,14 +33,12 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.Optional;
 
-@NonnullByDefault
 @Mixin(EntityTNTPrimed.class)
 public abstract class MixinEntityTNTPrimed extends MixinEntity implements PrimedTNT {
 

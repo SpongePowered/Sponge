@@ -39,34 +39,34 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ImmutableSpongeEntityValue implements ImmutableValue<Entity> {
+public class ImmutableSpongeEntityValue<T extends Entity> implements ImmutableValue<T> {
 
-    private final WeakReference<Entity> weakReference;
-    private final Key<? extends BaseValue<Entity>> key;
+    private final WeakReference<T> weakReference;
+    private final Key<? extends BaseValue<T>> key;
 
-    public ImmutableSpongeEntityValue(Key<? extends BaseValue<Entity>> key, Entity entity) {
+    public ImmutableSpongeEntityValue(Key<? extends BaseValue<T>> key, T entity) {
         this.weakReference = new WeakReference<>(checkNotNull(entity));
         this.key = checkNotNull(key);
     }
 
     @Override
-    public ImmutableValue<Entity> with(Entity value) {
-        return new ImmutableSpongeEntityValue(this.key, checkNotNull(value));
+    public ImmutableValue<T> with(T value) {
+        return new ImmutableSpongeEntityValue<>(this.key, checkNotNull(value));
     }
 
     @Override
-    public ImmutableValue<Entity> transform(Function<Entity, Entity> function) {
+    public ImmutableValue<T> transform(Function<T, T> function) {
         return with(checkNotNull(function).apply(this.weakReference.get()));
     }
 
     @Override
-    public Value<Entity> asMutable() {
+    public Value<T> asMutable() {
         checkState(!exists(), "The entity reference expired!");
-        return new SpongeEntityValue(this.key, this.weakReference.get());
+        return new SpongeEntityValue<>(this.key, this.weakReference.get());
     }
 
     @Override
-    public Entity get() {
+    public T get() {
         checkState(!exists(), "The entity reference expired!");
         return this.weakReference.get();
     }
@@ -77,18 +77,18 @@ public class ImmutableSpongeEntityValue implements ImmutableValue<Entity> {
     }
 
     @Override
-    public Entity getDefault() {
+    public T getDefault() {
         checkState(!exists(), "The entity reference expired!");
         return this.weakReference.get();
     }
 
     @Override
-    public Optional<Entity> getDirect() {
+    public Optional<T> getDirect() {
         return Optional.ofNullable(this.weakReference.get());
     }
 
     @Override
-    public Key<? extends BaseValue<Entity>> getKey() {
+    public Key<? extends BaseValue<T>> getKey() {
         return this.key;
     }
 

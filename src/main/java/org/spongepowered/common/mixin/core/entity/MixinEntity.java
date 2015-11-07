@@ -248,6 +248,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return new SpongeEntitySnapshotBuilder().from(this).build();
     }
 
+    @Override
+    public Random getRandom() {
+        return rand;
+    }
+
     public Vector3d getPosition() {
         return new Vector3d(this.posX, this.posY, this.posZ);
     }

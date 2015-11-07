@@ -27,12 +27,10 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 import net.minecraft.entity.monster.EntitySkeleton;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.monster.Skeleton;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;
 
-@NonnullByDefault
 @Mixin(EntitySkeleton.class)
 public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
 

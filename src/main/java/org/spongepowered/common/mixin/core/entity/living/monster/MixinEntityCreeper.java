@@ -26,16 +26,11 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityCreeper;
 import org.spongepowered.api.entity.living.monster.Creeper;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(EntityCreeper.class)
-@Implements(@Interface(iface = Creeper.class, prefix = "creeper$"))
-public abstract class MixinEntityCreeper extends MixinEntityMob {
+public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper {
 
     @Shadow private int timeSinceIgnited;
     @Shadow private int fuseTime = 30;

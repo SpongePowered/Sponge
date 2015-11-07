@@ -24,30 +24,47 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetLivingData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetLivingData;
+import org.spongepowered.common.data.value.immutable.common.ImmutableSpongeEntityValue;
 
-import java.util.List;
+public class ImmutableSpongeTargetLivingData extends AbstractImmutableSingleData<Living, ImmutableTargetLivingData, TargetLivingData> implements
+        ImmutableTargetLivingData {
 
-public class ImmutableSpongeTargetLivingData extends AbstractImmutableSingleListData<Living, ImmutableTargetLivingData, TargetLivingData>
-        implements ImmutableTargetLivingData {
+    private final ImmutableValue<Living> value;
 
-    public ImmutableSpongeTargetLivingData(List<Living> targets, int targetCount) {
-        super(ImmutableTargetLivingData.class, targets, Keys.TARGETS, SpongeTargetLivingData.class);
+    public ImmutableSpongeTargetLivingData() {
+        super(ImmutableTargetLivingData.class, null, Keys.TARGET);
+        this.value = new ImmutableSpongeEntityValue<>(Keys.TARGET, null);
+    }
 
-        checkArgument(targets.size() <= targetCount,
-                "The amount of targets is limited to " + String.valueOf(targetCount));
+    public ImmutableSpongeTargetLivingData(Living target) {
+        super(ImmutableTargetLivingData.class, target, Keys.TARGET);
+        this.value = new ImmutableSpongeEntityValue<>(Keys.TARGET, target);
     }
 
     @Override
-    public ImmutableListValue<Living> targets() {
+    public ImmutableValue<Living> getValueGetter() {
+        return value;
+    }
+
+    @Override
+    public TargetLivingData asMutable() {
+        return new SpongeTargetLivingData(this.getValue());
+    }
+
+    @Override
+    public ImmutableValue<Living> target() {
         return getValueGetter();
+    }
+
+    @Override
+    public int compareTo(ImmutableTargetLivingData o) {
+        return 0;
     }
 }

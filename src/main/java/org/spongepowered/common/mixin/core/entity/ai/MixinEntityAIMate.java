@@ -32,7 +32,6 @@ import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.BreedEntityEvent;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,7 +42,6 @@ import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
 
-@NonnullByDefault
 @Mixin(EntityAIMate.class)
 public abstract class MixinEntityAIMate {
 

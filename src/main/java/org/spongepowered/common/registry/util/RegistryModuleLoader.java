@@ -28,13 +28,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.ai.GoalType;
+import org.spongepowered.api.entity.ai.GoalTypes;
+import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.task.AITaskTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.RegistryModule;
+import org.spongepowered.common.registry.type.AITaskTypeModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
+import org.spongepowered.common.registry.type.GoalTypeModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.lang.reflect.Field;
@@ -75,6 +81,18 @@ public final class RegistryModuleLoader {
                             blockMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
                         }
                         RegistryHelper.mapFields(BlockTypes.class, blockMap);
+                    } else if (module instanceof AITaskTypeModule) {
+                        Map<String, AITaskType> aiMap = new HashMap<>();
+                        for (Map.Entry<String, AITaskType> entry : ((Map<String, AITaskType>) map).entrySet()) {
+                            aiMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+                        }
+                        RegistryHelper.mapFields(AITaskTypes.class, aiMap);
+                    } else if (module instanceof GoalTypeModule) {
+                        Map<String, GoalType> goalMap = new HashMap<>();
+                        for (Map.Entry<String, GoalType> entry : ((Map<String, GoalType>) map).entrySet()) {
+                            goalMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+                        }
+                        RegistryHelper.mapFields(GoalTypes.class, goalMap);
                     } else {
                         RegistryHelper.mapFields(getCatalogClass(module), map);
                     }

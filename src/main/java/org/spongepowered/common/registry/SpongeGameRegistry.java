@@ -35,10 +35,11 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.ImmutableDataRegistry;
-import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.task.AbstractAITask;
+import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
@@ -62,10 +63,10 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.SpongeDataRegistry;
-import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.registry.type.AITaskTypeModule;
 import org.spongepowered.common.registry.type.RotationRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
@@ -247,6 +248,12 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public void registerWorldGeneratorModifier(WorldGeneratorModifier modifier) {
         WorldGeneratorRegistry.getInstance().registerModifier(modifier);
+    }
+
+    @Override
+    public AITaskType registerAITaskType(Object plugin, String id, String name, Class<? extends AbstractAITask<? extends Agent>> aiClass) {
+
+        return AITaskTypeModule.getInstance().createAITaskType(plugin, id, name, aiClass);
     }
 
     @Override

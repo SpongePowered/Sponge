@@ -40,7 +40,7 @@ import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.living.Human;
+import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -130,7 +130,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void damageD(double amount) {
         Living thisEntity = (Living) this;
         DamageSource source = DamageSource.generic;
-        if (thisEntity instanceof Human) {
+        if (thisEntity instanceof Humanoid) {
             source = DamageSource.causePlayerDamage((EntityPlayer) thisEntity);
         } else {
             source = DamageSource.causeMobDamage((EntityLivingBase) thisEntity);

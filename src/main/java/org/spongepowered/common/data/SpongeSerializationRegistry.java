@@ -125,6 +125,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeDat
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetMultipleLivingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
@@ -227,6 +228,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetLivingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TargetMultipleLivingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
@@ -392,6 +394,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetLivingData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetMultipleLivingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVehicleData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
@@ -493,6 +496,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetLivingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetMultipleLivingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
@@ -596,7 +600,7 @@ import org.spongepowered.common.data.processor.data.entity.TargetLivingDataProce
 import org.spongepowered.common.data.processor.data.entity.VehicleDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.VillagerZombieProcessor;
-import org.spongepowered.common.data.processor.data.entity.WitherTargetLivingDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.TargetMultipleLivingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.WolfWetDataProcessor;
 import org.spongepowered.common.data.processor.data.item.BlockItemDataProcessor;
 import org.spongepowered.common.data.processor.data.item.BreakableDataProcessor;
@@ -722,13 +726,13 @@ import org.spongepowered.common.data.processor.value.entity.SkeletonTypeValuePro
 import org.spongepowered.common.data.processor.value.entity.SlimeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TameableOwnerValueProcessor;
-import org.spongepowered.common.data.processor.value.entity.TargetsValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.TargetLivingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TotalExperienceValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VehicleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VelocityValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.VillagerZombieValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
-import org.spongepowered.common.data.processor.value.entity.WitherTargetsValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.TargetMultipleLivingValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BlockItemValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookAuthorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
@@ -1210,9 +1214,9 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
                 new ArtDataProcessor());
 
-        final WitherTargetLivingDataProcessor witherTargetLivingDataProcessor = new WitherTargetLivingDataProcessor();
-        dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
-                ImmutableSpongeTargetLivingData.class, witherTargetLivingDataProcessor);
+        final TargetMultipleLivingDataProcessor targetMultipleLivingDataProcessor = new TargetMultipleLivingDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(TargetMultipleLivingData.class, SpongeTargetMultipleLivingData.class, ImmutableTargetMultipleLivingData.class,
+                ImmutableSpongeTargetMultipleLivingData.class, targetMultipleLivingDataProcessor);
 
         final TargetLivingDataProcessor targetLivingDataProcessor = new TargetLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
@@ -1358,8 +1362,8 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ART, new ArtValueProcessor());
-        dataRegistry.registerValueProcessor(Keys.TARGETS, new WitherTargetsValueProcessor());
-        dataRegistry.registerValueProcessor(Keys.TARGETS, new TargetsValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.TARGET, new TargetLivingValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.TARGETS, new TargetMultipleLivingValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIREWORK_EFFECTS, new EntityFireworkEffectsValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIREWORK_EFFECTS, new ItemFireworkEffectsValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new EntityFireworkRocketValueProcessor());
