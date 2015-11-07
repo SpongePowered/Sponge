@@ -1,7 +1,6 @@
 package org.spongepowered.common.data.processor.value.tileentity;
 
 import net.minecraft.tileentity.TileEntityLockable;
-import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
