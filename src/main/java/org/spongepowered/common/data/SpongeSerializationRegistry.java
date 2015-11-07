@@ -436,6 +436,7 @@ import org.spongepowered.common.data.processor.data.item.FishDataProcessor;
 import org.spongepowered.common.data.processor.data.item.GoldenAppleDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemAuthorDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemEnchantmentDataProcessor;
+import org.spongepowered.common.data.processor.data.item.ItemLockableDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemLoreDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemPagedDataProcessor;
 import org.spongepowered.common.data.processor.data.item.ItemSkullRepresentedPlayerDataProcessor;
@@ -451,6 +452,7 @@ import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
 import org.spongepowered.common.data.processor.value.ItemEnchantmentValueProcessor;
+import org.spongepowered.common.data.processor.value.LockTokenValueProcessor;
 import org.spongepowered.common.data.processor.value.RepresentedItemValueProcessor;
 import org.spongepowered.common.data.processor.value.block.BigMushroomTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.BrickTypeValueProcessor;
@@ -527,6 +529,7 @@ import org.spongepowered.common.data.processor.value.item.GoldenAppleValueProces
 import org.spongepowered.common.data.processor.value.item.ItemColorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDisplayNameValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemDurabilityValueProcessor;
+import org.spongepowered.common.data.processor.value.item.ItemLockTokenValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemLoreValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullRepresentedPlayerValueProcessor;
 import org.spongepowered.common.data.processor.value.item.ItemSkullValueProcessor;
@@ -885,9 +888,6 @@ public class SpongeSerializationRegistry {
 
         dataRegistry.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
                 new ArtDataProcessor());
-        
-        dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
-                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new LockableDataProcessor());
 
         final WitherTargetLivingDataProcessor witherTargetLivingDataProcessor = new WitherTargetLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
@@ -896,6 +896,11 @@ public class SpongeSerializationRegistry {
         final TargetLivingDataProcessor targetLivingDataProcessor = new TargetLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
                 ImmutableSpongeTargetLivingData.class, targetLivingDataProcessor);
+        
+        dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
+                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new LockableDataProcessor());
+        dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
+                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new ItemLockableDataProcessor());
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -994,6 +999,8 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.ART, new ArtValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TARGETS, new WitherTargetsValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TARGETS, new TargetsValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.LOCK_TOKEN, new LockTokenValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.LOCK_TOKEN, new ItemLockTokenValueProcessor());
     }
 
 }
