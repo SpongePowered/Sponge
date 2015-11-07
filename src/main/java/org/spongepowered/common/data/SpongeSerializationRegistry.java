@@ -446,7 +446,7 @@ import org.spongepowered.common.data.processor.data.item.SpawnableDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.BrewingStandDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.CooldownDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.FurnaceDataProcessor;
-import org.spongepowered.common.data.processor.data.tileentity.LockableDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.TileEntityLockableDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.NoteDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
@@ -898,7 +898,7 @@ public class SpongeSerializationRegistry {
                 ImmutableSpongeTargetLivingData.class, targetLivingDataProcessor);
         
         dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
-                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new LockableDataProcessor());
+                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new TileEntityLockableDataProcessor());
         dataRegistry.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
                 ImmutableLockableData.class, ImmutableSpongeLockableData.class, new ItemLockableDataProcessor());
 

@@ -16,9 +16,9 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
-public final class LockableDataProcessor extends AbstractSingleDataSingleTargetProcessor<ILockableContainer, String, Value<String>, LockableData, ImmutableLockableData> {
+public final class TileEntityLockableDataProcessor extends AbstractSingleDataSingleTargetProcessor<ILockableContainer, String, Value<String>, LockableData, ImmutableLockableData> {
 
-    public LockableDataProcessor() {
+    public TileEntityLockableDataProcessor() {
         super(Keys.LOCK_TOKEN, ILockableContainer.class);
     }
 

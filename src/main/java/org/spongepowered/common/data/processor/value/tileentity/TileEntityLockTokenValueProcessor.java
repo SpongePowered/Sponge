@@ -14,9 +14,9 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<ILockableContainer, String, Value<String>> {
+public final class TileEntityLockTokenValueProcessor extends AbstractSpongeValueProcessor<ILockableContainer, String, Value<String>> {
 
-    protected LockTokenValueProcessor() {
+    protected TileEntityLockTokenValueProcessor() {
         super(ILockableContainer.class, Keys.LOCK_TOKEN);
     }
 
