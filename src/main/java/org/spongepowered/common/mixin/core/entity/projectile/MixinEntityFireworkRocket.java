@@ -32,11 +32,12 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @NonnullByDefault
 @Mixin(EntityFireworkRocket.class)
-public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework {
+public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework, IMixinEntityFireworkRocket {
 
     @Shadow private int lifetime;
     @Shadow private int fireworkAge;
@@ -64,6 +65,11 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Override
     public void setShooter(ProjectileSource shooter) {
         this.projectileSource = shooter;
+    }
+
+    @Override
+    public void setModifier(byte modifier) {
+        this.lifetime = 10 * modifier + this.rand.nextInt(6) + this.rand.nextInt(7);
     }
 
     @Override
