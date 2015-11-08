@@ -42,7 +42,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
-import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -86,6 +85,7 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
+import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.world.CaptureType;
 
 import java.util.Collection;
@@ -161,7 +161,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Locale getLocale() {
-        return LocaleUtils.toLocale(this.translator);
+        return LanguageUtil.LOCALE_CACHE.getUnchecked(this.translator);
     }
 
     @Override
