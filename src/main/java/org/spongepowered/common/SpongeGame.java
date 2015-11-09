@@ -38,6 +38,7 @@ import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.event.EventManager;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
 import java.io.File;
@@ -54,11 +55,11 @@ public abstract class SpongeGame implements Game {
 
     private final PluginManager pluginManager;
     private final EventManager eventManager;
-    private final GameRegistry gameRegistry;
+    private final SpongeGameRegistry gameRegistry;
     private final ServiceManager serviceManager;
     private final TeleportHelper teleportHelper;
 
-    protected SpongeGame(PluginManager pluginManager, EventManager eventManager, GameRegistry gameRegistry, ServiceManager serviceManager,
+    protected SpongeGame(PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry, ServiceManager serviceManager,
             TeleportHelper teleportHelper) {
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
         this.eventManager = checkNotNull(eventManager, "eventManager");
@@ -78,7 +79,7 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public GameRegistry getRegistry() {
+    public SpongeGameRegistry getRegistry() {
         return this.gameRegistry;
     }
 
