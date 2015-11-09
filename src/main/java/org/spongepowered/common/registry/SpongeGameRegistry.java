@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Singleton;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSettings;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
@@ -105,6 +106,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+@Singleton
 public class SpongeGameRegistry implements GameRegistry {
 
     static {
