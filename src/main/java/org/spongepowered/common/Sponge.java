@@ -38,6 +38,7 @@ import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -48,13 +49,17 @@ import javax.inject.Singleton;
 public class Sponge {
 
     public static final String ECOSYSTEM_NAME = "Sponge";
-    private static final File gameDir = SpongeLaunch.getGameDirectory();
-    private static final File configDir = SpongeLaunch.getConfigDirectory();
-    private static final File pluginsDir = SpongeLaunch.getPluginsDirectory();
-    private static final File modConfigDir = new File(SpongeLaunch.getConfigDirectory() + File.separator + "sponge");
+
     @Nullable
     private static Sponge instance;
+
+    private static final Path gameDir = SpongeLaunch.getGameDirectory();
+    private static final Path configDir = SpongeLaunch.getConfigDirectory();
+    private static final Path pluginsDir = SpongeLaunch.getPluginsDirectory();
+    private static final Path spongeConfigDir = configDir.resolve("sponge");
+
     @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
+
     private final Injector injector;
     private final Game game;
     private final Logger logger;
@@ -112,25 +117,25 @@ public class Sponge {
         return getInstance().minecraftPlugin;
     }
 
-    public static File getGameDirectory() {
+    public static Path getGameDir() {
         return gameDir;
     }
 
-    public static File getConfigDirectory() {
+    public static Path getConfigDir() {
         return configDir;
     }
 
-    public static File getPluginsDirectory() {
+    public static Path getPluginsDir() {
         return pluginsDir;
     }
 
-    public static File getModConfigDirectory() {
-        return modConfigDir;
+    public static Path getSpongeConfigDir() {
+        return spongeConfigDir;
     }
 
     public static SpongeConfig<SpongeConfig.GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
-            globalConfig = new SpongeConfig<>(GLOBAL, new File(modConfigDir, "global.conf"), "sponge");
+            globalConfig = new SpongeConfig<>(GLOBAL, spongeConfigDir.resolve("global.conf"), "sponge");
         }
 
         return globalConfig;

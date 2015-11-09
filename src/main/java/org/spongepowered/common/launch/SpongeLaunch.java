@@ -27,39 +27,49 @@ package org.spongepowered.common.launch;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.annotation.Nullable;
 
 public class SpongeLaunch {
 
-    @Nullable private static File gameDir;
-    @Nullable private static File configDir;
-    @Nullable private static File pluginsDir;
+    @Nullable private static Path gameDir;
+    @Nullable private static Path configDir;
+    @Nullable private static Path pluginsDir;
 
     private SpongeLaunch() {
     }
 
-    public static void initialize(File gameDir, File configDir, File pluginsDir) {
+    public static void initialize() {
+        initialize(null);
+    }
+
+    public static void initialize(@Nullable  Path gameDir) {
+        initialize(null, null, null);
+    }
+
+    public static void initialize(@Nullable Path gameDir, @Nullable Path configDir, @Nullable Path pluginsDir) {
         if (gameDir == null) {
-            gameDir = new File(".");
+            gameDir = Paths.get("");
         }
 
         SpongeLaunch.gameDir = gameDir;
-        SpongeLaunch.configDir = configDir != null ? configDir : new File(gameDir, "config");
-        SpongeLaunch.pluginsDir = pluginsDir != null ? pluginsDir : new File(gameDir, "mods");
+        SpongeLaunch.configDir = configDir != null ? configDir : gameDir.resolve("config");
+        SpongeLaunch.pluginsDir = pluginsDir != null ? pluginsDir : gameDir.resolve("mods");
     }
 
-    public static File getGameDirectory() {
+    public static Path getGameDirectory() {
         checkState(gameDir != null, "Sponge was not initialized");
         return gameDir;
     }
 
-    public static File getConfigDirectory() {
+    public static Path getConfigDirectory() {
         checkState(configDir != null, "Sponge was not initialized");
         return configDir;
     }
 
-    public static File getPluginsDirectory() {
+    public static Path getPluginsDirectory() {
         checkState(pluginsDir != null, "Sponge was not initialized");
         return pluginsDir;
     }

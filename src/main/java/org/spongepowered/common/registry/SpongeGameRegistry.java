@@ -93,6 +93,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -314,8 +315,8 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public Favicon loadFavicon(File file) throws IOException {
-        return SpongeFavicon.load(file);
+    public Favicon loadFavicon(Path path) throws IOException {
+        return SpongeFavicon.load(path);
     }
 
     @Override

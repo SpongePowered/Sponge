@@ -42,6 +42,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import javax.inject.Singleton;
 
@@ -109,5 +110,5 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public abstract File getSavesDirectory();
+    public abstract Path getSavesDirectory();
 }

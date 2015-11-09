@@ -28,8 +28,8 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.config.ConfigRoot;
 import org.spongepowered.api.service.config.ConfigService;
+import org.spongepowered.common.Sponge;
 
-import java.io.File;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -38,7 +38,6 @@ import javax.inject.Inject;
  * Implementation of service to manage configurations.
  */
 public class SpongeConfigService implements ConfigService {
-    private static final File CONFIG_ROOT = new File("config");
     private final PluginManager manager;
 
     @Inject
@@ -67,12 +66,13 @@ public class SpongeConfigService implements ConfigService {
 
     public static ConfigRoot getSharedRoot(PluginContainer container) {
         final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(name, CONFIG_ROOT);
+        return new SpongeConfigRoot(name, Sponge.getConfigDir());
 
     }
 
     public static ConfigRoot getPrivateRoot(PluginContainer container) {
         final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(name, new File(CONFIG_ROOT, name));
+        return new SpongeConfigRoot(name, Sponge.getConfigDir().resolve(name));
     }
+
 }

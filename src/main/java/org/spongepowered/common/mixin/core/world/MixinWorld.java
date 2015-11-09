@@ -306,12 +306,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!client) {
             String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
             this.worldConfig =
-                    new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD,
-                            new File(Sponge.getModConfigDirectory() + File.separator + "worlds" + File.separator
-                                    + providerName + File.separator
-                                    + (providerIn.getDimensionId() == 0 ? "DIM0"
-                                            : DimensionRegistryModule.getInstance().getWorldFolder(providerIn.getDimensionId())),
-                                    "world.conf"),
+                    new SpongeConfig<>(SpongeConfig.Type.WORLD,
+                            Sponge.getSpongeConfigDir()
+                                    .resolve("worlds")
+                                    .resolve(providerName)
+                                    .resolve((providerIn.getDimensionId() == 0 ? "DIM0"
+                                            : DimensionRegistryModule.getInstance().getWorldFolder(providerIn.getDimensionId())))
+                                    .resolve("world.conf"),
                             Sponge.ECOSYSTEM_NAME.toLowerCase());
         }
 

@@ -306,8 +306,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
                 worldsavehandler =
-                        new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory() :
-                                new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldFolder, true);
+                        new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory().toFile() :
+                                Sponge.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
                 if (dim == 0) {
                     // overworld uses the client set world name
                     if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldFolder)) {

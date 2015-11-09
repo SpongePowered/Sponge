@@ -43,11 +43,14 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.util.Functional;
+import org.spongepowered.common.Sponge;
 import org.spongepowered.common.util.IpSet;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -144,38 +147,32 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     private T configBase;
     private String modId;
     private String configName;
-    @SuppressWarnings("unused")
-    private File file;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public SpongeConfig(Type type, File file, String modId) {
+    public SpongeConfig(Type type, Path path, String modId) {
 
         this.type = type;
-        this.file = file;
         this.modId = modId;
 
         try {
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
+            Files.createDirectories(path.getParent());
+            if (Files.notExists(path)) {
+                Files.createFile(path);
             }
 
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            this.loader = HoconConfigurationLoader.builder().setFile(file).build();
+            this.loader = HoconConfigurationLoader.builder().setPath(path).build();
             if (type == Type.GLOBAL) {
                 this.configName = "GLOBAL";
             } else {
-                this.configName = file.getParentFile().getName().toUpperCase();
+                this.configName = path.getParent().getFileName().toString().toUpperCase();
             }
 
             this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
 
             reload();
             save();
-        } catch (Throwable t) {
-            LogManager.getLogger().error(ExceptionUtils.getStackTrace(t));
+        } catch (Exception e) {
+            Sponge.getLogger().error("Failed to initialize configuration", e);
         }
     }
 
@@ -188,7 +185,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.configMapper.serialize(this.root.getNode(this.modId));
             this.loader.save(this.root);
         } catch (IOException | ObjectMappingException e) {
-            LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
+            Sponge.getLogger().error("Failed to save configuration", e);
         }
     }
 
@@ -199,8 +196,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                             TypeSerializers.getDefaultSerializers().newChild().registerType(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer()))
                     .setHeader(HEADER));
             this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
-        } catch (IOException | ObjectMappingException e) {
-            LogManager.getLogger().error(ExceptionUtils.getStackTrace(e));
+        } catch (Exception e) {
+            Sponge.getLogger().error("Failed to load configuration", e);
         }
     }
 

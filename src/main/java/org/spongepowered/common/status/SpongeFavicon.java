@@ -38,10 +38,11 @@ import io.netty.handler.codec.base64.Base64;
 import org.spongepowered.api.status.Favicon;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.imageio.ImageIO;
 
@@ -99,8 +100,10 @@ public class SpongeFavicon implements Favicon {
         return new SpongeFavicon(raw);
     }
 
-    public static Favicon load(File file) throws IOException {
-        return load(ImageIO.read(file));
+    public static Favicon load(Path path) throws IOException {
+        try (InputStream in = Files.newInputStream(path)) {
+            return load(in);
+        }
     }
 
     public static Favicon load(URL url) throws IOException {

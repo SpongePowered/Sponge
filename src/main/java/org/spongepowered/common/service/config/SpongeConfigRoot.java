@@ -28,26 +28,32 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.service.config.ConfigRoot;
+import org.spongepowered.common.Sponge;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Root for sponge configurations.
  */
 public class SpongeConfigRoot implements ConfigRoot {
     private final String pluginName;
-    private final File baseDir;
+    private final Path baseDir;
 
-    public SpongeConfigRoot(String pluginName, File baseDir) {
+    public SpongeConfigRoot(String pluginName, Path baseDir) {
         this.pluginName = pluginName;
         this.baseDir = baseDir;
     }
 
     @Override
-    public File getConfigFile() {
-        File configFile = new File(this.baseDir, this.pluginName + ".conf");
-        if (configFile.getParentFile().isDirectory()) {
-            configFile.getParentFile().mkdirs();
+    public Path getConfigPath() {
+        Path configFile = this.baseDir.resolve(this.pluginName + ".conf");
+        try {
+            Files.createDirectories(baseDir);
+        } catch (IOException e) {
+            Sponge.getLogger().error("Failed to create plugin dir for {} at {}", pluginName, baseDir, e);
         }
         return configFile;
     }
@@ -55,12 +61,12 @@ public class SpongeConfigRoot implements ConfigRoot {
     @Override
     public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
         return HoconConfigurationLoader.builder()
-                .setFile(getConfigFile())
+                .setPath(getConfigPath())
                 .build();
     }
 
     @Override
-    public File getDirectory() {
+    public Path getDirectory() {
         return this.baseDir;
     }
 }
