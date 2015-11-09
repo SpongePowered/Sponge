@@ -11,6 +11,20 @@ dependencies {
     compile common
 }
 
+// Eclipse is too stupid to order the classpath correctly unfortunately...
+// Put Common last
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                def lib = classpath.entries.find { it.path == '/SpongeCommon' }
+                def others = classpath.entries.findAll { it != lib }
+                classpath.entries = others + lib
+            }
+        }
+    }
+}
+
 jar {
     classifier = 'deobf'
 }
