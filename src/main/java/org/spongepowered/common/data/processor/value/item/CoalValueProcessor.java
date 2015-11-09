@@ -39,7 +39,6 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.item.SpongeCoalType;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,7 +66,7 @@ public class CoalValueProcessor extends AbstractSpongeValueProcessor<ItemStack, 
     @Override
     public Optional<CoalType> getVal(ItemStack stack) {
         final int coalmeta = stack.getItemDamage();
-        final List<CoalType> coalTypes = (List<CoalType>) Sponge.getSpongeRegistry().getAllOf(CoalType.class);
+        final List<CoalType> coalTypes = (List<CoalType>) Sponge.getRegistry().getAllOf(CoalType.class);
         return Optional.ofNullable(coalTypes.get(coalmeta));
     }
 

@@ -61,7 +61,6 @@ import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 public class SpongeCommonEventFactory {
 
@@ -103,7 +102,7 @@ public class SpongeCommonEventFactory {
         ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(transaction).build();
         ChangeInventoryEvent.Held event =
                 SpongeEventFactory.createChangeInventoryEventHeld(Sponge.getGame(), Cause.of(player), (Inventory) player.inventoryContainer, transactions);
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
 
         if (event.isCancelled()) {
             player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
@@ -138,7 +137,7 @@ public class SpongeCommonEventFactory {
             InteractInventoryEvent.Open event =
                     SpongeEventFactory.createInteractInventoryEventOpen(Sponge.getGame(), cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) player.openContainer);
-            Sponge.getGame().getEventManager().post(event);
+            Sponge.postEvent(event);
             if (event.isCancelled()) {
                 player.closeScreen();
             } else {
@@ -160,7 +159,7 @@ public class SpongeCommonEventFactory {
             InteractInventoryEvent.Close event =
                     SpongeEventFactory.createInteractInventoryEventClose(Sponge.getGame(), cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) StaticMixinHelper.lastOpenContainer);
-            Sponge.getGame().getEventManager().post(event);
+            Sponge.postEvent(event);
             if (event.isCancelled()) {
                 if (StaticMixinHelper.lastOpenContainer.getSlot(0) != null) {
                     player.openContainer = StaticMixinHelper.lastOpenContainer;
@@ -220,7 +219,7 @@ public class SpongeCommonEventFactory {
                     (org.spongepowered.api.item.inventory.Container) player.openContainer,
                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
         }
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         if (event.isCancelled()) {
             if (event instanceof CreativeInventoryEvent.Drop) {
                 world.getCapturedEntityItems().clear();
@@ -388,7 +387,7 @@ public class SpongeCommonEventFactory {
                             ((IMixinContainer) player.openContainer).getCapturedTransactions());
         }
 
-        Sponge.getGame().getEventManager().post(clickEvent);
+        Sponge.postEvent(clickEvent);
 
         if (clickEvent.isCancelled()) {
             if (clickEvent instanceof ClickInventoryEvent.Drop) {
@@ -463,7 +462,7 @@ public class SpongeCommonEventFactory {
 
         ImmutableList<org.spongepowered.api.entity.Entity> originalEntities = ImmutableList.copyOf((List<org.spongepowered.api.entity.Entity>)(List<?>) entities);
         CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(Sponge.getGame(), cause, originalEntities, (List<org.spongepowered.api.entity.Entity>)(List<?>) entities, (org.spongepowered.api.world.World) world);
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         return event;
     }
 }

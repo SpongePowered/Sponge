@@ -46,14 +46,11 @@ import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.service.user.UserStorage;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
@@ -69,7 +66,6 @@ import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -118,19 +114,19 @@ public final class SpongeBootstrap {
     }
 
     public static void preInitializeRegistry() {
-        Sponge.getSpongeRegistry().preInit();
+        Sponge.getRegistry().preInit();
     }
 
     public static void initializeRegistry() {
-        Sponge.getSpongeRegistry().init();
+        Sponge.getRegistry().init();
     }
 
     public static void postInitializeRegistry() {
-        Sponge.getSpongeRegistry().postInit();
+        Sponge.getRegistry().postInit();
     }
 
     public static void preGameRegisterAdditionals() {
-        Sponge.getSpongeRegistry().registerAdditionals();
+        Sponge.getRegistry().registerAdditionals();
     }
 
     public static void registerWorlds() {

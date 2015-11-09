@@ -117,8 +117,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!this.worldObj.isRemote) {
-                Sponge.getGame().getEventManager()
-                    .post(SpongeEventFactory.
+                Sponge.postEvent(SpongeEventFactory.
                         createSleepingEventTick(Sponge.getGame(), Cause.of(this),
                             this.getWorld().createSnapshot(VecHelper.toVector(this.playerLocation)), this));
             }

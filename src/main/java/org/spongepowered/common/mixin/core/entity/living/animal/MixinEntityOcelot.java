@@ -28,7 +28,6 @@ import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -69,7 +68,7 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
     @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player) {
         int random = rand.nextInt(bound);
-        if (random == 0 && !Sponge.getGame().getEventManager().post(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(), Cause.of(player, this.currentItemStack), this))) {
+        if (random == 0 && !Sponge.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(), Cause.of(player, this.currentItemStack), this))) {
             this.currentItemStack = null;
             return random;
         }

@@ -31,6 +31,7 @@ import static org.spongepowered.common.configuration.SpongeConfig.Type.GLOBAL;
 import com.google.inject.Injector;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.launch.SpongeLaunch;
@@ -91,8 +92,12 @@ public class Sponge {
         return (SpongeGame) getInstance().game;
     }
 
-    public static SpongeGameRegistry getSpongeRegistry() {
-        return (SpongeGameRegistry) getInstance().game.getRegistry();
+    public static SpongeGameRegistry getRegistry() {
+        return getGame().getRegistry();
+    }
+
+    public static boolean postEvent(Event event) {
+        return getGame().getEventManager().post(event);
     }
 
     public static Logger getLogger() {

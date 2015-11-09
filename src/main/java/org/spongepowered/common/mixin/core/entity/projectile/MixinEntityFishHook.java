@@ -31,7 +31,6 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -112,7 +111,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         EntitySnapshot fishHookSnapshot = this.createSnapshot();
         FishingEvent.HookEntity event = SpongeEventFactory.createFishingEventHookEntity(Sponge.getGame(), Cause.of(this.angler),
                 this.createSnapshot(), this, (Entity) entity);
-        if (!Sponge.getGame().getEventManager().post(event)) {
+        if (!Sponge.postEvent(event)) {
             if (this.getShooter() instanceof Entity) {
                 DamageSource.causeThrownDamage((net.minecraft.entity.Entity) (Object) this, (net.minecraft.entity.Entity) this.getShooter());
             }
@@ -158,7 +157,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         }
 
         FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler), exp, exp, fishHookSnapshot, this, transaction, (Player) this.angler);
-        if (!Sponge.getGame().getEventManager().post(event)) {
+        if (!Sponge.postEvent(event)) {
             if (this.caughtEntity != null)
             {
                 double d0 = this.angler.posX - this.posX;

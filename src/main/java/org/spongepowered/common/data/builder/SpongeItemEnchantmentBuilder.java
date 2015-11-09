@@ -41,7 +41,7 @@ public class SpongeItemEnchantmentBuilder implements DataBuilder<ItemEnchantment
     public Optional<ItemEnchantment> build(DataView container) throws InvalidDataException {
         final String enchantmentId = DataUtil.getData(container, Queries.ENCHANTMENT_ID, String.class);
         final int enchantmentLevel = DataUtil.getData(container, Queries.LEVEL, Integer.class);
-        final Enchantment enchantment = Sponge.getSpongeRegistry().getType(Enchantment.class, enchantmentId).get();
+        final Enchantment enchantment = Sponge.getRegistry().getType(Enchantment.class, enchantmentId).get();
         return Optional.of(new ItemEnchantment(enchantment, enchantmentLevel));
     }
 }

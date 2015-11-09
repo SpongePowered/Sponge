@@ -142,7 +142,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
         quantity(count);
 
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
-        final ItemType itemType = Sponge.getSpongeRegistry().getType(ItemType.class, itemTypeId).get();
+        final ItemType itemType = Sponge.getRegistry().getType(ItemType.class, itemTypeId).get();
         itemType(itemType);
 
         this.damageValue = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);

@@ -63,7 +63,7 @@ import java.util.List;
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
-    private final TileEntityType tileType = Sponge.getSpongeRegistry().getTranslated(this.getClass(), TileEntityType.class);
+    private final TileEntityType tileType = Sponge.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -76,7 +76,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
         final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name);
-        Sponge.getSpongeRegistry().registerAdditionalType(TileEntityType.class, tileEntityType);
+        Sponge.getRegistry().registerAdditionalType(TileEntityType.class, tileEntityType);
     }
 
     @Override

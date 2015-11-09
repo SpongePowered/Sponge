@@ -64,7 +64,7 @@ public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType,
 
     @Override
     protected Optional<CoalType> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(Sponge.getSpongeRegistry().getAllOf(CoalType.class), itemStack.getMetadata()));
+        return Optional.of(Iterables.get(Sponge.getRegistry().getAllOf(CoalType.class), itemStack.getMetadata()));
     }
 
     @Override

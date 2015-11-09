@@ -141,9 +141,9 @@ public final class RegistryModuleLoader {
             Method method = module.getClass().getMethod("registerDefaults");
             DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
             if (delay == null) {
-                return Sponge.getSpongeRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
+                return Sponge.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
             } else {
-                return Sponge.getSpongeRegistry().getPhase() == delay.value();
+                return Sponge.getRegistry().getPhase() == delay.value();
             }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -157,9 +157,9 @@ public final class RegistryModuleLoader {
             DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
             if (registration != null) {
                 if (delay == null) {
-                    return Sponge.getSpongeRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
+                    return Sponge.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
                 } else {
-                    return Sponge.getSpongeRegistry().getPhase() == delay.value();
+                    return Sponge.getRegistry().getPhase() == delay.value();
                 }
             }
         }

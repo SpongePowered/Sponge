@@ -81,7 +81,7 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal {
     @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player) {
         int random = rand.nextInt(bound);
-        if (random == 0 && !Sponge.getGame().getEventManager().post(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(), Cause.of(player, this.currentItemStack), this))) {
+        if (random == 0 && !Sponge.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(), Cause.of(player, this.currentItemStack), this))) {
             this.currentItemStack = null;
             return random;
         }

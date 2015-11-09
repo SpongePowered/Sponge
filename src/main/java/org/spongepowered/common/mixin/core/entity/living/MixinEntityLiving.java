@@ -96,7 +96,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         if (!playerIn.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getGame(), Cause.of(playerIn), leashedEntity);
-            Sponge.getGame().getEventManager().post(event);
+            Sponge.postEvent(event);
             if(event.isCancelled()) {
                 ci.cancel();
             }
@@ -109,7 +109,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         if (!this.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
             UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getGame(), entity == null ? Cause.of() : Cause.of(entity), leashedEntity);
-            Sponge.getGame().getEventManager().post(event);
+            Sponge.postEvent(event);
             if(event.isCancelled()) {
                 ci.cancel();
             }

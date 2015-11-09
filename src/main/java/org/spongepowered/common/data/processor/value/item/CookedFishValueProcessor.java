@@ -67,7 +67,7 @@ public class CookedFishValueProcessor extends AbstractSpongeValueProcessor<ItemS
     @Override
     public Optional<CookedFish> getVal(ItemStack stack) {
         final ItemFishFood.FishType fishType = ItemFishFood.FishType.byMetadata(stack.getMetadata());
-        return Sponge.getSpongeRegistry().getType(CookedFish.class, fishType.name());
+        return Sponge.getRegistry().getType(CookedFish.class, fishType.name());
     }
 
     @Override

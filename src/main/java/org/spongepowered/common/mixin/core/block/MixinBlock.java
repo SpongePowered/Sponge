@@ -124,7 +124,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector(pos));
         final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Sponge.getGame(), Cause.of(world), blockSnapshot);
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         if(event.isCancelled()) {
             ci.cancel();
         }

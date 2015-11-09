@@ -64,7 +64,7 @@ public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<Coo
 
     @Override
     protected Optional<CookedFish> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(Sponge.getSpongeRegistry().getAllOf(CookedFish.class), itemStack.getMetadata()));
+        return Optional.of(Iterables.get(Sponge.getRegistry().getAllOf(CookedFish.class), itemStack.getMetadata()));
     }
 
     @Override

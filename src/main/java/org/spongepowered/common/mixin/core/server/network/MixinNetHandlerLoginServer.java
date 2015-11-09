@@ -99,7 +99,7 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
         Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
         MessageSink sink = MessageSinks.toAll();
         ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, (RemoteConnection) this.networkManager, (GameProfile) this.loginGameProfile);
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         if (event.isCancelled()) {
             this.disconnectClient(Optional.ofNullable(event.getMessage()));
         }

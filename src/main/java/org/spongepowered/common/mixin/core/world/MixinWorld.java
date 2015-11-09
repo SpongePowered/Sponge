@@ -83,7 +83,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldSettings.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
@@ -182,7 +181,6 @@ import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
@@ -385,7 +383,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
 
                     if (populatorType == null) {
-                        populatorType = (SpongePopulatorType) Sponge.getSpongeRegistry().getTranslated(clazz, PopulatorType.class);
+                        populatorType = (SpongePopulatorType) Sponge.getRegistry().getTranslated(clazz, PopulatorType.class);
                     }
 
                     if (populatorType != null) {
@@ -635,7 +633,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getGame(), cause, this.capturedEntities,
                                     entitySnapshotBuilder.build(), (World) (Object) this);
                 }
-                Sponge.getGame().getEventManager().post(event);
+                Sponge.postEvent(event);
 
                 if (!((Cancellable) event).isCancelled()) {
                     if (entityIn instanceof net.minecraft.entity.effect.EntityWeatherEffect) {
@@ -806,7 +804,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         event = SpongeEventFactory.createChangeBlockEventPlace(Sponge.getGame(), cause, (World) world, blockTransactions);
                     }
 
-                    Sponge.getGame().getEventManager().post(event);
+                    Sponge.postEvent(event);
 
                     C08PacketPlayerBlockPlacement packet = null;
 
@@ -872,7 +870,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             PopulateChunkEvent.Post event =
                     SpongeEventFactory.createPopulateChunkEventPost(Sponge.getGame(), cause, ImmutableMap.copyOf(this.capturedSpongePopulators),
                             targetChunk);
-            Sponge.getGame().getEventManager().post(event);
+            Sponge.postEvent(event);
 
             for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
                 markAndNotifyBlockPost(transactions, CaptureType.POPULATE, cause);
@@ -993,7 +991,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             event = SpongeEventFactory.createDropItemEventDispense(Sponge.getGame(), cause, entities, entitySnapshotBuilder.build(), (World) this);
         }
 
-        if (!(Sponge.getGame().getEventManager().post(event))) {
+        if (!(Sponge.postEvent(event))) {
             // Handle player deaths
             for (Player causePlayer : cause.allOf(Player.class)) {
                 EntityPlayerMP playermp = (EntityPlayerMP) causePlayer;
@@ -1082,7 +1080,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             .createSpawnEntityEvent(Sponge.getGame(), cause, entities, entitySnapshotBuilder.build(), (World) (Object) this);
         }
 
-        if (!(Sponge.getGame().getEventManager().post(event))) {
+        if (!(Sponge.postEvent(event))) {
             Iterator<Entity> iterator = event.getEntities().iterator();
             while (iterator.hasNext()) {
                 Entity entity = iterator.next();

@@ -91,7 +91,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntity implements Entity, IMixinEntity {
 
     // @formatter:off
-    private EntityType entityType = Sponge.getSpongeRegistry().getTranslated(this.getClass(), EntityType.class);
+    private EntityType entityType = Sponge.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;

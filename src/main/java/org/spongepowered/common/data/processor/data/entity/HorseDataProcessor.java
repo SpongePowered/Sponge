@@ -88,7 +88,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
 
     @Override
     public Optional<HorseData> fill(DataContainer container, HorseData horseData) {
-        GameRegistry registry = Sponge.getSpongeRegistry();
+        GameRegistry registry = Sponge.getRegistry();
 
         horseData.set(Keys.HORSE_COLOR, HorseUtils.getHorseColor(container));
         horseData.set(Keys.HORSE_STYLE, HorseUtils.getHorseStyle(container));

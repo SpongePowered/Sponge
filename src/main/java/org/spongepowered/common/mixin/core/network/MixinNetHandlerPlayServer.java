@@ -81,7 +81,6 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -174,7 +173,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         final ChangeSignEvent event =
                 SpongeEventFactory.createChangeSignEvent(Sponge.getGame(), Cause.of(this.playerEntity), changedSignData.asImmutable(),
                         changedSignData, (Sign) tileentitysign);
-        if (!Sponge.getGame().getEventManager().post(event)) {
+        if (!Sponge.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
         } else {
             // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
@@ -319,7 +318,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
                 DisplaceEntityEvent.Move.TargetPlayer event =
                         SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(Sponge.getGame(), fromTransform, toTransform, player);
-                Sponge.getGame().getEventManager().post(event);
+                Sponge.postEvent(event);
                 if (event.isCancelled()) {
                     player.setTransform(fromTransform);
                     this.lastMoveLocation = from;
@@ -374,7 +373,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 SpongeImplFactory.createClientConnectionEventDisconnect(Sponge.getGame(), Cause.of(player), message, newMessage,
                         originalSink, player.getMessageSink(), player);
         this.tmpQuitMessage = null;
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         event.getSink().sendMessage(event.getMessage());
     }
 
@@ -402,8 +401,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         if (status.wasSuccessful().isPresent()) {
             this.sentResourcePacks.remove(hash);
         }
-        Sponge.getGame().getEventManager()
-                .post(SpongeEventFactory.createResourcePackStatusEvent(Sponge.getGame(), pack, (Player)this.playerEntity, status));
+        Sponge.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Sponge.getGame(), pack, (Player)this.playerEntity, status));
     }
 
     @Inject(method = "sendPacket", at = @At("HEAD"))

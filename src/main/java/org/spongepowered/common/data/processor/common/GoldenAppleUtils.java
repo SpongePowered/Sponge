@@ -37,7 +37,7 @@ public class GoldenAppleUtils {
     }
 
     public static GoldenApple getType(ItemStack itemStack) {
-        return Iterables.get(Sponge.getSpongeRegistry().getAllOf(GoldenApple.class), itemStack.getMetadata());
+        return Iterables.get(Sponge.getRegistry().getAllOf(GoldenApple.class), itemStack.getMetadata());
     }
 
 }

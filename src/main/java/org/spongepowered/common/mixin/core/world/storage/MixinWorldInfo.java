@@ -275,7 +275,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void setGameMode(GameMode gamemode) {
-        this.theGameType = Sponge.getSpongeRegistry().getGameType(gamemode);
+        this.theGameType = Sponge.getRegistry().getGameType(gamemode);
     }
 
     @Override

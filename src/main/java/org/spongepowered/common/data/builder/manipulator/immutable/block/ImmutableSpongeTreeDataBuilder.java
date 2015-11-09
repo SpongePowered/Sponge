@@ -64,7 +64,7 @@ public class ImmutableSpongeTreeDataBuilder implements ImmutableDataManipulatorB
     public Optional<ImmutableTreeData> build(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.TREE_TYPE.getQuery());
         final String treeTypeId = container.getString(Keys.TREE_TYPE.getQuery()).get();
-        final TreeType treeType = Sponge.getSpongeRegistry().getType(TreeType.class, treeTypeId).get();
+        final TreeType treeType = Sponge.getRegistry().getType(TreeType.class, treeTypeId).get();
         return Optional.of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType));
     }
 }

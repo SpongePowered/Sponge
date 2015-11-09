@@ -99,7 +99,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         // is the some really bad code....
         // At some point might write an overhaul of Villager for better handling
         // until then... there may be some exceptions thrown at random
-        List<Career> careers = Sponge.getSpongeRegistry().getCareers(this.profession);
+        List<Career> careers = Sponge.getRegistry().getCareers(this.profession);
         if (this.careerId == 0 || this.careerId > careers.size()) {
             this.careerId = new Random().nextInt(careers.size()) + 1;
         }

@@ -76,7 +76,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         ImmutableList<Transaction<BlockSnapshot>> transactions =
                 new ImmutableList.Builder<Transaction<BlockSnapshot>>().add(new Transaction<BlockSnapshot>(blockOriginal, blockReplacement)).build();
         final ChangeBlockEvent.Decay event = SpongeEventFactory.createChangeBlockEventDecay(Sponge.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         if (event.isCancelled()) {
             ci.cancel();
         }

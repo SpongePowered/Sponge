@@ -52,7 +52,7 @@ public abstract class MixinFishType implements Fish {
     @Override
     public Optional<CookedFish> getCookedFish() {
         if (this.cookable) {
-            final Optional<CookedFish> optional = Sponge.getSpongeRegistry().getType(CookedFish.class, "cooked." + this.unlocalizedName);
+            final Optional<CookedFish> optional = Sponge.getRegistry().getType(CookedFish.class, "cooked." + this.unlocalizedName);
             if (optional.isPresent()) {
                 return optional;
             }

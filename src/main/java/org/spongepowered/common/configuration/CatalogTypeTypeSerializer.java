@@ -40,7 +40,7 @@ public class CatalogTypeTypeSerializer implements TypeSerializer<CatalogType> {
 
     @Override
     public CatalogType deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        Optional<? extends CatalogType> ret = Sponge.getSpongeRegistry().getType(type.getRawType().asSubclass(CatalogType.class), value.getString());
+        Optional<? extends CatalogType> ret = Sponge.getRegistry().getType(type.getRawType().asSubclass(CatalogType.class), value.getString());
         if (!ret.isPresent()) {
             throw new ObjectMappingException("Input '" + value.getValue() + "' was not a valid value for type " + type);
         }

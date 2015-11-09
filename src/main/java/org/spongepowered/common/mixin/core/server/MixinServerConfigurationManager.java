@@ -180,7 +180,7 @@ public abstract class MixinServerConfigurationManager {
         Transform<World> fromTransform = player.getTransform().setLocation(location);
         MessageSink sink = MessageSinks.toAll();
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), Cause.of((Player) playerIn), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform, (RemoteConnection) netManager, (org.spongepowered.api.GameProfile) gameprofile);
-        Sponge.getGame().getEventManager().post(loginEvent);
+        Sponge.postEvent(loginEvent);
         if (kickReason != null || loginEvent.isCancelled()) {
             disconnectClient(netManager, Optional.ofNullable(loginEvent.getMessage()), gameprofile);
             return;
@@ -282,7 +282,7 @@ public abstract class MixinServerConfigurationManager {
         Text message = SpongeTexts.toText(chatcomponenttranslation);
         MessageSink originalSink = MessageSinks.toAll();
         final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), player);
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         // Send to the sink
         event.getSink().sendMessage(event.getMessage());
         // Sponge end
@@ -349,7 +349,7 @@ public abstract class MixinServerConfigurationManager {
         final RespawnPlayerEvent event =
                 SpongeImplFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
-        Sponge.getGame().getEventManager().post(event);
+        Sponge.postEvent(event);
         player.setTransform(event.getToTransform());
         location = event.getToTransform().getLocation();
 

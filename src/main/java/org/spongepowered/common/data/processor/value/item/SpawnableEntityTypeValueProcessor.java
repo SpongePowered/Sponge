@@ -71,7 +71,7 @@ public class SpawnableEntityTypeValueProcessor extends AbstractSpongeValueProces
     @Override
     public Optional<EntityType> getVal(ItemStack container) {
         final Class entity = EntityList.getClassFromID(container.getItemDamage());
-        for (EntityType type : Sponge.getSpongeRegistry().getAllOf(EntityType.class)) {
+        for (EntityType type : Sponge.getRegistry().getAllOf(EntityType.class)) {
             if (type.getEntityClass().equals(entity)) {
                 return Optional.of(type);
             }
