@@ -66,6 +66,7 @@ import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.StairShape;
@@ -245,6 +246,7 @@ public class KeyRegistry {
         keyMap.put("in_wall", makeSingleKey(Boolean.class, Value.class, of("InWall")));
         keyMap.put("delay", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Delay")));
         keyMap.put("item_blockstate", makeSingleKey(BlockState.class, Value.class, of("ItemBlockState")));
+        keyMap.put("skeleton_type", makeSingleKey(SkeletonType.class, Value.class, of("SkeletonType")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

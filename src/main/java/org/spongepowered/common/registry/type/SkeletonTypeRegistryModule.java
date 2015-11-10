@@ -22,41 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.monster;
+package org.spongepowered.common.registry.type;
 
-import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.living.monster.Skeleton;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.data.type.SkeletonType;
+import org.spongepowered.api.data.type.SkeletonTypes;
+import org.spongepowered.common.entity.SpongeSkeletonType;
+import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.util.RegisterCatalog;
 
-@NonnullByDefault
-@Mixin(EntitySkeleton.class)
-public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+public class SkeletonTypeRegistryModule implements CatalogRegistryModule<SkeletonType> {
+    @RegisterCatalog(SkeletonTypes.class)
+    private final Map<String, SkeletonType> skeletonTypeMap = new HashMap<>();
+
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        manipulators.add(getSkeletonData());
-    }
-    
-    public int getSkeletonType()
-    {
-        return this.dataWatcher.getWatchableObjectByte(13);
+    public Optional<SkeletonType> getById(String id) {
+        return Optional.ofNullable(this.skeletonTypeMap.get(checkNotNull(id).toLowerCase()));
     }
 
-    public void setSkeletonType(int type)
-    {
-        this.dataWatcher.updateObject(13, Byte.valueOf((byte) type));
-        this.isImmuneToFire = (type == 1);
+    @Override
+    public Collection<SkeletonType> getAll() {
+        return ImmutableList.copyOf(this.skeletonTypeMap.values());
+    }
 
-        if (type == 1)
-        {
-            this.setSize(0.72F, 2.535F);
-        }
-        else
-        {
-            this.setSize(0.6F, 1.95F);
-        }
+    @Override
+    public void registerDefaults() {
+        this.skeletonTypeMap.put("normal", new SpongeSkeletonType(0, "normal"));
+        this.skeletonTypeMap.put("wither", new SpongeSkeletonType(1, "wither"));
     }
 }

@@ -58,6 +58,7 @@ import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.StairShape;
@@ -170,6 +171,7 @@ import org.spongepowered.common.registry.type.SandTypeRegistryModule;
 import org.spongepowered.common.registry.type.SandstoneTypeRegistryModule;
 import org.spongepowered.common.registry.type.SelectorTypeRegistryModule;
 import org.spongepowered.common.registry.type.ShrubTypeRegistryModule;
+import org.spongepowered.common.registry.type.SkeletonTypeRegistryModule;
 import org.spongepowered.common.registry.type.SkullTypeRegistryModule;
 import org.spongepowered.common.registry.type.SlabTypeRegistryModule;
 import org.spongepowered.common.registry.type.SoundRegistryModule;
@@ -310,6 +312,7 @@ public final class CommonModuleRegistry {
             .registerModule(SandType.class, new SandTypeRegistryModule())
             .registerModule(SelectorType.class, new SelectorTypeRegistryModule())
             .registerModule(ShrubType.class, new ShrubTypeRegistryModule())
+            .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
             .registerModule(SkullType.class, new SkullTypeRegistryModule())
             .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
