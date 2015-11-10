@@ -27,10 +27,8 @@ package org.spongepowered.common.registry;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSettings;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
@@ -39,10 +37,6 @@ import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.entity.EntityType;
@@ -67,16 +61,12 @@ import org.spongepowered.api.world.gen.PopulatorFactory;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
-import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
-import org.spongepowered.common.entity.SpongeCareer;
-import org.spongepowered.common.entity.SpongeEntityMeta;
-import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.registry.type.RotationRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
@@ -88,14 +78,12 @@ import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -113,18 +101,6 @@ public class SpongeGameRegistry implements GameRegistry {
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
     }
-
-
-    public static final Map<Class<? extends WorldProvider>, SpongeConfig<SpongeConfig.DimensionConfig>> dimensionConfigs = Maps.newHashMap();
-
-    // Because these are annoying to deal with.
-    private final Map<String, Career> careerMappings = Maps.newHashMap();
-    private final Map<String, Profession> professionMappings = Maps.newHashMap();
-    private final Map<Integer, List<Career>> professionToCareerMappings = Maps.newHashMap();
-
-    // THESE NEED TO BE STATIC BECAUSE SPONGE HAS NOT FULLY
-    // INITIALIZED YET DURING THE TIME THAT THESE ARE ACCESSED
-    public static final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
 
     public final RegistrationPhase getPhase() {
         return this.phase;
@@ -276,11 +252,6 @@ public class SpongeGameRegistry implements GameRegistry {
             }
         }
         return gameruleList;
-    }
-
-    @Override
-    public List<Career> getCareers(Profession profession) {
-        return this.professionToCareerMappings.get(((SpongeEntityMeta) profession).type);
     }
 
     public WorldSettings.GameType getGameType(GameMode mode) {

@@ -37,8 +37,10 @@ import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,12 +58,13 @@ public class ProfessionRegistryModule implements AdditionalCatalogRegistryModule
     }
 
     @RegisterCatalog(Professions.class)
-    private final Map<String, Profession> professionMap = new HashMap<>();
-
-    private final Map<Profession, List<Career>> professionListMap = new IdentityHashMap<>();
+    private final Map<String, Profession> professionMap = new LinkedHashMap<>();
 
     @Override
     public void registerAdditionalCatalog(Profession extraCatalog) {
+        if (extraCatalog.getId().toLowerCase().equals("smith")) {
+            return;
+        }
         this.professionMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
     }
 
@@ -75,24 +78,23 @@ public class ProfessionRegistryModule implements AdditionalCatalogRegistryModule
         return ImmutableList.copyOf(this.professionMap.values());
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerCareerForProfession(Career career) {
-        Profession profession = checkNotNull(career).getProfession();
-        List<Career> careers = this.professionListMap.get(checkNotNull(profession));
-        if (careers == null) {
-            careers = new ArrayList<>();
-            this.professionListMap.put(profession, careers);
-        }
+        SpongeProfession profession = (SpongeProfession) checkNotNull(career).getProfession();
+        List<SpongeCareer> careers = (List<SpongeCareer>) (List) profession.getUnderlyingCareers();
         boolean isRegistered = false;
-        for (Career professionCareer : careers) {
-            if (((SpongeCareer) career).type == ((SpongeCareer) professionCareer).type) {
+        for (SpongeCareer professionCareer : careers) {
+            if (((SpongeCareer) career).type == professionCareer.type) {
                 isRegistered = true;
             }
         }
         if (!isRegistered) {
-            if (!careers.contains(career)) {
-                careers.add(career);
+            if (!careers.contains((SpongeCareer) career)) {
+                careers.add((SpongeCareer) career);
             }
         }
+        Collections.sort(careers, CareerRegistryModule.CAREER_COMPARATOR);
+
     }
 
     @Override

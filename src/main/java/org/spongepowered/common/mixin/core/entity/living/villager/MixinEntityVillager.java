@@ -95,20 +95,12 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Override
     public Career getCareer() {
-        // TODO for some reason, there is some form of validation issue, because villager code
-        // is the some really bad code....
-        // At some point might write an overhaul of Villager for better handling
-        // until then... there may be some exceptions thrown at random
-        List<Career> careers = Sponge.getRegistry().getCareers(this.profession);
+        List<Career> careers = this.profession.getCareers();
         if (this.careerId == 0 || this.careerId > careers.size()) {
             this.careerId = new Random().nextInt(careers.size()) + 1;
         }
-
         this.getRecipes(null);
-        if (this.profession == Professions.PRIEST) {
-            this.careerId = 1;
-        }
-        return ((List<Career>) Sponge.getGame().getRegistry().getCareers(this.profession)).get(this.careerId - 1);
+        return this.profession.getCareers().get(this.careerId - 1);
     }
 
     @Override

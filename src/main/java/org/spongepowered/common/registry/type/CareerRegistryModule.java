@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.common.entity.SpongeCareer;
@@ -35,6 +36,7 @@ import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -46,11 +48,18 @@ public class CareerRegistryModule implements AdditionalCatalogRegistryModule<Car
         return Holder.INSTANCE;
     }
 
+    public static final Comparator<SpongeCareer> CAREER_COMPARATOR = (o1, o2) -> Integer.compare(o1.type, o2.type);
+
     @RegisterCatalog(Careers.class)
     private final Map<String, Career> careerMap = new HashMap<>();
 
     @Override
     public void registerAdditionalCatalog(Career extraCatalog) {
+        if (this.forgeSpongeMapping.containsKey(extraCatalog.getId().toLowerCase())) {
+            // Basically, forge has alternate names for a minor few vanilla
+            // careers and this avoids having duplicate "careers" registered.
+            return;
+        }
         if (!this.careerMap.containsKey(extraCatalog.getId())) {
             this.careerMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
         }
@@ -74,6 +83,13 @@ public class CareerRegistryModule implements AdditionalCatalogRegistryModule<Car
         registerAdditionalCatalog(career);
         return career;
     }
+
+    private final Map<String, String> forgeSpongeMapping = ImmutableMap.<String, String>builder()
+        .put("leather", "leatherworker")
+        .put("armor", "armorer")
+        .put("tool", "tool_smith")
+        .put("weapon", "weapon_smith")
+        .build();
 
     @Override
     public void registerDefaults() {

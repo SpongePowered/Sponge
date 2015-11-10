@@ -69,20 +69,6 @@ public final class RegistryModuleLoader {
                     if (map.isEmpty()) {
                         return;
                     }
-
-                    if (module instanceof CareerRegistryModule) {
-                        Map<String, Career> careerMap = new HashMap<>();
-                        for (Map.Entry<String, Career> entry : ((Map<String, Career>) map).entrySet()) {
-                            careerMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-                        }
-                        RegistryHelper.mapFields(Careers.class, careerMap);
-                    } else if (module instanceof ProfessionRegistryModule) {
-                        Map<String, Profession> careerMap = new HashMap<>();
-                        for (Map.Entry<String, Profession> entry : ((Map<String, Profession>) map).entrySet()) {
-                            careerMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-                        }
-                        RegistryHelper.mapFields(Professions.class, careerMap);
-                    }
                     if (module instanceof ItemTypeRegistryModule) {
                         Map<String, ItemType> itemTypeMap = new HashMap<>();
                         for (Map.Entry<String, ItemType> entry : ((Map<String, ItemType>) map).entrySet()) {

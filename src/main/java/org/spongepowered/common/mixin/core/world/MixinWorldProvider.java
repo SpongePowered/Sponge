@@ -42,11 +42,8 @@ import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.IMixinWorldType;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.world.DimensionManager;
-
-import java.io.File;
 
 import javax.annotation.Nullable;
 
@@ -147,20 +144,11 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         return this.dimContext;
     }
 
+    @SuppressWarnings("unchecked")
     @Overwrite
     public static WorldProvider getProviderForDimension(int dimension) {
         WorldProvider provider = DimensionManager.createProviderFor(dimension);
-        if (((IMixinWorldProvider) provider).getDimensionConfig() == null) {
-            SpongeConfig<SpongeConfig.DimensionConfig> dimConfig = SpongeGameRegistry.dimensionConfigs.get(provider.getClass());
-            if (dimConfig == null) {
-                String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
-                dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
-                        Sponge.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), "sponge");
-                SpongeGameRegistry.dimensionConfigs.put(provider.getClass(), dimConfig);
-            }
-            ((IMixinWorldProvider) provider).setDimensionConfig(SpongeGameRegistry.dimensionConfigs.get(provider.getClass()));
-        }
-
+        DimensionRegistryModule.getInstance().validateProvider(provider);
         Dimension dim = (Dimension) provider;
         dim.setAllowsPlayerRespawns(provider.canRespawnHere());
         return provider;
