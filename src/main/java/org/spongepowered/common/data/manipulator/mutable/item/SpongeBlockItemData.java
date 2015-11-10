@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBlockItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.BlockUtil;
 
 public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockItemData, ImmutableBlockItemData> implements BlockItemData {
 
@@ -73,7 +74,7 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
 
     @Override
     public int compareTo(BlockItemData o) {
-        return 0;
+        return BlockUtil.BLOCK_STATE_COMPARATOR.compare(getValue(), o.get(Keys.ITEM_BLOCKSTATE).get());
     }
 
 }
