@@ -124,6 +124,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleD
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCoalData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCookedFishData;
@@ -219,6 +220,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
+import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.CoalData;
 import org.spongepowered.api.data.manipulator.mutable.item.CookedFishData;
@@ -375,6 +377,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVelocityData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBlockItemData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCoalData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCookedFishData;
@@ -469,6 +472,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleDat
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCoalData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCookedFishData;
@@ -563,6 +567,7 @@ import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor
 import org.spongepowered.common.data.processor.data.entity.VillagerZombieProcessor;
 import org.spongepowered.common.data.processor.data.entity.WitherTargetLivingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.WolfWetDataProcessor;
+import org.spongepowered.common.data.processor.data.item.BlockItemDataProcessor;
 import org.spongepowered.common.data.processor.data.item.BreakableDataProcessor;
 import org.spongepowered.common.data.processor.data.item.CoalDataProcessor;
 import org.spongepowered.common.data.processor.data.item.CookedFishDataProcessor;
@@ -678,6 +683,7 @@ import org.spongepowered.common.data.processor.value.entity.VelocityValueProcess
 import org.spongepowered.common.data.processor.value.entity.VillagerZombieValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.WitherTargetsValueProcessor;
+import org.spongepowered.common.data.processor.value.item.BlockItemValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookAuthorValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BookPagesValueProcessor;
 import org.spongepowered.common.data.processor.value.item.BreakableValueProcessor;
@@ -1166,6 +1172,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(FireworkEffectData.class, SpongeFireworkEffectData.class,
                 ImmutableFireworkEffectData.class, ImmutableSpongeFireworkEffectData.class, fireworkEffectDataProcessor);
 
+        final BlockItemDataProcessor blockItemDataProcessor = new BlockItemDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(BlockItemData.class, SpongeBlockItemData.class, ImmutableBlockItemData.class,
+                ImmutableSpongeBlockItemData.class, blockItemDataProcessor);
+
         final FireworkRocketDataProcessor fireworkRocketDataProcessor = new FireworkRocketDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(FireworkRocketData.class, SpongeFireworkRocketData.class,
                 ImmutableFireworkRocketData.class, ImmutableSpongeFireworkRocketData.class, fireworkRocketDataProcessor);
@@ -1300,6 +1310,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.IN_WALL, new InWallValueProcessor());
         dataRegistry.registerValueProcessor(Keys.AXIS, new AxisValueProcessor());
         dataRegistry.registerValueProcessor(Keys.DELAY, new DelayValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

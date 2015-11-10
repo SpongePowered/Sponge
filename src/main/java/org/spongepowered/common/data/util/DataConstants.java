@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.util;
 
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.api.data.type.BrickType;
@@ -99,6 +101,8 @@ public final class DataConstants {
     public static final double MINIMUM_EXHAUSTION = ZERO;
     public static final double DEFAULT_SATURATION = ZERO;
     public static final int DEFAULT_FOOD_LEVEL = 20;
+
+    public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
 
 
 }
