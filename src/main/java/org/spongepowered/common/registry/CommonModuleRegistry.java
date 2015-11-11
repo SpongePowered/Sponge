@@ -153,7 +153,6 @@ import org.spongepowered.common.registry.type.PortionTypeRegistryModule;
 import org.spongepowered.common.registry.type.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.registry.type.PrismarineRegistryModule;
 import org.spongepowered.common.registry.type.ProfessionRegistryModule;
-import org.spongepowered.common.registry.type.PropertyRegistryModule;
 import org.spongepowered.common.registry.type.QuartzTypeRegistryModule;
 import org.spongepowered.common.registry.type.RailDirectionRegistryModule;
 import org.spongepowered.common.registry.type.RotationRegistryModule;
@@ -285,7 +284,6 @@ public final class CommonModuleRegistry {
         registry.registerModule(PotionEffectType.class, new PotionEffectTypeRegistryModule());
         registry.registerModule(PrismarineType.class, new PrismarineRegistryModule());
         registry.registerModule(Profession.class, ProfessionRegistryModule.getInstance());
-        registry.registerModule(new PropertyRegistryModule());
         registry.registerModule(QuartzType.class, new QuartzTypeRegistryModule());
         registry.registerModule(RailDirection.class, new RailDirectionRegistryModule());
         registry.registerModule(Rotation.class, new RotationRegistryModule());
