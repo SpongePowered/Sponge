@@ -22,4 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.data.holders;
+package org.spongepowered.common.data.processor.value.block;
+
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.util.Axis;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+public class AxisValueProcessor extends
+        AbstractBlockOnlyValueProcessor<Axis, Value<Axis>> {
+
+    public AxisValueProcessor() {
+        super(Keys.AXIS);
+    }
+
+    @Override
+    protected Value<Axis> constructValue(Axis defaultValue) {
+        return new SpongeValue<>(Keys.AXIS, Axis.X, defaultValue);
+    }
+
+}

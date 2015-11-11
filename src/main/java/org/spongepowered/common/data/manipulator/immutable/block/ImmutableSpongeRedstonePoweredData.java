@@ -33,14 +33,20 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 
-public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableBoundedComparableData<Integer, ImmutableRedstonePoweredData, RedstonePoweredData> implements ImmutableRedstonePoweredData {
+public class ImmutableSpongeRedstonePoweredData extends
+        AbstractImmutableBoundedComparableData<Integer, ImmutableRedstonePoweredData, RedstonePoweredData> implements ImmutableRedstonePoweredData {
 
     public ImmutableSpongeRedstonePoweredData(int value) {
         this(value, 0, 15);
     }
 
     public ImmutableSpongeRedstonePoweredData(int value, int lowerBound, int upperBound) {
-        super(ImmutableRedstonePoweredData.class, value, Keys.POWER, intComparator(), SpongeRedstonePoweredData.class, lowerBound, upperBound, 0);
+        this(value, lowerBound, upperBound, 0);
+    }
+
+    public ImmutableSpongeRedstonePoweredData(int value, int lowerBound, int upperBound, int defaultValue) {
+        super(ImmutableRedstonePoweredData.class, value, Keys.POWER, intComparator(), SpongeRedstonePoweredData.class, lowerBound, upperBound,
+                defaultValue);
     }
 
     @Override

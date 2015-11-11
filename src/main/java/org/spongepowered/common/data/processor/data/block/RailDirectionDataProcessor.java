@@ -31,10 +31,10 @@ import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRailDirectionData;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 
 public class RailDirectionDataProcessor extends
-        AbstractBlockOnlyCatalogDataProcessor<RailDirection, Value<RailDirection>, RailDirectionData, ImmutableRailDirectionData> {
+        AbstractBlockOnlyDataProcessor<RailDirection, Value<RailDirection>, RailDirectionData, ImmutableRailDirectionData> {
 
     public RailDirectionDataProcessor() {
         super(Keys.RAIL_DIRECTION);

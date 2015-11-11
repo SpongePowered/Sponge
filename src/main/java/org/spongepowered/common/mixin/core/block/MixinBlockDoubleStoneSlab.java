@@ -31,11 +31,13 @@ import net.minecraft.block.BlockStoneSlab;
 import net.minecraft.block.BlockStoneSlabNew;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSeamlessData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
 
 @Mixin(value = {BlockDoubleStoneSlabNew.class, BlockDoubleStoneSlab.class})
@@ -43,12 +45,12 @@ public abstract class MixinBlockDoubleStoneSlab extends MixinBlockStoneSlab {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getSlabTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getSlabTypeFor(blockState), getIsSeamlessFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableSlabData.class.isAssignableFrom(immutable);
+        return ImmutableSlabData.class.isAssignableFrom(immutable) || ImmutableSeamlessData.class.isAssignableFrom(immutable);
     }
 
     private ImmutableSlabData getSlabTypeFor(IBlockState blockState) {
@@ -58,5 +60,15 @@ public abstract class MixinBlockDoubleStoneSlab extends MixinBlockStoneSlab {
                         : blockState.getBlock() instanceof BlockStoneSlabNew
                                 ? (SlabType) blockState.getValue(BlockStoneSlabNew.VARIANT)
                                 : SlabTypes.COBBLESTONE);
+    }
+
+    private ImmutableSeamlessData getIsSeamlessFor(IBlockState blockState) {
+        if (blockState.getBlock() instanceof BlockStoneSlab) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class,
+                    (Boolean) blockState.getValue(BlockStoneSlab.SEAMLESS));
+        } else {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class,
+                    (Boolean) blockState.getValue(BlockStoneSlabNew.SEAMLESS));
+        }
     }
 }

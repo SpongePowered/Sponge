@@ -28,11 +28,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class StairShapeValueProcessor extends
-        AbstractBlockOnlyCatalogDataValueProcessor<StairShape, Value<StairShape>> {
+        AbstractBlockOnlyValueProcessor<StairShape, Value<StairShape>> {
 
     public StairShapeValueProcessor() {
         super(Keys.STAIR_SHAPE);

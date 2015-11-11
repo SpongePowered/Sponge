@@ -28,11 +28,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class BigMushroomTypeValueProcessor extends
-        AbstractBlockOnlyCatalogDataValueProcessor<BigMushroomType, Value<BigMushroomType>> {
+        AbstractBlockOnlyValueProcessor<BigMushroomType, Value<BigMushroomType>> {
 
     public BigMushroomTypeValueProcessor() {
         super(Keys.BIG_MUSHROOM_TYPE);

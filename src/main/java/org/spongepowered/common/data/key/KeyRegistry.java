@@ -224,6 +224,19 @@ public class KeyRegistry {
         keyMap.put("targets", makeSingleKey(Living.class, ListValue.class, of("Targets")));
         keyMap.put("represented_block", makeSingleKey(BlockState.class, Value.class, of("RepresentedBlock")));
         keyMap.put("offset", makeSingleKey(Integer.class, Value.class, of("BlockOffset")));
+        keyMap.put("attached", makeSingleKey(Boolean.class, Value.class, of("Attached")));
+        keyMap.put("should_drop", makeSingleKey(Boolean.class, Value.class, of("ShouldDrop")));
+        keyMap.put("extended", makeSingleKey(Boolean.class, Value.class, of("Extended")));
+        keyMap.put("growth_stage", makeSingleKey(Integer.class, MutableBoundedValue.class, of("GrowthStage")));
+        keyMap.put("open", makeSingleKey(Boolean.class, Value.class, of("Open")));
+        keyMap.put("power", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Power")));
+        keyMap.put("seamless", makeSingleKey(Boolean.class, Value.class, of("Seamless")));
+        keyMap.put("snowed", makeSingleKey(Boolean.class, Value.class, of("Snowed")));
+        keyMap.put("suspended", makeSingleKey(Boolean.class, Value.class, of("Suspended")));
+        keyMap.put("occupied", makeSingleKey(Boolean.class, Value.class, of("Occupied")));
+        keyMap.put("decayable", makeSingleKey(Boolean.class, Value.class, of("Decayable")));
+        keyMap.put("in_wall", makeSingleKey(Boolean.class, Value.class, of("InWall")));
+        keyMap.put("delay", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Delay")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

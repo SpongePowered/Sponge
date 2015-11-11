@@ -31,10 +31,10 @@ import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.ComparatorTypes;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeComparatorData;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 
 public class ComparatorDataProcessor extends
-        AbstractBlockOnlyCatalogDataProcessor<ComparatorType, Value<ComparatorType>, ComparatorData, ImmutableComparatorData> {
+        AbstractBlockOnlyDataProcessor<ComparatorType, Value<ComparatorType>, ComparatorData, ImmutableComparatorData> {
 
     public ComparatorDataProcessor() {
         super(Keys.COMPARATOR_TYPE);

@@ -37,6 +37,10 @@ public class SpongeDisarmedData extends AbstractBooleanData<DisarmedData, Immuta
         super(DisarmedData.class, value, Keys.DISARMED, ImmutableSpongeDisarmedData.class, false);
     }
 
+    public SpongeDisarmedData() {
+        this(false);
+    }
+
     @Override
     public Value<Boolean> disarmed() {
         return getValueGetter();

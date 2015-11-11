@@ -37,6 +37,10 @@ public class SpongeSuspendedData extends AbstractBooleanData<SuspendedData, Immu
         super(SuspendedData.class, value, Keys.SUSPENDED, ImmutableSpongeSuspendedData.class, false);
     }
 
+    public SpongeSuspendedData() {
+        this(false);
+    }
+
     @Override
     public Value<Boolean> suspended() {
         return getValueGetter();

@@ -44,7 +44,9 @@ public final class QuartzTypeRegistryModule implements CatalogRegistryModule<Qua
     private final Map<String, QuartzType> quartzTypeMappings = new ImmutableMap.Builder<String, QuartzType>()
         .put("default", (QuartzType) (Object) BlockQuartz.EnumType.DEFAULT)
         .put("chiseled", (QuartzType) (Object) BlockQuartz.EnumType.CHISELED)
-        .put("column", (QuartzType) (Object) BlockQuartz.EnumType.LINES_Y)
+        .put("lines_x", (QuartzType) (Object) BlockQuartz.EnumType.LINES_X)
+        .put("lines_y", (QuartzType) (Object) BlockQuartz.EnumType.LINES_Y)
+        .put("lines_z", (QuartzType) (Object) BlockQuartz.EnumType.LINES_Z)
         .build();
 
     @Override

@@ -22,86 +22,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.holders;
-
-import static org.spongepowered.common.data.util.DirectionResolver.getFor;
+package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockLever;
+import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
-import org.spongepowered.common.mixin.core.block.MixinBlock;
+import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;
 
-@Mixin(BlockLever.class)
-public abstract class MixinBlockLever extends MixinBlock {
+@Mixin(BlockWallSign.class)
+public abstract class MixinBlockWallSign extends MixinBlockSign {
 
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final BlockLever.EnumOrientation intDir = (BlockLever.EnumOrientation) (Object) blockState.getValue(BlockLever.FACING);
-        final ImmutableDirectionalData directionalData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, getFor(intDir));
-        return directionalData;
-    }
-
-    protected ImmutablePoweredData getPoweredData(IBlockState blockState) {
-        final ImmutablePoweredData poweredData = ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class,
-                                                                                         (Boolean) blockState.getValue(BlockLever.POWERED));
-        return poweredData;
-    }
-
-    public ImmutableAxisData getAxisData(IBlockState blockState) {
-        final BlockLever.EnumOrientation orientation = (BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING);
-        final Axis axis;
-        switch (orientation) {
-            case UP_X:
-            case DOWN_X:
-                axis = Axis.X;
-                break;
-            case UP_Z:
-            case DOWN_Z:
-                axis = Axis.Z;
-                break;
-            default:
-                axis = Axis.Y;
-                break;
-        }
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, axis);
+        final EnumFacing facing = (EnumFacing) blockState.getValue(BlockWallSign.FACING);
+        final Direction direction = DirectionResolver.getFor(facing);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return super.supports(immutable);
+        return super.supports(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        final ImmutableDataManipulator rawManipulator = manipulator;
-        if (rawManipulator instanceof ImmutableDirectionalData) {
-            final BlockLever.EnumOrientation orientatio = null;
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
+            final EnumFacing facing = DirectionResolver.getFor(direction);
+            return Optional.of((BlockState) blockState.withProperty(BlockWallSign.FACING, facing));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction direction = (Direction) value;
+            final EnumFacing facing = DirectionResolver.getFor(direction);
+            return Optional.of((BlockState) blockState.withProperty(BlockWallSign.FACING, facing));
+        }
         return super.getStateWithValue(blockState, key, value);
     }
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getAxisData(blockState), getDirectionalData(blockState), getPoweredData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+                .addAll(super.getManipulators(blockState))
+                .add(getDirectionalData(blockState))
+                .build();
     }
 
 }

@@ -31,9 +31,9 @@ import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeHingeData;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 
-public class HingeDataProcessor extends AbstractBlockOnlyCatalogDataProcessor<Hinge, Value<Hinge>, HingeData, ImmutableHingeData> {
+public class HingeDataProcessor extends AbstractBlockOnlyDataProcessor<Hinge, Value<Hinge>, HingeData, ImmutableHingeData> {
 
     public HingeDataProcessor() {
         super(Keys.HINGE_POSITION);

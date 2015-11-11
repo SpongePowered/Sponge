@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.block;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -53,7 +52,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
 
     public ImmutableSpongeConnectedDirectionData(Set<Direction> directions) {
         super(ImmutableConnectedDirectionData.class);
-        this.directions = Sets.immutableEnumSet(directions);
+        this.directions = ImmutableSet.copyOf(directions);
 
         this.directionsValue = new ImmutableSpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.directions);
         this.northValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));

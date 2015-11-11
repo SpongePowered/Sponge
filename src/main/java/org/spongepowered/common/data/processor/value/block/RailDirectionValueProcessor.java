@@ -28,10 +28,10 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class RailDirectionValueProcessor extends AbstractBlockOnlyCatalogDataValueProcessor<RailDirection, Value<RailDirection>> {
+public class RailDirectionValueProcessor extends AbstractBlockOnlyValueProcessor<RailDirection, Value<RailDirection>> {
 
     public RailDirectionValueProcessor() {
         super(Keys.RAIL_DIRECTION);

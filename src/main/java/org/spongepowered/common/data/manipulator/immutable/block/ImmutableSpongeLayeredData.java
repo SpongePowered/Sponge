@@ -38,9 +38,13 @@ public class ImmutableSpongeLayeredData extends AbstractImmutableBoundedComparab
     public ImmutableSpongeLayeredData(int value) {
         this(value, 0, Integer.MAX_VALUE);
     }
-
+    
     public ImmutableSpongeLayeredData(int value, int lowerBound, int upperBound) {
-        super(ImmutableLayeredData.class, value, Keys.LAYER, intComparator(), SpongeLayeredData.class, lowerBound, upperBound, 0);
+        this(value, lowerBound, upperBound, 0);
+    }
+
+    public ImmutableSpongeLayeredData(int value, int lowerBound, int upperBound, int actualValue) {
+        super(ImmutableLayeredData.class, value, Keys.LAYER, intComparator(), SpongeLayeredData.class, lowerBound, upperBound, actualValue);
     }
 
     @Override

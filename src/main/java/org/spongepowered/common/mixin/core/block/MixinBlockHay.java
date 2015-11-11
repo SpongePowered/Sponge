@@ -25,43 +25,56 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockHay;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
+import org.spongepowered.common.data.util.DirectionChecker;
 
-import java.util.List;
 import java.util.Optional;
 
-@Mixin(BlockSnow.class)
-public abstract class MixinBlockSnowLayer extends MixinBlock {
+@Mixin(BlockHay.class)
+public abstract class MixinBlockHay extends MixinBlock {
 
-    private static final int LAYER_OFFSET = 1;
+    @Override
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getAxisData(blockState));
+    }
 
-    public ImmutableLayeredData getLayerData(IBlockState blockState) {
-        final int layer = (Integer) blockState.getValue(BlockSnow.LAYERS);
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, layer, 1, 8);
+    @Override
+    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return ImmutableAxisData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-
+        if (manipulator instanceof ImmutableAxisData) {
+            final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockHay.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+        }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        if (key.equals(Keys.AXIS)) {
+            final Axis axis = (Axis) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockHay.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+        }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @Override
-    public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getLayerData(blockState));
+    public ImmutableAxisData getAxisData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
+                DirectionChecker.convertAxisToSponge((EnumFacing.Axis) blockState.getValue(BlockHay.AXIS)));
     }
 }

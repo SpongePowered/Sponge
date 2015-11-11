@@ -32,11 +32,13 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirtData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSnowedData;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirtData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSnowedData;
 
 import java.util.Optional;
 
@@ -45,12 +47,12 @@ public abstract class MixinBlockDirt extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirtTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirtTypeFor(blockState), getIsSnowedFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableDirtData.class.isAssignableFrom(immutable);
+        return ImmutableDirtData.class.isAssignableFrom(immutable) || ImmutableSnowedData.class.isAssignableFrom(immutable);
     }
 
     @Override
@@ -58,6 +60,9 @@ public abstract class MixinBlockDirt extends MixinBlock {
         if (manipulator instanceof ImmutableDirtData) {
             final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) (Object) ((ImmutableDirtData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
+        }
+        if (manipulator instanceof ImmutableSnowedData) {
+            return Optional.of((BlockState) blockState);
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -68,10 +73,17 @@ public abstract class MixinBlockDirt extends MixinBlock {
             final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) value;
             return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
         }
+        if (key.equals(Keys.SNOWED)) {
+            return Optional.of((BlockState) blockState);
+        }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDirtData getDirtTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) blockState.getValue(BlockDirt.VARIANT));
+    }
+
+    private ImmutableSnowedData getIsSnowedFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, (Boolean) blockState.getValue(BlockDirt.SNOWY));
     }
 }

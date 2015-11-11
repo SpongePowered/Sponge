@@ -37,6 +37,10 @@ public class SpongePoweredData extends AbstractBooleanData<PoweredData, Immutabl
         super(PoweredData.class, value, Keys.POWERED, ImmutableSpongePoweredData.class, false);
     }
 
+    public SpongePoweredData() {
+        this(false);
+    }
+
     @Override
     public Value<Boolean> powered() {
         return getValueGetter();

@@ -24,17 +24,60 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockCake;
 import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
+
+import java.util.Optional;
 
 @Mixin(BlockCake.class)
 public abstract class MixinBlockCake extends MixinBlock {
 
-    public ImmutableLayeredData getLayerData(IBlockState blockState) {
-        final int layer = (Integer) blockState.getValue(BlockCake.BITES);
-        return null;
+    @Override
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getLayerData(blockState));
+    }
+
+    @Override
+    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+        return ImmutableLayeredData.class.isAssignableFrom(immutable);
+    }
+
+    @Override
+    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+        if (manipulator instanceof ImmutableLayeredData) {
+            int layers = ((ImmutableLayeredData) manipulator).layer().get();
+            if (layers > 6) {
+                layers = 6;
+            }
+            return Optional.of((BlockState) blockState.withProperty(BlockCake.BITES, layers));
+        }
+        return super.getStateWithData(blockState, manipulator);
+    }
+
+    @Override
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        if (key.equals(Keys.LAYER)) {
+            int layers = (Integer) value;
+            if (layers > 6) {
+                layers = 6;
+            }
+            return Optional.of((BlockState) blockState.withProperty(BlockCake.BITES, layers));
+        }
+        return super.getStateWithValue(blockState, key, value);
+    }
+
+    private ImmutableLayeredData getLayerData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, (Integer) blockState.getValue(BlockCake.BITES), 0, 6);
     }
 
 }

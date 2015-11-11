@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -40,17 +40,21 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectionData, ImmutableConnectedDirectionData> implements ConnectedDirectionData {
 
-    private EnumSet<Direction> connectedDirections = EnumSet.noneOf(Direction.class);
+    private Set<Direction> connectedDirections = new HashSet<Direction>();
 
     public SpongeConnectedDirectionData(Set<Direction> connectedDirections) {
         super(ConnectedDirectionData.class);
         registerGettersAndSetters();
-        this.connectedDirections = EnumSet.copyOf(connectedDirections);
+        this.connectedDirections = ImmutableSet.copyOf(connectedDirections);
+    }
+
+    public SpongeConnectedDirectionData() {
+    	this(ImmutableSet.<Direction>of(Direction.NONE));
     }
 
     @Override
@@ -124,7 +128,7 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     private void setDirections(Set<Direction> directions) {
-        this.connectedDirections = EnumSet.copyOf(checkNotNull(directions));
+        this.connectedDirections = ImmutableSet.copyOf(connectedDirections);
     }
 
     private void setNorth(Boolean north) {

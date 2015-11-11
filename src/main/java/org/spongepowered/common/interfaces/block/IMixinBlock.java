@@ -119,5 +119,13 @@ public interface IMixinBlock {
 
     // Automatically implemented by forge due to identical signature
     boolean isFlammable(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing);
+    
+    /**
+     * Returns true if the block needs a blockState that is 
+     * granted to be up-to-date
+     * 
+     * @return The boolean if it should force update
+     */
+    boolean forceUpdateBlockState();
 
 }
