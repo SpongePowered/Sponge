@@ -28,16 +28,21 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPistonExtension;
 import net.minecraft.block.BlockPistonMoving;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePistonData;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePistonData;
+import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;
 
@@ -46,12 +51,12 @@ public abstract class MixinBlockPistonMoving extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getPistonTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getPistonTypeFor(blockState), getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutablePistonData.class.isAssignableFrom(immutable);
+        return ImmutablePistonData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
@@ -60,6 +65,10 @@ public abstract class MixinBlockPistonMoving extends MixinBlock {
             final BlockPistonExtension.EnumPistonType pistonType =
                     (BlockPistonExtension.EnumPistonType) (Object) ((ImmutablePistonData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockPistonMoving.TYPE, pistonType));
+        }
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockPistonMoving.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -70,10 +79,19 @@ public abstract class MixinBlockPistonMoving extends MixinBlock {
             final BlockPistonExtension.EnumPistonType pistonType = (BlockPistonExtension.EnumPistonType) value;
             return Optional.of((BlockState) blockState.withProperty(BlockPistonMoving.TYPE, pistonType));
         }
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction dir = (Direction) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockPistonMoving.FACING, DirectionResolver.getFor(dir)));
+        }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutablePistonData getPistonTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class, (PistonType) blockState.getValue(BlockPistonMoving.TYPE));
+    }
+
+    private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
+                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockPistonMoving.FACING)));
     }
 }

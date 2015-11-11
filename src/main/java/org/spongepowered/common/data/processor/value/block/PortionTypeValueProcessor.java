@@ -28,10 +28,10 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class PortionTypeValueProcessor extends AbstractBlockOnlyCatalogDataValueProcessor<PortionType, Value<PortionType>> {
+public class PortionTypeValueProcessor extends AbstractBlockOnlyValueProcessor<PortionType, Value<PortionType>> {
 
     public PortionTypeValueProcessor() {
         super(Keys.PORTION_TYPE);

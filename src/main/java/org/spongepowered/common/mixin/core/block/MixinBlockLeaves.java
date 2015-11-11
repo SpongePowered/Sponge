@@ -38,6 +38,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDecayableData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
 import org.spongepowered.common.util.VecHelper;
@@ -97,9 +99,13 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
     }
 
+    private ImmutableDecayableData getIsDecayableFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, (Boolean) blockState.getValue(BlockLeaves.DECAYABLE));
+    }
+
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableTreeData.class.isAssignableFrom(immutable);
+        return ImmutableTreeData.class.isAssignableFrom(immutable) || ImmutableDecayableData.class.isAssignableFrom(immutable);
     }
 
     @Override
@@ -120,6 +126,10 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                 }
             }
             return Optional.empty();
+        }
+        if (manipulator instanceof ImmutableDecayableData) {
+            final boolean decayable = ((ImmutableDecayableData) manipulator).decayable().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockLeaves.DECAYABLE, decayable));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -143,15 +153,17 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             }
             return Optional.empty();
         }
+        if (key.equals(Keys.DECAYABLE)) {
+            final boolean decayable = (Boolean) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockLeaves.DECAYABLE, decayable));
+        }
         return super.getStateWithValue(blockState, key, value);
     }
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeData(blockState), getIsDecayableFor(blockState));
 
     }
-
-    // TODO implement for decayable etc.
 
 }

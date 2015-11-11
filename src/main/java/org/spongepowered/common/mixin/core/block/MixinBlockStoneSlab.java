@@ -34,6 +34,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.SlabType;
@@ -79,6 +80,15 @@ public abstract class MixinBlockStoneSlab extends MixinBlock {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) (Object) portionType));
         }
+        if (manipulator instanceof ImmutableSeamlessData) {
+            final boolean seamless = ((ImmutableSeamlessData) manipulator).seamless().get();
+            if (blockState.getBlock() instanceof BlockStoneSlab) {
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlab.SEAMLESS, seamless));
+            }
+            if (blockState.getBlock() instanceof BlockStoneSlabNew) {
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlabNew.SEAMLESS, seamless));
+            }
+        }
         return super.getStateWithData(blockState, manipulator);
     }
 
@@ -100,6 +110,15 @@ public abstract class MixinBlockStoneSlab extends MixinBlock {
             return Optional.empty();
         } else if (key.equals(Keys.PORTION_TYPE)) {
             return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) (Object) value));
+        }
+        if (key.equals(Keys.SEAMLESS)) {
+            final boolean seamless = (Boolean) value;
+            if (blockState.getBlock() instanceof BlockStoneSlab) {
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlab.SEAMLESS, seamless));
+            }
+            if (blockState.getBlock() instanceof BlockStoneSlabNew) {
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlabNew.SEAMLESS, seamless));
+            }
         }
         return super.getStateWithValue(blockState, key, value);
     }

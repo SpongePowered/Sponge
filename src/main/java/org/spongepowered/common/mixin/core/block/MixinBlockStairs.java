@@ -29,19 +29,25 @@ import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.BlockStairs.EnumHalf;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStairShapeData;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStairShapeData;
+import org.spongepowered.common.data.util.DirectionChecker;
+import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;
 
@@ -50,12 +56,14 @@ public abstract class MixinBlockStairs extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getStairShapeFor(blockState), getPortionTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getStairShapeFor(blockState), getPortionTypeFor(blockState),
+                getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableStairShapeData.class.isAssignableFrom(immutable) || ImmutablePortionData.class.isAssignableFrom(immutable);
+        return ImmutableStairShapeData.class.isAssignableFrom(immutable) || ImmutablePortionData.class.isAssignableFrom(immutable)
+                || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
@@ -66,6 +74,10 @@ public abstract class MixinBlockStairs extends MixinBlock {
         } else if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
+        }
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
+            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -78,6 +90,10 @@ public abstract class MixinBlockStairs extends MixinBlock {
         } else if (key.equals(Keys.PORTION_TYPE)) {
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, convertType((BlockSlab.EnumBlockHalf) (Object) value)));
         }
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
+            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, DirectionResolver.getFor(dir)));
+        }
         return super.getStateWithValue(blockState, key, value);
     }
 
@@ -88,6 +104,11 @@ public abstract class MixinBlockStairs extends MixinBlock {
     private ImmutablePortionData getPortionTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
                 convertType((EnumHalf) blockState.getValue(BlockStairs.HALF)));
+    }
+
+    private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
+                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockStairs.FACING)));
     }
 
     private PortionType convertType(BlockStairs.EnumHalf type) {

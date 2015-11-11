@@ -22,21 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.holders;
+package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockButton;
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.mixin.core.block.MixinBlock;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableExtendedData;
+import org.spongepowered.api.data.manipulator.mutable.block.ExtendedData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeExtendedData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 
-@Mixin(BlockButton.class)
-public abstract class MixinBlockButton extends MixinBlock {
 
-    public ImmutablePoweredData getPoweredData(IBlockState blockState) {
-        final boolean powered = (Boolean) blockState.getValue(BlockButton.POWERED);
-        return ImmutableDataCachingUtil.getManipulator(ImmutablePoweredData.class, powered);
+public class ExtendedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, ExtendedData, ImmutableExtendedData> {
+
+    public ExtendedDataProcessor() {
+        super(Keys.EXTENDED);
+    }
+
+    @Override
+    protected Boolean getDefaultValue() {
+        return false;
+    }
+
+    @Override
+    protected ExtendedData createManipulator() {
+        return new SpongeExtendedData();
     }
 
 }

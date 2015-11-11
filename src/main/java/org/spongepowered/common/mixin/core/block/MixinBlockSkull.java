@@ -22,62 +22,73 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.holders;
+package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockStandingSign;
+import net.minecraft.block.BlockSkull;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDropData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.mixin.core.block.MixinBlock;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDropData;
+import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;
 
-@Mixin(BlockStandingSign.class)
-public abstract class MixinBlockStandingSign extends MixinBlock {
+@Mixin(BlockSkull.class)
+public abstract class MixinBlockSkull extends MixinBlock {
 
-    public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final int intDir = (Integer) (Object) blockState.getValue(BlockStandingSign.ROTATION);
-        final SpongeDirectionalData directionalData = new SpongeDirectionalData();
-        directionalData.setValue(Direction.values()[(intDir + 8) % 16]);
-        return directionalData.asImmutable();
+    @Override
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getShouldDropFor(blockState), getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return super.supports(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
+        return ImmutableDropData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+        if (manipulator instanceof ImmutableDropData) {
+            final boolean shouldDrop = ((ImmutableDropData) manipulator).willDrop().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockSkull.NODROP, !shouldDrop));
+        }
         if (manipulator instanceof ImmutableDirectionalData) {
-            final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
-            final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.withProperty(BlockStandingSign.ROTATION, intDirection));
+            final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockSkull.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+        if (key.equals(Keys.SHOULD_DROP)) {
+            final boolean shouldDrop = (Boolean) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockSkull.NODROP, !shouldDrop));
+        }
         if (key.equals(Keys.DIRECTION)) {
-            final Direction direction = (Direction) value;
-            final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.withProperty(BlockStandingSign.ROTATION, intDirection));
+            final Direction dir = (Direction) value;
+            return Optional.of((BlockState) blockState.withProperty(BlockSkull.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState));
+    private ImmutableDropData getShouldDropFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !(Boolean) blockState.getValue(BlockSkull.NODROP));
     }
 
+    private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
+                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockSkull.FACING)));
+    }
 }

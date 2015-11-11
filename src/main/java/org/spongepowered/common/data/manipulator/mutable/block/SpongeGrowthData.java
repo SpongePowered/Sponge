@@ -40,7 +40,7 @@ public class SpongeGrowthData extends AbstractBoundedComparableData<Integer, Gro
     }
 
     public SpongeGrowthData(int value) {
-        this(value, 0, 1);
+        this(value, 0, 15);
     }
 
     public SpongeGrowthData(int value, int lowerBound, int upperBound) {

@@ -179,6 +179,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -1339,7 +1340,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkBlockBounds(x, y, z);
-        return (BlockState) getBlockState(new BlockPos(x, y, z));
+        IBlockState state = getBlockState(new BlockPos(x, y, z));
+        if (((IMixinBlock) state.getBlock()).forceUpdateBlockState()) {
+            BlockState updatedState = (BlockState) state.getBlock().getActualState(state, (IBlockAccess) this, new BlockPos(x, y, z));
+            return updatedState;
+        } else {
+            return (BlockState) state;
+        }
     }
 
     @Override

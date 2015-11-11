@@ -254,6 +254,9 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+        if(this.keyMap == null) {
+            this.populateKeyValues();
+        }
         if (this.keyMap.containsKey(checkNotNull(key))) {
             return Optional.of((E) this.keyMap.get(key));
         }

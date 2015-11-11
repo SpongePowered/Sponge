@@ -37,6 +37,10 @@ public class SpongeSeamlessData extends AbstractBooleanData<SeamlessData, Immuta
         super(SeamlessData.class, value, Keys.SEAMLESS, ImmutableSpongeSeamlessData.class, false);
     }
 
+    public SpongeSeamlessData() {
+        this(false);
+    }
+
     @Override
     public Value<Boolean> seamless() {
         return getValueGetter();

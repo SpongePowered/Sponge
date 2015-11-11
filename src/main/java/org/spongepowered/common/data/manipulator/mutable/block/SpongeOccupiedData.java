@@ -37,6 +37,10 @@ public class SpongeOccupiedData extends AbstractBooleanData<OccupiedData, Immuta
         super(OccupiedData.class, value, Keys.OCCUPIED, ImmutableSpongeOccupiedData.class, false);
     }
 
+    public SpongeOccupiedData() {
+        this(false);
+    }
+
     @Override
     public Value<Boolean> occupied() {
         return getValueGetter();

@@ -53,25 +53,44 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItem
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAttachedData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBigMushroomData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBrickData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableComparatorData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnectedDirectionData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDecayableData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDelayableData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirtData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDisarmedData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDisguisedBlockData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDoublePlantData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDropData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableExtendedData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableHingeData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableInWallData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableOccupiedData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableOpenData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePistonData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePrismarineData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableQuartzData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRailDirectionData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandstoneData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableShrubData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSnowedData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStairShapeData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSuspendedData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgentData;
@@ -129,25 +148,44 @@ import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
+import org.spongepowered.api.data.manipulator.mutable.block.AttachedData;
+import org.spongepowered.api.data.manipulator.mutable.block.AxisData;
 import org.spongepowered.api.data.manipulator.mutable.block.BigMushroomData;
 import org.spongepowered.api.data.manipulator.mutable.block.BrickData;
 import org.spongepowered.api.data.manipulator.mutable.block.ComparatorData;
+import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
+import org.spongepowered.api.data.manipulator.mutable.block.DecayableData;
+import org.spongepowered.api.data.manipulator.mutable.block.DelayableData;
+import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirtData;
+import org.spongepowered.api.data.manipulator.mutable.block.DisarmedData;
 import org.spongepowered.api.data.manipulator.mutable.block.DisguisedBlockData;
 import org.spongepowered.api.data.manipulator.mutable.block.DoublePlantData;
+import org.spongepowered.api.data.manipulator.mutable.block.DropData;
+import org.spongepowered.api.data.manipulator.mutable.block.ExtendedData;
+import org.spongepowered.api.data.manipulator.mutable.block.GrowthData;
 import org.spongepowered.api.data.manipulator.mutable.block.HingeData;
+import org.spongepowered.api.data.manipulator.mutable.block.InWallData;
+import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
+import org.spongepowered.api.data.manipulator.mutable.block.OccupiedData;
+import org.spongepowered.api.data.manipulator.mutable.block.OpenData;
 import org.spongepowered.api.data.manipulator.mutable.block.PistonData;
 import org.spongepowered.api.data.manipulator.mutable.block.PlantData;
 import org.spongepowered.api.data.manipulator.mutable.block.PortionData;
+import org.spongepowered.api.data.manipulator.mutable.block.PoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.PrismarineData;
 import org.spongepowered.api.data.manipulator.mutable.block.QuartzData;
 import org.spongepowered.api.data.manipulator.mutable.block.RailDirectionData;
+import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.SandData;
 import org.spongepowered.api.data.manipulator.mutable.block.SandstoneData;
+import org.spongepowered.api.data.manipulator.mutable.block.SeamlessData;
 import org.spongepowered.api.data.manipulator.mutable.block.ShrubData;
 import org.spongepowered.api.data.manipulator.mutable.block.SlabData;
+import org.spongepowered.api.data.manipulator.mutable.block.SnowedData;
 import org.spongepowered.api.data.manipulator.mutable.block.StairShapeData;
 import org.spongepowered.api.data.manipulator.mutable.block.StoneData;
+import org.spongepowered.api.data.manipulator.mutable.block.SuspendedData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.WallData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
@@ -266,25 +304,44 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepres
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAttachedData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeBigMushroomData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeBrickData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeComparatorData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDelayableData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirtData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDisarmedData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDisguisedBlockData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDoublePlantData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDropData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeExtendedData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeHingeData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeInWallData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOccupiedData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOpenData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePistonData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePlantData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePrismarineData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeQuartzData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRailDirectionData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRedstonePoweredData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandstoneData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSeamlessData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeShrubData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSnowedData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStairShapeData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStoneData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSuspendedData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWallData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAgentData;
@@ -341,25 +398,44 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeAttachedData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeAxisData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeBigMushroomData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeBrickData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeComparatorData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeConnectedDirectionData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDecayableData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDelayableData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirtData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDisarmedData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDisguisedBlockData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDoublePlantData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDropData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeExtendedData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeGrowthData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeHingeData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeInWallData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeLayeredData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeOccupiedData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeOpenData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePistonData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePlantData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePortionData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongePoweredData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePrismarineData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeQuartzData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRailDirectionData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSandData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSandstoneData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeSeamlessData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeShrubData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSlabData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeSnowedData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeStairShapeData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeStoneData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeSuspendedData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWallData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
@@ -415,25 +491,44 @@ import org.spongepowered.common.data.processor.data.FireworkEffectDataProcessor;
 import org.spongepowered.common.data.processor.data.FireworkRocketDataProcessor;
 import org.spongepowered.common.data.processor.data.RepresentedItemDataProcessor;
 import org.spongepowered.common.data.processor.data.SkullDataProcessor;
+import org.spongepowered.common.data.processor.data.block.AttachedDataProcessor;
+import org.spongepowered.common.data.processor.data.block.AxisDataProcessor;
 import org.spongepowered.common.data.processor.data.block.BigMushroomDataProcessor;
 import org.spongepowered.common.data.processor.data.block.BrickDataProcessor;
 import org.spongepowered.common.data.processor.data.block.ComparatorDataProcessor;
+import org.spongepowered.common.data.processor.data.block.ConnectedDirectionDataProcessor;
+import org.spongepowered.common.data.processor.data.block.DecayableDataProcessor;
+import org.spongepowered.common.data.processor.data.block.DelayableDataProcessor;
+import org.spongepowered.common.data.processor.data.block.DirectionalDataProcessor;
 import org.spongepowered.common.data.processor.data.block.DirtDataProcessor;
+import org.spongepowered.common.data.processor.data.block.DisarmedDataProcessor;
 import org.spongepowered.common.data.processor.data.block.DisguisedBlockDataProcessor;
 import org.spongepowered.common.data.processor.data.block.DoublePlantDataProcessor;
+import org.spongepowered.common.data.processor.data.block.DropDataProcessor;
+import org.spongepowered.common.data.processor.data.block.ExtendedDataProcessor;
+import org.spongepowered.common.data.processor.data.block.GrowthDataProcessor;
 import org.spongepowered.common.data.processor.data.block.HingeDataProcessor;
+import org.spongepowered.common.data.processor.data.block.InWallDataProcessor;
+import org.spongepowered.common.data.processor.data.block.LayeredDataProcessor;
+import org.spongepowered.common.data.processor.data.block.OccupiedDataProcessor;
+import org.spongepowered.common.data.processor.data.block.OpenDataProcessor;
 import org.spongepowered.common.data.processor.data.block.PistonDataProcessor;
 import org.spongepowered.common.data.processor.data.block.PlantDataProcessor;
 import org.spongepowered.common.data.processor.data.block.PortionDataProcessor;
+import org.spongepowered.common.data.processor.data.block.PoweredDataProcessor;
 import org.spongepowered.common.data.processor.data.block.PrismarineDataProcessor;
 import org.spongepowered.common.data.processor.data.block.QuartzDataProcessor;
 import org.spongepowered.common.data.processor.data.block.RailDirectionDataProcessor;
+import org.spongepowered.common.data.processor.data.block.RedstonePoweredDataProcessor;
 import org.spongepowered.common.data.processor.data.block.SandDataProcessor;
 import org.spongepowered.common.data.processor.data.block.SandstoneDataProcessor;
+import org.spongepowered.common.data.processor.data.block.SeamlessDataProcessor;
 import org.spongepowered.common.data.processor.data.block.ShrubDataProcessor;
 import org.spongepowered.common.data.processor.data.block.SlabDataProcessor;
+import org.spongepowered.common.data.processor.data.block.SnowedDataProcessor;
 import org.spongepowered.common.data.processor.data.block.StairShapeDataProcessor;
 import org.spongepowered.common.data.processor.data.block.StoneDataProcessor;
+import org.spongepowered.common.data.processor.data.block.SuspendedDataProcessor;
 import org.spongepowered.common.data.processor.data.block.TreeDataProcessor;
 import org.spongepowered.common.data.processor.data.block.WallDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.AgentDataProcessor;
@@ -491,30 +586,53 @@ import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedP
 import org.spongepowered.common.data.processor.value.DisplayNameVisibleValueProcessor;
 import org.spongepowered.common.data.processor.value.ItemEnchantmentValueProcessor;
 import org.spongepowered.common.data.processor.value.RepresentedItemValueProcessor;
+import org.spongepowered.common.data.processor.value.block.AttachedValueProcessor;
+import org.spongepowered.common.data.processor.value.block.AxisValueProcessor;
 import org.spongepowered.common.data.processor.value.block.BigMushroomTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.BrickTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.ComparatorTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.block.ConnectedDirectionsValueProcessor;
+import org.spongepowered.common.data.processor.value.block.ConnectedEastValueProcessor;
+import org.spongepowered.common.data.processor.value.block.ConnectedNorthValueProcessor;
+import org.spongepowered.common.data.processor.value.block.ConnectedSouthValueProcessor;
+import org.spongepowered.common.data.processor.value.block.ConnectedWestValueProcessor;
+import org.spongepowered.common.data.processor.value.block.DecayableValueProcessor;
+import org.spongepowered.common.data.processor.value.block.DelayValueProcessor;
+import org.spongepowered.common.data.processor.value.block.DirectionValueProcessor;
 import org.spongepowered.common.data.processor.value.block.DirtTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.block.DisarmedValueProcessor;
 import org.spongepowered.common.data.processor.value.block.DisguisedBlockTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.DoublePlantTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.block.ExtendedValueProcessor;
+import org.spongepowered.common.data.processor.value.block.GrowthStageValueProcessor;
 import org.spongepowered.common.data.processor.value.block.HingePositionValueProcessor;
+import org.spongepowered.common.data.processor.value.block.InWallValueProcessor;
+import org.spongepowered.common.data.processor.value.block.LayerValueProcessor;
+import org.spongepowered.common.data.processor.value.block.OccupiedValueProcessor;
+import org.spongepowered.common.data.processor.value.block.OpenValueProcessor;
 import org.spongepowered.common.data.processor.value.block.PistonTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.PlantTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.PortionTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.block.PowerValueProcessor;
+import org.spongepowered.common.data.processor.value.block.PoweredValueProcessor;
 import org.spongepowered.common.data.processor.value.block.PrismarineTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.QuartzTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.RailDirectionValueProcessor;
 import org.spongepowered.common.data.processor.value.block.SandTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.SandstoneTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.block.SeamlessValueProcessor;
+import org.spongepowered.common.data.processor.value.block.ShouldDropValueProcessor;
 import org.spongepowered.common.data.processor.value.block.ShrubTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.SlabTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.block.SnowedValueProcessor;
 import org.spongepowered.common.data.processor.value.block.StairShapeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.StoneTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.block.SuspendedValueProcessor;
 import org.spongepowered.common.data.processor.value.block.TreeTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.block.WallTypeValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.ArtValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.BaseVehicleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CanFlyValueProcessor;
-import org.spongepowered.common.data.processor.value.entity.ArtValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.CareerValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ChargedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ElderValueProcessor;
@@ -923,7 +1041,84 @@ public class SpongeSerializationRegistry {
         final BrewingStandDataProcessor brewingStandDataProcessor = new BrewingStandDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(BrewingStandData.class, SpongeBrewingStandData.class, ImmutableBrewingStandData.class,
                 ImmutableSpongeBrewingStandData.class, brewingStandDataProcessor);
+        
+        final AttachedDataProcessor attachedDataProcessor = new AttachedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(AttachedData.class, SpongeAttachedData.class, ImmutableAttachedData.class,
+                ImmutableSpongeAttachedData.class, attachedDataProcessor);
+        
+        final ConnectedDirectionDataProcessor connectedDirectionDataProcessor = new ConnectedDirectionDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class, ImmutableConnectedDirectionData.class,
+                ImmutableSpongeConnectedDirectionData.class, connectedDirectionDataProcessor);
+        
+        final DirectionalDataProcessor directionalDataProcessor = new DirectionalDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
+                ImmutableSpongeDirectionalData.class, directionalDataProcessor);
+        
+        final DisarmedDataProcessor disarmedDataProcessor = new DisarmedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(DisarmedData.class, SpongeDisarmedData.class, ImmutableDisarmedData.class,
+                ImmutableSpongeDisarmedData.class, disarmedDataProcessor);
+        
+        final DropDataProcessor dropDataProcessor = new DropDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(DropData.class, SpongeDropData.class, ImmutableDropData.class,
+                ImmutableSpongeDropData.class, dropDataProcessor);
+        
+        final ExtendedDataProcessor extendedDataProcessor = new ExtendedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ExtendedData.class, SpongeExtendedData.class, ImmutableExtendedData.class,
+                ImmutableSpongeExtendedData.class, extendedDataProcessor);
+        
+        final GrowthDataProcessor growthDataProcessor = new GrowthDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(GrowthData.class, SpongeGrowthData.class, ImmutableGrowthData.class,
+                ImmutableSpongeGrowthData.class, growthDataProcessor);
+        
+        final OpenDataProcessor openDataProcessor = new OpenDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(OpenData.class, SpongeOpenData.class, ImmutableOpenData.class,
+                ImmutableSpongeOpenData.class, openDataProcessor);
+        
+        final PoweredDataProcessor poweredDataProcessor = new PoweredDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(PoweredData.class, SpongePoweredData.class, ImmutablePoweredData.class,
+                ImmutableSpongePoweredData.class, poweredDataProcessor);
+        
+        final RedstonePoweredDataProcessor redstonePoweredDataProcessor = new RedstonePoweredDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(RedstonePoweredData.class, SpongeRedstonePoweredData.class,
+                ImmutableRedstonePoweredData.class, ImmutableSpongeRedstonePoweredData.class,
+                redstonePoweredDataProcessor);
+        
+        final SeamlessDataProcessor seamlessDataProcessor = new SeamlessDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(SeamlessData.class, SpongeSeamlessData.class, ImmutableSeamlessData.class,
+                ImmutableSpongeSeamlessData.class, seamlessDataProcessor);
+        
+        final SnowedDataProcessor snowedDataProcessor = new SnowedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(SnowedData.class, SpongeSnowedData.class, ImmutableSnowedData.class,
+                ImmutableSpongeSnowedData.class, snowedDataProcessor);
+        
+        final SuspendedDataProcessor suspendedDataProcessor = new SuspendedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(SuspendedData.class, SpongeSuspendedData.class, ImmutableSuspendedData.class,
+                ImmutableSpongeSuspendedData.class, suspendedDataProcessor);
+        
+        final OccupiedDataProcessor occupiedDataProcessor = new OccupiedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(OccupiedData.class, SpongeOccupiedData.class, ImmutableOccupiedData.class,
+                ImmutableSpongeOccupiedData.class, occupiedDataProcessor);
+        
+        final InWallDataProcessor inWallDataProcessor = new InWallDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(InWallData.class, SpongeInWallData.class, ImmutableInWallData.class,
+                ImmutableSpongeInWallData.class, inWallDataProcessor);
+        
+        final LayeredDataProcessor layeredDataProcessor = new LayeredDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(LayeredData.class, SpongeLayeredData.class, ImmutableLayeredData.class,
+                ImmutableSpongeLayeredData.class, layeredDataProcessor);
+        
+        final DecayableDataProcessor decayableDataProcessor = new DecayableDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(DecayableData.class, SpongeDecayableData.class, ImmutableDecayableData.class,
+                ImmutableSpongeDecayableData.class, decayableDataProcessor);
 
+        final AxisDataProcessor axisDataProcessor = new AxisDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(AxisData.class, SpongeAxisData.class, ImmutableAxisData.class,
+                ImmutableSpongeAxisData.class, axisDataProcessor);
+        
+        final DelayableDataProcessor delayableDataProcessor = new DelayableDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(DelayableData.class, SpongeDelayableData.class, ImmutableDelayableData.class,
+                ImmutableSpongeDelayableData.class, delayableDataProcessor);
+        
         final AgentDataProcessor agentDataProcessor = new AgentDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
                 ImmutableSpongeAgentData.class, agentDataProcessor);
@@ -1082,6 +1277,29 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new ItemFireworkRocketValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_BLOCK, new RepresentedBlockValueProcessor());
         dataRegistry.registerValueProcessor(Keys.OFFSET, new OffsetValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.ATTACHED, new AttachedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CONNECTED_DIRECTIONS, new ConnectedDirectionsValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CONNECTED_EAST, new ConnectedEastValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CONNECTED_NORTH, new ConnectedNorthValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CONNECTED_SOUTH, new ConnectedSouthValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.CONNECTED_WEST, new ConnectedWestValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.DIRECTION, new DirectionValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.DISARMED, new DisarmedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SHOULD_DROP, new ShouldDropValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.EXTENDED, new ExtendedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.GROWTH_STAGE, new GrowthStageValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.OPEN, new OpenValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.POWERED, new PoweredValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.POWER, new PowerValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SEAMLESS, new SeamlessValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SNOWED, new SnowedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SUSPENDED, new SuspendedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.OCCUPIED, new OccupiedValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.LAYER, new LayerValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.DECAYABLE, new DecayableValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.IN_WALL, new InWallValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.AXIS, new AxisValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.DELAY, new DelayValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

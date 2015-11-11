@@ -40,7 +40,7 @@ public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, La
     }
 
     public SpongeLayeredData(int value) {
-        this(value, 0, Integer.MAX_VALUE);
+        this(value, 0, 8);
     }
 
     public SpongeLayeredData(int value, int lowerBound, int upperBound) {

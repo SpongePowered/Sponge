@@ -32,12 +32,13 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStoneData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
 import java.util.Optional;
@@ -47,12 +48,12 @@ public abstract class MixinBlockSapling extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeTypeFor(blockState), getGrowthData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableStoneData.class.isAssignableFrom(immutable);
+        return ImmutableStoneData.class.isAssignableFrom(immutable) || ImmutableGrowthData.class.isAssignableFrom(immutable);
     }
 
     @Override
@@ -60,6 +61,13 @@ public abstract class MixinBlockSapling extends MixinBlock {
         if (manipulator instanceof ImmutableStoneData) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) (Object) ((ImmutableStoneData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockSapling.TYPE, treeType));
+        }
+        if (manipulator instanceof ImmutableGrowthData) {
+            int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
+            if (growth > 1) {
+                growth = 1;
+            }
+            return Optional.of((BlockState) blockState.withProperty(BlockSapling.STAGE, growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -70,10 +78,21 @@ public abstract class MixinBlockSapling extends MixinBlock {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) value;
             return Optional.of((BlockState) blockState.withProperty(BlockSapling.TYPE, treeType));
         }
+        if (key.equals(Keys.GROWTH_STAGE)) {
+            int growth = (Integer) value;
+            if (growth > 1) {
+                growth = 1;
+            }
+            return Optional.of((BlockState) blockState.withProperty(BlockSapling.STAGE, growth));
+        }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableSpongeTreeData getTreeTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) blockState.getValue(BlockSapling.TYPE));
+    }
+
+    private ImmutableGrowthData getGrowthData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(BlockSapling.STAGE), 0, 1);
     }
 }

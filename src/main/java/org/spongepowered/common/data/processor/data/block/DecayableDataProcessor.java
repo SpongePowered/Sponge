@@ -22,48 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.common;
+package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.data.DataTransactionBuilder;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDecayableData;
+import org.spongepowered.api.data.manipulator.mutable.block.DecayableData;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDecayableData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 
-import java.util.Optional;
 
-public abstract class AbstractBlockOnlyCatalogDataValueProcessor<T extends CatalogType, V extends Value<T>> extends
-        AbstractSpongeValueProcessor<ItemStack, T, V> {
+public class DecayableDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, DecayableData, ImmutableDecayableData> {
 
-    protected AbstractBlockOnlyCatalogDataValueProcessor(Key<V> key) {
-        super(ItemStack.class, key);
+    public DecayableDataProcessor() {
+        super(Keys.DECAYABLE);
     }
 
-    protected boolean supports(ItemStack container) {
+    @Override
+    protected Boolean getDefaultValue() {
         return false;
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    protected boolean set(ItemStack container, T value) {
-        return false;
-    }
-
-    @Override
-    protected Optional<T> getVal(ItemStack container) {
-        return Optional.empty();
-    }
-
-    @Override
-    protected ImmutableValue<T> constructImmutableValue(T value) {
-        return this.constructValue(value).asImmutable();
+    protected DecayableData createManipulator() {
+        return new SpongeDecayableData();
     }
 
 }

@@ -25,45 +25,44 @@
 package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.api.data.value.mutable.Value;
 
 import java.util.Optional;
 
-public abstract class AbstractBlockOnlyCatalogDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-        extends AbstractItemSingleDataProcessor<T, V, M, I> {
+public abstract class AbstractBlockOnlyValueProcessor<T, V extends Value<T>> extends
+        AbstractSpongeValueProcessor<ItemStack, T, V> {
 
-    protected AbstractBlockOnlyCatalogDataProcessor(Key<V> key) {
-        super(input -> false, key);
+    protected AbstractBlockOnlyValueProcessor(Key<V> key) {
+        super(ItemStack.class, key);
     }
 
-    @Override
-    protected boolean set(ItemStack itemStack, T value) {
+    protected boolean supports(ItemStack container) {
         return false;
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionBuilder.failNoData();
     }
 
     @Override
-    protected Optional<T> getVal(ItemStack itemStack) {
+    protected boolean set(ItemStack container, T value) {
+        return false;
+    }
+
+    @Override
+    protected Optional<T> getVal(ItemStack container) {
         return Optional.empty();
     }
 
-    protected abstract T getDefaultValue();
-
     @Override
     protected ImmutableValue<T> constructImmutableValue(T value) {
-        return ImmutableSpongeValue.cachedOf(this.key, getDefaultValue(), value);
+        return this.constructValue(value).asImmutable();
     }
 
 }

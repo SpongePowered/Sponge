@@ -31,9 +31,9 @@ import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePortionData;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyCatalogDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 
-public class PortionDataProcessor extends AbstractBlockOnlyCatalogDataProcessor<PortionType, Value<PortionType>, PortionData, ImmutablePortionData> {
+public class PortionDataProcessor extends AbstractBlockOnlyDataProcessor<PortionType, Value<PortionType>, PortionData, ImmutablePortionData> {
 
     public PortionDataProcessor() {
         super(Keys.PORTION_TYPE);

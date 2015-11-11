@@ -28,18 +28,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.block.BlockLever;
 import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 
 public class DirectionResolver {
 
     public static EnumFacing getFor(Direction direction) {
         switch (checkNotNull(direction)) {
-            case UP: return EnumFacing.UP;
-            case DOWN: return EnumFacing.DOWN;
-            case WEST: return EnumFacing.WEST;
-            case SOUTH: return EnumFacing.SOUTH;
-            case EAST: return EnumFacing.EAST;
-            case NORTH: return EnumFacing.NORTH;
+            case UP:
+                return EnumFacing.UP;
+            case DOWN:
+                return EnumFacing.DOWN;
+            case WEST:
+                return EnumFacing.WEST;
+            case SOUTH:
+                return EnumFacing.SOUTH;
+            case EAST:
+                return EnumFacing.EAST;
+            case NORTH:
+                return EnumFacing.NORTH;
             default:
                 throw new IllegalArgumentException("No matching direction found for direction: " + direction);
         }
@@ -47,12 +54,18 @@ public class DirectionResolver {
 
     public static Direction getFor(EnumFacing facing) {
         switch (checkNotNull(facing)) {
-            case UP: return Direction.UP;
-            case DOWN: return Direction.DOWN;
-            case WEST: return Direction.WEST;
-            case SOUTH: return Direction.SOUTH;
-            case EAST: return Direction.EAST;
-            case NORTH: return Direction.NORTH;
+            case UP:
+                return Direction.UP;
+            case DOWN:
+                return Direction.DOWN;
+            case WEST:
+                return Direction.WEST;
+            case SOUTH:
+                return Direction.SOUTH;
+            case EAST:
+                return Direction.EAST;
+            case NORTH:
+                return Direction.NORTH;
             default:
                 throw new IllegalArgumentException("No matching enum facing direction found for direction: " + facing);
         }
@@ -60,16 +73,43 @@ public class DirectionResolver {
 
     public static Direction getFor(BlockLever.EnumOrientation orientation) {
         switch (orientation) {
-            case DOWN_X : return Direction.DOWN;
-            case EAST : return Direction.EAST;
-            case WEST : return Direction.WEST;
-            case SOUTH : return Direction.SOUTH;
-            case NORTH : return Direction.NORTH;
-            case UP_Z : return Direction.UP;
-            case UP_X : return Direction.UP;
-            case DOWN_Z : return Direction.DOWN;
+            case DOWN_X:
+                return Direction.DOWN;
+            case EAST:
+                return Direction.EAST;
+            case WEST:
+                return Direction.WEST;
+            case SOUTH:
+                return Direction.SOUTH;
+            case NORTH:
+                return Direction.NORTH;
+            case UP_Z:
+                return Direction.UP;
+            case UP_X:
+                return Direction.UP;
+            case DOWN_Z:
+                return Direction.DOWN;
             default:
                 return Direction.NORTH;
+        }
+    }
+
+    public static BlockLever.EnumOrientation getAsOrientation(Direction direction, Axis axis) {
+        switch (direction) {
+            case DOWN:
+                return axis == Axis.Z ? BlockLever.EnumOrientation.DOWN_Z : BlockLever.EnumOrientation.DOWN_X;
+            case EAST:
+                return BlockLever.EnumOrientation.EAST;
+            case WEST:
+                return BlockLever.EnumOrientation.WEST;
+            case SOUTH:
+                return BlockLever.EnumOrientation.SOUTH;
+            case NORTH:
+                return BlockLever.EnumOrientation.NORTH;
+            case UP:
+                return axis == Axis.Z ? BlockLever.EnumOrientation.UP_Z : BlockLever.EnumOrientation.UP_X;
+            default:
+                return BlockLever.EnumOrientation.NORTH;
         }
     }
 

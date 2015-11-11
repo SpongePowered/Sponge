@@ -37,6 +37,10 @@ public class SpongeExtendedData extends AbstractBooleanData<ExtendedData, Immuta
         super(ExtendedData.class, value, Keys.EXTENDED, ImmutableSpongeExtendedData.class, false);
     }
 
+    public SpongeExtendedData() {
+        this(false);
+    }
+
     @Override
     public Value<Boolean> extended() {
         return getValueGetter();
