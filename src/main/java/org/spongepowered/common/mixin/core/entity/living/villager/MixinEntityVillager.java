@@ -29,7 +29,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -39,7 +38,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
@@ -95,12 +93,12 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Override
     public Career getCareer() {
-        List<Career> careers = this.profession.getCareers();
+        List<Career> careers = (List<Career>) this.profession.getCareers();
         if (this.careerId == 0 || this.careerId > careers.size()) {
             this.careerId = new Random().nextInt(careers.size()) + 1;
         }
         this.getRecipes(null);
-        return this.profession.getCareers().get(this.careerId - 1);
+        return careers.get(this.careerId - 1);
     }
 
     @Override
