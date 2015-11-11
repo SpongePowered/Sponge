@@ -102,6 +102,13 @@ public final class DataConstants {
     public static final double DEFAULT_SATURATION = ZERO;
     public static final int DEFAULT_FOOD_LEVEL = 20;
 
+    public static final double DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK = 2D;
+    public static final double DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE = 40;
+    public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
+    public static final boolean DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK = false;
+    public static final boolean DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM = true;
+    public static final int DEFAULT_FALLING_BLOCK_FALL_TIME = 0;
+    public static final boolean DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES = false;
     public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
 
 

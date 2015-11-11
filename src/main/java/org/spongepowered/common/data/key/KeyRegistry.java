@@ -222,6 +222,13 @@ public class KeyRegistry {
         keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
         keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
         keyMap.put("targets", makeSingleKey(Living.class, ListValue.class, of("Targets")));
+        keyMap.put("fall_damage_per_block", makeSingleKey(Double.class, Value.class, of("FallDamagePerBlock")));
+        keyMap.put("max_fall_damage", makeSingleKey(Double.class, Value.class, of("MaxFallDamage")));
+        keyMap.put("falling_block_state", makeSingleKey(BlockState.class, Value.class, of("FallingBlockState")));
+        keyMap.put("can_place_as_block", makeSingleKey(Boolean.class, Value.class, of("CanPlaceAsBlock")));
+        keyMap.put("can_drop_as_item", makeSingleKey(Boolean.class, Value.class, of("CanDropAsItem")));
+        keyMap.put("fall_time", makeSingleKey(Integer.class, Value.class, of("FallTime")));
+        keyMap.put("falling_block_can_hurt_entities", makeSingleKey(Boolean.class, Value.class, of("CanFallingBlockHurtEntities")));
         keyMap.put("represented_block", makeSingleKey(BlockState.class, Value.class, of("RepresentedBlock")));
         keyMap.put("offset", makeSingleKey(Integer.class, Value.class, of("BlockOffset")));
         keyMap.put("attached", makeSingleKey(Boolean.class, Value.class, of("Attached")));
