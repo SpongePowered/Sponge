@@ -29,7 +29,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -40,6 +39,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
@@ -76,7 +76,7 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
 
     @Override
     protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
-        return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, BlockTypes.STONE.getDefaultState(), value);
+        return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.DEFAULT_BLOCK_STATE, value);
     }
 
     @Override

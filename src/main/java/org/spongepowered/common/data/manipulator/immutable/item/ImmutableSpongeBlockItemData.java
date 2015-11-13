@@ -25,13 +25,13 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.BlockUtil;
 
@@ -42,7 +42,7 @@ public class ImmutableSpongeBlockItemData extends AbstractImmutableSingleData<Bl
 
     public ImmutableSpongeBlockItemData(BlockState value) {
         super(ImmutableBlockItemData.class, value, Keys.ITEM_BLOCKSTATE);
-        this.state = new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, BlockTypes.STONE.getDefaultState(), value);
+        this.state = new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.DEFAULT_BLOCK_STATE, value);
     }
 
     @Override
