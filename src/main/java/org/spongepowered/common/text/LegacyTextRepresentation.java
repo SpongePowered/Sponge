@@ -64,7 +64,11 @@ public class LegacyTextRepresentation implements TextRepresentation {
         LOOKUP = new String(lookup);
     }
 
-    private static int findFormat(char format) {
+    public static int getFormattingCount() {
+        return formatting.length;
+    }
+
+    public static int findFormat(char format) {
         int pos = LOOKUP.indexOf(format);
         if (pos == -1) {
             pos = LOOKUP.indexOf(Character.toLowerCase(format));
@@ -73,12 +77,12 @@ public class LegacyTextRepresentation implements TextRepresentation {
         return pos;
     }
 
-    private static boolean isFormat(char format) {
+    public static boolean isFormat(char format) {
         return findFormat(format) != -1;
     }
 
     @Nullable
-    private static EnumChatFormatting getFormat(char format) {
+    public static EnumChatFormatting getFormat(char format) {
         int pos = findFormat(format);
         return pos != -1 ? formatting[pos] : null;
     }
