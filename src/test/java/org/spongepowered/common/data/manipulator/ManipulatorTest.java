@@ -124,7 +124,7 @@ public class ManipulatorTest {
                     e.printStackTrace();
                 }
             }
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -177,7 +177,7 @@ public class ManipulatorTest {
                     e.printStackTrace();
                 }
             }
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
