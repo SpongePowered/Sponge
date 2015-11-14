@@ -71,6 +71,11 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
     }
 
     @Override
+    public ImmutableItemEnchantmentDataBuilder reset() {
+        return this;
+    }
+
+    @Override
     public Optional<ImmutableEnchantmentData> build(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
         SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();

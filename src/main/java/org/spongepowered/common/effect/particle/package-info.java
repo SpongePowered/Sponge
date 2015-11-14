@@ -22,27 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.meta;
-
-import static org.spongepowered.api.data.DataQuery.of;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.item.Enchantment;
-
-public class SpongeEnchantment implements DataSerializable {
-
-    public final Enchantment enchantment;
-    public final int level;
-
-    public SpongeEnchantment(Enchantment enchantment, int level) {
-        this.enchantment = enchantment;
-        this.level = level;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("Enchantment"), this.enchantment.getId()).set(of("Level"), this.level);
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.effect.particle;

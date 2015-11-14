@@ -29,36 +29,36 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockStateBuilder;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
-public class SpongeBlockStateBuilder implements BlockStateBuilder {
+public class SpongeBlockStateBuilder implements BlockState.Builder {
 
     private BlockState blockState;
 
     @Override
-    public BlockStateBuilder blockType(BlockType blockType) {
+    public BlockState.Builder blockType(BlockType blockType) {
         this.blockState = checkNotNull(blockType).getDefaultState();
         return this;
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public BlockStateBuilder add(DataManipulator<?, ?> manipulator) {
+    public BlockState.Builder add(DataManipulator<?, ?> manipulator) {
         return add((ImmutableDataManipulator) manipulator.asImmutable());
     }
 
     @Override
-    public BlockStateBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
+    public BlockState.Builder add(ImmutableDataManipulator<?, ?> manipulator) {
         final Optional<BlockState> optional = this.blockState.with(manipulator);
         if (optional.isPresent()) {
             this.blockState = optional.get();
@@ -67,13 +67,13 @@ public class SpongeBlockStateBuilder implements BlockStateBuilder {
     }
 
     @Override
-    public BlockStateBuilder from(BlockState holder) {
+    public BlockState.Builder from(BlockState holder) {
         this.blockState = holder;
         return this;
     }
 
     @Override
-    public BlockStateBuilder reset() {
+    public SpongeBlockStateBuilder reset() {
         this.blockState = BlockTypes.STONE.getDefaultState();
         return this;
     }

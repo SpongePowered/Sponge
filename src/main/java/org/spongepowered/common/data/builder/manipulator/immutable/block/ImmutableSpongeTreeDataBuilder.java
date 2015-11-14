@@ -61,6 +61,11 @@ public class ImmutableSpongeTreeDataBuilder implements ImmutableDataManipulatorB
     }
 
     @Override
+    public ImmutableDataManipulatorBuilder<ImmutableTreeData, TreeData> reset() {
+        return this;
+    }
+
+    @Override
     public Optional<ImmutableTreeData> build(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.TREE_TYPE.getQuery());
         final String treeTypeId = container.getString(Keys.TREE_TYPE.getQuery()).get();

@@ -29,15 +29,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.potion.Potion;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.potion.PotionEffect;
-import org.spongepowered.api.potion.PotionEffectBuilder;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
-public class SpongePotionBuilder implements PotionEffectBuilder {
+public class SpongePotionBuilder implements PotionEffect.Builder {
 
     private PotionEffectType potionType;
     private int duration;
@@ -49,7 +50,7 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
     }
 
     @Override
-    public PotionEffectBuilder from(PotionEffect holder) {
+    public PotionEffect.Builder from(PotionEffect holder) {
         this.potionType = checkNotNull(holder).getType();
         this.duration = holder.getDuration();
         this.amplifier = holder.getAmplifier();
@@ -60,38 +61,65 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
 
     @Override
     public Optional<PotionEffect> build(DataView container) throws InvalidDataException {
-        return Optional.empty(); // TODO
+        checkNotNull(container);
+        if (!container.contains(DataQueries.POTION_TYPE) || !container.contains(DataQueries.POTION_DURATION)
+            || !container.contains(DataQueries.POTION_AMPLIFIER) || !container.contains(DataQueries.POTION_AMBIANCE)
+            || !container.contains(DataQueries.POTION_SHOWS_PARTICLES)) {
+            throw new InvalidDataException("The container does not have data pertaining to PotionEffect!");
+        }
+        String effectName = container.getString(new DataQuery("PotionType")).get();
+        PotionEffectType potionType = null;
+        for (Potion potion : Potion.potionTypes) {
+            if (potion.getName().equalsIgnoreCase(effectName)) {
+                potionType = (PotionEffectType) potion;
+            }
+        }
+        if (potionType == null) {
+            throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
+        }
+        int duration = container.getInt(new DataQuery("Duration")).get();
+        int amplifier = container.getInt(new DataQuery("Amplifier")).get();
+        boolean ambience = container.getBoolean(new DataQuery("Ambience")).get();
+        boolean particles = container.getBoolean(new DataQuery("ShowsParticles")).get();
+        PotionEffect.Builder builder = new SpongePotionBuilder();
+
+        return Optional.of(builder.potionType(potionType)
+                               .particles(particles)
+                               .duration(duration)
+                               .amplifier(amplifier)
+                               .ambience(ambience)
+                               .build());
     }
 
     @Override
-    public PotionEffectBuilder potionType(PotionEffectType potionEffectType) {
+    public PotionEffect.Builder potionType(PotionEffectType potionEffectType) {
         checkNotNull(potionEffectType, "Potion effect type cannot be null");
         this.potionType = potionEffectType;
         return this;
     }
 
     @Override
-    public PotionEffectBuilder duration(int duration) {
+    public PotionEffect.Builder duration(int duration) {
         checkArgument(duration > 0, "Duration must be greater than 0");
         this.duration = duration;
         return this;
     }
 
     @Override
-    public PotionEffectBuilder amplifier(int amplifier) throws IllegalArgumentException {
+    public PotionEffect.Builder amplifier(int amplifier) throws IllegalArgumentException {
         checkArgument(amplifier >= 0, "Amplifier must not be negative");
         this.amplifier = amplifier;
         return this;
     }
 
     @Override
-    public PotionEffectBuilder ambience(boolean ambience) {
+    public PotionEffect.Builder ambience(boolean ambience) {
         this.isAmbient = ambience;
         return this;
     }
 
     @Override
-    public PotionEffectBuilder particles(boolean showsParticles) {
+    public PotionEffect.Builder particles(boolean showsParticles) {
         this.showParticles = showsParticles;
         return this;
     }
@@ -104,5 +132,15 @@ public class SpongePotionBuilder implements PotionEffectBuilder {
                 this.amplifier,
                 this.isAmbient,
                 this.showParticles);
+    }
+
+    @Override
+    public PotionEffect.Builder reset() {
+        this.potionType = null;
+        this.amplifier = 0;
+        this.duration = 0;
+        this.isAmbient = true;
+        this.showParticles = true;
+        return this;
     }
 }

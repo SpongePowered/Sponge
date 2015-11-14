@@ -37,7 +37,7 @@ import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
-import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
+import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -54,6 +54,7 @@ import org.spongepowered.api.statistic.TeamStatistic;
 import org.spongepowered.api.status.Favicon;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -217,27 +218,10 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T createBuilder(Class<T> builderClass) {
+    public <T extends ResettableBuilder<T>> T createBuilder(Class<T> builderClass) {
         checkNotNull(builderClass, "Builder class was null!");
         checkArgument(this.builderSupplierMap.containsKey(builderClass), "Could not find a Supplier for the provided class: " + builderClass.getCanonicalName());
         return (T) this.builderSupplierMap.get(builderClass).get();
-    }
-
-    @Override
-    public ParticleEffectBuilder createParticleEffectBuilder(ParticleType particle) {
-        checkNotNull(particle);
-
-        if (particle instanceof SpongeParticleType.Colorable) {
-            return new SpongeParticleEffectBuilder.BuilderColorable((SpongeParticleType.Colorable) particle);
-        } else if (particle instanceof SpongeParticleType.Resizable) {
-            return new SpongeParticleEffectBuilder.BuilderResizable((SpongeParticleType.Resizable) particle);
-        } else if (particle instanceof SpongeParticleType.Note) {
-            return new SpongeParticleEffectBuilder.BuilderNote((SpongeParticleType.Note) particle);
-        } else if (particle instanceof SpongeParticleType.Material) {
-            return new SpongeParticleEffectBuilder.BuilderMaterial((SpongeParticleType.Material) particle);
-        } else {
-            return new SpongeParticleEffectBuilder((SpongeParticleType) particle);
-        }
     }
 
     @Override

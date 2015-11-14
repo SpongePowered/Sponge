@@ -77,7 +77,7 @@ public final class SpongeParticleHelper {
         // Note: If the count > 0 -> speed = 0f else if count = 0 -> speed = 1f
 
         if (effect instanceof SpongeParticleEffect.Materialized) {
-            ItemStack item = ((SpongeParticleEffect.Materialized) effect).getItem();
+            ItemStack item = ((SpongeParticleEffect.Materialized) effect).getItem().createStack();
             ItemType itemType = item.getItem();
 
             int id = 0;

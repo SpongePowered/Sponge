@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Banner;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -37,14 +34,13 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
 import java.util.Optional;
 
 public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
-
-    public static final DataQuery BASE = of("Base");
-    public static final DataQuery PATTERNS = of("Patterns");
 
     public SpongeBannerBuilder(Game game) {
         super(game);
@@ -58,14 +54,14 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
             throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
         }
 
-        if (!container.contains(BASE) || !container.contains(PATTERNS)) {
+        if (!container.contains(DataQueries.BASE) || !container.contains(DataQueries.PATTERNS)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
         final SerializationService service = this.game.getServiceManager().provide(SerializationService.class).get();
 
-        final BannerData bannerData = null;
+        final BannerData bannerData = null; // TODO when banner data is implemented.
 
-        String dyeColorId = container.getString(BASE).get();
+        String dyeColorId = container.getString(DataQueries.BASE).get();
         Optional<DyeColor> colorOptional = this.game.getRegistry().getType(DyeColor.class, dyeColorId);
         if (!colorOptional.isPresent()) {
             throw new InvalidDataException("The provided container has an invalid dye color entry!");
@@ -73,7 +69,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         bannerData.baseColor().set(colorOptional.get());
 
         // Now we have to get the patterns list
-        final List<PatternLayer> patternsList = container.getSerializableList(PATTERNS, PatternLayer.class, service).get();
+        final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.PATTERNS, PatternLayer.class, service).get();
         final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
         patternsList.forEach(patternLayers::add);
         bannerData.set(patternLayers);
@@ -81,5 +77,10 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         banner.offer(bannerData);
         ((TileEntityBanner) banner).validate();
         return Optional.of(banner);
+    }
+
+    @Override
+    public SpongeBannerBuilder reset() {
+        return this;
     }
 }

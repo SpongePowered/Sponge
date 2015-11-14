@@ -28,19 +28,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.scoreboard.Team;
-import org.spongepowered.api.scoreboard.TeamBuilder;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class SpongeTeamBuilder implements TeamBuilder {
+public class SpongeTeamBuilder implements Team.Builder {
 
     private String name;
     private Text displayName;
@@ -58,13 +58,13 @@ public class SpongeTeamBuilder implements TeamBuilder {
     }
 
     @Override
-    public TeamBuilder name(String name) {
+    public Team.Builder name(String name) {
         this.name = checkNotNull(name, "Name cannot be null!");
         return this;
     }
 
     @Override
-    public TeamBuilder color(TextColor color) throws IllegalArgumentException {
+    public Team.Builder color(TextColor color) throws IllegalArgumentException {
         checkNotNull(color, "Color cannot be null!");
         if (color == TextColors.RESET) {
             throw new IllegalArgumentException("Color cannot be TextColors.RESET!");
@@ -74,55 +74,55 @@ public class SpongeTeamBuilder implements TeamBuilder {
     }
 
     @Override
-    public TeamBuilder displayName(Text displayName) throws IllegalArgumentException {
+    public Team.Builder displayName(Text displayName) throws IllegalArgumentException {
         this.displayName = checkNotNull(displayName, "DisplayName cannot be null!");
         return this;
     }
 
     @Override
-    public TeamBuilder prefix(Text prefix) {
+    public Team.Builder prefix(Text prefix) {
         this.prefix = checkNotNull(prefix, "Prefix cannot be null!");
         return this;
     }
 
     @Override
-    public TeamBuilder suffix(Text suffix) {
+    public Team.Builder suffix(Text suffix) {
         this.suffix = checkNotNull(suffix, "Suffix cannot be null!");
         return this;
     }
 
     @Override
-    public TeamBuilder allowFriendlyFire(boolean enabled) {
+    public Team.Builder allowFriendlyFire(boolean enabled) {
         this.allowFriendlyFire = enabled;
         return this;
     }
 
     @Override
-    public TeamBuilder canSeeFriendlyInvisibles(boolean enabled) {
+    public Team.Builder canSeeFriendlyInvisibles(boolean enabled) {
         this.showFriendlyInvisibles = enabled;
         return this;
     }
 
     @Override
-    public TeamBuilder nameTagVisibility(Visibility visibility) {
+    public Team.Builder nameTagVisibility(Visibility visibility) {
         this.nameTagVisibility = checkNotNull(visibility, "Visibility cannot be null!");
         return this;
     }
 
     @Override
-    public TeamBuilder deathTextVisibility(Visibility visibility) {
+    public Team.Builder deathTextVisibility(Visibility visibility) {
         this.deathMessageVisibility = checkNotNull(visibility, "Visibility cannot be null!");
         return this;
     }
 
     @Override
-    public TeamBuilder members(Set<Text> members) {
+    public Team.Builder members(Set<Text> members) {
         this.members = checkNotNull(members, "Members cannot be null!");
         return this;
     }
 
     @Override
-    public TeamBuilder reset() {
+    public ResettableBuilder reset() {
         this.name = null;
         this.displayName = null;
         this.color = TextColors.RESET;

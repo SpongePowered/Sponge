@@ -38,10 +38,10 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.DataProcessor;
@@ -56,7 +56,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class SpongeEntitySnapshotBuilder implements EntitySnapshotBuilder {
+public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
 
     UUID worldId;
     Vector3d position;

@@ -41,7 +41,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackBuilder;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -59,7 +58,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class SpongeItemStackBuilder implements ItemStackBuilder {
+public class SpongeItemStackBuilder implements ItemStack.Builder {
     private Set<DataManipulator<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
@@ -72,14 +71,14 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder itemType(ItemType itemType) {
+    public ItemStack.Builder itemType(ItemType itemType) {
         checkNotNull(itemType, "Item type cannot be null");
         this.type = itemType;
         return this;
     }
 
     @Override
-    public ItemStackBuilder quantity(int quantity) throws IllegalArgumentException {
+    public ItemStack.Builder quantity(int quantity) throws IllegalArgumentException {
         checkArgument(quantity > 0, "Quantity must be greater than 0");
         this.quantity = quantity;
         return this;
@@ -87,12 +86,12 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
 
 
     @Override
-    public ItemStackBuilder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
+    public ItemStack.Builder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
         return itemData(itemData.asMutable());
     }
 
     @Override
-    public ItemStackBuilder itemData(final DataManipulator<?, ?> itemData) throws IllegalArgumentException {
+    public ItemStack.Builder itemData(final DataManipulator<?, ?> itemData) throws IllegalArgumentException {
         checkNotNull(itemData, "Must have a non-null item data!");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
         // Validation is required, we can't let devs set block data on a non-block item!
@@ -109,7 +108,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder fromItemStack(ItemStack itemStack) {
+    public ItemStack.Builder fromItemStack(ItemStack itemStack) {
         checkNotNull(itemStack, "Item stack cannot be null");
         this.itemDataSet = new HashSet<>();
         // Assumes the item stack's values don't need to be validated
@@ -130,7 +129,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder fromContainer(DataView container) {
+    public ItemStack.Builder fromContainer(DataView container) {
         checkNotNull(container);
         if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)
             || !container.contains(DataQueries.ITEM_DAMAGE_VALUE)) {
@@ -162,7 +161,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder fromSnapshot(ItemStackSnapshot snapshot) {
+    public ItemStack.Builder fromSnapshot(ItemStackSnapshot snapshot) {
         checkNotNull(snapshot, "The snapshot was null!");
         itemType(snapshot.getType());
         quantity(snapshot.getCount());
@@ -184,7 +183,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder fromBlockSnapshot(BlockSnapshot blockSnapshot) {
+    public ItemStack.Builder fromBlockSnapshot(BlockSnapshot blockSnapshot) {
         checkNotNull(blockSnapshot, "The snapshot was null!");
         reset();
         final Optional<ItemType> itemType = blockSnapshot.getState().getType().getItem();
@@ -207,7 +206,7 @@ public class SpongeItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder reset() {
+    public ItemStack.Builder reset() {
         this.type = null;
         this.quantity = 1;
         this.maxQuantity = 64;

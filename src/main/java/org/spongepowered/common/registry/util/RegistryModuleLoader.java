@@ -42,6 +42,7 @@ import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.CareerRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.ProfessionRegistryModule;
+import org.spongepowered.common.registry.type.SoundRegistryModule;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

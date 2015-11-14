@@ -30,11 +30,11 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.explosion.ExplosionBuilder;
 
-public class SpongeExplosionBuilder implements ExplosionBuilder {
+public class SpongeExplosionBuilder implements Explosion.Builder {
 
     private World world;
     private Explosive sourceExplosive;
@@ -48,43 +48,43 @@ public class SpongeExplosionBuilder implements ExplosionBuilder {
     }
 
     @Override
-    public ExplosionBuilder world(World world) {
+    public Explosion.Builder world(World world) {
         this.world = checkNotNull(world, "world");
         return this;
     }
 
     @Override
-    public ExplosionBuilder sourceExplosive(Explosive source) {
+    public Explosion.Builder sourceExplosive(Explosive source) {
         this.sourceExplosive = source;
         return this;
     }
 
     @Override
-    public ExplosionBuilder radius(float radius) {
+    public Explosion.Builder radius(float radius) {
         this.radius = radius;
         return this;
     }
 
     @Override
-    public ExplosionBuilder origin(Vector3d origin) {
+    public Explosion.Builder origin(Vector3d origin) {
         this.origin = checkNotNull(origin, "origin");
         return this;
     }
 
     @Override
-    public ExplosionBuilder canCauseFire(boolean fire) {
+    public Explosion.Builder canCauseFire(boolean fire) {
         this.canCauseFire = fire;
         return this;
     }
 
     @Override
-    public ExplosionBuilder shouldBreakBlocks(boolean destroy) {
+    public Explosion.Builder shouldBreakBlocks(boolean destroy) {
         this.shouldBreakBlocks = destroy;
         return this;
     }
 
     @Override
-    public ExplosionBuilder reset() {
+    public ResettableBuilder reset() {
         this.world = null;
         this.sourceExplosive = null;
         this.radius = 0;

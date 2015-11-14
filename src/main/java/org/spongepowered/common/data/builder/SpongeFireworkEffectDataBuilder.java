@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.FireworkEffect;
-import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
@@ -67,7 +66,7 @@ public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffe
 
         boolean trails = container.getBoolean(SpongeFireworkEffect.TRAILS).get();
         boolean flickers = container.getBoolean(SpongeFireworkEffect.FLICKERS).get();
-        FireworkEffectBuilder builder = Sponge.getGame().getRegistry().createBuilder(FireworkEffectBuilder.class);
+        FireworkEffect.Builder builder = Sponge.getGame().getRegistry().createBuilder(FireworkEffect.Builder.class);
         return Optional.of(builder.colors(colors)
                 .fades(fades)
                 .flicker(flickers)

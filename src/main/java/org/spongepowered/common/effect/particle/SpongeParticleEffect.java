@@ -25,8 +25,14 @@
 package org.spongepowered.common.effect.particle;
 
 import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.effect.particle.ColoredParticle;
+import org.spongepowered.api.effect.particle.ItemParticle;
+import org.spongepowered.api.effect.particle.NoteParticle;
 import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ResizableParticle;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 import java.awt.Color;
 
@@ -66,7 +72,7 @@ public class SpongeParticleEffect implements ParticleEffect {
         return this.count;
     }
 
-    public static class Colored extends SpongeParticleEffect implements ParticleEffect.Colorable {
+    public static class Colored extends SpongeParticleEffect implements ColoredParticle {
 
         private Color color;
 
@@ -82,7 +88,7 @@ public class SpongeParticleEffect implements ParticleEffect {
 
     }
 
-    public static class Resized extends SpongeParticleEffect implements ParticleEffect.Resizable {
+    public static class Resized extends SpongeParticleEffect implements ResizableParticle {
 
         private float size;
 
@@ -98,7 +104,7 @@ public class SpongeParticleEffect implements ParticleEffect {
 
     }
 
-    public static class Note extends SpongeParticleEffect implements ParticleEffect.Note {
+    public static class Note extends SpongeParticleEffect implements NoteParticle {
 
         private float note;
 
@@ -114,17 +120,17 @@ public class SpongeParticleEffect implements ParticleEffect {
 
     }
 
-    public static class Materialized extends SpongeParticleEffect implements ParticleEffect.Material {
+    public static class Materialized extends SpongeParticleEffect implements ItemParticle {
 
-        private ItemStack item;
+        private ItemStackSnapshot item;
 
-        public Materialized(SpongeParticleType type, Vector3d motion, Vector3d offset, ItemStack item, int count) {
+        public Materialized(SpongeParticleType type, Vector3d motion, Vector3d offset, ItemStackSnapshot item, int count) {
             super(type, motion, offset, count);
             this.item = item;
         }
 
         @Override
-        public ItemStack getItem() {
+        public ItemStackSnapshot getItem() {
             return this.item;
         }
 

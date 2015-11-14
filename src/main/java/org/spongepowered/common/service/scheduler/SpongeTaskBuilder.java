@@ -30,12 +30,11 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.api.service.scheduler.TaskBuilder;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class SpongeTaskBuilder implements TaskBuilder {
+public class SpongeTaskBuilder implements Task.Builder {
 
     private Consumer<Task> consumer;
     private ScheduledTask.TaskSynchronicity syncType;
@@ -50,19 +49,19 @@ public class SpongeTaskBuilder implements TaskBuilder {
     }
 
     @Override
-    public TaskBuilder async() {
+    public Task.Builder async() {
         this.syncType = ScheduledTask.TaskSynchronicity.ASYNCHRONOUS;
         return this;
     }
 
     @Override
-    public TaskBuilder execute(Consumer<Task> executor) {
+    public Task.Builder execute(Consumer<Task> executor) {
         this.consumer = checkNotNull(executor, "executor");
         return this;
     }
 
     @Override
-    public TaskBuilder delay(long delay, TimeUnit unit) {
+    public Task.Builder delay(long delay, TimeUnit unit) {
         checkArgument(delay >= 0, "Delay cannot be negative");
         this.delay = checkNotNull(unit, "unit").toMillis(delay);
         this.delayIsTicks = false;
@@ -70,7 +69,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     }
 
     @Override
-    public TaskBuilder delayTicks(long delay) {
+    public Task.Builder delayTicks(long delay) {
         checkArgument(delay >= 0, "Delay cannot be negative");
         this.delay = delay;
         this.delayIsTicks = true;
@@ -78,7 +77,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     }
 
     @Override
-    public TaskBuilder interval(long interval, TimeUnit unit) {
+    public Task.Builder interval(long interval, TimeUnit unit) {
         checkArgument(interval >= 0, "Interval cannot be negative");
         this.interval = checkNotNull(unit, "unit").toMillis(interval);
         this.intervalIsTicks = false;
@@ -86,7 +85,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     }
 
     @Override
-    public TaskBuilder intervalTicks(long interval) {
+    public Task.Builder intervalTicks(long interval) {
         checkArgument(interval >= 0, "Interval cannot be negative");
         this.interval = interval;
         this.intervalIsTicks = true;
@@ -94,7 +93,7 @@ public class SpongeTaskBuilder implements TaskBuilder {
     }
 
     @Override
-    public TaskBuilder name(String name) {
+    public Task.Builder name(String name) {
         checkArgument(checkNotNull(name, "name").length() > 0, "Name cannot be empty");
         this.name = name;
         return this;
@@ -124,4 +123,14 @@ public class SpongeTaskBuilder implements TaskBuilder {
         return task;
     }
 
+    @Override
+    public Task.Builder reset() {
+        this.syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
+        this.consumer = null;
+        this.interval = 0;
+        this.delay = 0;
+        this.delayIsTicks = false;
+        this.name = null;
+        return this;
+    }
 }

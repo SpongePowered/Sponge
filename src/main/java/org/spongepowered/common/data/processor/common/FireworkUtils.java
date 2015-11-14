@@ -35,7 +35,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.item.FireworkEffect;
-import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -84,7 +83,7 @@ public class FireworkUtils {
     }
 
     public static FireworkEffect fromNbt(NBTTagCompound effectNbt) {
-        FireworkEffectBuilder builder = new SpongeFireworkEffectBuilder();
+        FireworkEffect.Builder builder = new SpongeFireworkEffectBuilder();
         if(effectNbt.hasKey("Flicker")) {
             builder.flicker(effectNbt.getBoolean("Flicker"));
         }

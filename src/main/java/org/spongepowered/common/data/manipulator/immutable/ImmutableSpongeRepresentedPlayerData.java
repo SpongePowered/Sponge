@@ -26,7 +26,6 @@ package org.spongepowered.common.data.manipulator.immutable;
 
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
@@ -34,6 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeRepresentedPlayerData
@@ -59,10 +59,10 @@ public class ImmutableSpongeRepresentedPlayerData
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer();
         if (this.value.getUniqueId() != null) {
-            container.set(this.usedKey.getQuery().then(DataQuery.of("Id")), this.value.getUniqueId().toString());
+            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_ID), this.value.getUniqueId().toString());
         }
         if (this.value.getName() != null) {
-            container.set(this.usedKey.getQuery().then(DataQuery.of("Name")), this.value.getName());
+            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_NAME), this.value.getName());
         }
         return container;
     }

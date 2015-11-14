@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.potion;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -34,8 +32,10 @@ import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
 
 @NonnullByDefault
 @Mixin(net.minecraft.potion.PotionEffect.class)
@@ -53,10 +53,12 @@ public abstract class MixinPotionEffect implements PotionEffect {
         return (PotionEffectType) Potion.potionTypes[getPotionID()];
     }
 
+    @Intrinsic
     public int potionEffect$getDuration() {
         return this.duration;
     }
 
+    @Intrinsic
     public int potionEffect$getAmplifier() {
         return this.amplifier;
     }
@@ -74,10 +76,10 @@ public abstract class MixinPotionEffect implements PotionEffect {
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("PotionType"), Potion.potionTypes[getPotionID()].getName())
-                .set(of("Duration"), this.duration)
-                .set(of("Amplifier"), this.amplifier)
-                .set(of("Ambience"), this.isAmbient)
-                .set(of("ShowsParticles"), this.showParticles);
+                .set(DataQueries.POTION_TYPE, Potion.potionTypes[getPotionID()].getName())
+                .set(DataQueries.POTION_DURATION, this.duration)
+                .set(DataQueries.POTION_AMPLIFIER, this.amplifier)
+                .set(DataQueries.POTION_AMBIANCE, this.isAmbient)
+                .set(DataQueries.POTION_SHOWS_PARTICLES, this.showParticles);
     }
 }

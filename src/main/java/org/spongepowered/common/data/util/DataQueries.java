@@ -29,6 +29,50 @@ import static org.spongepowered.api.data.DataQuery.of;
 import org.spongepowered.api.data.DataQuery;
 
 public final class DataQueries {
+
+
+    // BannerPatterns
+    public static final DataQuery BANNER_SHAPE_ID = of("BannerShapeId");
+    public static final DataQuery BANNER_COLOR = of("DyeColor");
+
+    // TileEntity
+    public static final DataQuery TILE_TYPE = of("tileType");
+    public static final DataQuery WORLD = of("world");
+    public static final DataQuery X_POS = of("x");
+    public static final DataQuery Y_POS = of("y");
+    public static final DataQuery Z_POS = of("z");
+
+    // Banners
+    public static final DataQuery BASE = of("Base");
+    public static final DataQuery PATTERNS = of("Patterns");
+
+    // Beacons
+    public static final DataQuery PRIMARY = of("primary");
+    public static final DataQuery SECONDARY = of("secondary");
+
+    // TileEntity names
+    public static final DataQuery CUSTOM_NAME = of("CustomName");
+
+    // RepresentedPlayerData
+    public static final DataQuery GAME_PROFILE_ID = of("Id");
+    public static final DataQuery GAME_PROFILE_NAME = of("Name");
+
+    // Velocity
+    public static final DataQuery VELOCITY_X = of("X");
+    public static final DataQuery VELOCITY_Y = of("Y");
+    public static final DataQuery VELOCITY_Z = of("Z");
+
+    // Enchantments
+    public static final DataQuery ENCHANTMENT_ID = of("Enchantment");
+    public static final DataQuery ENCHANTMENT_LEVEL = of("Level");
+
+    // Potions
+    public static final DataQuery POTION_TYPE = new DataQuery("PotionType");
+    public static final DataQuery POTION_AMPLIFIER = new DataQuery("Amplifier");
+    public static final DataQuery POTION_SHOWS_PARTICLES = new DataQuery("ShowsParticles");
+    public static final DataQuery POTION_AMBIANCE = new DataQuery("Ambiance");
+    public static final DataQuery POTION_DURATION = new DataQuery("Duration");
+
     private DataQueries() {}
 
     // General DataQueries
@@ -66,5 +110,14 @@ public final class DataQueries {
     public static final DataQuery ITEM_COUNT = of("Count");
     public static final DataQuery ITEM_TYPE = of("ItemType");
     public static final DataQuery ITEM_DAMAGE_VALUE = of("UnsafeDamage");
+
+    // TradeOffers
+    public static final DataQuery FIRST_QUERY = of("FirstItem");
+    public static final DataQuery SECOND_QUERY = of("SecondItem");
+    public static final DataQuery BUYING_QUERY = of("BuyingItem");
+    public static final DataQuery EXPERIENCE_QUERY = of("GrantsExperience");
+    public static final DataQuery MAX_QUERY = of("MaxUses");
+    public static final DataQuery USES_QUERY = of("Uses");
+
 
 }

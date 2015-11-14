@@ -33,7 +33,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedEntityCollectionValue;
 import org.spongepowered.api.data.value.mutable.WeightedEntityCollectionValue;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.weighted.WeightedCollection;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
@@ -123,7 +122,7 @@ public class ImmutableSpongeWeightedEntityCollectionValue extends ImmutableSpong
 
     @Override
     public ImmutableWeightedEntityCollectionValue with(EntityType entityType, Collection<DataManipulator<?, ?>> entityData) {
-        EntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
+        EntitySnapshot.Builder builder = new SpongeEntitySnapshotBuilder();
         builder.type(entityType);
         entityData.forEach(builder::add);
         return withElement(new WeightedSerializableObject<>(builder.build(), 1));

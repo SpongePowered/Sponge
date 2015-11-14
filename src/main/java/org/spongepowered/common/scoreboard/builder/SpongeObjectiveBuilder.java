@@ -29,13 +29,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.scoreboard.objective.ObjectiveBuilder;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
-public class SpongeObjectiveBuilder implements ObjectiveBuilder {
+public class SpongeObjectiveBuilder implements Objective.Builder {
 
     private String name;
     private Text displayName;
@@ -47,35 +47,35 @@ public class SpongeObjectiveBuilder implements ObjectiveBuilder {
     }
 
     @Override
-    public ObjectiveBuilder name(String name) {
+    public Objective.Builder name(String name) {
         checkNotNull(name, "Name cannot be null");
         this.name = name;
         return this;
     }
 
     @Override
-    public ObjectiveBuilder displayName(Text displayName) {
+    public Objective.Builder displayName(Text displayName) {
         checkNotNull(displayName, "DisplayName cannot be null");
         this.displayName = displayName;
         return this;
     }
 
     @Override
-    public ObjectiveBuilder criterion(Criterion criterion) {
+    public Objective.Builder criterion(Criterion criterion) {
         checkNotNull(criterion, "Criterion cannot be null");
         this.criterion = criterion;
         return this;
     }
 
     @Override
-    public ObjectiveBuilder objectiveDisplayMode(ObjectiveDisplayMode objectiveDisplayMode) {
+    public Objective.Builder objectiveDisplayMode(ObjectiveDisplayMode objectiveDisplayMode) {
         checkNotNull(objectiveDisplayMode, "ObjectiveDisplayMode cannot be null");
         this.objectiveDisplayMode = objectiveDisplayMode;
         return this;
     }
 
     @Override
-    public ObjectiveBuilder reset() {
+    public ResettableBuilder reset() {
         this.name = null;
         this.displayName = null;
         this.criterion = null;

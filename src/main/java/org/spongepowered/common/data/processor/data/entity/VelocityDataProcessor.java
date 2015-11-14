@@ -41,6 +41,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocity
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Map;
 import java.util.Optional;
@@ -83,9 +84,9 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
     public Optional<VelocityData> fill(DataContainer container, VelocityData velocityData) {
         checkDataExists(container, Keys.VELOCITY.getQuery());
         final DataView internalView = container.getView(Keys.VELOCITY.getQuery()).get();
-        final double x = getData(internalView, SpongeVelocityData.VELOCITY_X, Double.class);
-        final double y = getData(internalView, SpongeVelocityData.VELOCITY_Y, Double.class);
-        final double z = getData(internalView, SpongeVelocityData.VELOCITY_Z, Double.class);
+        final double x = getData(internalView, DataQueries.VELOCITY_X, Double.class);
+        final double y = getData(internalView, DataQueries.VELOCITY_Y, Double.class);
+        final double z = getData(internalView, DataQueries.VELOCITY_Z, Double.class);
         return Optional.of(velocityData.set(Keys.VELOCITY, new Vector3d(x, y, z)));
     }
 

@@ -22,38 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.meta;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.meta.PatternLayer;
-import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.data.util.DataQueries;
-
-public class SpongePatternLayer implements PatternLayer {
-
-    private final BannerPatternShape id;
-    private final DyeColor color;
-
-    public SpongePatternLayer(BannerPatternShape id, DyeColor color) {
-        this.id = id;
-        this.color = color;
-    }
-
-    @Override
-    public BannerPatternShape getShape() {
-        return this.id;
-    }
-
-    @Override
-    public DyeColor getColor() {
-        return this.color;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(DataQueries.BANNER_SHAPE_ID, this.id.getId()).set(DataQueries.BANNER_COLOR, this.color.getName());
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.scoreboard.builder;

@@ -30,26 +30,19 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.village.MerchantRecipe;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.item.merchant.TradeOfferBuilder;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
-public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<TradeOffer> {
-
-    private static final DataQuery FIRST_QUERY = of("FirstItem");
-    private static final DataQuery SECOND_QUERY = of("SecondItem");
-    private static final DataQuery BUYING_QUERY = of("BuyingItem");
-    private static final DataQuery EXPERIENCE_QUERY = of("GrantsExperience");
-    private static final DataQuery MAX_QUERY = of("MaxUses");
-    private static final DataQuery USES_QUERY = of("Uses");
+public class SpongeTradeOfferBuilder implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
     private ItemStack firstItem;
     private ItemStack secondItem;
@@ -63,41 +56,41 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
     }
 
     @Override
-    public TradeOfferBuilder firstBuyingItem(ItemStack item) {
+    public TradeOffer.Builder firstBuyingItem(ItemStack item) {
         checkNotNull(item, "Buying item cannot be null");
         this.firstItem = item;
         return this;
     }
 
     @Override
-    public TradeOfferBuilder secondBuyingItem(ItemStack item) {
+    public TradeOffer.Builder secondBuyingItem(ItemStack item) {
         this.secondItem = item;
         return this;
     }
 
     @Override
-    public TradeOfferBuilder sellingItem(ItemStack item) {
+    public TradeOffer.Builder sellingItem(ItemStack item) {
         checkNotNull(item, "Selling item cannot be null");
         this.sellingItem = item;
         return this;
     }
 
     @Override
-    public TradeOfferBuilder uses(int uses) {
+    public TradeOffer.Builder uses(int uses) {
         checkArgument(uses >= 0, "Usage count cannot be negative");
         this.useCount = uses;
         return this;
     }
 
     @Override
-    public TradeOfferBuilder maxUses(int maxUses) {
+    public TradeOffer.Builder maxUses(int maxUses) {
         checkArgument(maxUses > 0, "Max usage count must be greater than 0");
         this.maxUses = maxUses;
         return this;
     }
 
     @Override
-    public TradeOfferBuilder canGrantExperience(boolean experience) {
+    public TradeOffer.Builder canGrantExperience(boolean experience) {
         this.allowsExperience = experience;
         return this;
     }
@@ -115,7 +108,7 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
     }
 
     @Override
-    public TradeOfferBuilder from(TradeOffer offer) {
+    public TradeOffer.Builder from(TradeOffer offer) {
         checkNotNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
         this.firstItem = offer.getFirstBuyingItem();
@@ -128,7 +121,7 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
     }
 
     @Override
-    public TradeOfferBuilder reset() {
+    public SpongeTradeOfferBuilder reset() {
         this.firstItem = null;
         this.secondItem = null;
         this.sellingItem = null;
@@ -140,31 +133,32 @@ public class SpongeTradeOfferBuilder implements TradeOfferBuilder, DataBuilder<T
 
     @Override
     public Optional<TradeOffer> build(DataView container) throws InvalidDataException {
-        if (!container.contains(FIRST_QUERY) || !container.contains(SECOND_QUERY) || !container.contains(BUYING_QUERY) || !container.contains
-                (EXPERIENCE_QUERY) || !container.contains(MAX_QUERY) || !container.contains(USES_QUERY)) {
+        if (!container.contains(DataQueries.FIRST_QUERY) || !container.contains(DataQueries.SECOND_QUERY) || !container.contains(
+            DataQueries.BUYING_QUERY) || !container.contains
+                (DataQueries.EXPERIENCE_QUERY) || !container.contains(DataQueries.MAX_QUERY) || !container.contains(DataQueries.USES_QUERY)) {
             throw new InvalidDataException("Not enough information for constructing a TradeOffer!!");
         }
         final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
-        final ItemStack firstItem = container.getSerializable(FIRST_QUERY, ItemStack.class, serializationService).get();
-        final ItemStack buyingItem = container.getSerializable(BUYING_QUERY, ItemStack.class, serializationService).get();
+        final ItemStack firstItem = container.getSerializable(DataQueries.FIRST_QUERY, ItemStack.class, serializationService).get();
+        final ItemStack buyingItem = container.getSerializable(DataQueries.BUYING_QUERY, ItemStack.class, serializationService).get();
         final ItemStack secondItem;
         final boolean secondPresent;
-        if (container.getString(SECOND_QUERY).isPresent() && container.getString(SECOND_QUERY).get().equals("none")) {
+        if (container.getString(DataQueries.SECOND_QUERY).isPresent() && container.getString(DataQueries.SECOND_QUERY).get().equals("none")) {
             secondPresent = false;
             secondItem = null;
         } else {
             secondPresent = true;
-            secondItem = container.getSerializable(SECOND_QUERY, ItemStack.class, serializationService).get();
+            secondItem = container.getSerializable(DataQueries.SECOND_QUERY, ItemStack.class, serializationService).get();
         }
-        TradeOfferBuilder builder = new SpongeTradeOfferBuilder();
+        TradeOffer.Builder builder = new SpongeTradeOfferBuilder();
         builder.firstBuyingItem(firstItem);
         if (secondPresent) {
             builder.secondBuyingItem(secondItem);
         }
         builder.sellingItem(buyingItem)
-                .maxUses(container.getInt(MAX_QUERY).get())
-                .uses(container.getInt(USES_QUERY).get())
-                .canGrantExperience(container.getBoolean(EXPERIENCE_QUERY).get());
+                .maxUses(container.getInt(DataQueries.MAX_QUERY).get())
+                .uses(container.getInt(DataQueries.USES_QUERY).get())
+                .canGrantExperience(container.getBoolean(DataQueries.EXPERIENCE_QUERY).get());
         return Optional.of(builder.build());
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Maps;
 import net.minecraft.block.BlockJukebox;
@@ -54,11 +53,11 @@ import net.minecraft.util.BlockPos;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Map;
 import java.util.Optional;
@@ -73,12 +72,6 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
 
     private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
     protected final Game game;
-
-    private static final DataQuery TILE_TYPE = of("tileType");
-    private static final DataQuery WORLD = of("world");
-    private static final DataQuery X_POS = of("x");
-    private static final DataQuery Y_POS = of("y");
-    private static final DataQuery Z_POS = of("z");
 
     protected AbstractTileBuilder(Game game) {
         this.game = game;
@@ -119,17 +112,18 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
     @SuppressWarnings("unchecked")
     public Optional<T> build(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(TILE_TYPE) || !container.contains(WORLD) || !container.contains(X_POS) || !container.contains(Y_POS)
-            || !container.contains(Z_POS)) {
+        if (!container.contains(DataQueries.TILE_TYPE) || !container.contains(DataQueries.WORLD) || !container.contains(DataQueries.X_POS) || !container.contains(
+            DataQueries.Y_POS)
+            || !container.contains(DataQueries.Z_POS)) {
             throw new InvalidDataException("The provided container does not contain the data to make a TileEntity!");
         }
-        String worldName = container.getString(WORLD).get();
+        String worldName = container.getString(DataQueries.WORLD).get();
         Optional<World> worldOptional = this.game.getServer().getWorld(worldName);
         if (!worldOptional.isPresent()) {
             throw new InvalidDataException("The provided container references a world that does not exist!");
         }
 
-        Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.nameToClassMap.get(container.getString(TILE_TYPE).get());
+        Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.nameToClassMap.get(container.getString(DataQueries.TILE_TYPE).get());
         if (clazz == null) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?
             return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC
@@ -141,9 +135,9 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         }
         // Now we should be ready to actually deserialize the TileEntity with the right block.
 
-        final int x = container.getInt(X_POS).get();
-        final int y = container.getInt(Y_POS).get();
-        final int z = container.getInt(Z_POS).get();
+        final int x = container.getInt(DataQueries.X_POS).get();
+        final int y = container.getInt(DataQueries.Y_POS).get();
+        final int z = container.getInt(DataQueries.Z_POS).get();
 
         worldOptional.get().getLocation(x, y, z).setBlockType(type);
         BlockPos pos = new BlockPos(x, y, z);

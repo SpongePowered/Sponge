@@ -31,7 +31,6 @@ import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.api.service.scheduler.TaskBuilder;
 import org.spongepowered.common.Sponge;
 
 import java.util.Iterator;
@@ -59,7 +58,7 @@ public class SpongeScheduler implements SchedulerService {
     }
 
     @Override
-    public TaskBuilder createTaskBuilder() {
+    public Task.Builder createTaskBuilder() {
         return new SpongeTaskBuilder();
     }
 

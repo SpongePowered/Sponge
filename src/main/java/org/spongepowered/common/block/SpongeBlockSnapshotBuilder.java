@@ -34,7 +34,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockSnapshotBuilder;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
@@ -43,6 +42,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -59,7 +59,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class SpongeBlockSnapshotBuilder implements BlockSnapshotBuilder {
+public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
 
     BlockState blockState;
     BlockState extendedState;

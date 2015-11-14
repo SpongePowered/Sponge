@@ -29,7 +29,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
@@ -48,7 +47,7 @@ public class SpongeNextEntityToSpawnValue extends SpongeValue<WeightedSerializab
 
     @Override
     public MobSpawnerData.NextEntityToSpawnValue set(EntityType type, @Nullable Collection<DataManipulator<?, ?>> additionalProperties) {
-        final EntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
+        final EntitySnapshot.Builder builder = new SpongeEntitySnapshotBuilder();
         builder.type(type);
         if (additionalProperties != null) {
             additionalProperties.forEach(builder::add);

@@ -27,33 +27,33 @@ package org.spongepowered.common.scoreboard.builder;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.scoreboard.ScoreboardBuilder;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpongeScoreboardBuilder implements ScoreboardBuilder {
+public class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     private List<Objective> objectives = new ArrayList<>();
     private List<Team> teams = new ArrayList<>();
 
     @Override
-    public ScoreboardBuilder objectives(List<Objective> objectives) {
+    public Scoreboard.Builder objectives(List<Objective> objectives) {
         this.objectives = checkNotNull(objectives, "Objectives cannot be null!");
         return this;
     }
 
     @Override
-    public ScoreboardBuilder teams(List<Team> teams) {
+    public Scoreboard.Builder teams(List<Team> teams) {
         this.teams = checkNotNull(teams, "Teams cannot be null!");
         return this;
     }
 
     @Override
-    public ScoreboardBuilder reset() {
+    public Scoreboard.Builder reset() {
         this.objectives = new ArrayList<>();
         this.teams = new ArrayList<>();
         return this;

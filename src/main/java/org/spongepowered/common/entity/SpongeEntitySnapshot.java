@@ -46,7 +46,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntitySnapshotBuilder;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.cause.Cause;
@@ -263,7 +262,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @SuppressWarnings("rawtypes")
     @Override
     public Optional<EntitySnapshot> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
-        final EntitySnapshotBuilder builder = createBuilder();
+        final Builder builder = createBuilder();
         for (ImmutableDataManipulator manipulator : valueContainers) {
             builder.add(manipulator);
         }

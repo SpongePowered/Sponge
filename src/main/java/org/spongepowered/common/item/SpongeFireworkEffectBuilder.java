@@ -28,14 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.item.FireworkEffect;
-import org.spongepowered.api.item.FireworkEffectBuilder;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 
 import java.awt.Color;
 import java.util.List;
 
-public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
+public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
 
     private boolean trail = false;
     private boolean flicker = false;
@@ -44,26 +43,26 @@ public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
     private FireworkShape shape = FireworkShapes.BALL;
 
     @Override
-    public FireworkEffectBuilder trail(boolean trail) {
+    public SpongeFireworkEffectBuilder trail(boolean trail) {
         this.trail = trail;
         return this;
     }
 
     @Override
-    public FireworkEffectBuilder flicker(boolean flicker) {
+    public SpongeFireworkEffectBuilder flicker(boolean flicker) {
         this.flicker = flicker;
         return this;
     }
 
     @Override
-    public FireworkEffectBuilder color(Color color) {
+    public SpongeFireworkEffectBuilder color(Color color) {
         checkNotNull(color);
         this.colors.add(new Color(color.getRGB()));
         return this;
     }
 
     @Override
-    public FireworkEffectBuilder colors(Color... colors) {
+    public SpongeFireworkEffectBuilder colors(Color... colors) {
         checkNotNull(colors);
         for (Color color : colors) {
             this.colors.add(new Color(color.getRGB()));
@@ -72,7 +71,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
     }
 
     @Override
-    public FireworkEffectBuilder colors(Iterable<Color> colors) {
+    public SpongeFireworkEffectBuilder colors(Iterable<Color> colors) {
         checkNotNull(colors);
         for (Color color : colors) {
             this.colors.add(new Color(color.getRGB()));
@@ -81,14 +80,14 @@ public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
     }
 
     @Override
-    public FireworkEffectBuilder fade(Color color) {
+    public SpongeFireworkEffectBuilder fade(Color color) {
         checkNotNull(color);
         this.fades.add(new Color(color.getRGB()));
         return this;
     }
 
     @Override
-    public FireworkEffectBuilder fades(Color... colors) {
+    public SpongeFireworkEffectBuilder fades(Color... colors) {
         checkNotNull(colors);
         for (Color color : colors) {
             this.fades.add(new Color(color.getRGB()));
@@ -97,7 +96,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
     }
 
     @Override
-    public FireworkEffectBuilder fades(Iterable<Color> colors) {
+    public SpongeFireworkEffectBuilder fades(Iterable<Color> colors) {
         checkNotNull(colors);
         for (Color color : colors) {
             this.fades.add(new Color(color.getRGB()));
@@ -106,7 +105,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
     }
 
     @Override
-    public FireworkEffectBuilder shape(FireworkShape shape) {
+    public SpongeFireworkEffectBuilder shape(FireworkShape shape) {
         this.shape = checkNotNull(shape);
         return this;
     }
@@ -117,7 +116,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffectBuilder {
     }
 
     @Override
-    public FireworkEffectBuilder reset() {
+    public SpongeFireworkEffectBuilder reset() {
         this.trail = false;
         this.flicker = false;
         this.colors = Lists.newArrayList();
