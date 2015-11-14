@@ -124,7 +124,7 @@ public class ManipulatorTest {
                     e.printStackTrace();
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
@@ -177,7 +177,7 @@ public class ManipulatorTest {
                     e.printStackTrace();
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
