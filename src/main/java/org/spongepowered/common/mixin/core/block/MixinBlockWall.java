@@ -87,11 +87,6 @@ public abstract class MixinBlockWall extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.getValue(BlockWall.VARIANT));
     }
 
-    @Override
-    public boolean forceUpdateBlockState() {
-        return true;
-    }
-
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
         final Boolean north = (Boolean) blockState.getValue(BlockWall.NORTH);

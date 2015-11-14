@@ -72,11 +72,6 @@ public abstract class MixinBlockVine extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @Override
-    public boolean forceUpdateBlockState() {
-        return true;
-    }
-
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
         final Boolean north = (Boolean) blockState.getValue(BlockVine.NORTH);
