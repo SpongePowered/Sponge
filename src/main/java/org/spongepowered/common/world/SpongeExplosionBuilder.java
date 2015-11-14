@@ -84,7 +84,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
-    public ResettableBuilder reset() {
+    public SpongeExplosionBuilder reset() {
         this.world = null;
         this.sourceExplosive = null;
         this.radius = 0;

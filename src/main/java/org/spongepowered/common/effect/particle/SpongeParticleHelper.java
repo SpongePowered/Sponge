@@ -34,6 +34,7 @@ import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.data.type.SpongeNotePitch;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -136,7 +137,7 @@ public final class SpongeParticleHelper {
                 f0 = 0.00001f;
             }
         } else if (effect instanceof SpongeParticleEffect.Note) {
-            float note = ((SpongeParticleEffect.Note) effect).getNote();
+            float note = ((SpongeNotePitch) ((SpongeParticleEffect.Note) effect).getNote()).getByteId();
 
             if (note == 0f) {
                 return Lists.<Packet>newArrayList(new S2APacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f,

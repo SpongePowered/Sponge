@@ -122,7 +122,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     }
 
     @Override
-    public ResettableBuilder reset() {
+    public SpongeTeamBuilder reset() {
         this.name = null;
         this.displayName = null;
         this.color = TextColors.RESET;

@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.item.Item;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ColoredParticle;
 import org.spongepowered.api.effect.particle.ItemParticle;
 import org.spongepowered.api.effect.particle.NoteParticle;
@@ -179,11 +180,11 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
 
     public static class BuilderNote extends SpongeParticleEffectBuilder implements NoteParticle.Builder {
 
-        private float note;
+        private NotePitch note;
 
         @Override
-        public BuilderNote note(float note) {
-            checkArgument(note >= 0f && note <= 24f, "The note has to scale between 0 and 24!");
+        public BuilderNote note(NotePitch note) {
+            checkNotNull(note, "The note has to scale between 0 and 24!");
             this.note = note;
             return this;
         }

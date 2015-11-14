@@ -75,7 +75,7 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
     }
 
     @Override
-    public ResettableBuilder reset() {
+    public SpongeObjectiveBuilder reset() {
         this.name = null;
         this.displayName = null;
         this.criterion = null;

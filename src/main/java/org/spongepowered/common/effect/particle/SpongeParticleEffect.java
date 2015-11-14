@@ -25,6 +25,7 @@
 package org.spongepowered.common.effect.particle;
 
 import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ColoredParticle;
 import org.spongepowered.api.effect.particle.ItemParticle;
 import org.spongepowered.api.effect.particle.NoteParticle;
@@ -33,6 +34,8 @@ import org.spongepowered.api.effect.particle.ResizableParticle;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.type.SpongeNotePitch;
 
 import java.awt.Color;
 
@@ -106,15 +109,15 @@ public class SpongeParticleEffect implements ParticleEffect {
 
     public static class Note extends SpongeParticleEffect implements NoteParticle {
 
-        private float note;
+        private NotePitch note;
 
-        public Note(SpongeParticleType type, Vector3d motion, Vector3d offset, float note, int count) {
+        public Note(SpongeParticleType type, Vector3d motion, Vector3d offset, NotePitch note, int count) {
             super(type, motion, offset, count);
             this.note = note;
         }
 
         @Override
-        public float getNote() {
+        public NotePitch getNote() {
             return this.note;
         }
 
