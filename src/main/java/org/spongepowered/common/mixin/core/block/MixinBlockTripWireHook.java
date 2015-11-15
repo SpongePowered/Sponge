@@ -73,7 +73,7 @@ public abstract class MixinBlockTripWireHook extends MixinBlock {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockTripWireHook.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
@@ -91,7 +91,7 @@ public abstract class MixinBlockTripWireHook extends MixinBlock {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockTripWireHook.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);

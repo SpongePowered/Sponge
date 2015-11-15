@@ -76,7 +76,7 @@ public abstract class MixinBlockDoor extends MixinBlock {
             return Optional.of((BlockState) blockState.withProperty(BlockDoor.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
@@ -96,7 +96,7 @@ public abstract class MixinBlockDoor extends MixinBlock {
             return Optional.of((BlockState) blockState.withProperty(BlockDoor.OPEN, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);

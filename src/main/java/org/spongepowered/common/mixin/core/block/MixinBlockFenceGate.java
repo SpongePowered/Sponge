@@ -69,7 +69,7 @@ public abstract class MixinBlockFenceGate extends MixinBlockDirectional {
             return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableInWallData) {
             return Optional.of((BlockState) blockState);
@@ -84,7 +84,7 @@ public abstract class MixinBlockFenceGate extends MixinBlockDirectional {
             return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.OPEN, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.IN_WALL)) {
             return Optional.of((BlockState) blockState);

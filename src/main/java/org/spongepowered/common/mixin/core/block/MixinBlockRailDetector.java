@@ -58,7 +58,7 @@ public abstract class MixinBlockRailDetector extends MixinBlockRailBase {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -66,7 +66,7 @@ public abstract class MixinBlockRailDetector extends MixinBlockRailBase {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.POWERED, (Boolean) value));
         }
         return super.getStateWithValue(blockState, key, value);
     }

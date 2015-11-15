@@ -67,7 +67,8 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlockDirectional
             return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.MODE, comparatorType));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.POWERED, ((ImmutablePoweredData) manipulator).powered()
+                    .get()));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -79,7 +80,7 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlockDirectional
             return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.MODE, comparatorType));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState);
+            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.POWERED, (Boolean) value));
         }
         return super.getStateWithValue(blockState, key, value);
     }
