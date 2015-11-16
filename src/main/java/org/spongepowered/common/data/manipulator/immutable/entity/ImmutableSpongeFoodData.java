@@ -55,9 +55,9 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
         this.foodSaturationLevel = foodSaturationLevel;
         this.foodExhaustionLevel = foodExhaustionLevel;
 
-        foodLevelValue = ImmutableSpongeBoundedValue.cachedOf(Keys.FOOD_LEVEL, 20, this.foodLevel, intComparator(), 0, 20);
+        this.foodLevelValue = ImmutableSpongeBoundedValue.cachedOf(Keys.FOOD_LEVEL, 20, this.foodLevel, intComparator(), 0, 20);
 
-        exhaustionValue = SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
+        this.exhaustionValue = SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
                 .actualValue((double) this.foodExhaustionLevel)
                 .defaultValue(0D)
                 .minimum(0D)
@@ -65,7 +65,7 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
                 .build()
                 .asImmutable();
 
-        saturationValue = SpongeValueBuilder.boundedBuilder(Keys.SATURATION)
+        this.saturationValue = SpongeValueBuilder.boundedBuilder(Keys.SATURATION)
                 .actualValue((double) this.foodSaturationLevel)
                 .defaultValue(5D)
                 .minimum(0D)
@@ -100,17 +100,17 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
 
     @Override
     public ImmutableBoundedValue<Integer> foodLevel() {
-        return foodLevelValue;
+        return this.foodLevelValue;
     }
 
     @Override
     public ImmutableBoundedValue<Double> exhaustion() {
-        return exhaustionValue;
+        return this.exhaustionValue;
     }
 
     @Override
     public ImmutableBoundedValue<Double> saturation() {
-        return saturationValue;
+        return this.saturationValue;
     }
 
     public int getFood() {

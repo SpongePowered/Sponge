@@ -58,7 +58,7 @@ public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implem
         DataContainer container = super.toContainer();
         container.set(of("StoredCommand"), this.getCommandBlockLogic().commandStored);
         container.set(of("SuccessCount"), this.getCommandBlockLogic().successCount);
-        container.set(of("CustomName"), this.getCommandBlockLogic().getCustomName());
+        container.set(of("CustomName"), this.getCommandBlockLogic().getCommandSenderName());
         container.set(of("DoesTrackOutput"), this.getCommandBlockLogic().shouldTrackOutput());
         if (this.getCommandBlockLogic().shouldTrackOutput()) {
         }

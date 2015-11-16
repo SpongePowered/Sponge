@@ -107,13 +107,13 @@ public class ExtentViewTransform {
         }
 
         public int transformX(int x, int y) {
-            Preconditions.checkState(valid, "Cannot access biomes when rotated around an axis that isn't y");
-            return transform.transformX(x, 0, y);
+            Preconditions.checkState(this.valid, "Cannot access biomes when rotated around an axis that isn't y");
+            return this.transform.transformX(x, 0, y);
         }
 
         public int transformZ(int x, int y) {
-            Preconditions.checkState(valid, "Cannot access biomes when rotated around an axis that isn't y");
-            return transform.transformZ(x, 0, y);
+            Preconditions.checkState(this.valid, "Cannot access biomes when rotated around an axis that isn't y");
+            return this.transform.transformZ(x, 0, y);
         }
 
     }

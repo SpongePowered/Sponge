@@ -28,10 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.Sponge;
@@ -39,10 +35,7 @@ import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
-import org.spongepowered.common.registry.type.CareerRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
-import org.spongepowered.common.registry.type.ProfessionRegistryModule;
-import org.spongepowered.common.registry.type.SoundRegistryModule;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

@@ -57,7 +57,7 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
         super(ImmutableWireAttachmentData.class);
         this.wireAttachmentMap = ImmutableMap.copyOf(wireAttachmentMap);
 
-        this.wireAttachmentsValue = new ImmutableSpongeMapValue<Direction, WireAttachmentType>(Keys.WIRE_ATTACHMENTS, wireAttachmentMap);
+        this.wireAttachmentsValue = new ImmutableSpongeMapValue<>(Keys.WIRE_ATTACHMENTS, wireAttachmentMap);
         this.northValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_NORTH, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.NORTH));
         this.southValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_SOUTH, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.SOUTH));
         this.eastValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_EAST, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.EAST));
@@ -67,27 +67,27 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     @Override
     public ImmutableMapValue<Direction, WireAttachmentType> wireAttachments() {
-        return wireAttachmentsValue;
+        return this.wireAttachmentsValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentNorth() {
-        return northValue;
+        return this.northValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentSouth() {
-        return southValue;
+        return this.southValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentEast() {
-        return eastValue;
+        return this.eastValue;
     }
 
     @Override
     public ImmutableValue<WireAttachmentType> wireAttachmentWest() {
-        return westValue;
+        return this.westValue;
     }
 
     @Override
@@ -116,7 +116,7 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
     }
 
     public ImmutableMap<Direction, WireAttachmentType> getWireAttachmentMap() {
-        return wireAttachmentMap;
+        return this.wireAttachmentMap;
     }
 
     private WireAttachmentType getNorth() {

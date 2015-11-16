@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
 
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartRideable;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityMinecartEmpty.class)
 public abstract class MixinEntityMinecartRideable extends MixinEntityMinecart implements MinecartRideable {
 

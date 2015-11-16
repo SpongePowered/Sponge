@@ -33,9 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 

@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityRabbit;
 import org.spongepowered.api.entity.living.animal.Rabbit;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityRabbit.class)
 public abstract class MixinEntityRabbit extends MixinEntityAnimal implements Rabbit {
 

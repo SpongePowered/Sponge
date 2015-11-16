@@ -41,7 +41,6 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.DataProcessor;
@@ -109,6 +108,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public SpongeEntitySnapshotBuilder from(Entity entity) {
         reset();
@@ -127,13 +127,14 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public SpongeEntitySnapshotBuilder add(DataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         return add((ImmutableDataManipulator) manipulator.asImmutable());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public SpongeEntitySnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
@@ -165,6 +166,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
         this.manipulators.add(manipulator);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
         this.entityType = holder.getType();

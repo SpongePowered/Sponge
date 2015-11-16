@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
+import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import net.minecraft.entity.item.EntityPainting;
 
 @Mixin(EntityPainting.EnumArt.class)
 public abstract class MixinArtType implements Art {

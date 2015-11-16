@@ -26,20 +26,16 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntitySpider;
 import org.spongepowered.api.entity.living.monster.Spider;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(EntitySpider.class)
-@Implements(@Interface(iface = Spider.class, prefix = "spider$"))
-public abstract class MixinEntitySpider extends MixinEntityMob {
+public abstract class MixinEntitySpider extends MixinEntityMob implements Spider {
 
     @Shadow public abstract boolean isBesideClimbableBlock();
 
-    public boolean spider$isClimbing() {
+    @Override
+    public boolean isClimbing() {
         return this.isBesideClimbableBlock();
     }
 

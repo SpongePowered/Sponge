@@ -76,7 +76,7 @@ public class TargetLivingDataProcessor extends
 
     @Override
     protected ImmutableValue<List<Living>> constructImmutableValue(List<Living> value) {
-        return new ImmutableSpongeValue(Keys.TARGETS, new ArrayList<>(), value);
+        return new ImmutableSpongeValue<>(Keys.TARGETS, new ArrayList<>(), value);
     }
 
     @Override

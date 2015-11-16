@@ -26,14 +26,9 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityCaveSpider;
 import org.spongepowered.api.entity.living.monster.CaveSpider;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityCaveSpider.class)
-@Implements(@Interface(iface = CaveSpider.class, prefix = "cavespider$"))
-public abstract class MixinEntityCaveSpider extends MixinEntityMob {
+public abstract class MixinEntityCaveSpider extends MixinEntityMob implements CaveSpider {
 
 }

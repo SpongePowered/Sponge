@@ -27,14 +27,11 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 import net.minecraft.entity.monster.EntityGhast;
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
 
 @NonnullByDefault
 @Mixin(EntityGhast.class)
-@Implements(@Interface(iface = Ghast.class, prefix = "ghast$"))
-public abstract class MixinEntityGhast extends MixinEntityLiving {
+public abstract class MixinEntityGhast extends MixinEntityLiving implements Ghast {
 
 }

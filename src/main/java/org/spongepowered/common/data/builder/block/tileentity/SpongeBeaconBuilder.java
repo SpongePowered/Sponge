@@ -33,7 +33,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
 import org.spongepowered.api.potion.PotionEffectType;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;

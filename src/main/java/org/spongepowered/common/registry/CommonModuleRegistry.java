@@ -229,99 +229,103 @@ public final class CommonModuleRegistry {
     }
 
     private void registerDefaultSuppliers(SpongeGameRegistry registry) {
-        registry.registerBuilderSupplier(ItemStack.Builder.class, SpongeItemStackBuilder::new);
-        registry.registerBuilderSupplier(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new);
-        registry.registerBuilderSupplier(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new);
-        registry.registerBuilderSupplier(PotionEffect.Builder.class, SpongePotionBuilder::new);
-        registry.registerBuilderSupplier(Objective.Builder.class, SpongeObjectiveBuilder::new);
-        registry.registerBuilderSupplier(Team.Builder.class, SpongeTeamBuilder::new);
-        registry.registerBuilderSupplier(Scoreboard.Builder.class, SpongeScoreboardBuilder::new);
-        registry.registerBuilderSupplier(Statistic.Builder.class, () -> {throw new UnsupportedOperationException();});
-        registry.registerBuilderSupplier(WorldBuilder.class, SpongeWorldBuilder::new);
-        registry.registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new);
-        registry.registerBuilderSupplier(ValueBuilder.class, SpongeValueBuilder::new);
-        registry.registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new);
-        registry.registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new);
-        registry.registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new);
-        registry.registerBuilderSupplier(BlockDamageSourceBuilder.class, SpongeBlockDamageSourceBuilder::new);
-        registry.registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new);
-        registry.registerBuilderSupplier(ColoredParticle.Builder.class, SpongeParticleEffectBuilder.BuilderColorable::new);
-        registry.registerBuilderSupplier(NoteParticle.Builder.class, SpongeParticleEffectBuilder.BuilderNote::new);
-        registry.registerBuilderSupplier(ItemParticle.Builder.class, SpongeParticleEffectBuilder.BuilderMaterial::new);
-        registry.registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new);
+        registry.registerBuilderSupplier(ItemStack.Builder.class, SpongeItemStackBuilder::new)
+            .registerBuilderSupplier(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new)
+            .registerBuilderSupplier(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new)
+            .registerBuilderSupplier(PotionEffect.Builder.class, SpongePotionBuilder::new)
+            .registerBuilderSupplier(Objective.Builder.class, SpongeObjectiveBuilder::new)
+            .registerBuilderSupplier(Team.Builder.class, SpongeTeamBuilder::new)
+            .registerBuilderSupplier(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
+            .registerBuilderSupplier(Statistic.Builder.class, () -> {
+                throw new UnsupportedOperationException();
+            })
+            .registerBuilderSupplier(WorldBuilder.class, SpongeWorldBuilder::new)
+            .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
+            .registerBuilderSupplier(ValueBuilder.class, SpongeValueBuilder::new)
+            .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
+            .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
+            .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
+            .registerBuilderSupplier(BlockDamageSourceBuilder.class, SpongeBlockDamageSourceBuilder::new)
+            .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
+            .registerBuilderSupplier(ColoredParticle.Builder.class, SpongeParticleEffectBuilder.BuilderColorable::new)
+            .registerBuilderSupplier(NoteParticle.Builder.class, SpongeParticleEffectBuilder.BuilderNote::new)
+            .registerBuilderSupplier(ItemParticle.Builder.class, SpongeParticleEffectBuilder.BuilderMaterial::new)
+            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
-        registry.registerModule(new ArgumentRegistryModule());
-        registry.registerModule(Art.class, new ArtRegistryModule());
-        registry.registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule());
-        registry.registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance());
-        registry.registerModule(BigMushroomType.class, new BigMushroomRegistryModule());
-        registry.registerModule(BiomeType.class, new BiomeTypeRegistryModule());
-        registry.registerModule(BlockType.class, BlockTypeRegistryModule.getInstance());
-        registry.registerModule(BrickType.class, new BrickTypeRegistryModule());
-        registry.registerModule(Career.class, CareerRegistryModule.getInstance());
-        registry.registerModule(new ChatTypeRegistryModule());
-        registry.registerModule(CoalType.class, new CoalTypeRegistryModule());
-        registry.registerModule(ComparatorType.class, new ComparatorTypeRegistryModule());
-        registry.registerModule(CookedFish.class, new CookedFishRegistryModule());
-        registry.registerModule(Criterion.class, new CriteriaRegistryModule());
-        registry.registerModule(new DamageSourceRegistryModule());
-        registry.registerModule(DamageType.class, new DamageTypeRegistryModule());
-        registry.registerModule(Difficulty.class, new DifficultyRegistryModule());
-        registry.registerModule(DimensionType.class, DimensionRegistryModule.getInstance());
-        registry.registerModule(DirtType.class, new DirtTypeRegistryModule());
-        registry.registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule());
-        registry.registerModule(DisplaySlot.class, new DisplaySlotRegistryModule());
-        registry.registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule());
-        registry.registerModule(DyeColor.class, new DyeColorRegistryModule());
-        registry.registerModule(Enchantment.class, new EnchantmentRegistryModule());
-        registry.registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance());
-        registry.registerModule(EntityType.class, EntityTypeRegistryModule.getInstance());
-        registry.registerModule(FireworkShape.class, new FireworkShapeRegistryModule());
-        registry.registerModule(Fish.class, new FishRegistryModule());
-        registry.registerModule(GameMode.class, new GameModeRegistryModule());
-        registry.registerModule(GeneratorType.class, new GeneratorRegistryModule());
-        registry.registerModule(GoldenApple.class, new GoldenAppleRegistryModule());
-        registry.registerModule(Hinge.class, new HingeRegistryModule());
-        registry.registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance());
-        registry.registerModule(ItemType.class, ItemTypeRegistryModule.getInstance());
-        registry.registerModule(LogAxis.class, new LogAxisRegistryModule());
-        registry.registerModule(NotePitch.class, new NotePitchRegistryModule());
-        registry.registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule());
-        registry.registerModule(ParticleType.class, new ParticleRegistryModule());
-        registry.registerModule(PistonType.class, new PistonTypeRegistryModule());
-        registry.registerModule(PlantType.class, new PlantTypeModuleRegistry());
-        registry.registerModule(PopulatorType.class, new PopulatorTypeRegistryModule());
-        registry.registerModule(PortionType.class, new PortionTypeRegistryModule());
-        registry.registerModule(PotionEffectType.class, new PotionEffectTypeRegistryModule());
-        registry.registerModule(PrismarineType.class, new PrismarineRegistryModule());
-        registry.registerModule(Profession.class, ProfessionRegistryModule.getInstance());
-        registry.registerModule(QuartzType.class, new QuartzTypeRegistryModule());
-        registry.registerModule(RailDirection.class, new RailDirectionRegistryModule());
-        registry.registerModule(Rotation.class, new RotationRegistryModule());
-        registry.registerModule(SandstoneType.class, new SandstoneTypeRegistryModule());
-        registry.registerModule(SandType.class, new SandTypeRegistryModule());
-        registry.registerModule(SelectorType.class, new SelectorTypeRegistryModule());
-        registry.registerModule(ShrubType.class, new ShrubTypeRegistryModule());
-        registry.registerModule(SkullType.class, new SkullTypeRegistryModule());
-        registry.registerModule(SlabType.class, new SlabTypeRegistryModule());
-        registry.registerModule(SoundType.class, new SoundRegistryModule());
-        registry.registerModule(StairShape.class, new StairShapeRegistryModule());
-        registry.registerModule(StoneType.class, new StoneTypeRegistryModule());
-        registry.registerModule(TextColor.class, new TextColorsRegistryModule());
-        registry.registerModule(new TextStyleRegistryModule());
-        registry.registerModule(TileEntityType.class, new TileEntityTypeRegistryModule());
-        registry.registerModule(TreeType.class, new TreeTypeRegistryModule());
-        registry.registerModule(Visibility.class, new VisibilityRegistryModule());
-        registry.registerModule(WallType.class, new WallTypeRegistryModule());
-        registry.registerModule(Weather.class, new WeatherRegistryModule());
+        registry.registerModule(new ArgumentRegistryModule())
+            .registerModule(Art.class, new ArtRegistryModule())
+            .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
+            .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
+            .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())
+            .registerModule(BiomeType.class, new BiomeTypeRegistryModule())
+            .registerModule(BlockType.class, BlockTypeRegistryModule.getInstance())
+            .registerModule(BrickType.class, new BrickTypeRegistryModule())
+            .registerModule(Career.class, CareerRegistryModule.getInstance())
+            .registerModule(new ChatTypeRegistryModule())
+            .registerModule(CoalType.class, new CoalTypeRegistryModule())
+            .registerModule(ComparatorType.class, new ComparatorTypeRegistryModule())
+            .registerModule(CookedFish.class, new CookedFishRegistryModule())
+            .registerModule(Criterion.class, new CriteriaRegistryModule())
+            .registerModule(new DamageSourceRegistryModule())
+            .registerModule(DamageType.class, new DamageTypeRegistryModule())
+            .registerModule(Difficulty.class, new DifficultyRegistryModule())
+            .registerModule(DimensionType.class, DimensionRegistryModule.getInstance())
+            .registerModule(DirtType.class, new DirtTypeRegistryModule())
+            .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
+            .registerModule(DisplaySlot.class, new DisplaySlotRegistryModule())
+            .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
+            .registerModule(DyeColor.class, new DyeColorRegistryModule())
+            .registerModule(Enchantment.class, new EnchantmentRegistryModule())
+            .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
+            .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())
+            .registerModule(FireworkShape.class, new FireworkShapeRegistryModule())
+            .registerModule(Fish.class, new FishRegistryModule())
+            .registerModule(GameMode.class, new GameModeRegistryModule())
+            .registerModule(GeneratorType.class, new GeneratorRegistryModule())
+            .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
+            .registerModule(Hinge.class, new HingeRegistryModule())
+            .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
+            .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
+            .registerModule(LogAxis.class, new LogAxisRegistryModule())
+            .registerModule(NotePitch.class, new NotePitchRegistryModule())
+            .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
+            .registerModule(ParticleType.class, new ParticleRegistryModule())
+            .registerModule(PistonType.class, new PistonTypeRegistryModule())
+            .registerModule(PlantType.class, new PlantTypeModuleRegistry())
+            .registerModule(PopulatorType.class, new PopulatorTypeRegistryModule())
+            .registerModule(PortionType.class, new PortionTypeRegistryModule())
+            .registerModule(PotionEffectType.class, new PotionEffectTypeRegistryModule())
+            .registerModule(PrismarineType.class, new PrismarineRegistryModule())
+            .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
+            .registerModule(QuartzType.class, new QuartzTypeRegistryModule())
+            .registerModule(RailDirection.class, new RailDirectionRegistryModule())
+            .registerModule(Rotation.class, new RotationRegistryModule())
+            .registerModule(SandstoneType.class, new SandstoneTypeRegistryModule())
+            .registerModule(SandType.class, new SandTypeRegistryModule())
+            .registerModule(SelectorType.class, new SelectorTypeRegistryModule())
+            .registerModule(ShrubType.class, new ShrubTypeRegistryModule())
+            .registerModule(SkullType.class, new SkullTypeRegistryModule())
+            .registerModule(SlabType.class, new SlabTypeRegistryModule())
+            .registerModule(SoundType.class, new SoundRegistryModule())
+            .registerModule(StairShape.class, new StairShapeRegistryModule())
+            .registerModule(StoneType.class, new StoneTypeRegistryModule())
+            .registerModule(TextColor.class, new TextColorsRegistryModule())
+            .registerModule(new TextStyleRegistryModule())
+            .registerModule(TileEntityType.class, new TileEntityTypeRegistryModule())
+            .registerModule(TreeType.class, new TreeTypeRegistryModule())
+            .registerModule(Visibility.class, new VisibilityRegistryModule())
+            .registerModule(WallType.class, new WallTypeRegistryModule())
+            .registerModule(Weather.class, new WeatherRegistryModule());
     }
 
-    private CommonModuleRegistry() { }
+    private CommonModuleRegistry() {
+    }
 
     private static final class Holder {
+
         private static final CommonModuleRegistry INSTANCE = new CommonModuleRegistry();
     }
 

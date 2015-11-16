@@ -29,6 +29,6 @@ import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EntityAgeable.class)
-public abstract class MixinEntityAgeable extends MixinEntityLiving implements Ageable {
+public abstract class MixinEntityAgeable extends MixinEntityCreature implements Ageable {
 
 }

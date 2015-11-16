@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * So, considering this is the root of the immutable variants of
@@ -191,9 +192,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public int hashCode() {
         List<Object> objects = Lists.newArrayList();
-        for (Supplier<?> function : this.keyFieldGetterMap.values()) {
-            objects.add(function.get());
-        }
+        objects.addAll(this.keyFieldGetterMap.values().stream().map(Supplier::get).collect(Collectors.toList()));
         return Objects.hashCode(this.immutableClass, objects);
     }
 

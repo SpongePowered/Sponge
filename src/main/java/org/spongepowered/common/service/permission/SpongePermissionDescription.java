@@ -101,16 +101,7 @@ class SpongePermissionDescription implements PermissionDescription {
             return false;
         }
         SpongePermissionDescription other = (SpongePermissionDescription) obj;
-        if (!this.id.equals(other.id)) {
-            return false;
-        }
-        if (!this.owner.equals(other.owner)) {
-            return false;
-        }
-        if (!this.description.equals(other.description)) {
-            return false;
-        }
-        return true;
+        return this.id.equals(other.id) && this.owner.equals(other.owner) && this.description.equals(other.description);
     }
 
     @Override

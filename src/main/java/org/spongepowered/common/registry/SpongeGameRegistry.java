@@ -37,8 +37,6 @@ import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.ItemType;
@@ -66,8 +64,6 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
-import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
-import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.registry.type.RotationRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
@@ -143,13 +139,15 @@ public class SpongeGameRegistry implements GameRegistry {
      * @param registryModule
      * @param <T>
      */
-    public <T extends CatalogType> void registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
+    public <T extends CatalogType> SpongeGameRegistry registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
         checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
         this.catalogRegistryMap.put(catalogClass, registryModule);
+        return this;
     }
 
-    public void registerModule(RegistryModule module) {
+    public SpongeGameRegistry registerModule(RegistryModule module) {
         this.registryModules.add(checkNotNull(module));
+        return this;
     }
 
     public <T> SpongeGameRegistry registerBuilderSupplier(Class<T> builderClass, Supplier<? extends T> supplier) {

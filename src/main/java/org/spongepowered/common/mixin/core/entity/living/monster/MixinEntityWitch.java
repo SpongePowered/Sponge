@@ -27,15 +27,12 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 import net.minecraft.entity.monster.EntityWitch;
 import org.spongepowered.api.entity.living.monster.Witch;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
 @Mixin(EntityWitch.class)
-@Implements(@Interface(iface = Witch.class, prefix = "witch$"))
-public abstract class MixinEntityWitch extends MixinEntityMob {
+public abstract class MixinEntityWitch extends MixinEntityMob implements Witch {
 
     @Shadow public abstract boolean getAggressive();
 

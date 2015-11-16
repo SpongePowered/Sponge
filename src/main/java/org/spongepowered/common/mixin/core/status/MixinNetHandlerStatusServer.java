@@ -39,11 +39,8 @@ import org.spongepowered.common.status.SpongeStatusResponse;
 @Mixin(NetHandlerStatusServer.class)
 public abstract class MixinNetHandlerStatusServer {
 
-    @Shadow
-    private MinecraftServer server;
-
-    @Shadow
-    private NetworkManager networkManager;
+    @Shadow private MinecraftServer server;
+    @Shadow private NetworkManager networkManager;
 
     @Overwrite
     public void processServerQuery(C00PacketServerQuery packetIn) {

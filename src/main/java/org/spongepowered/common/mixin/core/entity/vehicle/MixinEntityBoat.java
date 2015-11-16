@@ -28,15 +28,14 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.vehicle.Boat;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-@NonnullByDefault
 @Mixin(EntityBoat.class)
 public abstract class MixinEntityBoat extends MixinEntity implements Boat {
 
@@ -162,26 +161,26 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("maxSpeed")) {
-            this.maxSpeed = compound.getDouble("maxSpeed");
+        if (compound.hasKey(NbtDataUtil.BOAT_MAX_SPEED)) {
+            this.maxSpeed = compound.getDouble(NbtDataUtil.BOAT_MAX_SPEED);
         }
-        if (compound.hasKey("moveOnLand")) {
-            this.moveOnLand = compound.getBoolean("moveOnLand");
+        if (compound.hasKey(NbtDataUtil.BOAT_MOVE_ON_LAND)) {
+            this.moveOnLand = compound.getBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND);
         }
-        if (compound.hasKey("occupiedDecelerationSpeed")) {
-            this.occupiedDecelerationSpeed = compound.getDouble("occupiedDecelerationSpeed");
+        if (compound.hasKey(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED)) {
+            this.occupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED);
         }
-        if (compound.hasKey("unoccupiedDecelerationSpeed")) {
-            this.unoccupiedDecelerationSpeed = compound.getDouble("unoccupiedDecelerationSpeed");
+        if (compound.hasKey(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
+            this.unoccupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED);
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setDouble("maxSpeed", this.maxSpeed);
-        compound.setBoolean("moveOnLand", this.moveOnLand);
-        compound.setDouble("occupiedDecelerationSpeed", this.occupiedDecelerationSpeed);
-        compound.setDouble("unoccupiedDecelerationSpeed", this.unoccupiedDecelerationSpeed);
+        compound.setDouble(NbtDataUtil.BOAT_MAX_SPEED, this.maxSpeed);
+        compound.setBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND, this.moveOnLand);
+        compound.setDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
+        compound.setDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
     }
 }

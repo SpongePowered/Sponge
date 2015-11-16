@@ -312,8 +312,8 @@ public class SpongeScoreboard implements Scoreboard {
             team.setNameSuffix(Texts.legacy().to(spongeTeam.getSuffix()));
             team.setAllowFriendlyFire(spongeTeam.allowFriendlyFire());
             team.setSeeFriendlyInvisiblesEnabled(spongeTeam.canSeeFriendlyInvisibles());
-            team.func_178772_a(((SpongeVisibility) spongeTeam.getNameTagVisibility()).getHandle());
-            team.func_178773_b(((SpongeVisibility) spongeTeam.getDeathTextVisibility()).getHandle());
+            team.setNameTagVisibility(((SpongeVisibility) spongeTeam.getNameTagVisibility()).getHandle());
+            team.setDeathMessageVisibility(((SpongeVisibility) spongeTeam.getDeathTextVisibility()).getHandle());
 
             for (Text member: spongeTeam.getMembers()) {
                 scoreboard.addPlayerToTeam(Texts.legacy().to(member), team.getRegisteredName());

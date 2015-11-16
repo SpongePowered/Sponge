@@ -51,7 +51,6 @@ import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -72,10 +71,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(net.minecraft.item.ItemStack.class)
 public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMixinCustomDataHolder {
 
@@ -343,11 +342,9 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public List<DataManipulator<?, ?>> getCustomManipulators() {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : this.manipulators) {
-            list.add(manipulator.copy());
-        }
-        return list;
+        return this.manipulators.stream()
+            .map(DataManipulator::copy)
+            .collect(Collectors.toList());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

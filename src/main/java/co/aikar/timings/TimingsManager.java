@@ -45,11 +45,11 @@ public final class TimingsManager {
     public static final FullServerTickHandler FULL_SERVER_TICK = new FullServerTickHandler();
     public static final TimingHandler TIMINGS_TICK = SpongeTimingsFactory.ofSafe("Timings Tick", FULL_SERVER_TICK);
     public static final Timing PLUGIN_GROUP_HANDLER = SpongeTimingsFactory.ofSafe("Plugins");
-    public static List<String> hiddenConfigs = new ArrayList<String>();
+    public static List<String> hiddenConfigs = new ArrayList<>();
     public static boolean privacy = false;
 
-    static final Collection<TimingHandler> HANDLERS = new ArrayDeque<TimingHandler>();
-    static final ArrayDeque<TimingHistory.MinuteReport> MINUTE_REPORTS = new ArrayDeque<TimingHistory.MinuteReport>();
+    static final Collection<TimingHandler> HANDLERS = new ArrayDeque<>();
+    static final ArrayDeque<TimingHistory.MinuteReport> MINUTE_REPORTS = new ArrayDeque<>();
 
     static EvictingQueue<TimingHistory> HISTORY = EvictingQueue.create(12);
     static TimingHandler CURRENT;

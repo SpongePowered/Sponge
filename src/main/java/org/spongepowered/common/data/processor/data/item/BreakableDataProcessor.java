@@ -91,7 +91,7 @@ public class BreakableDataProcessor
 
     @Override
     protected ImmutableValue<Set<BlockType>> constructImmutableValue(Set<BlockType> value) {
-        return new ImmutableSpongeSetValue<BlockType>(Keys.BREAKABLE_BLOCK_TYPES, value);
+        return new ImmutableSpongeSetValue<>(Keys.BREAKABLE_BLOCK_TYPES, value);
     }
 
 }

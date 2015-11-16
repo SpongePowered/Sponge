@@ -31,6 +31,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -59,8 +60,7 @@ public abstract class MixinWorldBorder implements WorldBorder {
     @Shadow public abstract long getTimeUntilTarget();
     @Shadow public abstract EnumBorderStatus getStatus();
     @Shadow public abstract double getDamageBuffer();
-    @Shadow
-    public abstract void setDamageBuffer(double buffer);
+    @Shadow public abstract void setDamageBuffer(double buffer);
     @Shadow(prefix = "shadow$")
     public abstract double shadow$getDamageAmount();
     @Shadow(prefix = "shadow$")
@@ -167,10 +167,12 @@ public abstract class MixinWorldBorder implements WorldBorder {
         setDamageBuffer(distance);
     }
 
+    @Intrinsic
     public double border$getDamageAmount() {
         return this.damageAmount;
     }
 
+    @Intrinsic
     public void border$setDamageAmount(double damage) {
         this.damageAmount = damage;
     }

@@ -30,7 +30,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeChargedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeChargedData extends AbstractBooleanData<ChargedData, ImmutableChargedData> implements ChargedData {
 

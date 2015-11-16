@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
@@ -52,7 +51,7 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
         this.fireTicks = fireTicks;
         this.fireDelay = fireDelay;
 
-        fireTicksValue = SpongeValueBuilder.boundedBuilder(Keys.FIRE_TICKS)
+        this.fireTicksValue = SpongeValueBuilder.boundedBuilder(Keys.FIRE_TICKS)
                 .actualValue(this.fireTicks)
                 .defaultValue(1)
                 .minimum(1)
@@ -60,7 +59,7 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
                 .build()
                 .asImmutable();
 
-        fireDelayValue = SpongeValueBuilder.boundedBuilder(Keys.FIRE_DAMAGE_DELAY)
+        this.fireDelayValue = SpongeValueBuilder.boundedBuilder(Keys.FIRE_DAMAGE_DELAY)
                 .actualValue(this.fireDelay)
                 .defaultValue(20)
                 .minimum(0)
@@ -73,12 +72,12 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
 
     @Override
     public ImmutableBoundedValue<Integer> fireTicks() {
-        return fireTicksValue;
+        return this.fireTicksValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> fireDelay() {
-        return fireDelayValue;
+        return this.fireDelayValue;
     }
 
     @Override

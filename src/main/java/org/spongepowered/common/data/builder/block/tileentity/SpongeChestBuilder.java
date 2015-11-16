@@ -27,9 +27,9 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
@@ -47,8 +47,8 @@ public class SpongeChestBuilder extends SpongeLockableBuilder<Chest> {
             throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
         }
         Chest chest = chestOptional.get();
-        if (container.contains(new DataQuery("CustomName"))) {
-            ((TileEntityChest) chest).setCustomName(container.getString(new DataQuery("CustomName")).get());
+        if (container.contains(DataQueries.CUSTOM_NAME)) {
+            ((TileEntityChest) chest).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
         }
         ((TileEntityChest) chest).validate();
         return Optional.of(chest);

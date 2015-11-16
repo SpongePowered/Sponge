@@ -35,26 +35,20 @@ import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.item.IMixinItem;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
 import java.util.Optional;
 
-@NonnullByDefault
 @Mixin(Item.class)
-@Implements(@Interface(iface = ItemType.class, prefix = "item$"))
-public abstract class MixinItem implements ItemType, IMixinItem{
+public abstract class MixinItem implements ItemType, IMixinItem {
 
     public Optional<BlockType> blockType = Optional.empty();
 
@@ -97,7 +91,8 @@ public abstract class MixinItem implements ItemType, IMixinItem{
         return getItemStackLimit();
     }
 
-    public Optional<BlockType> item$getBlock() {
+    @Override
+    public Optional<BlockType> getBlock() {
         return this.blockType;
     }
 

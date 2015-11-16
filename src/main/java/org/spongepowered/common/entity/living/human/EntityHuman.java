@@ -268,7 +268,7 @@ public class EntityHuman extends EntityCreature {
                 entityIn.setFire(j * 4);
             }
 
-            this.func_174815_a(this, entityIn);
+            this.applyEnchantments(this, entityIn);
         }
 
         return flag;
@@ -402,7 +402,7 @@ public class EntityHuman extends EntityCreature {
     @SuppressWarnings("unchecked")
     public S38PacketPlayerListItem createPlayerListPacket(S38PacketPlayerListItem.Action action) {
         S38PacketPlayerListItem packet = new S38PacketPlayerListItem(action);
-        packet.field_179769_b.add(packet.new AddPlayerData(this.fakeProfile, 0, WorldSettings.GameType.NOT_SET, this.getDisplayName()));
+        packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, WorldSettings.GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }
 

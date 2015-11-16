@@ -31,6 +31,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
 @NonnullByDefault
 @Mixin(EntityWitherSkull.class)
@@ -65,8 +66,8 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("damageAmount")) {
-            this.damage = compound.getFloat("damageAmount");
+        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
+            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
             this.damageSet = true;
         }
     }
@@ -75,9 +76,9 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         if (this.damageSet) {
-            compound.setFloat("damageAmount", this.damage);
+            compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
         } else {
-            compound.removeTag("damageAmount");
+            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 

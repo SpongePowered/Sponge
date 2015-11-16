@@ -37,8 +37,7 @@ import org.spongepowered.common.interfaces.IMixinNetworkManager;
 @Mixin(NetHandlerHandshakeTCP.class)
 public abstract class MixinNetHandlerHandshakeTCP {
 
-    @Shadow
-    private NetworkManager networkManager;
+    @Shadow private NetworkManager networkManager;
 
     @Inject(method = "processHandshake", at = @At("HEAD"))
     public void onProcessHandshake(C00Handshake packetIn, CallbackInfo ci) {

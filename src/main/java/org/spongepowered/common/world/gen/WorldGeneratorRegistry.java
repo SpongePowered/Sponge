@@ -34,7 +34,6 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.Sponge;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.util.Collection;
 import java.util.Collections;

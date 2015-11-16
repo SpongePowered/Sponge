@@ -26,25 +26,9 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityBlaze;
 import org.spongepowered.api.entity.living.monster.Blaze;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(EntityBlaze.class)
-@Implements(@Interface(iface = Blaze.class, prefix = "blaze$"))
-public abstract class MixinEntityBlaze extends MixinEntityMob {
+public abstract class MixinEntityBlaze extends MixinEntityMob implements Blaze {
 
-    @Shadow public abstract void func_70844_e(boolean onFire); // setOnFire
-    @Shadow public abstract boolean isBurning();
-
-    public boolean isOnFire() {
-        return isBurning();
-    }
-
-    public void setOnFire(boolean onFire) {
-        this.func_70844_e(onFire);
-    }
 }

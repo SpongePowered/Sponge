@@ -25,8 +25,6 @@
 package org.spongepowered.common.entity.player;
 
 import com.google.common.util.concurrent.Futures;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.play.server.S40PacketDisconnect;

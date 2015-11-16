@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.core.entity.vehicle.minecart;
 
 import net.minecraft.entity.item.EntityMinecartFurnace;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartFurnace;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(EntityMinecartFurnace.class)
 public abstract class MixinEntityMinecartFurnace extends MixinEntityMinecart implements MinecartFurnace {
 

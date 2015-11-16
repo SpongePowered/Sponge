@@ -254,7 +254,7 @@ public class SpongeHooks {
             logWarning("BB Size: {0} > {1} avg edge: {2}", size, maxBoundingBoxSize, aabb.getAverageEdgeLength());
             logWarning("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
             logWarning("Calculated bounding box: {0}", aabb);
-            logWarning("Entity bounding box: {0}", entity.getBoundingBox());
+            logWarning("Entity bounding box: {0}", entity.getCollisionBoundingBox());
             logWarning("Entity: {0}", entity);
             NBTTagCompound tag = new NBTTagCompound();
             entity.writeToNBT(tag);

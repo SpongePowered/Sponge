@@ -35,7 +35,6 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 

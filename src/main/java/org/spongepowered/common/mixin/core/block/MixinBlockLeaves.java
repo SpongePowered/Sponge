@@ -72,11 +72,11 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             target = "Lnet/minecraft/block/BlockLeaves;destroy(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), cancellable = true)
     public void callLeafDecay(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         Location<World> location =
-                new Location<World>((World) worldIn, VecHelper.toVector(pos));
+            new Location<>((World) worldIn, VecHelper.toVector(pos));
         BlockSnapshot blockOriginal = location.createSnapshot();
         BlockSnapshot blockReplacement = blockOriginal.withState(BlockTypes.AIR.getDefaultState());
         ImmutableList<Transaction<BlockSnapshot>> transactions =
-                new ImmutableList.Builder<Transaction<BlockSnapshot>>().add(new Transaction<BlockSnapshot>(blockOriginal, blockReplacement)).build();
+                new ImmutableList.Builder<Transaction<BlockSnapshot>>().add(new Transaction<>(blockOriginal, blockReplacement)).build();
         final ChangeBlockEvent.Decay event = SpongeEventFactory.createChangeBlockEventDecay(Sponge.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
         Sponge.postEvent(event);
         if (event.isCancelled()) {

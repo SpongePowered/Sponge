@@ -77,11 +77,10 @@ import java.util.stream.Collectors;
 // TODO decide if we want selector resolvers as part of the API, ask @kenzierocks for details
 public class SelectorResolver {
 
-    private static final Function<CommandSource, String> GET_NAME =
-        input -> input.getName();
+    private static final Function<CommandSource, String> GET_NAME = CommandSource::getName;
     private static final Vector3d ORIGIN = new Vector3d(0, 0, 0);
     private static final Set<ArgumentType<?>> LOCATION_BASED_ARGUMENTS;
-    private static final Function<Number, Double> TO_DOUBLE = input -> input.doubleValue();
+    private static final Function<Number, Double> TO_DOUBLE = Number::doubleValue;
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
 
     static {

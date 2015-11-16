@@ -38,22 +38,13 @@ import java.util.List;
 @Mixin(BiomeGenBase.class)
 public abstract class MixinBiomeGenBase implements BiomeType {
 
-    @Shadow
-    public String biomeName;
+    @Shadow public String biomeName;
+    @Shadow public float temperature;
+    @Shadow public float rainfall;
+    @Shadow public float minHeight;
+    @Shadow public float maxHeight;
 
-    @Shadow
-    public float temperature;
-
-    @Shadow
-    public float rainfall;
-
-    @Shadow
-    public float minHeight;
-
-    @Shadow
-    public float maxHeight;
-
-    private final List<Populator> populators = new ArrayList<Populator>();
+    private final List<Populator> populators = new ArrayList<>();
 
     @Override
     public String getName() {

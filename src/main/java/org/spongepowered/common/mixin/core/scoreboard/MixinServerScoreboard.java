@@ -50,7 +50,7 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
     @Shadow
     MinecraftServer scoreboardMCServer;
 
-    private List<EntityPlayerMP> players = new ArrayList<EntityPlayerMP>();
+    private List<EntityPlayerMP> players = new ArrayList<>();
 
     private void sendToPlayers(Packet packet) {
         for (EntityPlayerMP player: this.players) {
@@ -65,7 +65,7 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
     }
 
     void sendScoreboard(EntityPlayerMP player) {
-        this.scoreboardMCServer.getConfigurationManager().func_96456_a((ServerScoreboard) (Object) this, player);
+        this.scoreboardMCServer.getConfigurationManager().sendScoreboard((ServerScoreboard) (Object) this, player);
     }
 
     @Override
@@ -151,7 +151,7 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "func_96546_g", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
+    @Redirect(method = "getPlayerIterator", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
             false))
     public Iterator onGetPlayerIterator(List list) {
         return this.players.iterator();

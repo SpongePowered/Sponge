@@ -67,13 +67,25 @@ public final class DataQueries {
     public static final DataQuery ENCHANTMENT_LEVEL = of("Level");
 
     // Potions
-    public static final DataQuery POTION_TYPE = new DataQuery("PotionType");
-    public static final DataQuery POTION_AMPLIFIER = new DataQuery("Amplifier");
-    public static final DataQuery POTION_SHOWS_PARTICLES = new DataQuery("ShowsParticles");
-    public static final DataQuery POTION_AMBIANCE = new DataQuery("Ambiance");
-    public static final DataQuery POTION_DURATION = new DataQuery("Duration");
+    public static final DataQuery POTION_TYPE = of("PotionType");
+    public static final DataQuery POTION_AMPLIFIER = of("Amplifier");
+    public static final DataQuery POTION_SHOWS_PARTICLES = of("ShowsParticles");
+    public static final DataQuery POTION_AMBIANCE = of("Ambiance");
+    public static final DataQuery POTION_DURATION = of("Duration");
 
-    private DataQueries() {}
+    // TradeOffers
+    public static final DataQuery TRADE_OFFER_FIRST_ITEM = of("FirstItem");
+    public static final DataQuery TRADE_OFFER_SECOND_ITEM = of("SecondItem");
+    public static final DataQuery TRADE_OFFER_BUYING_ITEM = of("BuyingItem");
+    public static final DataQuery TRADE_OFFER_GRANTS_EXPERIENCE = of("GrantsExperience");
+    public static final DataQuery TRADE_OFFER_MAX_USES = of("MaxUses");
+    public static final DataQuery TRADE_OFFER_USES = of("Uses");
+
+    // Commands
+    public static final DataQuery SUCCESS_COUNT = of("SuccessCount");
+    public static final DataQuery DOES_TRACK_OUTPUT = of("DoesTrackOutput");
+    public static final DataQuery STORED_COMMAND = of("StoredCommand");
+
 
     // General DataQueries
     public static final DataQuery UNSAFE_NBT = of("UnsafeData");
@@ -119,5 +131,5 @@ public final class DataQueries {
     public static final DataQuery MAX_QUERY = of("MaxUses");
     public static final DataQuery USES_QUERY = of("Uses");
 
-
+    private DataQueries() { }
 }

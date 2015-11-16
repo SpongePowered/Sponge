@@ -25,36 +25,10 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityPotion;
-import net.minecraft.init.Items;
 import org.spongepowered.api.entity.projectile.ThrownPotion;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.potion.PotionEffect;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.List;
-
-@NonnullByDefault
 @Mixin(EntityPotion.class)
-@Implements(@Interface(iface = ThrownPotion.class, prefix = "potion$"))
-public abstract class MixinEntityPotion extends MixinEntityThrowable {
-
-    @Shadow private net.minecraft.item.ItemStack potionDamage;
-
-    public ItemStack getItem() {
-        return (ItemStack) this.potionDamage;
-    }
-
-    public void setItem(ItemStack item) {
-        this.potionDamage = (net.minecraft.item.ItemStack) item;
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<PotionEffect> getPotionEffects() {
-        return Items.potionitem.getEffects(this.potionDamage);
-    }
+public abstract class MixinEntityPotion extends MixinEntityThrowable implements ThrownPotion {
 
 }

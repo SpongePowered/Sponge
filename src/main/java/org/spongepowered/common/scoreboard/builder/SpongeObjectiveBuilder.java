@@ -32,7 +32,6 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 public class SpongeObjectiveBuilder implements Objective.Builder {

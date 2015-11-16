@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 

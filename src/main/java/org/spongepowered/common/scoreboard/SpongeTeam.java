@@ -235,7 +235,7 @@ public class SpongeTeam implements Team {
         this.allowRecursion = false;
         net.minecraft.scoreboard.Team.EnumVisible visible = ((SpongeVisibility) this.nameTagVisibility).getHandle();
         for (ScorePlayerTeam team: this.teams.values()) {
-            team.func_178772_a(visible);
+            team.setNameTagVisibility(visible);
         }
         this.allowRecursion = true;
     }
@@ -255,7 +255,7 @@ public class SpongeTeam implements Team {
         this.allowRecursion = false;
         net.minecraft.scoreboard.Team.EnumVisible visible = ((SpongeVisibility) this.deathMessageVisibility).getHandle();
         for (ScorePlayerTeam team: this.teams.values()) {
-            team.func_178773_b(visible);
+            team.setDeathMessageVisibility(visible);
         }
         this.allowRecursion = true;
     }
@@ -313,8 +313,8 @@ public class SpongeTeam implements Team {
         team.setChatFormat(((SpongeTextColor) this.color).getHandle());
         team.setNamePrefix(Texts.legacy().to(this.prefix));
         team.setNameSuffix(Texts.legacy().to(this.suffix));
-        team.func_178772_a(((SpongeVisibility) this.nameTagVisibility).getHandle());
-        team.func_178773_b(((SpongeVisibility) this.deathMessageVisibility).getHandle());
+        team.setNameTagVisibility(((SpongeVisibility) this.nameTagVisibility).getHandle());
+        team.setDeathMessageVisibility(((SpongeVisibility) this.deathMessageVisibility).getHandle());
 
         for (Text member: this.members) {
             scoreboard.addPlayerToTeam(Texts.legacy().to(member), team.getRegisteredName());

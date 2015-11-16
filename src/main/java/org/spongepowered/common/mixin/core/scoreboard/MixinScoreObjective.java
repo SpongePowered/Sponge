@@ -29,7 +29,6 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,7 +38,6 @@ import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
-@NonnullByDefault
 @Mixin(ScoreObjective.class)
 public abstract class MixinScoreObjective implements IMixinScoreObjective {
 

@@ -28,14 +28,12 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.nbt.NBTTagCompound;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@NonnullByDefault
 @Mixin(EntityItem.class)
 public abstract class MixinEntityItem extends MixinEntity implements Item {
 

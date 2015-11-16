@@ -204,7 +204,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public short getRemainingDelay() {
-        return remainingDelay;
+        return this.remainingDelay;
     }
 
     public void setRemainingDelay(short remainingDelay) {
@@ -212,7 +212,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public short getMinimumDelay() {
-        return minimumDelay;
+        return this.minimumDelay;
     }
 
     public void setMinimumDelay(short minimumDelay) {
@@ -220,7 +220,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public short getMaximumDelay() {
-        return maximumDelay;
+        return this.maximumDelay;
     }
 
     public void setMaximumDelay(short maximumDelay) {
@@ -228,7 +228,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public short getCount() {
-        return count;
+        return this.count;
     }
 
     public void setCount(short count) {
@@ -236,7 +236,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public short getMaximumEntities() {
-        return maximumEntities;
+        return this.maximumEntities;
     }
 
     public void setMaximumEntities(short maximumEntities) {
@@ -244,7 +244,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public short getPlayerRange() {
-        return playerRange;
+        return this.playerRange;
     }
 
     public void setPlayerRange(short playerRange) {
@@ -252,7 +252,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public short getSpawnRange() {
-        return spawnRange;
+        return this.spawnRange;
     }
 
     public void setSpawnRange(short spawnRange) {
@@ -260,7 +260,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public WeightedSerializableObject<EntitySnapshot> getNextEntityToSpawn() {
-        return nextEntityToSpawn;
+        return this.nextEntityToSpawn;
     }
 
     public void setNextEntityToSpawn(WeightedSerializableObject<EntitySnapshot> nextEntityToSpawn) {
@@ -268,7 +268,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public WeightedCollection<WeightedSerializableObject<EntitySnapshot>> getEntities() {
-        return entities;
+        return this.entities;
     }
 
     public void setEntities(WeightedCollection<WeightedSerializableObject<EntitySnapshot>> entities) {

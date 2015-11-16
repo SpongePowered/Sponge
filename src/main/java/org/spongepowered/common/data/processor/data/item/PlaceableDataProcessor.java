@@ -91,7 +91,7 @@ public class PlaceableDataProcessor
 
     @Override
     protected ImmutableValue<Set<BlockType>> constructImmutableValue(Set<BlockType> value) {
-        return new ImmutableSpongeSetValue<BlockType>(Keys.PLACEABLE_BLOCKS, value);
+        return new ImmutableSpongeSetValue<>(Keys.PLACEABLE_BLOCKS, value);
     }
 
 }

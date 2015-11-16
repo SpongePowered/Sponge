@@ -52,7 +52,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.world.Dimension;
@@ -95,34 +94,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@NonnullByDefault
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
-    @Shadow private String motd;
     @Shadow private static Logger logger;
-    @Shadow private ServerConfigurationManager serverConfigManager;
-    @Shadow private int tickCounter;
-    @Shadow public abstract EnumDifficulty getDifficulty();
-    @Shadow public abstract ServerConfigurationManager getConfigurationManager();
-    @Shadow public abstract void addChatMessage(IChatComponent message);
-    @Shadow public abstract boolean isServerInOnlineMode();
-    @Shadow public abstract void initiateShutdown();
-    @Shadow public abstract boolean isServerRunning();
-    @Shadow protected abstract void setUserMessage(String message);
-    @Shadow protected abstract void outputPercentRemaining(String message, int percent);
-    @Shadow protected abstract void clearCurrentTask();
-    @Shadow public WorldServer[] worldServers;
-    @Shadow public Profiler theProfiler;
     @Shadow private boolean enableBonusChest;
     @Shadow private boolean worldIsBeingDeleted;
+    @Shadow private int tickCounter;
+    @Shadow private String motd;
+    @Shadow private ServerConfigurationManager serverConfigManager;
+    @Shadow public WorldServer[] worldServers;
+    @Shadow public Profiler theProfiler;
+    @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
+    @Shadow public abstract void addChatMessage(IChatComponent message);
+    @Shadow public abstract void initiateShutdown();
+    @Shadow public abstract boolean isServerInOnlineMode();
+    @Shadow public abstract boolean isServerRunning();
     @Shadow public abstract boolean canStructuresSpawn();
     @Shadow public abstract boolean isHardcore();
     @Shadow public abstract boolean isSinglePlayer();
     @Shadow public abstract String getFolderName();
+    @Shadow public abstract ServerConfigurationManager getConfigurationManager();
+    @Shadow public abstract EnumDifficulty getDifficulty();
     @Shadow public abstract WorldSettings.GameType getGameType();
-    @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
+    @Shadow protected abstract void setUserMessage(String message);
+    @Shadow protected abstract void outputPercentRemaining(String message, int percent);
+    @Shadow protected abstract void clearCurrentTask();
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
 
@@ -276,7 +274,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.convertMapIfNeeded(overworldFolder);
         this.setUserMessage("menu.loadingLevel");
 
-        List<Integer> idList = new LinkedList<Integer>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
+        List<Integer> idList = new LinkedList<>(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
         idList.remove(Integer.valueOf(0));
         idList.add(0, 0); // load overworld first
         for (int dim : idList) {
@@ -579,7 +577,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Collection<World> getWorlds() {
-        List<World> worlds = new ArrayList<World>();
+        List<World> worlds = new ArrayList<>();
         for (WorldServer worldServer : DimensionManager.getWorlds()) {
             worlds.add((World) worldServer);
         }

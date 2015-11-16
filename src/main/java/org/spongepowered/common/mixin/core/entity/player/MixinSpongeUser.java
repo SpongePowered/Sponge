@@ -65,7 +65,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<CommandSource> getCommandSource() {
         return (Optional) getPlayer();
     }

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.potion;
 
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.potion.PotionEffectType;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -49,6 +48,7 @@ public abstract class MixinPotion {
         return this.name;
     }
 
+    @Intrinsic
     public String potion$getName() {
         return this.name;
     }

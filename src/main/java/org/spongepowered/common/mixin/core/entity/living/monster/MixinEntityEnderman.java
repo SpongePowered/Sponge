@@ -24,42 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.monster.EntityEnderman;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.entity.living.monster.Enderman;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;
-import java.util.Optional;
 
-@NonnullByDefault
 @Mixin(EntityEnderman.class)
-@Implements(@Interface(iface = Enderman.class, prefix = "enderman$"))
-public abstract class MixinEntityEnderman extends MixinEntityMob {
-
-    public Optional<BlockState> getCarriedBlock() {
-        return Optional.ofNullable((BlockState) Block.getStateById(this.dataWatcher.getWatchableObjectShort(16) & 65535));
-    }
-
-    public void setCarriedBlock(BlockState carriedBlock) {
-        this.dataWatcher
-            .updateObject(16, (short) (Block.getStateId(((IBlockState) carriedBlock).getBlock().getDefaultState()) & 65535));
-    }
-
-    public boolean isScreaming() {
-        return this.dataWatcher.getWatchableObjectByte(18) > 0;
-    }
-
-    public void setScreaming(boolean screaming) {
-        this.dataWatcher.updateObject(18, (byte) (screaming ? 1 : 0));
-    }
+public abstract class MixinEntityEnderman extends MixinEntityMob implements Enderman {
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {

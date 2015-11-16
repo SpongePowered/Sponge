@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item.merchant;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -34,6 +32,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
@@ -93,11 +92,11 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-                .set(of("FirstItem"), this.getFirstBuyingItem())
-                .set(of("SecondItem"), this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
-                .set(of("BuyingItem"), this.getItemToBuy())
-                .set(of("GrantsExperience"), this.doesGrantExperience())
-                .set(of("MaxUses"), this.getMaxTradeUses())
-                .set(of("Uses"), this.getUses());
+                .set(DataQueries.TRADE_OFFER_FIRST_ITEM, this.getFirstBuyingItem())
+                .set(DataQueries.TRADE_OFFER_SECOND_ITEM, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
+                .set(DataQueries.TRADE_OFFER_BUYING_ITEM, this.getItemToBuy())
+                .set(DataQueries.TRADE_OFFER_GRANTS_EXPERIENCE, this.doesGrantExperience())
+                .set(DataQueries.TRADE_OFFER_MAX_USES, this.getMaxTradeUses())
+                .set(DataQueries.TRADE_OFFER_USES, this.getUses());
     }
 }

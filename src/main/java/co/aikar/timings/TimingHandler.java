@@ -37,7 +37,7 @@ class TimingHandler implements Timing {
     final String name;
     private final boolean verbose;
 
-    final TIntObjectHashMap<TimingData> children = new LoadingIntMap<TimingData>(TimingData.LOADER);
+    final TIntObjectHashMap<TimingData> children = new LoadingIntMap<>(TimingData.LOADER);
 
     final TimingData record;
     private final TimingHandler groupHandler;

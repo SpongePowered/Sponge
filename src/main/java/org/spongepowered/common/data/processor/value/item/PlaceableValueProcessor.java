@@ -49,12 +49,12 @@ public class PlaceableValueProcessor extends AbstractSpongeValueProcessor<ItemSt
 
     @Override
     public SetValue<BlockType> constructValue(Set<BlockType> defaultValue) {
-        return new SpongeSetValue<BlockType>(Keys.PLACEABLE_BLOCKS, defaultValue);
+        return new SpongeSetValue<>(Keys.PLACEABLE_BLOCKS, defaultValue);
     }
     
     @Override
     public ImmutableSetValue<BlockType> constructImmutableValue(Set<BlockType> defaultValue) {
-        return new ImmutableSpongeSetValue<BlockType>(Keys.PLACEABLE_BLOCKS, defaultValue);
+        return new ImmutableSpongeSetValue<>(Keys.PLACEABLE_BLOCKS, defaultValue);
     }
 
     @Override

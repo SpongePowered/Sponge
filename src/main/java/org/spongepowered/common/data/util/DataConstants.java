@@ -45,7 +45,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.Sponge;
 import org.spongepowered.common.text.SpongeTexts;
 
 /**

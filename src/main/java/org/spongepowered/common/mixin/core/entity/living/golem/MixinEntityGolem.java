@@ -26,15 +26,10 @@ package org.spongepowered.common.mixin.core.entity.living.golem;
 
 import net.minecraft.entity.monster.EntityGolem;
 import org.spongepowered.api.entity.living.golem.Golem;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
 
-@NonnullByDefault
 @Mixin(EntityGolem.class)
-@Implements(@Interface(iface = Golem.class, prefix = "golem$"))
-public abstract class MixinEntityGolem extends MixinEntityLiving {
+public abstract class MixinEntityGolem extends MixinEntityLiving implements Golem {
 
 }

@@ -58,7 +58,7 @@ public interface IMixinEntity {
 
     NBTTagCompound getSpongeData();
 
-    void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators);
+    default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) { }
 
     /**
      * Read extra data (SpongeData) from the entity's NBT tag.

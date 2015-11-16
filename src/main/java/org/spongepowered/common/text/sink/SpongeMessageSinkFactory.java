@@ -34,7 +34,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;

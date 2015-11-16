@@ -39,6 +39,10 @@ public class ImmutableSpongeSlimeData extends AbstractImmutableBoundedComparable
         super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, intComparator(), SpongeSlimeData.class, 0, Integer.MAX_VALUE, 0);
     }
 
+    public ImmutableSpongeSlimeData(int value, int minimum, int maximum, int defaultSize) {
+        super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, intComparator(), SpongeSlimeData.class, minimum, maximum, defaultSize);
+    }
+
     @Override
     public ImmutableValue<Integer> size() {
         return getValueGetter();

@@ -63,10 +63,8 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
     @Shadow private MinecraftServer server;
     @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
 
-    @Shadow
-    abstract public String getConnectionInfo();
-    @Shadow
-    abstract public com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
+    @Shadow public abstract String getConnectionInfo();
+    @Shadow public abstract com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
 
     @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
             + "allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))

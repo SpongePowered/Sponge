@@ -34,7 +34,6 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;

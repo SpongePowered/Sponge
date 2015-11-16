@@ -26,14 +26,9 @@ package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityCow;
 import org.spongepowered.api.entity.living.animal.Cow;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityCow.class)
-@Implements(@Interface(iface = Cow.class, prefix = "cow$"))
-public abstract class MixinEntityCow extends MixinEntityAnimal {
+public abstract class MixinEntityCow extends MixinEntityAnimal implements Cow {
 
 }

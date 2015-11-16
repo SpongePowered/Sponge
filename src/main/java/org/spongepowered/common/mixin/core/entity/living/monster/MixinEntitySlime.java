@@ -25,11 +25,20 @@
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntitySlime;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
 
+import java.util.List;
+
 @Mixin(EntitySlime.class)
 public abstract class MixinEntitySlime extends MixinEntityLiving implements Slime {
 
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(get(SlimeData.class).get());
+    }
 }

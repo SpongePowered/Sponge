@@ -33,7 +33,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 

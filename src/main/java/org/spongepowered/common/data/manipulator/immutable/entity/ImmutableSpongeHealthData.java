@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
-
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -36,7 +34,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHealthData, HealthData> implements ImmutableHealthData {
 
@@ -51,7 +48,7 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
         this.health = health;
         this.maxHealth = maxHealth;
 
-        healthValue = SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+        this.healthValue = SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
                 .actualValue(this.health)
                 .defaultValue(this.maxHealth)
                 .minimum(0D)
@@ -59,7 +56,7 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
                 .build()
                 .asImmutable();
 
-        maxHealthValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_HEALTH)
+        this.maxHealthValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_HEALTH)
                 .actualValue(this.maxHealth)
                 .defaultValue(20D)
                 .minimum(0D)
@@ -72,12 +69,12 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
 
     @Override
     public ImmutableBoundedValue<Double> health() {
-        return healthValue;
+        return this.healthValue;
     }
 
     @Override
     public ImmutableBoundedValue<Double> maxHealth() {
-        return maxHealthValue;
+        return this.maxHealthValue;
     }
 
     @Override

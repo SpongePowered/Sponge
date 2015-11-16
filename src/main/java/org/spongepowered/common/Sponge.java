@@ -37,7 +37,6 @@ import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
-import java.io.File;
 import java.nio.file.Path;
 
 import javax.annotation.Nullable;

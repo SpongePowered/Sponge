@@ -26,14 +26,9 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityMagmaCube;
 import org.spongepowered.api.entity.living.monster.MagmaCube;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityMagmaCube.class)
-@Implements(@Interface(iface = MagmaCube.class, prefix = "magma$"))
-public abstract class MixinEntityMagmaCube extends MixinEntitySlime {
+public abstract class MixinEntityMagmaCube extends MixinEntitySlime implements MagmaCube {
 
 }

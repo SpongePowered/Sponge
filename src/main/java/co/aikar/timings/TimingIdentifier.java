@@ -88,7 +88,7 @@ final class TimingIdentifier {
         final int id = idPool++;
 
         final String name;
-        ArrayDeque<TimingHandler> handlers = new ArrayDeque<TimingHandler>(64);
+        ArrayDeque<TimingHandler> handlers = new ArrayDeque<>(64);
 
         private TimingGroup(String name) {
             this.name = name;

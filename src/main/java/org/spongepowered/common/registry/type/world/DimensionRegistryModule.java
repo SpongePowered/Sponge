@@ -33,7 +33,6 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.configuration.SpongeConfig;
-import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;

@@ -93,7 +93,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private NBTTagCompound spongeNbt;
     private NBTTagList playerUniqueIdNbt;
     private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
-    private List<UUID> pendingUniqueIds = new ArrayList<UUID>();
+    private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
 
     @Shadow private long randomSeed;

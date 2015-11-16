@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.BooleanTraits;
-import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 

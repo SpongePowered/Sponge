@@ -244,19 +244,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean captureTerrainGen = false;
     public boolean captureBlocks = false;
     public boolean restoringBlocks = false;
-    public List<Entity> capturedEntities = new ArrayList<Entity>();
-    public List<Entity> capturedEntityItems = new ArrayList<Entity>();
-    public List<Entity> capturedOnBlockAddedEntities = new ArrayList<Entity>();
-    public List<Entity> capturedOnBlockAddedItems = new ArrayList<Entity>();
+    public List<Entity> capturedEntities = new ArrayList<>();
+    public List<Entity> capturedEntityItems = new ArrayList<>();
+    public List<Entity> capturedOnBlockAddedEntities = new ArrayList<>();
+    public List<Entity> capturedOnBlockAddedItems = new ArrayList<>();
     public BlockSnapshot currentTickBlock = null;
     public BlockSnapshot currentTickOnBlockAdded = null;
     public Entity currentTickEntity = null;
     public TileEntity currentTickTileEntity = null;
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-    public List<BlockSnapshot> capturedSpongeBlockBreaks = new ArrayList<BlockSnapshot>();
-    public List<BlockSnapshot> capturedSpongeBlockPlaces = new ArrayList<BlockSnapshot>();
-    public List<BlockSnapshot> capturedSpongeBlockModifications = new ArrayList<BlockSnapshot>();
-    public List<BlockSnapshot> capturedSpongeBlockFluids = new ArrayList<BlockSnapshot>();
+    public List<BlockSnapshot> capturedSpongeBlockBreaks = new ArrayList<>();
+    public List<BlockSnapshot> capturedSpongeBlockPlaces = new ArrayList<>();
+    public List<BlockSnapshot> capturedSpongeBlockModifications = new ArrayList<>();
+    public List<BlockSnapshot> capturedSpongeBlockFluids = new ArrayList<>();
     public Map<PopulatorType, List<Transaction<BlockSnapshot>>> capturedSpongePopulators = Maps.newHashMap();
     public Map<CaptureType, List<BlockSnapshot>> captureBlockLists = Maps.newHashMap();
     private boolean keepSpawnLoaded;
@@ -399,10 +399,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                     if (populatorType != null) {
                         if (this.capturedSpongePopulators.get(populatorType) == null) {
-                            this.capturedSpongePopulators.put(populatorType, new ArrayList<Transaction<BlockSnapshot>>());
+                            this.capturedSpongePopulators.put(populatorType, new ArrayList<>());
                         }
 
-                        transaction = new Transaction<BlockSnapshot>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
+                        transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
                         this.capturedSpongePopulators.get(populatorType).add(transaction);
                     }
                 } else if (block.getMaterial().isLiquid() || currentState.getBlock().getMaterial().isLiquid()) {
@@ -668,7 +668,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 }
 
                 org.spongepowered.api.event.Event event = null;
-                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<EntitySnapshot>();
+                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                 entitySnapshotBuilder.add(((Entity) entityIn).createSnapshot());
 
                 if (entityIn instanceof EntityItem) {
@@ -719,7 +719,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
         Packet packetIn = StaticMixinHelper.processingPacket;
-        List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<Transaction<BlockSnapshot>>();
+        List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
         boolean destructDrop = false;
 
         // Attempt to find a Player cause if we do not have one
@@ -811,14 +811,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             if (capturedBlockList.size() > 0) {
                 ImmutableList<Transaction<BlockSnapshot>> blockTransactions;
-                ImmutableList.Builder<Transaction<BlockSnapshot>> builder = new ImmutableList.Builder<Transaction<BlockSnapshot>>();
+                ImmutableList.Builder<Transaction<BlockSnapshot>> builder = new ImmutableList.Builder<>();
 
                 Iterator<BlockSnapshot> iterator = capturedBlockList.iterator();
                 while (iterator.hasNext()) {
                     BlockSnapshot blockSnapshot = iterator.next();
                     BlockPos pos = VecHelper.toBlockPos(blockSnapshot.getPosition());
                     IBlockState currentState = getBlockState(pos);
-                    builder.add(new Transaction<BlockSnapshot>(blockSnapshot, createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, 0)));
+                    builder.add(new Transaction<>(blockSnapshot, createSpongeBlockSnapshot(currentState, currentState.getBlock()
+                        .getActualState(currentState, (IBlockAccess) this, pos), pos, 0)));
                     iterator.remove();
                 }
                 blockTransactions = builder.build();
@@ -1049,7 +1050,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions, boolean destructItems) {
         Iterator<Entity> iter = entities.iterator();
-        ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<EntitySnapshot>();
+        ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
             if (cause.first(User.class).isPresent()) {
@@ -1130,7 +1131,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     private void handleEntitySpawns(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions) {
         Iterator<Entity> iter = entities.iterator();
-        ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<EntitySnapshot>();
+        ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
             if (cause.first(User.class).isPresent()) {
@@ -1382,7 +1383,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
         this.builder.reset();
-        Location<World> location = new Location<World>((World) this, VecHelper.toVector(pos));
+        Location<World> location = new Location<>((World) this, VecHelper.toVector(pos));
         this.builder.blockState((BlockState) state)
                 .extendedState((BlockState) extended)
                 .worldId(location.getExtent().getUniqueId())
@@ -1692,7 +1693,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<Entity> restoreSnapshot(EntitySnapshot snapshot, Vector3d position) {
-        EntitySnapshot entitySnapshot = snapshot.withLocation(new Location<World>(this, position));
+        EntitySnapshot entitySnapshot = snapshot.withLocation(new Location<>(this, position));
         return entitySnapshot.restore();
     }
 
@@ -1907,7 +1908,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Location<World> getSpawnLocation() {
-        return new Location<World>(this, this.worldInfo.getSpawnX(), this.worldInfo.getSpawnY(), this.worldInfo.getSpawnZ());
+        return new Location<>(this, this.worldInfo.getSpawnX(), this.worldInfo.getSpawnY(), this.worldInfo.getSpawnZ());
     }
 
     @Override
@@ -2175,7 +2176,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
-        snapshot = snapshot.withLocation(new Location<World>(this, new Vector3i(x, y, z)));
+        snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, notifyNeighbors);
     }
 
@@ -2183,7 +2184,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
         final Optional<PropertyStore<T>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
         if (optional.isPresent()) {
-            return optional.get().getFor(new Location<World>(this, x, y, z));
+            return optional.get().getFor(new Location<>(this, x, y, z));
         }
         return Optional.empty();
     }
@@ -2192,7 +2193,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
         final Optional<PropertyStore<T>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
         if (optional.isPresent()) {
-            return optional.get().getFor(new Location<World>(this, x, y, z), direction);
+            return optional.get().getFor(new Location<>(this, x, y, z), direction);
         }
         return Optional.empty();
     }
@@ -2376,7 +2377,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         final BlockState blockState = getBlock(x, y, z);
         final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
         if (blockState.supports((Class) immutableDataManipulator.getClass())) {
-            final List<ImmutableValue<?>> old = new ArrayList<ImmutableValue<?>>(blockState.getValues());
+            final List<ImmutableValue<?>> old = new ArrayList<>(blockState.getValues());
             final BlockState newState = blockState.with(immutableDataManipulator).get();
             old.removeAll(newState.getValues());
             setBlock(x, y, z, newState);
@@ -2449,7 +2450,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Collection<DataManipulator<?, ?>> getManipulators(int x, int y, int z) {
-        final List<DataManipulator<?, ?>> list = new ArrayList<DataManipulator<?, ?>>();
+        final List<DataManipulator<?, ?>> list = new ArrayList<>();
         final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z).getManipulators();
         for (ImmutableDataManipulator<?, ?> immutableDataManipulator : manipulators) {
             list.add(immutableDataManipulator.asMutable());

@@ -86,7 +86,6 @@ import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
-import org.spongepowered.common.world.CaptureType;
 
 import java.util.Collection;
 import java.util.List;
@@ -115,7 +114,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     private net.minecraft.scoreboard.Scoreboard mcScoreboard = this.worldObj.getScoreboard();
 
-    @Inject(method = "func_152339_d", at = @At(value = "INVOKE",
+    @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private void onRemoveEntity(Entity entityIn, CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {

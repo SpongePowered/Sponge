@@ -44,16 +44,14 @@ import java.net.UnknownHostException;
 @Mixin(NetworkManager.class)
 public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements RemoteConnection, IMixinNetworkManager {
 
-    @Shadow
-    public abstract SocketAddress getRemoteAddress();
+    @Shadow private Channel channel;
 
-    @Shadow
-    private Channel channel;
+    @Shadow public abstract SocketAddress getRemoteAddress();
 
     private InetSocketAddress virtualHost;
     private MinecraftVersion version;
 
-    private static final InetSocketAddress localhost = InetSocketAddress.createUnresolved("127.0.0.1", 0);;
+    private static final InetSocketAddress localhost = InetSocketAddress.createUnresolved("127.0.0.1", 0);
 
     @Override
     public InetSocketAddress getAddress() {

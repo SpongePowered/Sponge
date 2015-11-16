@@ -28,6 +28,6 @@ public interface IMixinEntityXPOrb {
 
     int getExperience();
 
-    public void setExperience(int experience);
+    void setExperience(int experience);
 
 }

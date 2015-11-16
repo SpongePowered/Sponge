@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.plugin.PluginManager;
@@ -41,7 +40,6 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
-import java.io.File;
 import java.nio.file.Path;
 
 import javax.inject.Singleton;

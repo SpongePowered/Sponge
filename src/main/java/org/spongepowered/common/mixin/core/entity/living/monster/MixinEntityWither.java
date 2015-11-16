@@ -24,49 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.EntityWither;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@NonnullByDefault
 @Mixin(EntityWither.class)
-@Implements(@Interface(iface = Wither.class, prefix = "wither$"))
-public abstract class MixinEntityWither extends MixinEntityMob {
+public abstract class MixinEntityWither extends MixinEntityMob implements Wither {
 
-    @Shadow public abstract int getInvulTime();
-    @Shadow public abstract void setInvulTime(int invulnerableTicks);
-    @Shadow public abstract int getWatchedTargetId(int targetId);
-
-    public int getInvulnerableTicks() {
-        return this.getInvulTime();
-    }
-
-    public void setInvulnerableTicks(int invulnerableTicks) {
-        this.setInvulTime(invulnerableTicks);
-    }
-
-    public List<Living> getTargets() {
-        List<Living> watchedTargets = new ArrayList<Living>();
-        for (int i = 0; i < 2; ++i) {
-            int j = this.getWatchedTargetId(i + 1);
-            Entity entity = null;
-
-            if (j > 0) {
-                entity = this.worldObj.getEntityByID(j);
-            }
-            if (entity != null) {
-                watchedTargets.add((Living) entity);
-            }
-        }
-        return watchedTargets;
-    }
 }

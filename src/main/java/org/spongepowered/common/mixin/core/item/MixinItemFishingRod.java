@@ -36,13 +36,11 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 
-@NonnullByDefault
 @Mixin(ItemFishingRod.class)
 public abstract class MixinItemFishingRod extends Item {
 

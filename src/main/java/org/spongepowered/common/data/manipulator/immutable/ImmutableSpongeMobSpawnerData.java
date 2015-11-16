@@ -144,83 +144,83 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     public ImmutableBoundedValue<Short> remainingDelay() {
-        return remainingValue;
+        return this.remainingValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> minimumSpawnDelay() {
-        return minValue;
+        return this.minValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> maximumSpawnDelay() {
-        return maxValue;
+        return this.maxValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> spawnCount() {
-        return countValue;
+        return this.countValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> maximumNearbyEntities() {
-        return nearbyValue;
+        return this.nearbyValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> requiredPlayerRange() {
-        return playerRangeValue;
+        return this.playerRangeValue;
     }
 
     @Override
     public ImmutableBoundedValue<Short> spawnRange() {
-        return spawnRangeValue;
+        return this.spawnRangeValue;
     }
 
     @Override
     public ImmutableNextEntityToSpawnValue nextEntityToSpawn() {
-        return nextValue;
+        return this.nextValue;
     }
 
     @Override
     public ImmutableWeightedEntityCollectionValue possibleEntitiesToSpawn() {
-        return toSpawnValue;
+        return this.toSpawnValue;
     }
 
     public short getRemaining() {
-        return remaining;
+        return this.remaining;
     }
 
     public short getMinSpawnDelay() {
-        return minSpawnDelay;
+        return this.minSpawnDelay;
     }
 
     public short getMaxSpawnDelay() {
-        return maxSpawnDelay;
+        return this.maxSpawnDelay;
     }
 
     public short getCount() {
-        return count;
+        return this.count;
     }
 
     public short getMaxNearby() {
-        return maxNearby;
+        return this.maxNearby;
     }
 
     public short getPlayerRange() {
-        return playerRange;
+        return this.playerRange;
     }
 
     public short getSpawnRange() {
-        return spawnRange;
+        return this.spawnRange;
     }
 
     public WeightedSerializableObject<EntitySnapshot> getNextToSpawn() {
-        return nextToSpawn;
+        return this.nextToSpawn;
     }
 
     public WeightedCollection<WeightedSerializableObject<EntitySnapshot>> getEntitiesToSpawn() {
-        return entitiesToSpawn;
+        return this.entitiesToSpawn;
     }
 
     @Override

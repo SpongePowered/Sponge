@@ -428,11 +428,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("uniqueId", entityUuid)
-                .add("entityType", entityType)
-                .add("position", position)
-                .add("rotation", rotation)
-                .add("scale", scale)
+                .add("uniqueId", this.entityUuid)
+                .add("entityType", this.entityType)
+                .add("position", this.position)
+                .add("rotation", this.rotation)
+                .add("scale", this.scale)
                 .toString();
     }
 }

@@ -83,7 +83,7 @@ public class ItemSkullRepresentedPlayerDataProcessor extends AbstractItemSingleD
 
     @Override
     protected ImmutableValue<GameProfile> constructImmutableValue(GameProfile value) {
-        return new ImmutableSpongeValue<GameProfile>(this.key, SpongeRepresentedPlayerData.NULL_PROFILE, value);
+        return new ImmutableSpongeValue<>(this.key, SpongeRepresentedPlayerData.NULL_PROFILE, value);
     }
 
     @Override

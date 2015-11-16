@@ -78,7 +78,7 @@ public abstract class MixinBlockFence extends MixinBlock {
     }
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
-        final Set<Direction> directions = new HashSet<Direction>();
+        final Set<Direction> directions = new HashSet<>();
         final Boolean north = (Boolean) blockState.getValue(BlockFence.NORTH);
         final Boolean east = (Boolean) blockState.getValue(BlockFence.EAST);
         final Boolean west = (Boolean) blockState.getValue(BlockFence.WEST);

@@ -47,7 +47,7 @@ import java.util.List;
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
 
     private boolean captureInventory = false;
-    private List<SlotTransaction> capturedSlotTransactions = new ArrayList<SlotTransaction>();
+    private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
 
     @Shadow public List<Slot> inventorySlots;
     @Shadow public List<ItemStack> inventoryItemStacks;

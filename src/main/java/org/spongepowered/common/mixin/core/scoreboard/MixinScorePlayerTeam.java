@@ -34,7 +34,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +42,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinTeam;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.type.TextColorsRegistryModule;
 import org.spongepowered.common.registry.type.VisibilityRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeTeam;
@@ -53,7 +51,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-@NonnullByDefault
 @Mixin(ScorePlayerTeam.class)
 public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTeam {
 
@@ -65,9 +62,10 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     @Shadow public String colorSuffix;
     @Shadow public boolean allowFriendlyFire;
     @Shadow public boolean canSeeFriendlyInvisibles;
-    @Shadow public Team.EnumVisible field_178778_i; // nameTagVisibility
-    @Shadow public Team.EnumVisible field_178776_j; // deathMessageVisiblity
+    @Shadow public Team.EnumVisible nameTagVisibility;
+    @Shadow public Team.EnumVisible deathMessageVisibility;
     @Shadow public Set<String> membershipSet;
+    @SuppressWarnings("rawtypes")
     @Shadow public abstract Collection getMembershipCollection();
 
     private SpongeTeam spongeTeam;
@@ -135,8 +133,8 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         }
     }
 
-    @Inject(method = "func_178772_a", at = @At("HEAD"), cancellable = true)
-    public void setNametagVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
+    @Inject(method = "setNameTagVisibility", at = @At("HEAD"), cancellable = true)
+    public void onSetNametagVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
             this.spongeTeam.setNameTagVisibility(VisibilityRegistryModule.enumVisible.get(visibility));
@@ -145,8 +143,8 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         }
     }
 
-    @Inject(method = "func_178773_b", at = @At("HEAD"), cancellable = true)
-    public void setDeathMessageVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
+    @Inject(method = "setDeathMessageVisibility", at = @At("HEAD"), cancellable = true)
+    public void onSetDeathMessageVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
         if (this.shouldEcho()) {
             this.spongeTeam.allowRecursion = false;
             this.spongeTeam.setDeathTextVisibility(VisibilityRegistryModule.enumVisible.get(visibility));
@@ -186,7 +184,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
 
     @SuppressWarnings("rawtypes")
     public MessageSink getSink() {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
         Iterator iterator = collection.iterator();
@@ -202,8 +200,9 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
     }
 
     @SuppressWarnings("rawtypes")
+    @Override
     public MessageSink getSinkForPlayer(EntityPlayerMP player) {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         Collection collection = getMembershipCollection();
         Iterator iterator = collection.iterator();
@@ -218,8 +217,9 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         return MessageSinks.to(sources);
     }
 
+    @Override
     public MessageSink getNonTeamSink() {
-        Set<CommandSource> sources = new HashSet<CommandSource>();
+        Set<CommandSource> sources = new HashSet<>();
 
         for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i) {
             EntityPlayerMP player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);

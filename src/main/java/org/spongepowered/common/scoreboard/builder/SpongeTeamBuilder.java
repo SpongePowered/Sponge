@@ -34,7 +34,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.HashSet;

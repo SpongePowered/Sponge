@@ -26,7 +26,6 @@ package org.spongepowered.common.data.manipulator.mutable;
 
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
@@ -71,7 +70,7 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
 
     @Override
     public Value<GameProfile> owner() {
-        return new SpongeValue<GameProfile>(this.usedKey, this.getValue());
+        return new SpongeValue<>(this.usedKey, this.getValue());
     }
 
     @Override

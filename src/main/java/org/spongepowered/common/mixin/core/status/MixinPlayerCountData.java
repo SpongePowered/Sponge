@@ -38,13 +38,10 @@ import java.util.List;
 @Mixin(ServerStatusResponse.PlayerCountData.class)
 public abstract class MixinPlayerCountData implements ClientPingServerEvent.Response.Players {
 
+    @Shadow private int onlinePlayerCount;
+    @Shadow private int maxPlayers;
+
     private List<GameProfile> profiles;
-
-    @Shadow
-    private int onlinePlayerCount;
-
-    @Shadow
-    private int maxPlayers;
 
     @Override
     public int getOnline() {

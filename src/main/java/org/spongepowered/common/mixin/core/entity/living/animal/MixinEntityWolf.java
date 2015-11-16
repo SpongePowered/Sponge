@@ -51,8 +51,8 @@ import java.util.Random;
 
 @NonnullByDefault
 @Mixin(EntityWolf.class)
-@Implements(value = {@Interface(iface = Wolf.class, prefix = "wolf$"), @Interface(iface = IMixinAggressive.class, prefix="soft$")})
-public abstract class MixinEntityWolf extends MixinEntityAnimal {
+@Implements(value = @Interface(iface = IMixinAggressive.class, prefix="soft$"))
+public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf {
 
     @Shadow(prefix = "shadow$")
     public abstract boolean shadow$isAngry();
@@ -93,6 +93,6 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal {
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
+//        manipulators.add(get(AngerableData.class).get()); // Todo when someone adds the angerable data processor
     }
-
 }

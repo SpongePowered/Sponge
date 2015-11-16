@@ -28,16 +28,14 @@ import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
 @NonnullByDefault
 @Mixin(EntitySnowball.class)
-@Implements(@Interface(iface = Snowball.class, prefix = "snowball$"))
-public abstract class MixinEntitySnowball extends MixinEntityThrowable {
+public abstract class MixinEntitySnowball extends MixinEntityThrowable implements Snowball {
 
     private double damageAmount = 0;
     private boolean damageSet = false;
@@ -48,20 +46,11 @@ public abstract class MixinEntitySnowball extends MixinEntityThrowable {
         return this.damageSet ? (float) this.damageAmount : damage;
     }
 
-    public double getDamage() {
-        return this.damageAmount;
-    }
-
-    public void setDamage(double damage) {
-        this.damageSet = true;
-        this.damageAmount = damage;
-    }
-
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("damageAmount")) {
-            this.damageAmount = compound.getDouble("damageAmount");
+        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
+            this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
             this.damageSet = true;
         }
     }
@@ -70,9 +59,9 @@ public abstract class MixinEntitySnowball extends MixinEntityThrowable {
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         if (this.damageSet) {
-            compound.setDouble("damageAmount", this.damageAmount);
+            compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
         } else {
-            compound.removeTag("damageAmount");
+            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 

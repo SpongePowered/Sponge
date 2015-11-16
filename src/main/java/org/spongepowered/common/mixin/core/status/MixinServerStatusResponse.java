@@ -47,19 +47,13 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.class)
 public abstract class MixinServerStatusResponse implements ClientPingServerEvent.Response {
 
-    @Shadow
-    private IChatComponent serverMotd;
+    @Shadow private IChatComponent serverMotd;
+    @Shadow private ServerStatusResponse.PlayerCountData playerCount;
+    @Shadow private ServerStatusResponse.MinecraftProtocolVersionIdentifier protocolVersion;
+    @Shadow private String favicon;
+
     private Text description;
-
-    @Shadow
-    private ServerStatusResponse.PlayerCountData playerCount;
     private ServerStatusResponse.PlayerCountData playerBackup;
-
-    @Shadow
-    private ServerStatusResponse.MinecraftProtocolVersionIdentifier protocolVersion;
-
-    @Shadow
-    private String favicon;
     private Favicon faviconHandle;
 
     @Override

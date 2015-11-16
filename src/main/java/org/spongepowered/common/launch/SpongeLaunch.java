@@ -26,7 +26,6 @@ package org.spongepowered.common.launch;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

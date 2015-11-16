@@ -45,7 +45,7 @@ import java.util.Set;
 
 public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectionData, ImmutableConnectedDirectionData> implements ConnectedDirectionData {
 
-    private Set<Direction> connectedDirections = new HashSet<Direction>();
+    private Set<Direction> connectedDirections = new HashSet<>();
 
     public SpongeConnectedDirectionData(Set<Direction> connectedDirections) {
         super(ConnectedDirectionData.class);
@@ -108,27 +108,27 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     private Set<Direction> getDirections() {
-        return connectedDirections;
+        return this.connectedDirections;
     }
 
     private boolean isNorth() {
-        return connectedDirections.contains(Direction.NORTH);
+        return this.connectedDirections.contains(Direction.NORTH);
     }
 
     private boolean isSouth() {
-        return connectedDirections.contains(Direction.SOUTH);
+        return this.connectedDirections.contains(Direction.SOUTH);
     }
 
     private boolean isEast() {
-        return connectedDirections.contains(Direction.EAST);
+        return this.connectedDirections.contains(Direction.EAST);
     }
 
     private boolean isWest() {
-        return connectedDirections.contains(Direction.WEST);
+        return this.connectedDirections.contains(Direction.WEST);
     }
 
     private void setDirections(Set<Direction> directions) {
-        this.connectedDirections = ImmutableSet.copyOf(connectedDirections);
+        this.connectedDirections = ImmutableSet.copyOf(this.connectedDirections);
     }
 
     private void setNorth(Boolean north) {

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.Scoreboard;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +35,6 @@ import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.scoreboard.SpongeScore;
 
-@NonnullByDefault
 @Mixin(Score.class)
 public abstract class MixinScore implements IMixinScore {
 

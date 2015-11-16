@@ -26,15 +26,10 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityMob;
 import org.spongepowered.api.entity.living.monster.Monster;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
 
-@NonnullByDefault
 @Mixin(EntityMob.class)
-@Implements(@Interface(iface = Monster.class, prefix = "monster$"))
-public abstract class MixinEntityMob extends MixinEntityLiving {
+public abstract class MixinEntityMob extends MixinEntityLiving implements Monster {
 
 }

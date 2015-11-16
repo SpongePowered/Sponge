@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.type.TextColorsRegistryModule;
 
 import java.awt.Color;

@@ -35,8 +35,6 @@ import static org.spongepowered.api.util.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -73,6 +71,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -352,13 +351,7 @@ public class CommandSponge {
 
         @Override
         protected Iterable<String> getChoices(CommandSource source) {
-            return Iterables.transform(Sponge.getGame().getPluginManager().getPlugins(), new Function<PluginContainer, String>() {
-                @Nullable
-                @Override
-                public String apply(@Nullable PluginContainer input) {
-                    return input.getId();
-                }
-            });
+            return Sponge.getGame().getPluginManager().getPlugins().stream().map(PluginContainer::getId).collect(Collectors.toList());
         }
 
         @Override

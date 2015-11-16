@@ -62,7 +62,7 @@ public class OffsetValueProcessor extends AbstractSpongeValueProcessor<EntityMin
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeValue<Integer>(Keys.OFFSET, 6, value);
+        return new ImmutableSpongeValue<>(Keys.OFFSET, 6, value);
     }
 
     @Override

@@ -65,27 +65,27 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
 
     @Override
     public ImmutableSetValue<Direction> connectedDirections() {
-        return directionsValue;
+        return this.directionsValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedNorth() {
-        return northValue;
+        return this.northValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedSouth() {
-        return southValue;
+        return this.southValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedEast() {
-        return eastValue;
+        return this.eastValue;
     }
 
     @Override
     public ImmutableValue<Boolean> connectedWest() {
-        return westValue;
+        return this.westValue;
     }
 
     @Override
@@ -109,7 +109,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     }
 
     private Set<Direction> getDirections() {
-        return directions;
+        return this.directions;
     }
 
     private boolean isNorth() {

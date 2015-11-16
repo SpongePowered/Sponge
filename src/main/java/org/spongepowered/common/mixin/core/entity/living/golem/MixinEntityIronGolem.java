@@ -26,28 +26,9 @@ package org.spongepowered.common.mixin.core.entity.living.golem;
 
 import net.minecraft.entity.monster.EntityIronGolem;
 import org.spongepowered.api.entity.living.golem.IronGolem;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityIronGolem.class)
-@Implements(@Interface(iface = IronGolem.class, prefix = "irongolem$"))
-public abstract class MixinEntityIronGolem extends MixinEntityGolem {
-
-    public boolean isPlayerCreated() {
-        return (this.dataWatcher.getWatchableObjectByte(16) & 1) != 0;
-    }
-
-    public void setPlayerCreated(boolean playerCreated) {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(16);
-
-        if (playerCreated) {
-            this.dataWatcher.updateObject(16, (byte) (b0 | 1));
-        } else {
-            this.dataWatcher.updateObject(16, (byte) (b0 & -2));
-        }
-    }
+public abstract class MixinEntityIronGolem extends MixinEntityGolem implements IronGolem {
 
 }

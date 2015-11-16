@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.data.util.DataQueries;
 

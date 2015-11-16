@@ -28,22 +28,12 @@ import net.minecraft.entity.monster.EntityGuardian;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.entity.living.monster.Guardian;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-
 
 import java.util.List;
 
-@NonnullByDefault
 @Mixin(EntityGuardian.class)
-@Implements(@Interface(iface = Guardian.class, prefix = "guardian$"))
-public abstract class MixinEntityGuardian extends MixinEntityMob {
-
-    @Shadow public abstract boolean isElder();
-    @Shadow public abstract void setElder(boolean elder);
+public abstract class MixinEntityGuardian extends MixinEntityMob implements Guardian {
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {

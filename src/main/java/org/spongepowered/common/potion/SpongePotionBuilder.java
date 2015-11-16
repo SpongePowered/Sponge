@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.potion.Potion;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectType;
@@ -67,7 +66,7 @@ public class SpongePotionBuilder implements PotionEffect.Builder {
             || !container.contains(DataQueries.POTION_SHOWS_PARTICLES)) {
             throw new InvalidDataException("The container does not have data pertaining to PotionEffect!");
         }
-        String effectName = container.getString(new DataQuery("PotionType")).get();
+        String effectName = container.getString(DataQueries.POTION_TYPE).get();
         PotionEffectType potionType = null;
         for (Potion potion : Potion.potionTypes) {
             if (potion.getName().equalsIgnoreCase(effectName)) {
@@ -77,10 +76,10 @@ public class SpongePotionBuilder implements PotionEffect.Builder {
         if (potionType == null) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }
-        int duration = container.getInt(new DataQuery("Duration")).get();
-        int amplifier = container.getInt(new DataQuery("Amplifier")).get();
-        boolean ambience = container.getBoolean(new DataQuery("Ambience")).get();
-        boolean particles = container.getBoolean(new DataQuery("ShowsParticles")).get();
+        int duration = container.getInt(DataQueries.POTION_DURATION).get();
+        int amplifier = container.getInt(DataQueries.POTION_AMPLIFIER).get();
+        boolean ambience = container.getBoolean(DataQueries.POTION_AMBIANCE).get();
+        boolean particles = container.getBoolean(DataQueries.POTION_SHOWS_PARTICLES).get();
         PotionEffect.Builder builder = new SpongePotionBuilder();
 
         return Optional.of(builder.potionType(potionType)

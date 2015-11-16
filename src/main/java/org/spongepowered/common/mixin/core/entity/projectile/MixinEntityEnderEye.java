@@ -24,45 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityEnderEye;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-@NonnullByDefault
 @Mixin(EntityEnderEye.class)
 public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder {
 
-    @Shadow private double targetX;
-    @Shadow private double targetY;
-    @Shadow private double targetZ;
-    @Shadow private boolean shatterOrDrop;
-
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
-
-    public Vector3d getTargetedLocation() {
-        return new Vector3d(this.targetX, this.targetY, this.targetZ);
-    }
-
-    public void setTargetedLocation(Vector3d vector3d) {
-        this.targetX = vector3d.getX();
-        this.targetY = vector3d.getY();
-        this.targetZ = vector3d.getZ();
-    }
-
-    public boolean doesShatterOnDrop() {
-        return !this.shatterOrDrop;
-    }
-
-    public void setShatterOnDrop(boolean shatterOnDrop) {
-        this.shatterOrDrop = !shatterOnDrop;
-    }
 
     @Override
     public ProjectileSource getShooter() {

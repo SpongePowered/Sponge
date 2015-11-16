@@ -58,12 +58,12 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
 
     @Override
     public ImmutableValue<Text> displayName() {
-        return nameValue;
+        return this.nameValue;
     }
 
     @Override
     public ImmutableValue<Boolean> customNameVisible() {
-        return displaysValue;
+        return this.displaysValue;
     }
 
     @Override

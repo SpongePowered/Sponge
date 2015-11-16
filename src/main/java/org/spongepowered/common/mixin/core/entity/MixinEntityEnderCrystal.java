@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.item.EntityEnderCrystal;
 import org.spongepowered.api.entity.EnderCrystal;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityEnderCrystal.class)
 public abstract class MixinEntityEnderCrystal extends MixinEntity implements EnderCrystal {
 

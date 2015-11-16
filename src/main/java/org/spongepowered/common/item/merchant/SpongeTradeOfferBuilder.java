@@ -27,7 +27,6 @@ package org.spongepowered.common.item.merchant;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.data.DataView;
@@ -36,7 +35,6 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.data.util.DataQueries;
 

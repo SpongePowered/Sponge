@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.item.EntityFireworkRocket;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;

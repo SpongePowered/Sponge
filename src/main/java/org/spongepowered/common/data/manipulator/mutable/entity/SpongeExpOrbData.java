@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 public class SpongeExpOrbData extends AbstractBoundedComparableData<Integer, ExpOrbData, ImmutableExpOrbData> implements ExpOrbData {
 

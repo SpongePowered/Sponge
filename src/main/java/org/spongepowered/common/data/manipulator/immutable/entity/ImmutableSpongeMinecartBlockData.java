@@ -63,12 +63,12 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
 
     @Override
     public ImmutableValue<BlockState> block() {
-        return blockValue;
+        return this.blockValue;
     }
 
     @Override
     public ImmutableValue<Integer> offset() {
-        return offsetValue;
+        return this.offsetValue;
     }
 
     @Override
@@ -95,11 +95,11 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
     }
 
     public BlockState getBlock() {
-        return block;
+        return this.block;
     }
 
     public int getOffset() {
-        return offset;
+        return this.offset;
     }
 
     @Override

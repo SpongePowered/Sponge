@@ -35,7 +35,6 @@ import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.Optional;

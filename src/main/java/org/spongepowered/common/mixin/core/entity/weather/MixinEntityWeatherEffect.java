@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.core.entity.weather;
 
 import net.minecraft.entity.effect.EntityWeatherEffect;
 import org.spongepowered.api.entity.weather.WeatherEffect;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-@NonnullByDefault
 @Mixin(EntityWeatherEffect.class)
 public abstract class MixinEntityWeatherEffect extends MixinEntity implements WeatherEffect {
 

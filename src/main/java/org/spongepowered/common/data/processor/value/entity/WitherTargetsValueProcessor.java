@@ -58,7 +58,7 @@ public class WitherTargetsValueProcessor extends AbstractSpongeValueProcessor<En
     protected boolean set(EntityWither container, List<Living> value) {
         boolean hasSet = false;
         for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            container.func_82211_c(i, value.size() > i ? ((EntityLivingBase) value.get(i)).getEntityId() : 0);
+            container.updateWatchedTargetId(i, value.size() > i ? ((EntityLivingBase) value.get(i)).getEntityId() : 0);
             hasSet = true;
         }
         return hasSet;

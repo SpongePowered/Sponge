@@ -28,15 +28,10 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-@NonnullByDefault
 @Mixin(EntityMinecartCommandBlock.class)
 public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
 
@@ -44,26 +39,7 @@ public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecar
 
     @Override
     public ICommandSender asICommandSender() {
-        return commandBlockLogic;
-    }
-
-    public String getCommand() {
-        return this.commandBlockLogic.getCommandSenderName();
-    }
-
-    public void setCommand(@Nonnull String command) {
-        this.commandBlockLogic.setCommand(command);
-    }
-
-    public String getCommandName() {
-        return this.commandBlockLogic.getCustomName();
-    }
-
-    public void setCommandName(@Nullable String name) {
-        if (name == null) {
-            name = "@";
-        }
-        this.commandBlockLogic.setName(name);
+        return this.commandBlockLogic;
     }
 
 }

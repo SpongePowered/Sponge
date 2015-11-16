@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 
 public class SpongePopulatorType implements PopulatorType {

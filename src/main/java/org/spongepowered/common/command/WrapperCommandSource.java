@@ -88,7 +88,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public MemorySubjectData getSubjectData() {
-        return data;
+        return this.data;
     }
 
     @Override

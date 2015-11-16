@@ -56,7 +56,7 @@ public class WitherTargetLivingDataProcessor extends
     protected boolean set(EntityWither entity, List<Living> value) {
         boolean hasSet = false;
         for (int i = 0; i < MAX_TARGET_INDEX; i++) {
-            entity.func_82211_c(i, value.size() > i ? ((EntityLivingBase) value.get(i)).getEntityId() : 0);
+            entity.updateWatchedTargetId(i, value.size() > i ? ((EntityLivingBase) value.get(i)).getEntityId() : 0);
             hasSet = true;
         }
         return hasSet;
@@ -76,7 +76,7 @@ public class WitherTargetLivingDataProcessor extends
 
     @Override
     protected ImmutableValue<List<Living>> constructImmutableValue(List<Living> value) {
-        return new ImmutableSpongeValue(Keys.TARGETS, new ArrayList<>(), value);
+        return new ImmutableSpongeValue<>(Keys.TARGETS, new ArrayList<>(), value);
     }
 
     @Override

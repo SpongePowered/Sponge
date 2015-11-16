@@ -85,6 +85,6 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataMa
 
     @Override
     protected Value<E> getValueGetter() {
-        return new SpongeValue<E>(this.usedKey, this.defaultValue, this.getValue());
+        return new SpongeValue<>(this.usedKey, this.defaultValue, this.getValue());
     }
 }

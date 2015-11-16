@@ -55,12 +55,12 @@ public class CoalValueProcessor extends AbstractSpongeValueProcessor<ItemStack, 
 
     @Override
     protected Value<CoalType> constructValue(CoalType defaultValue) {
-        return new SpongeValue<CoalType>(Keys.COAL_TYPE, defaultValue);
+        return new SpongeValue<>(Keys.COAL_TYPE, defaultValue);
     }
     
     @Override
     protected ImmutableValue<CoalType> constructImmutableValue(CoalType defaultValue) {
-        return new ImmutableSpongeValue<CoalType>(Keys.COAL_TYPE, defaultValue);
+        return new ImmutableSpongeValue<>(Keys.COAL_TYPE, defaultValue);
     }
 
     @Override

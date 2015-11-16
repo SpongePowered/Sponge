@@ -38,11 +38,11 @@ public abstract class AbstractInventorySlot implements InventorySlot {
 
     @Override
     public IInventory getNMSInventory() {
-        return inventory;
+        return this.inventory;
     }
 
     @Override
     public int getSlotNumber() {
-        return index;
+        return this.index;
     }
 }

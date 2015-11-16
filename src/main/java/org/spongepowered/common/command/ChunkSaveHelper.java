@@ -41,7 +41,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,11 +79,11 @@ public class ChunkSaveHelper {
                     ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair((int) entity.posX >> 4, (int) entity.posZ >> 4);
                     chunkEntityCounts.adjustOrPutValue(chunkCoords, 1, 1);
                     classEntityCounts.adjustOrPutValue(entity.getClass(), 1, 1);
-                    if ((entity.getBoundingBox() != null) && logAll) {
+                    if ((entity.getCollisionBoundingBox() != null) && logAll) {
                         BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
                         if (!collidingCoords.contains(coords)) {
                             collidingCoords.add(coords);
-                            int size = entity.worldObj.getEntitiesWithinAABBExcludingEntity(entity, entity.getBoundingBox().expand(1, 1, 1)).size();
+                            int size = entity.worldObj.getEntitiesWithinAABBExcludingEntity(entity, entity.getCollisionBoundingBox().expand(1, 1, 1)).size();
                             if (size < 5) {
                                 continue;
                             }

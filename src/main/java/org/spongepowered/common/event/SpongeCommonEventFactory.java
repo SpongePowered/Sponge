@@ -133,7 +133,7 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<ItemStackSnapshot>(StaticMixinHelper.lastCursor, newCursor);
+            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
             InteractInventoryEvent.Open event =
                     SpongeEventFactory.createInteractInventoryEventOpen(Sponge.getGame(), cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) player.openContainer);
@@ -155,7 +155,7 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<ItemStackSnapshot>(StaticMixinHelper.lastCursor, newCursor);
+            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
             InteractInventoryEvent.Close event =
                     SpongeEventFactory.createInteractInventoryEventClose(Sponge.getGame(), cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) StaticMixinHelper.lastOpenContainer);
@@ -193,11 +193,11 @@ public class SpongeCommonEventFactory {
         ItemStackSnapshot newCursor =
                 player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<ItemStackSnapshot>(StaticMixinHelper.lastCursor, newCursor);
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
         CreativeInventoryEvent event = null;
         if (packetIn.getSlotId() == -1 && world.getCapturedEntityItems().size() > 0) {
             Iterator<Entity> iterator = world.getCapturedEntityItems().iterator();
-            ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<EntitySnapshot>();
+            ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
             while (iterator.hasNext()) {
                 Entity currentEntity = iterator.next();
                 SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), player.getUniqueID());
@@ -276,7 +276,7 @@ public class SpongeCommonEventFactory {
         ItemStackSnapshot newCursor =
                 player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<ItemStackSnapshot>(StaticMixinHelper.lastCursor, newCursor);
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
         ClickInventoryEvent clickEvent = null;
         // Handle empty slot clicks
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
@@ -291,7 +291,7 @@ public class SpongeCommonEventFactory {
             if (packetIn.getUsedButton() == BUTTON_PRIMARY) {
                 if (packetIn.getSlotId() == CLICK_OUTSIDE) {
                     Iterator<Entity> iterator = world.getCapturedEntityItems().iterator();
-                    ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<EntitySnapshot>();
+                    ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                     while (iterator.hasNext()) {
                         Entity currentEntity = iterator.next();
                         SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), player.getUniqueID());
@@ -311,7 +311,7 @@ public class SpongeCommonEventFactory {
             } else if (packetIn.getUsedButton() == BUTTON_SECONDARY) {
                 if (packetIn.getSlotId() == CLICK_OUTSIDE) {
                     Iterator<Entity> iterator = world.getCapturedEntityItems().iterator();
-                    ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<EntitySnapshot>();
+                    ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                     while (iterator.hasNext()) {
                         Entity currentEntity = iterator.next();
                         SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), player.getUniqueID());

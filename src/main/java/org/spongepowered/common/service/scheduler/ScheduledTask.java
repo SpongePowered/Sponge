@@ -70,7 +70,7 @@ public class ScheduledTask implements Task {
 
         public final boolean isActive;
 
-        private ScheduledTaskState(boolean active) {
+        ScheduledTaskState(boolean active) {
             this.isActive = active;
         }
     }

@@ -28,39 +28,20 @@ import net.minecraft.entity.passive.EntitySheep;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.entity.living.animal.Sheep;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 
-@NonnullByDefault
 @Mixin(EntitySheep.class)
 @Implements(@Interface(iface = Sheep.class, prefix = "sheep$"))
 public abstract class MixinEntitySheep extends MixinEntityAnimal implements Sheep {
-
-    @Shadow public abstract boolean getSheared();
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(ShearedData.class).get());
-    }
-
-    public boolean isSheared() {
-        return this.getSheared();
-    }
-
-    public void setSheared(boolean sheared) {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(16);
-
-        if (sheared) {
-            this.dataWatcher.updateObject(16, (byte) (b0 | 16));
-        } else {
-            this.dataWatcher.updateObject(16, (byte) (b0 & -17));
-        }
     }
 
 }

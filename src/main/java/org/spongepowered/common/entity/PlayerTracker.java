@@ -26,7 +26,7 @@ package org.spongepowered.common.entity;
 
 public class PlayerTracker {
 
-    public static enum Type {
+    public enum Type {
         OWNER,
         NOTIFIER
     }

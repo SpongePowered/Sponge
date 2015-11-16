@@ -42,10 +42,10 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-// TODO don't enable this until we want to enable custom data! Also, needs a lot of testing
 @Mixin({TileEntity.class, Entity.class})
 public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
 
@@ -106,13 +106,10 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
 
     @Override
     public List<DataManipulator<?, ?>> getCustomManipulators() {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : this.manipulators) {
-            list.add(manipulator.copy());
-        }
-        return list;
+        return this.manipulators.stream().map(DataManipulator::copy).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
         for (DataManipulator<?, ?> manipulator : this.manipulators) {

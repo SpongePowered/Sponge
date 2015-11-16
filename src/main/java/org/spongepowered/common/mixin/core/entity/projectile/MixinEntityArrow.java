@@ -30,8 +30,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
@@ -41,14 +39,10 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(EntityArrow.class)
-@Implements(@Interface(iface = Arrow.class, prefix = "arrow$"))
 public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
 
     @Shadow public double damage;
-    @Shadow public int knockbackStrength;
     @Shadow public Entity shootingEntity;
-    @Shadow public abstract boolean getIsCritical();
-    @Shadow public abstract void setIsCritical(boolean critical);
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.
@@ -74,22 +68,6 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
             this.shootingEntity = null;
         }
         this.projectileSource = shooter;
-    }
-
-    public double getDamage() {
-        return this.damage;
-    }
-
-    public void setDamage(double damage) {
-        this.damage = damage;
-    }
-
-    public void setKnockbackStrength(int knockbackStrength) {
-        this.knockbackStrength = knockbackStrength;
-    }
-
-    public int getKnockbackStrength() {
-        return this.knockbackStrength;
     }
 
     @Override

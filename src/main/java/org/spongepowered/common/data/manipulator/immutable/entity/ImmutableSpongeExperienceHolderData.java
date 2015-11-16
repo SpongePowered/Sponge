@@ -116,22 +116,22 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
 
     @Override
     public ImmutableBoundedValue<Integer> level() {
-        return levelValue;
+        return this.levelValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> totalExperience() {
-        return totalExpValue;
+        return this.totalExpValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> experienceSinceLevel() {
-        return expSinceLevelValue;
+        return this.expSinceLevelValue;
     }
 
     @Override
     public ImmutableBoundedValue<Integer> experienceBetweenLevels() {
-        return expBetweenLevelsValue;
+        return this.expBetweenLevelsValue;
     }
 
     public int getLevel() {

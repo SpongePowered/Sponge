@@ -44,19 +44,13 @@ import java.net.InetSocketAddress;
 @Mixin(PingResponseHandler.class)
 public abstract class MixinPingResponseHandler extends ChannelInboundHandlerAdapter {
 
-    @Shadow
-    private static Logger logger;
+    @Shadow private static Logger logger;
+    @Shadow private NetworkSystem networkSystem;
 
-    @Shadow
-    private NetworkSystem networkSystem;
+    @Shadow abstract void writeAndFlush(ChannelHandlerContext ctx, ByteBuf data);
+    @Shadow abstract ByteBuf getStringBuffer(String string);
 
     private ByteBuf buf;
-
-    @Shadow
-    abstract void writeAndFlush(ChannelHandlerContext ctx, ByteBuf data);
-
-    @Shadow
-    abstract ByteBuf getStringBuffer(String string);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {

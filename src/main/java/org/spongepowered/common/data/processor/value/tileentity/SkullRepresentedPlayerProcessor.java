@@ -65,7 +65,7 @@ public class SkullRepresentedPlayerProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected ImmutableValue<GameProfile> constructImmutableValue(GameProfile value) {
-        return new ImmutableSpongeValue<GameProfile>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, value);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class SkullRepresentedPlayerProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Value<GameProfile> constructValue(GameProfile actualValue) {
-        return new SpongeValue<GameProfile>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
+        return new SpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
     }
 
 }

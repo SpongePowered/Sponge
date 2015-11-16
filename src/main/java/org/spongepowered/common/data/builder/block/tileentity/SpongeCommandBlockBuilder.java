@@ -27,9 +27,9 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.CommandBlock;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
@@ -47,9 +47,9 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
             throw new InvalidDataException("The container had insufficient data to create a CommandBlock tile entity!");
         }
         CommandBlock commandblock = commandblockOptional.get();
-        if (!container.contains(new DataQuery("StoredCommand"))
-                || !container.contains(new DataQuery("SuccessCount"))
-                || !container.contains(new DataQuery("DoesTrackOutput"))) {
+        if (!container.contains(DataQueries.STORED_COMMAND)
+                || !container.contains(DataQueries.SUCCESS_COUNT)
+                || !container.contains(DataQueries.DOES_TRACK_OUTPUT)) {
             throw new InvalidDataException("The provided container does not contain the data to make a CommandBlock!");
         }
         // TODO Write CommandBlockData

@@ -54,12 +54,12 @@ public class FishValueProcessor extends AbstractSpongeValueProcessor<ItemStack, 
 
     @Override
     protected Value<Fish> constructValue(Fish defaultValue) {
-        return new SpongeValue<Fish>(Keys.FISH_TYPE, defaultValue);
+        return new SpongeValue<>(Keys.FISH_TYPE, defaultValue);
     }
 
     @Override
     protected ImmutableValue<Fish> constructImmutableValue(Fish defaultValue) {
-        return new ImmutableSpongeValue<Fish>(Keys.FISH_TYPE, defaultValue);
+        return new ImmutableSpongeValue<>(Keys.FISH_TYPE, defaultValue);
     }
 
     @Override

@@ -84,7 +84,7 @@ AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GamePr
 
     @Override
     protected ImmutableValue<GameProfile> constructImmutableValue(GameProfile value) {
-        return new ImmutableSpongeValue<GameProfile>(Keys.REPRESENTED_PLAYER,  SpongeRepresentedPlayerData.NULL_PROFILE, value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, value);
     }
 
     @Override

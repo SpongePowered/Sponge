@@ -22,31 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.difficulty;
-
-import net.minecraft.world.EnumDifficulty;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-
-@NonnullByDefault
-@Mixin(EnumDifficulty.class)
-public class MixinEnumDifficulty implements Difficulty {
-
-    @Shadow
-    private int difficultyId;
-
-    @Shadow
-    private String difficultyResourceKey;
-
-    @Override
-    public String getId() {
-        return this.difficultyResourceKey;
-    }
-
-    @Override
-    public String getName() {
-        return this.difficultyResourceKey.replace("options.difficulty.", "");
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.entity.living.monster;

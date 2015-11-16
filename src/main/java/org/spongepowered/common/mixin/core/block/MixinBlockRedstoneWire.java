@@ -92,7 +92,7 @@ public abstract class MixinBlockRedstoneWire extends MixinBlock {
     }
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
-        final Set<Direction> directions = new HashSet<Direction>();
+        final Set<Direction> directions = new HashSet<>();
         final IStringSerializable north = (IStringSerializable) blockState.getValue(BlockRedstoneWire.NORTH);
         final IStringSerializable east = (IStringSerializable) blockState.getValue(BlockRedstoneWire.EAST);
         final IStringSerializable west = (IStringSerializable) blockState.getValue(BlockRedstoneWire.WEST);

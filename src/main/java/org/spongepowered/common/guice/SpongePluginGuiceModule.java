@@ -174,7 +174,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public File get() {
-            return configDir.toFile();
+            return this.configDir.toFile();
         }
     }
 
@@ -189,7 +189,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public File get() {
-            return configPath.toFile();
+            return this.configPath.toFile();
         }
 
     }
@@ -205,7 +205,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public File get() {
-            return configPath.toFile();
+            return this.configPath.toFile();
         }
 
     }

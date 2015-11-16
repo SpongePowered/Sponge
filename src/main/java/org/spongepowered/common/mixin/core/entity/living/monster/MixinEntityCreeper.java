@@ -39,7 +39,6 @@ public abstract class MixinEntityCreeper extends MixinEntityMob {
 
     @Shadow private int timeSinceIgnited;
     @Shadow private int fuseTime = 30;
-    @Shadow public abstract boolean getPowered();
     @Shadow public abstract void explode();
     @Shadow public abstract void ignite();
 

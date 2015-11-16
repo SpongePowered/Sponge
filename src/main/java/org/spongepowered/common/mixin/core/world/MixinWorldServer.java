@@ -209,8 +209,8 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.processingCaptureCause = true;
         this.currentTickBlock = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, event.getPosition()), event.getPosition(), 3);
         Cause cause = Cause.of(this.currentTickBlock);
-        if (trackedBlockEvents.get(event.getPosition()) != null) {
-            User user = trackedBlockEvents.get(event.getPosition());
+        if (this.trackedBlockEvents.get(event.getPosition()) != null) {
+            User user = this.trackedBlockEvents.get(event.getPosition());
             cause = cause.with(user);
             StaticMixinHelper.blockEventUser = user;
         }

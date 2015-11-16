@@ -31,11 +31,7 @@ import org.spongepowered.api.effect.particle.ItemParticle;
 import org.spongepowered.api.effect.particle.NoteParticle;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ResizableParticle;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.Sponge;
-import org.spongepowered.common.data.type.SpongeNotePitch;
 
 import java.awt.Color;
 

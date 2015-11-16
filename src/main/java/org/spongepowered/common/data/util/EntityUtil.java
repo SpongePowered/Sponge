@@ -29,7 +29,6 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S10PacketSpawnPainting;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.world.WorldServer;
@@ -94,7 +93,7 @@ public final class EntityUtil {
             playerMPs.add(player);
         }
         painting.art = art;
-        painting.func_174859_a(painting.facingDirection);
+        painting.updateFacingWithBoundingBox(painting.facingDirection);
         for (EntityPlayerMP playerMP : playerMPs) {
             Sponge.getGame().getScheduler().createTaskBuilder()
                 .delayTicks(Sponge.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())

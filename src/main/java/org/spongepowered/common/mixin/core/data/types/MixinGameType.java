@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -38,15 +39,16 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 public abstract class MixinGameType {
     @Shadow String name;
 
-    public String gamemode$getId() {
+    public String getId() {
         return this.name;
     }
 
+    @Intrinsic
     public String gamemode$getName() {
         return this.name;
     }
 
-    public Translation gamemode$getTranslation() {
+    public Translation getTranslation() {
         return new SpongeTranslation("gameMode." + this.name.toLowerCase());
     }
 }

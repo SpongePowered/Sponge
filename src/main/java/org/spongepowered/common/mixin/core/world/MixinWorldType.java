@@ -88,7 +88,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
             // DataContainer
             // is via json and NBT
             try {
-                String jsonString = ChunkProviderSettings.Factory.func_177865_a("").toString();
+                String jsonString = ChunkProviderSettings.Factory.jsonToFactory("").toString();
                 NBTTagCompound nbt = JsonToNBT.getTagFromJson(jsonString);
                 return NbtTranslator.getInstance().translateFrom(nbt);
             } catch (NBTException e) {

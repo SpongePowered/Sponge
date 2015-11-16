@@ -26,14 +26,9 @@ package org.spongepowered.common.mixin.core.entity.living.golem;
 
 import net.minecraft.entity.monster.EntitySnowman;
 import org.spongepowered.api.entity.living.golem.SnowGolem;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntitySnowman.class)
-@Implements(@Interface(iface = SnowGolem.class, prefix = "snowman$"))
-public abstract class MixinEntitySnowman extends MixinEntityGolem {
+public abstract class MixinEntitySnowman extends MixinEntityGolem implements SnowGolem {
 
 }

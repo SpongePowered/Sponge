@@ -39,19 +39,19 @@ public abstract class MixinSlot implements InventorySlot {
 
     @Override
     public IInventory getNMSInventory() {
-        return inventory;
+        return this.inventory;
     }
 
     @Override
     public int getSlotNumber() {
-        return slotNumber;
+        return this.slotNumber;
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("parent", inventory)
-                .add("slotNumber", slotNumber)
+                .add("parent", this.inventory)
+                .add("slotNumber", this.slotNumber)
                 .toString();
     }
 }

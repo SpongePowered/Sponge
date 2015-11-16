@@ -25,24 +25,33 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.item.EntityXPOrb;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
 
-@NonnullByDefault
+import java.util.List;
+
 @Mixin(EntityXPOrb.class)
 public abstract class MixinEntityXPOrb extends MixinEntity implements ExperienceOrb, IMixinEntityXPOrb {
 
     @Shadow public int xpValue;
 
+    @Override
     public int getExperience() {
         return this.xpValue;
     }
 
+    @Override
     public void setExperience(int experience) {
         this.xpValue = experience;
     }
 
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(get(ExpOrbData.class).get());
+    }
 }

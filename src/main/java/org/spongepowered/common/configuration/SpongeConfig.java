@@ -40,13 +40,10 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.util.IpSet;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -792,7 +789,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private boolean enabled = true;
 
         @Setting(value = BLOCK_TRACKING_BLACKLIST, comment = "Add block ids you wish to blacklist for player block placement tracking.")
-        private List<String> blockBlacklist = new ArrayList<String>();
+        private List<String> blockBlacklist = new ArrayList<>();
 
         public boolean isEnabled() {
             return this.enabled;

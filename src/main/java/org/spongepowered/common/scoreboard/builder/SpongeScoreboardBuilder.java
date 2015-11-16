@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 
 import java.util.ArrayList;

@@ -32,9 +32,6 @@ import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
-import org.spongepowered.common.registry.RegistrationPhase;
-import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.util.DelayedRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;

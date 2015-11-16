@@ -109,22 +109,22 @@ public abstract class MixinServerConfigurationManager {
     @Shadow private static Logger logger;
     @Shadow private MinecraftServer mcServer;
     @Shadow private IPlayerFileData playerNBTManagerObj;
+    @Shadow public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @SuppressWarnings("rawtypes")
     @Shadow public List playerEntityList;
+    @Shadow protected abstract void sendScoreboard(ServerScoreboard scoreboardIn, EntityPlayerMP playerIn);
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
     @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_, net.minecraft.world.World worldIn);
-    @Shadow protected abstract void func_96456_a(ServerScoreboard scoreboardIn, EntityPlayerMP playerIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(IChatComponent component);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
-    @Shadow public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
 
     /**
      * Bridge methods to proxy modified method in Vanilla, nothing in Forge
      */
-    public void func_72355_a (NetworkManager netManager, EntityPlayerMP playerIn) {
+    public void func_72355_a(NetworkManager netManager, EntityPlayerMP playerIn) {
         initializeConnectionToPlayer(netManager, playerIn, null);
     }
 
@@ -176,7 +176,7 @@ public abstract class MixinServerConfigurationManager {
         }
 
         Player player = (Player) playerIn;
-        Location<World> location = new Location<World>((World)worldserver, VecHelper.toVector(playerIn.getPosition()));
+        Location<World> location = new Location<>((World) worldserver, VecHelper.toVector(playerIn.getPosition()));
         Transform<World> fromTransform = player.getTransform().setLocation(location);
         MessageSink sink = MessageSinks.toAll();
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), Cause.of((Player) playerIn), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform, (RemoteConnection) netManager, (org.spongepowered.api.GameProfile) gameprofile);
@@ -236,7 +236,7 @@ public abstract class MixinServerConfigurationManager {
         handler.sendPacket(new S39PacketPlayerAbilities(playerIn.capabilities));
         handler.sendPacket(new S09PacketHeldItemChange(playerIn.inventory.currentItem));
         playerIn.getStatFile().func_150877_d();
-        playerIn.getStatFile().func_150884_b(playerIn);
+        playerIn.getStatFile().sendAchievements(playerIn);
         this.mcServer.refreshStatusNextTick();
 
         this.playerLoggedIn(playerIn);
@@ -399,7 +399,7 @@ public abstract class MixinServerConfigurationManager {
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
-            return new Transform<World>(location, Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<>(location, Vector3d.ZERO, Vector3d.ZERO);
         }
 
         Vector3d spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
@@ -416,7 +416,7 @@ public abstract class MixinServerConfigurationManager {
         if (optRespawn.isPresent()) {
             // API TODO: Make this support multiple world spawn points
             // TODO Make RespawnLocationData 'shadow' the bed location from below
-            return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+            return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
         }
 
         BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
@@ -439,7 +439,7 @@ public abstract class MixinServerConfigurationManager {
             playerIn.dimension = prevDim;
         }
 
-        return new Transform<World>(new Location<World>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+        return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
     }
 
     @Overwrite

@@ -43,13 +43,13 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -58,7 +58,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(EntityFishHook.class)
 public abstract class MixinEntityFishHook extends MixinEntity implements FishHook, IMixinEntityFishHook {
 
@@ -124,18 +123,19 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         return this.damageAmount;
     }
 
-    public void setDamage(double damage) {
-        this.damageAmount = damage;
-    }
-
-    // I hate to use @Overwrite here, but we need to be able handle both an entity being caught
-    // and a fish being caught. There's no good way to do this with an injection.
+    /**
+     * @author Aaron1011 - February 6th, 2015
+     *
+     * Purpose: This needs to handle for both cases where a fish and/or an entity is being caught.
+     * There's no real good way to do this with an injection.
+     */
     @Overwrite
     public int handleHookRetraction() {
         if (this.worldObj.isRemote) {
             return 0;
         }
 
+        // Sponge start
         byte b0 = 0;
 
         net.minecraft.item.ItemStack itemStack = null;
@@ -158,8 +158,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
         FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler), exp, exp, fishHookSnapshot, this, transaction, (Player) this.angler);
         if (!Sponge.postEvent(event)) {
-            if (this.caughtEntity != null)
-            {
+            // Sponge end
+            if (this.caughtEntity != null) {
                 double d0 = this.angler.posX - this.posX;
                 double d2 = this.angler.posY - this.posY;
                 double d4 = this.angler.posZ - this.posZ;
@@ -171,6 +171,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 b0 = 3;
             }
 
+            // Sponge Start
             if (!event.getItemStackTransaction().getFinal().getType().equals(ItemTypes.NONE)) {
                 ItemStackSnapshot itemSnapshot = event.getItemStackTransaction().getFinal();
                 EntityItem entityitem1 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, (net.minecraft.item.ItemStack) itemSnapshot.createStack());
@@ -186,6 +187,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 this.angler.worldObj.spawnEntityInWorld(
                         new EntityXPOrb(this.angler.worldObj, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
                                 event.getExperience()));
+                // Sponge End
                 b0 = 1;
             }
 
@@ -196,11 +198,13 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             this.setDead();
             this.angler.fishEntity = null;
 
+            // Sponge Start
             if (this.fishingRod != null) {
                 this.fishingRod.damageItem(b0, this.angler);
                 this.angler.swingItem();
                 this.fishingRod = null;
             }
+            // Sponge End
         }
         return b0;
     }
@@ -213,8 +217,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("damageAmount")) {
-            this.damageAmount = compound.getDouble("damageAmount");
+        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
+            this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
         ProjectileSourceSerializer.readSourceFromNbt(compound, this);
     }
@@ -222,7 +226,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setDouble("damageAmount", this.damageAmount);
+        compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.angler);
     }
 }

@@ -35,11 +35,8 @@ import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

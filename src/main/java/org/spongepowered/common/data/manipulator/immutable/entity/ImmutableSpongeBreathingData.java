@@ -48,7 +48,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
         this.maxAir = maxAir;
         this.remainingAir = remainingAir;
 
-        remainingAirValue = SpongeValueBuilder.boundedBuilder(Keys.REMAINING_AIR)
+        this.remainingAirValue = SpongeValueBuilder.boundedBuilder(Keys.REMAINING_AIR)
                 .actualValue(remainingAir)
                 .defaultValue(this.maxAir)
                 .minimum(-20)
@@ -56,7 +56,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
                 .build()
                 .asImmutable();
 
-        maxAirValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_AIR)
+        this.maxAirValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_AIR)
                 .actualValue(this.maxAir)
                 .defaultValue(300)
                 .minimum(0)

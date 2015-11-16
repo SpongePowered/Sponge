@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.item.EntityFallingBlock;
 import org.spongepowered.api.entity.FallingBlock;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
 @Mixin(EntityFallingBlock.class)
 public abstract class MixinEntityFallingBlock extends MixinEntity implements FallingBlock {
 

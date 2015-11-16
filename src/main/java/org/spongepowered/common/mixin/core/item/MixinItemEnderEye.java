@@ -32,12 +32,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@NonnullByDefault
 @Mixin(ItemEnderEye.class)
 public class MixinItemEnderEye extends Item {
 

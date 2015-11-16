@@ -25,26 +25,19 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityPig;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
 import org.spongepowered.api.entity.living.animal.Pig;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
+import java.util.List;
+
 @Mixin(EntityPig.class)
-@Implements(@Interface(iface = Pig.class, prefix = "pig$"))
-public abstract class MixinEntityPig extends MixinEntityAnimal {
+public abstract class MixinEntityPig extends MixinEntityAnimal implements Pig {
 
-    public boolean isSaddled() {
-        return (this.dataWatcher.getWatchableObjectByte(16) & 1) != 0;
-    }
-
-    public void setSaddled(boolean saddled) {
-        if (saddled) {
-            this.dataWatcher.updateObject(16, (byte) 1);
-        } else {
-            this.dataWatcher.updateObject(16, (byte) 0);
-        }
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(get(PigSaddleData.class).get());
     }
 }

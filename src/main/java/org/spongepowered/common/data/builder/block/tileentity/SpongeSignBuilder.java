@@ -27,8 +27,8 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import net.minecraft.tileentity.TileEntitySign;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Sign;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 
 import java.util.Optional;
@@ -46,7 +46,7 @@ public class SpongeSignBuilder extends AbstractTileBuilder<Sign> {
         if (!signOptional.isPresent()) {
             throw new InvalidDataException("The container had insufficient data to create a Sign tile entity!");
         }
-        if (!container.contains(new DataQuery("Lines"))) {
+        if (!container.contains(Keys.SIGN_LINES.getQuery())) {
             throw new InvalidDataException("The container had insufficient data to create a Sign tile entity!");
         }
         Sign sign = signOptional.get();

@@ -113,7 +113,7 @@ public final class ReflectionUtil {
             // We've found the right constructor, now to actually construct it!
             return (Constructor<T>) ctor;
         }
-        throw new IllegalArgumentException("Applicable constructor not found!");
+        throw new IllegalArgumentException("Applicable constructor not found for class: " + objectClass.getCanonicalName() + " with args: " + Arrays.toString(args));
     }
 
     private static List<Object> deconstructArray(Object[] objects) {

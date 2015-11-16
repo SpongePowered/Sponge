@@ -25,19 +25,18 @@
 package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityPigZombie;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
 import org.spongepowered.api.entity.living.monster.ZombiePigman;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 import org.spongepowered.common.interfaces.entity.IMixinAnger;
 
-@NonnullByDefault
+import java.util.List;
+
 @Mixin(EntityPigZombie.class)
-@Implements(@Interface(iface = ZombiePigman.class, prefix = "pigzombie$"))
-public abstract class MixinEntityPigZombie extends MixinEntityZombie implements IMixinAggressive, IMixinAnger {
+public abstract class MixinEntityPigZombie extends MixinEntityZombie implements ZombiePigman, IMixinAggressive, IMixinAnger {
 
     @Shadow private int angerLevel;
 
@@ -59,5 +58,11 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
     @Override
     public void setAngerLevel(int angerLevel) {
         this.angerLevel = angerLevel < 0 ? 0 : angerLevel;
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(get(AngerableData.class).get());
     }
 }

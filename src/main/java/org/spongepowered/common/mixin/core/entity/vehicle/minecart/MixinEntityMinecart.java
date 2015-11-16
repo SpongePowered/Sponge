@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,7 +37,6 @@ import org.spongepowered.common.interfaces.IMixinMinecart;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VectorSerializer;
 
-@NonnullByDefault
 @Mixin(EntityMinecart.class)
 public abstract class MixinEntityMinecart extends MixinEntity implements Minecart, IMixinMinecart {
 

@@ -61,7 +61,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
      * into a hopper.
      */
     @Overwrite
-    public static boolean func_145898_a(IInventory source, EntityItem entityItem) {
+    public static boolean putDropInInventoryAllSlots(IInventory source, EntityItem entityItem) {
         boolean flag = false;
 
         if (entityItem == null) {
@@ -80,7 +80,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
             }
             // Sponge end
             ItemStack itemstack = entityItem.getEntityItem().copy();
-            ItemStack itemstack1 = TileEntityHopper.func_174918_a(source, itemstack, (EnumFacing)null);
+            ItemStack itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(source, itemstack, (EnumFacing)null);
 
             if (itemstack1 != null && itemstack1.stackSize != 0) {
                 entityItem.setEntityItemStack(itemstack1);

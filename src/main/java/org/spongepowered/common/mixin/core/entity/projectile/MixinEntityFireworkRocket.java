@@ -28,29 +28,18 @@ import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-@NonnullByDefault
 @Mixin(EntityFireworkRocket.class)
 public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework, IMixinEntityFireworkRocket {
 
     @Shadow private int lifetime;
-    @Shadow private int fireworkAge;
 
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
-
-    public int getFuseDuration() {
-        return this.lifetime - this.fireworkAge;
-    }
-
-    public void setFuseDuration(int fuseTicks) {
-        this.lifetime = fuseTicks + this.fireworkAge;
-    }
 
     @Override
     public void detonate() {
