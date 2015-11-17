@@ -25,6 +25,7 @@
 package org.spongepowered.common.event;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
@@ -37,11 +38,16 @@ import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IInteractionObject;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -51,16 +57,23 @@ import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.VecHelper;
 
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class SpongeCommonEventFactory {
 
@@ -463,6 +476,29 @@ public class SpongeCommonEventFactory {
         ImmutableList<org.spongepowered.api.entity.Entity> originalEntities = ImmutableList.copyOf((List<org.spongepowered.api.entity.Entity>)(List<?>) entities);
         CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(Sponge.getGame(), cause, originalEntities, (List<org.spongepowered.api.entity.Entity>)(List<?>) entities, (org.spongepowered.api.world.World) world);
         Sponge.postEvent(event);
+        return event;
+    }
+
+    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet<EnumFacing> notifiedSides) {
+        BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
+        Map<Direction, BlockState> neighbors = new HashMap<Direction, BlockState>();
+
+        if (notifiedSides != null) {
+            for (EnumFacing notifiedSide : notifiedSides) {
+                BlockPos offset = pos.offset(notifiedSide);
+                Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
+                Location<World> location = new Location<World>((World) world, VecHelper.toVector(offset));
+                if (location.getBlockY() >=0 && location.getBlockY() <= 255) {
+                    neighbors.put(direction, location.getBlock());
+                }
+            }
+        }
+
+        ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
+        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(Sponge.getGame(), Cause.of(snapshot), originalNeighbors, neighbors);
+        StaticMixinHelper.processingInternalForgeEvent = true;
+        Sponge.postEvent(event);
+        StaticMixinHelper.processingInternalForgeEvent = false;
         return event;
     }
 }

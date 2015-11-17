@@ -131,6 +131,7 @@ import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -266,6 +267,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Nullable private volatile Context worldContext;
     private ImmutableList<Populator> populators;
     private ImmutableList<GeneratorPopulator> generatorPopulators;
+    private final net.minecraft.world.World nmsWorld = (net.minecraft.world.World)(Object) this;
 
     protected SpongeScoreboard spongeScoreboard = new SpongeScoreboard();
 
@@ -347,7 +349,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      *
      * Purpose: Rewritten to support capturing blocks
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Overwrite
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (!this.isValid(pos)) {
@@ -368,8 +370,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Don't capture if we are restoring blocks
             if (!this.isRemote && !this.restoringBlocks) {
-                IMixinChunk spongeChunk = (IMixinChunk) chunk;
-
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
                 // black magic to track populators
@@ -600,7 +600,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (tickBlock != null) {
                     BlockPos sourcePos = VecHelper.toBlockPos(tickBlock.getPosition());
                     Block targetBlock = getBlockState(entityIn.getPosition()).getBlock();
-                    SpongeHooks.tryToTrackBlockAndEntity((net.minecraft.world.World)(Object) this, tickBlock, entityIn, sourcePos, targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
+                    SpongeHooks.tryToTrackBlockAndEntity(this.nmsWorld, tickBlock, entityIn, sourcePos, targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
                 }
                 if (this.currentTickEntity != null) {
                     Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
@@ -972,7 +972,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (player != null && packetIn instanceof C02PacketUseEntity) {
             C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
             if (packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
-                net.minecraft.entity.Entity entity = packet.getEntityFromWorld((net.minecraft.world.World)(Object) this);
+                net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.nmsWorld);
                 if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
                     Player spongePlayer = (Player) player;
                     MessageSink originalSink = spongePlayer.getMessageSink();
@@ -1255,12 +1255,23 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
-        this.notifyBlockOfStateChange(pos.west(), blockType, pos);
-        this.notifyBlockOfStateChange(pos.east(), blockType, pos);
-        this.notifyBlockOfStateChange(pos.down(), blockType, pos);
-        this.notifyBlockOfStateChange(pos.up(), blockType, pos);
-        this.notifyBlockOfStateChange(pos.north(), blockType, pos);
-        this.notifyBlockOfStateChange(pos.south(), blockType, pos);
+        if (this.nmsWorld.isRemote) {
+            for (EnumFacing facing : EnumFacing.values()) {
+                this.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+            }
+            return;
+        }
+
+        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World)this.nmsWorld, pos, java.util.EnumSet.allOf(EnumFacing.class));
+        if (event.isCancelled()) {
+            return;
+        }
+
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
+                this.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+            }
+        }
     }
 
     /**
@@ -1270,28 +1281,25 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-        if (skipSide != EnumFacing.WEST) {
-            this.notifyBlockOfStateChange(pos.west(), blockType, pos);
+        java.util.EnumSet<EnumFacing> directions = java.util.EnumSet.allOf(EnumFacing.class);
+        directions.remove(skipSide);
+
+        if (this.nmsWorld.isRemote) {
+            for (EnumFacing facing : directions) {
+                this.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+            }
+            return;
         }
 
-        if (skipSide != EnumFacing.EAST) {
-            this.notifyBlockOfStateChange(pos.east(), blockType, pos);
+        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World)this.nmsWorld, pos, directions);
+        if (event.isCancelled()) {
+            return;
         }
 
-        if (skipSide != EnumFacing.DOWN) {
-            this.notifyBlockOfStateChange(pos.down(), blockType, pos);
-        }
-
-        if (skipSide != EnumFacing.UP) {
-            this.notifyBlockOfStateChange(pos.up(), blockType, pos);
-        }
-
-        if (skipSide != EnumFacing.NORTH) {
-            this.notifyBlockOfStateChange(pos.north(), blockType, pos);
-        }
-
-        if (skipSide != EnumFacing.SOUTH) {
-            this.notifyBlockOfStateChange(pos.south(), blockType, pos);
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
+                this.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+            }
         }
     }
 
@@ -1344,12 +1352,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         }
 
                         if (source != null) {
-                            SpongeHooks.tryToTrackBlock((net.minecraft.world.World)(Object) this, source, sourcePos, iblockstate.getBlock(), notifyPos, PlayerTracker.Type.NOTIFIER);
+                            SpongeHooks.tryToTrackBlock(this.nmsWorld, source, sourcePos, iblockstate.getBlock(), notifyPos, PlayerTracker.Type.NOTIFIER);
                         }
                     }
                 }
 
-                iblockstate.getBlock().onNeighborBlockChange((net.minecraft.world.World)(Object) this, notifyPos, iblockstate, sourceBlock);
+                iblockstate.getBlock().onNeighborBlockChange(this.nmsWorld, notifyPos, iblockstate, sourceBlock);
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
@@ -1377,7 +1385,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
-        SpongeImplFactory.updateComparatorOutputLevel((net.minecraft.world.World)(Object) this, pos, blockIn);
+        SpongeImplFactory.updateComparatorOutputLevel(this.nmsWorld, pos, blockIn);
     }
 
     @Override
