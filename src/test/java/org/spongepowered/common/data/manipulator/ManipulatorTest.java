@@ -106,7 +106,7 @@ public class ManipulatorTest {
                     continue;
                 }
                 try {
-                    final Constructor<?> ctor = entry.getKey().getConstructor(null);
+                    final Constructor<?> ctor = entry.getKey().getConstructor();
                     System.out.println("Found " + entry.getKey().getCanonicalName() + " and will attempt to construct it!");
                     DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
                     System.out.println("Success!");
@@ -151,7 +151,7 @@ public class ManipulatorTest {
                     continue;
                 }
                 try {
-                    final Constructor<?> ctor = entry.getKey().getConstructor(null);
+                    final Constructor<?> ctor = entry.getKey().getConstructor();
                     System.out.println("[Serialization]: Found " + entry.getKey().getCanonicalName() + " and will attempt to construct it!");
                     final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
 
