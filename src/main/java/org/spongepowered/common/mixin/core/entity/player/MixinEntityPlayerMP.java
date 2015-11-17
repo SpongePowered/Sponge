@@ -368,7 +368,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void playSound(SoundType sound, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playerNetServerHandler.sendPacket(new S29PacketSoundEffect(sound.getName(), position.getX(), position.getY(), position.getZ(),
+        this.playerNetServerHandler.sendPacket(new S29PacketSoundEffect(sound.getId(), position.getX(), position.getY(), position.getZ(),
                 (float) Math.max(minVolume, volume), (float) pitch));
     }
 
