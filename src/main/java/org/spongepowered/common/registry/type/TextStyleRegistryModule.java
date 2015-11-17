@@ -42,6 +42,7 @@ public final class TextStyleRegistryModule implements RegistryModule {
         .put("strikethrough", SpongeTextStyle.of(EnumChatFormatting.STRIKETHROUGH))
         .put("obfuscated", SpongeTextStyle.of(EnumChatFormatting.OBFUSCATED))
         .put("reset", SpongeTextStyle.of(EnumChatFormatting.RESET))
+        .put("none", TextStyles.NONE)
         .build();
 
 }

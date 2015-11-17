@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.world.border.EnumBorderStatus;
-import net.minecraft.world.border.IBorderListener;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,7 +33,6 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Iterator;
 import java.util.List;
 
 @NonnullByDefault
@@ -43,24 +40,16 @@ import java.util.List;
 @Implements(@Interface(iface = WorldBorder.class, prefix = "border$"))
 public abstract class MixinWorldBorder implements WorldBorder {
 
-    @Shadow private int warningTime;
-    @Shadow private int warningDistance;
-    @Shadow private double startDiameter;
-    @Shadow private double endDiameter;
-    @Shadow private long endTime;
-    @Shadow private long startTime;
-    @Shadow private double damageAmount;
-
-
     @Shadow public abstract double getCenterX();
     @Shadow public abstract double getCenterZ();
     @Shadow public abstract double getTargetSize();
     @Shadow public abstract void setTransition(double newSize);
     @Shadow public abstract void setTransition(double oldSize, double newSize, long time);
     @Shadow public abstract long getTimeUntilTarget();
-    @Shadow public abstract EnumBorderStatus getStatus();
     @Shadow public abstract double getDamageBuffer();
     @Shadow public abstract void setDamageBuffer(double buffer);
+    @Shadow(prefix = "shadow$")
+    public abstract void shadow$setCenter(double x, double z);
     @Shadow(prefix = "shadow$")
     public abstract double shadow$getDamageAmount();
     @Shadow(prefix = "shadow$")
@@ -73,43 +62,31 @@ public abstract class MixinWorldBorder implements WorldBorder {
     public abstract int shadow$getWarningDistance();
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setWarningDistance(int distance);
+    @Shadow(prefix = "shadow$")
+    public abstract double shadow$getDiameter();
 
     @SuppressWarnings("rawtypes")
     @Shadow
     public abstract List getListeners();
 
-    @Override
-    public int getWarningTime() {
-        return this.warningTime;
+    @Intrinsic
+    public int border$getWarningTime() {
+        return shadow$getWarningTime();
     }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void setWarningTime(int time) {
-        this.warningTime = time;
-        Iterator var2 = this.getListeners().iterator();
-
-        while (var2.hasNext()) {
-            IBorderListener var3 = (IBorderListener) var2.next();
-            var3.onWarningTimeChanged((net.minecraft.world.border.WorldBorder) ((Object) this), this.warningTime);
-        }
+    @Intrinsic
+    public void border$setWarningTime(int time) {
+        shadow$setWarningTime(time);
     }
 
-    @Override
-    public int getWarningDistance() {
-        return this.warningDistance;
+    @Intrinsic
+    public int border$getWarningDistance() {
+        return shadow$getWarningDistance();
     }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void setWarningDistance(int distance) {
-        this.warningDistance = distance;
-        Iterator var2 = this.getListeners().iterator();
-
-        while (var2.hasNext()) {
-            IBorderListener var3 = (IBorderListener) var2.next();
-            var3.onWarningDistanceChanged((net.minecraft.world.border.WorldBorder) ((Object) this), this.warningDistance);
-        }
+    @Intrinsic
+    public void border$setWarningDistance(int distance) {
+        shadow$setWarningDistance(distance);
     }
 
     @Override
@@ -117,19 +94,9 @@ public abstract class MixinWorldBorder implements WorldBorder {
         return getTargetSize();
     }
 
-    @Override
-    public double getDiameter() {
-        if (this.getStatus() != EnumBorderStatus.STATIONARY) {
-            double time = (float) (System.currentTimeMillis() - this.startTime) / (float) (this.endTime - this.startTime);
-
-            if (time < 1.0D) {
-                return (this.startDiameter + (this.endDiameter - this.startDiameter) * time);
-            }
-
-            this.setTransition(this.endDiameter);
-        }
-
-        return this.startDiameter;
+    @Intrinsic
+    public double border$getDiameter() {
+        return shadow$getDiameter();
     }
 
     @Override
@@ -157,6 +124,11 @@ public abstract class MixinWorldBorder implements WorldBorder {
         return new Vector3d(getCenterX(), 0, getCenterZ());
     }
 
+    @Intrinsic
+    public void border$setCenter(double x, double z) {
+        this.shadow$setCenter(x, z);
+    }
+
     @Override
     public double getDamageThreshold() {
         return getDamageBuffer();
@@ -169,11 +141,11 @@ public abstract class MixinWorldBorder implements WorldBorder {
 
     @Intrinsic
     public double border$getDamageAmount() {
-        return this.damageAmount;
+        return shadow$getDamageAmount();
     }
 
     @Intrinsic
     public void border$setDamageAmount(double damage) {
-        this.damageAmount = damage;
+        shadow$setDamageAmount(damage);
     }
 }

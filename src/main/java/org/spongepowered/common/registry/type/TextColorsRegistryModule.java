@@ -75,6 +75,8 @@ public final class TextColorsRegistryModule implements CatalogRegistryModule<Tex
         addTextColor(EnumChatFormatting.YELLOW, new Color(0xFFFF55));
         addTextColor(EnumChatFormatting.WHITE, Color.WHITE);
         addTextColor(EnumChatFormatting.RESET, Color.WHITE);
+
+        textColorMappings.put("none", TextColors.NONE);
     }
 
     private static void addTextColor(EnumChatFormatting handle, Color color) {

@@ -1298,7 +1298,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     /**
      * @author bloodmc - November 15th, 2015
      *
-     * Purpose: Redirect's vanilla method to ours that includes source block 
+     * Purpose: Redirect's vanilla method to ours that includes source block
      * position.
      */
     @Overwrite
@@ -1816,7 +1816,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void playSound(SoundType sound, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playSoundEffect(position.getX(), position.getY(), position.getZ(), sound.getName(), (float) Math.max(minVolume, volume), (float) pitch);
+        this.playSoundEffect(position.getX(), position.getY(), position.getZ(), sound.getId(), (float) Math.max(minVolume, volume), (float) pitch);
     }
 
     @Override
