@@ -63,6 +63,6 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(AngerableData.class).get());
+//        manipulators.add(get(AngerableData.class).get()); // TODO enable when AngerableData is implemented.
     }
 }
