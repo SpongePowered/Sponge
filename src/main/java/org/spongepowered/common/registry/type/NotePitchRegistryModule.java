@@ -32,6 +32,7 @@ import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import java.util.Optional;
 
 public final class NotePitchRegistryModule implements CatalogRegistryModule<NotePitch> {
 
+    @RegisterCatalog(NotePitches.class)
     private final Map<String, NotePitch> notePitchMap = new HashMap<>();
 
     @Override
