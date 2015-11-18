@@ -75,6 +75,7 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
 import org.spongepowered.api.item.Enchantment;
@@ -133,6 +134,7 @@ import org.spongepowered.common.registry.type.CoalTypeRegistryModule;
 import org.spongepowered.common.registry.type.ComparatorTypeRegistryModule;
 import org.spongepowered.common.registry.type.CookedFishRegistryModule;
 import org.spongepowered.common.registry.type.CriteriaRegistryModule;
+import org.spongepowered.common.registry.type.DamageModifierTypeRegistryModule;
 import org.spongepowered.common.registry.type.DamageSourceRegistryModule;
 import org.spongepowered.common.registry.type.DamageTypeRegistryModule;
 import org.spongepowered.common.registry.type.DifficultyRegistryModule;
@@ -269,6 +271,7 @@ public final class CommonModuleRegistry {
             .registerModule(ComparatorType.class, new ComparatorTypeRegistryModule())
             .registerModule(CookedFish.class, new CookedFishRegistryModule())
             .registerModule(Criterion.class, new CriteriaRegistryModule())
+            .registerModule(DamageModifierType.class, new DamageModifierTypeRegistryModule())
             .registerModule(new DamageSourceRegistryModule())
             .registerModule(DamageType.class, new DamageTypeRegistryModule())
             .registerModule(Difficulty.class, new DifficultyRegistryModule())
