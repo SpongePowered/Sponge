@@ -68,6 +68,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent.ResourcePackStatus;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
@@ -110,9 +111,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Shadow public NetworkManager netManager;
     @Shadow public EntityPlayerMP playerEntity;
     @Shadow private MinecraftServer serverController;
+    @Shadow private IntHashMap field_147372_n;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);
-    @Shadow private IntHashMap field_147372_n;
 
     private boolean justTeleported = false;
     private Location<World> lastMoveLocation = null;
@@ -473,4 +474,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
         ci.cancel();
     }
+
+    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
+    public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
+        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(Sponge.getGame(), Cause.of(this.playerEntity), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
+        Sponge.postEvent(event);
+        if (!event.isCancelled()) {
+            player.attackTargetEntityWithCurrentItem(entityIn);
+        }
+    }
+
 }
