@@ -590,6 +590,7 @@ import org.spongepowered.common.data.processor.data.item.SpawnableDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.BrewingStandDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.CooldownDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.FurnaceDataProcessor;
+import org.spongepowered.common.data.processor.data.tileentity.JukeboxDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.NoteDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SignDataProcessor;
 import org.spongepowered.common.data.processor.data.tileentity.SkullRepresentedPlayerDataProcessor;
@@ -716,6 +717,7 @@ import org.spongepowered.common.data.processor.value.item.PlaceableValueProcesso
 import org.spongepowered.common.data.processor.value.item.SpawnableEntityTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.item.UnbreakableValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.CooldownValueProcessor;
+import org.spongepowered.common.data.processor.value.tileentity.JukeboxValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.MaxBurnTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.MaxCookTimeValueProcessor;
 import org.spongepowered.common.data.processor.value.tileentity.NoteValueProcessor;
@@ -1195,6 +1197,10 @@ public class SpongeSerializationRegistry {
         final MinecartBlockDataProcessor minecartBlockDataProcessor = new MinecartBlockDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(MinecartBlockData.class, SpongeMinecartBlockData.class,
                 ImmutableMinecartBlockData.class, ImmutableSpongeMinecartBlockData.class, minecartBlockDataProcessor);
+
+        final JukeboxDataProcessor jukeboxDataProcessor = new JukeboxDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
+                ImmutableSpongeRepresentedItemData.class, jukeboxDataProcessor);
 
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
