@@ -32,6 +32,7 @@ import net.minecraft.world.WorldType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
 import org.spongepowered.common.world.type.SpongeWorldTypeNether;
@@ -64,5 +65,14 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
         this.generatorTypeMappings.put("nether", (GeneratorType) new SpongeWorldTypeNether());
         this.generatorTypeMappings.put("end", (GeneratorType) new SpongeWorldTypeEnd());
         this.generatorTypeMappings.put("overworld", (GeneratorType) new SpongeWorldTypeOverworld());
+    }
+
+    @AdditionalRegistration
+    public void registerAdditional() {
+        for (WorldType worldType : WorldType.worldTypes) {
+            if (worldType != null && !this.generatorTypeMappings.values().contains(worldType)) {
+                this.generatorTypeMappings.put(worldType.getWorldTypeName().toLowerCase(), (GeneratorType) worldType);
+            }
+        }
     }
 }
