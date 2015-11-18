@@ -216,6 +216,7 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1279,13 +1280,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
      *
      * Purpose: Rewritten to pass the source block position.
      */
+    @SuppressWarnings("rawtypes")
     @Overwrite
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-        java.util.EnumSet<EnumFacing> directions = java.util.EnumSet.allOf(EnumFacing.class);
+        EnumSet directions = EnumSet.allOf(EnumFacing.class);
         directions.remove(skipSide);
 
         if (this.nmsWorld.isRemote) {
-            for (EnumFacing facing : directions) {
+            for (Object obj : directions) {
+                EnumFacing facing = (EnumFacing) obj;
                 this.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
             return;

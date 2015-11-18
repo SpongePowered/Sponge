@@ -479,12 +479,14 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet<EnumFacing> notifiedSides) {
+    @SuppressWarnings("rawtypes")
+    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
         Map<Direction, BlockState> neighbors = new HashMap<Direction, BlockState>();
 
         if (notifiedSides != null) {
-            for (EnumFacing notifiedSide : notifiedSides) {
+            for (Object obj : notifiedSides) {
+                EnumFacing notifiedSide = (EnumFacing) obj;
                 BlockPos offset = pos.offset(notifiedSide);
                 Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
                 Location<World> location = new Location<World>((World) world, VecHelper.toVector(offset));
