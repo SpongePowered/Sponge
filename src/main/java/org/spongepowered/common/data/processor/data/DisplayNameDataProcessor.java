@@ -49,6 +49,7 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDispla
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.Optional;
 
@@ -73,13 +74,13 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                 if (mainCompound == null) {
                     return Optional.empty(); // The book wasn't initialized.
                 }
-                final String titleString = mainCompound.getString("title");
+                final String titleString = mainCompound.getString(NbtDataUtil.ITEM_BOOK_TITLE);
                 final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(titleString));
                 return Optional.of(data);
             }
-            final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getSubCompound("display", false);
-            if (mainCompound != null && mainCompound.hasKey("Name", 8)) {
-                final String displayString = mainCompound.getString("Name");
+            final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
+            if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, 8)) {
+                final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
                 final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(displayString));
                 return Optional.of(data);
             } else {

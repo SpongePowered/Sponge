@@ -68,7 +68,7 @@ public final class NbtDataUtil {
     public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
 
     public static final String ITEM_DISPLAY = "display";
-    public static final String ITEM_DISPLAY_NAME = "name";
+    public static final String ITEM_DISPLAY_NAME = "Name";
     public static final String ITEM_LORE = "Lore";
     public static final String ITEM_COLOR = "color";
 
