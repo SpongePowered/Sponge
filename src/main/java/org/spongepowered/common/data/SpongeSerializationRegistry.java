@@ -1336,6 +1336,8 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.AXIS, new AxisValueProcessor());
         dataRegistry.registerValueProcessor(Keys.DELAY, new DelayValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.REPRESENTED_ITEM, new JukeboxValueProcessor());
+
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
