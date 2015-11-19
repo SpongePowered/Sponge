@@ -247,6 +247,7 @@ public class KeyRegistry {
         keyMap.put("decayable", makeSingleKey(Boolean.class, Value.class, of("Decayable")));
         keyMap.put("in_wall", makeSingleKey(Boolean.class, Value.class, of("InWall")));
         keyMap.put("delay", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Delay")));
+        keyMap.put("player_created", makeSingleKey(Boolean.class, Value.class, of("PlayerCreated")));
         keyMap.put("item_blockstate", makeSingleKey(BlockState.class, Value.class, of("ItemBlockState")));
         keyMap.put("skeleton_type", makeSingleKey(SkeletonType.class, Value.class, of("SkeletonType")));
         keyMap.put("ocelot_type", makeSingleKey(OcelotType.class, Value.class, of("OcelotType")));
