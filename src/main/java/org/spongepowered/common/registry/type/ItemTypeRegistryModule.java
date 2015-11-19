@@ -80,6 +80,7 @@ public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryMo
     @Override
     public void registerDefaults() {
         setItemNone();
+        this.itemTypeMappings.put("none", (ItemType) NONE_ITEM);
     }
 
     private void setItemNone() {
@@ -90,9 +91,11 @@ public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryMo
         }
     }
 
-    private ItemTypeRegistryModule() { }
+    private ItemTypeRegistryModule() {
+    }
 
     private static final class Holder {
+
         private static final ItemTypeRegistryModule INSTANCE = new ItemTypeRegistryModule();
     }
 }
