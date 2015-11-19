@@ -170,12 +170,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        // TODO remove when mixins can handle this special case of invoke special and calling supers.
-        // Mixin#76
-    }
-
-    @Override
     public World getWorld() {
         return (World) this.worldObj;
     }
