@@ -113,6 +113,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteab
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePigSaddleData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayerCreatedData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedData;
@@ -210,6 +211,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PlayerCreatedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PlayingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
@@ -368,6 +370,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMinecartBlockData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePigSaddleData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePlayerCreatedData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePlayingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
@@ -464,6 +467,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteable
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongePlayerCreatedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePlayingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedData;
@@ -559,6 +563,7 @@ import org.spongepowered.common.data.processor.data.entity.IgniteableDataProcess
 import org.spongepowered.common.data.processor.data.entity.MinecartBlockDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.MovementSpeedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.PigSaddleDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.PlayerCreatedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.PlayingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ShearedDataProcessor;
@@ -682,6 +687,7 @@ import org.spongepowered.common.data.processor.value.entity.MaxFallDamageValuePr
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.OffsetValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.PigSaddleValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.PlayerCreatedValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.PlayingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RepresentedBlockValueProcessor;
@@ -1198,6 +1204,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(MinecartBlockData.class, SpongeMinecartBlockData.class,
                 ImmutableMinecartBlockData.class, ImmutableSpongeMinecartBlockData.class, minecartBlockDataProcessor);
 
+        final PlayerCreatedDataProcessor playerCreatedDataProcessor = new PlayerCreatedDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(PlayerCreatedData.class, SpongePlayerCreatedData.class, ImmutablePlayerCreatedData.class,
+                ImmutableSpongePlayerCreatedData.class, playerCreatedDataProcessor);
+
         final JukeboxDataProcessor jukeboxDataProcessor = new JukeboxDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, jukeboxDataProcessor);
@@ -1335,6 +1345,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.IN_WALL, new InWallValueProcessor());
         dataRegistry.registerValueProcessor(Keys.AXIS, new AxisValueProcessor());
         dataRegistry.registerValueProcessor(Keys.DELAY, new DelayValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.PLAYER_CREATED, new PlayerCreatedValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
 
         // Properties
