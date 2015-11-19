@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.value.tileentity;
 
 import net.minecraft.block.BlockJukebox;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -79,7 +80,7 @@ public class JukeboxValueProcessor extends AbstractSpongeValueProcessor<BlockJuk
             if (itemStackSnapshot.isPresent()) {
                 try {
                     BlockJukebox.TileEntityJukebox jukebox = (BlockJukebox.TileEntityJukebox) container;
-                    jukebox.dropRecord(jukebox.getWorld(), jukebox.getPos(), null);
+                    ((BlockJukebox) Blocks.jukebox).dropRecord(jukebox.getWorld(), jukebox.getPos(), null);
                     jukebox.getWorld().setBlockState(jukebox.getPos(),
                             jukebox.getWorld().getBlockState(jukebox.getPos()).withProperty(BlockJukebox.HAS_RECORD, false), 2);
                     return builder.replace(itemStackSnapshot.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
