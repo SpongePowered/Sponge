@@ -122,7 +122,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow protected DataWatcher dataWatcher;
     @Shadow protected Random rand;
-    @Shadow protected boolean isImmuneToFire;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void mountEntity(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setDead();
@@ -139,7 +138,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
-    @Shadow protected abstract void setSize(float width, float height);
 
 
     // @formatter:on

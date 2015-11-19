@@ -35,28 +35,9 @@ import java.util.List;
 @NonnullByDefault
 @Mixin(EntitySkeleton.class)
 public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
+
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         manipulators.add(getSkeletonData());
-    }
-    
-    public int getSkeletonType()
-    {
-        return this.dataWatcher.getWatchableObjectByte(13);
-    }
-
-    public void setSkeletonType(int type)
-    {
-        this.dataWatcher.updateObject(13, Byte.valueOf((byte) type));
-        this.isImmuneToFire = (type == 1);
-
-        if (type == 1)
-        {
-            this.setSize(0.72F, 2.535F);
-        }
-        else
-        {
-            this.setSize(0.6F, 1.95F);
-        }
     }
 }
