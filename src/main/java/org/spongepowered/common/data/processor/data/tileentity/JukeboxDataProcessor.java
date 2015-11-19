@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.data.tileentity;
 
 import com.google.common.collect.Maps;
 import net.minecraft.block.BlockJukebox;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -85,7 +86,7 @@ public class JukeboxDataProcessor extends AbstractTileEntityDataProcessor<BlockJ
             if (itemStackSnapshot.isPresent()) {
                 try {
                     BlockJukebox.TileEntityJukebox jukebox = (BlockJukebox.TileEntityJukebox) dataHolder;
-                    jukebox.dropRecord(jukebox.getWorld(), jukebox.getPos(), null);
+                    ((BlockJukebox) Blocks.jukebox).dropRecord(jukebox.getWorld(), jukebox.getPos(), null);
                     jukebox.getWorld().setBlockState(jukebox.getPos(),
                             jukebox.getWorld().getBlockState(jukebox.getPos()).withProperty(BlockJukebox.HAS_RECORD, false), 2);
                     return builder.replace(itemStackSnapshot.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
