@@ -133,6 +133,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -632,12 +633,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 }
 
                 EntityLivingBase specialCause = null;
+                String causeName = "";
                 // Special case for throwables
                 if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityThrowable) {
                     EntityThrowable throwable = (EntityThrowable) entityIn;
                     specialCause = throwable.getThrower();
 
                     if (specialCause != null) {
+                        causeName = "Thrower";
                         if (specialCause instanceof Player) {
                             Player player = (Player) specialCause;
                             SpongeHooks.setCreatorEntityNbt(((IMixinEntity) entityIn).getSpongeData(), player.getUniqueId());
@@ -648,6 +651,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 else if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityTNTPrimed) {
                     EntityTNTPrimed tntEntity = (EntityTNTPrimed) entityIn;
                     specialCause = tntEntity.getTntPlacedBy();
+                    causeName = "Igniter";
 
                     if (specialCause instanceof Player) {
                         Player player = (Player) specialCause;
@@ -659,12 +663,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     EntityTameable tameable = (EntityTameable) entityIn;
                     if (tameable.getOwnerEntity() != null) {
                         specialCause = tameable.getOwnerEntity();
+                        causeName = NamedCause.OWNER;
                     }
                 }
 
                 if (specialCause != null) {
                     if (!cause.all().contains(specialCause)) {
-                        cause = cause.with(specialCause);
+                        cause = cause.with(NamedCause.of(causeName, specialCause));
                     }
                 }
 
@@ -740,13 +745,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     IMixinChunk spongeChunk = (IMixinChunk) chunk;
 
                     Optional<User> owner = spongeChunk.getBlockOwner(pos);
-                    Optional<User> interactUser = spongeChunk.getBlockNotifier(pos);
+                    Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
                     if (owner.isPresent()) {
-                        cause = cause.with(owner.get());
+                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
-                    if (interactUser.isPresent()) {
-                        if (!cause.all().contains(interactUser.get())) {
-                            Cause newCause = Cause.of(interactUser.get());
+                    if (notifier.isPresent()) {
+                        if (!cause.all().contains(notifier.get())) {
+                            Cause newCause = Cause.of(NamedCause.of(NamedCause.NOTIFIER, notifier.get()));
                             cause = newCause.with(cause.all());
                         }
                     }
@@ -756,12 +761,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (entity instanceof EntityTameable) {
                     EntityTameable tameable = (EntityTameable) entity;
                     if (tameable.getOwnerEntity() != null) {
-                        cause = cause.with(tameable.getOwnerEntity());
+                        cause = cause.with(NamedCause.of(NamedCause.OWNER, tameable.getOwnerEntity()));
                     }
                 } else {
                     Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                     if (owner.isPresent()) {
-                        cause = cause.with(owner.get());
+                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
                 }
             }
@@ -1063,7 +1068,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent()) {
                     if (!cause.all().contains(owner.get())) {
-                        cause = cause.with(owner.get());
+                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
                     SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), owner.get().getUniqueId());
                 }
@@ -1144,7 +1149,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent()) {
                     if (!cause.all().contains(owner.get())) {
-                        cause = cause.with(owner.get());
+                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
                     SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), owner.get().getUniqueId());
                 }

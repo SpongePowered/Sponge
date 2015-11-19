@@ -46,9 +46,11 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
@@ -61,6 +63,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.Sponge;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -74,6 +77,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class SpongeCommonEventFactory {
 
@@ -497,7 +501,22 @@ public class SpongeCommonEventFactory {
         }
 
         ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
-        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(Sponge.getGame(), Cause.of(snapshot), originalNeighbors, neighbors);
+        // Determine cause
+        Cause cause = Cause.of(snapshot);
+        net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
+        IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
+        if (spongeChunk != null) {
+            Optional<User> owner = spongeChunk.getBlockOwner(pos);
+            Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
+            if (notifier.isPresent()) {
+                cause = cause.with(NamedCause.of(NamedCause.NOTIFIER, notifier.get()));
+            }
+            if (owner.isPresent()) {
+                cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+            }
+        }
+
+        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(Sponge.getGame(), cause, originalNeighbors, neighbors);
         StaticMixinHelper.processingInternalForgeEvent = true;
         Sponge.postEvent(event);
         StaticMixinHelper.processingInternalForgeEvent = false;
