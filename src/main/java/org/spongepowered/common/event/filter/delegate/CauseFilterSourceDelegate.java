@@ -26,13 +26,14 @@ package org.spongepowered.common.event.filter.delegate;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.CauseTracked;
 import org.spongepowered.api.util.Tuple;
 
 import java.lang.reflect.Method;
@@ -44,7 +45,8 @@ public abstract class CauseFilterSourceDelegate implements ParameterFilterSource
     public Tuple<Integer, Integer> write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local) {
         // Get the cause
         mv.visitVarInsn(ALOAD, 1);
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Event.class), "getCause",
+        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(CauseTracked.class));
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(CauseTracked.class), "getCause",
                 "()" + Type.getDescriptor(Cause.class), true);
 
         Class<?> targetType = param.getType();

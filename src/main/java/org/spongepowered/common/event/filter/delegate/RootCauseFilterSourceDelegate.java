@@ -48,15 +48,19 @@ public class RootCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
     @Override
     protected void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
         mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "root",
-                "()Ljava/lang/Object;", false);
+                "()Ljava/util/Optional;", false);
     }
 
     @Override
     protected void insertCheck(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
         Label failure = new Label();
         Label success = new Label();
+        mv.visitVarInsn(ALOAD, local);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
+        mv.visitJumpInsn(IFEQ, failure);
         mv.visitLdcInsn(Type.getType(targetType));
         mv.visitVarInsn(ALOAD, local);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "get", "()Ljava/lang/Object;", false);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "isAssignableFrom", "(Ljava/lang/Class;)Z", false);
         mv.visitJumpInsn(IFNE, success);
@@ -68,6 +72,10 @@ public class RootCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
 
     @Override
     protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
-
+        // who needs strongly typed variables anyway
+        mv.visitVarInsn(ALOAD, local);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "get", "()Ljava/lang/Object;", false);
+        mv.visitVarInsn(ASTORE, local);
     }
+    
 }
