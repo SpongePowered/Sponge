@@ -46,15 +46,13 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
 
     private final EventListener<? super T> listener;
 
-    private final boolean ignoreCancelled;
     private final boolean beforeModifications;
 
-    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean ignoreCancelled, boolean beforeModifications) {
+    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventClass = checkNotNull(eventClass, "eventClass");
         this.order = checkNotNull(order, "order");
         this.listener = checkNotNull(listener, "listener");
-        this.ignoreCancelled = ignoreCancelled;
         this.beforeModifications = beforeModifications;
     }
 
@@ -85,10 +83,6 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
 
     @Override
     public void handle(T event) throws Exception {
-        if (this.ignoreCancelled && event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-            return;
-        }
-
         this.listener.handle(event);
     }
 

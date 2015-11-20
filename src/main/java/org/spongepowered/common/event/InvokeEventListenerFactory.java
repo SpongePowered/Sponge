@@ -27,30 +27,54 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.Event;
+import org.spongepowered.common.event.filter.EventFilter;
+import org.spongepowered.common.event.filter.FilterFactory;
 
 import java.lang.reflect.Method;
 
 public final class InvokeEventListenerFactory implements AnnotatedEventListener.Factory {
 
+    private FilterFactory filterFactory;
+
+    public InvokeEventListenerFactory(FilterFactory factory) {
+        this.filterFactory = checkNotNull(factory, "filterFactory");
+    }
+
     @Override
     public AnnotatedEventListener create(Object handle, Method method) throws Exception {
-        return new InvokeEventHandler(handle, method);
+        EventFilter filter = this.filterFactory.createFilter(method).newInstance();
+        if (filter == null && method.getParameterCount() != 1) {
+            // basic sanity check
+            throw new IllegalStateException("Failed to generate EventFilter for non trivial filtering operation.");
+        }
+        return new InvokeEventHandler(handle, method, filter);
     }
 
     private static class InvokeEventHandler extends AnnotatedEventListener {
 
         private final Method method;
+        private final EventFilter filter;
 
-        private InvokeEventHandler(Object handle, Method method) {
+        private InvokeEventHandler(Object handle, Method method, EventFilter filter) {
             super(handle);
             this.method = checkNotNull(method, "method");
+            this.filter = filter;
         }
 
         @Override
         public void handle(Event event) throws Exception {
-            this.method.invoke(this.handle, event);
+            if (this.filter != null) {
+                Object[] filtered = this.filter.filter(event);
+                if (filtered != null) {
+                    StringBuilder args = new StringBuilder();
+                    for (Object o : filtered) {
+                        args.append(o.getClass().getName()).append(" ");
+                    }
+                    this.method.invoke(this.handle, filtered);
+                }
+            } else {
+                this.method.invoke(this.handle, event);
+            }
         }
-
     }
-
 }
