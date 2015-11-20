@@ -69,8 +69,10 @@ public class SkeletonTypeValueProcessor extends AbstractSpongeValueProcessor<Ent
                 
             case 1:
                 return Optional.of(SkeletonTypes.WITHER);
+                
+            default:
+                return Optional.empty();
         }
-        return Optional.empty();
     }
     
     @Override
