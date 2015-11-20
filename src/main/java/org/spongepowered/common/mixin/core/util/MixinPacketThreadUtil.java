@@ -28,8 +28,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C13PacketPlayerAbilities;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,23 +43,25 @@ import org.spongepowered.common.util.StaticMixinHelper;
 @Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
 public class MixinPacketThreadUtil {
 
-    @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V"))
+    @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
     public void onProcessPacket(Packet packetIn, INetHandler netHandler) {
-        if (netHandler instanceof NetHandlerPlayServer) {
+        if (netHandler instanceof NetHandlerPlayServer && !(packetIn instanceof C03PacketPlayer) && !(packetIn instanceof C13PacketPlayerAbilities)) {
             StaticMixinHelper.processingPacket = packetIn;
-            StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer)netHandler).playerEntity;
+            StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
-            ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory.getItemStack()).createSnapshot();
+            ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                    : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory.getItemStack()).createSnapshot();
             StaticMixinHelper.lastCursor = cursor;
 
-            IMixinWorld world = (IMixinWorld)StaticMixinHelper.packetPlayer.worldObj;
-            if (StaticMixinHelper.packetPlayer.getHeldItem() != null && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
+            IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
+            if (StaticMixinHelper.packetPlayer.getHeldItem() != null
+                    && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
                 StaticMixinHelper.lastPlayerItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
             world.setProcessingCaptureCause(true);
             packetIn.processPacket(netHandler);
-            ((IMixinWorld)StaticMixinHelper.packetPlayer.worldObj).handlePostTickCaptures(Cause.of(StaticMixinHelper.packetPlayer));
+            ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj).handlePostTickCaptures(Cause.of(StaticMixinHelper.packetPlayer));
             world.setProcessingCaptureCause(false);
             StaticMixinHelper.packetPlayer = null;
             StaticMixinHelper.processingPacket = null;
