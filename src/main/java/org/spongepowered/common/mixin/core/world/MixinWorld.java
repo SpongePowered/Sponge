@@ -640,7 +640,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     specialCause = throwable.getThrower();
 
                     if (specialCause != null) {
-                        causeName = "Thrower";
+                        causeName = NamedCause.THROWER;
                         if (specialCause instanceof Player) {
                             Player player = (Player) specialCause;
                             SpongeHooks.setCreatorEntityNbt(((IMixinEntity) entityIn).getSpongeData(), player.getUniqueId());
@@ -651,7 +651,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 else if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityTNTPrimed) {
                     EntityTNTPrimed tntEntity = (EntityTNTPrimed) entityIn;
                     specialCause = tntEntity.getTntPlacedBy();
-                    causeName = "Igniter";
+                    causeName = NamedCause.IGNITER;
 
                     if (specialCause instanceof Player) {
                         Player player = (Player) specialCause;
@@ -1067,7 +1067,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
                 Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent()) {
-                    if (!cause.all().contains(owner.get())) {
+                    if (!cause.any(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
                     SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), owner.get().getUniqueId());
@@ -1099,8 +1099,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             Iterator<Entity> iterator =
-                    event instanceof DropItemEvent.Destruct ? ((DropItemEvent.Destruct) event).getEntities().iterator()
-                            : ((DropItemEvent.Dispense) event).getEntities().iterator();
+                event instanceof DropItemEvent.Destruct ? ((DropItemEvent.Destruct) event).getEntities().iterator()
+                                                        : ((DropItemEvent.Dispense) event).getEntities().iterator();
             while (iterator.hasNext()) {
                 Entity entity = iterator.next();
                 boolean invalidSpawn = false;
