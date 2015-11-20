@@ -117,6 +117,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayingD
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSittingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkeletonData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
@@ -214,6 +215,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.PlayingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
@@ -372,6 +374,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSittingData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSkeletonData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSlimeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
@@ -468,6 +471,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongePlayingDat
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
@@ -563,6 +567,7 @@ import org.spongepowered.common.data.processor.data.entity.PlayingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ShearedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SittingDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.SkeletonDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SlimeDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SneakingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.TameableDataProcessor;
@@ -686,6 +691,7 @@ import org.spongepowered.common.data.processor.value.entity.PlayingValueProcesso
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RepresentedBlockValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ScreamingValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.SkeletonTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SlimeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TameableOwnerValueProcessor;
@@ -1173,6 +1179,9 @@ public class SpongeSerializationRegistry {
 
         dataRegistry.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
                 new ArtDataProcessor());
+        
+        dataRegistry.registerDataProcessorAndImpl(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class, 
+                ImmutableSpongeSkeletonData.class, new SkeletonDataProcessor());
 
         final WitherTargetLivingDataProcessor witherTargetLivingDataProcessor = new WitherTargetLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
@@ -1337,6 +1346,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.DELAY, new DelayValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_ITEM, new JukeboxValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SKELETON_TYPE, new SkeletonTypeValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
