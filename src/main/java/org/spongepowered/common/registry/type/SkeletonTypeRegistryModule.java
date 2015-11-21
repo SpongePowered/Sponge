@@ -22,20 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.entity;
+package org.spongepowered.common.registry.type;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkeletonData;
-import org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
+import org.spongepowered.common.entity.SpongeSkeletonType;
+import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.util.RegisterCatalog;
 
-public class ImmutableSpongeSkeletonData extends AbstractImmutableSingleCatalogData<SkeletonType, ImmutableSkeletonData, SkeletonData> implements ImmutableSkeletonData {
+import com.google.common.collect.ImmutableList;
 
-    public ImmutableSpongeSkeletonData(SkeletonType type) {
-        super(ImmutableSkeletonData.class, type, SkeletonTypes.NORMAL, Keys.SKELETON_TYPE, SpongeSkeletonData.class);
+public class SkeletonTypeRegistryModule implements CatalogRegistryModule<SkeletonType> {
+
+    @RegisterCatalog(SkeletonTypes.class)
+    private final Map<String, SkeletonType> skeletonTypeMap = new HashMap<>();
+
+    @Override
+    public Optional<SkeletonType> getById(String id) {
+        return Optional.ofNullable(this.skeletonTypeMap.get(checkNotNull(id).toLowerCase()));
+    }
+
+    @Override
+    public Collection<SkeletonType> getAll() {
+        return ImmutableList.copyOf(this.skeletonTypeMap.values());
+    }
+
+    @Override
+    public void registerDefaults() {
+        this.skeletonTypeMap.put("normal", new SpongeSkeletonType(0, "normal"));
+        this.skeletonTypeMap.put("wither", new SpongeSkeletonType(1, "wither"));
     }
 
 }

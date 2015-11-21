@@ -48,16 +48,19 @@ import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.StairShape;
@@ -163,6 +166,7 @@ import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.LogAxisRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 import org.spongepowered.common.registry.type.ObjectiveDisplayModeRegistryModule;
+import org.spongepowered.common.registry.type.OcelotTypeRegistryModule;
 import org.spongepowered.common.registry.type.ParticleRegistryModule;
 import org.spongepowered.common.registry.type.PistonTypeRegistryModule;
 import org.spongepowered.common.registry.type.PlantTypeModuleRegistry;
@@ -172,12 +176,14 @@ import org.spongepowered.common.registry.type.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.registry.type.PrismarineRegistryModule;
 import org.spongepowered.common.registry.type.ProfessionRegistryModule;
 import org.spongepowered.common.registry.type.QuartzTypeRegistryModule;
+import org.spongepowered.common.registry.type.RabbitTypeRegistryModule;
 import org.spongepowered.common.registry.type.RailDirectionRegistryModule;
 import org.spongepowered.common.registry.type.RotationRegistryModule;
 import org.spongepowered.common.registry.type.SandTypeRegistryModule;
 import org.spongepowered.common.registry.type.SandstoneTypeRegistryModule;
 import org.spongepowered.common.registry.type.SelectorTypeRegistryModule;
 import org.spongepowered.common.registry.type.ShrubTypeRegistryModule;
+import org.spongepowered.common.registry.type.SkeletonTypeRegistryModule;
 import org.spongepowered.common.registry.type.SkullTypeRegistryModule;
 import org.spongepowered.common.registry.type.SlabTypeRegistryModule;
 import org.spongepowered.common.registry.type.SoundRegistryModule;
@@ -307,6 +313,7 @@ public final class CommonModuleRegistry {
             .registerModule(LogAxis.class, new LogAxisRegistryModule())
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
+            .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
             .registerModule(ParticleType.class, new ParticleRegistryModule())
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
             .registerModule(PlantType.class, new PlantTypeModuleRegistry())
@@ -316,12 +323,14 @@ public final class CommonModuleRegistry {
             .registerModule(PrismarineType.class, new PrismarineRegistryModule())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
             .registerModule(QuartzType.class, new QuartzTypeRegistryModule())
+            .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
             .registerModule(RailDirection.class, new RailDirectionRegistryModule())
             .registerModule(Rotation.class, new RotationRegistryModule())
             .registerModule(SandstoneType.class, new SandstoneTypeRegistryModule())
             .registerModule(SandType.class, new SandTypeRegistryModule())
             .registerModule(SelectorType.class, new SelectorTypeRegistryModule())
             .registerModule(ShrubType.class, new ShrubTypeRegistryModule())
+            .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
             .registerModule(SkullType.class, new SkullTypeRegistryModule())
             .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
