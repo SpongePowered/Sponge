@@ -35,7 +35,7 @@ import org.spongepowered.common.text.format.SpongeTextStyle;
 public final class TextStyleRegistryModule implements RegistryModule {
 
     @RegisterCatalog(TextStyles.class)
-    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = new ImmutableMap.Builder<String, TextStyle.Base>()
+    public static final ImmutableMap<String, TextStyle> textStyleMappings = ImmutableMap.<String, TextStyle>builder()
         .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
         .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
         .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
