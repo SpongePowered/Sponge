@@ -24,21 +24,42 @@
  */
 package org.spongepowered.common.plugin;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.plugin.PluginContainer;
+import com.google.inject.Singleton;
+import org.slf4j.Logger;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeVersion;
 
-public abstract class SpongePluginContainer implements PluginContainer {
+import java.util.Optional;
 
-    protected SpongePluginContainer() {
+@Singleton
+public final class SpongeApiContainer extends SpongePluginContainer {
+
+    protected SpongeApiContainer() {
     }
 
     @Override
-    public String toString() {
-        return Objects.toStringHelper("Plugin")
-                .add("id", this.getId())
-                .add("name", this.getName())
-                .add("version", this.getVersion())
-                .toString();
+    public String getId() {
+        return SpongeImpl.API_ID;
+    }
+
+    @Override
+    public String getName() {
+        return SpongeVersion.API_NAME;
+    }
+
+    @Override
+    public String getVersion() {
+        return SpongeVersion.API_VERSION;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return SpongeImpl.getSlf4jLogger();
+    }
+
+    @Override
+    public Optional<Object> getInstance() {
+        return Optional.of(SpongeImpl.getGame());
     }
 
 }

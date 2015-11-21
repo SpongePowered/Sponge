@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.command.SimpleCommandManager;
 import org.spongepowered.api.config.ConfigManager;
@@ -52,17 +52,12 @@ import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
-import java.nio.file.Path;
-
 import javax.inject.Singleton;
 
 @Singleton
 public abstract class SpongeGame implements Game {
 
-    public static final String API_VERSION = Objects.firstNonNull(SpongeGame.class.getPackage().getSpecificationVersion(), "DEV");
-    public static final String IMPLEMENTATION_VERSION = Objects.firstNonNull(SpongeGame.class.getPackage().getImplementationVersion(), "DEV");
-
-    public static final MinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
+    private final Platform platform;
 
     private final PluginManager pluginManager;
     private final EventManager eventManager;
@@ -72,16 +67,22 @@ public abstract class SpongeGame implements Game {
     private final ConfigManager configManager;
     private final CommandManager commandManager;
 
-    protected SpongeGame(PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry, ServiceManager serviceManager,
-            TeleportHelper teleportHelper) {
+    protected SpongeGame(Platform platform, PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry,
+            ServiceManager serviceManager, TeleportHelper teleportHelper) {
+        this.platform = checkNotNull(platform, "platform");
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
         this.eventManager = checkNotNull(eventManager, "eventManager");
         this.gameRegistry = checkNotNull(gameRegistry, "gameRegistry");
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
         this.configManager = new SpongeConfigManager(this.pluginManager);
-        this.commandManager = new SimpleCommandManager(this, SpongeBootstrap.slf4jLogger, new SpongeCommandDisambiguator(this));
+        this.commandManager = new SimpleCommandManager(this, SpongeImpl.getSlf4jLogger(), new SpongeCommandDisambiguator(this));
 
+    }
+
+    @Override
+    public Platform getPlatform() {
+        return this.platform;
     }
 
     @Override
@@ -130,9 +131,6 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public abstract Path getSavesDirectory();
-
-    @Override
     public SerializationManager getSerializationManager() {
         return SpongeSerializationManager.getInstance();
     }
@@ -150,6 +148,13 @@ public abstract class SpongeGame implements Game {
     @Override
     public ImmutableDataRegistry getImmutableDataRegistry() {
         return SpongeImmutableRegistry.getInstance();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("platform", platform)
+                .toString();
     }
 
 }

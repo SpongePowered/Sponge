@@ -28,9 +28,6 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import org.apache.logging.log4j.spi.AbstractLogger;
-import org.slf4j.Logger;
-import org.slf4j.impl.SLF4JLogger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ProviderExistsException;
@@ -61,7 +58,6 @@ import java.util.UUID;
  */
 @NonnullByDefault
 public final class SpongeBootstrap {
-    static final Logger slf4jLogger = new SLF4JLogger((AbstractLogger) SpongeImpl.getLogger(), SpongeImpl.getLogger().getName());
 
     public static void initializeServices() {
         registerService(SqlService.class, new SqlServiceImpl());

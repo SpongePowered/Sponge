@@ -22,23 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.plugin;
+package org.spongepowered.common;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.plugin.PluginContainer;
+import static com.google.common.base.Objects.firstNonNull;
 
-public abstract class SpongePluginContainer implements PluginContainer {
+import org.spongepowered.api.MinecraftVersion;
 
-    protected SpongePluginContainer() {
+import java.util.Optional;
+
+public final class SpongeVersion {
+
+    // TODO: Keep up to date
+    public static final MinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
+
+    public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), SpongeImpl.API_NAME);
+    public static final String API_VERSION = firstNonNull(getPackage().getSpecificationVersion(), "DEV");
+
+    public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
+    public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
+
+    private SpongeVersion() {
     }
 
-    @Override
-    public String toString() {
-        return Objects.toStringHelper("Plugin")
-                .add("id", this.getId())
-                .add("name", this.getName())
-                .add("version", this.getVersion())
-                .toString();
+    private static Package getPackage() {
+        return SpongeVersion.class.getPackage();
     }
 
 }

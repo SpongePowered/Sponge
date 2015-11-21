@@ -324,13 +324,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
             String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
             this.worldConfig =
                     new SpongeConfig<>(SpongeConfig.Type.WORLD,
-                                       SpongeImpl.getSpongeConfigDir()
+                            SpongeImpl.getSpongeConfigDir()
                                     .resolve("worlds")
                                     .resolve(providerName)
                                     .resolve((providerIn.getDimensionId() == 0 ? "DIM0"
                                             : DimensionRegistryModule.getInstance().getWorldFolder(providerIn.getDimensionId())))
                                     .resolve("world.conf"),
-                                       SpongeImpl.ECOSYSTEM_NAME.toLowerCase());
+                            SpongeImpl.ECOSYSTEM_ID);
         }
 
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {

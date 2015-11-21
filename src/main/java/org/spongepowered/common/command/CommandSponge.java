@@ -325,8 +325,8 @@ public class CommandSponge {
                 .description(Texts.of("Display Sponge's current version"))
                 .permission("sponge.command.version")
                 .executor((src, args) -> {
-                    src.sendMessage(Texts.of("SpongeMod: ", title(SpongeImpl.getGame().getPlatform().getVersion()), "\n",
-                                             "SpongeAPI: ", title(SpongeImpl.getGame().getPlatform().getApiVersion())));
+                    src.sendMessage(Texts.of("SpongeMod: ", title(SpongeImpl.getGame().getPlatform().getImplementation().getVersion()), "\n",
+                            "SpongeAPI: ", title(SpongeImpl.getGame().getPlatform().getApi().getVersion())));
                     return CommandResult.success();
                 })
                 .build();

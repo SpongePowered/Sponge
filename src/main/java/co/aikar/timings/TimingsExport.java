@@ -87,7 +87,7 @@ class TimingsExport extends Thread {
     static void reportTimings(CommandSource sender) {
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", SpongeImpl.getGame().getPlatform().getVersion())
+                .add("version", SpongeImpl.getGame().getPlatform().getImplementation().getVersion())
                 .add("maxplayers", SpongeImpl.getGame().getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)

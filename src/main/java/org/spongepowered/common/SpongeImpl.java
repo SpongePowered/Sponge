@@ -30,6 +30,7 @@ import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
 import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -47,7 +48,11 @@ import javax.inject.Singleton;
 @Singleton
 public class SpongeImpl {
 
+    public static final String API_NAME = "SpongeAPI";
+    public static final String API_ID = "spongeapi";
+
     public static final String ECOSYSTEM_NAME = "Sponge";
+    public static final String ECOSYSTEM_ID = "sponge";
 
     @Nullable
     private static SpongeImpl instance;
@@ -55,13 +60,14 @@ public class SpongeImpl {
     private static final Path gameDir = SpongeLaunch.getGameDirectory();
     private static final Path configDir = SpongeLaunch.getConfigDirectory();
     private static final Path pluginsDir = SpongeLaunch.getPluginsDirectory();
-    private static final Path spongeConfigDir = configDir.resolve("sponge");
+    private static final Path spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
 
     @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
 
     private final Injector injector;
     private final Game game;
     private final Logger logger;
+    private final org.slf4j.Logger slf4jLogger;
     private final PluginContainer plugin;
     private final PluginContainer minecraftPlugin;
 
@@ -75,6 +81,7 @@ public class SpongeImpl {
         this.injector = checkNotNull(injector, "injector");
         this.game = checkNotNull(game, "game");
         this.logger = checkNotNull(logger, "logger");
+        this.slf4jLogger = LoggerFactory.getLogger(this.logger.getName());
         this.plugin = checkNotNull(plugin, "plugin");
         this.minecraftPlugin = checkNotNull(minecraftPlugin, "minecraftPlugin");
     }
@@ -108,6 +115,10 @@ public class SpongeImpl {
         return getInstance().logger;
     }
 
+    public static org.slf4j.Logger getSlf4jLogger() {
+        return getInstance().slf4jLogger;
+    }
+
     public static PluginContainer getPlugin() {
         return getInstance().plugin;
     }
@@ -134,7 +145,7 @@ public class SpongeImpl {
 
     public static SpongeConfig<SpongeConfig.GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
-            globalConfig = new SpongeConfig<>(GLOBAL, spongeConfigDir.resolve("global.conf"), "sponge");
+            globalConfig = new SpongeConfig<>(GLOBAL, spongeConfigDir.resolve("global.conf"), ECOSYSTEM_ID);
         }
 
         return globalConfig;

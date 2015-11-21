@@ -579,8 +579,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         } else {
             // Migrate old NBT data to new location
             // Note: this should be removed soon
-            if (nbt.hasKey("Sponge")) {
-                this.spongeNbt = nbt.getCompoundTag("Sponge");
+            if (nbt.hasKey(SpongeImpl.ECOSYSTEM_NAME)) {
+                this.spongeNbt = nbt.getCompoundTag(SpongeImpl.ECOSYSTEM_NAME);
             }
             this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
         }

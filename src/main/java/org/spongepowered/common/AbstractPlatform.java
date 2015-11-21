@@ -26,50 +26,52 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.Objects;
+import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.plugin.PluginContainer;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Singleton
 public abstract class AbstractPlatform implements Platform {
 
+    private final PluginContainer api;
+    private final PluginContainer impl;
     private final MinecraftVersion minecraftVersion;
-    private final String apiVersion;
-    private final String version;
 
     protected final Map<String, Object> platformMap = new HashMap<String, Object>() {
 
-        private static final long serialVersionUID = 4481663796339419546L;
-
         @Override
         public Object put(String key, Object value) {
-            checkArgument(!this.containsKey(key), "Cannot set the value of the existing key " + key);
+            checkArgument(!this.containsKey(key), "Cannot set the value of the existing key %s", key);
             return super.put(key, value);
         }
     };
 
-    public AbstractPlatform(MinecraftVersion minecraftVersion, String apiVersion, String version) {
+    protected AbstractPlatform(PluginContainer api, PluginContainer impl, MinecraftVersion minecraftVersion) {
+        this.api = api;
+        this.impl = impl;
         this.minecraftVersion = minecraftVersion;
-        this.apiVersion = apiVersion;
-        this.version = version;
 
-        this.platformMap.put("Name", this.getName());
         this.platformMap.put("Type", this.getType());
-        this.platformMap.put("ExecutionType", this.getExecutionType());
-        this.platformMap.put("ApiVersion", this.getApiVersion());
-        this.platformMap.put("ImplementationVersion", this.getVersion());
+        this.platformMap.put("ApiName", this.api.getName());
+        this.platformMap.put("ApiVersion", this.api.getVersion());
+        this.platformMap.put("ImplementationName", this.impl.getName());
+        this.platformMap.put("ImplementationVersion", this.impl.getVersion());
         this.platformMap.put("MinecraftVersion", this.getMinecraftVersion());
     }
 
     @Override
-    public String getVersion() {
-        return this.version;
+    public PluginContainer getApi() {
+        return this.api;
     }
 
     @Override
-    public String getApiVersion() {
-        return this.apiVersion;
+    public PluginContainer getImplementation() {
+        return this.impl;
     }
 
     @Override
@@ -78,13 +80,19 @@ public abstract class AbstractPlatform implements Platform {
     }
 
     @Override
-    public String getName() {
-        return "Sponge";
+    public final Map<String, Object> asMap() {
+        return this.platformMap;
     }
 
     @Override
-    public final Map<String, Object> asMap() {
-        return this.platformMap;
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("type", getType())
+                .add("executionType", getExecutionType())
+                .add("api", this.api)
+                .add("impl", this.impl)
+                .add("minecraftVersion", getMinecraftVersion())
+                .toString();
     }
 
 }

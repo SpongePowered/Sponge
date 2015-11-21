@@ -124,8 +124,7 @@ public final class DimensionRegistryModule implements ExtraClassCatalogRegistryM
             if (!isConfigRegistered(provider.getClass())) {
                 String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
                 SpongeConfig<SpongeConfig.DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
-                                                                                       SpongeImpl
-                                                                                           .getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), "sponge");
+                    SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
                 registerConfig(provider.getClass(), config);
             }
             ((IMixinWorldProvider) provider).setDimensionConfig(getConfig(provider.getClass()));
