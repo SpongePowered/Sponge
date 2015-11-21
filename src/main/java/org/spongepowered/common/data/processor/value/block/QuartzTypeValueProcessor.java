@@ -40,6 +40,7 @@ public class QuartzTypeValueProcessor extends AbstractCatalogDataValueProcessor<
         super(Keys.QUARTZ_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.QUARTZ_BLOCK || container.getItem() == ItemTypes.QUARTZ_STAIRS;
     }

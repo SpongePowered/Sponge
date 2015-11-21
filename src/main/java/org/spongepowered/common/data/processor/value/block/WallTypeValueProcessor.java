@@ -40,6 +40,7 @@ public class WallTypeValueProcessor extends AbstractCatalogDataValueProcessor<Wa
         super(Keys.WALL_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.COBBLESTONE_WALL;
     }

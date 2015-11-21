@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -65,6 +66,7 @@ public class StaticMixinHelper {
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
     public static int lastDestroyedEntityId = -1;
+    public static EntityLivingBase currentTargetEntity;
 
     @SuppressWarnings({"deprecation", "rawtypes"})
     public static Class getCallerClass(int level) {

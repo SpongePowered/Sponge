@@ -39,6 +39,7 @@ public class PistonTypeValueProcessor extends AbstractCatalogDataValueProcessor<
         super(Keys.PISTON_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.PISTON;
     }

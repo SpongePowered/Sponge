@@ -40,6 +40,7 @@ public class BrickTypeValueProcessor extends AbstractCatalogDataValueProcessor<B
         super(Keys.BRICK_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.STONEBRICK || container.getItem() == ItemTypes.STONE_BRICK_STAIRS;
     }

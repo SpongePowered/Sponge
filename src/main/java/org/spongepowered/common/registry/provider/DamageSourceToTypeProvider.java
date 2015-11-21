@@ -40,36 +40,36 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         return Holder.INSTANCE;
     }
 
+    private final Map<String, DamageType> damageSourceToTypeMappings = new HashMap<>();
+
     private DamageSourceToTypeProvider() {
 
-        damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
-        damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
-        damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
-        damageSourceToTypeMappings.put("drown", DamageTypes.DROWN);
-        damageSourceToTypeMappings.put("fall", DamageTypes.CONTACT);
-        damageSourceToTypeMappings.put("fallingblock", DamageTypes.CONTACT);
-        damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
-        damageSourceToTypeMappings.put("indirectmagic", DamageTypes.MAGIC);
-        damageSourceToTypeMappings.put("infire", DamageTypes.FIRE);
-        damageSourceToTypeMappings.put("inwall", DamageTypes.CONTACT);
-        damageSourceToTypeMappings.put("lava", DamageTypes.FIRE);
-        damageSourceToTypeMappings.put("lightningbolt", DamageTypes.PROJECTILE);
-        damageSourceToTypeMappings.put("magic", DamageTypes.MAGIC);
-        damageSourceToTypeMappings.put("mob", DamageTypes.ATTACK);
-        damageSourceToTypeMappings.put("onfire", DamageTypes.FIRE);
-        damageSourceToTypeMappings.put("outofworld", DamageTypes.VOID);
-        damageSourceToTypeMappings.put("player", DamageTypes.ATTACK);
-        damageSourceToTypeMappings.put("starve", DamageTypes.HUNGER);
-        damageSourceToTypeMappings.put("thorns", DamageTypes.MAGIC);
-        damageSourceToTypeMappings.put("thrown", DamageTypes.CONTACT);
-        damageSourceToTypeMappings.put("wither", DamageTypes.MAGIC);
+        this.damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
+        this.damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("drown", DamageTypes.DROWN);
+        this.damageSourceToTypeMappings.put("fall", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("fallingblock", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
+        this.damageSourceToTypeMappings.put("indirectmagic", DamageTypes.MAGIC);
+        this.damageSourceToTypeMappings.put("infire", DamageTypes.FIRE);
+        this.damageSourceToTypeMappings.put("inwall", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("lava", DamageTypes.FIRE);
+        this.damageSourceToTypeMappings.put("lightningbolt", DamageTypes.PROJECTILE);
+        this.damageSourceToTypeMappings.put("magic", DamageTypes.MAGIC);
+        this.damageSourceToTypeMappings.put("mob", DamageTypes.ATTACK);
+        this.damageSourceToTypeMappings.put("onfire", DamageTypes.FIRE);
+        this.damageSourceToTypeMappings.put("outofworld", DamageTypes.VOID);
+        this.damageSourceToTypeMappings.put("player", DamageTypes.ATTACK);
+        this.damageSourceToTypeMappings.put("starve", DamageTypes.HUNGER);
+        this.damageSourceToTypeMappings.put("thorns", DamageTypes.MAGIC);
+        this.damageSourceToTypeMappings.put("thrown", DamageTypes.PROJECTILE);
+        this.damageSourceToTypeMappings.put("wither", DamageTypes.MAGIC);
     }
-
-    public static final Map<String, DamageType> damageSourceToTypeMappings = new HashMap<>();
 
     @Override
     public Optional<DamageType> get(String key) {
-        return Optional.ofNullable(damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase()));
+        return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase()));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
     }
 
     public void addCustom(String in) {
-        damageSourceToTypeMappings.put(in, DamageTypes.CUSTOM);
+        this.damageSourceToTypeMappings.put(in, DamageTypes.CUSTOM);
     }
 
     private static final class Holder {

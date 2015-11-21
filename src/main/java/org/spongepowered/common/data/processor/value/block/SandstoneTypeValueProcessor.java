@@ -40,6 +40,7 @@ public class SandstoneTypeValueProcessor extends AbstractCatalogDataValueProcess
         super(Keys.SANDSTONE_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.SANDSTONE || container.getItem() == ItemTypes.SANDSTONE_STAIRS;
     }

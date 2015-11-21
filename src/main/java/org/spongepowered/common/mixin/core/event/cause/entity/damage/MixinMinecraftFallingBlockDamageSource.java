@@ -22,53 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.cause.entity.damage;
+package org.spongepowered.common.mixin.core.event.cause.entity.damage;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
+import org.spongepowered.api.entity.FallingBlock;
+import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.MinecraftFallingBlockDamageSource;
 
-public class SpongeDamageType implements DamageType {
+@Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
+public abstract class MixinMinecraftFallingBlockDamageSource extends MixinEntityDamageSource implements FallingBlockDamageSource {
 
-    private String id; // TODO: figure out how to handle mods
-    private String name;
+    @Shadow(remap = false) private ImmutableFallingBlockData fallingBlockData;
 
-    public SpongeDamageType(String name) {
-        this.name = name;
-        this.id = name.toLowerCase();
+    @Override
+    public FallingBlock getSource() {
+        return (FallingBlock) super.getSource();
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeDamageType other = (SpongeDamageType) obj;
-        return this.id.equals(other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
+    public ImmutableFallingBlockData getFallingBlockData() {
+        return this.fallingBlockData;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .toString();
+        return Objects.toStringHelper("FallingBlockDamageSource")
+            .add("Name", this.damageType)
+            .add("Type", this.damage$getDamageType().getId())
+            .add("FallingBlock", getSource().toString())
+            .add("Data", getFallingBlockData())
+            .toString();
     }
+
 }

@@ -27,43 +27,41 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.common.event.SpongeDamageType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.common.data.type.SpongeEquipmentType;
+import org.spongepowered.common.data.type.SpongeEquipmentTypeWorn;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-public final class DamageTypeRegistryModule implements CatalogRegistryModule<DamageType> {
+public class EquipmentTypeRegistryModule implements CatalogRegistryModule<EquipmentType> {
 
-    @RegisterCatalog(DamageTypes.class)
-    private final ImmutableMap<String, DamageType> damageTypeMappings = new ImmutableMap.Builder<String, DamageType>()
-        .put("attack", new SpongeDamageType("attack"))
-        .put("contact", new SpongeDamageType("contact"))
-        .put("custom", new SpongeDamageType("custom"))
-        .put("drown", new SpongeDamageType("drown"))
-        .put("explosive", new SpongeDamageType("explosive"))
-        .put("fall", new SpongeDamageType("fall"))
-        .put("fire", new SpongeDamageType("fire"))
-        .put("generic", new SpongeDamageType("generic"))
-        .put("hunger", new SpongeDamageType("hunger"))
-        .put("magic", new SpongeDamageType("magic"))
-        .put("projectile", new SpongeDamageType("projectile"))
-        .put("suffocate", new SpongeDamageType("suffocate"))
-        .put("void", new SpongeDamageType("void"))
-        .build();
+    @RegisterCatalog(EquipmentTypes.class)
+    private final Map<String, EquipmentType> equipmentTypeMap = new HashMap<>();
 
     @Override
-    public Optional<DamageType> getById(String id) {
-        return Optional.ofNullable(this.damageTypeMappings.get(checkNotNull(id).toLowerCase()));
+    public Optional<EquipmentType> getById(String id) {
+        return Optional.ofNullable(this.equipmentTypeMap.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
-    public Collection<DamageType> getAll() {
-        return ImmutableList.copyOf(this.damageTypeMappings.values());
+    public Collection<EquipmentType> getAll() {
+        return ImmutableList.copyOf(this.equipmentTypeMap.values());
     }
 
+    @Override
+    public void registerDefaults() {
+        this.equipmentTypeMap.put("any", new SpongeEquipmentType("any"));
+        this.equipmentTypeMap.put("equipped", new SpongeEquipmentType("equipped"));
+        this.equipmentTypeMap.put("headwear", new SpongeEquipmentTypeWorn("head", 0));
+        this.equipmentTypeMap.put("chestplate", new SpongeEquipmentTypeWorn("chestplate", 1));
+        this.equipmentTypeMap.put("leggings", new SpongeEquipmentTypeWorn("leggings", 2));
+        this.equipmentTypeMap.put("boots", new SpongeEquipmentTypeWorn("boots", 3));
+        this.equipmentTypeMap.put("worn", new SpongeEquipmentTypeWorn("worn", 0));
+    }
 }

@@ -27,15 +27,19 @@ package org.spongepowered.common.mixin.core.entity;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
@@ -55,6 +59,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -66,6 +71,8 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.event.DamageEventHandler;
+import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -88,6 +95,9 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.entity.Entity.class)
 public abstract class MixinEntity implements Entity, IMixinEntity {
 
+    private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;lava:Lnet/minecraft/util/DamageSource;";
+    private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
+    private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;inFire:Lnet/minecraft/util/DamageSource;";
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
@@ -115,6 +125,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public boolean isDead;
     @Shadow public boolean onGround;
     @Shadow public boolean inWater;
+    @Shadow protected boolean isImmuneToFire;
     @Shadow public int hurtResistantTime;
     @Shadow public int fireResistance;
     @Shadow public int fire;
@@ -133,9 +144,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract String getCustomNameTag();
     @Shadow public abstract void setCustomNameTag(String name);
     @Shadow public abstract UUID getUniqueID();
+    @Shadow public abstract AxisAlignedBB getEntityBoundingBox();
     @Shadow protected abstract boolean getAlwaysRenderNameTag();
     @Shadow protected abstract void setAlwaysRenderNameTag(boolean visible);
+    @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
@@ -165,9 +179,63 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
+    private DamageSource originalLava;
+
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    public void preSetOnFire(CallbackInfo callbackInfo) {
+        if (!this.worldObj.isRemote) {
+            this.originalLava = DamageSource.lava;
+            AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
+            Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
+                block.getMaterial() == Material.lava);
+            DamageSource.lava = new MinecraftBlockDamageSource("lava", location).setFireDamage();
+        }
+    }
+
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD))
+    public void postSetOnFire(CallbackInfo callbackInfo) {
+        if (!this.worldObj.isRemote) {
+            if (this.originalLava == null) {
+                SpongeImpl.getLogger().error("Original lava is null!");
+                Thread.dumpStack();
+            }
+            DamageSource.lava = this.originalLava;
+        }
+    }
+
+    private DamageSource originalInFire;
+
+    @Inject(method = "dealFireDamage", at = @At(value = "FIELD", target = FIRE_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    public void preFire(CallbackInfo callbackInfo) {
+        // Sponge Start - Find the fire block!
+        if (!this.worldObj.isRemote) {
+            this.originalInFire = DamageSource.inFire;
+            AxisAlignedBB bb = this.getEntityBoundingBox().contract(0.001D, 0.001D, 0.001D);
+            Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
+                block == Blocks.fire || block == Blocks.flowing_lava || block == Blocks.lava);
+            DamageSource.inFire = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
+        }
+    }
+
+    @Inject(method = "dealFireDamage", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD))
+    public void postDealFireDamage(CallbackInfo callbackInfo) {
+        if (!this.worldObj.isRemote) {
+            if (this.originalInFire == null) {
+                SpongeImpl.getLogger().error("Original fire is null!");
+                Thread.dumpStack();
+            }
+            DamageSource.inFire = this.originalInFire;
+        }
+    }
+
     @Override
     public void setEyeHeight(Double value) {
         this.modifiedEyeHeight = value;
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        // Until mixin can resolve it's funkyness with default methods.
     }
 
     @Override

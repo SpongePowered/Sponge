@@ -22,41 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.block;
+package org.spongepowered.common.mixin.core.event.cause.entity.damage;
 
-import net.minecraft.block.BlockStone;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.StoneType;
-import org.spongepowered.api.data.type.StoneTypes;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.data.processor.common.AbstractCatalogDataValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import com.google.common.base.Objects;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.MinecraftBlockDamageSource;
 
-public class StoneTypeValueProcessor extends AbstractCatalogDataValueProcessor<StoneType, Value<StoneType>> {
+@Mixin(value = MinecraftBlockDamageSource.class, priority = 991)
+public abstract class MixinMinecraftBlockDamageSource extends MixinDamageSource implements BlockDamageSource {
 
-    public StoneTypeValueProcessor() {
-        super(Keys.STONE_TYPE);
+    @Shadow(remap = false) private BlockSnapshot blockSnapshot;
+    @Shadow(remap = false) private Location<World> location;
+
+    @Override
+    public Location<World> getLocation() {
+        return this.location;
     }
 
     @Override
-    protected boolean supports(ItemStack container) {
-        return container.getItem() == ItemTypes.STONE || container.getItem() == ItemTypes.STONE_STAIRS;
+    public BlockSnapshot getBlockSnapshot() {
+        return this.blockSnapshot;
     }
 
     @Override
-    protected StoneType getFromMeta(int meta) {
-        return (StoneType) (Object) BlockStone.EnumType.byMetadata(meta);
-    }
-
-    @Override
-    protected int setToMeta(StoneType type) {
-        return ((BlockStone.EnumType) (Object) type).getMetadata();
-    }
-
-    @Override
-    protected Value<StoneType> constructValue(StoneType defaultValue) {
-        return new SpongeValue<>(Keys.STONE_TYPE, StoneTypes.STONE, defaultValue);
+    public String toString() {
+        return Objects.toStringHelper("BlockDamageSource")
+            .add("Name", this.damageType)
+            .add("Type", damage$getDamageType().getId())
+            .add("BlockSnapshot", getBlockSnapshot())
+            .add("Location", this.location)
+            .toString();
     }
 }

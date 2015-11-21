@@ -40,6 +40,7 @@ public class DisguisedBlockTypeValueProcessor extends AbstractCatalogDataValuePr
         super(Keys.DISGUISED_BLOCK_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.MONSTER_EGG;
     }

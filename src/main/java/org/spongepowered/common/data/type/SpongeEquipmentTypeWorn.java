@@ -22,4 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.event.cause.entity.damage;
+package org.spongepowered.common.data.type;
+
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypeWorn;
+
+public class SpongeEquipmentTypeWorn extends SpongeEquipmentType implements EquipmentTypeWorn {
+
+    private final int slot;
+
+    public SpongeEquipmentTypeWorn(String id, int slot) {
+        super(id);
+        this.slot = slot;
+    }
+}

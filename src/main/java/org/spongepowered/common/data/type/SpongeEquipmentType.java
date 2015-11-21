@@ -22,30 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.event.cause.entity.damage;
+package org.spongepowered.common.data.type;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 
-@Mixin(value = net.minecraft.util.EntityDamageSource.class, priority = 991)
-public abstract class MixinEntityDamageSource extends MixinDamageSource implements EntityDamageSource {
+public class SpongeEquipmentType implements EquipmentType {
 
-    @Shadow protected net.minecraft.entity.Entity damageSourceEntity;
+    private final String id;
 
-    @Override
-    public Entity getSource() {
-        return ((Entity) this.damageSourceEntity);
+    public SpongeEquipmentType(String id) {
+        this.id = id;
     }
 
     @Override
-    public String toString() {
-        return Objects.toStringHelper("EntityDamageSource")
-            .add("Name", this.damageType)
-            .add("Type", this.damage$getDamageType().getId())
-            .add("Source", getSource())
-            .toString();
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.id;
     }
 }

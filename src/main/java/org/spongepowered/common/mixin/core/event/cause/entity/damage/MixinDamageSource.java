@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.event.cause.entity.damage;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -39,7 +40,7 @@ import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 
 import java.util.Optional;
 
-@Mixin(net.minecraft.util.DamageSource.class)
+@Mixin(value = net.minecraft.util.DamageSource.class, priority = 990)
 @Implements(@Interface(iface = DamageSource.class, prefix = "damage$"))
 public abstract class MixinDamageSource {
 
@@ -93,4 +94,11 @@ public abstract class MixinDamageSource {
         return this.apiDamageType;
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper("DamageSource")
+            .add("Name", this.damageType)
+            .add("Type", this.apiDamageType.getId())
+            .toString();
+    }
 }

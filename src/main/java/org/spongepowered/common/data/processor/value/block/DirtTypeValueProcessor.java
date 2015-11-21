@@ -40,6 +40,7 @@ public class DirtTypeValueProcessor extends AbstractCatalogDataValueProcessor<Di
         super(Keys.DIRT_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.DIRT;
     }

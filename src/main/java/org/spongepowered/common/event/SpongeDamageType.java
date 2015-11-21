@@ -22,41 +22,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.block;
+package org.spongepowered.common.event;
 
-import net.minecraft.block.BlockStone;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.StoneType;
-import org.spongepowered.api.data.type.StoneTypes;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.data.processor.common.AbstractCatalogDataValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import com.google.common.base.Objects;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
-public class StoneTypeValueProcessor extends AbstractCatalogDataValueProcessor<StoneType, Value<StoneType>> {
+public class SpongeDamageType implements DamageType {
 
-    public StoneTypeValueProcessor() {
-        super(Keys.STONE_TYPE);
+    private String id; // TODO: figure out how to handle mods
+    private String name;
+
+    public SpongeDamageType(String name) {
+        this.name = name;
+        this.id = name.toLowerCase();
     }
 
     @Override
-    protected boolean supports(ItemStack container) {
-        return container.getItem() == ItemTypes.STONE || container.getItem() == ItemTypes.STONE_STAIRS;
+    public String getId() {
+        return this.id;
     }
 
     @Override
-    protected StoneType getFromMeta(int meta) {
-        return (StoneType) (Object) BlockStone.EnumType.byMetadata(meta);
+    public String getName() {
+        return this.name;
     }
 
     @Override
-    protected int setToMeta(StoneType type) {
-        return ((BlockStone.EnumType) (Object) type).getMetadata();
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeDamageType other = (SpongeDamageType) obj;
+        return this.id.equals(other.id);
     }
 
     @Override
-    protected Value<StoneType> constructValue(StoneType defaultValue) {
-        return new SpongeValue<>(Keys.STONE_TYPE, StoneTypes.STONE, defaultValue);
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
     }
 }

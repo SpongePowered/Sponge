@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.cause.entity.damage;
+package org.spongepowered.common.event;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;

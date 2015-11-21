@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.cause.entity.damage;
+package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -30,13 +30,11 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-public final class SpongeBlockDamageSourceBuilder implements BlockDamageSourceBuilder {
+public final class SpongeBlockDamageSourceBuilder implements BlockDamageSource.Builder {
 
-    private boolean creative;
     private boolean scales;
     private boolean armor;
     private boolean explosion;
@@ -47,54 +45,53 @@ public final class SpongeBlockDamageSourceBuilder implements BlockDamageSourceBu
     private BlockSnapshot blockSnapshot;
 
     public SpongeBlockDamageSourceBuilder() {
-
     }
 
 
     @Override
-    public BlockDamageSourceBuilder scalesWithDifficulty() {
+    public BlockDamageSource.Builder scalesWithDifficulty() {
         this.scales = true;
         return this;
     }
 
     @Override
-    public BlockDamageSourceBuilder bypassesArmor() {
+    public BlockDamageSource.Builder bypassesArmor() {
         this.armor = true;
         return this;
     }
 
     @Override
-    public BlockDamageSourceBuilder explosion() {
+    public BlockDamageSource.Builder explosion() {
         this.explosion = true;
         return this;
     }
 
     @Override
-    public BlockDamageSourceBuilder absolute() {
+    public BlockDamageSource.Builder absolute() {
         this.absolute = true;
         return this;
     }
 
     @Override
-    public BlockDamageSourceBuilder magical() {
+    public BlockDamageSource.Builder magical() {
         this.magical = true;
         return this;
     }
 
     @Override
-    public BlockDamageSourceBuilder type(DamageType damageType) {
+    public BlockDamageSource.Builder type(DamageType damageType) {
         this.damageType = checkNotNull(damageType);
         return this;
     }
 
     @Override
-    public BlockDamageSourceBuilder block(Location<World> location) {
+    public BlockDamageSource.Builder block(Location<World> location) {
         this.location = location;
         return this;
     }
 
     @Override
-    public BlockDamageSourceBuilder block(BlockSnapshot blockState) {
+    public BlockDamageSource.Builder block(BlockSnapshot blockState) {
         this.blockSnapshot = checkNotNull(blockState);
         return this;
     }
@@ -104,13 +101,31 @@ public final class SpongeBlockDamageSourceBuilder implements BlockDamageSourceBu
         checkState(this.location != null);
         checkState(this.blockSnapshot != null);
         checkState(this.damageType != null);
-        return new SpongeBlockDamageSource(this.location,
-                                           this.blockSnapshot,
-                                           this.damageType,
-                                           this.absolute,
-                                           this.armor,
-                                           this.scales,
-                                           this.explosion,
-                                           this.magical);
+        MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getId(), this.location);
+        if (this.absolute) {
+            damageSource.setDamageIsAbsolute();
+        } else if (this.armor) {
+            damageSource.setDamageBypassesArmor();
+        } else if (this.scales) {
+            damageSource.setDifficultyScaled();
+        } else if (this.explosion) {
+            damageSource.setExplosion();
+        } else if (this.magical) {
+            damageSource.setMagicDamage();
+        }
+        return (BlockDamageSource) damageSource;
+    }
+
+    @Override
+    public BlockDamageSource.Builder reset() {
+        this.scales = false;
+        this.armor = false;
+        this.explosion = false;
+        this.absolute = false;
+        this.magical = false;
+        this.damageType = null;
+        this.location = null;
+        this.blockSnapshot = null;
+        return this;
     }
 }

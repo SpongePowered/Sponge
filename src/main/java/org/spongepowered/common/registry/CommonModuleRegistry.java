@@ -77,12 +77,13 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSourceBuilder;
+import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.potion.PotionEffect;
 import org.spongepowered.api.potion.PotionEffectType;
@@ -111,7 +112,7 @@ import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
+import org.spongepowered.common.event.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
@@ -145,6 +146,7 @@ import org.spongepowered.common.registry.type.DoublePlantTypeRegistryModule;
 import org.spongepowered.common.registry.type.DyeColorRegistryModule;
 import org.spongepowered.common.registry.type.EnchantmentRegistryModule;
 import org.spongepowered.common.registry.type.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.EquipmentTypeRegistryModule;
 import org.spongepowered.common.registry.type.FireworkShapeRegistryModule;
 import org.spongepowered.common.registry.type.FishRegistryModule;
 import org.spongepowered.common.registry.type.GameModeRegistryModule;
@@ -247,7 +249,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
             .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
-            .registerBuilderSupplier(BlockDamageSourceBuilder.class, SpongeBlockDamageSourceBuilder::new)
+            .registerBuilderSupplier(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
             .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
             .registerBuilderSupplier(ColoredParticle.Builder.class, SpongeParticleEffectBuilder.BuilderColorable::new)
             .registerBuilderSupplier(NoteParticle.Builder.class, SpongeParticleEffectBuilder.BuilderNote::new)
@@ -284,6 +286,7 @@ public final class CommonModuleRegistry {
             .registerModule(Enchantment.class, new EnchantmentRegistryModule())
             .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
             .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())
+            .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())
             .registerModule(FireworkShape.class, new FireworkShapeRegistryModule())
             .registerModule(Fish.class, new FishRegistryModule())
             .registerModule(GameMode.class, new GameModeRegistryModule())

@@ -40,6 +40,7 @@ public class PrismarineTypeValueProcessor extends AbstractCatalogDataValueProces
         super(Keys.PRISMARINE_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.PRISMARINE;
     }

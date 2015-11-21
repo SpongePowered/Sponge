@@ -22,41 +22,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.block;
+package org.spongepowered.common.event;
 
-import net.minecraft.block.BlockStone;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.StoneType;
-import org.spongepowered.api.data.type.StoneTypes;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.data.processor.common.AbstractCatalogDataValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 
-public class StoneTypeValueProcessor extends AbstractCatalogDataValueProcessor<StoneType, Value<StoneType>> {
+public class SpongeEntityDamageSourceBuilder implements EntityDamageSource.Builder {
 
-    public StoneTypeValueProcessor() {
-        super(Keys.STONE_TYPE);
+    @Override
+    public EntityDamageSource.Builder scalesWithDifficulty() {
+        return null;
     }
 
     @Override
-    protected boolean supports(ItemStack container) {
-        return container.getItem() == ItemTypes.STONE || container.getItem() == ItemTypes.STONE_STAIRS;
+    public EntityDamageSource.Builder bypassesArmor() {
+        return null;
     }
 
     @Override
-    protected StoneType getFromMeta(int meta) {
-        return (StoneType) (Object) BlockStone.EnumType.byMetadata(meta);
+    public EntityDamageSource.Builder explosion() {
+        return null;
     }
 
     @Override
-    protected int setToMeta(StoneType type) {
-        return ((BlockStone.EnumType) (Object) type).getMetadata();
+    public EntityDamageSource.Builder absolute() {
+        return null;
     }
 
     @Override
-    protected Value<StoneType> constructValue(StoneType defaultValue) {
-        return new SpongeValue<>(Keys.STONE_TYPE, StoneTypes.STONE, defaultValue);
+    public EntityDamageSource.Builder magical() {
+        return null;
+    }
+
+    @Override
+    public EntityDamageSource.Builder type(DamageType damageType) {
+        return null;
+    }
+
+    @Override
+    public EntityDamageSource.Builder entity(Entity entity) {
+        return null;
+    }
+
+    @Override
+    public EntityDamageSource build() throws IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public EntityDamageSource.Builder reset() {
+        return null;
     }
 }

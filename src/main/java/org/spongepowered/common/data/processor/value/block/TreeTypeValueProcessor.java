@@ -102,6 +102,7 @@ public class TreeTypeValueProcessor extends AbstractCatalogDataValueProcessor<Tr
         }
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.PLANKS || container.getItem() == ItemTypes.LEAVES
                 || container.getItem() == ItemTypes.LEAVES2 || container.getItem() == ItemTypes.LOG

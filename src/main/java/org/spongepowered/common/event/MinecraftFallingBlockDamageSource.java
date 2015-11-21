@@ -22,30 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.event.cause.entity.damage;
+package org.spongepowered.common.event;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.util.EntityDamageSource;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
 
-@Mixin(value = net.minecraft.util.EntityDamageSource.class, priority = 991)
-public abstract class MixinEntityDamageSource extends MixinDamageSource implements EntityDamageSource {
+public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
-    @Shadow protected net.minecraft.entity.Entity damageSourceEntity;
+    private final ImmutableFallingBlockData fallingBlockData;
 
-    @Override
-    public Entity getSource() {
-        return ((Entity) this.damageSourceEntity);
+    public MinecraftFallingBlockDamageSource(String p_i1567_1_, EntityFallingBlock damageSourceEntityIn) {
+        super(p_i1567_1_, damageSourceEntityIn);
+        this.fallingBlockData = ((DataHolder) damageSourceEntityIn).get(FallingBlockData.class).get().asImmutable();
     }
 
     @Override
-    public String toString() {
-        return Objects.toStringHelper("EntityDamageSource")
-            .add("Name", this.damageType)
-            .add("Type", this.damage$getDamageType().getId())
-            .add("Source", getSource())
-            .toString();
+    public EntityFallingBlock getEntity() {
+        return (EntityFallingBlock) super.getEntity();
     }
+
 }

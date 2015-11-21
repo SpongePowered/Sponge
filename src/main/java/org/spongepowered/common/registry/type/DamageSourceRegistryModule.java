@@ -27,7 +27,9 @@ package org.spongepowered.common.registry.type;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
 import org.spongepowered.common.registry.RegistryModule;
+import org.spongepowered.common.registry.util.RegistrationDependency;
 
+@RegistrationDependency(DamageTypeRegistryModule.class)
 public final class DamageSourceRegistryModule implements RegistryModule {
 
     public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;
@@ -42,12 +44,12 @@ public final class DamageSourceRegistryModule implements RegistryModule {
             DamageSources.class.getDeclaredField("FALLING").set(null, (DamageSource) net.minecraft.util.DamageSource.fall);
             DamageSources.class.getDeclaredField("FIRE_TICK").set(null, (DamageSource) net.minecraft.util.DamageSource.onFire);
             DamageSources.class.getDeclaredField("GENERIC").set(null, (DamageSource) net.minecraft.util.DamageSource.generic);
-            DamageSources.class.getDeclaredField("IN_FIRE").set(null, (DamageSource) net.minecraft.util.DamageSource.inFire);
             DamageSources.class.getDeclaredField("MAGIC").set(null, (DamageSource) net.minecraft.util.DamageSource.magic);
             DamageSources.class.getDeclaredField("MELTING").set(null, DAMAGESOURCE_MELTING);
             DamageSources.class.getDeclaredField("POISON").set(null, DAMAGESOURCE_POISON);
             DamageSources.class.getDeclaredField("STARVATION").set(null, (DamageSource) net.minecraft.util.DamageSource.starve);
             DamageSources.class.getDeclaredField("WITHER").set(null, (DamageSource) net.minecraft.util.DamageSource.wither);
+            DamageSources.class.getDeclaredField("VOID").set(null, (DamageSource) net.minecraft.util.DamageSource.outOfWorld);
         } catch (Exception e) {
             e.printStackTrace();
         }

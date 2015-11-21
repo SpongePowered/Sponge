@@ -40,6 +40,7 @@ public class SandTypeValueProcessor extends AbstractCatalogDataValueProcessor<Sa
         super(Keys.SAND_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.SAND;
     }

@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import com.google.common.base.Objects;
 import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(net.minecraft.enchantment.Enchantment.class)
 public abstract class MixinEnchantment implements Enchantment {
 
+    @Shadow protected String name;
     @Shadow private int weight;
 
     @Shadow public abstract int getMinLevel();
@@ -46,6 +49,7 @@ public abstract class MixinEnchantment implements Enchantment {
     @Shadow public abstract int getMinEnchantability(int level);
     @Shadow public abstract int getMaxEnchantability(int level);
     @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
+    @Shadow(prefix = "minecraft$") public abstract String minecraft$getName();
 
     private String id = "";
 
@@ -92,5 +96,18 @@ public abstract class MixinEnchantment implements Enchantment {
     @Override
     public boolean isCompatibleWith(Enchantment ench) {
         return canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
+    }
+
+    @Intrinsic
+    public String shadow$getName() {
+        return minecraft$getName();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper("Enchantment")
+            .add("Name", shadow$getName())
+            .add("Id", getId())
+            .toString();
     }
 }

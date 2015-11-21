@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageModifierType;
+import org.spongepowered.common.event.SpongeDamageModifierType;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -66,5 +66,6 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
         this.modifierTypeMap.put("armor_enchantment", new SpongeDamageModifierType("Armor Enchantment", "armor_enchantment"));
         this.modifierTypeMap.put("magic", new SpongeDamageModifierType("Magic", "magic"));
         this.modifierTypeMap.put("difficulty", new SpongeDamageModifierType("Difficulty", "difficulty"));
+        this.modifierTypeMap.put("absorption", new SpongeDamageModifierType("Absorption", "absorption"));
     }
 }

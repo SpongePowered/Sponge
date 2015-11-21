@@ -41,6 +41,7 @@ public abstract class AbstractBlockOnlyValueProcessor<T, V extends Value<T>> ext
         super(ItemStack.class, key);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return false;
     }

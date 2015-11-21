@@ -22,30 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.event.cause.entity.damage;
+package org.spongepowered.common.event;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.util.DamageSource;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
-@Mixin(value = net.minecraft.util.EntityDamageSource.class, priority = 991)
-public abstract class MixinEntityDamageSource extends MixinDamageSource implements EntityDamageSource {
+public class MinecraftBlockDamageSource extends DamageSource {
 
-    @Shadow protected net.minecraft.entity.Entity damageSourceEntity;
+    private final BlockSnapshot blockSnapshot;
+    private final Location<World> location;
 
-    @Override
-    public Entity getSource() {
-        return ((Entity) this.damageSourceEntity);
+    public MinecraftBlockDamageSource(String damageTypeIn, Location<World> location) {
+        super(damageTypeIn);
+        this.blockSnapshot = location.createSnapshot();
+        this.location = location;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("EntityDamageSource")
+        return Objects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.damage$getDamageType().getId())
-            .add("Source", getSource())
+            .add("BlockSnapshot", this.blockSnapshot)
+            .add("Location", this.location)
             .toString();
     }
 }

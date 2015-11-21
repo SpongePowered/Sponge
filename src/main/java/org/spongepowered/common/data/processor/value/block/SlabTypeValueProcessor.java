@@ -43,6 +43,7 @@ public class SlabTypeValueProcessor extends AbstractCatalogDataValueProcessor<Sl
         super(Keys.SLAB_TYPE);
     }
 
+    @Override
     protected boolean supports(ItemStack container) {
         return container.getItem() == ItemTypes.STONE_SLAB || container.getItem() == ItemTypes.STONE_SLAB2;
     }
