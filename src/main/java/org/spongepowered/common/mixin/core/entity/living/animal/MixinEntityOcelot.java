@@ -81,6 +81,7 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
+        manipulators.add(getOcelotData());
     }
 
 }
