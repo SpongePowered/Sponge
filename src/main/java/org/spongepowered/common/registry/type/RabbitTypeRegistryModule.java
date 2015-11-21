@@ -22,22 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.monster;
+package org.spongepowered.common.registry.type;
 
-import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.living.monster.Skeleton;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RabbitTypes;
+import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.util.RegisterCatalog;
 
-@NonnullByDefault
-@Mixin(EntitySkeleton.class)
-public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitType> {
+
+    @RegisterCatalog(RabbitTypes.class)
+    private final Map<String, RabbitType> rabbitTypeMap = new HashMap<>();
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        manipulators.add(getSkeletonData());
+    public Optional<RabbitType> getById(String id) {
+        return Optional.ofNullable(this.rabbitTypeMap.get(checkNotNull(id).toLowerCase()));
     }
+
+    @Override
+    public Collection<RabbitType> getAll() {
+        return ImmutableList.copyOf(this.rabbitTypeMap.values());
+    }
+
+    @Override
+    public void registerDefaults() {
+        this.rabbitTypeMap.putAll(SpongeEntityConstants.RABBIT_TYPES);
+        
+    }
+
 }

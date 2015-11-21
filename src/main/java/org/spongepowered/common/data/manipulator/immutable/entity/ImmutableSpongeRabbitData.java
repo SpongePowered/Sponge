@@ -22,22 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.monster;
+package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.living.monster.Skeleton;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRabbitData;
+import org.spongepowered.api.data.manipulator.mutable.entity.RabbitData;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RabbitTypes;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData;
 
-import java.util.List;
+public class ImmutableSpongeRabbitData extends AbstractImmutableSingleCatalogData<RabbitType, ImmutableRabbitData, RabbitData> implements ImmutableRabbitData {
 
-@NonnullByDefault
-@Mixin(EntitySkeleton.class)
-public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        manipulators.add(getSkeletonData());
+    public ImmutableSpongeRabbitData(RabbitType type) {
+        super(ImmutableRabbitData.class, type, RabbitTypes.BROWN, Keys.RABBIT_TYPE, SpongeRabbitData.class);
     }
+
 }

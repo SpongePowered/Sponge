@@ -22,22 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.living.monster;
+package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.living.monster.Skeleton;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableOcelotData;
+import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 
-import java.util.List;
+public class ImmutableSpongeOcelotData extends AbstractImmutableSingleCatalogData<OcelotType, ImmutableOcelotData, OcelotData> implements ImmutableOcelotData {
 
-@NonnullByDefault
-@Mixin(EntitySkeleton.class)
-public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        manipulators.add(getSkeletonData());
+    public ImmutableSpongeOcelotData(OcelotType type) {
+        super(ImmutableOcelotData.class, type, OcelotTypes.WILD_OCELOT, Keys.OCELOT_TYPE, SpongeOcelotData.class);
     }
+
 }

@@ -25,10 +25,17 @@
 package org.spongepowered.common.mixin.core.entity.living.animal;
 
 import net.minecraft.entity.passive.EntityRabbit;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.animal.Rabbit;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.List;
 
 @Mixin(EntityRabbit.class)
 public abstract class MixinEntityRabbit extends MixinEntityAnimal implements Rabbit {
 
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        manipulators.add(getRabbitData());
+    }
 }

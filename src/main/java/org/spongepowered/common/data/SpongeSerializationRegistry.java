@@ -112,11 +112,14 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseDat
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteableData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableOcelotData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePigSaddleData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRabbitData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSittingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkeletonData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
@@ -209,11 +212,14 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
+import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PlayingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.RabbitData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
@@ -369,11 +375,14 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgniteableData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMinecartBlockData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeOcelotData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePigSaddleData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePlayingData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeRabbitData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeScreamingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSittingData;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSkeletonData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSlimeData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSneakingData;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
@@ -465,11 +474,14 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePlayingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
@@ -560,11 +572,14 @@ import org.spongepowered.common.data.processor.data.entity.HorseDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.IgniteableDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.MinecartBlockDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.MovementSpeedDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.OcelotDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.PigSaddleDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.PlayingDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.RabbitDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ScreamingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.ShearedDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SittingDataProcessor;
+import org.spongepowered.common.data.processor.data.entity.SkeletonDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SlimeDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.SneakingDataProcessor;
 import org.spongepowered.common.data.processor.data.entity.TameableDataProcessor;
@@ -682,12 +697,15 @@ import org.spongepowered.common.data.processor.value.entity.IsSittingValueProces
 import org.spongepowered.common.data.processor.value.entity.MaxAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxFallDamageValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.MaxHealthValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.OcelotTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.OffsetValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.PigSaddleValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.PlayingValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.RabbitTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RemainingAirValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.RepresentedBlockValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.ScreamingValueProcessor;
+import org.spongepowered.common.data.processor.value.entity.SkeletonTypeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SlimeValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.SneakingValueProcessor;
 import org.spongepowered.common.data.processor.value.entity.TameableOwnerValueProcessor;
@@ -1210,6 +1228,18 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
                                                   ImmutableSpongeFallingBlockData.class, fallingBlockDataProcessor);
 
+        final SkeletonDataProcessor skeletonDataProcessor = new SkeletonDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class, 
+                ImmutableSpongeSkeletonData.class, skeletonDataProcessor);
+        
+        final OcelotDataProcessor ocelotDataProcessor = new OcelotDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(OcelotData.class, SpongeOcelotData.class, ImmutableOcelotData.class, 
+                ImmutableSpongeOcelotData.class, ocelotDataProcessor);
+        
+        final RabbitDataProcessor rabbitDataProcessor = new RabbitDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(RabbitData.class, SpongeRabbitData.class, ImmutableRabbitData.class, 
+                ImmutableSpongeRabbitData.class, rabbitDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1345,6 +1375,9 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.DELAY, new DelayValueProcessor());
         dataRegistry.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_ITEM, new JukeboxValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SKELETON_TYPE, new SkeletonTypeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.OCELOT_TYPE, new OcelotTypeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.RABBIT_TYPE, new RabbitTypeValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
