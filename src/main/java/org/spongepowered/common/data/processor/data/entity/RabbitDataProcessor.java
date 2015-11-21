@@ -38,6 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.entity.SpongeRabbitType;
 
 import net.minecraft.entity.passive.EntityRabbit;
 
@@ -56,8 +57,10 @@ public class RabbitDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected boolean set(EntityRabbit entity, RabbitType value) {
-        entity.setRabbitType(Integer.parseInt(value.getId()));
-        return true;
+        if (value instanceof SpongeRabbitType) {
+            entity.setRabbitType(((SpongeRabbitType) value).type);
+        }
+        return false;
     }
 
     @Override

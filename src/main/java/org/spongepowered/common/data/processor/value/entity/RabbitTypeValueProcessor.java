@@ -22,61 +22,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.entity;
+package org.spongepowered.common.data.processor.value.entity;
 
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableOcelotData;
-import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
-import org.spongepowered.api.data.type.OcelotType;
-import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RabbitTypes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.entity.SpongeOcelotType;
+import org.spongepowered.common.entity.SpongeRabbitType;
 
-import net.minecraft.entity.passive.EntityOcelot;
+import net.minecraft.entity.passive.EntityRabbit;
 
 import java.util.Optional;
 
-public class OcelotDataProcessor extends AbstractEntitySingleDataProcessor<EntityOcelot, OcelotType, Value<OcelotType>, OcelotData, ImmutableOcelotData> {
+public class RabbitTypeValueProcessor extends AbstractSpongeValueProcessor<EntityRabbit, RabbitType, Value<RabbitType>> {
 
-    public OcelotDataProcessor() {
-        super(EntityOcelot.class, Keys.OCELOT_TYPE);
+    public RabbitTypeValueProcessor() {
+        super(EntityRabbit.class, Keys.RABBIT_TYPE);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionBuilder.failNoData();
     }
 
     @Override
-    protected boolean set(EntityOcelot entity, OcelotType value) {
-        if (value instanceof SpongeOcelotType) {
-            entity.setTameSkin(((SpongeOcelotType) value).type);
+    protected Value<RabbitType> constructValue(RabbitType defaultValue) {
+        return new SpongeValue<>(Keys.RABBIT_TYPE, defaultValue, RabbitTypes.BROWN);
+    }
+
+    @Override
+    protected boolean set(EntityRabbit container, RabbitType value) {
+        if (value instanceof SpongeRabbitType) {
+            container.setRabbitType(((SpongeRabbitType) value).type);
             return true;
         }
         return false;
     }
 
     @Override
-    protected Optional<OcelotType> getVal(EntityOcelot entity) {
-        return Optional.ofNullable(SpongeEntityConstants.OCELOT_IDMAP.get(entity.getTameSkin()));
+    protected Optional<RabbitType> getVal(EntityRabbit container) {
+        return Optional.ofNullable(SpongeEntityConstants.RABBIT_IDMAP.get(container.getRabbitType()));
     }
-
+    
     @Override
-    protected ImmutableValue<OcelotType> constructImmutableValue(OcelotType value) {
-        return ImmutableSpongeValue.cachedOf(Keys.OCELOT_TYPE, OcelotTypes.WILD_OCELOT, value);
-    }
-
-    @Override
-    protected OcelotData createManipulator() {
-        return new SpongeOcelotData();
+    protected ImmutableValue<RabbitType> constructImmutableValue(RabbitType value) {
+        return ImmutableSpongeValue.cachedOf(Keys.RABBIT_TYPE, RabbitTypes.BROWN, value);
     }
 
 }
