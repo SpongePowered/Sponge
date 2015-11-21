@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
-import org.spongepowered.common.entity.SpongeOcelotType;
+import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -56,10 +56,7 @@ public class OcelotTypeRegistryModule implements CatalogRegistryModule<OcelotTyp
 
     @Override
     public void registerDefaults() {
-        this.ocelotTypeMap.put("wild_ocelot", new SpongeOcelotType(0, "wild_ocelot"));
-        this.ocelotTypeMap.put("black_cat", new SpongeOcelotType(1, "black_cat"));
-        this.ocelotTypeMap.put("red_cat", new SpongeOcelotType(2, "red_cat"));
-        this.ocelotTypeMap.put("siamese_cat", new SpongeOcelotType(3, "siamese_cat"));
+        this.ocelotTypeMap.putAll(SpongeEntityConstants.OCELOT_TYPES);
         
     }
 

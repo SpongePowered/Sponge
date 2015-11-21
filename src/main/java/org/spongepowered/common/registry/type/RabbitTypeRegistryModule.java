@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
-import org.spongepowered.common.entity.SpongeRabbitType;
+import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -56,13 +56,7 @@ public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitTyp
 
     @Override
     public void registerDefaults() {
-        this.rabbitTypeMap.put("brown", new SpongeRabbitType(0, "brown"));
-        this.rabbitTypeMap.put("white", new SpongeRabbitType(1, "white"));
-        this.rabbitTypeMap.put("black", new SpongeRabbitType(2, "black"));
-        this.rabbitTypeMap.put("black_and_white", new SpongeRabbitType(3, "black_and_white"));
-        this.rabbitTypeMap.put("gold", new SpongeRabbitType(4, "gold"));
-        this.rabbitTypeMap.put("salt_and_pepper", new SpongeRabbitType(5, "salt_and_pepper"));
-        this.rabbitTypeMap.put("killer", new SpongeRabbitType(99, "killer"));
+        this.rabbitTypeMap.putAll(SpongeEntityConstants.RABBIT_TYPES);
         
     }
 

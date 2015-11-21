@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
-import org.spongepowered.common.entity.SpongeSkeletonType;
+import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -56,8 +56,7 @@ public class SkeletonTypeRegistryModule implements CatalogRegistryModule<Skeleto
 
     @Override
     public void registerDefaults() {
-        this.skeletonTypeMap.put("normal", new SpongeSkeletonType(0, "normal"));
-        this.skeletonTypeMap.put("wither", new SpongeSkeletonType(1, "wither"));
+        this.skeletonTypeMap.putAll(SpongeEntityConstants.SKELETON_TYPES);
     }
 
 }
