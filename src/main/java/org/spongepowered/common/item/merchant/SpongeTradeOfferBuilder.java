@@ -34,8 +34,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
@@ -136,9 +136,9 @@ public class SpongeTradeOfferBuilder implements TradeOffer.Builder, DataBuilder<
                 (DataQueries.EXPERIENCE_QUERY) || !container.contains(DataQueries.MAX_QUERY) || !container.contains(DataQueries.USES_QUERY)) {
             throw new InvalidDataException("Not enough information for constructing a TradeOffer!!");
         }
-        final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
-        final ItemStack firstItem = container.getSerializable(DataQueries.FIRST_QUERY, ItemStack.class, serializationService).get();
-        final ItemStack buyingItem = container.getSerializable(DataQueries.BUYING_QUERY, ItemStack.class, serializationService).get();
+        final SerializationManager serializationManager = SpongeImpl.getGame().getServiceManager().provide(SerializationManager.class).get();
+        final ItemStack firstItem = container.getSerializable(DataQueries.FIRST_QUERY, ItemStack.class, serializationManager).get();
+        final ItemStack buyingItem = container.getSerializable(DataQueries.BUYING_QUERY, ItemStack.class, serializationManager).get();
         final ItemStack secondItem;
         final boolean secondPresent;
         if (container.getString(DataQueries.SECOND_QUERY).isPresent() && container.getString(DataQueries.SECOND_QUERY).get().equals("none")) {
@@ -146,7 +146,7 @@ public class SpongeTradeOfferBuilder implements TradeOffer.Builder, DataBuilder<
             secondItem = null;
         } else {
             secondPresent = true;
-            secondItem = container.getSerializable(DataQueries.SECOND_QUERY, ItemStack.class, serializationService).get();
+            secondItem = container.getSerializable(DataQueries.SECOND_QUERY, ItemStack.class, serializationManager).get();
         }
         TradeOffer.Builder builder = new SpongeTradeOfferBuilder();
         builder.firstBuyingItem(firstItem);

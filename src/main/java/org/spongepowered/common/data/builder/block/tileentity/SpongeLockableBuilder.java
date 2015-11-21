@@ -31,7 +31,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.service.persistence.SerializationManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +53,7 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
         if (!container.contains(new DataQuery("Contents"))) {
             throw new InvalidDataException("The provided container does not contain the data to make a lockable tile entity!");
         }
-        SerializationService service = this.game.getServiceManager().provide(SerializationService.class).get();
+        SerializationManager service = this.game.getServiceManager().provide(SerializationManager.class).get();
         List<DataView> contents = container.getViewList(new DataQuery("Contents")).get();
         for (DataView content: contents) {
             net.minecraft.item.ItemStack stack =

@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.configuration.SpongeConfig.TimingsCategory;
 
 import java.util.Optional;
@@ -49,20 +49,20 @@ public class SpongeTimingsFactory implements TimingsFactory {
     private final boolean moduleEnabled;
 
     public SpongeTimingsFactory() {
-        this.moduleEnabled = Sponge.getGlobalConfig().getConfig().getModules().usePluginTimings();
+        this.moduleEnabled = SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginTimings();
     }
 
     public void init() {
-        TimingsCategory config = Sponge.getGlobalConfig().getConfig().getTimings();
+        TimingsCategory config = SpongeImpl.getGlobalConfig().getConfig().getTimings();
         setVerboseTimingsEnabled(config.isVerbose());
         setTimingsEnabled(this.moduleEnabled && config.isEnabled());
         setHistoryInterval(config.getHistoryInterval());
         setHistoryLength(config.getHistoryLength());
 
-        Sponge.getLogger().info("Sponge Timings: " + this.timingsEnabled +
-                " - Verbose: " + this.verboseEnabled +
-                " - Interval: " + timeSummary(this.historyInterval / 20) +
-                " - Length: " + timeSummary(this.historyLength / 20));
+        SpongeImpl.getLogger().info("Sponge Timings: " + this.timingsEnabled +
+                                    " - Verbose: " + this.verboseEnabled +
+                                    " - Interval: " + timeSummary(this.historyInterval / 20) +
+                                    " - Length: " + timeSummary(this.historyLength / 20));
     }
 
     private static String timeSummary(int seconds) {
@@ -79,7 +79,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     }
 
     private static PluginContainer checkPlugin(Object plugin) {
-        Optional<PluginContainer> optPlugin = Sponge.getGame().getPluginManager().fromInstance(plugin);
+        Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         checkArgument(optPlugin.isPresent(), "Provided object is not a plugin instance");
         return optPlugin.get();
     }
@@ -154,7 +154,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
         Queue<TimingHistory> oldQueue = TimingsManager.HISTORY;
         int frames = (getHistoryLength() / getHistoryInterval());
         if (length > maxLength) {
-            Sponge.getLogger().warn(
+            SpongeImpl.getLogger().warn(
                     "Timings Length too high. Requested " + length + ", max is " + maxLength
                             + ". To get longer history, you must increase your interval. Set Interval to "
                             + Math.ceil(length / this.MAX_HISTORY_FRAMES)
@@ -172,7 +172,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     @Override
     public void generateReport(CommandSource sender) {
         if (sender == null) {
-            sender = Sponge.getGame().getServer().getConsole();
+            sender = SpongeImpl.getGame().getServer().getConsole();
         }
         TimingsExport.reportTimings(sender);
     }

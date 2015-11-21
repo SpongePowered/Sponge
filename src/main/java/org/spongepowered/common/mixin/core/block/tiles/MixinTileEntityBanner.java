@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
@@ -85,11 +85,12 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     private void updatePatterns() {
         this.patternLayers.clear();
         if (this.patterns != null) {
-            SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
+            SpongeGameRegistry registry = (SpongeGameRegistry) SpongeImpl.getGame().getRegistry();
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
-                this.patternLayers.add(new SpongePatternLayer(Sponge.getRegistry().getType(BannerPatternShape.class, tagCompound.getString("Pattern")).get(),
-                        registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger("Color")).getName()).get()));
+                this.patternLayers.add(new SpongePatternLayer(
+                    SpongeImpl.getRegistry().getType(BannerPatternShape.class, tagCompound.getString("Pattern")).get(),
+                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger("Color")).getName()).get()));
             }
         }
         this.markDirtyAndUpdate();

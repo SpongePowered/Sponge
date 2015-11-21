@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableD
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.BreakablePlaceableUtils;
@@ -82,7 +82,7 @@ public class BreakableDataProcessor
                     return builder.result(DataTransactionResult.Type.FAILURE).build();
                 }
             } catch (Exception e) {
-                Sponge.getLogger().debug("An exception occurred when removing data: ", e);
+                SpongeImpl.getLogger().debug("An exception occurred when removing data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).build();
             }
         }

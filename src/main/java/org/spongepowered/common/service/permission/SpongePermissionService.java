@@ -40,7 +40,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.context.ContextCalculator;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.FixedParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.GlobalMemorySubjectData;
 
@@ -78,7 +78,7 @@ public class SpongePermissionService implements PermissionService {
                                                                      s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)),
                                                                      s -> {
                                                                          if (s.equals("Server")) {
-                                                                             return Sponge.getGame().getServer().getConsole();
+                                                                             return SpongeImpl.getGame().getServer().getConsole();
                                                                          } else if (s.equals("RCON")) {
                                                                              // TODO: Implement RCON API?
                                                                          }

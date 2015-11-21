@@ -26,7 +26,7 @@ package org.spongepowered.common.text.xml;
 
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
 
@@ -59,7 +59,7 @@ public class Color extends Element {
         }
 
         if (this.name != null) {
-            Optional<TextColor> color = Sponge.getGame().getRegistry().getType(TextColor.class, this.name.toUpperCase());
+            Optional<TextColor> color = SpongeImpl.getGame().getRegistry().getType(TextColor.class, this.name.toUpperCase());
             if (color.isPresent()) {
                 builder.color(color.get());
             }

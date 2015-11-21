@@ -37,8 +37,8 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmen
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
@@ -78,10 +78,10 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
     @Override
     public Optional<ImmutableEnchantmentData> build(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+        SerializationManager serializationManager = SpongeImpl.getGame().getServiceManager().provide(SerializationManager.class).get();
         final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
                                                                                  ItemEnchantment.class,
-                                                                                 serializationService).get();
+                                                                                 serializationManager).get();
         return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
     }
 }

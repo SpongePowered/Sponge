@@ -58,7 +58,7 @@ import java.util.Iterator;
 public class SpongeImplFactory {
 
     public static LoadWorldEvent createLoadWorldEvent(Game game, World world) {
-        return SpongeEventFactory.createLoadWorldEvent(game, Cause.of(Sponge.getGame().getServer()), world);
+        return SpongeEventFactory.createLoadWorldEvent(game, Cause.of(SpongeImpl.getGame().getServer()), world);
     }
 
     public static ClientConnectionEvent.Join createClientConnectionEventJoin(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {

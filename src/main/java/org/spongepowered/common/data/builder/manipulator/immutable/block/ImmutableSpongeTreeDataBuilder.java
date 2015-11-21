@@ -37,7 +37,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
@@ -69,7 +69,7 @@ public class ImmutableSpongeTreeDataBuilder implements ImmutableDataManipulatorB
     public Optional<ImmutableTreeData> build(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.TREE_TYPE.getQuery());
         final String treeTypeId = container.getString(Keys.TREE_TYPE.getQuery()).get();
-        final TreeType treeType = Sponge.getRegistry().getType(TreeType.class, treeTypeId).get();
+        final TreeType treeType = SpongeImpl.getRegistry().getType(TreeType.class, treeTypeId).get();
         return Optional.of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType));
     }
 }

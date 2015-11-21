@@ -37,7 +37,7 @@ import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.network.ChannelRegistrationException;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
         if (checkNotNull(channel, "channel").length() > 20) {
             throw new ChannelRegistrationException("Channel name cannot be greater than 20 characters");
         }
-        Optional<PluginContainer> optPlugin = Sponge.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
+        Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
         checkArgument(optPlugin.isPresent(), "Provided plugin argument is not a plugin instance");
         return optPlugin.get();
     }

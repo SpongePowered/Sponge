@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
 import org.spongepowered.common.util.VecHelper;
@@ -117,9 +117,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!this.worldObj.isRemote) {
-                Sponge.postEvent(SpongeEventFactory.
-                        createSleepingEventTick(Sponge.getGame(), Cause.of(this),
-                            this.getWorld().createSnapshot(VecHelper.toVector(this.playerLocation)), this));
+                SpongeImpl.postEvent(SpongeEventFactory.
+                        createSleepingEventTick(SpongeImpl.getGame(), Cause.of(this),
+                                                this.getWorld().createSnapshot(VecHelper.toVector(this.playerLocation)), this));
             }
             return true;
         }

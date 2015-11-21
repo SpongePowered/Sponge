@@ -39,7 +39,7 @@ import org.spongepowered.api.service.command.SimpleCommandService;
 import org.spongepowered.api.service.config.ConfigService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.service.persistence.SerializationManager;
 import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.rcon.RconService;
 import org.spongepowered.api.service.scheduler.SchedulerService;
@@ -54,7 +54,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.service.config.SpongeConfigService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
-import org.spongepowered.common.service.persistence.SpongeSerializationService;
+import org.spongepowered.common.service.persistence.SpongeSerializationManager;
 import org.spongepowered.common.service.profile.SpongeProfileResolver;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
@@ -73,58 +73,53 @@ import java.util.UUID;
  */
 @NonnullByDefault
 public final class SpongeBootstrap {
-    private static final Logger slf4jLogger = new SLF4JLogger((AbstractLogger) Sponge.getLogger(), Sponge.getLogger().getName());
+    private static final Logger slf4jLogger = new SLF4JLogger((AbstractLogger) SpongeImpl.getLogger(), SpongeImpl.getLogger().getName());
 
     public static void initializeServices() {
-        SimpleCommandService commandService = new SimpleCommandService(Sponge.getGame(), slf4jLogger,
-                new SpongeCommandDisambiguator(Sponge.getGame()));
+        SimpleCommandService commandService = new SimpleCommandService(SpongeImpl.getGame(), slf4jLogger,
+                                                                       new SpongeCommandDisambiguator(SpongeImpl.getGame()));
         if (registerService(CommandService.class, commandService)) {
-            commandService.register(Sponge.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
-            commandService.register(Sponge.getPlugin(), SpongeHelpCommand.create(), "help");
-            commandService.register(Sponge.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
+            commandService.register(SpongeImpl.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
+            commandService.register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help");
+            commandService.register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
         }
 
         registerService(SqlService.class, new SqlServiceImpl());
-        if (!registerService(SchedulerService.class, SpongeScheduler.getInstance())) {
-            throw new ExceptionInInitializerError("Cannot continue with a Non-Sponge Scheduler!");
-        }
-        registerService(SerializationService.class, SpongeSerializationService.getInstance());
-        registerService(PropertyRegistry.class, SpongePropertyRegistry.getInstance());
         registerService(PaginationService.class, new SpongePaginationService());
-        if (Sponge.getGame().getPlatform().getType() == Platform.Type.SERVER) {
+        if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));
         }
-        registerService(ConfigService.class, new SpongeConfigService(Sponge.getGame().getPluginManager()));
+        registerService(ConfigService.class, new SpongeConfigService(SpongeImpl.getGame().getPluginManager()));
         registerService(UserStorage.class, new SpongeUserStorage());
         registerService(GameProfileResolver.class, new SpongeProfileResolver());
-        Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class)
-                .executeWhenPresent(input -> Sponge.getGame().getServer().getConsole().getContainingCollection());
+        SpongeImpl.getGame().getServiceManager().potentiallyProvide(PermissionService.class)
+                .executeWhenPresent(input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
     }
 
     private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {
         try {
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), serviceClass, serviceImpl);
+            SpongeImpl.getGame().getServiceManager().setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
             return true;
         } catch (ProviderExistsException e) {
-            Sponge.getLogger().warn("Non-Sponge {} already registered: {}", serviceClass.getSimpleName(), e.getLocalizedMessage());
+            SpongeImpl.getLogger().warn("Non-Sponge {} already registered: {}", serviceClass.getSimpleName(), e.getLocalizedMessage());
             return false;
         }
     }
 
     public static void preInitializeRegistry() {
-        Sponge.getRegistry().preInit();
+        SpongeImpl.getRegistry().preInit();
     }
 
     public static void initializeRegistry() {
-        Sponge.getRegistry().init();
+        SpongeImpl.getRegistry().init();
     }
 
     public static void postInitializeRegistry() {
-        Sponge.getRegistry().postInit();
+        SpongeImpl.getRegistry().postInit();
     }
 
     public static void preGameRegisterAdditionals() {
-        Sponge.getRegistry().registerAdditionals();
+        SpongeImpl.getRegistry().registerAdditionals();
     }
 
     public static void registerWorlds() {
@@ -148,11 +143,11 @@ public final class SpongeBootstrap {
                     int dimensionId = spongeData.getInteger("dimensionId");
                     if (!(dimensionId == -1) && !(dimensionId == 0) && !(dimensionId == 1)) {
                         if (!enabled) {
-                            Sponge.getLogger().info("World {} is currently disabled. Skipping world load...", child.getName());
+                            SpongeImpl.getLogger().info("World {} is currently disabled. Skipping world load...", child.getName());
                             continue;
                         }
                         if (!loadOnStartup) {
-                            Sponge.getLogger().info("World {} 'loadOnStartup' is disabled.. Skipping world load...", child.getName());
+                            SpongeImpl.getLogger().info("World {} 'loadOnStartup' is disabled.. Skipping world load...", child.getName());
                             continue;
                         }
                     } else if (dimensionId == -1) {
@@ -177,11 +172,11 @@ public final class SpongeBootstrap {
                         });
 
                     } else {
-                        Sponge.getLogger().info("World {} is disabled! Skipping world registration...", child.getName());
+                        SpongeImpl.getLogger().info("World {} is disabled! Skipping world registration...", child.getName());
                     }
                 }
             } catch (Throwable t) {
-                Sponge.getLogger().error("Error during world registration.", t);
+                SpongeImpl.getLogger().error("Error during world registration.", t);
             }
         }
     }

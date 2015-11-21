@@ -31,7 +31,7 @@ import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
@@ -124,7 +124,8 @@ public final class DimensionRegistryModule implements ExtraClassCatalogRegistryM
             if (!isConfigRegistered(provider.getClass())) {
                 String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
                 SpongeConfig<SpongeConfig.DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
-                    Sponge.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), "sponge");
+                                                                                       SpongeImpl
+                                                                                           .getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), "sponge");
                 registerConfig(provider.getClass(), config);
             }
             ((IMixinWorldProvider) provider).setDimensionConfig(getConfig(provider.getClass()));

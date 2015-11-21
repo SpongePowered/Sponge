@@ -44,7 +44,7 @@ import net.minecraft.world.storage.SaveHandler;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -133,8 +133,8 @@ public class DimensionManager {
                 throw new RuntimeException(String.format("No WorldProvider bound for dimension %d", dim));
             }
         } catch (Exception e) {
-            Sponge.getLogger().log(Level.ERROR, String.format("An error occurred trying to create an instance of WorldProvider %d (%s)",
-                    dim, providers.get(getProviderType(dim)).getSimpleName()), e);
+            SpongeImpl.getLogger().log(Level.ERROR, String.format("An error occurred trying to create an instance of WorldProvider %d (%s)",
+                                                                  dim, providers.get(getProviderType(dim)).getSimpleName()), e);
             throw new RuntimeException(e);
         }
     }
@@ -204,11 +204,11 @@ public class DimensionManager {
             worlds.put(id, world);
             weakWorldMap.put(world, world);
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().put(id, new long[100]);
-            Sponge.getLogger().info("Loading dimension {} ({}) ({})", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
+            SpongeImpl.getLogger().info("Loading dimension {} ({}) ({})", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
         } else {
             worlds.remove(id);
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().remove(id);
-            Sponge.getLogger().info("Unloading dimension {}", id);
+            SpongeImpl.getLogger().info("Unloading dimension {}", id);
         }
 
         ArrayList<WorldServer> tmp = new ArrayList<>();
@@ -287,7 +287,7 @@ public class DimensionManager {
         try {
             DimensionManager.getProviderType(dim);
         } catch (Exception e) {
-            Sponge.getLogger().log(Level.ERROR, "Cannot Hotload Dim: " + e.getMessage());
+            SpongeImpl.getLogger().log(Level.ERROR, "Cannot Hotload Dim: " + e.getMessage());
             return; // If a provider hasn't been registered then we can't hotload the dim
         }
         MinecraftServer mcServer = overworld.getMinecraftServer();
@@ -296,7 +296,7 @@ public class DimensionManager {
         WorldServer world =
                 (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.theProfiler).init()));
         world.addWorldAccess(new WorldManager(mcServer, world));
-        Sponge.postEvent(SpongeImplFactory.createLoadWorldEvent(Sponge.getGame(), (org.spongepowered.api.world.World) world));
+        SpongeImpl.postEvent(SpongeImplFactory.createLoadWorldEvent(SpongeImpl.getGame(), (org.spongepowered.api.world.World) world));
         if (!mcServer.isSinglePlayer()) {
             world.getWorldInfo().setGameType(mcServer.getGameType());
         }

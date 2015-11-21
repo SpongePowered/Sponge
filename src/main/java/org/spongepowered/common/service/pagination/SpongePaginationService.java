@@ -44,7 +44,7 @@ import org.spongepowered.api.util.command.args.CommandArgs;
 import org.spongepowered.api.util.command.args.CommandContext;
 import org.spongepowered.api.util.command.args.CommandElement;
 import org.spongepowered.api.util.command.spec.CommandSpec;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -97,7 +97,7 @@ public class SpongePaginationService implements PaginationService {
 
     void registerCommandOnce() {
         if (this.commandRegistered.compareAndSet(false, true)) {
-            Sponge.getGame().getCommandDispatcher().register(Sponge.getPlugin(), CommandSpec.builder()
+            SpongeImpl.getGame().getCommandDispatcher().register(SpongeImpl.getPlugin(), CommandSpec.builder()
                 .description(t("Helper command for paginations occurring"))
                 .arguments(new ActivePaginationCommandElement(t("pagination-id")))
                 .child(CommandSpec.builder()

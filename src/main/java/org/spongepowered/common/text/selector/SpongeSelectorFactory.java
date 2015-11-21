@@ -42,7 +42,7 @@ import org.spongepowered.api.text.selector.SelectorBuilder;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -64,7 +64,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
         ImmutableMap.Builder<String, SelectorType> builder =
                 ImmutableMap.builder();
 
-        for (SelectorType type : Sponge.getGame().getRegistry()
+        for (SelectorType type : SpongeImpl.getGame().getRegistry()
                 .getAllOf(SelectorType.class)) {
             builder.put(type.getId(), type);
         }
@@ -80,10 +80,10 @@ public class SpongeSelectorFactory implements SelectorFactory {
                 try {
                     return (V) m.invoke(null, input);
                 } catch (IllegalAccessException e) {
-                    Sponge.getLogger().debug(m + " wasn't public", e);
+                    SpongeImpl.getLogger().debug(m + " wasn't public", e);
                     return null;
                 } catch (IllegalArgumentException e) {
-                    Sponge.getLogger()
+                    SpongeImpl.getLogger()
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
@@ -95,10 +95,10 @@ public class SpongeSelectorFactory implements SelectorFactory {
                 try {
                     return (V) m.invoke(input);
                 } catch (IllegalAccessException e) {
-                    Sponge.getLogger().debug(m + " wasn't public", e);
+                    SpongeImpl.getLogger().debug(m + " wasn't public", e);
                     return null;
                 } catch (IllegalArgumentException e) {
-                    Sponge.getLogger()
+                    SpongeImpl.getLogger()
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {

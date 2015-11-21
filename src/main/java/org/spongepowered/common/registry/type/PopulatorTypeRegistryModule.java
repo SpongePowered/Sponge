@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.util.CustomCatalogRegistration;
@@ -126,7 +126,7 @@ public final class PopulatorTypeRegistryModule implements ExtraClassCatalogRegis
                 // add new mapping with minecraft id
                 this.populatorTypeMappings.put(((SpongePopulatorType) populatorType).getId(), populatorType);
             } else {
-                Sponge.getLogger().error("A populator is null at the moment! Populator: " + fieldName);
+                SpongeImpl.getLogger().error("A populator is null at the moment! Populator: " + fieldName);
             }
             return populatorType;
         });

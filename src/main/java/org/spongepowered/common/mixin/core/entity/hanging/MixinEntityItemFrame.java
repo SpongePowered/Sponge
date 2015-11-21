@@ -30,7 +30,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
 
@@ -60,7 +60,7 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
     }
 
     public Rotation getItemRotation() {
-        return Sponge.getGame().getRegistry().getRotationFromDegree(shadow$getRotation() * 45).get();
+        return SpongeImpl.getGame().getRegistry().getRotationFromDegree(shadow$getRotation() * 45).get();
     }
 
     public void setRotation(Rotation itemRotation) {

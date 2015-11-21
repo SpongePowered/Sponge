@@ -44,7 +44,7 @@ import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -168,10 +168,10 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @SuppressWarnings("unchecked")
     private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId) {
-        String entityFullName = String.format("%s.%s", Sponge.ECOSYSTEM_NAME, entityName);
+        String entityFullName = String.format("%s.%s", SpongeImpl.ECOSYSTEM_NAME, entityName);
         EntityList.classToStringMapping.put(entityClass, entityFullName);
         EntityList.stringToClassMapping.put(entityFullName, entityClass);
-        return new SpongeEntityType(entityId, entityName, Sponge.ECOSYSTEM_NAME, entityClass);
+        return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass);
     }
 
     @CustomCatalogRegistration

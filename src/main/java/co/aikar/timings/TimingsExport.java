@@ -44,7 +44,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.util.command.source.RconSource;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityType;
 
 import java.io.ByteArrayOutputStream;
@@ -87,15 +87,15 @@ class TimingsExport extends Thread {
     static void reportTimings(CommandSource sender) {
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", Sponge.getGame().getPlatform().getVersion())
-                .add("maxplayers", Sponge.getGame().getServer().getMaxPlayers())
+                .add("version", SpongeImpl.getGame().getPlatform().getVersion())
+                .add("maxplayers", SpongeImpl.getGame().getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
             builder.add("server", SERVER_NAME)
-                    .add("motd", Texts.toPlain(Sponge.getGame().getServer().getMotd()))
-                    .add("online-mode", Sponge.getGame().getServer().getOnlineMode())
+                    .add("motd", Texts.toPlain(SpongeImpl.getGame().getServer().getMotd()))
+                    .add("online-mode", SpongeImpl.getGame().getServer().getOnlineMode())
                     .add("icon", MinecraftServer.getServer().getServerStatusResponse().getFavicon());
         }
 
@@ -160,7 +160,7 @@ class TimingsExport extends Thread {
 
         // Information about loaded plugins
 
-        builder.add("plugins", JSONUtil.mapArrayToObject(Sponge.getGame().getPluginManager().getPlugins(), (plugin) -> {
+        builder.add("plugins", JSONUtil.mapArrayToObject(SpongeImpl.getGame().getPluginManager().getPlugins(), (plugin) -> {
             // TODO This is only available on Forge
 //            ModMetadata metadata = ((ModContainer) plugin).getMetadata();
             return JSONUtil.objectBuilder().add(plugin.getName(), JSONUtil.objectBuilder()
@@ -174,7 +174,7 @@ class TimingsExport extends Thread {
         // Information on the users Config
 
         builder.add("config", JSONUtil.objectBuilder()
-                .add("sponge", serializeConfigNode(Sponge.getGlobalConfig().getRootNode())));
+                .add("sponge", serializeConfigNode(SpongeImpl.getGlobalConfig().getRootNode())));
 
         new TimingsExport(sender, builder.build(), history).start();
     }
@@ -279,7 +279,7 @@ class TimingsExport extends Thread {
                         TextColors.RED, "Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage()));
                 this.sender.sendMessage(Texts.of(TextColors.RED, "Check your logs for more information"));
                 if (response != null) {
-                    Sponge.getLogger().fatal(response);
+                    SpongeImpl.getLogger().fatal(response);
                 }
                 return;
             }
@@ -287,18 +287,18 @@ class TimingsExport extends Thread {
             String location = con.getHeaderField("Location");
             this.sender.sendMessage(Texts.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(location)), location));
             if (!(this.sender instanceof ConsoleSource)) {
-                Sponge.getLogger().info("View Timings Report: " + location);
+                SpongeImpl.getLogger().info("View Timings Report: " + location);
             }
 
             if (response != null && !response.isEmpty()) {
-                Sponge.getLogger().info("Timing Response: " + response);
+                SpongeImpl.getLogger().info("Timing Response: " + response);
             }
         } catch (IOException ex) {
             this.sender.sendMessage(Texts.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
             if (response != null) {
-                Sponge.getLogger().fatal(response);
+                SpongeImpl.getLogger().fatal(response);
             }
-            Sponge.getLogger().fatal("Could not paste timings", ex);
+            SpongeImpl.getLogger().fatal("Could not paste timings", ex);
         }
     }
 
@@ -317,7 +317,7 @@ class TimingsExport extends Thread {
 
         } catch (IOException ex) {
             this.sender.sendMessage(Texts.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
-            Sponge.getLogger().warn(con.getResponseMessage(), ex);
+            SpongeImpl.getLogger().warn(con.getResponseMessage(), ex);
             return null;
         } finally {
             if (is != null) {

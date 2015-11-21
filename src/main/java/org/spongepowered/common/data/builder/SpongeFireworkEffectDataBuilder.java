@@ -32,7 +32,7 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.SpongeFireworkEffect;
 
 import java.awt.Color;
@@ -53,7 +53,7 @@ public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffe
             throw new InvalidDataException("The container does not have data pertaining to FireworkEffect!");
         }
         String type = container.getString(SpongeFireworkEffect.TYPE).get();
-        Optional<FireworkShape> oShape = Sponge.getGame().getRegistry().getType(FireworkShape.class, type);
+        Optional<FireworkShape> oShape = SpongeImpl.getGame().getRegistry().getType(FireworkShape.class, type);
         if(!oShape.isPresent()) throw new InvalidDataException("The container has an invalid type; " + type);
 
         List<Integer> intColors = container.getIntegerList(SpongeFireworkEffect.COLORS).get();
@@ -66,7 +66,7 @@ public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffe
 
         boolean trails = container.getBoolean(SpongeFireworkEffect.TRAILS).get();
         boolean flickers = container.getBoolean(SpongeFireworkEffect.FLICKERS).get();
-        FireworkEffect.Builder builder = Sponge.getGame().getRegistry().createBuilder(FireworkEffect.Builder.class);
+        FireworkEffect.Builder builder = SpongeImpl.getGame().getRegistry().createBuilder(FireworkEffect.Builder.class);
         return Optional.of(builder.colors(colors)
                 .fades(fades)
                 .flicker(flickers)

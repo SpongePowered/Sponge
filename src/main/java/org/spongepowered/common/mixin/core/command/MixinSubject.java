@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
@@ -68,8 +68,8 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     public void subjectConstructor(CallbackInfo ci) {
-        if (Sponge.isInitialized()) {
-            Sponge.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
+        if (SpongeImpl.isInitialized()) {
+            SpongeImpl.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     @Nullable
     private Subject internalSubject() {
         if (this.thisSubject == null) {
-            Optional<PermissionService> serv = Sponge.getGame().getServiceManager().provide(PermissionService.class);
+            Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
             if (serv.isPresent()) {
                 new SubjectSettingCallback(this).accept(serv.get());
             }

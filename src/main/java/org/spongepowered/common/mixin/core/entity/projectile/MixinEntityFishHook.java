@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.IMixinEntityFishHook;
@@ -108,9 +108,9 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         )
     public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
         EntitySnapshot fishHookSnapshot = this.createSnapshot();
-        FishingEvent.HookEntity event = SpongeEventFactory.createFishingEventHookEntity(Sponge.getGame(), Cause.of(this.angler),
-                this.createSnapshot(), this, (Entity) entity);
-        if (!Sponge.postEvent(event)) {
+        FishingEvent.HookEntity event = SpongeEventFactory.createFishingEventHookEntity(SpongeImpl.getGame(), Cause.of(this.angler),
+                                                                                        this.createSnapshot(), this, (Entity) entity);
+        if (!SpongeImpl.postEvent(event)) {
             if (this.getShooter() instanceof Entity) {
                 DamageSource.causeThrownDamage((net.minecraft.entity.Entity) (Object) this, (net.minecraft.entity.Entity) this.getShooter());
             }
@@ -156,8 +156,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             transaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
         }
 
-        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Sponge.getGame(), Cause.of(this.angler), exp, exp, fishHookSnapshot, this, transaction, (Player) this.angler);
-        if (!Sponge.postEvent(event)) {
+        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(SpongeImpl.getGame(), Cause.of(this.angler), exp, exp, fishHookSnapshot, this, transaction, (Player) this.angler);
+        if (!SpongeImpl.postEvent(event)) {
             // Sponge end
             if (this.caughtEntity != null) {
                 double d0 = this.angler.posX - this.posX;

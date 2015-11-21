@@ -28,7 +28,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.service.config.ConfigRoot;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,7 +52,7 @@ public class SpongeConfigRoot implements ConfigRoot {
         try {
             Files.createDirectories(this.baseDir);
         } catch (IOException e) {
-            Sponge.getLogger().error("Failed to create plugin dir for {} at {}", this.pluginName, this.baseDir, e);
+            SpongeImpl.getLogger().error("Failed to create plugin dir for {} at {}", this.pluginName, this.baseDir, e);
         }
         return configFile;
     }

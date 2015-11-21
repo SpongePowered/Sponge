@@ -69,7 +69,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -103,7 +103,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public boolean keepsLevel = false;
     private boolean sleepingIgnored;
 
-    private final User user = Sponge.getGame().getServiceManager().provideUnchecked(UserStorage.class).getOrCreate((GameProfile) getGameProfile());
+    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorage.class).getOrCreate((GameProfile) getGameProfile());
 
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
@@ -347,7 +347,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void kick() {
-        kick(Texts.of(Sponge.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
+        kick(Texts.of(SpongeImpl.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
     }
 
     @Override

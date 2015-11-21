@@ -39,7 +39,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinkFactory;
 import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -65,7 +65,7 @@ public class SpongeMessageSinkFactory implements MessageSinkFactory {
 
         @Override
         public Iterable<CommandSource> getRecipients() {
-            PermissionService service =  Sponge.getGame().getServiceManager().provideUnchecked(PermissionService.class);
+            PermissionService service =  SpongeImpl.getGame().getServiceManager().provideUnchecked(PermissionService.class);
             return Iterables.concat(
                     Iterables.transform(service.getKnownSubjects().values(), new Function<SubjectCollection, Iterable<CommandSource>>() {
                 @Nullable

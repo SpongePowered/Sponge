@@ -35,7 +35,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
@@ -95,7 +95,7 @@ public class SpongeBlockStateBuilder implements BlockState.Builder {
         }
         */
         final String blockid = container.getString(DataQueries.BLOCK_TYPE).get();
-        final BlockType blockType = Sponge.getGame().getRegistry().getType(BlockType.class, blockid).get();
+        final BlockType blockType = SpongeImpl.getGame().getRegistry().getType(BlockType.class, blockid).get();
         final int meta = container.getInt(DataQueries.BLOCK_STATE_UNSAFE_META).get();
         BlockState blockState = (BlockState) ((Block) blockType).getStateFromMeta(meta);
         try {

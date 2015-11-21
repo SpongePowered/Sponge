@@ -66,7 +66,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -533,7 +533,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get user from storage if one exists
-                return Sponge.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
+                return SpongeImpl.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
@@ -545,7 +545,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get user from storage if one exists
-                return Sponge.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
+                return SpongeImpl.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
             }
         }
 
@@ -564,7 +564,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get user from storage if one exists
-                return Sponge.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
+                return SpongeImpl.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
@@ -576,7 +576,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get user from storage if one exists
-                return Sponge.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
+                return SpongeImpl.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid.get());
             }
         }
 

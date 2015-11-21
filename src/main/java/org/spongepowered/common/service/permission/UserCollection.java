@@ -27,7 +27,7 @@ package org.spongepowered.common.service.permission;
 import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 import org.spongepowered.common.service.profile.SpongeProfileResolver;
 
@@ -83,7 +83,7 @@ public class UserCollection extends SpongeSubjectCollection {
     @Override
     @SuppressWarnings("unchecked")
     public Iterable<Subject> getAllSubjects() {
-        return (Iterable) Sponge.getGame().getServer().getOnlinePlayers();
+        return (Iterable) SpongeImpl.getGame().getServer().getOnlinePlayers();
         /*return ImmutableSet.copyOf(Iterables.concat(
                 Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(),
                         new Function<Object, Subject>() {

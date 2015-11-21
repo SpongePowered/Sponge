@@ -51,7 +51,7 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
@@ -118,7 +118,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Transform<World>> getTransform() {
-        Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
+        Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
             return Optional.of(transform);
@@ -133,7 +133,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        Optional<World> optional = Sponge.getGame().getServer().getWorld(this.worldUuid);
+        Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Location<World> location = new Location<>(optional.get(), this.position);
             return Optional.of(location);
@@ -384,7 +384,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Entity> restore() {
-        Optional<World> world = Sponge.getGame().getServer().getWorld(this.worldUuid);
+        Optional<World> world = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (!world.isPresent()) {
             return Optional.empty();
         }

@@ -40,7 +40,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.service.persistence.SpongeSerializationService;
+import org.spongepowered.common.service.persistence.SpongeSerializationManager;
 
 import java.util.Map;
 import java.util.Optional;
@@ -86,7 +86,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Enti
             return Optional.empty();
         }
 
-        BlockState block = container.getSerializable(Keys.REPRESENTED_BLOCK.getQuery(), BlockState.class, SpongeSerializationService.getInstance()).get();
+        BlockState block = container.getSerializable(Keys.REPRESENTED_BLOCK.getQuery(), BlockState.class, SpongeSerializationManager.getInstance()).get();
         int offset = container.getInt(Keys.OFFSET.getQuery()).get();
 
         data.set(Keys.REPRESENTED_BLOCK, block);

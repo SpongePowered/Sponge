@@ -61,7 +61,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -89,7 +89,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntity implements Entity, IMixinEntity {
 
     // @formatter:off
-    private EntityType entityType = Sponge.getRegistry().getTranslated(this.getClass(), EntityType.class);
+    private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
@@ -232,7 +232,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
         if (!forced) {
             // Validate
-            TeleportHelper teleportHelper = Sponge.getGame().getTeleportHelper();
+            TeleportHelper teleportHelper = SpongeImpl.getGame().getTeleportHelper();
             Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
             if (!safeLocation.isPresent()) {
                 return false;
@@ -397,7 +397,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         Optional<WorldProperties> props = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
         if (props.isPresent()) {
             if (props.get().isEnabled()) {
-                Optional<World> world = Sponge.getGame().getServer().loadWorld(worldName);
+                Optional<World> world = SpongeImpl.getGame().getServer().loadWorld(worldName);
                 if (world.isPresent()) {
                     Location<World> location = new Location<>(world.get(), position);
                     return setLocationSafely(location);
@@ -656,7 +656,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                         offer(manipulator);
                     }
                 } catch (InvalidDataException e) {
-                    Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
+                    SpongeImpl.getLogger().error("Could not deserialize custom plugin data! ", e);
                 }
             }
         }
@@ -763,7 +763,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 return Optional.of((User)player);
             }
             // player is not online, get user from storage if one exists
-            return Sponge.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid);
+            return SpongeImpl.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid);
         }
     }
 }

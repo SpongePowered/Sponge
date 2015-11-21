@@ -83,7 +83,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -179,8 +179,8 @@ public abstract class MixinServerConfigurationManager {
         Location<World> location = new Location<>((World) worldserver, VecHelper.toVector(playerIn.getPosition()));
         Transform<World> fromTransform = player.getTransform().setLocation(location);
         MessageSink sink = MessageSinks.toAll();
-        ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(Sponge.getGame(), Cause.of((Player) playerIn), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform, (RemoteConnection) netManager, (org.spongepowered.api.GameProfile) gameprofile);
-        Sponge.postEvent(loginEvent);
+        ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(SpongeImpl.getGame(), Cause.of((Player) playerIn), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform, (RemoteConnection) netManager, (org.spongepowered.api.GameProfile) gameprofile);
+        SpongeImpl.postEvent(loginEvent);
         if (kickReason != null || loginEvent.isCancelled()) {
             disconnectClient(netManager, Optional.ofNullable(loginEvent.getMessage()), gameprofile);
             return;
@@ -281,8 +281,8 @@ public abstract class MixinServerConfigurationManager {
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         Text message = SpongeTexts.toText(chatcomponenttranslation);
         MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(Sponge.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), player);
-        Sponge.postEvent(event);
+        final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(SpongeImpl.getGame(), Cause.of(player), originalMessage, message, originalSink, player.getMessageSink(), player);
+        SpongeImpl.postEvent(event);
         // Send to the sink
         event.getSink().sendMessage(event.getMessage());
         // Sponge end
@@ -347,14 +347,14 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplFactory.createRespawnPlayerEvent(Sponge.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
+                SpongeImplFactory.createRespawnPlayerEvent(SpongeImpl.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
-        Sponge.postEvent(event);
+        SpongeImpl.postEvent(event);
         player.setTransform(event.getToTransform());
         location = event.getToTransform().getLocation();
 
         if (!(location.getExtent() instanceof WorldServer)) {
-            Sponge.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
+            SpongeImpl.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
             location = event.getFromTransform().getLocation();
         }
         final WorldServer targetWorld = (WorldServer) location.getExtent();

@@ -43,7 +43,7 @@ import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.spec.CommandSpec;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Comparator;
 import java.util.Optional;
@@ -64,7 +64,7 @@ public class SpongeHelpCommand {
             .executor((src, args) -> {
                 Optional<String> command = args.getOne("command");
                 if (command.isPresent()) {
-                    Optional<? extends CommandMapping> mapping = Sponge.getGame().getCommandDispatcher().get(command.get());
+                    Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandDispatcher().get(command.get());
                     if (mapping.isPresent()) {
                         CommandCallable callable = mapping.get().getCallable();
                         Optional<? extends Text> desc = callable.getHelp(src);
@@ -78,11 +78,11 @@ public class SpongeHelpCommand {
                     throw new CommandException(Texts.of("No such command: ", command.get()));
                 }
 
-                PaginationBuilder builder = Sponge.getGame().getServiceManager().provide(PaginationService.class).get().builder();
+                PaginationBuilder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
                 builder.title(Texts.builder("Available commands:").color(TextColors.DARK_GREEN).build());
 
                 TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
-                commands.addAll(Collections2.filter(Sponge.getGame().getCommandDispatcher().getAll().values(), input -> input.getCallable()
+                commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandDispatcher().getAll().values(), input -> input.getCallable()
                     .testPermission(src)));
                 builder.contents(ImmutableList.copyOf(Collections2.transform(commands, input -> getDescription(src, input))));
                 builder.sendTo(src);

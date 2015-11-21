@@ -58,7 +58,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
@@ -113,8 +113,8 @@ public class CommandSponge {
                         INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins"))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
-                        .valueFlag(world(Texts.of("world"), Sponge.getGame()), "-world", "w")
-                        .valueFlag(dimension(Texts.of("dimension"), Sponge.getGame()), "-dimension", "d")
+                        .valueFlag(world(Texts.of("world"), SpongeImpl.getGame()), "-world", "w")
+                        .valueFlag(dimension(Texts.of("dimension"), SpongeImpl.getGame()), "-dimension", "d")
                         .buildWith(flagChildren)))
                 .executor(nonFlagChildren)
                 .build();
@@ -127,7 +127,7 @@ public class CommandSponge {
         public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
             int successes = 0;
             if (args.hasAny("global")) {
-                src.sendMessage(Texts.of("Global: ", processGlobal(Sponge.getGlobalConfig(), src, args)));
+                src.sendMessage(Texts.of("Global: ", processGlobal(SpongeImpl.getGlobalConfig(), src, args)));
                 ++successes;
             }
             if (args.hasAny("dimension")) {
@@ -140,7 +140,7 @@ public class CommandSponge {
             }
             if (args.hasAny("world")) {
                 for (WorldProperties properties : args.<WorldProperties>getAll("world")) {
-                    Optional<World> world = Sponge.getGame().getServer().getWorld(properties.getUniqueId());
+                    Optional<World> world = SpongeImpl.getGame().getServer().getWorld(properties.getUniqueId());
                     if (!world.isPresent()) {
                         throw new CommandException(Texts.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
@@ -199,7 +199,7 @@ public class CommandSponge {
                     @Override
                     protected Text processGlobal(SpongeConfig<SpongeConfig.GlobalConfig> config, CommandSource source, CommandContext args)
                             throws CommandException {
-                        for (World world : Sponge.getGame().getServer().getWorlds()) {
+                        for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
                             source.sendMessage(Texts.of("World ", Texts.of(TextStyles.BOLD, world.getName()),
                                     getChunksInfo(((WorldServer) world))));
                         }
@@ -210,7 +210,7 @@ public class CommandSponge {
                     protected Text processDimension(SpongeConfig<SpongeConfig.DimensionConfig> config, DimensionType dim, CommandSource source,
                             CommandContext args)
                             throws CommandException {
-                        Sponge.getGame().getServer().getWorlds().stream().filter(world -> world.getDimension().getType().equals(dim))
+                        SpongeImpl.getGame().getServer().getWorlds().stream().filter(world -> world.getDimension().getType().equals(dim))
                             .forEach(world -> source.sendMessage(Texts.of("World ", Texts.of(TextStyles.BOLD, world.getName()),
                                                                       getChunksInfo(((WorldServer) world)))));
                         return Texts.of("Printed chunk info for all worlds in dimension ", dim.getName());
@@ -325,8 +325,8 @@ public class CommandSponge {
                 .description(Texts.of("Display Sponge's current version"))
                 .permission("sponge.command.version")
                 .executor((src, args) -> {
-                    src.sendMessage(Texts.of("SpongeMod: ", title(Sponge.getGame().getPlatform().getVersion()), "\n",
-                            "SpongeAPI: ", title(Sponge.getGame().getPlatform().getApiVersion())));
+                    src.sendMessage(Texts.of("SpongeMod: ", title(SpongeImpl.getGame().getPlatform().getVersion()), "\n",
+                                             "SpongeAPI: ", title(SpongeImpl.getGame().getPlatform().getApiVersion())));
                     return CommandResult.success();
                 })
                 .build();
@@ -351,12 +351,12 @@ public class CommandSponge {
 
         @Override
         protected Iterable<String> getChoices(CommandSource source) {
-            return Sponge.getGame().getPluginManager().getPlugins().stream().map(PluginContainer::getId).collect(Collectors.toList());
+            return SpongeImpl.getGame().getPluginManager().getPlugins().stream().map(PluginContainer::getId).collect(Collectors.toList());
         }
 
         @Override
         protected Object getValue(String choice) throws IllegalArgumentException {
-            Optional<PluginContainer> plugin = Sponge.getGame().getPluginManager().getPlugin(choice);
+            Optional<PluginContainer> plugin = SpongeImpl.getGame().getPluginManager().getPlugin(choice);
             if (!plugin.isPresent()) {
                 throw new IllegalArgumentException("Plugin " + choice + " was not valid");
             }
@@ -386,7 +386,7 @@ public class CommandSponge {
 
                         }
                     } else {
-                        Collection<PluginContainer> plugins = Sponge.getGame().getPluginManager().getPlugins();
+                        Collection<PluginContainer> plugins = SpongeImpl.getGame().getPluginManager().getPlugins();
                         TextBuilder build = Texts.builder(String.format("Plugins (%d): ", plugins.size()));
                         boolean first = true;
                         for (PluginContainer next : plugins) {

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin;
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class BungeeCordPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return !(!Sponge.getGlobalConfig().getConfig().getModules().usePluginBungeeCord() && mixinClassName.contains("mixin.bungee"));
+        return !(!SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginBungeeCord() && mixinClassName.contains("mixin.bungee"));
     }
 
     @Override

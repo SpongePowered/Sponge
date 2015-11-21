@@ -35,7 +35,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.processor.common.HorseUtils;
@@ -88,7 +88,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
 
     @Override
     public Optional<HorseData> fill(DataContainer container, HorseData horseData) {
-        GameRegistry registry = Sponge.getRegistry();
+        GameRegistry registry = SpongeImpl.getRegistry();
 
         horseData.set(Keys.HORSE_COLOR, HorseUtils.getHorseColor(container));
         horseData.set(Keys.HORSE_STYLE, HorseUtils.getHorseStyle(container));

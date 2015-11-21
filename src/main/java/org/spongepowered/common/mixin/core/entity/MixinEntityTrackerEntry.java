@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.living.human.RemovePlayerListRunnable;
 
@@ -74,12 +74,12 @@ public abstract class MixinEntityTrackerEntry {
         if (human.canRemoveFromListImmediately()) {
             thisCtx.sendPacket(removePacket);
         } else {
-            int delay = Sponge.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
+            int delay = SpongeImpl.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
             Runnable removeTask = new RemovePlayerListRunnable(human, playerIn, removePacket);
             if (delay == 0) {
                 removeTask.run();
             } else {
-                Sponge.getGame().getScheduler().createTaskBuilder().execute(removeTask).delayTicks(delay).submit(Sponge.getPlugin());
+                SpongeImpl.getGame().getScheduler().createTaskBuilder().execute(removeTask).delayTicks(delay).submit(SpongeImpl.getPlugin());
             }
         }
     }

@@ -40,7 +40,7 @@ import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
 
@@ -76,7 +76,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         String name = nbt.getString("name");
                         EntityType type = null;
                         if (nbt.hasKey("type", 8)) {
-                            type = Sponge.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
+                            type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));

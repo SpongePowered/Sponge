@@ -47,7 +47,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -67,7 +67,7 @@ import java.util.List;
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
-    private final TileEntityType tileType = Sponge.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
+    private final TileEntityType tileType = SpongeImpl.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -95,7 +95,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
         final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name);
-        Sponge.getRegistry().registerAdditionalType(TileEntityType.class, tileEntityType);
+        SpongeImpl.getRegistry().registerAdditionalType(TileEntityType.class, tileEntityType);
     }
 
     @Override
@@ -206,7 +206,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
                         offer(manipulator);
                     }
                 } catch (InvalidDataException e) {
-                    Sponge.getLogger().error("Could not deserialize custom plugin data! ", e);
+                    SpongeImpl.getLogger().error("Could not deserialize custom plugin data! ", e);
                 }
             }
         }

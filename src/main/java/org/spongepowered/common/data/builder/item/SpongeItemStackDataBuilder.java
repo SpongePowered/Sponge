@@ -36,7 +36,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
@@ -56,7 +56,7 @@ public class SpongeItemStackDataBuilder implements DataBuilder<ItemStack> {
         }
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
         final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
-        final ItemType itemType = Sponge.getRegistry().getType(ItemType.class, itemTypeId).get();
+        final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
         final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
         if (container.contains(DataQueries.UNSAFE_NBT)) {

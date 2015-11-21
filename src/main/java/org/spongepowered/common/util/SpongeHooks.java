@@ -52,7 +52,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.configuration.SpongeConfig;
 import org.spongepowered.common.configuration.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -82,15 +82,15 @@ public class SpongeHooks {
     private static TObjectLongHashMap<CollisionWarning> recentWarnings = new TObjectLongHashMap<>();
 
     public static void logInfo(String msg, Object... args) {
-        Sponge.getLogger().info(MessageFormat.format(msg, args));
+        SpongeImpl.getLogger().info(MessageFormat.format(msg, args));
     }
 
     public static void logWarning(String msg, Object... args) {
-        Sponge.getLogger().warn(MessageFormat.format(msg, args));
+        SpongeImpl.getLogger().warn(MessageFormat.format(msg, args));
     }
 
     public static void logSevere(String msg, Object... args) {
-        Sponge.getLogger().fatal(MessageFormat.format(msg, args));
+        SpongeImpl.getLogger().fatal(MessageFormat.format(msg, args));
     }
 
     public static void logStack(SpongeConfig<?> config) {
@@ -385,7 +385,7 @@ public class SpongeHooks {
     }
 
     public static void enableThreadContentionMonitoring() {
-        if (!Sponge.getGlobalConfig().getConfig().getDebug().isEnableThreadContentionMonitoring()) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getDebug().isEnableThreadContentionMonitoring()) {
             return;
         }
         ThreadMXBean mbean = ManagementFactory.getThreadMXBean();
@@ -400,7 +400,7 @@ public class SpongeHooks {
                 .getDimensionConfig().getConfig().isConfigEnabled()) {
             return ((IMixinWorldProvider) world.provider).getDimensionConfig();
         } else {
-            return Sponge.getGlobalConfig();
+            return SpongeImpl.getGlobalConfig();
         }
     }
 

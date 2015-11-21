@@ -46,7 +46,7 @@ import org.spongepowered.api.util.command.CommandPermissionException;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.InvocationCommandException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
@@ -89,7 +89,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     public CommandResult process(CommandSource source, String arguments) throws CommandException {
 
         if (!testPermission(source)) {
-            throw new CommandPermissionException(Texts.of(Sponge.getGame().getRegistry()
+            throw new CommandPermissionException(Texts.of(SpongeImpl.getGame().getRegistry()
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
@@ -181,7 +181,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     public Text getUsage(CommandSource source) {
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         String usage = this.command.getCommandUsage(mcSender);
-        Translation translation = Sponge.getGame().getRegistry().getTranslationById(usage).get();
+        Translation translation = SpongeImpl.getGame().getRegistry().getTranslationById(usage).get();
         if (source instanceof Player) {
             usage = translation.get(((Player) source).getLocale());
         } else {

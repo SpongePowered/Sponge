@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinRConConsoleSource;
 
 import java.io.IOException;
@@ -103,7 +103,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
             initSource();
         }
         RconConnectionEvent.Login event = SpongeEventFactory.createRconConnectionEventLogin(((RconSource) this.source));
-        Sponge.postEvent(event);
+        SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             this.loggedIn = false;
             throw new IOException("Cancelled login");
@@ -116,7 +116,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
             initSource();
         }
         if (this.loggedIn) {
-            Sponge.postEvent(SpongeEventFactory.createRconConnectionEventDisconnect((RconSource) this.source));
+            SpongeImpl.postEvent(SpongeEventFactory.createRconConnectionEventDisconnect((RconSource) this.source));
         }
     }
 }

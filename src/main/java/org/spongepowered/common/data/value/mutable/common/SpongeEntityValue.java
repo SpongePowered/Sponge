@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.lang.ref.WeakReference;
@@ -65,7 +65,7 @@ public class SpongeEntityValue implements Value<Entity> {
     public Entity get() {
         @Nullable Entity entity = this.weakReference.get();
         if (entity == null) {
-            for (World world : Sponge.getGame().getServer().getWorlds()) {
+            for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
                 final Optional<Entity> optional = world.getEntity(this.entityid);
                 if (optional.isPresent()) {
                     return optional.get();

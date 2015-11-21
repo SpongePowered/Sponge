@@ -34,7 +34,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
@@ -49,7 +49,7 @@ public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnap
     @Override
     public Optional<ItemStackSnapshot> build(DataView container) throws InvalidDataException {
         final String itemString = getData(container, DataQueries.ITEM_TYPE, String.class);
-        final ItemType itemType = Sponge.getRegistry().getType(ItemType.class, itemString).get();
+        final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemString).get();
         final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
         final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
         final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;

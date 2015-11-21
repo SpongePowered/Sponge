@@ -35,7 +35,7 @@ import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.service.profile.GameProfileResolver;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
@@ -56,7 +56,7 @@ public class SkullUtils {
     }
 
     public static SkullType getSkullType(int skullType) {
-        return Iterables.get(Sponge.getRegistry().getAllOf(SkullType.class), skullType);
+        return Iterables.get(SpongeImpl.getRegistry().getAllOf(SkullType.class), skullType);
     }
 
     public static boolean isValidItemStack(Object container) {
@@ -123,13 +123,13 @@ public class SkullUtils {
             return null;
         }
         // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
-        final GameProfileResolver resolver = Sponge.getGame().getServiceManager().provide(GameProfileResolver.class).get();
+        final GameProfileResolver resolver = SpongeImpl.getGame().getServiceManager().provide(GameProfileResolver.class).get();
         if (profile.getName() == null || profile.getName().isEmpty()) {
             final ListenableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
             try {
                 return future.get();
             } catch (InterruptedException | ExecutionException e) {
-                Sponge.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
+                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
                 return null;
             }
         } else if (profile.getUniqueId() == null) {
@@ -137,7 +137,7 @@ public class SkullUtils {
             try {
                 return future.get();
             } catch (InterruptedException | ExecutionException e) {
-                Sponge.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
+                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
                 return null;
             }
         } else {

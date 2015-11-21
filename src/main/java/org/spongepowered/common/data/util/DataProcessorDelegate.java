@@ -38,7 +38,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 
 import java.util.Optional;
@@ -50,7 +50,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     public DataProcessorDelegate(ImmutableList<DataProcessor<M, I>> processors) {
         ImmutableList.Builder<Tuple<DataProcessor<M, I>, Timing>> builder = ImmutableList.builder();
         for (DataProcessor<M, I> processor : processors) {
-            builder.add(new Tuple<>(processor, SpongeTimingsFactory.ofSafe(Sponge.getPlugin(), processor.getClass().getCanonicalName())));
+            builder.add(new Tuple<>(processor, SpongeTimingsFactory.ofSafe(SpongeImpl.getPlugin(), processor.getClass().getCanonicalName())));
         }
         this.processors = builder.build();
     }

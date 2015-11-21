@@ -31,7 +31,7 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.type.EntityTypeRegistryModule;
 
 import java.lang.reflect.Method;
@@ -60,13 +60,13 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
                     final Class<? extends CatalogType> type2 = type.asSubclass(CatalogType.class);
                     converters.put(converterKey, (Function<String, T>) input -> {
                         // assume it exists for now
-                        return (T) Sponge.getGame().getRegistry().getType(type2, input).get();
+                        return (T) SpongeImpl.getGame().getRegistry().getType(type2, input).get();
                     });
                 } else {
                     throw new IllegalStateException("can't convert " + type);
                 }
             } catch (SecurityException e) {
-                Sponge.getLogger().catching(e);
+                SpongeImpl.getLogger().catching(e);
             }
         }
         return (Function<String, T>) converters.get(converterKey);

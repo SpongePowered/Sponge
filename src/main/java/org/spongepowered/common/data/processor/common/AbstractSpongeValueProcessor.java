@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
@@ -121,7 +121,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
                 }
                 return builder.result(DataTransactionResult.Type.FAILURE).reject(newValue).build();
             } catch (Exception e) {
-                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
+                SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject(newValue).build();
             }
         }

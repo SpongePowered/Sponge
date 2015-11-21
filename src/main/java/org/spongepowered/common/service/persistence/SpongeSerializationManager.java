@@ -33,26 +33,26 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.service.persistence.DataBuilder;
-import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.service.persistence.SerializationManager;
 import org.spongepowered.common.configuration.DataSerializableTypeSerializer;
 
 import java.util.Map;
 import java.util.Optional;
 
-public final class SpongeSerializationService implements SerializationService {
+public final class SpongeSerializationManager implements SerializationManager {
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(DataSerializable.class), new DataSerializableTypeSerializer());
     }
 
-    private static final SpongeSerializationService instance = new SpongeSerializationService();
+    private static final SpongeSerializationManager instance = new SpongeSerializationManager();
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
     private boolean registrationComplete = false;
 
-    public static SpongeSerializationService getInstance() {
+    public static SpongeSerializationManager getInstance() {
         return instance;
     }
 
-    private SpongeSerializationService() {}
+    private SpongeSerializationManager() {}
 
     public void completeRegistration() {
         checkState(!this.registrationComplete);

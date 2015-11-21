@@ -38,7 +38,7 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.LocatedSource;
 import org.spongepowered.api.util.command.source.RemoteSource;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.net.InetAddress;
 import java.util.Optional;
@@ -64,7 +64,7 @@ public class SpongeContextCalculator implements ContextCalculator {
                     ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
                     final InetAddress addr = checkNotNull(function.apply(key), "addr");
                     builder.add(new Context(contextKey, addr.getHostAddress()));
-                    for (String set : Maps.filterValues(Sponge.getGlobalConfig().getConfig().getIpSets(), input -> {
+                    for (String set : Maps.filterValues(SpongeImpl.getGlobalConfig().getConfig().getIpSets(), input -> {
                         return input.apply(addr);
                     }).keySet()) {
                         builder.add(new Context(contextKey, set));

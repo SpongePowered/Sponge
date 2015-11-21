@@ -41,11 +41,11 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.service.persistence.SerializationManager;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -182,15 +182,15 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         checkDataExists(container, DataQueries.BLOCK_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        final SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+        final SerializationManager serializationManager = SpongeImpl.getGame().getServiceManager().provide(SerializationManager.class).get();
         // this is unused for now
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
-        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationService).get();
+        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationManager).get();
         BlockState extendedState = null;
         if (container.contains(DataQueries.BLOCK_EXTENDED_STATE)) {
-            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, serializationService).get();
+            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, serializationManager).get();
         } else {
             extendedState = blockState;
         }

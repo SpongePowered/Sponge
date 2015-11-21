@@ -29,7 +29,7 @@ import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 
 import java.lang.reflect.Constructor;
@@ -76,8 +76,8 @@ public final class ReflectionUtil {
         try {
             return ctor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            Sponge.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
-            + "with the args: " + Arrays.toString(args), e);
+            SpongeImpl.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
+                                         + "with the args: " + Arrays.toString(args), e);
         }
         throw new IllegalArgumentException("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
          + "the args: " + Arrays.toString(args));

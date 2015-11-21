@@ -34,7 +34,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -59,7 +59,7 @@ public class ChunkSaveHelper {
             writer.setIndent("  ");
             writer.beginArray();
 
-            for (World spongeWorld : Sponge.getGame().getServer().getWorlds()) {
+            for (World spongeWorld : SpongeImpl.getGame().getServer().getWorlds()) {
                 WorldServer world = (WorldServer) spongeWorld;
                 writer.beginObject();
                 writer.name("name").value(((WorldServer) spongeWorld).getSaveHandler().getWorldDirectoryName());

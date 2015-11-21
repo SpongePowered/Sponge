@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -86,7 +86,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
                 return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get()))
                     .result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
-                Sponge.getLogger().error("There was an issue resetting the custom name on an entity!", e);
+                SpongeImpl.getLogger().error("There was an issue resetting the custom name on an entity!", e);
                 return builder.result(DataTransactionResult.Type.ERROR).build();
             }
         } else {

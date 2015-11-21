@@ -37,7 +37,7 @@ import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCookedFishData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
@@ -64,7 +64,7 @@ public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<Coo
 
     @Override
     protected Optional<CookedFish> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(Sponge.getRegistry().getAllOf(CookedFish.class), itemStack.getMetadata()));
+        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(CookedFish.class), itemStack.getMetadata()));
     }
 
     @Override

@@ -62,7 +62,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
@@ -275,7 +275,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void setGameMode(GameMode gamemode) {
-        this.theGameType = Sponge.getRegistry().getGameType(gamemode);
+        this.theGameType = SpongeImpl.getRegistry().getGameType(gamemode);
     }
 
     @Override
@@ -654,7 +654,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public DataContainer getAdditionalProperties() {
         NBTTagCompound additionalProperties = (NBTTagCompound) this.spongeRootLevelNbt.copy();
-        additionalProperties.removeTag(Sponge.ECOSYSTEM_NAME);
+        additionalProperties.removeTag(SpongeImpl.ECOSYSTEM_NAME);
         return NbtTranslator.getInstance().translateFrom(additionalProperties);
     }
 }

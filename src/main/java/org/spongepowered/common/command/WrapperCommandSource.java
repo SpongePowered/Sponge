@@ -37,7 +37,7 @@ import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.LocatedSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
@@ -53,7 +53,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     private WrapperCommandSource(ICommandSender sender) {
         this.sender = sender;
-        this.data = new MemorySubjectData(Sponge.getGame().getServiceManager().provide(PermissionService.class).get());
+        this.data = new MemorySubjectData(SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get());
 
         // ICommandSenders have a *very* basic understanding of permissions, so
         // get what we can.
@@ -61,7 +61,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
                 Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(1, "@")));
         this.data.setPermission(SubjectData.GLOBAL_CONTEXT, "minecraft.commandblock",
                 Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(2, "")));
-        for (CommandMapping command : Sponge.getGame().getCommandDispatcher().getCommands()) {
+        for (CommandMapping command : SpongeImpl.getGame().getCommandDispatcher().getCommands()) {
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
                 this.data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
@@ -82,7 +82,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public SubjectCollection getContainingCollection() {
-        SpongePermissionService permission = (SpongePermissionService) Sponge.getGame().getServiceManager().provide(PermissionService.class).get();
+        SpongePermissionService permission = (SpongePermissionService) SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get();
         return permission.getSubjects(SpongePermissionService.SUBJECTS_SYSTEM);
     }
 
@@ -112,7 +112,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public MessageSink getMessageSink() {
-        return Sponge.getGame().getServer().getBroadcastSink();
+        return SpongeImpl.getGame().getServer().getBroadcastSink();
     }
 
     @Override

@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
 
@@ -52,7 +52,7 @@ public abstract class MixinFishType implements Fish {
     @Override
     public Optional<CookedFish> getCookedFish() {
         if (this.cookable) {
-            final Optional<CookedFish> optional = Sponge.getRegistry().getType(CookedFish.class, "cooked." + this.unlocalizedName);
+            final Optional<CookedFish> optional = SpongeImpl.getRegistry().getType(CookedFish.class, "cooked." + this.unlocalizedName);
             if (optional.isPresent()) {
                 return optional;
             }

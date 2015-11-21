@@ -26,6 +26,7 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -60,7 +61,7 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             ((TileEntityBrewingStand) brewingStand).setName(container.getString(NAME_QUERY).get());
         }
 
-        final BrewingStandData brewingData = this.game.getRegistry().getManipulatorRegistry().getBuilder(BrewingStandData.class).get().create();
+        final BrewingStandData brewingData = Sponge.getManipulatorRegistry().getBuilder(BrewingStandData.class).get().create();
         brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
         brewingStand.offer(brewingData);
 

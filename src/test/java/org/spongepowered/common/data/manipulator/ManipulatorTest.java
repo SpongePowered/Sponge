@@ -39,17 +39,14 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
-import org.spongepowered.common.service.persistence.SpongeSerializationService;
-import org.spongepowered.common.text.SpongeTextFactory;
+import org.spongepowered.common.service.persistence.SpongeSerializationManager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -60,7 +57,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Sponge.class)
+@PrepareForTest(SpongeImpl.class)
 public class ManipulatorTest {
 
     @SuppressWarnings("unchecked")
@@ -82,9 +79,9 @@ public class ManipulatorTest {
             SpongeGame mockGame = mock(SpongeGame.class);
 
             final ServiceManager mockServiceManager = mock(ServiceManager.class);
-            final SerializationService serializationService = SpongeSerializationService.getInstance();
+            final SerializationManager serializationManager = SpongeSerializationManager.getInstance();
             Mockito.when(mockGame.getServiceManager()).thenReturn(mockServiceManager);
-            when(mockServiceManager.provide(SerializationService.class)).thenReturn(Optional.of(serializationService));
+            when(mockServiceManager.provide(SerializationManager.class)).thenReturn(Optional.of(serializationManager));
             SpongeSerializationRegistry.setupSerialization(mockGame);
         } catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();

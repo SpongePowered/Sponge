@@ -30,7 +30,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.RegistryModule;
@@ -121,9 +121,9 @@ public final class RegistryModuleLoader {
             Method method = module.getClass().getMethod("registerDefaults");
             DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
             if (delay == null) {
-                return Sponge.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
+                return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
             } else {
-                return Sponge.getRegistry().getPhase() == delay.value();
+                return SpongeImpl.getRegistry().getPhase() == delay.value();
             }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -137,9 +137,9 @@ public final class RegistryModuleLoader {
             DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
             if (registration != null) {
                 if (delay == null) {
-                    return Sponge.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
+                    return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
                 } else {
-                    return Sponge.getRegistry().getPhase() == delay.value();
+                    return SpongeImpl.getRegistry().getPhase() == delay.value();
                 }
             }
         }
@@ -156,7 +156,7 @@ public final class RegistryModuleLoader {
                     field.setAccessible(true);
                     return (Map<String, ?>) field.get(module);
                 } catch (Exception e) {
-                    Sponge.getLogger().error("Failed to retrieve a registry field from module: " + module.getClass().getCanonicalName());
+                    SpongeImpl.getLogger().error("Failed to retrieve a registry field from module: " + module.getClass().getCanonicalName());
                 }
             }
         }
@@ -179,8 +179,8 @@ public final class RegistryModuleLoader {
                 method.invoke(module);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
-            Sponge.getLogger().error("Error when calling custom catalog registration for module: "
-                                     + module.getClass().getCanonicalName(), e);
+            SpongeImpl.getLogger().error("Error when calling custom catalog registration for module: "
+                                         + module.getClass().getCanonicalName(), e);
         }
     }
 

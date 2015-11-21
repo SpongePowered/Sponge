@@ -28,7 +28,7 @@ import co.aikar.util.LoadingMap;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.command.CommandMapping;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public final class TimingsManager {
                 handler.processTick(violated);
             }
 
-            TimingHistory.playerTicks += Sponge.getGame().getServer().getOnlinePlayers().size();
+            TimingHistory.playerTicks += SpongeImpl.getGame().getServer().getOnlinePlayers().size();
             TimingHistory.timedTicks++;
             // Generate TPS/Ping/Tick reports every minute
         }
@@ -113,7 +113,7 @@ public final class TimingsManager {
                     timings.reset(true);
                 }
             }
-            Sponge.getLogger().info("Timings Reset");
+            SpongeImpl.getLogger().info("Timings Reset");
             HISTORY.clear();
             needsFullReset = false;
             needsRecheckEnabled = false;
@@ -143,7 +143,7 @@ public final class TimingsManager {
         if (!("minecraft".equals(pluginName)
                 || "bukkit".equals(pluginName)
                 || "Spigot".equals(pluginName))) {
-            plugin = Sponge.getGame().getPluginManager().getPlugin(pluginName);
+            plugin = SpongeImpl.getGame().getPluginManager().getPlugin(pluginName);
         }
         if (!plugin.isPresent()) {
             return SpongeTimingsFactory.ofSafe("Command: " + pluginName + ":" + command.getPrimaryAlias());

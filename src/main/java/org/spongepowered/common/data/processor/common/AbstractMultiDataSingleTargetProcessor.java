@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -107,7 +107,7 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
                     return builder.result(DataTransactionResult.Type.FAILURE).reject(newValues).build();
                 }
             } catch (Exception e) {
-                Sponge.getLogger().debug("An exception occurred when setting data: ", e);
+                SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject(newValues).build();
             }
         }

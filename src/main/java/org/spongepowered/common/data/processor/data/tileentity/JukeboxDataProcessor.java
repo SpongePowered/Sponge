@@ -37,7 +37,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
 
@@ -91,7 +91,7 @@ public class JukeboxDataProcessor extends AbstractTileEntityDataProcessor<BlockJ
                             jukebox.getWorld().getBlockState(jukebox.getPos()).withProperty(BlockJukebox.HAS_RECORD, false), 2);
                     return builder.replace(itemStackSnapshot.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {

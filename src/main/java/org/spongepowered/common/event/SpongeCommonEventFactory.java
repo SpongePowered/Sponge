@@ -62,7 +62,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinWorld;
@@ -118,8 +118,8 @@ public class SpongeCommonEventFactory {
         SlotTransaction transaction = new SlotTransaction((org.spongepowered.api.item.inventory.Slot) slot, originalSnapshot, newSnapshot);
         ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(transaction).build();
         ChangeInventoryEvent.Held event =
-                SpongeEventFactory.createChangeInventoryEventHeld(Sponge.getGame(), Cause.of(player), (Inventory) player.inventoryContainer, transactions);
-        Sponge.postEvent(event);
+                SpongeEventFactory.createChangeInventoryEventHeld(SpongeImpl.getGame(), Cause.of(player), (Inventory) player.inventoryContainer, transactions);
+        SpongeImpl.postEvent(event);
 
         if (event.isCancelled()) {
             player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
@@ -152,9 +152,9 @@ public class SpongeCommonEventFactory {
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
             Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
             InteractInventoryEvent.Open event =
-                    SpongeEventFactory.createInteractInventoryEventOpen(Sponge.getGame(), cause, cursorTransaction,
-                            (org.spongepowered.api.item.inventory.Container) player.openContainer);
-            Sponge.postEvent(event);
+                    SpongeEventFactory.createInteractInventoryEventOpen(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                        (org.spongepowered.api.item.inventory.Container) player.openContainer);
+            SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 player.closeScreen();
             } else {
@@ -174,9 +174,9 @@ public class SpongeCommonEventFactory {
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
             Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
             InteractInventoryEvent.Close event =
-                    SpongeEventFactory.createInteractInventoryEventClose(Sponge.getGame(), cause, cursorTransaction,
-                            (org.spongepowered.api.item.inventory.Container) StaticMixinHelper.lastOpenContainer);
-            Sponge.postEvent(event);
+                    SpongeEventFactory.createInteractInventoryEventClose(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                         (org.spongepowered.api.item.inventory.Container) StaticMixinHelper.lastOpenContainer);
+            SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 if (StaticMixinHelper.lastOpenContainer.getSlot(0) != null) {
                     player.openContainer = StaticMixinHelper.lastOpenContainer;
@@ -220,9 +220,9 @@ public class SpongeCommonEventFactory {
                 SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), player.getUniqueID());
                 entitySnapshotBuilder.add(currentEntity.createSnapshot());
             }
-            event = SpongeEventFactory.createCreativeInventoryEventDrop(Sponge.getGame(), cause, cursorTransaction, world.getCapturedEntityItems(),
-                    entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
-                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+            event = SpongeEventFactory.createCreativeInventoryEventDrop(SpongeImpl.getGame(), cause, cursorTransaction, world.getCapturedEntityItems(),
+                                                                        entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
+                                                                        ((IMixinContainer) player.openContainer).getCapturedTransactions());
         } else {
             if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
                 Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
@@ -232,11 +232,11 @@ public class SpongeCommonEventFactory {
                     ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
                 }
             }
-            event = SpongeEventFactory.createCreativeInventoryEventClick(Sponge.getGame(), cause, cursorTransaction,
-                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+            event = SpongeEventFactory.createCreativeInventoryEventClick(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                         (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                         ((IMixinContainer) player.openContainer).getCapturedTransactions());
         }
-        Sponge.postEvent(event);
+        SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             if (event instanceof CreativeInventoryEvent.Drop) {
                 world.getCapturedEntityItems().clear();
@@ -315,15 +315,15 @@ public class SpongeCommonEventFactory {
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropFull(Sponge.getGame(), cause, cursorTransaction,
-                                    world.getCapturedEntities(), entitySnapshotBuilder.build(),
-                                    (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
-                                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                            SpongeEventFactory.createClickInventoryEventDropFull(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                 world.getCapturedEntities(), entitySnapshotBuilder.build(),
+                                                                                 (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
+                                                                                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 } else {
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventPrimary(Sponge.getGame(), cause, cursorTransaction,
-                                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                            SpongeEventFactory.createClickInventoryEventPrimary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                                ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 }
             } else if (packetIn.getUsedButton() == BUTTON_SECONDARY) {
                 if (packetIn.getSlotId() == CLICK_OUTSIDE) {
@@ -335,63 +335,63 @@ public class SpongeCommonEventFactory {
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropSingle(Sponge.getGame(), cause, cursorTransaction,
-                                    world.getCapturedEntities(), entitySnapshotBuilder.build(),
-                                    (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
-                                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                            SpongeEventFactory.createClickInventoryEventDropSingle(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                   world.getCapturedEntities(), entitySnapshotBuilder.build(),
+                                                                                   (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
+                                                                                   ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 } else {
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventSecondary(Sponge.getGame(), cause, cursorTransaction,
-                                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                            SpongeEventFactory.createClickInventoryEventSecondary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                  (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                                  ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 }
             } else if (packetIn.getUsedButton() == BUTTON_MIDDLE) {
                 clickEvent =
-                        SpongeEventFactory.createClickInventoryEventMiddle(Sponge.getGame(), cause, cursorTransaction,
-                                (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                        SpongeEventFactory.createClickInventoryEventMiddle(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                           (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                           ((IMixinContainer) player.openContainer).getCapturedTransactions());
             }
         } else if (packetIn.getMode() == MODE_SHIFT_CLICK) {
             if (packetIn.getUsedButton() == BUTTON_PRIMARY) {
                 clickEvent =
-                        SpongeEventFactory.createClickInventoryEventShiftPrimary(Sponge.getGame(), cause, cursorTransaction,
-                                (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                        SpongeEventFactory.createClickInventoryEventShiftPrimary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                 (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
             } else {
                 clickEvent =
-                        SpongeEventFactory.createClickInventoryEventShiftSecondary(Sponge.getGame(), cause, cursorTransaction,
-                                (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                        SpongeEventFactory.createClickInventoryEventShiftSecondary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                   (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                                   ((IMixinContainer) player.openContainer).getCapturedTransactions());
             }
         } else if (packetIn.getMode() == MODE_HOTBAR) {
             clickEvent =
-                    SpongeEventFactory.createClickInventoryEventNumberPress(Sponge.getGame(), cause, cursorTransaction,
-                            (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                            ((IMixinContainer) player.openContainer).getCapturedTransactions(), packetIn.getUsedButton());
+                    SpongeEventFactory.createClickInventoryEventNumberPress(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                            (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                            ((IMixinContainer) player.openContainer).getCapturedTransactions(), packetIn.getUsedButton());
         } else if (packetIn.getMode() == MODE_DROP) {
             if (packetIn.getUsedButton() == BUTTON_PRIMARY) {
                 clickEvent =
-                        SpongeEventFactory.createClickInventoryEventPrimary(Sponge.getGame(), cause, cursorTransaction,
-                                (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                        SpongeEventFactory.createClickInventoryEventPrimary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                            (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                            ((IMixinContainer) player.openContainer).getCapturedTransactions());
             } else if (packetIn.getUsedButton() == BUTTON_SECONDARY) {
                 clickEvent =
-                        SpongeEventFactory.createClickInventoryEventSecondary(Sponge.getGame(), cause, cursorTransaction,
-                                (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                        SpongeEventFactory.createClickInventoryEventSecondary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                              (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                              ((IMixinContainer) player.openContainer).getCapturedTransactions());
             }
         } else if (packetIn.getMode() == MODE_DRAG) {
             if (packetIn.getSlotId() == CLICK_OUTSIDE) {
                 if (packetIn.getUsedButton() == CLICK_DRAG_LEFT) {
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDragPrimary(Sponge.getGame(), cause, cursorTransaction,
-                                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                            SpongeEventFactory.createClickInventoryEventDragPrimary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 } else if (packetIn.getUsedButton() == CLICK_DRAG_RIGHT) {
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDragSecondary(Sponge.getGame(), cause, cursorTransaction,
-                                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                            SpongeEventFactory.createClickInventoryEventDragSecondary(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                                      (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                                      ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 }
             }
             if (clickEvent == null) {
@@ -399,12 +399,12 @@ public class SpongeCommonEventFactory {
             }
         } else if (packetIn.getMode() == MODE_DOUBLE_CLICK) {
             clickEvent =
-                    SpongeEventFactory.createClickInventoryEventDouble(Sponge.getGame(), cause, cursorTransaction,
-                            (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                            ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                    SpongeEventFactory.createClickInventoryEventDouble(SpongeImpl.getGame(), cause, cursorTransaction,
+                                                                       (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                                                                       ((IMixinContainer) player.openContainer).getCapturedTransactions());
         }
 
-        Sponge.postEvent(clickEvent);
+        SpongeImpl.postEvent(clickEvent);
 
         if (clickEvent.isCancelled()) {
             if (clickEvent instanceof ClickInventoryEvent.Drop) {
@@ -478,8 +478,8 @@ public class SpongeCommonEventFactory {
         }
 
         ImmutableList<org.spongepowered.api.entity.Entity> originalEntities = ImmutableList.copyOf((List<org.spongepowered.api.entity.Entity>)(List<?>) entities);
-        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(Sponge.getGame(), cause, originalEntities, (List<org.spongepowered.api.entity.Entity>)(List<?>) entities, (org.spongepowered.api.world.World) world);
-        Sponge.postEvent(event);
+        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(SpongeImpl.getGame(), cause, originalEntities, (List<org.spongepowered.api.entity.Entity>)(List<?>) entities, (org.spongepowered.api.world.World) world);
+        SpongeImpl.postEvent(event);
         return event;
     }
 
@@ -516,9 +516,9 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(Sponge.getGame(), cause, originalNeighbors, neighbors);
+        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(SpongeImpl.getGame(), cause, originalNeighbors, neighbors);
         StaticMixinHelper.processingInternalForgeEvent = true;
-        Sponge.postEvent(event);
+        SpongeImpl.postEvent(event);
         StaticMixinHelper.processingInternalForgeEvent = false;
         return event;
     }

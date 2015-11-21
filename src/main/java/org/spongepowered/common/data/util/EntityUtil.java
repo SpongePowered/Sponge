@@ -32,7 +32,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S10PacketSpawnPainting;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,13 +95,13 @@ public final class EntityUtil {
         painting.art = art;
         painting.updateFacingWithBoundingBox(painting.facingDirection);
         for (EntityPlayerMP playerMP : playerMPs) {
-            Sponge.getGame().getScheduler().createTaskBuilder()
-                .delayTicks(Sponge.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
+            SpongeImpl.getGame().getScheduler().createTaskBuilder()
+                .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
                 .execute(() -> {
                     final S10PacketSpawnPainting packet = new S10PacketSpawnPainting(painting);
                     playerMP.playerNetServerHandler.sendPacket(packet);
                 })
-                .submit(Sponge.getPlugin());
+                .submit(SpongeImpl.getPlugin());
         }
         return true;
     }

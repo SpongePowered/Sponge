@@ -45,12 +45,12 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
-public class Sponge {
+public class SpongeImpl {
 
     public static final String ECOSYSTEM_NAME = "Sponge";
 
     @Nullable
-    private static Sponge instance;
+    private static SpongeImpl instance;
 
     private static final Path gameDir = SpongeLaunch.getGameDirectory();
     private static final Path configDir = SpongeLaunch.getConfigDirectory();
@@ -66,8 +66,8 @@ public class Sponge {
     private final PluginContainer minecraftPlugin;
 
     @Inject
-    public Sponge(Injector injector, Game game, Logger logger,
-            @Named(Sponge.ECOSYSTEM_NAME) PluginContainer plugin, @Named("Minecraft") PluginContainer minecraftPlugin) {
+    public SpongeImpl(Injector injector, Game game, Logger logger,
+                      @Named(SpongeImpl.ECOSYSTEM_NAME) PluginContainer plugin, @Named("Minecraft") PluginContainer minecraftPlugin) {
 
         checkState(instance == null, "Sponge was already initialized");
         instance = this;
@@ -79,7 +79,7 @@ public class Sponge {
         this.minecraftPlugin = checkNotNull(minecraftPlugin, "minecraftPlugin");
     }
 
-    public static Sponge getInstance() {
+    public static SpongeImpl getInstance() {
         checkState(instance != null, "Sponge was not initialized");
         return instance;
     }

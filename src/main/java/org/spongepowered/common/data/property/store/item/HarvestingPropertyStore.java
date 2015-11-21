@@ -31,7 +31,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.property.item.HarvestingProperty;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
 import java.util.Collection;
@@ -48,7 +48,7 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
             final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set<BlockType>) ((ItemTool) item).effectiveBlocks);
             return Optional.of(new HarvestingProperty(blocks));
         } else {
-            final Collection<BlockType> blockTypes = Sponge.getRegistry().getAllOf(BlockType.class);
+            final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);
             final ImmutableSet.Builder<BlockType> builder = ImmutableSet.builder();
             blockTypes.stream().filter(blockType -> item.canHarvestBlock((Block) blockType)).forEach(builder::add);
             final ImmutableSet<BlockType> blocks = builder.build();

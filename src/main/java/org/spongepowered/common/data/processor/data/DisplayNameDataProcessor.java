@@ -44,7 +44,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
@@ -143,7 +143,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                     ((ItemStack) dataHolder).clearCustomName();
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the displayName from an ItemStack!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the displayName from an ItemStack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
@@ -158,7 +158,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                     ((Entity) dataHolder).setAlwaysRenderNameTag(false);
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue resetting the custom name on an entity!", e);
+                    SpongeImpl.getLogger().error("There was an issue resetting the custom name on an entity!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {

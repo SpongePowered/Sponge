@@ -38,8 +38,8 @@ import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.service.persistence.SerializationService;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -83,10 +83,10 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
     @Override
     public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        SerializationService serializationService = Sponge.getGame().getServiceManager().provide(SerializationService.class).get();
+        SerializationManager serializationManager = SpongeImpl.getGame().getServiceManager().provide(SerializationManager.class).get();
         final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
                                                                                  ItemEnchantment.class,
-                                                                                 serializationService).get();
+                                                                                 serializationManager).get();
         final ListValue<ItemEnchantment> existing = enchantmentData.enchantments();
         existing.addAll(enchantments);
         enchantmentData.set(existing);

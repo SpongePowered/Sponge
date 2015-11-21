@@ -38,7 +38,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 
 @Mixin(ItemFishingRod.class)
@@ -57,7 +57,7 @@ public abstract class MixinItemFishingRod extends Item {
             EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();
             // only fire event on server-side to avoid crash on client
             if (!player.worldObj.isRemote
-                    && Sponge.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getGame(), Cause.of(player), fishHookSnapshot, (FishHook) fishHook))) {
+                && SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(SpongeImpl.getGame(), Cause.of(player), fishHookSnapshot, (FishHook) fishHook))) {
                 player.fishEntity = null;
                 return itemStack;
             }

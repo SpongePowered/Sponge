@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleD
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.util.EntityUtil;
@@ -73,7 +73,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
             return Optional.empty();
         } else {
             final UUID uuid = UUID.fromString(container.getString(Keys.VEHICLE.getQuery()).get());
-            for (World world : Sponge.getGame().getServer().getWorlds()) {
+            for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
                 for (Entity entity : world.getEntities()) {
                     if (entity.getUniqueId().equals(uuid)) {
                         vehicleData.set(Keys.VEHICLE, entity);

@@ -33,7 +33,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -65,7 +65,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
                     NbtDataUtil.removeColorFromNBT(stack);
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the color from an ItemStack!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the color from an ItemStack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {

@@ -59,7 +59,7 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -386,7 +386,7 @@ public class SelectorResolver {
 
     private Set<? extends Extent> getExtentSet() {
         if (!this.alwaysUsePosition && Collections.disjoint(getArgumentTypes(this.selector.getArguments()), LOCATION_BASED_ARGUMENTS)) {
-            return ImmutableSet.copyOf(Sponge.getGame().getServer().getWorlds());
+            return ImmutableSet.copyOf(SpongeImpl.getGame().getServer().getWorlds());
         }
         return ImmutableSet.copyOf(this.extents);
     }

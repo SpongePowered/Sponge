@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -96,8 +96,8 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
     public boolean fireAuthEvent() {
         Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
         MessageSink sink = MessageSinks.toAll();
-        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Sponge.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, (RemoteConnection) this.networkManager, (GameProfile) this.loginGameProfile);
-        Sponge.postEvent(event);
+        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(SpongeImpl.getGame(), Cause.of(this.loginGameProfile), disconnectMessage, disconnectMessage, sink, sink, (RemoteConnection) this.networkManager, (GameProfile) this.loginGameProfile);
+        SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             this.disconnectClient(Optional.ofNullable(event.getMessage()));
         }

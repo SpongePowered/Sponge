@@ -38,7 +38,7 @@ import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.profile.ProfileNotFoundException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -255,7 +255,7 @@ public class SpongeProfileResolver implements GameProfileResolver {
         try {
             return new SingleQuery(uniqueId, useCache).call();
         } catch (Exception e) {
-            Sponge.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
+            SpongeImpl.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
             return null;
         }
     }

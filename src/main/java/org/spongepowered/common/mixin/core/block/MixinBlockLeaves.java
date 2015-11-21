@@ -53,7 +53,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
@@ -77,8 +77,8 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         BlockSnapshot blockReplacement = blockOriginal.withState(BlockTypes.AIR.getDefaultState());
         ImmutableList<Transaction<BlockSnapshot>> transactions =
                 new ImmutableList.Builder<Transaction<BlockSnapshot>>().add(new Transaction<>(blockOriginal, blockReplacement)).build();
-        final ChangeBlockEvent.Decay event = SpongeEventFactory.createChangeBlockEventDecay(Sponge.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
-        Sponge.postEvent(event);
+        final ChangeBlockEvent.Decay event = SpongeEventFactory.createChangeBlockEventDecay(SpongeImpl.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
+        SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ci.cancel();
         }

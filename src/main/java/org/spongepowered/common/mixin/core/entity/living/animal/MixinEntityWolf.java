@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
 import java.util.List;
@@ -81,7 +81,8 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player) {
         int random = rand.nextInt(bound);
-        if (random == 0 && !Sponge.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getGame(), Cause.of(player, this.currentItemStack), this))) {
+        if (random == 0 && !SpongeImpl
+            .postEvent(SpongeEventFactory.createTameEntityEvent(SpongeImpl.getGame(), Cause.of(player, this.currentItemStack), this))) {
             this.currentItemStack = null;
             return random;
         }

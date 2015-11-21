@@ -105,7 +105,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.value.SpongeValueBuilder;
@@ -203,7 +203,7 @@ public final class CommonModuleRegistry {
     }
 
     public void registerDefaultModules() {
-        SpongeGameRegistry registry = Sponge.getRegistry();
+        SpongeGameRegistry registry = SpongeImpl.getRegistry();
         registerFactories();
         registerDefaultSuppliers(registry);
         registerCommonModules(registry);
@@ -226,7 +226,7 @@ public final class CommonModuleRegistry {
                 registry.initialize();
             }
         } catch (Exception e) {
-            Sponge.getLogger().error("Could not initialize a factory!", e);
+            SpongeImpl.getLogger().error("Could not initialize a factory!", e);
         }
     }
 

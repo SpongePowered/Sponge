@@ -43,7 +43,7 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
-import org.spongepowered.common.service.persistence.SpongeSerializationService;
+import org.spongepowered.common.service.persistence.SpongeSerializationManager;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -118,7 +118,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         });
         registry.processorMap.clear();
 
-        SpongeSerializationService serializationService = SpongeSerializationService.getInstance();
+        SpongeSerializationManager serializationService = SpongeSerializationManager.getInstance();
         registry.dataProcessorDelegates.entrySet().forEach(entry -> {
             if (!Modifier.isInterface(entry.getKey().getModifiers()) && !Modifier.isAbstract(entry.getKey().getModifiers())) {
                 DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
@@ -155,7 +155,7 @@ public final class SpongeDataRegistry implements DataManipulatorRegistry {
         if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
             this.builderMap.put(manipulatorClass, checkNotNull(builder));
             this.immutableBuilderMap.put(checkNotNull(immutableManipulatorClass), builder);
-            SpongeSerializationService.getInstance().registerBuilder((Class<T>) manipulatorClass, builder);
+            SpongeSerializationManager.getInstance().registerBuilder((Class<T>) manipulatorClass, builder);
         } else {
             throw new IllegalStateException("Already registered the DataUtil for " + manipulatorClass.getCanonicalName());
         }

@@ -42,7 +42,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -141,7 +141,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         quantity(count);
 
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
-        final ItemType itemType = Sponge.getRegistry().getType(ItemType.class, itemTypeId).get();
+        final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
         itemType(itemType);
 
         this.damageValue = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);

@@ -31,7 +31,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -87,7 +87,7 @@ public class ItemColorValueProcessor extends AbstractSpongeValueProcessor<ItemSt
                     NbtDataUtil.removeColorFromNBT(stack);
                     return builder.replace(new ImmutableSpongeValue<>(Keys.COLOR, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the color from an itemstack!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the color from an itemstack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {

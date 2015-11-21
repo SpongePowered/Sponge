@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -85,7 +85,7 @@ public class JukeboxValueProcessor extends AbstractSpongeValueProcessor<BlockJuk
                             jukebox.getWorld().getBlockState(jukebox.getPos()).withProperty(BlockJukebox.HAS_RECORD, false), 2);
                     return builder.replace(itemStackSnapshot.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {

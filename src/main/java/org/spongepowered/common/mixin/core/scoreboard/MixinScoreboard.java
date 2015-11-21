@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinTeam;
@@ -134,7 +134,7 @@ public abstract class MixinScoreboard implements IMixinScoreboard {
             //System.out.format("Scoreboard: {} Objecite: {} DisplaySlot: ", new Object[] {this.scoreboard, objective,Iterables.get((
             //        (SpongeGameRegistry) Sponge.getGame().getRegistry()).displaySlotMappings.values(), slot) });
             this.scoreboard.addObjective(((IMixinScoreObjective) objective).getSpongeObjective(),
-                                         Iterables.get(Sponge.getRegistry().getAllOf(DisplaySlot.class), slot));
+                                         Iterables.get(SpongeImpl.getRegistry().getAllOf(DisplaySlot.class), slot));
             this.scoreboard.allowRecursion = true;
             ci.cancel();
         }

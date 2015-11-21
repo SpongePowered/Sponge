@@ -38,7 +38,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
@@ -72,7 +72,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
                     NbtDataUtil.removeLoreFromNBT((ItemStack) dataHolder);
                     return builder.replace(data.get().getValues()).result(Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the lore from an itemstack!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the lore from an itemstack!", e);
                     return builder.result(Type.ERROR).build();
                 }
             } else {

@@ -58,7 +58,7 @@ import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.gen.PopulatorFactory;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.configuration.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
@@ -292,15 +292,6 @@ public class SpongeGameRegistry implements GameRegistry {
         throw new UnsupportedOperationException(); // TODO
     }
 
-    @Override
-    public DataManipulatorRegistry getManipulatorRegistry() {
-        return SpongeDataRegistry.getInstance();
-    }
-
-    @Override
-    public ImmutableDataRegistry getImmutableDataRegistry() {
-        return SpongeImmutableRegistry.getInstance();
-    }
 
     @Override
     public Optional<Translation> getTranslationById(String id) {
@@ -386,7 +377,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void preInit() {
         this.phase = RegistrationPhase.PRE_INIT;
-        SpongeSerializationRegistry.setupSerialization(Sponge.getGame());
+        SpongeSerializationRegistry.setupSerialization(SpongeImpl.getGame());
         registerModulePhase();
 
     }

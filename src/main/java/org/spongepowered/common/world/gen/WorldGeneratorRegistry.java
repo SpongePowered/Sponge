@@ -33,7 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -112,7 +112,7 @@ public final class WorldGeneratorRegistry {
             if (modifier != null) {
                 modifiers.add(modifier);
             } else {
-                Sponge.getLogger().error("World generator modifier with id " + id + " not found. Missing plugin?");
+                SpongeImpl.getLogger().error("World generator modifier with id " + id + " not found. Missing plugin?");
             }
         }
         return modifiers;

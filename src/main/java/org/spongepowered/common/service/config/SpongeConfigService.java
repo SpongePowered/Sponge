@@ -28,7 +28,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.config.ConfigRoot;
 import org.spongepowered.api.service.config.ConfigService;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
 
@@ -66,13 +66,13 @@ public class SpongeConfigService implements ConfigService {
 
     public static ConfigRoot getSharedRoot(PluginContainer container) {
         final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(name, Sponge.getConfigDir());
+        return new SpongeConfigRoot(name, SpongeImpl.getConfigDir());
 
     }
 
     public static ConfigRoot getPrivateRoot(PluginContainer container) {
         final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(name, Sponge.getConfigDir().resolve(name));
+        return new SpongeConfigRoot(name, SpongeImpl.getConfigDir().resolve(name));
     }
 
 }

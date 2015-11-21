@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -103,7 +103,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
                     ((ItemStack) container).clearCustomName();
                     return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    Sponge.getLogger().error("There was an issue removing the displayname from an itemstack!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the displayname from an itemstack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {

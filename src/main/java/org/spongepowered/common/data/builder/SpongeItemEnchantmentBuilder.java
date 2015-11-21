@@ -30,7 +30,7 @@ import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.service.persistence.DataBuilder;
 import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
@@ -41,7 +41,7 @@ public class SpongeItemEnchantmentBuilder implements DataBuilder<ItemEnchantment
     public Optional<ItemEnchantment> build(DataView container) throws InvalidDataException {
         final String enchantmentId = DataUtil.getData(container, Queries.ENCHANTMENT_ID, String.class);
         final int enchantmentLevel = DataUtil.getData(container, Queries.LEVEL, Integer.class);
-        final Enchantment enchantment = Sponge.getRegistry().getType(Enchantment.class, enchantmentId).get();
+        final Enchantment enchantment = SpongeImpl.getRegistry().getType(Enchantment.class, enchantmentId).get();
         return Optional.of(new ItemEnchantment(enchantment, enchantmentLevel));
     }
 }

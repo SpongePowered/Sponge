@@ -41,7 +41,7 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.IpSet;
 
 import java.io.IOException;
@@ -170,7 +170,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             reload();
             save();
         } catch (Exception e) {
-            Sponge.getLogger().error("Failed to initialize configuration", e);
+            SpongeImpl.getLogger().error("Failed to initialize configuration", e);
         }
     }
 
@@ -183,7 +183,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.configMapper.serialize(this.root.getNode(this.modId));
             this.loader.save(this.root);
         } catch (IOException | ObjectMappingException e) {
-            Sponge.getLogger().error("Failed to save configuration", e);
+            SpongeImpl.getLogger().error("Failed to save configuration", e);
         }
     }
 
@@ -195,7 +195,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                     .setHeader(HEADER));
             this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
         } catch (Exception e) {
-            Sponge.getLogger().error("Failed to load configuration", e);
+            SpongeImpl.getLogger().error("Failed to load configuration", e);
         }
     }
 

@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
@@ -123,8 +123,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector(pos));
-        final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Sponge.getGame(), Cause.of(world), blockSnapshot);
-        Sponge.postEvent(event);
+        final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(SpongeImpl.getGame(), Cause.of(world), blockSnapshot);
+        SpongeImpl.postEvent(event);
         if(event.isCancelled()) {
             ci.cancel();
         }

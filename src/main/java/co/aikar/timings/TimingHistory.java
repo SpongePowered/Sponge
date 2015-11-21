@@ -40,7 +40,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityType;
 
 import java.lang.management.ManagementFactory;
@@ -96,14 +96,14 @@ public class TimingHistory {
         final Map<EntityType, Counter> entityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
         final Map<BlockType, Counter> tileEntityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
         // Information about all loaded chunks/entities
-        this.worlds = JSONUtil.mapArrayToObject(Sponge.getGame().getServer().getWorlds(), (world) -> {
+        this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.getGame().getServer().getWorlds(), (world) -> {
             return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
                 entityCounts.clear();
                 tileEntityCounts.clear();
 
                 for (Entity entity : chunk.getEntities()) {
                     if (entity.getType() == null) {
-                        Sponge.getLogger().error("Entity is not registered {}", entity);
+                        SpongeImpl.getLogger().error("Entity is not registered {}", entity);
                         continue;
                     }
                     entityCounts.get(entity.getType()).increment();
@@ -208,7 +208,7 @@ public class TimingHistory {
         final double avg;
 
         PingRecord() {
-            final Collection<Player> onlinePlayers = Sponge.getGame().getServer().getOnlinePlayers();
+            final Collection<Player> onlinePlayers = SpongeImpl.getGame().getServer().getOnlinePlayers();
             int totalPing = 0;
             for (Player player : onlinePlayers) {
                 totalPing += player.getConnection().getPing();

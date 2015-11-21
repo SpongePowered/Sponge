@@ -41,7 +41,7 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
@@ -294,7 +294,7 @@ public class SpongeScoreboard implements Scoreboard {
     }
 
     private void setDisplaySlots(net.minecraft.scoreboard.Scoreboard scoreboard, Scoreboard spongeScoreboard) {
-        for (DisplaySlot displaySlot: Sponge.getGame().getRegistry().getAllOf(DisplaySlot.class)) {
+        for (DisplaySlot displaySlot: SpongeImpl.getGame().getRegistry().getAllOf(DisplaySlot.class)) {
             Optional<Objective> objective = spongeScoreboard.getObjective(displaySlot);
             if (objective.isPresent()) {
                 scoreboard.setObjectiveInDisplaySlot(((SpongeDisplaySlot) displaySlot).getIndex(), scoreboard.getObjective(objective.get().getName()));

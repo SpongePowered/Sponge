@@ -39,7 +39,7 @@ import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
@@ -78,7 +78,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
 
     @Override
     public Optional<SkullData> fill(DataContainer container, SkullData skullData) {
-        return Optional.of(skullData.set(Keys.SKULL_TYPE, Sponge.getGame().getRegistry()
+        return Optional.of(skullData.set(Keys.SKULL_TYPE, SpongeImpl.getGame().getRegistry()
             .getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
     }
 

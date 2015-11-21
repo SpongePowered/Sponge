@@ -40,7 +40,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
@@ -77,7 +77,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         }
 
         CommandSource source = WrapperCommandSource.of(sender);
-        CommandResult result = Sponge.getGame().getCommandDispatcher().process(source, command);
+        CommandResult result = SpongeImpl.getGame().getCommandDispatcher().process(source, command);
         updateStat(sender, CommandResultStats.Type.AFFECTED_BLOCKS, result.getAffectedBlocks());
         updateStat(sender, CommandResultStats.Type.AFFECTED_ENTITIES, result.getAffectedEntities());
         updateStat(sender, CommandResultStats.Type.AFFECTED_ITEMS, result.getAffectedItems());
@@ -99,18 +99,18 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         MinecraftCommandWrapper cmd = wrapCommand(command);
         if (cmd.getOwner().getId().equalsIgnoreCase("minecraft")) {
             this.lowPriorityCommands.add(cmd);
-        } else if (Sponge.getGame() == null) { // TODO: How?
+        } else if (SpongeImpl.getGame() == null) { // TODO: How?
             this.earlyRegisterCommands.add(cmd);
         } else {
-            Sponge.getGame().getCommandDispatcher().register(cmd.getOwner(), cmd, cmd.getNames());
-            registerDefaultPermissions(Sponge.getGame(), cmd);
+            SpongeImpl.getGame().getCommandDispatcher().register(cmd.getOwner(), cmd, cmd.getNames());
+            registerDefaultPermissions(SpongeImpl.getGame(), cmd);
         }
         return super.registerCommand(command);
     }
 
     @Override
     public MinecraftCommandWrapper wrapCommand(ICommand command) {
-        return new MinecraftCommandWrapper(Sponge.getMinecraftPlugin(), command);
+        return new MinecraftCommandWrapper(SpongeImpl.getMinecraftPlugin(), command);
     }
 
     private void registerDefaultPermissions(Game game, MinecraftCommandWrapper cmd) {
@@ -159,7 +159,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
     @Override
     @SuppressWarnings("rawtypes")
     public List getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos) {
-        CommandService service = Sponge.getGame().getCommandDispatcher();
+        CommandService service = SpongeImpl.getGame().getCommandDispatcher();
         CommandSource source = (CommandSource) sender;
         return service.getSuggestions(source, input);
     }

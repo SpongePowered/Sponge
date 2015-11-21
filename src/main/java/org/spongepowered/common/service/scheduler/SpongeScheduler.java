@@ -31,7 +31,7 @@ import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -135,7 +135,7 @@ public class SpongeScheduler implements SchedulerService {
      * @throws IllegalArgumentException If the object is not a plugin instance
      */
     static PluginContainer checkPluginInstance(Object plugin) {
-        Optional<PluginContainer> optPlugin = Sponge.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
+        Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
         checkArgument(optPlugin.isPresent(), "Provided object is not a plugin instance");
         return optPlugin.get();
     }

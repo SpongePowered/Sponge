@@ -49,7 +49,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -145,11 +145,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public boolean restore(boolean force, boolean notifyNeighbors) {
-        if (!Sponge.getGame().getServer().getWorld(this.worldUniqueId).isPresent()) {
+        if (!SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).isPresent()) {
             return false;
         }
 
-        net.minecraft.world.World world = (net.minecraft.world.World) Sponge.getGame().getServer().getWorld(this.worldUniqueId).get();
+        net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);
         IBlockState replaced = (IBlockState) this.blockState;
@@ -173,7 +173,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        Optional<World> worldOptional = Sponge.getGame().getServer().getWorld(this.worldUniqueId);
+        Optional<World> worldOptional = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
         if (worldOptional.isPresent()) {
             return Optional.of(new Location<>(worldOptional.get(), this.getPosition()));
         }

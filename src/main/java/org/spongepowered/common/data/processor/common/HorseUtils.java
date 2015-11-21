@@ -32,7 +32,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
@@ -49,7 +49,7 @@ public class HorseUtils {
 
     public static HorseColor getHorseColor(DataView container) {
 
-        return Sponge.getRegistry().getType(HorseColor.class, getData(container, Keys.HORSE_COLOR, String.class)).get();
+        return SpongeImpl.getRegistry().getType(HorseColor.class, getData(container, Keys.HORSE_COLOR, String.class)).get();
     }
 
     public static HorseStyle getHorseStyle(EntityHorse horse) {
@@ -57,7 +57,7 @@ public class HorseUtils {
     }
 
     public static HorseStyle getHorseStyle(DataView container) {
-        return Sponge.getRegistry().getType(HorseStyle.class, getData(container, Keys.HORSE_STYLE, String.class)).get();
+        return SpongeImpl.getRegistry().getType(HorseStyle.class, getData(container, Keys.HORSE_STYLE, String.class)).get();
     }
 
     public static HorseVariant getHorseVariant(int type) {
@@ -65,6 +65,6 @@ public class HorseUtils {
     }
 
     public static HorseVariant getHorseVariant(DataView container) {
-        return Sponge.getRegistry().getType(HorseVariant.class, getData(container, Keys.HORSE_VARIANT, String.class)).get();
+        return SpongeImpl.getRegistry().getType(HorseVariant.class, getData(container, Keys.HORSE_VARIANT, String.class)).get();
     }
 }

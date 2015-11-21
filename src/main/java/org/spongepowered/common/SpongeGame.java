@@ -31,13 +31,21 @@ import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.data.ImmutableDataRegistry;
+import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
+import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.event.EventManager;
+import org.spongepowered.api.service.persistence.SerializationManager;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.data.SpongeImmutableRegistry;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.service.persistence.SpongeSerializationManager;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
 import java.nio.file.Path;
@@ -109,4 +117,25 @@ public abstract class SpongeGame implements Game {
 
     @Override
     public abstract Path getSavesDirectory();
+
+    @Override
+    public SerializationManager getSerializationService() {
+        return SpongeSerializationManager.getInstance();
+    }
+
+    @Override
+    public PropertyRegistry getPropertyRegistry() {
+        return SpongePropertyRegistry.getInstance();
+    }
+
+    @Override
+    public DataManipulatorRegistry getManipulatorRegistry() {
+        return SpongeDataRegistry.getInstance();
+    }
+
+    @Override
+    public ImmutableDataRegistry getImmutableDataRegistry() {
+        return SpongeImmutableRegistry.getInstance();
+    }
+
 }

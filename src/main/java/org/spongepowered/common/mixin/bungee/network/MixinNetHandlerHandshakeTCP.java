@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 import java.net.InetSocketAddress;
@@ -51,7 +51,7 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
     @Inject(method = "processHandshake", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/NetworkManager;setNetHandler(Lnet/minecraft/network/INetHandler;)V", ordinal = 0), cancellable = true)
     public void onProcessHandshakeEnd(C00Handshake packetIn, CallbackInfo ci) {
-        if (Sponge.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()) {
             String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {

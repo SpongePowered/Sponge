@@ -66,7 +66,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
@@ -302,10 +302,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             WorldSettings newWorldSettings ;
             AnvilSaveHandler worldsavehandler;
 
-            if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
+            if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
                 worldsavehandler =
-                        new AnvilSaveHandler(dim == 0 ? Sponge.getGame().getSavesDirectory().toFile() :
-                                Sponge.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
+                        new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
+                                             SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
                 if (dim == 0) {
                     // overworld uses the client set world name
                     if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldFolder)) {
@@ -366,7 +366,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
-            Sponge.postEvent(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this), (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
+            SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(this), (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
             final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
 
@@ -377,7 +377,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 world.getWorldInfo().setGameType(this.getGameType());
             }
 
-            Sponge.postEvent(SpongeImplFactory.createLoadWorldEvent(Sponge.getGame(), (World) world));
+            SpongeImpl.postEvent(SpongeImplFactory.createLoadWorldEvent(SpongeImpl.getGame(), (World) world));
         }
 
         this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
@@ -464,7 +464,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (worldInfo != null) {
             // check if enabled
             if (!((WorldProperties) worldInfo).isEnabled()) {
-                Sponge.getLogger().error("Unable to load world " + worldName + ". World is disabled!");
+                SpongeImpl.getLogger().error("Unable to load world " + worldName + ". World is disabled!");
                 return Optional.empty();
             }
 
@@ -495,7 +495,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldProvider) world.provider).setDimension(dim);
 
         world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
-        Sponge.postEvent(SpongeImplFactory.createLoadWorldEvent(Sponge.getGame(), (World) world));
+        SpongeImpl.postEvent(SpongeImplFactory.createLoadWorldEvent(SpongeImpl.getGame(), (World) world));
         if (!isSinglePlayer()) {
             world.getWorldInfo().setGameType(getGameType());
         }
@@ -517,10 +517,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         int dim;
         AnvilSaveHandler savehandler;
-        if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
+        if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             savehandler =
-                    new AnvilSaveHandler(new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
-                            true);
+                    new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
+                                         true);
 
         } else {
             savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true);
@@ -561,7 +561,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
 
-        Sponge.postEvent(SpongeEventFactory.createConstructWorldEvent(Sponge.getGame(), Cause.of(this), settings, (WorldProperties)
+        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(this), settings, (WorldProperties)
                 worldInfo));
         return Optional.of((WorldProperties) worldInfo);
     }
@@ -604,9 +604,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public AnvilSaveHandler getHandler(String worldName) {
-        if (Sponge.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
-            return new AnvilSaveHandler(new File(Sponge.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
-                    true);
+        if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
+            return new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
+                                        true);
         } else {
             return new AnvilSaveHandler(new File(getFolderName()), worldName, true);
         }

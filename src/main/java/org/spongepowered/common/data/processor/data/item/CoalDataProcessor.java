@@ -37,7 +37,7 @@ import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.api.data.type.CoalTypes;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCoalData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -64,7 +64,7 @@ public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType,
 
     @Override
     protected Optional<CoalType> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(Sponge.getRegistry().getAllOf(CoalType.class), itemStack.getMetadata()));
+        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(CoalType.class), itemStack.getMetadata()));
     }
 
     @Override

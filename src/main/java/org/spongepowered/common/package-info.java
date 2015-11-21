@@ -22,28 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.network.packet;
-
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.handshake.client.C00Handshake;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
-
-@Mixin(C00Handshake.class)
-public abstract class MixinC00Handshake {
-
-    @Shadow public String ip;
-
-    @Redirect(method = "readPacketData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readStringFromBuffer(I)Ljava/lang/String;"))
-    public String onReadPacketData(PacketBuffer buf, int value) {
-        if (!SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
-                || !SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()) {
-            return buf.readStringFromBuffer(255);
-        } else {
-            return buf.readStringFromBuffer(Short.MAX_VALUE);
-        }
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common;

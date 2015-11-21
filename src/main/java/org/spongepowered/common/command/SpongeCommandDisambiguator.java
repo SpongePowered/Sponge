@@ -36,7 +36,7 @@ import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.dispatcher.Disambiguator;
 import org.spongepowered.api.util.command.dispatcher.SimpleDispatcher;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,19 +58,20 @@ public class SpongeCommandDisambiguator implements Disambiguator {
     @NonnullByDefault
     public Optional<CommandMapping> disambiguate(CommandSource source, String aliasUsed, List<CommandMapping> availableOptions) {
         if (availableOptions.size() > 1) {
-            final String chosenPlugin = Sponge.getGlobalConfig().getConfig().getCommands().getAliases().get(aliasUsed.toLowerCase());
+            final String chosenPlugin = SpongeImpl.getGlobalConfig().getConfig().getCommands().getAliases().get(aliasUsed.toLowerCase());
             if (chosenPlugin != null) {
                 Optional<PluginContainer> container = this.game.getPluginManager().getPlugin(chosenPlugin);
                 if (!container.isPresent()) {
-                    Sponge.getGame().getServer().getConsole().sendMessage(t("Unable to find plugin '" + chosenPlugin + "' for command '" + aliasUsed
-                            + "', falling back to default"));
+                    SpongeImpl
+                        .getGame().getServer().getConsole().sendMessage(t("Unable to find plugin '" + chosenPlugin + "' for command '" + aliasUsed
+                                                                          + "', falling back to default"));
                 } else {
                     final Set<CommandMapping> ownedCommands = this.game.getCommandDispatcher().getOwnedBy(container.get());
                     final List<CommandMapping> ownedMatchingCommands = ImmutableList.copyOf(Iterables.filter(availableOptions,
                             Predicates.in(ownedCommands)));
                     if (ownedMatchingCommands.isEmpty()) {
-                        Sponge.getGame().getServer().getConsole().sendMessage(t("Plugin " + container.get().getName() + " was specified as the "
-                                + "preferred owner for " + aliasUsed + ", but does not have any such command!"));
+                        SpongeImpl.getGame().getServer().getConsole().sendMessage(t("Plugin " + container.get().getName() + " was specified as the "
+                                                                                    + "preferred owner for " + aliasUsed + ", but does not have any such command!"));
                     } else if (ownedMatchingCommands.size() > 1) {
                         throw new IllegalStateException("Plugin " + container.get().getName() + " seems to have multiple commands registered as "
                                 + aliasUsed + "! This is a programming error!");
