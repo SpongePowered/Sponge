@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import net.minecraft.entity.passive.EntityRabbit;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -39,8 +40,6 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeRabbitType;
-
-import net.minecraft.entity.passive.EntityRabbit;
 
 import java.util.Optional;
 

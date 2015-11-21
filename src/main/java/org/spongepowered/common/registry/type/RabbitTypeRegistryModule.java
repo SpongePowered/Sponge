@@ -26,18 +26,17 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitType> {
 
