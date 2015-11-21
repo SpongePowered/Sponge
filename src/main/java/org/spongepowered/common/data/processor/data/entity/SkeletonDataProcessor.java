@@ -39,6 +39,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonDa
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.entity.SpongeSkeletonType;
 
 import java.util.Optional;
 
@@ -55,8 +56,11 @@ public class SkeletonDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected boolean set(EntitySkeleton entity, SkeletonType value) {
-        entity.setSkeletonType(Integer.parseInt(value.getId()));
-        return true;
+        if (value instanceof SpongeSkeletonType) {
+            entity.setSkeletonType(((SpongeSkeletonType) value).type);
+            return true;
+        }
+        return false;
     }
 
     @Override
