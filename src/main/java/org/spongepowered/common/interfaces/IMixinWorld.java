@@ -90,6 +90,8 @@ public interface IMixinWorld {
 
     void setCapturingEntitySpawns(boolean flag);
 
+    void setCapturingBlockDecay(boolean flag);
+
     void setCurrentTickBlock(BlockSnapshot snapshot);
 
     long getWeatherStartTime();

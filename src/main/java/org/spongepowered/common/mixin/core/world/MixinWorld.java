@@ -244,6 +244,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private long weatherStartTime;
     public boolean processingCaptureCause = false;
     public boolean captureEntitySpawns = true;
+    public boolean captureBlockDecay = false;
     public boolean captureTerrainGen = false;
     public boolean captureBlocks = false;
     public boolean restoringBlocks = false;
@@ -257,6 +258,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public TileEntity currentTickTileEntity = null;
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     public List<BlockSnapshot> capturedSpongeBlockBreaks = new ArrayList<>();
+    public List<BlockSnapshot> capturedSpongeBlockDecays = new ArrayList<>();
     public List<BlockSnapshot> capturedSpongeBlockPlaces = new ArrayList<>();
     public List<BlockSnapshot> capturedSpongeBlockModifications = new ArrayList<>();
     public List<BlockSnapshot> capturedSpongeBlockFluids = new ArrayList<>();
@@ -341,6 +343,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.captureBlocks = true;
         this.captureEntitySpawns = true;
         this.captureBlockLists.put(CaptureType.BREAK, this.capturedSpongeBlockBreaks);
+        this.captureBlockLists.put(CaptureType.DECAY, this.capturedSpongeBlockDecays);
         this.captureBlockLists.put(CaptureType.FLUID, this.capturedSpongeBlockFluids);
         this.captureBlockLists.put(CaptureType.MODIFY, this.capturedSpongeBlockModifications);
         this.captureBlockLists.put(CaptureType.PLACE, this.capturedSpongeBlockPlaces);
@@ -409,6 +412,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
                 } else if (block.getMaterial().isLiquid() || currentState.getBlock().getMaterial().isLiquid()) {
                     this.capturedSpongeBlockFluids.add(originalBlockSnapshot);
+                } else if (this.captureBlockDecay) {
+                    this.capturedSpongeBlockDecays.add(originalBlockSnapshot);
                 } else if (block == Blocks.air) {
                     this.capturedSpongeBlockBreaks.add(originalBlockSnapshot);
                 } else if (block != currentState.getBlock()) {
@@ -425,6 +430,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (iblockstate1 == null) {
                 if (originalBlockSnapshot != null) {
                     this.capturedSpongeBlockBreaks.remove(originalBlockSnapshot);
+                    this.capturedSpongeBlockDecays.remove(originalBlockSnapshot);
                     this.capturedSpongeBlockFluids.remove(originalBlockSnapshot);
                     this.capturedSpongeBlockPlaces.remove(originalBlockSnapshot);
                     this.capturedSpongeBlockModifications.remove(originalBlockSnapshot);
@@ -846,6 +852,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         }
 
                         event = SpongeEventFactory.createChangeBlockEventBreak(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
+                    } else if (captureType == CaptureType.DECAY) {
+                        event = SpongeEventFactory.createChangeBlockEventDecay(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
                     } else if (captureType == CaptureType.FLUID) {
                         event = SpongeEventFactory.createChangeBlockEventFluid(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
                     } else if (captureType == CaptureType.MODIFY) {
@@ -1465,6 +1473,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setCapturingEntitySpawns(boolean flag) {
         this.captureEntitySpawns = flag;
+    }
+
+    @Override
+    public void setCapturingBlockDecay(boolean flag) {
+        this.captureBlockDecay = flag;
     }
 
     @Override

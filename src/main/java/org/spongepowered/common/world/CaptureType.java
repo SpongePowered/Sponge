@@ -28,6 +28,7 @@ package org.spongepowered.common.world;
 public enum CaptureType {
 
     BREAK,
+    DECAY,
     FLUID,
     MODIFY,
     PLACE,
