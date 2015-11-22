@@ -35,7 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData
 public class ImmutableSpongeRabbitData extends AbstractImmutableSingleCatalogData<RabbitType, ImmutableRabbitData, RabbitData> implements ImmutableRabbitData {
 
     public ImmutableSpongeRabbitData(RabbitType type) {
-        super(ImmutableRabbitData.class, type, RabbitTypes.WHITE, Keys.RABBIT_TYPE, SpongeRabbitData.class);
+        super(ImmutableRabbitData.class, type, RabbitTypes.BROWN, Keys.RABBIT_TYPE, SpongeRabbitData.class);
     }
 
 }
