@@ -31,10 +31,7 @@ import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -43,45 +40,30 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.interfaces.IMixinWorld;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @NonnullByDefault
 @Mixin(BlockLeaves.class)
 public abstract class MixinBlockLeaves extends MixinBlock {
 
-    @Inject(method = "updateTick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockLeaves;destroy(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"), cancellable = true)
-    public void callLeafDecay(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        Location<World> location =
-            new Location<>((World) worldIn, VecHelper.toVector(pos));
-        BlockSnapshot blockOriginal = location.createSnapshot();
-        BlockSnapshot blockReplacement = blockOriginal.withState(BlockTypes.AIR.getDefaultState());
-        ImmutableList<Transaction<BlockSnapshot>> transactions =
-                new ImmutableList.Builder<Transaction<BlockSnapshot>>().add(new Transaction<>(blockOriginal, blockReplacement)).build();
-        final ChangeBlockEvent.Decay event = SpongeEventFactory.createChangeBlockEventDecay(SpongeImpl.getGame(), Cause.of(worldIn), (World) worldIn, transactions);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            ci.cancel();
-        }
+    @Redirect(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/BlockPos;)Z") )
+    private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
+        IMixinWorld spongeWorld = (IMixinWorld) worldIn;
+        spongeWorld.setCapturingBlockDecay(true);
+        boolean result = worldIn.setBlockToAir(pos);
+        spongeWorld.setCapturingBlockDecay(false);
+        return result;
     }
 
     protected ImmutableTreeData getTreeData(IBlockState blockState) {
