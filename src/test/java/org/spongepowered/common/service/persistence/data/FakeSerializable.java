@@ -35,21 +35,24 @@ public class FakeSerializable implements DataSerializable {
     public final int myInt;
     public final double theDouble;
     public final String nestedCompound;
+    public final boolean aBoolean;
 
     public FakeSerializable(String foo, int myInt, double theDouble, String nestedCompound) {
         this.foo = foo;
         this.myInt = myInt;
         this.theDouble = theDouble;
         this.nestedCompound = nestedCompound;
+        this.aBoolean = false;
     }
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = new MemoryDataContainer();
-        container.set(new DataQuery("foo"), "your mum");
-        container.set(new DataQuery("myInt"), 1);
-        container.set(new DataQuery("theDouble"), 10.0D);
-        container.set(new DataQuery("nested", "compound"), "your face");
+        container.set(DataQuery.of("foo"), this.foo);
+        container.set(DataQuery.of("myInt"), this.myInt);
+        container.set(DataQuery.of("theDouble"), this.theDouble);
+        container.set(DataQuery.of("nested", "compound"), this.nestedCompound);
+        container.set(DataQuery.of("MyBoolean"), this.aBoolean);
         return container;
     }
 }

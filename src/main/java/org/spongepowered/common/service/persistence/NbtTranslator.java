@@ -58,6 +58,7 @@ import java.util.Set;
 public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     private static final NbtTranslator instance = new NbtTranslator();
+    public static final String BOOLEAN_IDENTIFER = "$Boolean";
 
     public static NbtTranslator getInstance() {
         return instance;
@@ -84,16 +85,20 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 NBTTagCompound inner = new NBTTagCompound();
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
                 compound.setTag(key, inner);
+            } if (value instanceof Boolean) {
+                compound.setTag(key + BOOLEAN_IDENTIFER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
             } else {
                 compound.setTag(key, getBaseFromObject(value));
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static NBTBase getBaseFromObject(Object value) {
         checkNotNull(value);
-        if (value instanceof Byte) {
+        if (value instanceof Boolean) {
+            return new NBTTagByte((Boolean) value ? (byte) 1 : 0);
+        } else if (value instanceof Byte) {
             return new NBTTagByte((Byte) value);
         } else if (value instanceof Short) {
             return new NBTTagShort((Short) value);
@@ -141,7 +146,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             NBTTagCompound compound = new NBTTagCompound();
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 if (entry.getKey() instanceof DataQuery) {
-                    compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
+                    if (entry.getValue() instanceof Boolean) {
+                        compound.setBoolean(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFER, (Boolean) entry.getValue());
+                    } else {
+                        compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
+                    }
                 } else if (entry.getKey() instanceof String) {
                     compound.setTag((String) entry.getKey(), getBaseFromObject(entry.getValue()));
                 } else {
@@ -178,7 +187,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         checkArgument(type > NbtDataUtil.TAG_END && type <= NbtDataUtil.TAG_INT_ARRAY);
         switch (type) {
             case NbtDataUtil.TAG_BYTE:
-                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getByte());
+                if (key.contains(BOOLEAN_IDENTIFER)) {
+                    view.set(of('.', key.replace(BOOLEAN_IDENTIFER, "")), (((NBTBase.NBTPrimitive) base).getByte() == 1));
+                } else {
+                    view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getByte());
+                }
                 break;
             case NbtDataUtil.TAG_SHORT:
                 view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getShort());
