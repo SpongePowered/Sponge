@@ -138,7 +138,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
-
+    @Shadow public abstract void setSize(float width, float height);
 
     // @formatter:on
 
