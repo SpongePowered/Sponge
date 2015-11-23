@@ -783,6 +783,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
             EntityLivingBase rootEntity = (EntityLivingBase) cause.root().get();
             EntitySnapshot lastKilledEntity = ((IMixinEntityLivingBase) rootEntity).getLastKilledTarget();
             EntityLivingBase lastActiveTarget = ((IMixinEntityLivingBase) rootEntity).getLastActiveTarget();
+            // Player kills aren't tracked so we need to inspect the C02 packet for a kill
+            if (lastKilledEntity == null && packetIn instanceof C02PacketUseEntity) {
+                C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
+                net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.nmsWorld);
+                if (entity instanceof EntityLivingBase) {
+                    EntityLivingBase livingEntity = (EntityLivingBase) entity;
+                    if (livingEntity.getHealth() <= 0) {
+                        lastKilledEntity = ((org.spongepowered.api.entity.Entity) entity).createSnapshot();
+                    }
+                }
+            }
             // Check for targeted entity
             if (lastKilledEntity != null) {
                 // add the last targeted entity
