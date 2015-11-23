@@ -44,7 +44,7 @@ public class AsyncScheduler extends SchedulerBase {
     private final Lock lock = new ReentrantLock();
     private final Condition condition = this.lock.newCondition();
     // The dynamic thread pooling executor of asynchronous tasks.
-    private ExecutorService executor;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     AsyncScheduler() {
         super(ScheduledTask.TaskSynchronicity.ASYNCHRONOUS);
@@ -55,8 +55,11 @@ public class AsyncScheduler extends SchedulerBase {
         thread.start();
     }
 
+    ExecutorService getExecutor() {
+        return this.executor;
+    }
+
     private void mainLoop() {
-        this.executor = Executors.newCachedThreadPool();
         this.lastProcessingTimestamp = System.currentTimeMillis();
         while (true) {
             recalibrateMinimumTimeout();

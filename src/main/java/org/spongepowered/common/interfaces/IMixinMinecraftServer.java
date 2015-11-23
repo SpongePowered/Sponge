@@ -33,4 +33,7 @@ public interface IMixinMinecraftServer {
     Hashtable<Integer, long[]> getWorldTickTimes();
 
     AnvilSaveHandler getHandler(String worldName);
+
+    void setSaveEnabled(boolean enabled);
+
 }

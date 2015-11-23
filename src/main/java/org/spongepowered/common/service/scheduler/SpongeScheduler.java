@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.scheduler.Task;
@@ -169,6 +171,15 @@ public class SpongeScheduler implements SchedulerService {
      */
     public void tickSyncScheduler() {
         this.syncScheduler.tick();
+    }
+
+    private ListeningExecutorService listeningExec = null;
+
+    public ListeningExecutorService getListeningExecService() {
+        if (this.listeningExec == null) {
+            this.listeningExec = MoreExecutors.listeningDecorator(this.asyncScheduler.getExecutor());
+        }
+        return this.listeningExec;
     }
 
 }

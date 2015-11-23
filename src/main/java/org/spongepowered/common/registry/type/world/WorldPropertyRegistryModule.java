@@ -50,20 +50,25 @@ public final class WorldPropertyRegistryModule {
         this.worldPropertiesNameMappings.put(properties.getWorldName(), properties);
     }
 
+    public void unregister(WorldProperties properties) {
+        this.worldPropertiesUuidMappings.remove(properties.getUniqueId());
+        this.worldPropertiesNameMappings.remove(properties.getWorldName());
+    }
+
     public Optional<WorldProperties> getWorldProperties(String name) {
-        return Optional.ofNullable(this.worldPropertiesNameMappings.get(checkNotNull(name)));
+        return Optional.ofNullable(this.worldPropertiesNameMappings.get(checkNotNull(name, "name")));
     }
 
     public boolean isWorldRegistered(String name) {
-        return this.worldPropertiesNameMappings.containsKey(checkNotNull(name));
+        return this.worldPropertiesNameMappings.containsKey(checkNotNull(name, "name"));
     }
 
     public Optional<WorldProperties> getWorldProperties(UUID uuid) {
-        return Optional.ofNullable(this.worldPropertiesUuidMappings.get(checkNotNull(uuid)));
+        return Optional.ofNullable(this.worldPropertiesUuidMappings.get(checkNotNull(uuid, "uuid")));
     }
 
     public boolean isWorldRegistered(UUID uuid) {
-        return this.worldPropertiesNameMappings.containsKey(checkNotNull(uuid));
+        return this.worldPropertiesUuidMappings.containsKey(checkNotNull(uuid, "uuid"));
     }
 
     public Collection<WorldProperties> getAllWorldProperties() {

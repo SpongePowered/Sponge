@@ -24,13 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldProvider;
@@ -48,6 +54,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.world.ChunkLoadService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
@@ -79,6 +86,7 @@ import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
+import org.spongepowered.common.util.ServerUtils;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -89,6 +97,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -106,6 +115,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow public WorldServer[] worldServers;
     @Shadow public Profiler theProfiler;
+    @Shadow public long[] tickTimeArray;
+
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(IChatComponent message);
     @Shadow public abstract void initiateShutdown();
@@ -125,6 +136,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
 
     private ResourcePack resourcePack;
+    private boolean enableSaving = true;
 
     @Override
     public Optional<World> getWorld(String worldName) {
@@ -218,6 +230,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public int getRunningTimeTicks() {
         return this.tickCounter;
+    }
+
+    @Override
+    public double getTicksPerSecond() {
+        double nanoSPerTick = MathHelper.average(this.tickTimeArray);
+        // Cap at 20 TPS
+        return 1000 / Math.max(50, nanoSPerTick / 1000000);
     }
 
     @Override
@@ -603,6 +622,87 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
+    public Collection<WorldProperties> getUnloadedWorlds() {
+        File rootDir = DimensionManager.getCurrentSaveRootDirectory();
+        if (rootDir == null) {
+            return Collections.emptyList();
+        }
+        List<WorldProperties> worlds = Lists.newArrayList();
+        for (File f : rootDir.listFiles()) {
+            if (f.isDirectory()) {
+                if (this.getWorld(f.getName()).isPresent()) {
+                    continue;
+                }
+                File level = new File(f, "level.dat");
+                File levelSponge = new File(f, "level_sponge.dat");
+                if (level.isFile() && levelSponge.isFile()) {
+                    WorldInfo info = getHandler(f.getName()).loadWorldInfo();
+                    if (info != null) {
+                        worlds.add((WorldProperties) info);
+                    }
+                }
+            }
+        }
+        return worlds;
+    }
+
+    @Override
+    public Optional<WorldProperties> getWorldProperties(UUID uniqueId) {
+        return WorldPropertyRegistryModule.getInstance().getWorldProperties(uniqueId);
+    }
+
+    @Override
+    public ListenableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
+        return ServerUtils.copyWorld((MinecraftServer) (Object) this, checkNotNull(worldProperties, "worldProperties"),
+                checkNotNull(copyName, "copyName"));
+    }
+
+    @Override
+    public Optional<WorldProperties> renameWorld(WorldProperties worldProperties, String newName) {
+        checkNotNull(newName, "newName");
+        checkState(DimensionManager.getWorldFromDimId(((IMixinWorldInfo) checkNotNull(worldProperties, "worldProperties"))
+                .getDimensionId()) == null, "World still loaded");
+        File rootDir = DimensionManager.getCurrentSaveRootDirectory();
+        if (rootDir == null) {
+            return Optional.empty();
+        }
+        File oldDir = new File(rootDir, worldProperties.getWorldName());
+        File newDir = new File(rootDir, newName);
+        if (newDir.exists()) {
+            return Optional.empty();
+        }
+        if (!oldDir.renameTo(newDir)) {
+            return Optional.empty();
+        }
+        WorldInfo info = new WorldInfo((WorldInfo) worldProperties);
+        info.setWorldName(newName);
+        getHandler(newName).saveWorldInfo(info);
+        return Optional.of((WorldProperties) info);
+    }
+
+    @Override
+    public ListenableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
+        return ServerUtils.deleteWorld(checkNotNull(worldProperties, "worldProperties"));
+    }
+
+    @Override
+    public boolean saveWorldProperties(WorldProperties properties) {
+        WorldServer world = DimensionManager.getWorldFromDimId(((IMixinWorldInfo) checkNotNull(properties, "properties")).getDimensionId());
+        if (world != null) {
+            world.getSaveHandler().saveWorldInfo(world.getWorldInfo());
+        } else {
+            getHandler(properties.getWorldName()).saveWorldInfo((WorldInfo) properties);
+        }
+        // No return values or exceptions so can only assume true.
+        return true;
+    }
+
+    @Override
+    public ChunkLoadService getChunkLoadService() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public AnvilSaveHandler getHandler(String worldName) {
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             return new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
@@ -637,6 +737,18 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Override
+    public void setSaveEnabled(boolean enabled) {
+        this.enableSaving = enabled;
+    }
+
+    @Inject(method = "saveAllWorlds(Z)V", at = @At("HEAD"), cancellable = true)
+    private void onSaveWorlds(boolean dontLog, CallbackInfo ci) {
+        if (!this.enableSaving) {
+            ci.cancel();
         }
     }
 }

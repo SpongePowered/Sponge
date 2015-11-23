@@ -146,12 +146,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
-        this.worldEnabled = true;
-        this.spongeRootLevelNbt = new NBTTagCompound();
-        this.spongeNbt = new NBTTagCompound();
-        this.playerUniqueIdNbt = new NBTTagList();
-        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
-        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+        onConstruction(ci);
 
         WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
         this.dimensionType = creationSettings.getDimensionType();
@@ -160,12 +155,20 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
-        this.worldEnabled = true;
-        this.spongeRootLevelNbt = new NBTTagCompound();
-        this.spongeNbt = new NBTTagCompound();
-        this.playerUniqueIdNbt = new NBTTagList();
-        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
-        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+        onConstruction(ci);
+    }
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    public void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
+        onConstruction(ci);
+
+        MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
+        this.worldEnabled = info.worldEnabled;
+        this.dimensionType = info.dimensionType;
+        this.loadOnStartup = info.loadOnStartup;
+        this.keepSpawnLoaded = info.keepSpawnLoaded;
+        this.isMod = info.isMod;
+        this.generatorModifiers = info.generatorModifiers;
     }
 
     @Override

@@ -30,7 +30,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.MinecraftServer;
@@ -39,6 +38,7 @@ import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.service.profile.GameProfileResolver;
 import org.spongepowered.api.service.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +48,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 
 public class SpongeProfileResolver implements GameProfileResolver {
 
@@ -190,7 +189,7 @@ public class SpongeProfileResolver implements GameProfileResolver {
         }
     }
 
-    private final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private final ListeningExecutorService executor = SpongeScheduler.getInstance().getListeningExecService();
 
     @Override
     public ListenableFuture<GameProfile> get(UUID uniqueId) {
