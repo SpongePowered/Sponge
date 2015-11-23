@@ -69,9 +69,9 @@ public class SpongeHelpCommand {
                         CommandCallable callable = mapping.get().getCallable();
                         Optional<? extends Text> desc = callable.getHelp(src);
                         if (desc.isPresent()) {
-                            src.sendMessage(desc.get());
+                            src.sendMessages(desc.get());
                         } else {
-                            src.sendMessage(Texts.of("Usage: /", command.get(), callable.getUsage(src)));
+                            src.sendMessages(Texts.of("Usage: /", command.get(), callable.getUsage(src)));
                         }
                         return CommandResult.success();
                     }

@@ -97,14 +97,14 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     }
 
     @Override
-    public void sendMessage(Text... messages) {
+    public void sendMessages(Text... messages) {
         for (Text text : messages) {
             this.sender.addChatMessage(SpongeTexts.toComponent(text));
         }
     }
 
     @Override
-    public void sendMessage(Iterable<Text> messages) {
+    public void sendMessages(Iterable<Text> messages) {
         for (Text text : messages) {
             this.sender.addChatMessage(SpongeTexts.toComponent(text));
         }

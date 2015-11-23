@@ -48,6 +48,11 @@ import java.util.Optional;
 
 public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, VelocityData, ImmutableVelocityData> {
 
+    // EntityLivingBase.moveEntityWithHeading sets y-velocity at this value when
+    // entity is at rest. Value is -0.08 * 0.9800000190734863. See
+    // https://github.com/SpongePowered/SpongeCommon/issues/149#issuecomment-158832297
+    public static final float ENTITY_REST_Y_VEL = -0.0784000015258789F;
+
     public VelocityDataProcessor() {
         super(Entity.class);
     }
@@ -75,7 +80,7 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
     @Override
     protected Map<Key<?>, ?> getValues(Entity entity) {
         final double xVel = entity.motionX;
-        final double yVel = entity.motionY;
+        final double yVel = entity.motionY == ENTITY_REST_Y_VEL ? 0 : entity.motionY;
         final double zVel = entity.motionZ;
         return ImmutableMap.<Key<?>, Object>of(Keys.VELOCITY, new Vector3d(xVel, yVel, zVel));
     }

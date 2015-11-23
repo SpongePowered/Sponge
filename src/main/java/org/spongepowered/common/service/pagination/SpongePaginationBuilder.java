@@ -127,7 +127,7 @@ class SpongePaginationBuilder implements PaginationBuilder {
         try {
             pagination.nextPage();
         } catch (CommandException e) {
-            source.sendMessage(error(e.getText()));
+            source.sendMessages(error(e.getText()));
         }
 
     }

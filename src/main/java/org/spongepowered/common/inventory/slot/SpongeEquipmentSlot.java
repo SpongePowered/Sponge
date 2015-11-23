@@ -31,7 +31,7 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
-import org.spongepowered.api.text.translation.Translatable;
+import org.spongepowered.api.text.translation.Translation;
 
 public class SpongeEquipmentSlot extends AbstractInventorySlot implements EquipmentSlot {
 
@@ -80,7 +80,7 @@ public class SpongeEquipmentSlot extends AbstractInventorySlot implements Equipm
     }
 
     @Override
-    public <T extends Inventory> T query(Translatable... names) {
+    public <T extends Inventory> T query(Translation... names) {
         return null;
     }
 

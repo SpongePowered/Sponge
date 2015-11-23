@@ -138,6 +138,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow public abstract void setSize(float width, float height);
 
 
     // @formatter:on
@@ -745,7 +746,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
            return Optional.empty();
         } else {
             NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
-            
+
             if (!creatorNbt.hasKey("uuid_most") || !creatorNbt.hasKey("uuid_least")) {
                 return Optional.empty();
             }

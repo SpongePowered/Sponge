@@ -150,7 +150,7 @@ abstract class ActivePagination {
         if (this.footer != null) {
             toSend.add(this.footer);
         }
-        src.sendMessage(toSend);
+        src.sendMessages(toSend);
     }
 
     protected Text calculateFooter(int currentPage) {

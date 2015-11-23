@@ -62,7 +62,7 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public void addChatMessage(IChatComponent component) {
-        this.source.sendMessage(SpongeTexts.toText(component));
+        this.source.sendMessages(SpongeTexts.toText(component));
     }
 
     @Override

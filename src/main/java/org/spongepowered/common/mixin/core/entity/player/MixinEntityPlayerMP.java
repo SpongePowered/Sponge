@@ -164,7 +164,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void sendMessage(ChatType type, Text... messages) {
+    public void sendMessages(ChatType type, Text... messages) {
         for (Text text : messages) {
             if (type == ChatTypes.ACTION_BAR) {
                 text = SpongeTexts.fixActionBarFormatting(text);
@@ -176,7 +176,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void sendMessage(ChatType type, Iterable<Text> messages) {
+    public void sendMessages(ChatType type, Iterable<Text> messages) {
         for (Text text : messages) {
             if (type == ChatTypes.ACTION_BAR) {
                 text = SpongeTexts.fixActionBarFormatting(text);
