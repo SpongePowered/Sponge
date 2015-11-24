@@ -596,4 +596,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             DamageEventHandler.acceptArmorModifier(this.nmsEntityLiving, source, modifier, entityEvent.getDamage(modifier));
         }
     }
+
+    @Override
+    public boolean hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount) {
+        return true;
+    }
+
 }
