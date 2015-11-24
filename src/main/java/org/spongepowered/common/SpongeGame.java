@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.GameState;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.api.config.ConfigManager;
@@ -64,6 +65,8 @@ public abstract class SpongeGame implements Game {
     private final TeleportHelper teleportHelper;
     private final ConfigManager configManager;
     private final CommandManager commandManager;
+
+    private GameState state = GameState.CONSTRUCTION;
 
     protected SpongeGame(Platform platform, PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry,
             ServiceManager serviceManager, TeleportHelper teleportHelper, Logger logger) {
@@ -143,6 +146,15 @@ public abstract class SpongeGame implements Game {
         return Objects.toStringHelper(this)
                 .add("platform", this.platform)
                 .toString();
+    }
+
+    @Override
+    public GameState getState() {
+        return this.state;
+    }
+
+    public void setState(GameState state) {
+        this.state = checkNotNull(state);
     }
 
 }

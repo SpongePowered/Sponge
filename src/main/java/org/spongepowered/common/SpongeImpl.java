@@ -32,9 +32,15 @@ import com.google.inject.Injector;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.GameState;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.SpongeEventFactoryUtils;
+import org.spongepowered.api.event.game.state.GameStateEvent;
+import org.spongepowered.api.event.game.state.GameStoppedEvent;
+import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
@@ -149,6 +155,16 @@ public class SpongeImpl {
         }
 
         return globalConfig;
+    }
+
+    public static void postState(Class<? extends GameStateEvent> type, GameState state) {
+        getGame().setState(state);
+        ((SpongeEventManager) getGame().getEventManager()).post(SpongeEventFactoryUtils.createState(type, getGame()), true);
+    }
+    
+    public static void postShutdownEvents() {
+        postState(GameStoppingEvent.class, GameState.GAME_STOPPING);
+        postState(GameStoppedEvent.class, GameState.GAME_STOPPED);
     }
 
 }

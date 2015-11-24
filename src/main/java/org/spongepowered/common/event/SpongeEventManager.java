@@ -257,6 +257,10 @@ public class SpongeEventManager implements EventManager {
     public boolean post(Event event) {
         return post(event, getHandlerCache(event).getListeners());
     }
+    
+    public boolean post(Event event, boolean allowClientThread) {
+        return post(event);
+    }
 
     public boolean post(Event event, Order order) {
         return post(event, getHandlerCache(event).getListenersByOrder(order));
