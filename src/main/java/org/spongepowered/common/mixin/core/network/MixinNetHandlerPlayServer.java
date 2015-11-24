@@ -233,7 +233,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                         }
                         Player spongePlayer = ((Player) this.playerEntity);
                         if (permissionCheck == null || !spongePlayer.hasPermission(permissionCheck)) {
-                            spongePlayer.sendMessages(t("You do not have permission to edit this command block!").builder()
+                            spongePlayer.sendMessage(t("You do not have permission to edit this command block!").builder()
                                     .color(TextColors.RED).build());
                             return;
                             // Sponge end

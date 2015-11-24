@@ -2075,6 +2075,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public void sendMessage(ChatType type, Text message) {
+        for (Player player : getPlayers()) {
+            player.sendMessages(type, message);
+        }
+    }
+
+    @Override
     public void sendMessages(ChatType type, Text... messages) {
         for (Player player : getPlayers()) {
             player.sendMessages(type, messages);

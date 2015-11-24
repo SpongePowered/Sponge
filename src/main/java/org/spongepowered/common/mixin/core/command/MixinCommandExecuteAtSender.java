@@ -54,6 +54,11 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
     @Shadow(aliases = "val$sender") private ICommandSender field_174802_b;
 
     @Override
+    public void sendMessage(Text message) {
+        getOriginalSource().sendMessages(message);
+    }
+
+    @Override
     public void sendMessages(Text... messages) {
         getOriginalSource().sendMessages(messages);
     }

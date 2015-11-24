@@ -57,6 +57,11 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
     }
 
     @Override
+    public void sendMessage(Text message) {
+        this.asICommandSender().addChatMessage(SpongeTexts.toComponent(message));
+    }
+
+    @Override
     public void sendMessages(Text... messages) {
         for (Text message : messages) {
             this.asICommandSender().addChatMessage(SpongeTexts.toComponent(message));
