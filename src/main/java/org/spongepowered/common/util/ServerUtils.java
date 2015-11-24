@@ -44,6 +44,7 @@ import org.spongepowered.common.service.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
@@ -104,8 +105,13 @@ public class ServerUtils {
                 return Optional.empty();
             }
 
+            FileFilter filter = null;
+            if (((IMixinWorldInfo) this.oldInfo).getDimensionId() == 0) {
+                oldDir = rootDir;
+                filter = (file) -> !file.isDirectory() || !new File(file, "level.dat").exists();
+            }
             try {
-                FileUtils.copyDirectory(oldDir, newDir);
+                FileUtils.copyDirectory(oldDir, newDir, filter);
             } catch (IOException e) {
                 return Optional.empty();
             }
