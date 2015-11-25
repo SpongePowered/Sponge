@@ -87,7 +87,7 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
 
     @Override
     public BlockState withExtendedProperties(Location<World> location) {
-        return (BlockState) this.block.getActualState(this, (net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location.getBlockPosition())); 
+        return (BlockState) this.block.getActualState(this, (net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

@@ -46,10 +46,10 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
             final Extent extent = ((Location) propertyHolder).getExtent();
             if (extent instanceof World) {
                 final net.minecraft.world.World world = (net.minecraft.world.World) extent;
-                final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(((Location) propertyHolder).getBlockPosition()));
+                final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos((Location) propertyHolder));
                 return Optional.of(new GroundLuminanceProperty(light));
             } else if (extent instanceof Chunk) {
-                final float light = ((net.minecraft.world.chunk.Chunk) extent).getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(((Location) propertyHolder).getBlockPosition()));
+                final float light = ((net.minecraft.world.chunk.Chunk) extent).getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos((Location) propertyHolder));
                 return Optional.of(new GroundLuminanceProperty(light));
             }
         }
@@ -59,7 +59,7 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
     @Override
     public Optional<GroundLuminanceProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location.getBlockPosition()));
+        final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location));
         return Optional.of(new GroundLuminanceProperty(light));
     }
 

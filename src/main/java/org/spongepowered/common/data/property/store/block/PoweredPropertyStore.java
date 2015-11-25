@@ -57,7 +57,7 @@ public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredPro
 
     @Override
     public Optional<PoweredProperty> getFor(Location<World> location) {
-        final BlockPos pos = VecHelper.toBlockPos(location.getBlockPosition());
+        final BlockPos pos = VecHelper.toBlockPos(location);
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         return Optional.of(world.isBlockPowered(pos) ? TRUE : FALSE);
     }
@@ -67,7 +67,7 @@ public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredPro
         checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final EnumFacing facing = DirectionFacingProvider.getInstance().get(direction).get();
-        final boolean powered = world.getStrongPower(VecHelper.toBlockPos(location.getBlockPosition()).offset(facing), facing) > 0;
+        final boolean powered = world.getStrongPower(VecHelper.toBlockPos(location).offset(facing), facing) > 0;
         return Optional.of(powered ? TRUE : FALSE);
     }
 }

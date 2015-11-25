@@ -32,6 +32,7 @@ import net.minecraft.util.Rotations;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3i;
 import net.minecraft.world.ChunkCoordIntPair;
+import org.spongepowered.api.world.Location;
 
 public final class VecHelper {
 
@@ -49,6 +50,10 @@ public final class VecHelper {
         return new BlockPos(vector.getX(), vector.getY(), vector.getZ());
     }
 
+    // === SpongeAPI Location --> BlockPos ===
+    public static BlockPos toBlockPos(Location<?> location) {
+        return toBlockPos(location.getBlockPosition());
+    }
     // === MC BlockPos --> Flow Vector3i ==
 
     public static Vector3i toVector(BlockPos pos) {

@@ -377,7 +377,7 @@ public class DamageEventHandler {
         } else if (damageSource instanceof BlockDamageSource) {
             List<Object> causeObjects = new ArrayList<>();
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
-            BlockPos blockPos = VecHelper.toBlockPos(location.getBlockPosition());
+            BlockPos blockPos = VecHelper.toBlockPos(location);
             Optional<User> owner = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())
                 .getChunkFromBlockCoords(blockPos)).getBlockOwner(blockPos);
             Optional<User> notifier = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())

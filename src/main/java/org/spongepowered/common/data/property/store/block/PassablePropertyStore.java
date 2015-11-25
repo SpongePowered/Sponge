@@ -51,7 +51,7 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore<PassablePr
     @Override
     public Optional<PassableProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final BlockPos pos = VecHelper.toBlockPos(location.getBlockPosition());
+        final BlockPos pos = VecHelper.toBlockPos(location);
         final boolean passable = world.getBlockState(pos).getBlock().isPassable(world, pos);
         return Optional.of(passable ? TRUE : FALSE);
     }

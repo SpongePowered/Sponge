@@ -45,7 +45,7 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
             final Extent extent = ((Location) propertyHolder).getExtent();
             if (extent instanceof World) {
                 final net.minecraft.world.World world = (net.minecraft.world.World) extent;
-                final BiomeGenBase biome = world.getBiomeGenForCoords(VecHelper.toBlockPos(((Location) propertyHolder).getBlockPosition()));
+                final BiomeGenBase biome = world.getBiomeGenForCoords(VecHelper.toBlockPos((Location) propertyHolder));
                 return Optional.of(new TemperatureProperty(biome.temperature));
             }
         }
@@ -55,7 +55,7 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
     @Override
     public Optional<TemperatureProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final BiomeGenBase biome = world.getBiomeGenForCoords(VecHelper.toBlockPos(location.getBlockPosition()));
+        final BiomeGenBase biome = world.getBiomeGenForCoords(VecHelper.toBlockPos(location));
         return Optional.of(new TemperatureProperty(biome.temperature));
     }
 

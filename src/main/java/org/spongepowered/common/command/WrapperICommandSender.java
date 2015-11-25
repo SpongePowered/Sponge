@@ -73,7 +73,7 @@ public class WrapperICommandSender implements ICommandSender {
     @Override
     public BlockPos getPosition() {
         if (this.source instanceof LocatedSource) {
-            return VecHelper.toBlockPos(((LocatedSource) this.source).getLocation().getBlockPosition());
+            return VecHelper.toBlockPos(((LocatedSource) this.source).getLocation());
         }
         return BlockPos.ORIGIN;
     }
