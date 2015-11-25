@@ -58,7 +58,7 @@ public class RabbitDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     protected boolean set(EntityRabbit entity, RabbitType value) {
         if (value instanceof SpongeRabbitType) {
             entity.setRabbitType(((SpongeRabbitType) value).type);
-			return true;
+            return true;
         }
         return false;
     }
