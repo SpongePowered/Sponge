@@ -234,7 +234,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             if (!list.hasNoTags()) {
                 compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
                 final List<DataView> views = Lists.newArrayList();
-                for (int i = 0; i < list.tagCount() - 1; i++) {
+                for (int i = 0; i < list.tagCount(); i++) {
                     final NBTTagCompound dataCompound = list.getCompoundTagAt(i);
                     views.add(NbtTranslator.getInstance().translateFrom(dataCompound));
                 }
