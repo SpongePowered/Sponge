@@ -56,6 +56,7 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
 
     @Shadow(prefix = "shadow$")
     public abstract boolean shadow$isAngry();
+
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setAngry(boolean angry);
 

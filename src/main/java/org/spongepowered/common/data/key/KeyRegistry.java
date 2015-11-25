@@ -221,6 +221,7 @@ public class KeyRegistry {
         keyMap.put("vehicle", makeSingleKey(Entity.class, Value.class, of("Vehicle")));
         keyMap.put("base_vehicle", makeSingleKey(Entity.class, Value.class, of("BaseVehicle")));
         keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
+        keyMap.put("target", makeSingleKey(Living.class, Value.class, of("Target")));
         keyMap.put("targets", makeSingleKey(Living.class, ListValue.class, of("Targets")));
         keyMap.put("fall_damage_per_block", makeSingleKey(Double.class, Value.class, of("FallDamagePerBlock")));
         keyMap.put("max_fall_damage", makeSingleKey(Double.class, Value.class, of("MaxFallDamage")));

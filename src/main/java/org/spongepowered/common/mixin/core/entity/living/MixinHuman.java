@@ -36,7 +36,7 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import java.util.Optional;
 
 @Mixin(value = EntityHuman.class, remap = false)
-public abstract class MixinHuman extends MixinEntityLivingBase implements Human {
+public abstract class MixinHuman extends MixinEntityCreature implements Human {
 
     @Shadow private GameProfile fakeProfile;
     private Inventory openInventory;

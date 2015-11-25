@@ -2,6 +2,7 @@
     "package": "org.spongepowered.common.mixin.api",
     "refmap": "mixins.common.refmap.json",
     "mixins": [
+        "ai.MixinAbstractAITask",
         "text.MixinText",
         "text.MixinTextLiteral",
         "text.MixinTextPlaceholder",

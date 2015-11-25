@@ -26,10 +26,14 @@ package org.spongepowered.common.mixin.core.entity.living;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.ai.Goal;
+import org.spongepowered.api.entity.ai.GoalType;
+import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -44,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 
 import java.util.Optional;
 
@@ -58,6 +63,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
+    @Shadow private EntityAITasks tasks;
+    @Shadow private EntityAITasks targetTasks;
 
     public boolean isAiEnabled() {
         return !isAIDisabled();
@@ -89,6 +96,14 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     public void setCanPickupItems(boolean canPickupItems) {
         this.canPickUpLoot = canPickupItems;
+    }
+
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    public void onConstruct(CallbackInfo ci) {
+        ((IMixinEntityAITasks) tasks).setOwner((EntityLiving) (Object) this);
+        ((IMixinEntityAITasks) tasks).setType(GoalTypes.NORMAL);
+        ((IMixinEntityAITasks) targetTasks).setOwner((EntityLiving) (Object) this);
+        ((IMixinEntityAITasks) targetTasks).setType(GoalTypes.TARGET);
     }
 
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
@@ -126,5 +141,16 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
             }
             this.lastActiveTarget = null;
         }
+    }
+
+
+    @Override
+    public Optional<Goal<? extends Agent>> getGoal(GoalType type) {
+        if (GoalTypes.NORMAL.equals(type)) {
+            return Optional.ofNullable((Goal) tasks);
+        } else if (GoalTypes.TARGET.equals(type)) {
+            return Optional.ofNullable((Goal) targetTasks);
+        }
+        return Optional.empty();
     }
 }

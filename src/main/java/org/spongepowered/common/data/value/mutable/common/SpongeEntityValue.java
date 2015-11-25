@@ -48,13 +48,13 @@ import javax.annotation.Nullable;
  * This class provides a safe reference for an {@link Entity} such that
  * references aren't maintained and therefor leaked. Provided that
  */
-public class SpongeEntityValue implements Value<Entity> {
+public class SpongeEntityValue<T extends Entity> implements Value<T> {
 
-    private final Key<? extends BaseValue<Entity>> key;
+    private final Key<? extends BaseValue<T>> key;
     private UUID entityid;
-    private WeakReference<Entity> weakReference = new WeakReference<>(null);
+    private WeakReference<T> weakReference = new WeakReference<>(null);
 
-    public SpongeEntityValue(Key<? extends BaseValue<Entity>> key, Entity actualValue) {
+    public SpongeEntityValue(Key<? extends BaseValue<T>> key, T actualValue) {
         this.key = checkNotNull(key);
         this.entityid = checkNotNull(actualValue).getUniqueId();
         this.weakReference = new WeakReference<>(actualValue);
@@ -62,11 +62,11 @@ public class SpongeEntityValue implements Value<Entity> {
     }
 
     @Override
-    public Entity get() {
+    public T get() {
         @Nullable Entity entity = this.weakReference.get();
         if (entity == null) {
             for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
-                final Optional<Entity> optional = world.getEntity(this.entityid);
+                final Optional<T> optional = (Optional<T>) world.getEntity(this.entityid);
                 if (optional.isPresent()) {
                     return optional.get();
                 }
@@ -81,38 +81,38 @@ public class SpongeEntityValue implements Value<Entity> {
     }
 
     @Override
-    public Entity getDefault() {
+    public T getDefault() {
         checkState(!exists(), "The entity reference expired!");
         return this.weakReference.get();
     }
 
     @Override
-    public Optional<Entity> getDirect() {
+    public Optional<T> getDirect() {
         return Optional.ofNullable(this.weakReference.get());
     }
 
     @Override
-    public Key<? extends BaseValue<Entity>> getKey() {
+    public Key<? extends BaseValue<T>> getKey() {
         return this.key;
     }
 
     @Override
-    public Value<Entity> set(Entity value) {
+    public Value<T> set(T value) {
         this.entityid = checkNotNull(value).getUniqueId();
         this.weakReference = new WeakReference<>(value);
         return this;
     }
 
     @Override
-    public Value<Entity> transform(Function<Entity, Entity> function) {
-        final Entity entity = checkNotNull(checkNotNull(function).apply(this.weakReference.get()));
+    public Value<T> transform(Function<T, T> function) {
+        final T entity = checkNotNull(checkNotNull(function).apply(this.weakReference.get()));
         this.weakReference = new WeakReference<>(entity);
         this.entityid = checkNotNull(entity).getUniqueId();
         return this;
     }
 
     @Override
-    public ImmutableValue<Entity> asImmutable() {
+    public ImmutableValue<T> asImmutable() {
         return new ImmutableSpongeValue<>(getKey(), this.weakReference.get());
     }
 

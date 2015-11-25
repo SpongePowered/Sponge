@@ -30,12 +30,12 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TargetLivingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetMultipleLivingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TargetMultipleLivingData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetLivingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetMultipleLivingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class WitherTargetLivingDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityWither, List<Living>, ImmutableListValue<Living>, TargetLivingData, ImmutableTargetLivingData> {
+        AbstractEntitySingleDataProcessor<EntityWither, List<Living>, ImmutableListValue<Living>, TargetMultipleLivingData, ImmutableTargetMultipleLivingData> {
 
     public static int MAX_TARGET_INDEX = 2;
 
@@ -80,8 +80,8 @@ public class WitherTargetLivingDataProcessor extends
     }
 
     @Override
-    protected TargetLivingData createManipulator() {
-        return new SpongeTargetLivingData(new ArrayList<>(), MAX_TARGET_INDEX + 1);
+    protected TargetMultipleLivingData createManipulator() {
+        return new SpongeTargetMultipleLivingData(new ArrayList<>(), MAX_TARGET_INDEX + 1);
     }
 
     @Override
