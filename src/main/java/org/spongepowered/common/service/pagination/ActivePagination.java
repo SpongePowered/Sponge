@@ -178,7 +178,7 @@ abstract class ActivePagination {
             if (needsDiv) {
                 ret.append(DIVIDER_TEXT);
             }
-+           ret.append(Texts.of("»"));
+            ret.append(Texts.of("»"));
         }
         if (this.title != null) {
             ret.color(this.title.getColor());
