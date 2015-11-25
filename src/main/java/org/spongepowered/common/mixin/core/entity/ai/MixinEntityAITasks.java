@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 
@@ -116,9 +116,9 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     @Overwrite
     public void addTask(int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal) (Object) this);
-        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getGame(), priority, priority, (Goal) (Object) this, (Agent)
+        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(SpongeImpl.getGame(), priority, priority, (Goal) (Object) this, (Agent)
                 owner, (AITask) base);
-        Sponge.postEvent(event);
+        SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ((IMixinEntityAIBase) base).setGoal(null);
         } else {
@@ -155,9 +155,9 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             final EntityAIBase otherAiBase = entityaitaskentry.action;
 
             if (otherAiBase.equals(aiBase)) {
-                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Sponge.getGame(),
+                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(SpongeImpl.getGame(),
                         (Goal) (Object) this, (Agent) owner, (AITask) otherAiBase, entityaitaskentry.priority);
-                Sponge.postEvent(event);
+                SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     if (this.executingTaskEntries.contains(entityaitaskentry)) {
                         otherAiBase.resetTask();

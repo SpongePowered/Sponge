@@ -38,7 +38,7 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.ai.SpongeAITaskType;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
@@ -83,16 +83,16 @@ public class AITaskTypeModule implements CatalogRegistryModule<AITaskType> {
 
     @Override
     public void registerDefaults() {
-        createAITaskType(Sponge.getMinecraftPlugin(), "wander", "Wander", WanderAITask.class);
-        createAITaskType(Sponge.getMinecraftPlugin(), "avoid_entity", "Avoid Entity", AvoidEntityAITask.class);
-        createAITaskType(Sponge.getMinecraftPlugin(), "run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
-        createAITaskType(Sponge.getMinecraftPlugin(), "swimming", "Swimming", SwimmingAITask.class);
-        createAITaskType(Sponge.getMinecraftPlugin(), "watch_closest", "Watch Closest", WatchClosestAITask.class);
+        createAITaskType(SpongeImpl.getMinecraftPlugin(), "wander", "Wander", WanderAITask.class);
+        createAITaskType(SpongeImpl.getMinecraftPlugin(), "avoid_entity", "Avoid Entity", AvoidEntityAITask.class);
+        createAITaskType(SpongeImpl.getMinecraftPlugin(), "run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
+        createAITaskType(SpongeImpl.getMinecraftPlugin(), "swimming", "Swimming", SwimmingAITask.class);
+        createAITaskType(SpongeImpl.getMinecraftPlugin(), "watch_closest", "Watch Closest", WatchClosestAITask.class);
     }
 
     public AITaskType createAITaskType(Object plugin, String id, String name, Class<? extends AITask<? extends
             Agent>> aiClass) {
-        final Optional<PluginContainer> optPluginContainer = Sponge.getGame().getPluginManager().fromInstance(plugin);
+        final Optional<PluginContainer> optPluginContainer = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         Preconditions.checkArgument(optPluginContainer.isPresent());
         final PluginContainer pluginContainer = optPluginContainer.get();
         final String combinedId = pluginContainer.getId().toLowerCase() + ":" + id;

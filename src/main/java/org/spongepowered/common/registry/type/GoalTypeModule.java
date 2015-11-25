@@ -33,7 +33,7 @@ import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.Sponge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.ai.SpongeGoalType;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
@@ -70,12 +70,12 @@ public class GoalTypeModule implements CatalogRegistryModule<GoalType> {
 
     @Override
     public void registerDefaults() {
-        createGoalType(Sponge.getMinecraftPlugin(), "normal", "Normal");
-        createGoalType(Sponge.getMinecraftPlugin(), "target", "Target");
+        createGoalType(SpongeImpl.getMinecraftPlugin(), "normal", "Normal");
+        createGoalType(SpongeImpl.getMinecraftPlugin(), "target", "Target");
     }
 
     public GoalType createGoalType(Object plugin, String id, String name) {
-        final Optional<PluginContainer> optPluginContainer = Sponge.getGame().getPluginManager().fromInstance(plugin);
+        final Optional<PluginContainer> optPluginContainer = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         Preconditions.checkArgument(optPluginContainer.isPresent());
         final PluginContainer pluginContainer = optPluginContainer.get();
         final String combinedId = pluginContainer.getId().toLowerCase() + ":" + id;
