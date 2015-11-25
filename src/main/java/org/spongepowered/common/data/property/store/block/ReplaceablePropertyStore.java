@@ -26,7 +26,10 @@ package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
 import org.spongepowered.api.data.property.block.ReplaceableProperty;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -44,4 +47,10 @@ public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<Replace
         return Optional.of(block.getMaterial().isReplaceable() ? TRUE : FALSE);
     }
 
+    @Override
+    public Optional<ReplaceableProperty> getFor(Location<World> location) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+        final Block block = (Block) location.getBlockType();
+        return Optional.of(block.isReplaceable(world, VecHelper.toBlockPos(location)) ? TRUE : FALSE);
+    }
 }

@@ -25,13 +25,12 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -39,21 +38,14 @@ import java.util.Optional;
 
 public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<GroundLuminanceProperty> {
 
-    @SuppressWarnings("rawtypes")
     @Override
     public Optional<GroundLuminanceProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location) {
-            final Extent extent = ((Location) propertyHolder).getExtent();
-            if (extent instanceof World) {
-                final net.minecraft.world.World world = (net.minecraft.world.World) extent;
-                final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos((Location) propertyHolder));
-                return Optional.of(new GroundLuminanceProperty(light));
-            } else if (extent instanceof Chunk) {
-                final float light = ((net.minecraft.world.chunk.Chunk) extent).getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos((Location) propertyHolder));
-                return Optional.of(new GroundLuminanceProperty(light));
-            }
+        if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof Chunk) {
+            final Chunk chunk = (Chunk) ((Location<?>) propertyHolder).getExtent();
+            final float light = chunk.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos((Location<?>) propertyHolder));
+            return Optional.of(new GroundLuminanceProperty(light));
         }
-        return Optional.empty();
+        return super.getFor(propertyHolder);
     }
 
     @Override

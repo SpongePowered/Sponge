@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
+import net.minecraft.block.Block;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.data.property.block.PoweredProperty;
+import org.spongepowered.api.data.property.block.SolidCubeProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -35,23 +36,24 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredProperty> {
+public class SolidCubePropertyStore extends AbstractSpongePropertyStore<SolidCubeProperty> {
 
-    private static final PoweredProperty TRUE = new PoweredProperty(true);
-    private static final PoweredProperty FALSE = new PoweredProperty(false);
+    protected static final SolidCubeProperty TRUE = new SolidCubeProperty(true);
+    protected static final SolidCubeProperty FALSE = new SolidCubeProperty(false);
 
     @Override
-    public Optional<PoweredProperty> getFor(Location<World> location) {
+    public Optional<SolidCubeProperty> getFor(Location<World> location) {
+        final Block block = (Block) location.getBlockType();
+        return Optional.of(block.getMaterial().isSolid() ? TRUE : FALSE);
+    }
+
+    @Override
+    public Optional<SolidCubeProperty> getFor(Location<World> location, Direction direction) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+        final Block block = (Block) location.getBlockType();
         final BlockPos pos = VecHelper.toBlockPos(location);
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        return Optional.of(world.isBlockPowered(pos) ? TRUE : FALSE);
+        final EnumFacing facing = toEnumFacing(direction);
+        return Optional.of(block.isBlockSolid(world, pos, facing) ? TRUE : FALSE);
     }
 
-    @Override
-    public Optional<PoweredProperty> getFor(Location<World> location, Direction direction) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final EnumFacing facing = toEnumFacing(direction);
-        final boolean powered = world.getStrongPower(VecHelper.toBlockPos(location).offset(facing), facing) > 0;
-        return Optional.of(powered ? TRUE : FALSE);
-    }
 }

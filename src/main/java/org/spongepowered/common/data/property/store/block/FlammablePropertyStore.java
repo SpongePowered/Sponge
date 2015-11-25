@@ -24,19 +24,14 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.IBlockAccess;
-import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.FlammableProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
@@ -46,24 +41,13 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
     private static final FlammableProperty TRUE = new FlammableProperty(true);
     private static final FlammableProperty FALSE = new FlammableProperty(false);
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Optional<FlammableProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location) {
-            if (((Location<?>) propertyHolder).getExtent() instanceof net.minecraft.world.World) {
-                return getFor((Location<World>) propertyHolder);
-            }
-        }
-        return Optional.empty();
-    }
-
     @Override
     public Optional<FlammableProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final BlockPos pos = VecHelper.toBlockPos(location);
         final IMixinBlock block = (IMixinBlock) world.getBlockState(pos).getBlock();
         for (EnumFacing facing : EnumFacing.values()) {
-            if (block.isFlammable((IBlockAccess) world, pos, facing)) {
+            if (block.isFlammable(world, pos, facing)) {
                 return Optional.of(TRUE);
             }
         }
@@ -72,9 +56,8 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
 
     @Override
     public Optional<FlammableProperty> getFor(Location<World> location, Direction direction) {
-        checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final EnumFacing facing = DirectionFacingProvider.getInstance().get(direction).get();
+        final EnumFacing facing = toEnumFacing(direction);
         final BlockPos pos = VecHelper.toBlockPos(location);
         final boolean flammable = ((IMixinBlock) world.getBlockState(pos).getBlock()).isFlammable(world, pos, facing);
         return Optional.of(flammable ? TRUE : FALSE);

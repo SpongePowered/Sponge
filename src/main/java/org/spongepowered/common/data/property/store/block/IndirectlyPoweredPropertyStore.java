@@ -24,16 +24,12 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
@@ -42,17 +38,6 @@ public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<
 
     private static final IndirectlyPoweredProperty TRUE = new IndirectlyPoweredProperty(true);
     private static final IndirectlyPoweredProperty FALSE = new IndirectlyPoweredProperty(false);
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Optional<IndirectlyPoweredProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location) {
-            if (((Location<?>) propertyHolder).getExtent() instanceof net.minecraft.world.World) {
-                return getFor((Location<World>) propertyHolder);
-            }
-        }
-        return Optional.empty();
-    }
 
     @Override
     public Optional<IndirectlyPoweredProperty> getFor(Location<World> location) {
@@ -63,9 +48,8 @@ public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<
 
     @Override
     public Optional<IndirectlyPoweredProperty> getFor(Location<World> location, Direction direction) {
-        checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final EnumFacing facing = DirectionFacingProvider.getInstance().get(direction).get();
+        final EnumFacing facing = toEnumFacing(direction);
         final boolean powered = world.getRedstonePower(VecHelper.toBlockPos(location).offset(facing), facing) > 0;
         return Optional.of(powered ? TRUE : FALSE);
     }

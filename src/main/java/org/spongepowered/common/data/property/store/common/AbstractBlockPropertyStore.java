@@ -35,7 +35,6 @@ import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.Optional;
 
@@ -48,7 +47,8 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     }
 
     /**
-     * Gets the property for the block, if the block is actually containing a property in the first place.
+     * Gets the property for the block, if the block is actually containing a
+     * property in the first place.
      *
      * @param block The block
      * @return The property, if available
@@ -56,8 +56,9 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     protected abstract Optional<T> getForBlock(Block block);
 
     /**
-     * This is intended for properties that are intentionally for directional orientations.
-     * Typically, this is always absent, only a few properties can be retrieved for specific directions.
+     * This is intended for properties that are intentionally for directional
+     * orientations. Typically, this is always absent, only a few properties can
+     * be retrieved for specific directions.
      *
      * @param world The world
      * @param x The x coordinate
@@ -70,11 +71,10 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
         return Optional.empty();
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
-            final Block block = (Block) ((Location) propertyHolder).getBlockType();
+            final Block block = (Block) ((Location<?>) propertyHolder).getBlockType();
             return getForBlock(block);
         } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
             final Item item = ((ItemStack) propertyHolder).getItem();
@@ -100,6 +100,6 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     @Override
     public Optional<T> getFor(Location<World> location, Direction direction) {
         return getForDirection(((net.minecraft.world.World) location.getExtent()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
-                               DirectionFacingProvider.getInstance().get(direction).get());
+                toEnumFacing(direction));
     }
 }

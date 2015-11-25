@@ -25,32 +25,16 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.TemperatureProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
 public class TemperaturePropertyStore extends AbstractSpongePropertyStore<TemperatureProperty> {
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Optional<TemperatureProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location) {
-            final Extent extent = ((Location) propertyHolder).getExtent();
-            if (extent instanceof World) {
-                final net.minecraft.world.World world = (net.minecraft.world.World) extent;
-                final BiomeGenBase biome = world.getBiomeGenForCoords(VecHelper.toBlockPos((Location) propertyHolder));
-                return Optional.of(new TemperatureProperty(biome.temperature));
-            }
-        }
-        return Optional.empty();
-    }
 
     @Override
     public Optional<TemperatureProperty> getFor(Location<World> location) {

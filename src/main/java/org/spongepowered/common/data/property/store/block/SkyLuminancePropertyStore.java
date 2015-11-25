@@ -25,13 +25,12 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -39,21 +38,14 @@ import java.util.Optional;
 
 public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLuminanceProperty> {
 
-    @SuppressWarnings("rawtypes")
     @Override
     public Optional<SkyLuminanceProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location) {
-            final Extent extent = ((Location) propertyHolder).getExtent();
-            if (extent instanceof World) {
-                final net.minecraft.world.World world = (net.minecraft.world.World) extent;
-                final float light = world.getLightFor(EnumSkyBlock.SKY, VecHelper.toBlockPos((Location) propertyHolder));
-                return Optional.of(new SkyLuminanceProperty(light));
-            } else if (extent instanceof Chunk) {
-                final float light = ((net.minecraft.world.chunk.Chunk) extent).getLightFor(EnumSkyBlock.SKY, VecHelper.toBlockPos((Location) propertyHolder));
-                return Optional.of(new SkyLuminanceProperty(light));
-            }
+        if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof Chunk) {
+            final Chunk chunk = (Chunk) ((Location<?>) propertyHolder).getExtent();
+            final float light = chunk.getLightFor(EnumSkyBlock.SKY, VecHelper.toBlockPos((Location<?>) propertyHolder));
+            return Optional.of(new SkyLuminanceProperty(light));
         }
-        return Optional.empty();
+        return super.getFor(propertyHolder);
     }
 
     @Override
@@ -63,7 +55,8 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLu
         return Optional.of(new SkyLuminanceProperty(light));
     }
 
-    @Override public Optional<SkyLuminanceProperty> getFor(Location<World> location, Direction direction) {
+    @Override
+    public Optional<SkyLuminanceProperty> getFor(Location<World> location, Direction direction) {
         // TODO gabziou fix this
         return Optional.empty();
     }

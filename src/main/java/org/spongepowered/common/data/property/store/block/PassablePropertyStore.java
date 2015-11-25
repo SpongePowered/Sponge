@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.BlockPos;
 import org.spongepowered.api.data.property.block.PassableProperty;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -51,9 +50,8 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore<PassablePr
     @Override
     public Optional<PassableProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final BlockPos pos = VecHelper.toBlockPos(location);
-        final boolean passable = world.getBlockState(pos).getBlock().isPassable(world, pos);
-        return Optional.of(passable ? TRUE : FALSE);
+        final Block block = (Block) location.getBlockType();
+        return Optional.of(block.isPassable(world, VecHelper.toBlockPos(location)) ? TRUE : FALSE);
     }
 
 }
