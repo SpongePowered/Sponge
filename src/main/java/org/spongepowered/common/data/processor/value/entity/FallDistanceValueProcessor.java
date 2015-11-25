@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class FallDistanceValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected MutableBoundedValue<Float> constructValue(Float value) {
-        return SpongeValueBuilder.boundedBuilder(Keys.FALL_DISTANCE)
+        return SpongeValueFactory.boundedBuilder(Keys.FALL_DISTANCE)
                 .actualValue(value)
                 .defaultValue(0F)
                 .minimum(0F)

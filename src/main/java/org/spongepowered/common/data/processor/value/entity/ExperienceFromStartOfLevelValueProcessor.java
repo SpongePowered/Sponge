@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -55,7 +55,7 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
 
     @Override
     public ImmutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
+        return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
             .defaultValue(0)
             .actualValue(defaultValue)
             .minimum(0)

@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -43,7 +43,7 @@ public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<T
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.PASSED_BURN_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0)
                 .maximum(1600)
                 .defaultValue(defaultValue)
@@ -66,7 +66,7 @@ public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<T
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return SpongeValueBuilder.boundedBuilder(Keys.PASSED_BURN_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .build()

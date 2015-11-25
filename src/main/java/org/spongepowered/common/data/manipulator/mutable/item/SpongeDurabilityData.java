@@ -36,7 +36,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeDurabilityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class SpongeDurabilityData extends AbstractData<DurabilityData, ImmutableDurabilityData> implements DurabilityData {
 
@@ -75,7 +75,7 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
 
     @Override
     public MutableBoundedValue<Integer> durability() {
-        return SpongeValueBuilder.boundedBuilder(Keys.ITEM_DURABILITY)
+        return SpongeValueFactory.boundedBuilder(Keys.ITEM_DURABILITY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(this.defaultDurability)
@@ -85,7 +85,7 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
 
     @Override
     public Value<Boolean> unbreakable() {
-        return new SpongeValueBuilder().createValue(Keys.UNBREAKABLE, this.unbreakable, false);
+        return SpongeValueFactory.getInstance().createValue(Keys.UNBREAKABLE, this.unbreakable, false);
     }
 
     @Override

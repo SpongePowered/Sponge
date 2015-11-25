@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BoundedValue;
-import org.spongepowered.api.data.value.ValueBuilder;
+import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
@@ -52,8 +52,13 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class SpongeValueBuilder implements ValueBuilder {
+public class SpongeValueFactory implements ValueFactory {
 
+    private static ValueFactory instance = new SpongeValueFactory();
+
+    public static ValueFactory getInstance() {
+        return instance;
+    }
 
     @Override
     public <E> Value<E> createValue(Key<Value<E>> key, E element) {
@@ -113,6 +118,8 @@ public class SpongeValueBuilder implements ValueBuilder {
     public static <E> BoundedValueBuilder<E> boundedBuilder(Key<? extends BoundedValue<E>> key) {
         return new SpongeBoundedValueBuilder<>(checkNotNull(key));
     }
+
+    private SpongeValueFactory() { }
 
     public static final class SpongeBoundedValueBuilder<E> implements BoundedValueBuilder<E> {
 

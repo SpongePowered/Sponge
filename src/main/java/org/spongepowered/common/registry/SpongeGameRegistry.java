@@ -37,6 +37,7 @@ import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
+import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.ItemType;
@@ -64,6 +65,7 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.registry.type.RotationRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
@@ -346,6 +348,11 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public ExtentBufferFactory getExtentBufferFactory() {
         return SpongeExtentBufferFactory.INSTANCE;
+    }
+
+    @Override
+    public ValueFactory getValueFactory() {
+        return SpongeValueFactory.getInstance();
     }
 
     private void registerModulePhase() {

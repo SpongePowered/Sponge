@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -63,7 +63,7 @@ public class BrewingStandDataProcessor extends AbstractTileEntitySingleDataProce
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_BREW_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(400)

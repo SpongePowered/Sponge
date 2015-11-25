@@ -33,7 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnaceData> implements FurnaceData {
 
@@ -79,7 +79,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
 
     @Override
     public MutableBoundedValue<Integer> passedBurnTime() {
-        return SpongeValueBuilder.boundedBuilder(Keys.PASSED_BURN_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0)
                 .maximum(this.maxBurnTime)
                 .defaultValue(0)
@@ -97,7 +97,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
 
     @Override
     public MutableBoundedValue<Integer> maxBurnTime() {
-        return SpongeValueBuilder.boundedBuilder(Keys.MAX_BURN_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(1600)
@@ -115,7 +115,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
 
     @Override
     public MutableBoundedValue<Integer> passedCookTime() {
-        return SpongeValueBuilder.boundedBuilder(Keys.PASSED_COOK_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
                 .minimum(0)
                 .maximum(this.maxCookTime)
                 .defaultValue(0)
@@ -133,7 +133,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
 
     @Override
     public MutableBoundedValue<Integer> maxCookTime() {
-        return SpongeValueBuilder.boundedBuilder(Keys.MAX_COOK_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(200)

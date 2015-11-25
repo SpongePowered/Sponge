@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.MAX_HEALTH)
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
             .defaultValue(20D)
             .minimum(1D)
             .maximum(((Float) Float.MAX_VALUE).doubleValue())

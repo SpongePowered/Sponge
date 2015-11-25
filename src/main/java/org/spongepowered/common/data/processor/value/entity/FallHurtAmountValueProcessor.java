@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -45,8 +45,7 @@ public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected MutableBoundedValue<Double> constructValue(Double value) {
-        return new SpongeValueBuilder()
-                .createBoundedValueBuilder(Keys.FALL_DAMAGE_PER_BLOCK)
+        return SpongeValueFactory.boundedBuilder(Keys.FALL_DAMAGE_PER_BLOCK)
                 .actualValue(value)
                 .defaultValue(DataConstants.DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK)
                 .minimum(0d)

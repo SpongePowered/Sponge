@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ public class MaxCookTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.MAX_COOK_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(defaultValue)
@@ -66,7 +66,7 @@ public class MaxCookTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return SpongeValueBuilder.boundedBuilder(Keys.MAX_COOK_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(200)

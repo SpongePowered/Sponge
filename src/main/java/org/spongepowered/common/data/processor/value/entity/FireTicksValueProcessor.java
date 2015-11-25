@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -59,7 +59,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.FIRE_TICKS)
+        return SpongeValueFactory.boundedBuilder(Keys.FIRE_TICKS)
             .defaultValue(DataConstants.DEFAULT_FIRE_TICKS)
             .minimum(DataConstants.MINIMUM_FIRE_TICKS)
             .maximum(Integer.MAX_VALUE)

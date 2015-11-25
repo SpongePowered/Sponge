@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthData> implements HealthData {
 
@@ -56,7 +56,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
 
     @Override
     public MutableBoundedValue<Double> health() {
-        return SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+        return SpongeValueFactory.boundedBuilder(Keys.HEALTH)
             .minimum(0D)
             .maximum(this.maxHealth)
             .defaultValue(this.maxHealth)
@@ -66,7 +66,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
 
     @Override
     public MutableBoundedValue<Double> maxHealth() {
-        return SpongeValueBuilder.boundedBuilder(Keys.MAX_HEALTH)
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
             .defaultValue(20D)
             .minimum(0D)
             .maximum((double) Float.MAX_VALUE)

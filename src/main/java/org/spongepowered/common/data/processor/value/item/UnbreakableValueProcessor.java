@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -51,7 +51,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
 
     @Override
     public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValueBuilder().createValue(Keys.UNBREAKABLE, defaultValue, false);
+        return SpongeValueFactory.getInstance().createValue(Keys.UNBREAKABLE, defaultValue, false);
     }
 
     @Override

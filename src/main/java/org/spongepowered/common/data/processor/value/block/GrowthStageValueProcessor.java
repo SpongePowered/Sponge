@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.value.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class GrowthStageValueProcessor extends
         AbstractBlockOnlyValueProcessor<Integer, MutableBoundedValue<Integer>> {
@@ -38,7 +38,7 @@ public class GrowthStageValueProcessor extends
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.GROWTH_STAGE)
+        return SpongeValueFactory.boundedBuilder(Keys.GROWTH_STAGE)
                 .defaultValue(0)
                 .minimum(0)
                 .maximum(7)

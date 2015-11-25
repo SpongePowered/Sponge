@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
 import java.util.Optional;
@@ -44,7 +44,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<IMixinEnt
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.MAX_AIR)
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_AIR)
             .defaultValue(300)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)

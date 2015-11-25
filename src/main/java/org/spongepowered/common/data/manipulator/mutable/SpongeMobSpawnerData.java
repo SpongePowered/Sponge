@@ -41,7 +41,7 @@ import org.spongepowered.api.util.weighted.WeightedCollection;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeMobSpawnerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeNextEntityToSpawnValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedEntityCollectionValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
@@ -85,7 +85,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> remainingDelay() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
             .minimum((short) 0)
             .maximum(this.maximumDelay)
             .defaultValue((short) 20)
@@ -95,7 +95,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> minimumSpawnDelay() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MINIMUM_DELAY)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MINIMUM_DELAY)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue((short) 200)
@@ -105,7 +105,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> maximumSpawnDelay() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MAXIMUM_DELAY)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MAXIMUM_DELAY)
             .minimum((short) 1)
             .maximum(Short.MAX_VALUE)
             .defaultValue((short) 800)
@@ -115,7 +115,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> spawnCount() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_SPAWN_COUNT)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_SPAWN_COUNT)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue((short) 4)
@@ -125,7 +125,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> maximumNearbyEntities() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue((short) 6)
@@ -135,7 +135,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> requiredPlayerRange() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_REQURED_PLAYER_RANGE)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REQURED_PLAYER_RANGE)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue((short) 16)
@@ -145,7 +145,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> spawnRange() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SPAWNER_SPAWN_RANGE)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_SPAWN_RANGE)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue((short) 4)

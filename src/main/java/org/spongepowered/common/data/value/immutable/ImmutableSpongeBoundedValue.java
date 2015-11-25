@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Comparator;
 import java.util.function.Function;
@@ -80,7 +80,7 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
     @SuppressWarnings("unchecked")
     @Override
     public MutableBoundedValue<E> asMutable() {
-        return SpongeValueBuilder.boundedBuilder((Key<? extends BoundedValue<E>>) getKey())
+        return SpongeValueFactory.boundedBuilder((Key<? extends BoundedValue<E>>) getKey())
             .defaultValue(getDefault())
             .minimum(getMinValue())
             .maximum(getMaxValue())

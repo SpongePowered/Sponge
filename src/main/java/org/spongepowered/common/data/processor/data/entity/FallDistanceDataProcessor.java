@@ -36,7 +36,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallDistanceData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -60,7 +60,7 @@ public class FallDistanceDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected ImmutableBoundedValue<Float> constructImmutableValue(Float value) {
-        return SpongeValueBuilder.boundedBuilder(Keys.FALL_DISTANCE)
+        return SpongeValueFactory.boundedBuilder(Keys.FALL_DISTANCE)
                 .actualValue(value)
                 .defaultValue(0F)
                 .minimum(0F)

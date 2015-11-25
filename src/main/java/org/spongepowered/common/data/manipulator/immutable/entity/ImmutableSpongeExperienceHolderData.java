@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static org.spongepowered.common.data.value.SpongeValueBuilder.boundedBuilder;
+import static org.spongepowered.common.data.value.SpongeValueFactory.boundedBuilder;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;

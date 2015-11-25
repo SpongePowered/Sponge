@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ public class CooldownValueProcessor extends AbstractSpongeValueProcessor<TileEnt
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer value) {
-        return SpongeValueBuilder.boundedBuilder(Keys.COOLDOWN)
+        return SpongeValueFactory.boundedBuilder(Keys.COOLDOWN)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(0)

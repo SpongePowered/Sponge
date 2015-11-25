@@ -33,7 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFoodData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> implements FoodData {
 
@@ -82,7 +82,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public MutableBoundedValue<Integer> foodLevel() {
-        return SpongeValueBuilder.boundedBuilder(Keys.FOOD_LEVEL)
+        return SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
             .defaultValue(20)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
@@ -92,7 +92,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public MutableBoundedValue<Double> exhaustion() {
-        return SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
+        return SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
             .defaultValue(0D)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)
@@ -102,7 +102,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public MutableBoundedValue<Double> saturation() {
-        return SpongeValueBuilder.boundedBuilder(Keys.EXHAUSTION)
+        return SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
             .defaultValue(0D)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)

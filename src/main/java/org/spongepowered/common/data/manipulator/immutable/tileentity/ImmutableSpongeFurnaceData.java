@@ -33,7 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableFurnaceData, FurnaceData> implements ImmutableFurnaceData {
 
@@ -55,19 +55,19 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
         this.passedCookTime = passedCookTime;
         this.maxCookTime = maxCookTime;
 
-        this.passedBurnTimeValue = SpongeValueBuilder.boundedBuilder(Keys.PASSED_BURN_TIME)
+        this.passedBurnTimeValue = SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0).maximum(this.maxBurnTime).defaultValue(0)
                 .actualValue(this.passedBurnTime).build().asImmutable();
 
-        this.maxBurnTimeValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_BURN_TIME)
+        this.maxBurnTimeValue = SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
                 .minimum(0).maximum(Integer.MAX_VALUE).defaultValue(1600)
                 .actualValue(this.maxBurnTime).build().asImmutable();
 
-        this.passedCookTimeValue = SpongeValueBuilder.boundedBuilder(Keys.PASSED_COOK_TIME)
+        this.passedCookTimeValue = SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
                 .minimum(0).maximum(this.maxCookTime).defaultValue(0)
                 .actualValue(this.passedCookTime).build().asImmutable();
 
-        this.maxCookTimeValue = SpongeValueBuilder.boundedBuilder(Keys.MAX_COOK_TIME)
+        this.maxCookTimeValue = SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
                 .minimum(0).maximum(Integer.MAX_VALUE).defaultValue(200)
                 .actualValue(this.maxCookTime).build().asImmutable();
 

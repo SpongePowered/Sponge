@@ -36,7 +36,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -62,7 +62,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
         this.lastOutput = lastOutput;
 
         this.storedValue = new ImmutableSpongeValue<>(Keys.COMMAND, this.storedCommand);
-        this.successValue = SpongeValueBuilder.boundedBuilder(Keys.SUCCESS_COUNT)
+        this.successValue = SpongeValueFactory.boundedBuilder(Keys.SUCCESS_COUNT)
                 .actualValue(this.success)
                 .defaultValue(0)
                 .minimum(0)

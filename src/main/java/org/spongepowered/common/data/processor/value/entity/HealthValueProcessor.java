@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
 
     @Override
     public MutableBoundedValue<Double> constructValue(Double health) {
-        return SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+        return SpongeValueFactory.boundedBuilder(Keys.HEALTH)
             .comparator(doubleComparator())
             .minimum(0D)
             .maximum(((Float) Float.MAX_VALUE).doubleValue())
@@ -75,7 +75,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
         if (container instanceof EntityLivingBase) {
             final double health = ((EntityLivingBase) container).getHealth();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            return Optional.of(SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+            return Optional.of(SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .minimum(0D)
                 .maximum(maxHealth)
                 .defaultValue(maxHealth)
@@ -96,7 +96,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
         if (container instanceof EntityLivingBase) {
             final DataTransactionBuilder builder = DataTransactionBuilder.builder();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
-            final ImmutableBoundedValue<Double> newHealthValue = SpongeValueBuilder.boundedBuilder(Keys.HEALTH)
+            final ImmutableBoundedValue<Double> newHealthValue = SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .defaultValue(maxHealth)
                 .minimum(0D)
                 .maximum(maxHealth)

@@ -40,7 +40,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCommandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -67,7 +67,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
 
     @Override
     public MutableBoundedValue<Integer> successCount() {
-        return SpongeValueBuilder.boundedBuilder(Keys.SUCCESS_COUNT)
+        return SpongeValueFactory.boundedBuilder(Keys.SUCCESS_COUNT)
                 .actualValue(this.success)
                 .defaultValue(0)
                 .minimum(0)

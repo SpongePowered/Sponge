@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -70,7 +70,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.EXPERIENCE_LEVEL)
+        return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_LEVEL)
             .defaultValue(0)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)

@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
@@ -81,7 +81,7 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
                                                                               this.lowerBound,
                                                                               this.upperBound);
         } else {
-            this.immutableBoundedValue = SpongeValueBuilder.boundedBuilder((Key<? extends BoundedValue<T>>) this.usedKey)
+            this.immutableBoundedValue = SpongeValueFactory.boundedBuilder((Key<? extends BoundedValue<T>>) this.usedKey)
             .defaultValue(this.defaultValue)
             .actualValue(this.value)
             .minimum(this.lowerBound)

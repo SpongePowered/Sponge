@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ public class RemainingBrewTimeValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_BREW_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(defaultValue)
@@ -68,7 +68,7 @@ public class RemainingBrewTimeValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_BREW_TIME)
+        return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(400)

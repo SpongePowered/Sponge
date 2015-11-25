@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueBuilder;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
-        return SpongeValueBuilder.boundedBuilder(Keys.REMAINING_AIR)
+        return SpongeValueFactory.boundedBuilder(Keys.REMAINING_AIR)
             .defaultValue(300)
             .minimum(-20)
             .maximum(Integer.MAX_VALUE)
