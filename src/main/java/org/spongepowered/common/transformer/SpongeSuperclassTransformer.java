@@ -34,17 +34,16 @@ import org.spongepowered.asm.lib.tree.MethodInsnNode;
 import org.spongepowered.asm.lib.tree.MethodNode;
 import org.spongepowered.asm.lib.util.CheckClassAdapter;
 
-public class SpongeAISuperclassTransformer implements IClassTransformer {
-
-    private static final String SUPERCLASS = "org/spongepowered/common/entity/ai/SpongeEntityAICommonSuperclass";
+public class SpongeSuperclassTransformer implements IClassTransformer {
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        if (name.equals("org.spongepowered.api.entity.ai.task.AbstractAITask")) {
+        String superclass = SpongeSuperclassRegistry.getSuperclass(name);
+        if (superclass != null) {
             ClassNode node = this.readClass(basicClass);
 
-            node.superName = SUPERCLASS;
-            this.transformMethod(node.methods.stream().filter(m -> m.name.equals("<init>")).findFirst().get());
+            node.superName = superclass;
+            node.methods.stream().filter(m -> m.name.equals("<init>")).forEach(m -> this.transformMethod(m, name, superclass));
 
             node.accept(new CheckClassAdapter(new ClassWriter(0)));
 
@@ -56,20 +55,18 @@ public class SpongeAISuperclassTransformer implements IClassTransformer {
         return basicClass;
     }
 
-    private void transformMethod(MethodNode node) {
-        MethodInsnNode methodInsnNode = this.findInsn(node);
-        if (methodInsnNode != null) {
-            methodInsnNode.owner = SUPERCLASS;
-        }
+    private void transformMethod(MethodNode node, String name, String superClass) {
+        MethodInsnNode methodInsnNode = this.findSuper(node, name);
+        methodInsnNode.owner = superClass;
     }
 
-    private MethodInsnNode findInsn(MethodNode method) {
+    private MethodInsnNode findSuper(MethodNode method, String name) {
         for (AbstractInsnNode node: method.instructions.toArray()) {
             if (node.getOpcode() == Opcodes.INVOKESPECIAL && ((MethodInsnNode) node).name.equals("<init>")) {
                 return (MethodInsnNode) node;
             }
         }
-        return null;
+        throw new IllegalStateException(String.format("Unable to find super() call in class '%s'", method, name));
     }
 
     private ClassNode readClass(byte[] basicClass) {
