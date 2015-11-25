@@ -245,7 +245,7 @@ public final class CommonModuleRegistry {
             })
             .registerBuilderSupplier(WorldBuilder.class, SpongeWorldBuilder::new)
             .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
-            .registerBuilderSupplier(ValueFactory.class, SpongeValueFactory::new)
+            .registerBuilderSupplier(ValueFactory.class, SpongeValueFactory::getInstance)
             .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
             .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
