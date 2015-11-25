@@ -28,8 +28,7 @@ compileJava {
             '-Xlint:-processing',
             "-AoutSrgFile=${project.mixinSrg.canonicalPath}",
             "-AoutRefMapFile=${project.mixinRefMap.canonicalPath}",
-            "-AreobfSrgFile=${project.file('build/srgs/mcp-srg.srg').canonicalPath}",
-            '-AdisableTargetValidator=true'
+            "-AreobfSrgFile=${project.file('build/srgs/mcp-srg.srg').canonicalPath}"
     ]
 }
 
