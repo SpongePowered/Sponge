@@ -243,6 +243,7 @@ import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.block.BlastResistanceProperty;
+import org.spongepowered.api.data.property.block.FlammableProperty;
 import org.spongepowered.api.data.property.block.GravityAffectedProperty;
 import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
 import org.spongepowered.api.data.property.block.HardnessProperty;
@@ -730,6 +731,7 @@ import org.spongepowered.common.data.processor.value.tileentity.TileEntityDispla
 import org.spongepowered.common.data.processor.value.tileentity.TileEntitySkullValueProcessor;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.property.store.block.BlastResistancePropertyStore;
+import org.spongepowered.common.data.property.store.block.FlammablePropertyStore;
 import org.spongepowered.common.data.property.store.block.GravityAffectedPropertyStore;
 import org.spongepowered.common.data.property.store.block.GroundLuminancePropertyStore;
 import org.spongepowered.common.data.property.store.block.HardnessPropertyStore;
@@ -1061,72 +1063,72 @@ public class SpongeSerializationRegistry {
         final BrewingStandDataProcessor brewingStandDataProcessor = new BrewingStandDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(BrewingStandData.class, SpongeBrewingStandData.class, ImmutableBrewingStandData.class,
                 ImmutableSpongeBrewingStandData.class, brewingStandDataProcessor);
-        
+
         final AttachedDataProcessor attachedDataProcessor = new AttachedDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(AttachedData.class, SpongeAttachedData.class, ImmutableAttachedData.class,
                 ImmutableSpongeAttachedData.class, attachedDataProcessor);
-        
+
         final ConnectedDirectionDataProcessor connectedDirectionDataProcessor = new ConnectedDirectionDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class, ImmutableConnectedDirectionData.class,
                 ImmutableSpongeConnectedDirectionData.class, connectedDirectionDataProcessor);
-        
+
         final DirectionalDataProcessor directionalDataProcessor = new DirectionalDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
                 ImmutableSpongeDirectionalData.class, directionalDataProcessor);
-        
+
         final DisarmedDataProcessor disarmedDataProcessor = new DisarmedDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(DisarmedData.class, SpongeDisarmedData.class, ImmutableDisarmedData.class,
                 ImmutableSpongeDisarmedData.class, disarmedDataProcessor);
-        
+
         final DropDataProcessor dropDataProcessor = new DropDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(DropData.class, SpongeDropData.class, ImmutableDropData.class,
                 ImmutableSpongeDropData.class, dropDataProcessor);
-        
+
         final ExtendedDataProcessor extendedDataProcessor = new ExtendedDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(ExtendedData.class, SpongeExtendedData.class, ImmutableExtendedData.class,
                 ImmutableSpongeExtendedData.class, extendedDataProcessor);
-        
+
         final GrowthDataProcessor growthDataProcessor = new GrowthDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(GrowthData.class, SpongeGrowthData.class, ImmutableGrowthData.class,
                 ImmutableSpongeGrowthData.class, growthDataProcessor);
-        
+
         final OpenDataProcessor openDataProcessor = new OpenDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(OpenData.class, SpongeOpenData.class, ImmutableOpenData.class,
                 ImmutableSpongeOpenData.class, openDataProcessor);
-        
+
         final PoweredDataProcessor poweredDataProcessor = new PoweredDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(PoweredData.class, SpongePoweredData.class, ImmutablePoweredData.class,
                 ImmutableSpongePoweredData.class, poweredDataProcessor);
-        
+
         final RedstonePoweredDataProcessor redstonePoweredDataProcessor = new RedstonePoweredDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(RedstonePoweredData.class, SpongeRedstonePoweredData.class,
                 ImmutableRedstonePoweredData.class, ImmutableSpongeRedstonePoweredData.class,
                 redstonePoweredDataProcessor);
-        
+
         final SeamlessDataProcessor seamlessDataProcessor = new SeamlessDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(SeamlessData.class, SpongeSeamlessData.class, ImmutableSeamlessData.class,
                 ImmutableSpongeSeamlessData.class, seamlessDataProcessor);
-        
+
         final SnowedDataProcessor snowedDataProcessor = new SnowedDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(SnowedData.class, SpongeSnowedData.class, ImmutableSnowedData.class,
                 ImmutableSpongeSnowedData.class, snowedDataProcessor);
-        
+
         final SuspendedDataProcessor suspendedDataProcessor = new SuspendedDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(SuspendedData.class, SpongeSuspendedData.class, ImmutableSuspendedData.class,
                 ImmutableSpongeSuspendedData.class, suspendedDataProcessor);
-        
+
         final OccupiedDataProcessor occupiedDataProcessor = new OccupiedDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(OccupiedData.class, SpongeOccupiedData.class, ImmutableOccupiedData.class,
                 ImmutableSpongeOccupiedData.class, occupiedDataProcessor);
-        
+
         final InWallDataProcessor inWallDataProcessor = new InWallDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(InWallData.class, SpongeInWallData.class, ImmutableInWallData.class,
                 ImmutableSpongeInWallData.class, inWallDataProcessor);
-        
+
         final LayeredDataProcessor layeredDataProcessor = new LayeredDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(LayeredData.class, SpongeLayeredData.class, ImmutableLayeredData.class,
                 ImmutableSpongeLayeredData.class, layeredDataProcessor);
-        
+
         final DecayableDataProcessor decayableDataProcessor = new DecayableDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(DecayableData.class, SpongeDecayableData.class, ImmutableDecayableData.class,
                 ImmutableSpongeDecayableData.class, decayableDataProcessor);
@@ -1134,11 +1136,11 @@ public class SpongeSerializationRegistry {
         final AxisDataProcessor axisDataProcessor = new AxisDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(AxisData.class, SpongeAxisData.class, ImmutableAxisData.class,
                 ImmutableSpongeAxisData.class, axisDataProcessor);
-        
+
         final DelayableDataProcessor delayableDataProcessor = new DelayableDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(DelayableData.class, SpongeDelayableData.class, ImmutableDelayableData.class,
                 ImmutableSpongeDelayableData.class, delayableDataProcessor);
-        
+
         final AgentDataProcessor agentDataProcessor = new AgentDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
                 ImmutableSpongeAgentData.class, agentDataProcessor);
@@ -1347,6 +1349,7 @@ public class SpongeSerializationRegistry {
 
         // Blocks
         propertyRegistry.register(BlastResistanceProperty.class, new BlastResistancePropertyStore());
+        propertyRegistry.register(FlammableProperty.class, new FlammablePropertyStore());
         propertyRegistry.register(GravityAffectedProperty.class, new GravityAffectedPropertyStore());
         propertyRegistry.register(GroundLuminanceProperty.class, new GroundLuminancePropertyStore());
         propertyRegistry.register(HardnessProperty.class, new HardnessPropertyStore());

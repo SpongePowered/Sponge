@@ -217,6 +217,7 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -309,9 +310,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
     @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
-    @Shadow public abstract int getRedstonePower(BlockPos pos, EnumFacing facing);
-    @Shadow public abstract int getStrongPower(BlockPos pos, EnumFacing direction);
-    @Shadow public abstract int isBlockIndirectlyGettingPowered(BlockPos pos);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
@@ -2116,30 +2114,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    public Collection<Direction> getPoweredBlockFaces(int x, int y, int z) {
-        // Similar to World.getStrongPower(BlockPos)
-        BlockPos pos = new BlockPos(x, y, z);
-        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
-        for (EnumFacing facing : EnumFacing.values()) {
-            if (this.getStrongPower(pos.offset(facing), facing) > 0) {
-                faces.add(DirectionFacingProvider.getInstance().getKey(facing).get());
-            }
-        }
-        return faces.build();
-    }
-
-    public Collection<Direction> getIndirectlyPoweredBlockFaces(int x, int y, int z) {
-        // Similar to World.isBlockIndirectlyGettingPowered
-        BlockPos pos = new BlockPos(x, y, z);
-        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
-        for (EnumFacing facing : EnumFacing.values()) {
-            if (this.getRedstonePower(pos.offset(facing), facing) > 0) {
-                faces.add(DirectionFacingProvider.getInstance().getKey(facing).get());
-            }
-        }
-        return faces.build();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities() {
@@ -2249,6 +2223,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Property<?, ?>> getProperties(int x, int y, int z) {
         return SpongePropertyRegistry.getInstance().getPropertiesFor(new Location<World>(this, x, y, z));
+    }
+
+    @Override
+    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
+        final Optional<? extends PropertyStore<? extends Property<?, ?>>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
+        if (!optional.isPresent()) {
+            return Collections.emptyList();
+        }
+        final PropertyStore<? extends Property<?, ?>> store = optional.get();
+        final Location<World> loc = new Location<World>(this, x, y, z);
+        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
+        for (EnumFacing facing : EnumFacing.values()) {
+            Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+            if (store.getFor(loc, direction).isPresent()) {
+                faces.add(direction);
+            }
+        }
+        return faces.build();
     }
 
     @Override

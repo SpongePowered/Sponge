@@ -32,13 +32,16 @@ import java.util.Optional;
 
 public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<StatisticsTrackedProperty> {
 
+    private static final StatisticsTrackedProperty TRUE = new StatisticsTrackedProperty(true);
+    private static final StatisticsTrackedProperty FALSE = new StatisticsTrackedProperty(false);
+
     public StatisticsTrackedPropertyStore() {
         super(true);
     }
 
     @Override
     protected Optional<StatisticsTrackedProperty> getForBlock(Block block) {
-        return Optional.of(new StatisticsTrackedProperty(block.getEnableStats()));
+        return Optional.of(block.getEnableStats() ? TRUE : FALSE);
     }
 
 }

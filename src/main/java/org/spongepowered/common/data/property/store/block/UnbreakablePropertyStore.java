@@ -32,13 +32,16 @@ import java.util.Optional;
 
 public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<UnbreakableProperty> {
 
+    private static final UnbreakableProperty TRUE = new UnbreakableProperty(true);
+    private static final UnbreakableProperty FALSE = new UnbreakableProperty(false);
+
     public UnbreakablePropertyStore() {
         super(false);
     }
 
     @Override
     protected Optional<UnbreakableProperty> getForBlock(Block block) {
-        return Optional.of(new UnbreakableProperty(block.getBlockHardness(null, null) < 0));
+        return Optional.of(block.getBlockHardness(null, null) < 0 ? TRUE : FALSE);
     }
 
 }

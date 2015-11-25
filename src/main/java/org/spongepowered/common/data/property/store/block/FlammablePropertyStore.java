@@ -26,26 +26,29 @@ package org.spongepowered.common.data.property.store.block;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
+import org.spongepowered.api.data.property.block.FlammableProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<IndirectlyPoweredProperty> {
+public class FlammablePropertyStore extends AbstractSpongePropertyStore<FlammableProperty> {
 
-    private static final IndirectlyPoweredProperty TRUE = new IndirectlyPoweredProperty(true);
-    private static final IndirectlyPoweredProperty FALSE = new IndirectlyPoweredProperty(false);
+    private static final FlammableProperty TRUE = new FlammableProperty(true);
+    private static final FlammableProperty FALSE = new FlammableProperty(false);
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<IndirectlyPoweredProperty> getFor(PropertyHolder propertyHolder) {
+    public Optional<FlammableProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
             if (((Location<?>) propertyHolder).getExtent() instanceof net.minecraft.world.World) {
                 return getFor((Location<World>) propertyHolder);
@@ -55,18 +58,26 @@ public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<
     }
 
     @Override
-    public Optional<IndirectlyPoweredProperty> getFor(Location<World> location) {
+    public Optional<FlammableProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final boolean powered = world.isBlockIndirectlyGettingPowered(VecHelper.toBlockPos(location.getBlockPosition())) > 0;
-        return Optional.of(powered ? TRUE : FALSE);
+        final BlockPos pos = VecHelper.toBlockPos(location.getBlockPosition());
+        final IMixinBlock block = (IMixinBlock) world.getBlockState(pos).getBlock();
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (block.isFlammable((IBlockAccess) world, pos, facing)) {
+                return Optional.of(TRUE);
+            }
+        }
+        return Optional.of(FALSE);
     }
 
     @Override
-    public Optional<IndirectlyPoweredProperty> getFor(Location<World> location, Direction direction) {
+    public Optional<FlammableProperty> getFor(Location<World> location, Direction direction) {
         checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final EnumFacing facing = DirectionFacingProvider.getInstance().get(direction).get();
-        final boolean powered = world.getRedstonePower(VecHelper.toBlockPos(location.getBlockPosition()).offset(facing), facing) > 0;
-        return Optional.of(powered ? TRUE : FALSE);
+        final BlockPos pos = VecHelper.toBlockPos(location.getBlockPosition());
+        final boolean flammable = ((IMixinBlock) world.getBlockState(pos).getBlock()).isFlammable(world, pos, facing);
+        return Optional.of(flammable ? TRUE : FALSE);
     }
+
 }

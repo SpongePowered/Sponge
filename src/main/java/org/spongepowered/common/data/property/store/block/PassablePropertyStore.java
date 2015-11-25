@@ -25,12 +25,19 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.util.BlockPos;
 import org.spongepowered.api.data.property.block.PassableProperty;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
 public class PassablePropertyStore extends AbstractBlockPropertyStore<PassableProperty> {
+
+    private static final PassableProperty TRUE = new PassableProperty(true);
+    private static final PassableProperty FALSE = new PassableProperty(false);
 
     public PassablePropertyStore() {
         super(false);
@@ -38,7 +45,15 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore<PassablePr
 
     @Override
     protected Optional<PassableProperty> getForBlock(Block block) {
-        return Optional.of(new PassableProperty(block.getMaterial().blocksMovement()));
+        return Optional.of(block.getMaterial().blocksMovement() ? FALSE : TRUE);
+    }
+
+    @Override
+    public Optional<PassableProperty> getFor(Location<World> location) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+        final BlockPos pos = VecHelper.toBlockPos(location.getBlockPosition());
+        final boolean passable = world.getBlockState(pos).getBlock().isPassable(world, pos);
+        return Optional.of(passable ? TRUE : FALSE);
     }
 
 }

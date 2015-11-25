@@ -33,13 +33,16 @@ import java.util.Optional;
 
 public class GravityAffectedPropertyStore extends AbstractBlockPropertyStore<GravityAffectedProperty> {
 
+    private static final GravityAffectedProperty TRUE = new GravityAffectedProperty(true);
+    private static final GravityAffectedProperty FALSE = new GravityAffectedProperty(false);
+
     public GravityAffectedPropertyStore() {
         super(false);
     }
 
     @Override
     protected Optional<GravityAffectedProperty> getForBlock(Block block) {
-        return Optional.of(new GravityAffectedProperty(BlockFalling.class.isAssignableFrom(block.getClass())));
+        return Optional.of(BlockFalling.class.isAssignableFrom(block.getClass()) ? TRUE : FALSE);
     }
 
 }

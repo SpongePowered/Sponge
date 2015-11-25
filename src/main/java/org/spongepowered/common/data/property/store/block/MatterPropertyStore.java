@@ -28,6 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import org.spongepowered.api.data.property.block.MatterProperty;
+import org.spongepowered.api.data.property.block.MatterProperty.Matter;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
@@ -36,6 +37,10 @@ import java.util.Optional;
 // sponge implementation.
 public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProperty> {
 
+    private static final MatterProperty SOLID = new MatterProperty(Matter.SOLID);
+    private static final MatterProperty LIQUID = new MatterProperty(Matter.LIQUID);
+    private static final MatterProperty GAS = new MatterProperty(Matter.GAS);
+
     public MatterPropertyStore() {
         super(true);
     }
@@ -43,11 +48,11 @@ public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProper
     @Override
     protected Optional<MatterProperty> getForBlock(Block block) {
         if (BlockLiquid.class.isAssignableFrom(block.getClass())) {
-            return Optional.of(new MatterProperty(MatterProperty.Matter.LIQUID));
+            return Optional.of(LIQUID);
         } else if (block.getMaterial() == Material.air) {
-            return Optional.of(new MatterProperty(MatterProperty.Matter.GAS));
+            return Optional.of(GAS);
         } else {
-            return Optional.of(new MatterProperty(MatterProperty.Matter.SOLID));
+            return Optional.of(SOLID);
         }
     }
 

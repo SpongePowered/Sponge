@@ -32,13 +32,16 @@ import java.util.Optional;
 
 public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<ReplaceableProperty> {
 
+    private static final ReplaceableProperty TRUE = new ReplaceableProperty(true);
+    private static final ReplaceableProperty FALSE = new ReplaceableProperty(false);
+
     public ReplaceablePropertyStore() {
         super(false);
     }
 
     @Override
     protected Optional<ReplaceableProperty> getForBlock(Block block) {
-        return Optional.of(new ReplaceableProperty(block.getMaterial().isReplaceable()));
+        return Optional.of(block.getMaterial().isReplaceable() ? TRUE : FALSE);
     }
 
 }
