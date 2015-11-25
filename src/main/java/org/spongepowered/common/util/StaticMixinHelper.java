@@ -67,9 +67,5 @@ public class StaticMixinHelper {
     public static IInventory lastOpenInventory = null;
     public static int lastDestroyedEntityId = -1;
     public static EntityLivingBase currentTargetEntity;
-
-    @SuppressWarnings({"deprecation", "rawtypes"})
-    public static Class getCallerClass(int level) {
-        return sun.reflect.Reflection.getCallerClass(level);
-    }
+    public static Class runningGenerator = null;
 }

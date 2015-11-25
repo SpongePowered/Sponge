@@ -352,7 +352,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      *
      * Purpose: Rewritten to support capturing blocks
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     @Overwrite
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (!this.isValid(pos)) {
@@ -375,29 +375,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!this.isRemote && !this.restoringBlocks) {
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
-                // black magic to track populators
-                Class clazz = StaticMixinHelper.getCallerClass(3);
-
-                if (net.minecraft.world.gen.feature.WorldGenerator.class.isAssignableFrom(clazz)) {
+                if (StaticMixinHelper.runningGenerator != null && net.minecraft.world.gen.feature.WorldGenerator.class.isAssignableFrom(StaticMixinHelper.runningGenerator)) {
                     SpongePopulatorType populatorType = null;
                     populatorType = StaticMixinHelper.populator;
 
-                    if (clazz == net.minecraft.world.gen.feature.WorldGenerator.class) {
-                        if (StaticMixinHelper.lastPopulatorClass != null) {
-                            clazz = StaticMixinHelper.lastPopulatorClass;
-                        } else {
-                            int level = 3;
-                            // locate correct generator class
-                            while (clazz == net.minecraft.world.gen.feature.WorldGenerator.class
-                                    || clazz == net.minecraft.world.gen.feature.WorldGenHugeTrees.class) {
-                                clazz = StaticMixinHelper.getCallerClass(level);
-                                level++;
-                            }
-                        }
-                    }
-
                     if (populatorType == null) {
-                        populatorType = (SpongePopulatorType) SpongeImpl.getRegistry().getTranslated(clazz, PopulatorType.class);
+                        populatorType = (SpongePopulatorType) SpongeImpl.getRegistry().getTranslated(StaticMixinHelper.runningGenerator, PopulatorType.class);
                     }
 
                     if (populatorType != null) {
