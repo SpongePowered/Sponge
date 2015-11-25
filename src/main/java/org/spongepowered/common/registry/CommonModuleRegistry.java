@@ -64,7 +64,6 @@ import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.WallType;
-import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.effect.particle.ColoredParticle;
 import org.spongepowered.api.effect.particle.ItemParticle;
 import org.spongepowered.api.effect.particle.NoteParticle;
@@ -109,7 +108,6 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.SpongeBlockDamageSourceBuilder;
@@ -245,7 +243,6 @@ public final class CommonModuleRegistry {
             })
             .registerBuilderSupplier(WorldBuilder.class, SpongeWorldBuilder::new)
             .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
-            .registerBuilderSupplier(ValueFactory.class, SpongeValueFactory::getInstance)
             .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
             .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
