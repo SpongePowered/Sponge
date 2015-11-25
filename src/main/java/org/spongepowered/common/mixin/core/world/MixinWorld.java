@@ -37,6 +37,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -1404,14 +1405,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 .extendedState((BlockState) extended)
                 .worldId(location.getExtent().getUniqueId())
                 .position(location.getBlockPosition());
-        net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
-        NBTTagCompound nbt = null;
-        if (te != null) {
-            nbt = new NBTTagCompound();
-            te.writeToNBT(nbt);
-        }
-        if (nbt != null) {
-            this.builder.unsafeNbt(nbt);
+        if (state.getBlock() instanceof ITileEntityProvider) {
+            net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
+            NBTTagCompound nbt = null;
+            if (te != null) {
+                nbt = new NBTTagCompound();
+                te.writeToNBT(nbt);
+            }
+            if (nbt != null) {
+                this.builder.unsafeNbt(nbt);
+            }
         }
 
         return new SpongeBlockSnapshot(this.builder, updateFlag);

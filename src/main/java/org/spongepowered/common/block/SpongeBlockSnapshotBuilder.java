@@ -31,6 +31,7 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -55,6 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -106,14 +108,12 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         this.blockState = location.getBlock();
         this.worldUuid = location.getExtent().getUniqueId();
         this.coords = location.getBlockPosition();
-        if (location.hasTileEntity()) {
-            this.compound = new NBTTagCompound();
-            ((TileEntity) location.getTileEntity().get()).writeToNBT(this.compound);
-            final List<ImmutableDataManipulator<?, ?>> list = Lists.newArrayList();
-            for (DataManipulator<?, ?> manipulator : location.getContainers()) {
-                list.add(manipulator.asImmutable());
+        if (this.blockState.getType() instanceof ITileEntityProvider) {
+            if (location.hasTileEntity()) {
+                this.compound = new NBTTagCompound();
+                ((TileEntity) location.getTileEntity().get()).writeToNBT(this.compound);
+                this.manipulators = location.getContainers().stream().map(DataManipulator::asImmutable).collect(Collectors.toList());
             }
-            this.manipulators = list;
         }
         return this;
     }
