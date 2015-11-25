@@ -160,6 +160,8 @@ abstract class ActivePagination {
         TextBuilder ret = Texts.builder();
         if (hasPrevious) {
             ret.append(this.prevPageText).append(DIVIDER_TEXT);
+        } else {
+            ret.append(Texts.of("«")).append(DIVIDER_TEXT);
         }
         boolean needsDiv = false;
         int totalPages = getTotalPages();
@@ -172,6 +174,11 @@ abstract class ActivePagination {
                 ret.append(DIVIDER_TEXT);
             }
             ret.append(this.nextPageText);
+        } else {
+            if (needsDiv) {
+                ret.append(DIVIDER_TEXT);
+            }
+            ret.append(Texts.of("»"));
         }
         if (this.title != null) {
             ret.color(this.title.getColor());
