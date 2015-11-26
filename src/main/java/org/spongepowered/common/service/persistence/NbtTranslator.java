@@ -85,7 +85,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 NBTTagCompound inner = new NBTTagCompound();
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
                 compound.setTag(key, inner);
-            } if (value instanceof Boolean) {
+            } else if (value instanceof Boolean) {
                 compound.setTag(key + BOOLEAN_IDENTIFER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
             } else {
                 compound.setTag(key, getBaseFromObject(value));
