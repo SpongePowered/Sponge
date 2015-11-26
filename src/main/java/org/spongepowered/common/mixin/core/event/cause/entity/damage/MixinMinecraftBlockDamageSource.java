@@ -53,7 +53,7 @@ public abstract class MixinMinecraftBlockDamageSource extends MixinDamageSource 
     public String toString() {
         return Objects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
-            .add("Type", damage$getDamageType().getId())
+            .add("Type", getType().getId())
             .add("BlockSnapshot", getBlockSnapshot())
             .add("Location", this.location)
             .toString();

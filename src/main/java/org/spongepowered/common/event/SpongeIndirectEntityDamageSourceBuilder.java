@@ -28,67 +28,77 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 
 import java.lang.ref.WeakReference;
 
-public class SpongeEntityDamageSourceBuilder extends SpongeDamageSourceBuilder implements EntityDamageSource.Builder {
+public class SpongeIndirectEntityDamageSourceBuilder extends SpongeEntityDamageSourceBuilder implements IndirectEntityDamageSource.Builder {
 
-    protected WeakReference<Entity> reference = null;
+    private WeakReference<Entity> proxy = null;
 
     @Override
-    public EntityDamageSource.Builder scalesWithDifficulty() {
+    public IndirectEntityDamageSource.Builder scalesWithDifficulty() {
         super.scalesWithDifficulty();
         return this;
     }
 
     @Override
-    public EntityDamageSource.Builder bypassesArmor() {
+    public IndirectEntityDamageSource.Builder bypassesArmor() {
         super.bypassesArmor();
         return this;
     }
 
     @Override
-    public EntityDamageSource.Builder explosion() {
+    public IndirectEntityDamageSource.Builder explosion() {
         super.explosion();
         return this;
     }
 
     @Override
-    public EntityDamageSource.Builder absolute() {
+    public IndirectEntityDamageSource.Builder absolute() {
         super.absolute();
         return this;
     }
 
     @Override
-    public EntityDamageSource.Builder magical() {
+    public IndirectEntityDamageSource.Builder magical() {
         super.magical();
         return this;
     }
 
     @Override
-    public EntityDamageSource.Builder creative() {
+    public IndirectEntityDamageSource.Builder creative() {
         super.creative();
         return this;
     }
 
     @Override
-    public EntityDamageSource.Builder type(DamageType damageType) {
+    public IndirectEntityDamageSource.Builder type(DamageType damageType) {
         super.type(damageType);
         return this;
     }
 
     @Override
-    public EntityDamageSource.Builder entity(Entity entity) {
+    public IndirectEntityDamageSource.Builder proxySource(Entity projectile) {
+        this.proxy = new WeakReference<>(projectile);
+        return this;
+    }
+
+    @Override
+    public IndirectEntityDamageSource.Builder entity(Entity entity) {
         this.reference = new WeakReference<>(entity);
         return this;
     }
 
     @Override
-    public EntityDamageSource build() throws IllegalStateException {
+    public IndirectEntityDamageSource build() throws IllegalStateException {
         checkState(this.reference.get() != null);
-        net.minecraft.util.EntityDamageSource damageSource =
-            new net.minecraft.util.EntityDamageSource(this.damageType.getId(), (net.minecraft.entity.Entity) this.reference.get());
+        checkState(this.proxy.get() != null);
+        checkState(this.damageType != null);
+        net.minecraft.util.EntityDamageSourceIndirect damageSource =
+            new net.minecraft.util.EntityDamageSourceIndirect(this.damageType.getId(),
+                (net.minecraft.entity.Entity) this.reference.get(),
+                (net.minecraft.entity.Entity) this.proxy.get());
         if (this.creative) {
             damageSource.setDamageAllowedInCreativeMode();
         }
@@ -107,13 +117,14 @@ public class SpongeEntityDamageSourceBuilder extends SpongeDamageSourceBuilder i
         if (this.explosion) {
             damageSource.setExplosion();
         }
-        return (EntityDamageSource) damageSource;
+        return (IndirectEntityDamageSource) damageSource;
     }
 
     @Override
-    public EntityDamageSource.Builder reset() {
+    public IndirectEntityDamageSource.Builder reset() {
         super.reset();
         this.reference = null;
+        this.proxy = null;
         return this;
     }
 }

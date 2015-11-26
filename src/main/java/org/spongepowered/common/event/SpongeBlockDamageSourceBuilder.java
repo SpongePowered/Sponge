@@ -33,20 +33,10 @@ import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-public final class SpongeBlockDamageSourceBuilder implements BlockDamageSource.Builder {
+public class SpongeBlockDamageSourceBuilder extends SpongeDamageSourceBuilder implements BlockDamageSource.Builder {
 
-    private boolean scales;
-    private boolean armor;
-    private boolean explosion;
-    private boolean absolute;
-    private boolean magical;
-    private DamageType damageType;
     private Location<World> location;
     private BlockSnapshot blockSnapshot;
-
-    public SpongeBlockDamageSourceBuilder() {
-    }
-
 
     @Override
     public BlockDamageSource.Builder scalesWithDifficulty() {
@@ -56,31 +46,37 @@ public final class SpongeBlockDamageSourceBuilder implements BlockDamageSource.B
 
     @Override
     public BlockDamageSource.Builder bypassesArmor() {
-        this.armor = true;
+        super.bypassesArmor();
         return this;
     }
 
     @Override
     public BlockDamageSource.Builder explosion() {
-        this.explosion = true;
+        super.explosion();
         return this;
     }
 
     @Override
     public BlockDamageSource.Builder absolute() {
-        this.absolute = true;
+        super.absolute();
         return this;
     }
 
     @Override
     public BlockDamageSource.Builder magical() {
-        this.magical = true;
+        super.magical();
+        return this;
+    }
+
+    @Override
+    public BlockDamageSource.Builder creative() {
+        super.creative();
         return this;
     }
 
     @Override
     public BlockDamageSource.Builder type(DamageType damageType) {
-        this.damageType = checkNotNull(damageType);
+        super.type(damageType);
         return this;
     }
 
@@ -104,26 +100,28 @@ public final class SpongeBlockDamageSourceBuilder implements BlockDamageSource.B
         MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getId(), this.location);
         if (this.absolute) {
             damageSource.setDamageIsAbsolute();
-        } else if (this.armor) {
+        }
+        if (this.bypasses) {
             damageSource.setDamageBypassesArmor();
-        } else if (this.scales) {
+        }
+        if (this.scales) {
             damageSource.setDifficultyScaled();
-        } else if (this.explosion) {
+        }
+        if (this.explosion) {
             damageSource.setExplosion();
-        } else if (this.magical) {
+        }
+        if (this.magical) {
             damageSource.setMagicDamage();
+        }
+        if (this.creative) {
+            damageSource.setDamageAllowedInCreativeMode();
         }
         return (BlockDamageSource) damageSource;
     }
 
     @Override
     public BlockDamageSource.Builder reset() {
-        this.scales = false;
-        this.armor = false;
-        this.explosion = false;
-        this.absolute = false;
-        this.magical = false;
-        this.damageType = null;
+        super.reset();
         this.location = null;
         this.blockSnapshot = null;
         return this;

@@ -41,8 +41,7 @@ import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 import java.util.Optional;
 
 @Mixin(value = net.minecraft.util.DamageSource.class, priority = 990)
-@Implements(@Interface(iface = DamageSource.class, prefix = "damage$"))
-public abstract class MixinDamageSource {
+public abstract class MixinDamageSource implements DamageSource {
 
     @Shadow public String damageType;
 
@@ -52,8 +51,6 @@ public abstract class MixinDamageSource {
     @Shadow public abstract boolean isDamageAbsolute();
     @Shadow public abstract boolean isMagicDamage();
     @Shadow public abstract float getHungerDamage();
-    @Shadow public abstract net.minecraft.util.DamageSource setExplosion();
-    @Shadow public abstract net.minecraft.util.DamageSource setProjectile();
     @Shadow public abstract boolean isDifficultyScaled();
     @Shadow public abstract boolean isExplosion();
 
@@ -68,29 +65,38 @@ public abstract class MixinDamageSource {
         this.apiDamageType = damageType.orElse(DamageTypes.CUSTOM);
     }
 
-    @Intrinsic
-    public boolean damage$isExplosion() {
+    @Override
+    public boolean isExplosive() {
         return isExplosion();
     }
 
+    @Override
     public boolean isMagic() {
         return isMagicDamage();
     }
 
+    @Override
+    public boolean doesAffectCreative() {
+        return canHarmInCreative();
+    }
+
+    @Override
     public boolean isAbsolute() {
         return isDamageAbsolute();
     }
 
+    @Override
     public boolean isBypassingArmor() {
         return isUnblockable();
     }
 
-    @Intrinsic
-    public boolean damage$isDifficultyScaled() {
+    @Override
+    public boolean isScaledByDifficulty() {
         return isDifficultyScaled();
     }
 
-    public DamageType damage$getDamageType() {
+    @Override
+    public DamageType getType() {
         return this.apiDamageType;
     }
 

@@ -77,6 +77,10 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
@@ -111,6 +115,10 @@ import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.SpongeBlockDamageSourceBuilder;
+import org.spongepowered.common.event.SpongeDamageSourceBuilder;
+import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
+import org.spongepowered.common.event.SpongeFallingBlockDamgeSourceBuilder;
+import org.spongepowered.common.event.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
@@ -241,6 +249,11 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Statistic.Builder.class, () -> {
                 throw new UnsupportedOperationException();
             })
+            .registerBuilderSupplier(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
+            .registerBuilderSupplier(EntityDamageSource.Builder.class, SpongeEntityDamageSourceBuilder::new)
+            .registerBuilderSupplier(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
+            .registerBuilderSupplier(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
+            .registerBuilderSupplier(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
             .registerBuilderSupplier(WorldBuilder.class, SpongeWorldBuilder::new)
             .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
             .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
