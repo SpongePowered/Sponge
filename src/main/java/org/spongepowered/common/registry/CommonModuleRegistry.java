@@ -259,7 +259,6 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
             .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
-            .registerBuilderSupplier(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
             .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
             .registerBuilderSupplier(ColoredParticle.Builder.class, SpongeParticleEffectBuilder.BuilderColorable::new)
             .registerBuilderSupplier(NoteParticle.Builder.class, SpongeParticleEffectBuilder.BuilderNote::new)
