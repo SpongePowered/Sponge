@@ -93,6 +93,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(EntityPlayerMP.class)
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
@@ -114,6 +116,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
 
     private net.minecraft.scoreboard.Scoreboard mcScoreboard = this.worldObj.getScoreboard();
+    
+    @Nullable private Vector3d velocityOverride = null;
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
@@ -409,5 +413,24 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void setSleepingIgnored(boolean sleepingIgnored) {
         this.sleepingIgnored = sleepingIgnored;
+    }
+    
+    @Override
+    public Vector3d getVelocity() {
+        if (this.velocityOverride != null) {
+            return this.velocityOverride;
+        }
+        return super.getVelocity();
+    }
+    
+    @Override
+    public void setVelocity(Vector3d velocity) {
+        super.setVelocity(velocity);
+        this.velocityOverride = null;
+    }
+    
+    @Override
+    public void setVelocityOverride(@Nullable Vector3d velocity) {
+        this.velocityOverride = velocity;
     }
 }
