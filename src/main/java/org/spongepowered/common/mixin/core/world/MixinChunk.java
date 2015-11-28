@@ -477,6 +477,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType) {
         if (this.worldObj.isRemote || !SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().isEnabled()) {
             return;
+        } else {
+            IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
+            if (spongeWorld.capturingTerrainGen()) {
+                // Don't track chunk gen
+                return;
+            }
         }
 
         if (!SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType)block).getId())) {

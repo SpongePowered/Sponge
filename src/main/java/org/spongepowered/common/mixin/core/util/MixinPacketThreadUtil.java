@@ -45,7 +45,7 @@ public class MixinPacketThreadUtil {
 
     @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
     public void onProcessPacket(Packet packetIn, INetHandler netHandler) {
-        if (netHandler instanceof NetHandlerPlayServer && !(packetIn instanceof C03PacketPlayer) && !(packetIn instanceof C13PacketPlayerAbilities)) {
+        if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.processingPacket = packetIn;
             StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
