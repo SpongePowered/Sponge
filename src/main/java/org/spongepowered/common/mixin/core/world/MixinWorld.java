@@ -1129,7 +1129,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 iterator.remove();
             }
         } else {
-            if (StaticMixinHelper.packetPlayer != null) {
+            if (cause.root().get() == StaticMixinHelper.packetPlayer) {
                 sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
             }
             this.capturedEntityItems.clear();
