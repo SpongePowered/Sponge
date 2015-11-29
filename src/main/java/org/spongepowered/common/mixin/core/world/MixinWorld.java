@@ -996,7 +996,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         // Inventory Events
         if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
-            if (packetIn instanceof C10PacketCreativeInventoryAction) {
+            if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
                 SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(player), player, (C10PacketCreativeInventoryAction) packetIn);
             } else {
                 SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(player), player, packetIn);

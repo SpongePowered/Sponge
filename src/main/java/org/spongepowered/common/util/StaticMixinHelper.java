@@ -47,10 +47,6 @@ public class StaticMixinHelper {
     public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
-    public static final BlockPos HANGING_NEIGHBOR_OFFSET_EAST = new BlockPos(1, 1, 0);
-    public static final BlockPos HANGING_NEIGHBOR_OFFSET_WEST = new BlockPos(-1, 1, 0);
-    public static final BlockPos HANGING_NEIGHBOR_OFFSET_NORTH = new BlockPos(0, 1, -1);
-    public static final BlockPos HANGING_NEIGHBOR_OFFSET_SOUTH = new BlockPos(0, 1, 1);
     public static EntityPlayerMP packetPlayer = null;
     public static User blockEventUser = null;
     public static Packet processingPacket = null;
@@ -68,4 +64,6 @@ public class StaticMixinHelper {
     public static int lastDestroyedEntityId = -1;
     public static EntityLivingBase currentTargetEntity;
     public static Class runningGenerator = null;
+    public static long lastInventoryOpenPacketTimeStamp = 0;
+    public static boolean ignoreCreativeInventoryPacket = false;
 }

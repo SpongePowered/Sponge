@@ -31,7 +31,9 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C13PacketPlayerAbilities;
+import net.minecraft.network.play.client.C16PacketClientStatus;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,6 +50,25 @@ public class MixinPacketThreadUtil {
         if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.processingPacket = packetIn;
             StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
+
+            // This is another horrible hack required since the client sends a C10 packet for every slot
+            // containing an itemstack after a C16 packet in the following scenarios :
+            // 1. Opening creative inventory after initial server join.
+            // 2. Opening creative inventory again after making a change in previous inventory open.
+            //
+            // This is done in order to sync client inventory to server and would be fine if the C10 packet
+            // included an Enum of some sort that defined what type of sync was happening.
+            if (StaticMixinHelper.packetPlayer.theItemInWorldManager.isCreative() && (packetIn instanceof C16PacketClientStatus
+                    && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
+                StaticMixinHelper.lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
+            } else if (packetIn instanceof C10PacketCreativeInventoryAction) {
+                long packetDiff = System.currentTimeMillis() - StaticMixinHelper.lastInventoryOpenPacketTimeStamp;
+                // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
+                if (packetDiff < 100) {
+                    StaticMixinHelper.ignoreCreativeInventoryPacket = true;
+                }
+            }
+
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
             ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                     : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory.getItemStack()).createSnapshot();
@@ -67,6 +88,7 @@ public class MixinPacketThreadUtil {
             StaticMixinHelper.processingPacket = null;
             StaticMixinHelper.lastCursor = null;
             StaticMixinHelper.lastOpenContainer = null;
+            StaticMixinHelper.ignoreCreativeInventoryPacket = false;
         } else { // client
             packetIn.processPacket(netHandler);
         }
