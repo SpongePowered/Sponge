@@ -28,10 +28,12 @@ import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.potion.PotionEffectType;
@@ -88,6 +90,20 @@ public class BeaconDataProcessor extends AbstractSpongeDataProcessor<BeaconData,
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return null;
+        if (dataHolder instanceof TileEntityBeacon) {
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<BeaconData> oldData = this.from(dataHolder);
+            if (oldData.isPresent()) {
+                builder.replace(oldData.get().getValues());
+            }
+            try {
+                ((IMixinTileEntityBeacon) dataHolder).setPrimaryEffect(0);
+                ((IMixinTileEntityBeacon) dataHolder).setSecondaryEffect(0);
+            } catch (Exception e) {
+                return builder.result(DataTransactionResult.Type.ERROR).build();
+            }
+            return builder.result(DataTransactionResult.Type.SUCCESS).build();
+        }
+        return DataTransactionBuilder.failNoData();
     }
 }
