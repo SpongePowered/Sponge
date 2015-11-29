@@ -29,6 +29,7 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,17 +53,16 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
     private EntityType watchedType;
 
     @Override
-    public EntityType getWatchedType() {
+    public Class<? extends Entity> getWatchedClass() {
         if (watchedType == null) {
             watchedType = SpongeImpl.getRegistry().getTranslated(watchedClass, EntityType.class);
         }
-        return watchedType;
+        return watchedClass;
     }
 
     @Override
-    public WatchClosestAITask setWatchedType(EntityType watchedType) {
-        this.watchedClass = watchedType.getEntityClass();
-        this.watchedType = watchedType;
+    public WatchClosestAITask setWatchedClass(Class<? extends Entity> watchedClass) {
+        this.watchedClass = watchedClass;
         return this;
     }
 

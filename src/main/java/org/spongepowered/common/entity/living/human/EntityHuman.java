@@ -98,6 +98,7 @@ public class EntityHuman extends EntityCreature {
         super(worldIn);
         this.fakeProfile = new GameProfile(this.entityUniqueID, "");
         this.setSize(0.6F, 1.8F);
+        this.setCanPickUpLoot(true);
     }
 
     @Override

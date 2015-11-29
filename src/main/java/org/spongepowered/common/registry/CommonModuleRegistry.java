@@ -77,10 +77,12 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -119,11 +121,13 @@ import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.entity.ai.SpongeAttackLivingAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeAvoidEntityAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeRunAroundLikeCrazyAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeSwimmingAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeWanderAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
+import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.event.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -273,7 +277,9 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(AvoidEntityAITask.Builder.class, SpongeAvoidEntityAIBuilder::new)
             .registerBuilderSupplier(RunAroundLikeCrazyAITask.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
             .registerBuilderSupplier(SwimmingAITask.Builder.class, SpongeSwimmingAIBuilder::new)
-            .registerBuilderSupplier(WatchClosestAITask.Builder.class, SpongeWatchClosestAIBuilder::new);
+            .registerBuilderSupplier(WatchClosestAITask.Builder.class, SpongeWatchClosestAIBuilder::new)
+            .registerBuilderSupplier(FindNearestAttackableTargetAITask.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
+            .registerBuilderSupplier(AttackLivingAITask.Builder.class, SpongeAttackLivingAIBuilder::new);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

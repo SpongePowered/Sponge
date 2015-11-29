@@ -32,10 +32,12 @@ import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AITaskTypes;
 import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
@@ -88,6 +90,9 @@ public class AITaskTypeModule implements CatalogRegistryModule<AITaskType> {
         createAITaskType(SpongeImpl.getMinecraftPlugin(), "run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
         createAITaskType(SpongeImpl.getMinecraftPlugin(), "swimming", "Swimming", SwimmingAITask.class);
         createAITaskType(SpongeImpl.getMinecraftPlugin(), "watch_closest", "Watch Closest", WatchClosestAITask.class);
+        createAITaskType(SpongeImpl.getMinecraftPlugin(), "find_nearest_attackable_target", "Find Nearest Attackable Target",
+                FindNearestAttackableTargetAITask.class);
+        createAITaskType(SpongeImpl.getMinecraftPlugin(), "attack_living", "Attack Living", AttackLivingAITask.class);
     }
 
     public AITaskType createAITaskType(Object plugin, String id, String name, Class<? extends AITask<? extends

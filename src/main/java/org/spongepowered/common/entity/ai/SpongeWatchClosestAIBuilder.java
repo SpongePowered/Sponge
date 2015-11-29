@@ -27,13 +27,13 @@ package org.spongepowered.common.entity.ai;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
-import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
 import org.spongepowered.api.entity.living.Agent;
 
 public class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
 
-    private EntityType watchedType;
+    private Class<? extends Entity> watchedClass;
     private float maxDistance;
     private float chance;
 
@@ -42,8 +42,8 @@ public class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
     }
 
     @Override
-    public WatchClosestAITask.Builder watch(EntityType watchedType) {
-        this.watchedType = watchedType;
+    public WatchClosestAITask.Builder watch(Class<? extends Entity> watchedClass) {
+        this.watchedClass = watchedClass;
         return this;
     }
 
@@ -61,7 +61,7 @@ public class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
 
     @Override
     public WatchClosestAITask.Builder reset() {
-        this.watchedType = null;
+        this.watchedClass = null;
         this.maxDistance = 8;
         this.chance = 0.02f;
         return this;
@@ -69,7 +69,7 @@ public class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
 
     @Override
     public WatchClosestAITask build(Agent owner) {
-        Preconditions.checkNotNull(this.watchedType);
-        return (WatchClosestAITask) new EntityAIWatchClosest((EntityLiving) owner, watchedType.getEntityClass(), this.maxDistance, this.chance);
+        Preconditions.checkNotNull(this.watchedClass);
+        return (WatchClosestAITask) new EntityAIWatchClosest((EntityLiving) owner, watchedClass, this.maxDistance, this.chance);
     }
 }
