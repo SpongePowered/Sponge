@@ -45,8 +45,8 @@ public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof ILockableContainer) {
-            set((ILockableContainer) container, "");
+        if (container instanceof TileEntityLockable) {
+            set((TileEntityLockable) container, "");
             return DataTransactionResult.successNoData();
         }
         return DataTransactionResult.failNoData();
