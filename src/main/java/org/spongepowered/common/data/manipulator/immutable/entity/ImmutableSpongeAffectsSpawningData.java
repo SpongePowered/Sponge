@@ -22,16 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import net.minecraft.util.BlockPos;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
+import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpawningData;
 
-public interface IMixinEntityPlayer {
-    BlockPos getBedLocation(int dim);
+public class ImmutableSpongeAffectsSpawningData extends AbstractImmutableBooleanData<ImmutableAffectsSpawningData, AffectsSpawningData> implements ImmutableAffectsSpawningData {
 
-    boolean isSpawnForced(int dim);
+    public ImmutableSpongeAffectsSpawningData(boolean value) {
+        super(ImmutableAffectsSpawningData.class, value, Keys.AFFECTS_SPAWNING, SpongeAffectsSpawningData.class, false);
+    }
 
-    boolean affectsSpawning();
+    @Override
+    public ImmutableValue<Boolean> affectsSpawning() {
+        return getValueGetter();
+    }
 
-    void setAffectsSpawning(boolean affectsSpawning);
 }

@@ -39,6 +39,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.command.IEntitySelector;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityHanging;
@@ -191,6 +192,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
@@ -287,6 +289,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public Scoreboard worldScoreboard;
     @Shadow public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
     @Shadow private net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow public List playerEntities;
 
     @Shadow(prefix = "shadow$") public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
@@ -2470,5 +2473,52 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setWeatherStartTime(long weatherStartTime) {
         this.weatherStartTime = weatherStartTime;
+    }
+
+    @Nullable
+    @Override
+    public EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double distance) {
+        return this.getClosestPlayerWhoAffectsSpawning(entity.posX, entity.posY, entity.posZ, distance);
+    }
+
+    @Nullable
+    @Override
+    public EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance) {
+        double bestDistance = -1.0D;
+        EntityPlayer result = null;
+
+        for (Object entity : this.playerEntities) {
+            EntityPlayer player = (EntityPlayer) entity;
+            if (player == null || player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) {
+                continue;
+            }
+
+            double playerDistance = player.getDistanceSq(x, y, z);
+
+            if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
+                bestDistance = playerDistance;
+                result = player;
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public boolean isAnyPlayerWithinRangeAtWhoAffectsSpawning(double x, double y, double z, double range) {
+        for (Object entity : this.playerEntities) {
+            EntityPlayer player = (EntityPlayer) entity;
+            if (player == null || player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) {
+                continue;
+            }
+
+            double distance = player.getDistanceSq(x, y, z);
+
+            if (range < 0.0D || distance < range * range) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
