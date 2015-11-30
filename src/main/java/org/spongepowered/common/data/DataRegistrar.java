@@ -813,6 +813,7 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, moistureDataProcessor);
 
+
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1020,6 +1021,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class,
                 ImmutableSpongeSplashPotionData.class, splashPotionDualProcessor);
         dataManager.registerValueProcessor(Keys.IS_SPLASH_POTION, splashPotionDualProcessor);
+
+        final AffectsSpawningDataProcessor affectsSpawningDataProcessor = new AffectsSpawningDataProcessor();
+        dataManager.registerDataProcessorAndImpl(AffectsSpawningData.class, SpongeAffectsSpawningData.class, ImmutableAffectsSpawningData.class,
+            ImmutableSpongeAffectsSpawningData.class, affectsSpawningDataProcessor);
+        dataManager.registerValueProcessor(Keys.AFFECTS_SPAWNING, affectsSpawningDataProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

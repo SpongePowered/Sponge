@@ -108,8 +108,6 @@ public interface IMixinWorld {
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
 
-    Map<PopulatorType, List<Transaction<BlockSnapshot>>> getCapturedPopulatorChanges();
-
-    void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause);
+    boolean isAnyPlayerWithinRangeAtWhoAffectsSpawning(double x, double y, double z, double range);
 
 }

@@ -51,7 +51,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.IMixinWorld;
 
 import java.util.Optional;
 

@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.data.processor.dual.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
@@ -49,8 +48,9 @@ public class AffectsSpawningDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+    protected boolean set(EntityPlayerMP entity, Boolean value) {
+        ((IMixinEntityPlayer) entity).setAffectsSpawning(value);
+        return true;
     }
 
     @Override

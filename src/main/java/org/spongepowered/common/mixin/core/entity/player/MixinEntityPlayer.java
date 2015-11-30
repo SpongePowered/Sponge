@@ -65,7 +65,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos spawnChunk;
     @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
-    private boolean affectsSpawning = true;
+    private boolean affectsSpawning;
 
     // utility method for getting the total experience at an arbitrary level
     // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()

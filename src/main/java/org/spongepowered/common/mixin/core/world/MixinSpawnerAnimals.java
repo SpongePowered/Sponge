@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.IMixinWorld;
 
 import java.util.Random;
 
@@ -79,6 +79,21 @@ public abstract class MixinSpawnerAnimals {
         }
 
         return player.isSpectator();
+    }
+
+    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
+    public boolean onFindChunksForSpawningEligiblePlayer(EntityPlayer player) {
+        if (!((IMixinEntityPlayer) player).affectsSpawning()) {
+            // We treat players who do not affect spawning as "spectators"
+            return true;
+        }
+
+        return player.isSpectator();
+    }
+
+    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isAnyPlayerWithinRangeAt(DDDD)Z"))
+    public boolean onFindChunksForSpawningWithinRange(WorldServer world, double x, double y, double z, double range) {
+        return ((IMixinWorld) world).isAnyPlayerWithinRangeAtWhoAffectsSpawning(x, y, z, range);
     }
 
 }
