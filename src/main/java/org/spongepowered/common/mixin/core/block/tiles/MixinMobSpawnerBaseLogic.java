@@ -22,16 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.block.tiles;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.IMixinWorld;
 
-public interface IMixinEntityPlayer {
-    BlockPos getBedLocation(int dim);
+@Mixin(MobSpawnerBaseLogic.class)
+public class MixinMobSpawnerBaseLogic {
 
-    boolean isSpawnForced(int dim);
+    @Redirect(method = "isActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAnyPlayerWithinRangeAt(DDDD)Z"))
+    public boolean onIsActivated(World world, double x, double y, double z, double range) {
+        return ((IMixinWorld) world).isAnyPlayerWithinRangeAtWhoAffectsSpawning(x, y, z, range);
+    }
 
-    boolean affectsSpawning();
-
-    void setAffectsSpawning(boolean affectsSpawning);
 }
