@@ -254,22 +254,7 @@ public class KeyRegistry {
         keyMap.put("delay", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Delay")));
         keyMap.put("player_created", makeSingleKey(Boolean.class, Value.class, of("PlayerCreated")));
         keyMap.put("item_blockstate", makeSingleKey(BlockState.class, Value.class, of("ItemBlockState")));
-        keyMap.put("skeleton_type", makeSingleKey(SkeletonType.class, Value.class, of("SkeletonType")));
-        keyMap.put("ocelot_type", makeSingleKey(OcelotType.class, Value.class, of("OcelotType")));
-        keyMap.put("rabbit_type", makeSingleKey(RabbitType.class, Value.class, of("RabbitType")));
-        keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
-        keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
-        keyMap.put("banner_patterns", new PatternKey());
-        keyMap.put("respawn_locations", makeMapKey(UUID.class, Vector3d.class, of("RespawnLocations")));
-        keyMap.put("expiration_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ExpirationTicks")));
-        keyMap.put("skin", makeSingleKey(UUID.class, Value.class, of("Skin")));
-        keyMap.put("moisture", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Moisture")));
-        keyMap.put("angry", makeSingleKey(Boolean.class, Value.class, of("Angry")));
-        keyMap.put("anger", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Anger")));
-        keyMap.put("rotation", makeSingleKey(Rotation.class, Value.class, of("Rotation")));
-        keyMap.put("is_splash_potion", makeSingleKey(Boolean.class, Value.class, of("IsSplashPotion")));
-        keyMap.put("affects_spawning", makeSingleKey(Boolean.class, Value.class, of("AffectsSpawning")));
-        keyMap.put("critical_hit", makeSingleKey(Boolean.class, Value.class, of("CriticalHit")));
+        keyMap.put("trade_offers", makeListKey(TradeOffer.class, of("TradeOffers")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
