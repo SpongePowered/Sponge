@@ -70,7 +70,6 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.management.MBeanServer;
 
@@ -460,30 +459,6 @@ public class SpongeHooks {
             }
         }
         return causedBy;
-    }
-
-    public static void setCreatorEntityNbt(NBTTagCompound nbt, UUID uuid) {
-        if (!nbt.hasKey(NbtDataUtil.SPONGE_ENTITY_CREATOR)) {
-            NBTTagCompound creatorNbt = new NBTTagCompound();
-            creatorNbt.setLong("uuid_least", uuid.getLeastSignificantBits());
-            creatorNbt.setLong("uuid_most", uuid.getMostSignificantBits());
-            nbt.setTag(NbtDataUtil.SPONGE_ENTITY_CREATOR, creatorNbt);
-        } else {
-            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR).setLong("uuid_least", uuid.getLeastSignificantBits());
-            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_CREATOR).setLong("uuid_most", uuid.getMostSignificantBits());
-        }
-    }
-
-    public static void setNotifierEntityNbt(NBTTagCompound nbt, UUID uuid) {
-        if (!nbt.hasKey(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)) {
-            NBTTagCompound creatorNbt = new NBTTagCompound();
-            creatorNbt.setLong("uuid_least", uuid.getLeastSignificantBits());
-            creatorNbt.setLong("uuid_most", uuid.getMostSignificantBits());
-            nbt.setTag(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, creatorNbt);
-        } else {
-            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).setLong("uuid_least", uuid.getLeastSignificantBits());
-            nbt.getCompoundTag(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).setLong("uuid_most", uuid.getMostSignificantBits());
-        }
     }
 
     @SuppressWarnings("unchecked")

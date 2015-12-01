@@ -131,19 +131,6 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "setAttackTarget", at = @At("RETURN"))
-    public void onSetAttackTarget(EntityLivingBase targetEntity, CallbackInfo ci) {
-        if (targetEntity != null) {
-            this.lastActiveTarget = targetEntity;
-        } else {
-            if (this.lastActiveTarget != null && this.lastActiveTarget.getHealth() == 0) {
-                this.lastKilledTarget = ((org.spongepowered.api.entity.Entity)this.lastActiveTarget).createSnapshot();
-            }
-            this.lastActiveTarget = null;
-        }
-    }
-
-
     @Override
     public Optional<Goal<? extends Agent>> getGoal(GoalType type) {
         if (GoalTypes.NORMAL.equals(type)) {

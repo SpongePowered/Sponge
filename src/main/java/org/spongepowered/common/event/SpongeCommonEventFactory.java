@@ -63,12 +63,12 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
@@ -217,7 +217,7 @@ public class SpongeCommonEventFactory {
             ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
             while (iterator.hasNext()) {
                 Entity currentEntity = iterator.next();
-                SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), player.getUniqueID());
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                 entitySnapshotBuilder.add(currentEntity.createSnapshot());
             }
             event = SpongeEventFactory.createCreativeInventoryEventDrop(SpongeImpl.getGame(), cause, cursorTransaction, world.getCapturedEntityItems(),
@@ -311,7 +311,7 @@ public class SpongeCommonEventFactory {
                     ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                     while (iterator.hasNext()) {
                         Entity currentEntity = iterator.next();
-                        SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), player.getUniqueID());
+                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
                     clickEvent =
@@ -331,7 +331,7 @@ public class SpongeCommonEventFactory {
                     ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                     while (iterator.hasNext()) {
                         Entity currentEntity = iterator.next();
-                        SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), player.getUniqueID());
+                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
                     clickEvent =

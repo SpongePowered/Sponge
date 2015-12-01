@@ -824,4 +824,17 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             return SpongeImpl.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid);
         }
     }
+
+    @Override
+    public void trackEntityUniqueId(String nbtKey, UUID uuid) {
+        if (!getSpongeData().hasKey(nbtKey)) {
+            NBTTagCompound sourceNbt = new NBTTagCompound();
+            sourceNbt.setLong("uuid_least", uuid.getLeastSignificantBits());
+            sourceNbt.setLong("uuid_most", uuid.getMostSignificantBits());
+            getSpongeData().setTag(nbtKey, sourceNbt);
+        } else {
+            getSpongeData().getCompoundTag(nbtKey).setLong("uuid_least", uuid.getLeastSignificantBits());
+            getSpongeData().getCompoundTag(nbtKey).setLong("uuid_most", uuid.getMostSignificantBits());
+        }
+    }
 }

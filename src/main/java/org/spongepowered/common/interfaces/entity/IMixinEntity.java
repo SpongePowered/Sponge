@@ -31,6 +31,7 @@ import org.spongepowered.api.entity.living.player.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IMixinEntity {
 
@@ -49,6 +50,8 @@ public interface IMixinEntity {
     boolean getDefaultActivationState();
 
     Optional<User> getTrackedPlayer(String nbtKey);
+
+    void trackEntityUniqueId(String nbtKey, UUID uuid);
 
     void setActivatedTick(long tick);
 

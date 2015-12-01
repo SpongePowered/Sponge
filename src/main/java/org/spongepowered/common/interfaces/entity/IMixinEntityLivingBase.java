@@ -39,10 +39,6 @@ public interface IMixinEntityLivingBase {
 
     boolean damageEntityHook(DamageSource damageSource, float damage);
 
-    EntitySnapshot getLastKilledTarget();
-
-    EntityLivingBase getLastActiveTarget();
-
     double getLastDamage();
 
     int getMaxAir();

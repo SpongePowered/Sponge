@@ -35,6 +35,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 
@@ -62,7 +63,9 @@ public class StaticMixinHelper {
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
     public static int lastDestroyedEntityId = -1;
-    public static EntityLivingBase currentTargetEntity;
+    public static EntityLivingBase currentTargetEntity = null;
+    public static Cause dropCause = null;
+    @SuppressWarnings("rawtypes")
     public static Class runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean ignoreCreativeInventoryPacket = false;

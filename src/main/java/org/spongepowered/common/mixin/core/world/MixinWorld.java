@@ -196,7 +196,6 @@ import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
@@ -595,7 +594,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (this.currentTickEntity != null) {
                     Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                     if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                        SpongeHooks.setCreatorEntityNbt(((IMixinEntity) entityIn).getSpongeData(), creator.get().getUniqueId());
+                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
                     }
                 }
                 if (entityIn instanceof EntityItem) {
@@ -631,7 +630,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         causeName = NamedCause.THROWER;
                         if (specialCause instanceof Player) {
                             Player player = (Player) specialCause;
-                            SpongeHooks.setCreatorEntityNbt(((IMixinEntity) entityIn).getSpongeData(), player.getUniqueId());
+                            ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
                         }
                     }
                 }
@@ -643,7 +642,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                     if (specialCause instanceof Player) {
                         Player player = (Player) specialCause;
-                        SpongeHooks.setCreatorEntityNbt(((IMixinEntity) entityIn).getSpongeData(), player.getUniqueId());
+                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
                     }
                 }
                 // Special case for Tameables
@@ -756,55 +755,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     if (owner.isPresent()) {
                         cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
-                }
-            }
-        }
-
-        // Check root cause for additional information
-        if (cause.root().get() instanceof EntityLivingBase) {
-            EntityLivingBase rootEntity = (EntityLivingBase) cause.root().get();
-            EntitySnapshot lastKilledEntity = ((IMixinEntityLivingBase) rootEntity).getLastKilledTarget();
-            EntityLivingBase lastActiveTarget = ((IMixinEntityLivingBase) rootEntity).getLastActiveTarget();
-            // Player kills aren't tracked so we need to inspect the C02 packet for a kill
-            if (lastKilledEntity == null && packetIn instanceof C02PacketUseEntity) {
-                C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
-                net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.nmsWorld);
-                if (entity instanceof EntityLivingBase) {
-                    EntityLivingBase livingEntity = (EntityLivingBase) entity;
-                    if (livingEntity.getHealth() <= 0) {
-                        lastKilledEntity = ((org.spongepowered.api.entity.Entity) entity).createSnapshot();
-                    }
-                }
-            }
-            // Check for targeted entity
-            if (lastKilledEntity != null) {
-                // add the last targeted entity
-                if (!cause.all().contains(lastKilledEntity)) {
-                    Cause newCause = Cause.of(lastKilledEntity);
-                    newCause = newCause.with(cause.all());
-                    cause = newCause;
-                    destructDrop = true;
-                }
-            } else if (lastActiveTarget != null) {
-                if (!cause.all().contains(lastActiveTarget)) {
-                    if (lastActiveTarget.getHealth() <= 0) {
-                        Cause newCause = Cause.of(((Entity) lastActiveTarget).createSnapshot());
-                        newCause = newCause.with(cause.all());
-                        cause = newCause;
-                        destructDrop = true;
-                    } else {
-                        cause = cause.with(lastActiveTarget);
-                    }
-                }
-            }
-            if (rootEntity.getHealth() <= 0) {
-                destructDrop = true;
-            }
-        } else {
-            if (cause.root().get() instanceof net.minecraft.entity.Entity) {
-                net.minecraft.entity.Entity entity = (net.minecraft.entity.Entity) cause.root().get();
-                if (entity.isDead) {
-                    destructDrop = true;
                 }
             }
         }
@@ -1008,11 +958,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         // Handle Entity captures
         if (this.capturedEntityItems.size() > 0) {
+            if (StaticMixinHelper.dropCause != null) {
+                cause = StaticMixinHelper.dropCause;
+                destructDrop = true;
+            }
             handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions, destructDrop);
         }
         if (this.capturedEntities.size() > 0) {
             handleEntitySpawns(cause, this.capturedEntities, invalidTransactions);
         }
+
+        StaticMixinHelper.dropCause = null;
     }
 
     private void handlePostPlayerBlockEvent(CaptureType captureType, EntityPlayerMP player, net.minecraft.world.World world,
@@ -1063,7 +1019,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (cause.first(User.class).isPresent()) {
                 // store user UUID with entity to track later
                 User user = cause.first(User.class).get();
-                SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), user.getUniqueId());
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
             } else if (cause.first(Entity.class).isPresent()) {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
                 Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
@@ -1071,7 +1027,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     if (!cause.any(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
-                    SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), owner.get().getUniqueId());
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
             }
             entitySnapshotBuilder.add(currentEntity.createSnapshot());
@@ -1144,7 +1100,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (cause.first(User.class).isPresent()) {
                 // store user UUID with entity to track later
                 User user = cause.first(User.class).get();
-                SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), user.getUniqueId());
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
             } else if (cause.first(Entity.class).isPresent()) {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
                 Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
@@ -1152,7 +1108,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     if (!cause.all().contains(owner.get())) {
                         cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
-                    SpongeHooks.setCreatorEntityNbt(((IMixinEntity) currentEntity).getSpongeData(), owner.get().getUniqueId());
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
             }
             entitySnapshotBuilder.add(currentEntity.createSnapshot());

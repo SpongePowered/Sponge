@@ -81,8 +81,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     private EntityLivingBase nmsEntityLiving = (EntityLivingBase) (Object) this;
     private int maxAir = 300;
-    public EntitySnapshot lastKilledTarget;
-    public EntityLivingBase lastActiveTarget;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -309,28 +307,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (!((net.minecraft.entity.Entity) (Object) this instanceof EntityHuman)) {
             world.setEntityState(self, state);
         }
-    }
-
-    @Inject(method = "setRevengeTarget", at = @At("RETURN"))
-    public void onSetRevengeTarget(EntityLivingBase targetEntity, CallbackInfo ci) {
-        if (targetEntity != null) {
-            this.lastActiveTarget = targetEntity;
-        } else {
-            if (this.lastActiveTarget != null && this.lastActiveTarget.getHealth() == 0) {
-                this.lastKilledTarget = ((org.spongepowered.api.entity.Entity)this.lastActiveTarget).createSnapshot();
-            }
-            this.lastActiveTarget = null;
-        }
-    }
-
-    @Override
-    public EntitySnapshot getLastKilledTarget() {
-        return this.lastKilledTarget;
-    }
-
-    @Override
-    public EntityLivingBase getLastActiveTarget() {
-        return this.lastActiveTarget;
     }
 
     @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
