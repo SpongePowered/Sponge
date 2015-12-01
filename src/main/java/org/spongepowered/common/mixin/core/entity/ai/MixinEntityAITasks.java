@@ -57,7 +57,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     private GoalType type;
 
     public Agent goal$getOwner() {
-        return (Agent) owner;
+        return (Agent) this.owner;
     }
 
     public GoalType goal$getType() {
@@ -98,7 +98,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     public List<? extends AITask<?>> goal$getTasksByType(AITaskType type) {
         final List<AITask<?>> tasks = new ArrayList<>();
 
-        for (EntityAITasks.EntityAITaskEntry entry : (List<EntityAITasks.EntityAITaskEntry>) taskEntries) {
+        for (EntityAITasks.EntityAITaskEntry entry : (List<EntityAITasks.EntityAITaskEntry>) this.taskEntries) {
             final AITask<?> task = (AITask<?>) entry.action;
 
             if (task.getType().equals(type)) {
@@ -110,14 +110,14 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     }
 
     public List<? extends AITask<?>> goal$getTasks() {
-        return (List<? extends AITask<?>>) taskEntries;
+        return (List<? extends AITask<?>>) this.taskEntries;
     }
 
     @Overwrite
     public void addTask(int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal) (Object) this);
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(SpongeImpl.getGame(), priority, priority, (Goal) (Object) this, (Agent)
-                owner, (AITask) base);
+            this.owner, (AITask) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ((IMixinEntityAIBase) base).setGoal(null);
@@ -128,7 +128,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
     @Override
     public EntityLiving getOwner() {
-        return owner;
+        return this.owner;
     }
 
     @Override
@@ -138,7 +138,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
     @Override
     public GoalType getType() {
-        return type;
+        return this.type;
     }
 
     @Override
@@ -146,6 +146,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         this.type = type;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public void removeTask(EntityAIBase aiBase) {
         final Iterator iterator = this.taskEntries.iterator();
@@ -156,7 +157,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
             if (otherAiBase.equals(aiBase)) {
                 final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(SpongeImpl.getGame(),
-                        (Goal) (Object) this, (Agent) owner, (AITask) otherAiBase, entityaitaskentry.priority);
+                    (Goal) (Object) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     if (this.executingTaskEntries.contains(entityaitaskentry)) {
@@ -170,9 +171,10 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
-    private boolean areTasksCompatible(EntityAITasks.EntityAITaskEntry p_75777_1_, EntityAITasks.EntityAITaskEntry p_75777_2_) {
-        return (((AITask) p_75777_2_.action).canRunConcurrentWith((AITask) p_75777_1_.action));
+    private boolean areTasksCompatible(EntityAITasks.EntityAITaskEntry taskEntry1, EntityAITasks.EntityAITaskEntry taskEntry2) {
+        return (((AITask) taskEntry2.action).canRunConcurrentWith((AITask) taskEntry1.action));
     }
 
     @Override
