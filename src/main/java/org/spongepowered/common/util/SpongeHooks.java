@@ -525,7 +525,7 @@ public class SpongeHooks {
     public static void tryToTrackBlockAndEntity(World world, Object source, Entity entity, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {
         Optional<User> user = tryToTrackBlock(world, source, sourcePos, targetBlock, targetPos, type);
         if (user.isPresent()) {
-            setCreatorEntityNbt(((IMixinEntity) entity).getSpongeData(), user.get().getUniqueId());
+            ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.get().getUniqueId());
         }
     }
 }
