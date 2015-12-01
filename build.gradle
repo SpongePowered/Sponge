@@ -49,7 +49,7 @@ dependencies {
 
     compile 'com.zaxxer:HikariCP:2.4.1'
 
-    runtime 'org.mariadb.jdbc:mariadb-java-client:1.2.3'
+    runtime 'org.mariadb.jdbc:mariadb-java-client:1.3.2'
     runtime 'com.h2database:h2:1.4.190'
     runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
 }
