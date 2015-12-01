@@ -41,14 +41,18 @@ import java.util.Optional;
 
 public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeColor> {
 
+    public static DyeColorRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
+
     @RegisterCatalog(DyeColors.class)
     private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
-
 
     @Override
     public Optional<DyeColor> getById(String id) {
         return Optional.ofNullable(this.dyeColorMappings.get(checkNotNull(id).toLowerCase()));
     }
+
 
     @Override
     public Collection<DyeColor> getAll() {
@@ -69,5 +73,20 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
                 this.dyeColorMappings.put(dyeColor.getName().toLowerCase(), (DyeColor) (Object) dyeColor);
             }
         }
+    }
+
+    public static Optional<DyeColor> fromId(int id) {
+        for (EnumDyeColor color : EnumDyeColor.values()) {
+            if (color.ordinal() == id) {
+                return Optional.of((DyeColor) (Object) color);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private DyeColorRegistryModule() { }
+
+    private static final class Holder {
+        private static final DyeColorRegistryModule INSTANCE = new DyeColorRegistryModule();
     }
 }

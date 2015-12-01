@@ -31,6 +31,7 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BigMushroomType;
@@ -124,6 +125,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.SpongeAttackLivingAIBuilder;
@@ -287,14 +289,15 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ColoredParticle.Builder.class, SpongeParticleEffectBuilder.BuilderColorable::new)
             .registerBuilderSupplier(NoteParticle.Builder.class, SpongeParticleEffectBuilder.BuilderNote::new)
             .registerBuilderSupplier(ItemParticle.Builder.class, SpongeParticleEffectBuilder.BuilderMaterial::new)
-            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new)
             .registerBuilderSupplier(WanderAITask.Builder.class, SpongeWanderAIBuilder::new)
             .registerBuilderSupplier(AvoidEntityAITask.Builder.class, SpongeAvoidEntityAIBuilder::new)
             .registerBuilderSupplier(RunAroundLikeCrazyAITask.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
             .registerBuilderSupplier(SwimmingAITask.Builder.class, SpongeSwimmingAIBuilder::new)
             .registerBuilderSupplier(WatchClosestAITask.Builder.class, SpongeWatchClosestAIBuilder::new)
             .registerBuilderSupplier(FindNearestAttackableTargetAITask.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
-            .registerBuilderSupplier(AttackLivingAITask.Builder.class, SpongeAttackLivingAIBuilder::new);
+            .registerBuilderSupplier(AttackLivingAITask.Builder.class, SpongeAttackLivingAIBuilder::new)
+            .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
+            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -323,7 +326,7 @@ public final class CommonModuleRegistry {
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
             .registerModule(DisplaySlot.class, new DisplaySlotRegistryModule())
             .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
-            .registerModule(DyeColor.class, new DyeColorRegistryModule())
+            .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
             .registerModule(Enchantment.class, new EnchantmentRegistryModule())
             .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
             .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())

@@ -34,6 +34,7 @@ import com.google.common.collect.MapMaker;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -80,6 +81,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -254,10 +256,25 @@ public class KeyRegistry {
         keyMap.put("ocelot_type", makeSingleKey(OcelotType.class, Value.class, of("OcelotType")));
         keyMap.put("rabbit_type", makeSingleKey(RabbitType.class, Value.class, of("RabbitType")));
         keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
+        keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
+        keyMap.put("banner_patterns", new PatternKey());
     }
 
     private static Map<String, Key<?>> getKeyMap() {
         generateKeyMap();
         return keyMap;
+    }
+
+    private static final class PatternKey implements Key<PatternListValue> {
+
+        @Override
+        public Class<PatternListValue> getValueClass() {
+            return PatternListValue.class;
+        }
+
+        @Override
+        public DataQuery getQuery() {
+            return of("BannerPatterns");
+        }
     }
 }

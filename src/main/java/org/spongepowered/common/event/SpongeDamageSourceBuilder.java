@@ -78,7 +78,7 @@ public class SpongeDamageSourceBuilder implements DamageSource.Builder {
     @Override
     public DamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "DamageType was null!");
-        net.minecraft.util.DamageSource source = new net.minecraft.util.DamageSource(damageType.getId());
+        net.minecraft.util.DamageSource source = new net.minecraft.util.DamageSource(this.damageType.getId());
         if (this.absolute) {
             source.setDamageIsAbsolute();
         }

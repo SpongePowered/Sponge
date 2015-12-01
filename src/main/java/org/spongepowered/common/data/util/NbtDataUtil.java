@@ -51,6 +51,9 @@ import java.util.Optional;
  */
 public final class NbtDataUtil {
 
+    public static final String BANNER_PATTERN_ID = "Pattern";
+    public static final String BANNER_PATTERN_COLOR = "Color";
+
     private NbtDataUtil() {
     }
 
