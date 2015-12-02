@@ -113,16 +113,16 @@ public class ManipulatorTest {
                 } catch (NoSuchMethodException e) {
                     System.out.println("Found no no-args constructor for: " + entry.getKey().getCanonicalName());
                 } catch (InstantiationException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 } catch (InvocationTargetException e) {
                     System.out.println("Failed to construct manipulator: " + entry.getKey().getCanonicalName());
                 } catch (Exception e) {
-                    System.out.println("There was an unknown exception, probably with validation of the Immutable copy");
-                    e.printStackTrace();
+                    System.out.println("There was an unknown exception, probably with validation of the Immutable copy for: " + entry.getKey().getCanonicalName());
+//                    e.printStackTrace();
                 }
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -168,14 +168,14 @@ public class ManipulatorTest {
                     System.out.println("[Serialization]: Safely de-serialized!");
                 } catch (NoSuchMethodException | InstantiationException | InvocationTargetException e) {
                     System.out.println("Exceptions thrown! ");
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 } catch (Exception e) {
                     System.out.println("There was an unknown exception, probably because Sponge was not initialized...");
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
