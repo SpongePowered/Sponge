@@ -54,7 +54,7 @@ public abstract class MixinEntityMinecartHopper extends MixinEntityMinecartConta
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this);
+        this.fabric = new DefaultInventoryFabric((IInventory) this);
         this.slots = new SlotCollection.Builder().add(5).build();
         this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
     }

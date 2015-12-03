@@ -30,6 +30,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.context.ContextViewer;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -48,6 +49,8 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class WrapperCommandSource extends SpongeSubject implements CommandSource {
 
@@ -94,6 +97,13 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     @Override
     public String getName() {
         return this.sender.getName();
+    }
+
+    @Override
+    public String getName(@Nullable ContextViewer viewer) {
+        // We've filtered out other targets below, we can assume that
+        // this is not a source we need to target for names.
+        return this.getName();
     }
 
     @Override

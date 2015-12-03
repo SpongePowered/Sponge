@@ -57,14 +57,17 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.context.ContextViewer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.context.DataContext;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
@@ -118,6 +121,8 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.entity.context.ContextManager;
+import org.spongepowered.common.entity.context.store.EntityContextStore;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
@@ -125,6 +130,7 @@ import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntityContext;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -147,7 +153,7 @@ import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = Entity.class, prefix = "entity$"))
-public abstract class MixinEntity implements IMixinEntity {
+public abstract class MixinEntity implements IMixinEntity, IMixinEntityContext {
 
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;LAVA:Lnet/minecraft/util/DamageSource;";
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
@@ -166,7 +172,9 @@ public abstract class MixinEntity implements IMixinEntity {
     private float origHeight;
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
-    @Nullable private Text displayName;
+    private EntityContextStore contextStore = this.createContextStore();
+    private boolean skipCustomNameSet = false;
+    protected DamageSource lastDamageSource;
     protected Cause destructCause;
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
@@ -243,6 +251,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
 
     // @formatter:on
 
@@ -1208,40 +1217,66 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Nullable
-    @Override
-    public Text getDisplayNameText() {
-        return this.displayName;
-    }
-
-    private boolean skipSettingCustomNameTag = false;
-
-    @Override
-    public void setDisplayName(@Nullable Text displayName) {
-        this.displayName = displayName;
-
-        this.skipSettingCustomNameTag = true;
-        if (this.displayName == null) {
-            this.setCustomNameTag("");
-        } else {
-            this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
-        }
-
-        this.skipSettingCustomNameTag = false;
-    }
-
     @Inject(method = "setCustomNameTag", at = @At("RETURN"))
     public void onSetCustomNameTag(String name, CallbackInfo ci) {
-        if (!this.skipSettingCustomNameTag) {
-            this.displayName = SpongeTexts.fromLegacy(name);
+        if (!this.skipCustomNameSet) {
+            this.contextStore.setDisplayName(SpongeTexts.fromLegacy(name));
         }
     }
 
     @Override
     public boolean canSee(Entity entity) {
-        // note: this implementation will be changing with contextual data
-        Optional<Boolean> optional = entity.get(Keys.VANISH);
-        return (!optional.isPresent() || !optional.get()) && !((IMixinEntity) entity).isVanished();
+        return this.contextStore.canSee(entity);
+    }
+
+    @Override
+    public void hide(Entity entity) {
+        this.contextStore.hide(entity);
+    }
+
+    @Override
+    public void show(Entity entity) {
+        this.contextStore.show(entity);
+    }
+
+    @Override
+    public void pushSkipCustomNameSet(boolean flag) {
+        this.skipCustomNameSet = true;
+    }
+
+    @Override
+    public boolean hasContext(ContextViewer viewer) {
+        return ContextManager.contains(this, viewer);
+    }
+
+    @Override
+    public DataContext getContext(ContextViewer viewer) {
+        return ContextManager.get(this, viewer);
+    }
+
+    @Override
+    public Text getDisplayName() {
+        return this.contextStore.getDisplayName();
+    }
+
+    @Override
+    public Text getDisplayName(@Nullable ContextViewer viewer) {
+        return this.contextStore.getDisplayName(viewer);
+    }
+
+    @Override
+    public void clearDisplayNames() {
+        this.contextStore.clearDisplayNames();
+    }
+
+    @Override
+    public EntityContextStore getContextStore() {
+        return this.contextStore;
+    }
+
+    @Override
+    public EntityContextStore createContextStore() {
+        return new EntityContextStore((net.minecraft.entity.Entity) (Object) this);
     }
 
     /**

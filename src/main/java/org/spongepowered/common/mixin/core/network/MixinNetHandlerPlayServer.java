@@ -49,6 +49,7 @@ import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.network.play.server.SPacketTeams;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
@@ -64,6 +65,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
@@ -104,15 +106,20 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.entity.IMixinEntityContext;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketTeams;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -254,17 +261,23 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      * @author kashike
      */
     private Packet<?> rewritePacket(final Packet<?> packetIn) {
+        Packet<?> packetOut = packetIn;
+
         // Update the tab list data
-        if (packetIn instanceof SPacketPlayerListItem) {
-            ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
+        if (packetOut instanceof SPacketPlayerListItem) {
+            ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetOut);
         }
         // Store the resource pack for use when processing resource pack statuses
-        else if (packetIn instanceof IMixinPacketResourcePackSend) {
-            IMixinPacketResourcePackSend packet = (IMixinPacketResourcePackSend) packetIn;
+        else if (packetOut instanceof IMixinPacketResourcePackSend) {
+            final IMixinPacketResourcePackSend packet = (IMixinPacketResourcePackSend) packetOut;
             this.sentResourcePacks.put(packet.setFakeHash(), packet.getResourcePack());
         }
+        // Translate fake names
+        else if (packetOut instanceof SPacketTeams) {
+            packetOut = ((IMixinSPacketTeams) packetOut).translate((Server) this.serverController, (Player) this.player);
+        }
 
-        return packetIn;
+        return packetOut;
     }
 
     /**

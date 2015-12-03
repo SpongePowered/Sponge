@@ -29,6 +29,8 @@ import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.context.ContextDataProcessor;
+import org.spongepowered.common.data.context.ContextValueProcessor;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 
 import java.util.Comparator;
@@ -44,6 +46,12 @@ public class ComparatorUtil {
 
     public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR =
         (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
+
+    public static final Comparator<ContextValueProcessor<?, ?>> CONTEXT_VALUE_PROCESSOR_COMPARATOR =
+            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
+
+    public static final Comparator<ContextDataProcessor<?, ?>> CONTEXT_DATA_PROCESSOR_COMPARATOR =
+            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
 
     public static final Comparator<PropertyStore<?>> PROPERTY_STORE_COMPARATOR =
         (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());

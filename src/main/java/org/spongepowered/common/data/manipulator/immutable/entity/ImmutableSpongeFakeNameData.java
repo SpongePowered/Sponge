@@ -24,49 +24,37 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkinData;
-import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFakeNameData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FakeNameData;
+import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFakeNameData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 
-import java.util.UUID;
+import java.util.Optional;
 
-public class ImmutableSpongeSkinData extends AbstractImmutableSingleData<UUID, ImmutableSkinData, SkinData> implements ImmutableSkinData {
+public final class ImmutableSpongeFakeNameData extends AbstractImmutableSingleData<Optional<String>, ImmutableFakeNameData, FakeNameData>
+        implements ImmutableFakeNameData {
 
-    private final ImmutableSpongeValue<UUID> skinValue;
-
-    public ImmutableSpongeSkinData() {
-        this(new UUID(0, 0));
-    }
-
-    public ImmutableSpongeSkinData(UUID value) {
-        super(ImmutableSkinData.class, value, Keys.SKIN_UNIQUE_ID);
-        this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, value);
-    }
-
-    @Override
-    public SkinData asMutable() {
-        return new SpongeSkinData(this.value);
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-            .set(Keys.SKIN_UNIQUE_ID.getQuery(), this.value.toString());
-    }
-
-    @Override
-    public ImmutableValue<UUID> skinUniqueId() {
-        return this.skinValue;
+    public ImmutableSpongeFakeNameData(Optional<String> value) {
+        super(ImmutableFakeNameData.class, value, Keys.FAKE_NAME);
     }
 
     @Override
     protected ImmutableValue<?> getValueGetter() {
-        return skinUniqueId();
+        return this.fakeName();
+    }
+
+    @Override
+    public FakeNameData asMutable() {
+        return new SpongeFakeNameData(this.getValue());
+    }
+
+    @Override
+    public ImmutableOptionalValue<String> fakeName() {
+        return new ImmutableSpongeOptionalValue<>(this.usedKey, this.getValue());
     }
 
 }

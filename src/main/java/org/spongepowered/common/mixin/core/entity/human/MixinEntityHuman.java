@@ -25,22 +25,29 @@
 package org.spongepowered.common.mixin.core.entity.human;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.context.store.EntityContextStore;
+import org.spongepowered.common.entity.context.store.HumanoidContextStore;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
 
 @Mixin(value = EntityHuman.class, remap = false)
 public abstract class MixinEntityHuman extends MixinEntityCreature implements Human {
 
-    @Shadow private GameProfile fakeProfile;
+    @Shadow private GameProfile profile;
     private Inventory openInventory;
 
     @Override
     public String getName() {
-        return this.fakeProfile.getName();
+        return this.profile.getName();
     }
 
+    @Override
+    public EntityContextStore createContextStore() {
+        return new HumanoidContextStore((Entity) (Object) this);
+    }
 }

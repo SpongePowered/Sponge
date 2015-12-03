@@ -39,7 +39,7 @@ import java.util.Optional;
 
 public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
 
-    private final Class<C> containerClass;
+    protected final Class<C> containerClass;
     protected final Key<V> key;
 
     protected AbstractSpongeValueProcessor(Class<C> containerClass, Key<V> key) {

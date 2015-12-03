@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.entity.living.human;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -53,22 +51,18 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameType;
 import net.minecraft.world.World;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.player.tab.TabListEntryAdapter;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.util.TextureUtil;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -82,28 +76,15 @@ import javax.annotation.Nullable;
  */
 public class EntityHuman extends EntityCreature implements TeamMember, IRangedAttackMob {
 
-    // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
-    // you can access this data once per minute, lets cache for 2 minutes
-    private static final LoadingCache<UUID, PropertyMap> PROPERTIES_CACHE = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.MINUTES)
-            .build(new CacheLoader<UUID, PropertyMap>() {
-
-                @Override
-                public PropertyMap load(UUID uuid) throws Exception {
-                    return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
-                            .getProperties();
-                }
-            });
-
     // A queue of packets waiting to send to players tracking this human
-    private final Map<UUID, List<Packet<?>[]>> playerPacketMap = Maps.newHashMap();
+    private final ListMultimap<UUID, Packet<?>[]> playerPacketMap = ArrayListMultimap.create();
 
-    private GameProfile fakeProfile;
-    @Nullable private UUID skinUuid;
+    private GameProfile profile;
     private boolean aiDisabled = false;
 
     public EntityHuman(World worldIn) {
         super(worldIn);
-        this.fakeProfile = new GameProfile(this.entityUniqueID, "");
+        this.profile = new GameProfile(this.entityUniqueID, "");
         this.setSize(0.6F, 1.8F);
         this.setCanPickUpLoot(true);
     }
@@ -127,6 +108,10 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         this.dataManager.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
     }
 
+    public GameProfile getProfile() {
+        return this.profile;
+    }
+
     @Override
     public boolean isLeftHanded() {
         return this.dataManager.get(EntityPlayer.MAIN_HAND) == 0;
@@ -139,12 +124,12 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public Text getTeamRepresentation() {
-        return Text.of(this.fakeProfile.getName());
+        return Text.of(this.profile.getName());
     }
 
     @Override
     public Team getTeam() {
-        return this.world.getScoreboard().getPlayersTeam(this.fakeProfile.getName());
+        return this.world.getScoreboard().getPlayersTeam(this.profile.getName());
     }
 
     @Override
@@ -164,23 +149,28 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound tagCompund) {
-        super.readEntityFromNBT(tagCompund);
-        String skinUuidString = ((IMixinEntity) this).getSpongeData().getString("skinUuid");
-        if (!skinUuidString.isEmpty()) {
-            this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
+    public void readEntityFromNBT(NBTTagCompound rootCompound) {
+        super.readEntityFromNBT(rootCompound);
+        final NBTTagCompound spongeCompound = ((IMixinEntity) this).getSpongeData();
+
+        @Nullable ProfileProperty textures = TextureUtil.read(spongeCompound);
+        if (textures != null) {
+            TextureUtil.toPropertyMap(this.profile.getProperties(), textures);
+        } else if (spongeCompound.hasKey(NbtDataUtil.HUMANOID_TEXTURES_UNIQUE_ID, NbtDataUtil.TAG_STRING)) {
+            String skinUniqueId = ((IMixinEntity) this).getSpongeData().getString(NbtDataUtil.HUMANOID_TEXTURES_UNIQUE_ID);
+            if (!skinUniqueId.isEmpty()) {
+                TextureUtil.migrateLegacyTextureUniqueId(this.profile, UUID.fromString(skinUniqueId));
+            }
         }
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound tagCompound) {
-        super.writeEntityToNBT(tagCompound);
-        NBTTagCompound spongeData = ((IMixinEntity) this).getSpongeData();
-        if (this.skinUuid != null) {
-            spongeData.setString("skinUuid", this.skinUuid.toString());
-        } else {
-            spongeData.removeTag("skinUuid");
-        }
+    public void writeEntityToNBT(NBTTagCompound rootCompound) {
+        super.writeEntityToNBT(rootCompound);
+        final NBTTagCompound spongeCompound = ((IMixinEntity) this).getSpongeData();
+
+        TextureUtil.write(spongeCompound, TextureUtil.fromProfile(this.profile));
+        spongeCompound.removeTag(NbtDataUtil.HUMANOID_TEXTURES_UNIQUE_ID); // Remove legacy StringTag
     }
 
     @Override
@@ -308,19 +298,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     private void renameProfile(String newName) {
-        PropertyMap props = this.fakeProfile.getProperties();
-        this.fakeProfile = new GameProfile(this.fakeProfile.getId(), newName);
-        this.fakeProfile.getProperties().putAll(props);
-    }
-
-    private boolean updateFakeProfileWithSkin(UUID skin) {
-        PropertyMap properties = PROPERTIES_CACHE.getUnchecked(skin);
-        if (properties.isEmpty()) {
-            return false;
-        }
-        this.fakeProfile.getProperties().replaceValues("textures", properties.get("textures"));
-        this.skinUuid = skin;
-        return true;
+        PropertyMap properties = this.profile.getProperties();
+        this.profile = new GameProfile(this.profile.getId(), newName);
+        this.profile.getProperties().putAll(properties);
     }
 
     public void removeFromTabListDelayed(@Nullable EntityPlayerMP player, SPacketPlayerListItem removePacket) {
@@ -336,49 +316,14 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         }
     }
 
-    public boolean setSkinUuid(UUID skin) {
-        if (!SpongeImpl.getServer().isServerInOnlineMode()) {
-            // Skins only work when online-mode = true
-            return false;
-        }
-        if (skin.equals(this.skinUuid)) {
-            return true;
-        }
-        if (!updateFakeProfileWithSkin(skin)) {
-            return false;
-        }
-        if (this.isAliveAndInWorld()) {
-            this.respawnOnClient();
-        }
-        return true;
-    }
-
-    @Nullable
-    public UUID getSkinUuid() {
-        return this.skinUuid;
-    }
-
-    public DataTransactionResult removeSkin() {
-        if (this.skinUuid == null) {
-            return DataTransactionResult.successNoData();
-        }
-        this.fakeProfile.getProperties().removeAll("textures");
-        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
-        this.skinUuid = null;
-        if (this.isAliveAndInWorld()) {
-            this.respawnOnClient();
-        }
-        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
-    }
-
     private boolean isAliveAndInWorld() {
         return this.world.getEntityByID(this.getEntityId()) == this && !this.isDead;
     }
 
-    private void respawnOnClient() {
-        this.pushPackets(new SPacketDestroyEntities(this.getEntityId()), this.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
+    public void respawnOnClient() {
+        this.pushPackets(new SPacketDestroyEntities(this.getEntityId()), TabListEntryAdapter.human(this, null, SPacketPlayerListItem.Action.ADD_PLAYER));
         this.pushPackets(this.createSpawnPacket());
-        removeFromTabListDelayed(null, this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
+        removeFromTabListDelayed(null, TabListEntryAdapter.human(this, null, SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**
@@ -388,7 +333,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @return Whether it can be removed with 0 ticks delay
      */
     public boolean canRemoveFromListImmediately() {
-        return !this.fakeProfile.getProperties().containsKey("textures");
+        return !this.profile.getProperties().containsKey("textures");
     }
 
     /**
@@ -400,8 +345,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @param player The player that has stopped tracking this human
      */
     public void onRemovedFrom(EntityPlayerMP player) {
-        this.playerPacketMap.remove(player.getUniqueID());
-        player.connection.sendPacket(this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
+        this.playerPacketMap.removeAll(player.getUniqueID());
+        player.connection.sendPacket(TabListEntryAdapter.human(this, player, SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**
@@ -415,25 +360,13 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     public SPacketSpawnPlayer createSpawnPacket() {
         SPacketSpawnPlayer packet = new SPacketSpawnPlayer();
         packet.entityId = this.getEntityId();
-        packet.uniqueId = this.fakeProfile.getId();
+        packet.uniqueId = this.profile.getId();
         packet.x = this.posX;
         packet.y = this.posY;
         packet.z = this.posZ;
         packet.yaw = (byte) ((int) (this.rotationYaw * 256.0F / 360.0F));
         packet.pitch = (byte) ((int) (this.rotationPitch * 256.0F / 360.0F));
         packet.watcher = this.getDataManager();
-        return packet;
-    }
-
-    /**
-     * Creates a {@link SPacketPlayerListItem} packet with the given action.
-     *
-     * @param action The action to apply on the tab list
-     * @return A new tab list packet
-     */
-    public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
-        SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
-        packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }
 
@@ -455,19 +388,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      */
     public void pushPackets(@Nullable EntityPlayerMP player, Packet<?>... packets) {
         if (player == null) {
-            List<Packet<?>[]> queue = this.playerPacketMap.get(null);
-            if (queue == null) {
-                queue = new ArrayList<>();
-                this.playerPacketMap.put(null, queue);
-            }
-            queue.add(packets);
+            this.playerPacketMap.put(null, packets);
         } else {
-            List<Packet<?>[]> queue = this.playerPacketMap.get(player.getUniqueID());
-            if (queue == null) {
-                queue = new ArrayList<>();
-                this.playerPacketMap.put(player.getUniqueID(), queue);
-            }
-            queue.add(packets);
+            this.playerPacketMap.put(player.getUniqueID(), packets);
         }
     }
 
@@ -477,6 +400,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @param player The player to get packets for (or null for all players)
      * @return An array of packets to send in a single tick
      */
+    @Nullable
     public Packet<?>[] popQueuedPackets(@Nullable EntityPlayerMP player) {
         List<Packet<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
         return queue == null || queue.isEmpty() ? null : queue.remove(0);

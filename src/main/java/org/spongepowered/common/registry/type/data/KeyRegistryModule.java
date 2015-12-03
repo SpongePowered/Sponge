@@ -65,6 +65,7 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.statistic.Statistic;
@@ -344,6 +345,12 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         private static final long serialVersionUID = -1;
     };
     public static final TypeToken<Value<GameProfile>> GAME_PROFILE_VALUE_TOKEN = new TypeToken<Value<GameProfile>>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<ProfileProperty> PROFILE_PROPERTY_TOKEN = new TypeToken<ProfileProperty>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<Value<ProfileProperty>> PROFILE_PROPERTY_VALUE_TOKEN = new TypeToken<Value<ProfileProperty>>() {
         private static final long serialVersionUID = -1;
     };
     public static final TypeToken<StoneType> STONE_TOKEN = new TypeToken<StoneType>() {
@@ -935,8 +942,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("expiration_ticks", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("ExpirationTicks"), "sponge:expiration_ticks", "Expiration Ticks"));
 
-        this.fieldMap.put("skin_unique_id", makeSingleKey(UUID_TOKEN, UUID_VALUE_TOKEN, of("SkinUUID"), "sponge:skin_uuid", "Skin UUID"));
-
         this.fieldMap.put("moisture", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("Moisture"), "sponge:moisture", "Moisture"));
 
         this.fieldMap.put("angry", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("Angry"), "sponge:angry", "Angry"));
@@ -1066,6 +1071,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("structure_show_air", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("StructureShowAir"), "sponge:structure_show_air", "Structure Show Air"));
         this.fieldMap.put("structure_show_bounding_box", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("StructureShowBoundingBox"), "sponge:structure_show_bounding_box", "Structure Show Bounding Box"));
         this.fieldMap.put("structure_size", makeSingleKey(VECTOR_3I_TOKEN, VECTOR_3I_VALUE_TOKEN, of("StructureSize"), "sponge:structure_size", "Structure Size"));
+
+        this.fieldMap.put("fake_name", makeSingleKey(STRING_TOKEN, STRING_VALUE_TOKEN, of("FakeName"), "sponge:fake_name", "Fake Name"));
+        this.fieldMap.put("humanoid_textures_property", makeSingleKey(PROFILE_PROPERTY_TOKEN, PROFILE_PROPERTY_VALUE_TOKEN, of("HumanoidTexturesProperty"), "sponge:humanoid_textures_property", "Humanoid Textures Property"));
+        this.fieldMap.put("humanoid_textures_unique_id", makeSingleKey(UUID_TOKEN, UUID_VALUE_TOKEN, of("HumanoidTexturesId"), "sponge:humanoid_textures_id", "Humanoid Textures Id"));
 
         for (Key<?> key : this.fieldMap.values()) {
             this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);

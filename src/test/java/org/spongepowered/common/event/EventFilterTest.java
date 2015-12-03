@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Assert;
 import org.junit.Test;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
+import org.spongepowered.api.data.manipulator.mutable.entity.HumanoidTextureData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
@@ -240,10 +240,10 @@ public class EventFilterTest {
         AnnotatedEventListener inverseSupportsSkinListener = this.getListener(listener, "inverseSupportsSkinListener", SubEvent.class, Player.class);
 
         Player player1 = mock(Player.class);
-        when(player1.supports(SkinData.class)).thenReturn(false);
+        when(player1.supports(HumanoidTextureData.class)).thenReturn(false);
 
         Player player2 = mock(Player.class);
-        when(player2.supports(SkinData.class)).thenReturn(true);
+        when(player2.supports(HumanoidTextureData.class)).thenReturn(true);
 
         Cause cause1 = Cause.source(player1).build();
         Cause cause2 = Cause.source(player2).build();
@@ -271,10 +271,10 @@ public class EventFilterTest {
         AnnotatedEventListener inversehasSkinListener = this.getListener(listener, "inverseHasSkinListener", SubEvent.class, Player.class);
 
         Player player1 = mock(Player.class);
-        when(player1.get(SkinData.class)).thenReturn(Optional.empty());
+        when(player1.get(HumanoidTextureData.class)).thenReturn(Optional.empty());
 
         Player player2 = mock(Player.class);
-        when(player2.get(SkinData.class)).thenReturn(Optional.of(mock(SkinData.class)));
+        when(player2.get(HumanoidTextureData.class)).thenReturn(Optional.of(mock(HumanoidTextureData.class)));
 
         Cause cause1 = Cause.source(player1).build();
         Cause cause2 = Cause.source(player2).build();

@@ -73,19 +73,12 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public boolean supports(DataHolder holder) {
-        return holder instanceof Entity || holder instanceof ItemStack || holder instanceof IWorldNameable;
+        return holder instanceof ItemStack || holder instanceof IWorldNameable;
     }
 
     @Override
     public Optional<DisplayNameData> from(DataHolder holder) {
-        if (holder instanceof Entity) {
-            @Nullable Text displayName = ((IMixinEntity) holder).getDisplayNameText();
-            if (displayName != null) {
-                return Optional.of(new SpongeDisplayNameData(displayName));
-            } else {
-                return Optional.empty();
-            }
-        } else if (holder instanceof ItemStack) {
+        if (holder instanceof ItemStack) {
             ItemStack stack = (ItemStack) holder;
             if (!stack.hasDisplayName()) {
                 return Optional.empty();
@@ -127,23 +120,6 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public DataTransactionResult set(DataHolder holder, DisplayNameData manipulator, MergeFunction function) {
-        if (holder instanceof IMixinEntity && !(holder instanceof Player)) {
-            final Optional<DisplayNameData> old = from(holder);
-            final DisplayNameData merged = checkNotNull(function).merge(old.orElse(null), manipulator);
-            final Text newValue = merged.displayName().get();
-            final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
-            try {
-                ((IMixinEntity) holder).setDisplayName(newValue);
-                if (old.isPresent()) {
-                    return DataTransactionResult.successReplaceResult(old.get().displayName().asImmutable(), immutableValue);
-                } else {
-                    return DataTransactionResult.successResult(immutableValue);
-                }
-            } catch (Exception e) {
-                SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
-                return DataTransactionResult.errorResult(immutableValue);
-            }
-        }
         if (holder instanceof ItemStack) {
             final Optional<DisplayNameData> prevValue = from(holder);
             final DisplayNameData merged = checkNotNull(function).merge(prevValue.orElse(null), manipulator);
@@ -175,21 +151,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public DataTransactionResult remove(DataHolder holder) {
-        if (holder instanceof Entity) {
-            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<DisplayNameData> optional = this.from(holder);
-            if (optional.isPresent()) {
-                try {
-                    ((IMixinEntity) holder).setDisplayName(null);
-                    return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
-                } catch (Exception e) {
-                    SpongeImpl.getLogger().error("There was an issue resetting the display name from an Entity!", e);
-                    return builder.result(DataTransactionResult.Type.ERROR).build();
-                }
-            } else {
-                return builder.result(DataTransactionResult.Type.SUCCESS).build();
-            }
-        } else if (holder instanceof ItemStack) {
+        if (holder instanceof ItemStack) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<DisplayNameData> optional = this.from(holder);
             if (optional.isPresent()) {
@@ -210,7 +172,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public boolean supports(EntityType type) {
-        return Entity.class.isAssignableFrom(type.getEntityClass());
+        return false;
     }
 
 }

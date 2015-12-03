@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityMinecartContainer;
-import net.minecraft.world.ILockableContainer;
-import net.minecraft.world.storage.loot.ILootContainer;
 import org.spongepowered.api.entity.vehicle.minecart.ContainerMinecart;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,6 +33,6 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EntityMinecartContainer.class)
 @Implements({@Interface(iface = CarriedInventory.class, prefix = "carried$"), @Interface(iface = ContainerMinecart.class, prefix = "container$")})
-public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart implements ILockableContainer, ILootContainer {
+public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart {
 
 }

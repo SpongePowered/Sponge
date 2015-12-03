@@ -54,6 +54,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.context.ContextViewer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -96,6 +97,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -235,6 +237,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return Optional.empty();
         }
         return Optional.ofNullable((Player) getPlayerList().getPlayerByUsername(name));
+    }
+
+    @Override
+    public Optional<Player> getPlayer(String name, @Nullable ContextViewer viewer) {
+        if (this.getPlayerList() == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable((Player) ((IMixinPlayerList) this.getPlayerList()).getPlayer(name, viewer));
     }
 
     @Override

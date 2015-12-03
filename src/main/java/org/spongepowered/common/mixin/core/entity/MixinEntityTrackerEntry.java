@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.player.tab.TabListEntryAdapter;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Set;
@@ -53,21 +54,23 @@ public abstract class MixinEntityTrackerEntry {
 
     @Redirect(method = "updatePlayerEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onSendSpawnPacket(final NetHandlerPlayServer thisCtx, final Packet<?> spawnPacket, final EntityPlayerMP playerIn) {
+    public void onSendSpawnPacket(final NetHandlerPlayServer connection, final Packet<?> spawnPacket, final EntityPlayerMP playerIn) {
         if (!(this.trackedEntity instanceof EntityHuman)) {
             // This is the method call that was @Redirected
-            thisCtx.sendPacket(spawnPacket);
+            connection.sendPacket(spawnPacket);
             return;
         }
+
         final EntityHuman human = (EntityHuman) this.trackedEntity;
-        // Adds the GameProfile to the client
-        thisCtx.sendPacket(human.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
+
         // Actually spawn the human (a player)
-        thisCtx.sendPacket(spawnPacket);
+        connection.sendPacket(spawnPacket);
+        // Adds the GameProfile to the client
+        connection.sendPacket(TabListEntryAdapter.human(human, playerIn, SPacketPlayerListItem.Action.ADD_PLAYER));
         // Remove from tab list
-        final SPacketPlayerListItem removePacket = human.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER);
+        final SPacketPlayerListItem removePacket = TabListEntryAdapter.human(human, playerIn, SPacketPlayerListItem.Action.REMOVE_PLAYER);
         if (human.canRemoveFromListImmediately()) {
-            thisCtx.sendPacket(removePacket);
+            connection.sendPacket(removePacket);
         } else {
             human.removeFromTabListDelayed(playerIn, removePacket);
         }
@@ -93,16 +96,16 @@ public abstract class MixinEntityTrackerEntry {
             return;
         }
         EntityHuman human = (EntityHuman) this.trackedEntity;
-        Packet<?>[] packets = human.popQueuedPackets(null);
+        Packet<?>[] globalPackets = human.popQueuedPackets(null);
         for (EntityPlayerMP player : this.trackingPlayers) {
-            if (packets != null) {
-                for (Packet<?> packet : packets) {
+            if (globalPackets != null) {
+                for (Packet<?> packet : globalPackets) {
                     player.connection.sendPacket(packet);
                 }
             }
-            Packet<?>[] playerPackets = human.popQueuedPackets(player);
-            if (playerPackets != null) {
-                for (Packet<?> packet : playerPackets) {
+            Packet<?>[] scopedPackets = human.popQueuedPackets(player);
+            if (scopedPackets != null) {
+                for (Packet<?> packet : scopedPackets) {
                     player.connection.sendPacket(packet);
                 }
             }

@@ -88,6 +88,11 @@ import org.spongepowered.common.data.manipulator.mutable.entity.*;
 import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
 import org.spongepowered.common.data.manipulator.mutable.item.*;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.*;
+import org.spongepowered.common.data.processor.context.dual.ContextAwareDisplayNameProcessor;
+import org.spongepowered.common.data.processor.context.dual.FakeNameDualProcessor;
+import org.spongepowered.common.data.processor.context.multi.HumanoidTextureDataProcessor;
+import org.spongepowered.common.data.processor.context.value.HumanoidTextureIdValueProcessor;
+import org.spongepowered.common.data.processor.context.value.HumanoidTexturePropertyValueProcessor;
 import org.spongepowered.common.data.processor.data.*;
 import org.spongepowered.common.data.processor.data.block.*;
 import org.spongepowered.common.data.processor.data.entity.*;
@@ -320,9 +325,6 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
                 ImmutableSpongeCareerData.class, new CareerDataProcessor());
-
-        dataManager.registerDualProcessor(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
-                ImmutableSpongeSkinData.class, new SkinDataProcessor());
 
         dataManager.registerDualProcessor(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
                 ImmutableSpongeExpOrbData.class, new ExpOrbDataProcessor());
@@ -687,6 +689,15 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(MobSpawnerData.class, SpongeMobSpawnerData.class, ImmutableMobSpawnerData.class,
                 ImmutableSpongeMobSpawnerData.class, new MobSpawnerDataProcessor());
 
+        // Context
+        dataManager.registerContextAwareDualProcessor(DisplayNameData.class, SpongeDisplayNameData.class, ImmutableDisplayNameData.class,
+                ImmutableSpongeDisplayNameData.class, Keys.DISPLAY_NAME, new ContextAwareDisplayNameProcessor());
+
+        dataManager.registerContextAwareDualProcessor(FakeNameData.class, SpongeFakeNameData.class, ImmutableFakeNameData.class,
+                ImmutableSpongeFakeNameData.class, Keys.FAKE_NAME, new FakeNameDualProcessor());
+
+        dataManager.registerContextAwareDataProcessorAndImpl(HumanoidTextureData.class, SpongeHumanoidTextureData.class, ImmutableHumanoidTextureData.class,
+                ImmutableSpongeHumanoidTextureData.class, new HumanoidTextureDataProcessor());
 
         // Values
 
@@ -698,7 +709,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.FIRE_DAMAGE_DELAY, new FireDamageDelayValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new ItemDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new TileEntityDisplayNameValueProcessor());
-        dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new EntityDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataManager.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
@@ -788,6 +798,10 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.SPAWNER_SPAWN_RANGE, new SpawnerSpawnRangeValueProcessor());
         dataManager.registerValueProcessor(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new SpawnerNextEntityToSpawnValueProcessor());
         dataManager.registerValueProcessor(Keys.SPAWNER_ENTITIES, new SpawnerEntitiesValueProcessor());
+
+        // Context
+        dataManager.registerContextAwareValueProcessor(Keys.HUMANOID_TEXTURES_PROPERTY, new HumanoidTexturePropertyValueProcessor());
+        dataManager.registerContextAwareValueProcessor(Keys.HUMANOID_TEXTURES_UNIQUE_ID, new HumanoidTextureIdValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

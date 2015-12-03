@@ -36,7 +36,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -113,10 +112,6 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     boolean isUntargetable();
 
     void setUntargetable(boolean untargetable);
-
-    @Nullable Text getDisplayNameText();
-
-    void setDisplayName(@Nullable Text displayName);
 
     void setCurrentCollidingBlock(BlockState state);
 

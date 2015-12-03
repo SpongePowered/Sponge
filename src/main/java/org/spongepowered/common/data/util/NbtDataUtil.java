@@ -178,6 +178,12 @@ public final class NbtDataUtil {
     public static final String PREVIOUS_PICKUP_DELAY = "PreviousPickupDelay";
     public static final String PREVIOUS_DESPAWN_DELAY = "PreviousDespawnDelay";
 
+    // Textures
+    public static final String HUMANOID_TEXTURES_VALUE = "HumanoidTexturesValue";
+    public static final String HUMANOID_TEXTURES_SIGNATURE = "HumanoidTexturesSignature";
+    /** @deprecated replaced with the two above */
+    @java.lang.Deprecated public static final String HUMANOID_TEXTURES_UNIQUE_ID = "skinUuid";
+
     public static final class Deprecated {
 
         public static final class Entity {

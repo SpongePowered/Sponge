@@ -54,7 +54,7 @@ public abstract class MixinEntityMinecartChest extends MixinEntityMinecartContai
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this);
+        this.fabric = new DefaultInventoryFabric((IInventory) this);
         this.slots = new SlotCollection.Builder().add(27).build();
         this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
     }

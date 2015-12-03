@@ -22,21 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.entity.context;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldServer;
+import org.spongepowered.api.context.ContextViewer;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.data.context.SpongeDataContext;
 
-public interface IMixinPlayerList {
+public class SpongeEntityContext extends SpongeDataContext {
 
-    double getMovementFactor(WorldProvider worldProvider);
+    public SpongeEntityContext(Entity contextual, ContextViewer viewer) {
+        super(contextual, viewer);
+    }
 
-    void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn);
-
-    void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter);
-
-    void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world
-            .Teleporter teleporter);
 }

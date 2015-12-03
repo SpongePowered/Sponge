@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.listener;
 
-import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
+import org.spongepowered.api.data.manipulator.mutable.entity.HumanoidTextureData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
@@ -37,12 +37,12 @@ public class DataSupportsListener {
     public boolean inverseSupportsSkinListenerCalled;
 
     @Listener
-    public void supportsSkinListener(EventFilterTest.SubEvent event, @First @Supports(SkinData.class) Player player) {
+    public void supportsSkinListener(EventFilterTest.SubEvent event, @First @Supports(HumanoidTextureData.class) Player player) {
         this.supportsSkinListenerCalled = true;
     }
 
     @Listener
-    public void inverseSupportsSkinListener(EventFilterTest.SubEvent event, @First @Supports(value = SkinData.class, inverse = true) Player player) {
+    public void inverseSupportsSkinListener(EventFilterTest.SubEvent event, @First @Supports(value = HumanoidTextureData.class, inverse = true) Player player) {
         this.inverseSupportsSkinListenerCalled = true;
     }
 }

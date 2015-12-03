@@ -73,9 +73,11 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
 import org.objectweb.asm.Opcodes;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.context.ContextViewer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
@@ -102,6 +104,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -130,6 +133,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.context.store.EntityContextStore;
+import org.spongepowered.common.entity.context.store.PlayerContextStore;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
@@ -157,6 +162,7 @@ import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.SkinUtil;
+import org.spongepowered.common.util.TextureUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -220,6 +226,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
     @Nullable private Vector3d velocityOverride = null;
+
+    @Inject(method = "<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/WorldServer;Lcom/mojang/authlib/GameProfile;Lnet/minecraft/server/management/PlayerInteractionManager;)V", at = @At("RETURN"))
+    public void construct(MinecraftServer server, WorldServer worldIn, com.mojang.authlib.GameProfile profile, PlayerInteractionManager interactionManager, CallbackInfo ci) {
+        ((PlayerContextStore) this.getContextStore()).setRealTextures(TextureUtil.fromProfile(profile));
+    }
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
@@ -742,17 +753,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    @Nullable
-    public Text getDisplayNameText() {
-        return Text.of(getName());
-    }
-
-    @Override
-    public void setDisplayName(@Nullable Text displayName) {
-        // Do nothing
-    }
-
-    @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getJoinData());
@@ -842,4 +842,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             ((IMixinContainer) this.openContainer).setSpectatorChest(true);
         }
     }
+
+    @Override
+    public EntityContextStore createContextStore() {
+        return new PlayerContextStore((EntityPlayer) (Object) this);
+    }
+
+    @Override
+    public Optional<ProfileProperty> getRealTextures() {
+        return ((PlayerContextStore) this.getContextStore()).getRealTextures();
+    }
+
+    @Override
+    public String getName(@Nullable ContextViewer viewer) {
+        return ((PlayerContextStore) this.getContextStore()).getName(viewer);
+    }
+
 }

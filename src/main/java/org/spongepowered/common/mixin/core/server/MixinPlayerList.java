@@ -73,6 +73,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.context.ContextViewer;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -109,11 +110,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.context.store.PlayerContextStore;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.entity.player.tab.TabListEntryAdapter;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.PlayerPhase;
-import org.spongepowered.common.interfaces.IMixinPlayerList;
+import org.spongepowered.common.interfaces.entity.IMixinEntityContext;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -834,11 +838,15 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         for (EntityPlayerMP viewer : this.playerEntityList) {
             if (((Player) viewer).canSee((Player) player)) {
-                viewer.connection.sendPacket(noSpecificViewerPacket);
+                if (((PlayerContextStore) ((IMixinEntityContext) viewer).getContextStore()).hasSomethingFake((ContextViewer) viewer)) {
+                    viewer.connection.sendPacket(TabListEntryAdapter.addPacket(player, viewer));
+                } else {
+                    viewer.connection.sendPacket(noSpecificViewerPacket);
+                }
             }
 
             if (((Player) player).canSee((Player) viewer)) {
-                player.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, viewer));
+                player.connection.sendPacket(TabListEntryAdapter.addPacket(viewer, player));
             }
         }
 
@@ -876,4 +884,17 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Check the world info of the current world instead of overworld world info
         return player.world.getWorldInfo();
     }
+
+    @Nullable
+    @Override
+    public EntityPlayerMP getPlayer(String name, @Nullable ContextViewer viewer) {
+        for (EntityPlayerMP player : this.playerEntityList) {
+            if (((Player) player).getName(viewer).equalsIgnoreCase(name)) {
+                return player;
+            }
+        }
+
+        return null;
+    }
+
 }
