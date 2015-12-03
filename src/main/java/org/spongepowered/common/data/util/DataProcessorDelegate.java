@@ -29,7 +29,6 @@ import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -138,7 +137,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
             }
             tuple.getSecond().stopTiming();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -169,7 +168,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
             tuple.getSecond().stopTiming();
 
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

@@ -43,7 +43,7 @@ import org.spongepowered.api.util.persistence.SerializationManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.data.SpongeDataRegistry;
-import org.spongepowered.common.data.SpongeSerializationRegistry;
+import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.util.persistence.SpongeSerializationManager;
@@ -82,7 +82,7 @@ public class ManipulatorTest {
             final SerializationManager serializationManager = SpongeSerializationManager.getInstance();
             Mockito.when(mockGame.getServiceManager()).thenReturn(mockServiceManager);
             when(mockServiceManager.provide(SerializationManager.class)).thenReturn(Optional.of(serializationManager));
-            SpongeSerializationRegistry.setupSerialization(mockGame);
+            DataRegistrar.setupSerialization(mockGame);
         } catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -77,6 +76,6 @@ public class EntityFireworkRocketValueProcessor extends AbstractSpongeValueProce
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

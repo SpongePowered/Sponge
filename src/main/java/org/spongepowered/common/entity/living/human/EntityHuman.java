@@ -25,7 +25,7 @@
 
 package org.spongepowered.common.entity.living.human;
 
-import static org.spongepowered.api.data.DataTransactionBuilder.failResult;
+import static org.spongepowered.api.data.DataTransactionResult.failResult;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -51,7 +51,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
@@ -294,18 +293,18 @@ public class EntityHuman extends EntityCreature {
     public DataTransactionResult setSkinData(SkinData skin) {
         if (!MinecraftServer.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
-            return failResult(skin.skin().asImmutable());
+            return DataTransactionResult.failResult(skin.skin().asImmutable());
         }
         if (skin.skin().get().equals(this.skinUuid)) {
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
         if (!updateFakeProfileWithSkin(skin.skin().get())) {
-            return failResult(skin.skin().asImmutable());
+            return DataTransactionResult.failResult(skin.skin().asImmutable());
         }
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
-        return DataTransactionBuilder.successNoData();
+        return DataTransactionResult.successNoData();
     }
 
     public Optional<SkinData> getSkinData() {

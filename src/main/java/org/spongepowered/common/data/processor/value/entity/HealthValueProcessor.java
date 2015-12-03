@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.entity;
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 
 import net.minecraft.entity.EntityLivingBase;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -94,7 +93,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
     public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
         final ImmutableBoundedValue<Double> proposedValue = constructImmutableValue(value);
         if (container instanceof EntityLivingBase) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
             final ImmutableBoundedValue<Double> newHealthValue = SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .defaultValue(maxHealth)
@@ -105,20 +104,20 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
                 .asImmutable();
             final ImmutableBoundedValue<Double> oldHealthValue = getApiValueFromContainer(container).get().asImmutable();
             if (value > maxHealth) {
-                return DataTransactionBuilder.errorResult(newHealthValue);
+                return DataTransactionResult.errorResult(newHealthValue);
             }
             try {
                 ((EntityLivingBase) container).setHealth(value.floatValue());
             } catch (Exception e) {
-                return DataTransactionBuilder.errorResult(newHealthValue);
+                return DataTransactionResult.errorResult(newHealthValue);
             }
             return builder.success(newHealthValue).replace(oldHealthValue).result(DataTransactionResult.Type.SUCCESS).build();
         }
-        return DataTransactionBuilder.failResult(proposedValue);
+        return DataTransactionResult.failResult(proposedValue);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

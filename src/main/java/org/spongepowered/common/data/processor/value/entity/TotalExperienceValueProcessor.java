@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.player.EntityPlayer;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -45,7 +44,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value;
 
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -48,9 +47,9 @@ public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ILockableContainer) {
             set((ILockableContainer) container, "");
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

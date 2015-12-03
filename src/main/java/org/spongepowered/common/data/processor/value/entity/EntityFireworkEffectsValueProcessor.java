@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.item.EntityFireworkRocket;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -70,8 +69,8 @@ public class EntityFireworkEffectsValueProcessor extends AbstractSpongeValueProc
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if(FireworkUtils.removeFireworkEffects(container)) {
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

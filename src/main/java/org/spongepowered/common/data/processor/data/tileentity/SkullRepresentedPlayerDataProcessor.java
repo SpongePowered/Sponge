@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.data.tileentity;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
@@ -62,14 +61,14 @@ AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GamePr
             final Optional<GameProfile> oldData = getVal(skull);
             if (SkullUtils.setProfile(skull, null)) {
                 if (oldData.isPresent()) {
-                    return DataTransactionBuilder.successReplaceResult(Collections.emptySet(),
-                            Collections.singleton(constructImmutableValue(oldData.get())));
+                    return DataTransactionResult.successReplaceResult(Collections.emptySet(),
+                                                                      Collections.singleton(constructImmutableValue(oldData.get())));
                 } else {
-                    return DataTransactionBuilder.successNoData();
+                    return DataTransactionResult.successNoData();
                 }
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

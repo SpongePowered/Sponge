@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.passive.EntityTameable;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -68,6 +67,6 @@ public class TameableOwnerValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

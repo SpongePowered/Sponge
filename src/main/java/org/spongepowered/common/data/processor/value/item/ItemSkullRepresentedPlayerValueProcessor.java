@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.SkullTypes;
@@ -70,14 +69,14 @@ public class ItemSkullRepresentedPlayerValueProcessor extends AbstractSpongeValu
             final Optional<GameProfile> oldData = getVal(skull);
             if (SkullUtils.setProfile(skull, null)) {
                 if (oldData.isPresent()) {
-                    return DataTransactionBuilder.successReplaceResult(Collections.emptySet(),
-                            Collections.singleton(constructImmutableValue(oldData.get())));
+                    return DataTransactionResult.successReplaceResult(Collections.emptySet(),
+                                                                      Collections.singleton(constructImmutableValue(oldData.get())));
                 } else {
-                    return DataTransactionBuilder.successNoData();
+                    return DataTransactionResult.successNoData();
                 }
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

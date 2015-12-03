@@ -76,6 +76,7 @@ import org.spongepowered.common.data.processor.data.block.*;
 import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
+import org.spongepowered.common.data.processor.dual.entity.*;
 import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
@@ -88,7 +89,7 @@ import org.spongepowered.common.data.property.store.item.*;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 
-public class SpongeSerializationRegistry {
+public class DataRegistrar {
 
     public static void setupSerialization(Game game) {
         KeyRegistry.registerKeys();
@@ -147,10 +148,6 @@ public class SpongeSerializationRegistry {
         final ColoredDataProcessor coloredDataProcessor = new ColoredDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(ColoredData.class, SpongeColoredData.class,
                 ImmutableColoredData.class, ImmutableSpongeColoredData.class, coloredDataProcessor);
-
-        final CareerDataProcessor careerDataProcessor = new CareerDataProcessor();
-        dataRegistry.registerDataProcessorAndImpl(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
-                ImmutableSpongeCareerData.class, careerDataProcessor);
 
         final SignDataProcessor signDataProcessor = new SignDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class,
@@ -501,9 +498,6 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
                 ImmutableSpongeVehicleData.class, vehicleDataProcessor);
 
-        dataRegistry.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
-                new ArtDataProcessor());
-
         final TargetMultipleLivingDataProcessor targetMultipleLivingDataProcessor = new TargetMultipleLivingDataProcessor();
         dataRegistry.registerDataProcessorAndImpl(TargetMultipleLivingData.class, SpongeTargetMultipleLivingData.class, ImmutableTargetMultipleLivingData.class,
                 ImmutableSpongeTargetMultipleLivingData.class, targetMultipleLivingDataProcessor);
@@ -574,7 +568,6 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.DISPLAY_NAME, new TileEntityDisplayNameValueProcessor());
         dataRegistry.registerValueProcessor(Keys.DISPLAY_NAME, new EntityDisplayNameValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SHOWS_DISPLAY_NAME, new DisplayNameVisibleValueProcessor());
-        dataRegistry.registerValueProcessor(Keys.CAREER, new CareerValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SKULL_TYPE, new TileEntitySkullValueProcessor());
         dataRegistry.registerValueProcessor(Keys.SKULL_TYPE, new ItemSkullValueProcessor());
@@ -659,7 +652,6 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.NOTE_PITCH, new NoteValueProcessor());
         dataRegistry.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
-        dataRegistry.registerValueProcessor(Keys.ART, new ArtValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TARGET, new TargetLivingValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TARGETS, new TargetMultipleLivingValueProcessor());
         dataRegistry.registerValueProcessor(Keys.FIREWORK_EFFECTS, new EntityFireworkEffectsValueProcessor());
@@ -709,6 +701,22 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.BANNER_BASE_COLOR, new TileBannerBaseColorValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
         dataRegistry.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
+
+        // Dual Processors
+        final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ExpirableData.class, SpongeExpirableData.class, ImmutableExpirableData.class,
+            ImmutableSpongeExpirableData.class, expirableDataProcessor);
+        dataRegistry.registerValueProcessor(Keys.EXPIRATION_TICKS, expirableDataProcessor);
+
+        final ArtDualProcessor artDualProcessor = new ArtDualProcessor();
+        dataRegistry.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
+            artDualProcessor);
+        dataRegistry.registerValueProcessor(Keys.ART, artDualProcessor);
+
+        final CareerDualProcessor careerDualProcessor = new CareerDualProcessor();
+        dataRegistry.registerDataProcessorAndImpl(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
+            ImmutableSpongeCareerData.class, careerDualProcessor);
+        dataRegistry.registerValueProcessor(Keys.CAREER, careerDualProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

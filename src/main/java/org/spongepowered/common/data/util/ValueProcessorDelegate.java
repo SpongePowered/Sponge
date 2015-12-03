@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.util;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -107,7 +106,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
                 }
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -120,6 +119,6 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
                 }
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

@@ -30,7 +30,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -80,7 +79,7 @@ public class JukeboxDataProcessor extends AbstractTileEntityDataProcessor<BlockJ
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         if(dataHolder instanceof BlockJukebox.TileEntityJukebox) {
             Optional<ItemStackSnapshot> itemStackSnapshot = dataHolder.get(Keys.REPRESENTED_ITEM);
             if (itemStackSnapshot.isPresent()) {
@@ -95,11 +94,11 @@ public class JukeboxDataProcessor extends AbstractTileEntityDataProcessor<BlockJ
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
-                return DataTransactionBuilder.successNoData();
+                return DataTransactionResult.successNoData();
             }
         }
 
-        return builder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

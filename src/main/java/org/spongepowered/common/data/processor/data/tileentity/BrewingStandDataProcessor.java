@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
@@ -79,6 +78,6 @@ public class BrewingStandDataProcessor extends AbstractTileEntitySingleDataProce
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.failNoData(); //cannot be removed
+        return DataTransactionResult.failNoData(); //cannot be removed
     }
 }

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
@@ -60,7 +59,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
             final Optional<ColoredData> optional = from(dataHolder);
             final ItemStack stack = (ItemStack) dataHolder;
             if (ColorUtil.hasColorInNbt(stack) && optional.isPresent()) {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 try {
                     NbtDataUtil.removeColorFromNBT(stack);
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
@@ -69,10 +68,10 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
-                return DataTransactionBuilder.failNoData();
+                return DataTransactionResult.failNoData();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

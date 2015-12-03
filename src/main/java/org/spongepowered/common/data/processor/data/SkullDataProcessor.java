@@ -30,7 +30,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -84,10 +83,10 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
 
     private DataTransactionResult setImpl(DataHolder dataHolder, SkullData manipulator, SpongeSkullType newType) {
         if (!this.supports(dataHolder)) {
-            return DataTransactionBuilder.failResult(manipulator.getValues());
+            return DataTransactionResult.failResult(manipulator.getValues());
         }
 
-        DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        DataTransactionResult.Builder builder = DataTransactionResult.builder();
 
         SpongeSkullType oldType = null;
 
@@ -103,8 +102,8 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
             itemStack.setItemDamage(newType.getByteId());
         }
 
-        return DataTransactionBuilder.successReplaceResult(new ImmutableSpongeValue<>(Keys.SKULL_TYPE, newType),
-                                                           new ImmutableSpongeValue<>(Keys.SKULL_TYPE, oldType));
+        return DataTransactionResult.successReplaceResult(new ImmutableSpongeValue<>(Keys.SKULL_TYPE, newType),
+                                                          new ImmutableSpongeValue<>(Keys.SKULL_TYPE, oldType));
     }
 
     @Override
@@ -113,7 +112,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
         if (this.supports(dataHolder)) {
             return this.setImpl(dataHolder, manipulator, (SpongeSkullType) function.merge(this.from(dataHolder).get(), manipulator).type().get());
         }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return DataTransactionResult.failResult(manipulator.getValues());
     }
 
     @Override
@@ -126,7 +125,7 @@ public class SkullDataProcessor extends AbstractSpongeDataProcessor<SkullData, I
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+        return DataTransactionResult.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
 
     @Override

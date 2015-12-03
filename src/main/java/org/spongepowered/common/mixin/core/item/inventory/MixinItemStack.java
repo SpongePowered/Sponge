@@ -32,7 +32,6 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -275,7 +274,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 break;
             }
         }
-        final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         final DataManipulator<?, ?> newManipulator = checkNotNull(function.merge(existingManipulator, (DataManipulator) manipulator.copy()));
         if (existingManipulator != null) {
             builder.replace(existingManipulator.getValues());
@@ -329,9 +328,9 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         if (manipulator != null) {
             this.manipulators.remove(manipulator);
             resyncCustomToTag();
-            return DataTransactionBuilder.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
+            return DataTransactionResult.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
         } else {
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
     }
 
@@ -352,7 +351,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
         for (DataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(((Value) manipulator.getValue((Key) key).get()).asImmutable());
                 manipulator.set(key, value);
                 builder.success(((Value) manipulator.getValue((Key) key).get()).asImmutable());
@@ -360,7 +359,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -371,12 +370,12 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
                 resyncCustomToTag();
-                return DataTransactionBuilder.builder()
+                return DataTransactionResult.builder()
                     .replace(manipulator.getValues())
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

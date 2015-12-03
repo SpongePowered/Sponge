@@ -28,7 +28,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetLivingData;
@@ -81,16 +80,16 @@ public class TargetLivingDataProcessor extends AbstractEntitySingleDataProcessor
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
 
         final Optional<Living> current = dataHolder.get(Keys.TARGET);
         DataTransactionResult result;
         if (current.isPresent()) {
-            result = DataTransactionBuilder.builder().replace(constructImmutableValue(current.get())).build();
+            result = DataTransactionResult.builder().replace(constructImmutableValue(current.get())).build();
             ((EntityLiving) dataHolder).setAttackTarget(null);
         } else {
-            result = DataTransactionBuilder.successNoData();
+            result = DataTransactionResult.successNoData();
         }
 
         return result;

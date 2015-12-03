@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.item;
 import net.minecraft.entity.EntityList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -88,8 +87,8 @@ public class SpawnableEntityTypeValueProcessor extends AbstractSpongeValueProces
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (this.supports(container)) {
             ((ItemStack) container).setItemDamage(0);
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

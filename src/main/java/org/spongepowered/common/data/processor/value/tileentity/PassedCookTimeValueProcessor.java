@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.tileentity;
 
 import net.minecraft.tileentity.TileEntityFurnace;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -79,6 +78,6 @@ public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<T
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData(); //cannot be removed
+        return DataTransactionResult.failNoData(); //cannot be removed
     }
 }

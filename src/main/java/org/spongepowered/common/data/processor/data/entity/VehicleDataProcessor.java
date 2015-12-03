@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.data.entity;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -92,11 +91,11 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
             if (entity.isRiding()) {
                 Entity ridingEntity = (Entity) entity.ridingEntity;
                 entity.mountEntity(null);
-                return DataTransactionBuilder.successResult(new ImmutableSpongeEntityValue(Keys.VEHICLE, ridingEntity));
+                return DataTransactionResult.successResult(new ImmutableSpongeEntityValue(Keys.VEHICLE, ridingEntity));
             }
-            return DataTransactionBuilder.builder().result(DataTransactionResult.Type.SUCCESS).build();
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
         } else {
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
     }
 

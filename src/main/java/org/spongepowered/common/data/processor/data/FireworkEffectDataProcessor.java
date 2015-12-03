@@ -29,7 +29,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -100,7 +99,7 @@ public class FireworkEffectDataProcessor extends AbstractSingleDataProcessor<Lis
         Optional<FireworkEffectData> oldData = dataHolder.get(FireworkEffectData.class);
         FireworkEffectData newData = function.merge(oldData.orElse(null), manipulator);
 
-        DataTransactionBuilder result = DataTransactionBuilder.builder();
+        DataTransactionResult.Builder result = DataTransactionResult.builder();
         if(oldData.isPresent()) {
             result.replace(oldData.get().getValues());
         }
@@ -109,7 +108,7 @@ public class FireworkEffectDataProcessor extends AbstractSingleDataProcessor<Lis
         if(FireworkUtils.setFireworkEffects(dataHolder, effects)) {
             return result.success(newData.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
         } else {
-            return DataTransactionBuilder.failResult(newData.getValues());
+            return DataTransactionResult.failResult(newData.getValues());
         }
     }
 
@@ -125,8 +124,8 @@ public class FireworkEffectDataProcessor extends AbstractSingleDataProcessor<Lis
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         if(FireworkUtils.removeFireworkEffects(dataHolder)) {
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

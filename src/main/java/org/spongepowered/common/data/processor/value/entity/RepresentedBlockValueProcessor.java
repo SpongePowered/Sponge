@@ -28,7 +28,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -74,8 +73,8 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
             EntityMinecart cart = (EntityMinecart) container;
             ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
             cart.setHasDisplayTile(false);
-            return DataTransactionBuilder.builder().replace(block).build();
+            return DataTransactionResult.builder().replace(block).build();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

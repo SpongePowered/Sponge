@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
@@ -70,7 +69,7 @@ public class PlaceableDataProcessor
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (supports(dataHolder)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<PlaceableData> old = from(dataHolder);
             try {
                 if (set((ItemStack) dataHolder, ImmutableSet.<BlockType>of())) {
@@ -86,7 +85,7 @@ public class PlaceableDataProcessor
                 return builder.result(DataTransactionResult.Type.ERROR).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

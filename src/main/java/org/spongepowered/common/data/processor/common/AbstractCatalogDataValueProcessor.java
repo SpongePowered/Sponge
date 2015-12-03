@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -48,7 +47,7 @@ public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

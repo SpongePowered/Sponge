@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -110,7 +109,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
         final ImmutableValue<E> newValue = constructImmutableValue(value);
         if (supports(container)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<E> oldVal = getVal((C) container);
             try {
                 if (set((C) container, value)) {
@@ -125,7 +124,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
                 return builder.result(DataTransactionResult.Type.ERROR).reject(newValue).build();
             }
         }
-        return DataTransactionBuilder.failResult(newValue);
+        return DataTransactionResult.failResult(newValue);
     }
 
 }

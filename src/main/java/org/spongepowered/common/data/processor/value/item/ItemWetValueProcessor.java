@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -53,11 +52,11 @@ public class ItemWetValueProcessor extends AbstractSpongeValueProcessor<ItemStac
                 ImmutableValue<Boolean> newValue = constructImmutableValue(false);
                 stack.setItemDamage(0);
 
-                return DataTransactionBuilder.successReplaceResult(original, newValue);
+                return DataTransactionResult.successReplaceResult(original, newValue);
             }
         }
 
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

@@ -28,7 +28,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
@@ -86,8 +85,8 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (this.supports(dataHolder)) {
             ((ItemStack) dataHolder).setItemDamage(0);
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

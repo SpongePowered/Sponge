@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.item;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -96,7 +95,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<Text> optional = getValueFromContainer(container);
             if (optional.isPresent()) {
                 try {
@@ -110,5 +109,5 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();    }
+        return DataTransactionResult.failNoData();    }
 }

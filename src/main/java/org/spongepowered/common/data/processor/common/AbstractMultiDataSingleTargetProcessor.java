@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -88,7 +87,7 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
     @Override
     public DataTransactionResult set(DataHolder dataHolder, T manipulator, MergeFunction function) {
         if (supports(dataHolder)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<T> old = from(dataHolder);
             final T merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final Map<Key<?>, Object> map = new IdentityHashMap<>();
@@ -111,7 +110,7 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
                 return builder.result(DataTransactionResult.Type.ERROR).reject(newValues).build();
             }
         }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return DataTransactionResult.failResult(manipulator.getValues());
     }
 
 

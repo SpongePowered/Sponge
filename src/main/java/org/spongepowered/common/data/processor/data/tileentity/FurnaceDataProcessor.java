@@ -29,7 +29,6 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -135,6 +134,6 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.failNoData(); //cannot be removed
+        return DataTransactionResult.failNoData(); //cannot be removed
     }
 }

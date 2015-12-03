@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -59,13 +58,13 @@ public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity,
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
             if (((Entity) dataHolder).fire > 0) {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(from(dataHolder).get().getValues());
                 ((Entity) dataHolder).extinguish();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

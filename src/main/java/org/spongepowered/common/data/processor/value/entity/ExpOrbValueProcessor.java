@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.entity;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import net.minecraft.entity.item.EntityXPOrb;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -69,7 +68,7 @@ public class ExpOrbValueProcessor extends AbstractSpongeValueProcessor<EntityXPO
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
 }

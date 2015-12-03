@@ -29,7 +29,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -107,9 +106,9 @@ public class ItemSignLinesValueProcessor extends AbstractSpongeValueProcessor<It
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (!((ItemStack) container).getItem().equals(Items.sign)) {
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         } else {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
                 final ImmutableListValue<Text> immutableTexts =

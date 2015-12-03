@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -48,9 +47,9 @@ public final class TileEntityLockTokenValueProcessor extends AbstractSpongeValue
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof TileEntityLockable) {
             set((TileEntityLockable) container, "");
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

@@ -32,7 +32,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -94,7 +93,7 @@ public abstract class MixinDataHolder implements DataHolder {
             } else if (this instanceof IMixinCustomDataHolder) {
                 return ((IMixinCustomDataHolder) this).offerCustom(key, value);
             }
-            return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.FAILURE).build();
         }
     }
 
@@ -108,14 +107,14 @@ public abstract class MixinDataHolder implements DataHolder {
             } else if (this instanceof IMixinCustomDataHolder) {
                 return ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
             }
-            return DataTransactionBuilder.failResult(valueContainer.getValues());
+            return DataTransactionResult.failResult(valueContainer.getValues());
         }
     }
 
     @Override
     public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> valueContainers) {
         try (Timing timing = SpongeTimings.dataOfferMultiManipulators.startTiming()) {
-            DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            DataTransactionResult.Builder builder = DataTransactionResult.builder();
             for (DataManipulator<?, ?> manipulator : valueContainers) {
                 final DataTransactionResult result = offer(manipulator);
                 if (!result.getRejectedData().isEmpty()) {
@@ -151,7 +150,7 @@ public abstract class MixinDataHolder implements DataHolder {
             } else if (this instanceof IMixinCustomDataHolder) {
                 return ((IMixinCustomDataHolder) this).removeCustom(containerClass);
             }
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
     }
 
@@ -164,7 +163,7 @@ public abstract class MixinDataHolder implements DataHolder {
             } else if (this instanceof IMixinCustomDataHolder) {
                 return ((IMixinCustomDataHolder) this).removeCustom(key);
             }
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
     }
 
@@ -172,9 +171,9 @@ public abstract class MixinDataHolder implements DataHolder {
     public DataTransactionResult undo(DataTransactionResult result) {
         try (Timing timing = SpongeTimings.dataOfferManipulator.startTiming()) {
             if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
-                return DataTransactionBuilder.successNoData();
+                return DataTransactionResult.successNoData();
             }
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             for (ImmutableValue<?> replaced : result.getReplacedData()) {
                 builder.absorbResult(offer(replaced));
             }

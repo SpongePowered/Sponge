@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.tileentity.TileEntityHopper;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
@@ -75,6 +74,6 @@ public class CooldownDataProcessor
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

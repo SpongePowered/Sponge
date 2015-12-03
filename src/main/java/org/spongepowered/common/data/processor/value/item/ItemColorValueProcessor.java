@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -82,7 +81,7 @@ public class ItemColorValueProcessor extends AbstractSpongeValueProcessor<ItemSt
             final ItemStack stack = (ItemStack) container;
             final Optional<Color> optional = getVal(stack);
             if (ColorUtil.hasColorInNbt(stack) && optional.isPresent()) {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 try {
                     NbtDataUtil.removeColorFromNBT(stack);
                     return builder.replace(new ImmutableSpongeValue<>(Keys.COLOR, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
@@ -91,9 +90,9 @@ public class ItemColorValueProcessor extends AbstractSpongeValueProcessor<ItemSt
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
-                return DataTransactionBuilder.failNoData();
+                return DataTransactionResult.failNoData();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

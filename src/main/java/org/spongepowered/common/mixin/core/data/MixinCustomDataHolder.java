@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -60,7 +59,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
                 break;
             }
         }
-        final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         final DataManipulator<?, ?> newManipulator = checkNotNull(function.merge(existingManipulator, (DataManipulator) manipulator.copy()));
         if (existingManipulator != null) {
             builder.replace(existingManipulator.getValues());
@@ -93,9 +92,9 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
         }
         if (manipulator != null) {
             this.manipulators.remove(manipulator);
-            return DataTransactionBuilder.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
+            return DataTransactionResult.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
         } else {
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
     }
 
@@ -114,14 +113,14 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
         for (DataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(((Value) manipulator.getValue((Key) key).get()).asImmutable());
                 manipulator.set(key, value);
                 builder.success(((Value) manipulator.getValue((Key) key).get()).asImmutable());
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -131,13 +130,13 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
             final DataManipulator<?, ?> manipulator = iterator.next();
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
-                return DataTransactionBuilder.builder()
+                return DataTransactionResult.builder()
                     .replace(manipulator.getValues())
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
 }

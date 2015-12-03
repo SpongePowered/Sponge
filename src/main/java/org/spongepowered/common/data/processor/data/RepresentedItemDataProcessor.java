@@ -29,7 +29,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
@@ -83,11 +82,11 @@ public class RepresentedItemDataProcessor extends AbstractEntitySingleDataProces
             if (((EntityItemFrame) dataHolder).getDisplayedItem() != null) {
                 final ImmutableValue<ItemStackSnapshot> old = constructImmutableValue(getVal((EntityItemFrame) dataHolder).get());
                 ((EntityItemFrame) dataHolder).setDisplayedItem(null);
-                return DataTransactionBuilder.builder().replace(old).result(DataTransactionResult.Type.SUCCESS).build();
+                return DataTransactionResult.builder().replace(old).result(DataTransactionResult.Type.SUCCESS).build();
             } else {
-                return DataTransactionBuilder.successNoData();
+                return DataTransactionResult.successNoData();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

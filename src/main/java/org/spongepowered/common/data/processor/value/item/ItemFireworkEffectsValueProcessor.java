@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.item;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -77,8 +76,8 @@ public class ItemFireworkEffectsValueProcessor extends AbstractSpongeValueProces
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if(FireworkUtils.removeFireworkEffects(container)) {
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

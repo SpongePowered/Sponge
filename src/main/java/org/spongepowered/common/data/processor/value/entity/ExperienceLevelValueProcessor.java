@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.player.EntityPlayer;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -57,15 +56,15 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
             player.experience = 0;
             player.experienceLevel = value;
             final ImmutableBoundedValue<Integer> oldImmutableValue = constructImmutableValue(oldValue);
-            return DataTransactionBuilder.successReplaceResult(newValue, oldImmutableValue);
+            return DataTransactionResult.successReplaceResult(newValue, oldImmutableValue);
         }
 
-        return DataTransactionBuilder.failResult(newValue);
+        return DataTransactionResult.failResult(newValue);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

@@ -33,7 +33,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.IWorldNameable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -118,7 +117,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, DisplayNameData manipulator, MergeFunction function) {
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return DataTransactionResult.failResult(manipulator.getValues());
     }
 
     @Override
@@ -136,7 +135,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<DisplayNameData> optional = from(dataHolder);
             if (optional.isPresent()) {
                 try {
@@ -150,7 +149,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         } else if (dataHolder instanceof Entity) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<DisplayNameData> optional = from(dataHolder);
             if (optional.isPresent()) {
                 try {
@@ -165,7 +164,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -84,7 +83,7 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<TileEn
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof TileEntitySign) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
                 final ImmutableListValue<Text> immutableTexts = new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(oldData.get()));
@@ -100,6 +99,6 @@ public class SignLinesValueProcessor extends AbstractSpongeValueProcessor<TileEn
                 return builder.result(DataTransactionResult.Type.ERROR).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

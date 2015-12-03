@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.util;
 
-import static org.spongepowered.api.data.DataTransactionBuilder.successNoData;
+import static org.spongepowered.api.data.DataTransactionResult.successNoData;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;

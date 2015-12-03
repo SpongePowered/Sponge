@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.data.tileentity;
 import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
@@ -51,9 +50,9 @@ public final class TileEntityLockableDataProcessor
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntityLockable) {
             set((TileEntityLockable) dataHolder, "");
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

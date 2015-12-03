@@ -28,7 +28,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -86,9 +85,9 @@ public class RepresentedItemValueProcessor extends AbstractSpongeValueProcessor<
             if (((EntityItemFrame) container).getDisplayedItem() != null) {
                 final ImmutableValue<ItemStackSnapshot> value = constructValue(getValueFromContainer(container).get()).asImmutable();
                 ((EntityItemFrame) container).setDisplayedItem(null);
-                return DataTransactionBuilder.builder().replace(value).result(DataTransactionResult.Type.SUCCESS).build();
+                return DataTransactionResult.builder().replace(value).result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

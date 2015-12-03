@@ -29,7 +29,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataTransactionResult.Type;
 import org.spongepowered.api.data.key.Keys;
@@ -65,7 +64,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (supports(dataHolder)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<LoreData> data = from(dataHolder);
             if (data.isPresent()) {
                 try {
@@ -79,7 +78,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
                 return builder.result(Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

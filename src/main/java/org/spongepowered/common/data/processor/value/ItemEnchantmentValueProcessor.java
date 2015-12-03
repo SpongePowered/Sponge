@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -72,12 +71,12 @@ public class ItemEnchantmentValueProcessor extends AbstractSpongeValueProcessor<
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
             if (((ItemStack) container).isItemEnchanted()) {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(constructValue(getValueFromContainer(container).get()).asImmutable());
                 ((ItemStack) container).getTagCompound().removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

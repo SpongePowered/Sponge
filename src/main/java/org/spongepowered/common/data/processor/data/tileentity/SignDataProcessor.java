@@ -34,7 +34,6 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -155,7 +154,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
         if (dataHolder instanceof TileEntitySign) {
             final Optional<SignData> oldData = dataHolder.get(SignData.class);
             if (oldData.isPresent()) {
-                DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(oldData.get().getValues());
                 final List<Text> texts = manipulator.get(Keys.SIGN_LINES).get();
                 for (int i = 0; i < 4; i++) {
@@ -168,9 +167,9 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             }
         } if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).getItem().equals(Items.sign)) {
-                return DataTransactionBuilder.failResult(manipulator.getValues());
+                return DataTransactionResult.failResult(manipulator.getValues());
             }
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<SignData> oldData = from(dataHolder);
             if (oldData.isPresent()) {
                 builder.replace(oldData.get().getValues());
@@ -192,7 +191,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 return builder.reject(manipulator.getValues()).result(DataTransactionResult.Type.ERROR).build();
             }
         }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return DataTransactionResult.failResult(manipulator.getValues());
     }
 
     @Override
@@ -207,7 +206,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (dataHolder instanceof TileEntitySign) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<SignData> oldData = from(dataHolder);
             if (oldData.isPresent()) {
                 builder.replace(oldData.get().getValues());
@@ -223,9 +222,9 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             return builder.result(DataTransactionResult.Type.SUCCESS).build();
         } else if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).getItem().equals(Items.sign)) {
-                return DataTransactionBuilder.failNoData();
+                return DataTransactionResult.failNoData();
             } else {
-                final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 final Optional<SignData> oldData = from(dataHolder);
                 if (oldData.isPresent()) {
                     builder.replace(oldData.get().getValues());
@@ -244,7 +243,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
                 }
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

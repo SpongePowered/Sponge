@@ -30,7 +30,6 @@ import net.minecraft.entity.item.EntityMinecart;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -99,7 +98,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Enti
     public DataTransactionResult remove(DataHolder dataHolder) {
         if(dataHolder instanceof EntityMinecart) {
             EntityMinecart cart = (EntityMinecart) dataHolder;
-            DataTransactionBuilder builder = DataTransactionBuilder.builder().result(DataTransactionResult.Type.SUCCESS);
+            DataTransactionResult.Builder builder = DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS);
             if(cart.hasDisplayTile()) {
                 ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
                 ImmutableValue<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.getDisplayTileOffset());
@@ -108,6 +107,6 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Enti
             }
             return builder.build();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

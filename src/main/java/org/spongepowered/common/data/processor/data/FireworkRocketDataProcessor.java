@@ -30,7 +30,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -105,7 +104,7 @@ public class FireworkRocketDataProcessor extends AbstractSingleDataProcessor<Int
 
         int modifier = newData.get(Keys.FIREWORK_FLIGHT_MODIFIER).get();
 
-        DataTransactionBuilder result = DataTransactionBuilder.builder();
+        DataTransactionResult.Builder result = DataTransactionResult.builder();
         if(oldData.isPresent()) {
             result.replace(oldData.get().getValues());
         }
@@ -127,7 +126,7 @@ public class FireworkRocketDataProcessor extends AbstractSingleDataProcessor<Int
         }
 
 
-        return DataTransactionBuilder.failResult(newData.getValues());
+        return DataTransactionResult.failResult(newData.getValues());
     }
 
     @Override
@@ -145,9 +144,9 @@ public class FireworkRocketDataProcessor extends AbstractSingleDataProcessor<Int
             if(fireworks != null) {
                 fireworks.removeTag("Flight");
             }
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
 }

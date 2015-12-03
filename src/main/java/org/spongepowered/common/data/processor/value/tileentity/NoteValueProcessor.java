@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.tileentity.TileEntityNote;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.NotePitch;
@@ -72,6 +71,6 @@ public class NoteValueProcessor extends AbstractSpongeValueProcessor<TileEntityN
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

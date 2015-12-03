@@ -30,7 +30,6 @@ import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.entity.passive.EntityTameable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -96,7 +95,7 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
     public DataTransactionResult set(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
         if (dataHolder instanceof EntityTameable) {
             final EntityTameable entityTameable = (EntityTameable) dataHolder;
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final String sPrevTamer = entityTameable.getOwnerId();
             final Optional<UUID> prevTamer = TameableDataProcessor.asUUID(sPrevTamer);
             final TameableData
@@ -117,7 +116,7 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
                 return builder.build();
             }
         }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return DataTransactionResult.failResult(manipulator.getValues());
     }
 
     @Override
@@ -129,7 +128,7 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
         //Fail to remove data, at this stage untameable tameables are not supported.
-        return DataTransactionBuilder.builder().result(DataTransactionResult.Type.FAILURE).build();
+        return DataTransactionResult.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
 
     @Override

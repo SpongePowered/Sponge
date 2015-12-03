@@ -106,7 +106,6 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Property;
@@ -2323,7 +2322,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             final Optional<E> optional = get(x, y, z, key);
             return offer(x, y, z, key, function.apply(optional.get()));
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -2334,13 +2333,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
             ImmutableValue<E> old = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
             setBlock(x, y, z, blockState.with(key, value).get());
             ImmutableValue<E> newVal = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
-            return DataTransactionBuilder.successReplaceResult(newVal, old);
+            return DataTransactionResult.successReplaceResult(newVal, old);
         }
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
         if (tileEntity.isPresent() && tileEntity.get().supports(key)) {
             return tileEntity.get().offer(key, value);
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -2363,19 +2362,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
             final BlockState newState = blockState.with(immutableDataManipulator).get();
             old.removeAll(newState.getValues());
             setBlock(x, y, z, newState);
-            return DataTransactionBuilder.successReplaceResult(old, manipulator.getValues());
+            return DataTransactionResult.successReplaceResult(old, manipulator.getValues());
         } else {
             final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
             if (tileEntityOptional.isPresent()) {
                 return tileEntityOptional.get().offer(manipulator, function);
             }
         }
-        return DataTransactionBuilder.failResult(manipulator.getValues());
+        return DataTransactionResult.failResult(manipulator.getValues());
     }
 
     @Override
     public DataTransactionResult offer(int x, int y, int z, Iterable<DataManipulator<?, ?>> manipulators) {
-        final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         for (DataManipulator<?, ?> manipulator : manipulators) {
             builder.absorbResult(offer(x, y, z, manipulator));
         }
@@ -2388,7 +2387,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (tileEntityOptional.isPresent()) {
             return tileEntityOptional.get().remove(manipulatorClass);
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -2397,12 +2396,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (tileEntityOptional.isPresent()) {
             return tileEntityOptional.get().remove(key);
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
     public DataTransactionResult undo(int x, int y, int z, DataTransactionResult result) {
-        return DataTransactionBuilder.failNoData(); // todo
+        return DataTransactionResult.failNoData(); // todo
     }
 
     @Override
@@ -2417,7 +2416,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from, MergeFunction function) {
-        final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         final Collection<DataManipulator<?, ?>> manipulators = from.getContainers();
         for (DataManipulator<?, ?> manipulator : manipulators) {
             builder.absorbResult(offer(xTo, yTo, zTo, manipulator, function));

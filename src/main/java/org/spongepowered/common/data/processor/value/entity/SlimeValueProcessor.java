@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.entity;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import net.minecraft.entity.monster.EntitySlime;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -73,6 +72,6 @@ public class SlimeValueProcessor extends AbstractSpongeValueProcessor<EntitySlim
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

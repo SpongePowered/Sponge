@@ -22,38 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.entity;
+package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.item.EntityPainting;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.util.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ArtValueProcessor extends AbstractSpongeValueProcessor<EntityPainting, Art, Value<Art>> {
+public class ArtDualProcessor extends AbstractSingleTargetDualProcessor<EntityPainting, Art, Value<Art>, ArtData, ImmutableArtData> {
 
-    public ArtValueProcessor() {
+    public ArtDualProcessor() {
         super(EntityPainting.class, Keys.ART);
-    }
-
-    @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
-    }
-
-    @Override
-    protected Value<Art> constructValue(Art defaultValue) {
-        return new SpongeValue<>(Keys.ART, defaultValue);
     }
 
     @SuppressWarnings("unchecked")
@@ -66,13 +58,27 @@ public class ArtValueProcessor extends AbstractSpongeValueProcessor<EntityPainti
     }
 
     @Override
-    protected Optional<Art> getVal(EntityPainting container) {
-        return Optional.of((Art) (Object) container.art);
+    protected Optional<Art> getVal(EntityPainting entity) {
+        return Optional.of((Art) (Object) entity.art);
     }
 
     @Override
     protected ImmutableValue<Art> constructImmutableValue(Art value) {
-        return new ImmutableSpongeValue<>(Keys.ART, SpongeArtData.DEFAULT_ART, value);
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, SpongeArtData.DEFAULT_ART);
     }
 
+    @Override
+    protected ArtData createManipulator() {
+        return new SpongeArtData();
+    }
+
+    @Override
+    protected Value<Art> constructValue(Art actualValue) {
+        return new SpongeValue<>(Keys.ART, SpongeArtData.DEFAULT_ART, actualValue);
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 }

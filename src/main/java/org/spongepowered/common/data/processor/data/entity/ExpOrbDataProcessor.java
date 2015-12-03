@@ -28,7 +28,6 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
@@ -71,6 +70,6 @@ public class ExpOrbDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }

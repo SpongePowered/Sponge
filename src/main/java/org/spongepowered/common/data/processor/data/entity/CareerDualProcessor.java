@@ -24,57 +24,58 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.item.EntityPainting;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
+import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
-import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.Careers;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.EntityUtil;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 import java.util.Optional;
 
-public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPainting, Art, Value<Art>, ArtData, ImmutableArtData> {
+public class CareerDualProcessor extends AbstractSingleTargetDualProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
 
-    public ArtDataProcessor() {
-        super(EntityPainting.class, Keys.ART);
+    public CareerDualProcessor() {
+        super(EntityVillager.class, Keys.CAREER);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionBuilder.failNoData();
+    protected CareerData createManipulator() {
+        return new SpongeCareerData();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(EntityPainting entity, Art value) {
-        if (!entity.worldObj.isRemote) {
-            EntityUtil.refreshPainting(entity, (EntityPainting.EnumArt) (Object) value);
-        }
+    protected boolean set(EntityVillager entity, Career value) {
+        ((IMixinVillager) entity).setCareer(value);
         return true;
     }
 
     @Override
-    protected Optional<Art> getVal(EntityPainting entity) {
-        return Optional.of((Art) (Object) entity.art);
+    protected Optional<Career> getVal(EntityVillager entity) {
+        return Optional.of(((IMixinVillager) entity).getCareer());
     }
 
     @Override
-    protected ImmutableValue<Art> constructImmutableValue(Art value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, SpongeArtData.DEFAULT_ART);
+    protected ImmutableValue<Career> constructImmutableValue(Career value) {
+        return ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.FARMER, value);
     }
 
     @Override
-    protected ArtData createManipulator() {
-        return new SpongeArtData();
+    protected Value<Career> constructValue(Career actualValue) {
+        return new SpongeValue<Career>(Keys.CAREER, Careers.FARMER, actualValue);
     }
 
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 }

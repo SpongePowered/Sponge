@@ -29,7 +29,6 @@ import static org.spongepowered.common.data.util.ItemsHelper.getTagCompound;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -83,7 +82,7 @@ public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<ItemSt
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (this.supports(container)) {
-            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<List<Text>> oldData = getValueFromContainer(container);
             if (oldData.isPresent()) {
                 final ImmutableListValue<Text> pages = new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(oldData.get()));
@@ -93,7 +92,7 @@ public class BookPagesValueProcessor extends AbstractSpongeValueProcessor<ItemSt
             return builder.result(DataTransactionResult.Type.SUCCESS).build();
 
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
 }

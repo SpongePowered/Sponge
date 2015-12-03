@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -56,11 +55,11 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
             if (entity.isRiding()) {
                 Entity ridingEntity = (Entity) entity.ridingEntity;
                 entity.mountEntity(null);
-                return DataTransactionBuilder.successResult(new ImmutableSpongeEntityValue(Keys.VEHICLE, ridingEntity));
+                return DataTransactionResult.successResult(new ImmutableSpongeEntityValue(Keys.VEHICLE, ridingEntity));
             }
-            return DataTransactionBuilder.builder().result(DataTransactionResult.Type.SUCCESS).build();
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
         } else {
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
     }
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.value.item;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -80,8 +79,8 @@ public class ItemFireworkRocketValueProcessor extends AbstractSpongeValueProcess
             if(fireworks != null) {
                 fireworks.removeTag("Flight");
             }
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }
