@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
@@ -71,8 +72,8 @@ public class GameModeDataProcessor extends
     }
 
     @Override
-    protected Value<GameMode> constructValue(GameMode actualValue) {
-        return new SpongeValue<>(Keys.GAME_MODE, GameModes.SURVIVAL, actualValue);
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionResult.failNoData();
     }
 
     @Override

@@ -34,10 +34,15 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.util.PEBKACException;
+import org.spongepowered.api.service.ServiceManager;
+import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeGame;
+import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.data.DataRegistrar;
+import org.spongepowered.common.data.key.KeyRegistry;
+import org.spongepowered.common.data.util.DataProcessorDelegate;
+import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -47,20 +52,32 @@ import java.util.Set;
 @RunWith(Parameterized.class)
 public class ManipulatorTest {
 
-    @Parameterized.Parameters(name = "{index} Data: {0}")
-    public static Iterable<Object[]> data() throws Exception {
-        return DataTestUtil.generateManipulatorTestObjects();
-    }
+    @SuppressWarnings("unchecked")
+    @BeforeClass
+    public static void setupKeys() {
+        try { // Setting up keys
+            Method mapGetter = KeyRegistry.class.getDeclaredMethod("getKeyMap", new Class[0]);
+            mapGetter.setAccessible(true);
+            final Map<String, Key<?>> mapping = (Map<String, Key<?>>) mapGetter.invoke(null);
+            for (Field field : Keys.class.getDeclaredFields()) {
+                if (!mapping.containsKey(field.getName().toLowerCase())) {
+                    continue;
+                }
+                Field modifierField = Field.class.getDeclaredField("modifiers");
+                modifierField.setAccessible(true);
+                modifierField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                field.set(null, mapping.get(field.getName().toLowerCase()));
+            }
+            SpongeGame mockGame = mock(SpongeGame.class);
 
-    private String dataName;
-    private Class<? extends DataManipulator<?, ?>> manipulatorClass;
-    private DataManipulatorBuilder<?, ?> builder;
-
-
-    public ManipulatorTest(String simpleName, Class<? extends DataManipulator<?, ?>> manipulatorClass, DataManipulatorBuilder<?, ?> builder) {
-        this.manipulatorClass = manipulatorClass;
-        this.dataName = simpleName;
-        this.builder = builder;
+            final ServiceManager mockServiceManager = mock(ServiceManager.class);
+            final SerializationManager serializationManager = SpongeSerializationManager.getInstance();
+            Mockito.when(mockGame.getServiceManager()).thenReturn(mockServiceManager);
+            when(mockServiceManager.provide(SerializationManager.class)).thenReturn(Optional.of(serializationManager));
+            DataRegistrar.setupSerialization(mockGame);
+        } catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressWarnings("unchecked")

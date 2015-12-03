@@ -22,30 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.dual.entity;
+package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.passive.EntityOcelot;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpawningData;
-import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.IMixinEntityPlayer;
+import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.entity.SpongeOcelotType;
 
 import java.util.Optional;
 
-public class AffectsSpawningDataProcessor extends
-    AbstractSingleTargetDualProcessor<EntityPlayerMP, Boolean, Value<Boolean>, AffectsSpawningData, ImmutableAffectsSpawningData> {
+public class OcelotTypeValueProcessor extends AbstractSpongeValueProcessor<EntityOcelot, OcelotType, Value<OcelotType>> {
 
-    public AffectsSpawningDataProcessor() {
-        super(EntityPlayerMP.class, Keys.AFFECTS_SPAWNING);
+    public OcelotTypeValueProcessor() {
+        super(EntityOcelot.class, Keys.OCELOT_TYPE);
     }
 
     @Override
@@ -54,27 +52,27 @@ public class AffectsSpawningDataProcessor extends
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityPlayerMP entity) {
-        return Optional.of(((IMixinEntityPlayer) entity).affectsSpawning());
+    protected Value<OcelotType> constructValue(OcelotType defaultValue) {
+        return new SpongeValue<>(Keys.OCELOT_TYPE, defaultValue, OcelotTypes.WILD_OCELOT);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.AFFECTS_SPAWNING, true, value);
+    protected boolean set(EntityOcelot container, OcelotType value) {
+        if (value instanceof SpongeOcelotType) {
+            container.setTameSkin(((SpongeOcelotType) value).type);
+            return true;
+        }
+        return false;
     }
 
     @Override
-    protected AffectsSpawningData createManipulator() {
-        return new SpongeAffectsSpawningData();
+    protected Optional<OcelotType> getVal(EntityOcelot container) {
+        return Optional.ofNullable(SpongeEntityConstants.OCELOT_IDMAP.get(container.getTameSkin()));
+    }
+    
+    @Override
+    protected ImmutableValue<OcelotType> constructImmutableValue(OcelotType value) {
+        return ImmutableSpongeValue.cachedOf(Keys.OCELOT_TYPE, OcelotTypes.WILD_OCELOT, value);
     }
 
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.AFFECTS_SPAWNING, true, actualValue);
-    }
-
-    @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
-    }
 }

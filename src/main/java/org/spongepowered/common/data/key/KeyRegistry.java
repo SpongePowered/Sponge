@@ -262,6 +262,7 @@ public class KeyRegistry {
         keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
         keyMap.put("banner_patterns", new PatternKey());
         keyMap.put("respawn_locations", makeMapKey(UUID.class, Vector3d.class, of("RespawnLocations")));
+        keyMap.put("expiration_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ExpirationTicks")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

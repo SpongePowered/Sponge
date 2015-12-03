@@ -22,30 +22,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.dual.entity;
+package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpawningData;
-import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 
 import java.util.Optional;
 
-public class AffectsSpawningDataProcessor extends
-    AbstractSingleTargetDualProcessor<EntityPlayerMP, Boolean, Value<Boolean>, AffectsSpawningData, ImmutableAffectsSpawningData> {
+public class GameModeValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, GameMode, Value<GameMode>> {
 
-    public AffectsSpawningDataProcessor() {
-        super(EntityPlayerMP.class, Keys.AFFECTS_SPAWNING);
+    public GameModeValueProcessor() {
+        super(EntityPlayer.class, Keys.GAME_MODE);
+    }
+
+    @Override
+    public Optional<GameMode> getValueFromContainer(ValueContainer<?> container) {
+        if (container instanceof EntityPlayerMP) {
+            return Optional.of((GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    protected Value<GameMode> constructValue(GameMode defaultValue) {
+        return new SpongeValue<>(getKey(), DataConstants.DEFAULT_GAMEMODE, defaultValue);
+    }
+
+    @Override
+    protected boolean set(EntityPlayer container, GameMode value) {
+        container.setGameType((WorldSettings.GameType) (Object) value);
+        return true;
+    }
+
+    @Override
+    protected Optional<GameMode> getVal(EntityPlayer container) {
+        return Optional.of((GameMode) (Object) ((EntityPlayerMP) container).theItemInWorldManager.getGameType());
+    }
+
+    @Override
+    protected ImmutableValue<GameMode> constructImmutableValue(GameMode value) {
+        return ImmutableSpongeValue.cachedOf(getKey(), DataConstants.DEFAULT_GAMEMODE, value);
     }
 
     @Override
@@ -53,28 +80,4 @@ public class AffectsSpawningDataProcessor extends
         return DataTransactionResult.failNoData();
     }
 
-    @Override
-    protected Optional<Boolean> getVal(EntityPlayerMP entity) {
-        return Optional.of(((IMixinEntityPlayer) entity).affectsSpawning());
-    }
-
-    @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.AFFECTS_SPAWNING, true, value);
-    }
-
-    @Override
-    protected AffectsSpawningData createManipulator() {
-        return new SpongeAffectsSpawningData();
-    }
-
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.AFFECTS_SPAWNING, true, actualValue);
-    }
-
-    @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
-    }
 }

@@ -36,10 +36,6 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class SpongeExpirableData extends AbstractBoundedComparableData<Integer, ExpirableData, ImmutableExpirableData> implements ExpirableData {
 
-    public SpongeExpirableData() {
-        this(0, 2400);
-    }
-
     public SpongeExpirableData(Integer value, Integer upperBound) {
         super(ExpirableData.class, value, Keys.EXPIRATION_TICKS, intComparator(), ImmutableSpongeExpirableData.class, 0, upperBound, 0);
     }

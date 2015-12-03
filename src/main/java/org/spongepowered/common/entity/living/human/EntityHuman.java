@@ -25,6 +25,8 @@
 
 package org.spongepowered.common.entity.living.human;
 
+import static org.spongepowered.api.data.DataTransactionResult.failResult;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -304,18 +306,25 @@ public class EntityHuman extends EntityCreature {
     public boolean setSkinUuid(UUID skin) {
         if (!MinecraftServer.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
-            return false;
+            return DataTransactionResult.failResult(skin.skin().asImmutable());
         }
-        if (skin.equals(this.skinUuid)) {
-            return true;
+        if (skin.skin().get().equals(this.skinUuid)) {
+            return DataTransactionResult.successNoData();
         }
-        if (!updateFakeProfileWithSkin(skin)) {
-            return false;
+        if (!updateFakeProfileWithSkin(skin.skin().get())) {
+            return DataTransactionResult.failResult(skin.skin().asImmutable());
         }
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
-        return true;
+        return DataTransactionResult.successNoData();
+    }
+
+    public Optional<SkinData> getSkinData() {
+        if (this.skinUuid != null) {
+            return Optional.empty(); //Optional.<SkinData>of(new SpongeSkinData(this.skinUuid));
+        }
+        return Optional.empty();
     }
 
     public UUID getSkinUuid() {

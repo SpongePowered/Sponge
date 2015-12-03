@@ -22,54 +22,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.dual.entity;
+package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.item.EntityXPOrb;
-import org.spongepowered.api.data.DataHolder;
+import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 import java.util.Optional;
 
-public class ExpOrbDataProcessor extends
-    AbstractSingleTargetDualProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
+public class CareerDualProcessor extends AbstractSingleTargetDualProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
 
-    public ExpOrbDataProcessor() {
-        super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
+    public CareerDualProcessor() {
+        super(EntityVillager.class, Keys.CAREER);
     }
 
     @Override
-    protected boolean set(EntityXPOrb entity, Integer value) {
-        ((IMixinEntityXPOrb) entity).setExperience(value);
+    protected CareerData createManipulator() {
+        return new SpongeCareerData();
+    }
+
+    @Override
+    protected boolean set(EntityVillager entity, Career value) {
+        ((IMixinVillager) entity).setCareer(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityXPOrb entity) {
-        return Optional.of(((IMixinEntityXPOrb) entity).getExperience());
+    protected Optional<Career> getVal(EntityVillager entity) {
+        return Optional.of(((IMixinVillager) entity).getCareer());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected ImmutableValue<Career> constructImmutableValue(Career value) {
+        return ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.FARMER, value);
     }
 
     @Override
-    protected ExpOrbData createManipulator() {
-        return new SpongeExpOrbData();
+    protected Value<Career> constructValue(Career actualValue) {
+        return new SpongeValue<Career>(Keys.CAREER, Careers.FARMER, actualValue);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

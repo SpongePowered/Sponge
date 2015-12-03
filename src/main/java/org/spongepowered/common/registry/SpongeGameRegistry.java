@@ -62,7 +62,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -380,6 +380,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void preInit() {
         this.phase = RegistrationPhase.PRE_INIT;
+        DataRegistrar.setupSerialization(SpongeImpl.getGame());
         registerModulePhase();
     }
 

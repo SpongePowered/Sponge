@@ -49,8 +49,8 @@ public class FlyingDataProcessor extends AbstractSingleTargetDualProcessor<Entit
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.IS_FLYING, actualValue);
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionResult.failNoData();
     }
 
     @Override
