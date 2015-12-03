@@ -5,4 +5,5 @@
     <suppress checks="(JavadocMethod|(Method|Member|Parameter|LocalVariable)Name)" files="src[\\/](main|test)[\\/]java"/>
     <suppress checks="Indentation" files="package-info\.java"/>
     <suppress checks="AbbreviationAsWordInName" files="[\\/]mixin[\\/]"/>
+    <suppress checks="AvoidStarImport" files="SpongeSerializationRegistry\.java"/>
 </suppressions>
