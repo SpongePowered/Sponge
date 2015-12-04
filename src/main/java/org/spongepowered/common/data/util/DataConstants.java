@@ -98,6 +98,9 @@ public final class DataConstants {
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM = true;
     public static final int DEFAULT_FALLING_BLOCK_FALL_TIME = 1;
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES = false;
+    public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
+    
+    public static final boolean ANGRY_DEFAULT = false;
 
     public static final class Catalog {
         private Catalog() {}

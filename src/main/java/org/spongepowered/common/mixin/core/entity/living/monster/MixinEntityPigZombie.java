@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.living.monster;
 
 import net.minecraft.entity.monster.EntityPigZombie;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
 import org.spongepowered.api.entity.living.monster.ZombiePigman;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +48,11 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
 
     @Override
     public void setAngry(boolean angry) {
-        this.angerLevel = 400 + this.rand.nextInt(400);
+        if (angry) {
+            this.angerLevel = 400 + this.rand.nextInt(400);
+        } else {
+            this.angerLevel = 0;
+        }
     }
 
     @Override
@@ -63,6 +68,7 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-//        manipulators.add(get(AngerableData.class).get()); // TODO enable when AngerableData is implemented.
+        manipulators.add(get(AggressiveData.class).get());
+        manipulators.add(get(AngerableData.class).get());
     }
 }
