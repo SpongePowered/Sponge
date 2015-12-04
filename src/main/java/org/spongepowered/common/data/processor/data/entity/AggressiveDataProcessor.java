@@ -53,7 +53,7 @@ public class AggressiveDataProcessor extends AbstractEntitySingleDataProcessor<E
 
     @Override
     protected boolean set(EntityPigZombie entity, Boolean value) {
-        ((IMixinAggressive) entity).setAngry(value); //mostly used to be consistent with mixins - probably soesn't work/not needed
+        ((IMixinAggressive) entity).setAngry(value);
         return true;
     }
 
