@@ -998,6 +998,17 @@ public class DataRegistrar {
             ImmutableSpongeGameModeData.class, gameModeDataProcessor);
         dataManager.registerValueProcessor(Keys.GAME_MODE, gameModeDataProcessor);
 
+        final AggressiveDataProcessor aggressiveDataProcessor = new AggressiveDataProcessor();
+        dataManager.registerDataProcessorAndImpl(AggressiveData.class, SpongeAggressiveData.class, ImmutableAggressiveData.class,
+            ImmutableSpongeAggressiveData.class, aggressiveDataProcessor);
+        dataManager.registerValueProcessor(Keys.ANGRY, aggressiveDataProcessor);
+
+
+        final AngerableDataProcessor angerableDataProcessor = new AngerableDataProcessor();
+        dataManager.registerDataProcessorAndImpl(AngerableData.class, SpongeAngerableData.class, ImmutableAngerableData.class,
+            ImmutableSpongeAngerableData.class, angerableDataProcessor);
+        dataManager.registerValueProcessor(Keys.ANGER, angerableDataProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 

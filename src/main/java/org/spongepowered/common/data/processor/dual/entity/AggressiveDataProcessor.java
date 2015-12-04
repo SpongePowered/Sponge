@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.dual.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.monster.EntityPigZombie;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAggressiveData;
@@ -47,8 +47,9 @@ public class AggressiveDataProcessor extends AbstractSingleTargetDualProcessor<E
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+    protected boolean set(EntityPigZombie entity, Boolean value) {
+        ((IMixinAggressive) entity).setAngry(value);
+        return true;
     }
 
     @Override
