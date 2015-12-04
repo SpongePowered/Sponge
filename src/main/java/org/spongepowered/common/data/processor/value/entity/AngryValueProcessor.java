@@ -57,7 +57,7 @@ public class AngryValueProcessor extends AbstractSpongeValueProcessor<EntityPigZ
 
     @Override
     protected boolean set(EntityPigZombie container, Boolean value) {
-        ((IMixinAggressive) container).setAngry(value); //mostly used to be consistent with mixins - probably doesn't work/not needed
+        ((IMixinAggressive) container).setAngry(value);
         return true;
     }
 
