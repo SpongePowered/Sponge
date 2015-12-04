@@ -49,6 +49,12 @@ import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.util.persistence.DataContentUpdater;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
+import org.spongepowered.common.data.context.ContextDataProcessor;
+import org.spongepowered.common.data.context.ContextDataProcessorDelegate;
+import org.spongepowered.common.data.context.ContextValueProcessor;
+import org.spongepowered.common.data.context.ContextValueProcessorDelegate;
+import org.spongepowered.common.data.context.ContextAwareDataProcessor;
+import org.spongepowered.common.data.context.ContextAwareValueProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
@@ -93,6 +99,15 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
+    private final Map<Class<? extends DataManipulator<?, ?>>, List<ContextDataProcessor<?, ?>>> contextProcessorMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<ContextDataProcessor<?, ?>>> immutableContextProcessorMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+    private final Map<Key<? extends BaseValue<?>>, List<ContextValueProcessor<?, ?>>> contextValueProcessorMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
 
 
     // Processor delegates
@@ -101,6 +116,9 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =  new IdentityHashMap<>();
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
     private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
+    private final Map<Key<? extends BaseValue<?>>, ContextValueProcessorDelegate<?, ?>> contextValueDelegates = new IdentityHashMap<>();
+    private final Map<Class<? extends DataManipulator<?, ?>>, ContextDataProcessorDelegate<?, ?>> contextDataProcessorDelegates =  new IdentityHashMap<>();
+    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, ContextDataProcessorDelegate<?, ?>> immutableContextDataProcessorDelegates =  new IdentityHashMap<>();
 
     // Content updaters
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap = new IdentityHashMap<>();
@@ -258,8 +276,32 @@ public final class SpongeDataManager implements DataManager {
         });
         registry.immutableProcessorMap.clear();
 
+        // Context
+        registry.contextValueProcessorMap.entrySet().forEach(entry -> {
+            ImmutableList.Builder<ContextValueProcessor<?, ?>> builder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.CONTEXT_VALUE_PROCESSOR_COMPARATOR);
+            builder.addAll(entry.getValue());
+            final ContextValueProcessorDelegate<?, ?> delegate = new ContextValueProcessorDelegate(entry.getKey(), builder.build());
+            registry.contextValueDelegates.put(entry.getKey(), delegate);
+        });
+        registry.contextValueProcessorMap.clear();
+        registry.contextProcessorMap.entrySet().forEach(entry -> {
+            ImmutableList.Builder<ContextDataProcessor<?, ?>> builder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.CONTEXT_DATA_PROCESSOR_COMPARATOR);
+            builder.addAll(entry.getValue());
+            final ContextDataProcessorDelegate<?, ?> delegate = new ContextDataProcessorDelegate(builder.build());
+            registry.contextDataProcessorDelegates.put(entry.getKey(), delegate);
+        });
+        registry.contextProcessorMap.clear();
+        registry.immutableContextProcessorMap.entrySet().forEach(entry -> {
+            ImmutableList.Builder<ContextDataProcessor<?, ?>> builder = ImmutableList.builder();
+            Collections.sort(entry.getValue(), ComparatorUtil.CONTEXT_DATA_PROCESSOR_COMPARATOR);
+            builder.addAll(entry.getValue());
+            final ContextDataProcessorDelegate<?, ?> delegate = new ContextDataProcessorDelegate(builder.build());
+            registry.immutableContextDataProcessorDelegates.put(entry.getKey(), delegate);
+        });
+        registry.immutableContextProcessorMap.clear();
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -430,6 +472,176 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings("unchecked")
     public <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
         return Optional.ofNullable((ValueProcessor<E, ? extends BaseValue<E>>) this.valueDelegates.get(key));
+    }
+
+    /**
+     * Registers a {@link DataManipulator} class and the
+     * {@link ImmutableDataManipulator} class along with the implemented
+     * classes such that the processor is meant to handle the implementations
+     * for those specific classes.
+     *
+     * @param manipulatorClass The manipulator class
+     * @param implClass The implemented manipulator class
+     * @param immutableDataManipulator The immutable class
+     * @param implImClass The implemented immutable class
+     * @param processor The processor
+     * @param <T> The type of data manipulator
+     * @param <I> The type of immutable data manipulator
+     */
+    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerContextDataProcessorAndImpl(
+        Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
+        Class<? extends I> implImClass, ContextDataProcessor<T, I> processor) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
+        checkArgument(!Modifier.isAbstract(implClass.getModifiers()), "The Implemented DataManipulator class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(implClass.getModifiers()), "The Implemented DataManipulator class cannot be an interface!");
+        checkArgument(!Modifier.isAbstract(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
+        checkArgument(!Modifier.isInterface(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
+        checkArgument(!(processor instanceof ContextDataProcessorDelegate), "Cannot register ContextDataProcessorDelegates!");
+
+        if (!this.interfaceToImplDataManipulatorClasses.containsKey(manipulatorClass)) { // we only need to insert it once.
+            this.interfaceToImplDataManipulatorClasses.put(manipulatorClass, implClass);
+        }
+
+        List<ContextDataProcessor<?, ?>> processorList = this.contextProcessorMap.get(manipulatorClass);
+        if (processorList == null) {
+            processorList = new CopyOnWriteArrayList<>();
+            this.contextProcessorMap.put(manipulatorClass, processorList);
+            this.contextProcessorMap.put(implClass, processorList);
+        }
+
+        checkArgument(!processorList.contains(processor), "Duplicate ContextDataProcessor Registration!");
+        processorList.add(processor);
+
+        List<ContextDataProcessor<?, ?>> immutableProcessorList = this.immutableContextProcessorMap.get(immutableDataManipulator);
+        if (immutableProcessorList == null) {
+            immutableProcessorList = new CopyOnWriteArrayList<>();
+            this.immutableContextProcessorMap.put(immutableDataManipulator, immutableProcessorList);
+            this.immutableContextProcessorMap.put(implImClass, immutableProcessorList);
+        }
+
+        checkArgument(!immutableProcessorList.contains(processor), "Duplicate ContextDataProcessor Registration!");
+        immutableProcessorList.add(processor);
+    }
+
+    /**
+     * Registers a {@link DataManipulator} class and the
+     * {@link ImmutableDataManipulator} class along with the implemented
+     * classes such that the processor is meant to handle the implementations
+     * for those specific classes.
+     *
+     * @param manipulatorClass The manipulator class
+     * @param implClass The implemented manipulator class
+     * @param immutableDataManipulator The immutable class
+     * @param implImClass The implemented immutable class
+     * @param processor The processor
+     * @param <M> The type of data manipulator
+     * @param <I> The type of immutable data manipulator
+     */
+    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void registerContextuallyAwareDataProcessorAndImpl(
+        Class<M> manipulatorClass, Class<? extends M> implClass, Class<I> immutableDataManipulator,
+        Class<? extends I> implImClass, ContextAwareDataProcessor<M, I> processor) {
+        registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
+        registerContextDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
+    }
+
+    /**
+     * Gets the {@link ContextDataProcessorDelegate} for the provided
+     * {@link DataManipulator} class.
+     *
+     * @param mutableClass The class of the data manipulator
+     * @param <T> The type of data manipulator
+     * @param <I> The type of immutable data manipulator
+     * @return The data processor
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<ContextDataProcessor<T, I>> getContextProcessor(
+        Class<T> mutableClass) {
+        return Optional.ofNullable((ContextDataProcessor<T, I>) this.contextDataProcessorDelegates.get(checkNotNull(mutableClass)));
+    }
+
+    /**
+     * Gets a wildcarded typed {@link ContextDataProcessor} for the provided
+     * {@link DataManipulator} class. This is primarily useful when the
+     * type information is not known (due to type erasure).
+     *
+     * @param mutableClass The mutable class
+     * @return The data processor
+     */
+    public Optional<ContextDataProcessor<?, ?>> getWildContextProcessor(Class<? extends DataManipulator<?, ?>> mutableClass) {
+        return Optional.ofNullable(this.contextDataProcessorDelegates.get(checkNotNull(mutableClass)));
+    }
+
+    /**
+     * Gets the raw typed {@link ContextDataProcessor} with no type generics.
+     *
+     * @param class1 The class of the {@link DataManipulator}
+     * @return The raw typed data processor
+     */
+    @SuppressWarnings("rawtypes")
+    public Optional<ContextDataProcessor> getWildContextDataProcessor(Class<? extends DataManipulator> class1) {
+        return Optional.ofNullable(this.contextDataProcessorDelegates.get(checkNotNull(class1)));
+    }
+
+    /**
+     * Gets the {@link ContextDataProcessor} for the {@link ImmutableDataManipulator}
+     * class.
+     *
+     * @param immutableClass The immutable data manipulator class
+     * @param <T> The type of DataManipulator
+     * @param <I> The type of ImmutableDataManipulator
+     * @return The data processor
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<ContextDataProcessor<T, I>>
+    getImmutableContextProcessor(Class<I> immutableClass) {
+        return Optional.ofNullable((ContextDataProcessor<T, I>) this.immutableContextDataProcessorDelegates.get(checkNotNull(immutableClass)));
+    }
+
+    /**
+     * Gets the raw typed {@link ContextDataProcessor} for the
+     * {@link ImmutableDataManipulator} class.
+     *
+     * @param immutableClass The immutable data manipulator class
+     * @return The raw typed data processor
+     */
+    @SuppressWarnings("rawtypes")
+    public Optional<ContextDataProcessor> getWildImmutableContextProcessor(Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
+        return Optional.ofNullable(this.immutableContextDataProcessorDelegates.get(checkNotNull(immutableClass)));
+    }
+
+    public <E, V extends BaseValue<E>> void registerContextValueProcessor(Key<V> key, ContextValueProcessor<E, V> processor) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
+        checkNotNull(key, "key");
+        checkNotNull(processor, "processor");
+        checkArgument(!(processor instanceof ContextValueProcessorDelegate), "Cannot register ValueProcessorDelegates! READ THE DOCS!");
+
+        List<ContextValueProcessor<?, ?>> processors = this.contextValueProcessorMap.get(key);
+        if (processors == null) {
+            processors = Collections.synchronizedList(Lists.<ContextValueProcessor<?, ?>>newArrayList());
+            this.contextValueProcessorMap.put(key, processors);
+        }
+
+        checkArgument(!processors.contains(processor), "Duplicate ContextValueProcessor registration!");
+        processors.add(processor);
+    }
+
+    public <E, V extends BaseValue<E>> void registerContextuallyAwareValueProcessor(Key<V> key, ContextAwareValueProcessor<E, V> processor) {
+        registerValueProcessor(key, processor);
+        registerContextValueProcessor(key, processor);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E, V extends BaseValue<E>> Optional<ContextValueProcessor<E, V>> getContextValueProcessor(Key<V> key) {
+        return Optional.ofNullable((ContextValueProcessor<E, V>) this.contextValueDelegates.get(key));
+    }
+
+    public Optional<ContextValueProcessor<?, ?>> getWildContextValueProcessor(Key<?> key) {
+        return Optional.ofNullable(this.contextValueDelegates.get(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E> Optional<ContextValueProcessor<E, ? extends BaseValue<E>>> getBaseContextValueProcessor(Key<? extends BaseValue<E>> key) {
+        return Optional.ofNullable((ContextValueProcessor<E, ? extends BaseValue<E>>) this.contextValueDelegates.get(key));
     }
 
 }
