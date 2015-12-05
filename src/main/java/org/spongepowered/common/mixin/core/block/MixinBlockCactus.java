@@ -27,20 +27,55 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockCactus;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
+import org.spongepowered.common.event.MinecraftBlockDamageSource;
 
 import java.util.Optional;
 
 @Mixin(BlockCactus.class)
 public abstract class MixinBlockCactus extends MixinBlock {
+
+    private static final String CACTUS_DAMAGE_FIELD = "Lnet/minecraft/util/DamageSource;cactus:Lnet/minecraft/util/DamageSource;";
+
+    private DamageSource originalCactus;
+
+    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD, opcode = Opcodes.GETSTATIC))
+    public void preSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
+        if (!worldIn.isRemote) {
+            this.originalCactus = DamageSource.cactus;
+            Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
+            DamageSource.cactus = new MinecraftBlockDamageSource("cactus", location).setFireDamage();
+        }
+    }
+
+    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "INVOKE_ASSIGN", target = CACTUS_DAMAGE_FIELD))
+    public void postSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
+        if (!worldIn.isRemote) {
+            if (this.originalCactus == null) {
+                SpongeImpl.getLogger().error("Original cactus is null!");
+                Thread.dumpStack();
+            }
+            DamageSource.cactus = this.originalCactus;
+        }
+    }
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
