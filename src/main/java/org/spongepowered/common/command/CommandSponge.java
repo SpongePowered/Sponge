@@ -379,8 +379,8 @@ public class CommandSponge {
                             TextBuilder build = Texts.builder().append(title(container.getName()),
                                     Texts.of(" v" + container.getVersion()), NEWLINE_TEXT)
                                     .append(Texts.of(INDENT, title("ID: "), container.getId(), NEWLINE_TEXT,
-                                            INDENT, title("Main class: "), container.getInstance() == null ? " Virtual mod " :
-                                                    container.getInstance().getClass().getCanonicalName()));
+                                            INDENT, title("Main class: "), !container.getInstance().isPresent() ? " Virtual mod " :
+                                                    container.getInstance().get().getClass().getCanonicalName()));
                             // TODO: Provide more metadata once it is exposed
                             src.sendMessage(build.build());
 
