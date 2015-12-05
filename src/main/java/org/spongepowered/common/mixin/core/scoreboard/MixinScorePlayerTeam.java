@@ -174,7 +174,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
 
     @Override
     public boolean isSameTeam(Team other) {
-        return ((IMixinTeam) other).getSpongeTeam() == this.spongeTeam;
+        return other != null && ((IMixinTeam) other).getSpongeTeam() == this.spongeTeam;
     }
 
     private boolean shouldEcho() {
