@@ -47,7 +47,7 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.List;
 import java.util.Optional;

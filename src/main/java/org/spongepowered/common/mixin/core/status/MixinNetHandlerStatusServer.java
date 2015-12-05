@@ -33,8 +33,8 @@ import net.minecraft.server.network.NetHandlerStatusServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.status.SpongeStatusClient;
-import org.spongepowered.common.status.SpongeStatusResponse;
+import org.spongepowered.common.network.status.SpongeStatusClient;
+import org.spongepowered.common.network.status.SpongeStatusResponse;
 
 @Mixin(NetHandlerStatusServer.class)
 public abstract class MixinNetHandlerStatusServer {

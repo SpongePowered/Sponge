@@ -86,7 +86,7 @@ import org.spongepowered.common.data.property.store.block.*;
 import org.spongepowered.common.data.property.store.entity.*;
 import org.spongepowered.common.data.property.store.item.*;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.service.persistence.SpongeSerializationManager;
+import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 
 public class SpongeSerializationRegistry {
 

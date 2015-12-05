@@ -64,7 +64,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
 import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;

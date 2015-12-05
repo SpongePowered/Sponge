@@ -30,7 +30,7 @@ import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.configuration.SpongeConfig.TimingsCategory;
+import org.spongepowered.common.config.SpongeConfig.TimingsCategory;
 
 import java.util.Optional;
 import java.util.Queue;

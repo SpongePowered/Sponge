@@ -46,9 +46,9 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
-import org.spongepowered.common.service.config.SpongeConfigManager;
-import org.spongepowered.common.service.persistence.SpongeSerializationManager;
-import org.spongepowered.common.service.scheduler.SpongeScheduler;
+import org.spongepowered.common.config.SpongeConfigManager;
+import org.spongepowered.common.util.persistence.SpongeSerializationManager;
+import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.nio.file.Path;
 

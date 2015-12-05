@@ -43,7 +43,7 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
-import org.spongepowered.common.service.persistence.SpongeSerializationManager;
+import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;

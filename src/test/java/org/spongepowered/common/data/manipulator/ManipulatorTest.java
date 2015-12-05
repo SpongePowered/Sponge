@@ -46,7 +46,7 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeSerializationRegistry;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
-import org.spongepowered.common.service.persistence.SpongeSerializationManager;
+import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

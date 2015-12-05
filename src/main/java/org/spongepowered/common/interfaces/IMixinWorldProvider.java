@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.BlockPos;
-import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig;
 
 public interface IMixinWorldProvider {
 

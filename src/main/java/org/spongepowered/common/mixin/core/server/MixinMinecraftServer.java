@@ -86,7 +86,7 @@ import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
-import org.spongepowered.common.service.profile.SpongeProfileManager;
+import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.util.ServerUtils;
 import org.spongepowered.common.world.DimensionManager;

@@ -49,7 +49,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.HashSet;
 import java.util.List;

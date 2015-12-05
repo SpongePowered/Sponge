@@ -49,7 +49,7 @@ import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.List;

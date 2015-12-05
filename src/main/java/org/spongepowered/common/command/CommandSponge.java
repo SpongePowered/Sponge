@@ -59,7 +59,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinWorld;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.util.SpongeHooks;

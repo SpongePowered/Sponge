@@ -143,7 +143,7 @@ import org.spongepowered.common.event.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
-import org.spongepowered.common.potion.SpongePotionBuilder;
+import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.registry.factory.MessageSinkFactoryModule;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.SelectorFactoryModule;

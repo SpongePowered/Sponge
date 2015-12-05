@@ -26,14 +26,14 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.common.configuration.SpongeConfig.Type.GLOBAL;
+import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 

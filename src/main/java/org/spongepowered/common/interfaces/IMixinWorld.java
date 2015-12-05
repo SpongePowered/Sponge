@@ -35,7 +35,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig;
 
 import java.util.List;
 import java.util.Optional;

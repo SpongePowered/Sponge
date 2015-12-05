@@ -46,7 +46,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectDat
 import org.spongepowered.common.data.processor.common.AbstractSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.service.persistence.SpongeSerializationManager;
+import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 
 import java.util.List;
 import java.util.Optional;

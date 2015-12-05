@@ -66,7 +66,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
-import org.spongepowered.common.service.persistence.NbtTranslator;
+import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
 import java.util.ArrayList;

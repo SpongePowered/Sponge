@@ -36,8 +36,8 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.status.SpongeLegacyMinecraftVersion;
-import org.spongepowered.common.status.SpongeStatusResponse;
+import org.spongepowered.common.network.status.SpongeLegacyMinecraftVersion;
+import org.spongepowered.common.network.status.SpongeStatusResponse;
 
 import java.net.InetSocketAddress;
 

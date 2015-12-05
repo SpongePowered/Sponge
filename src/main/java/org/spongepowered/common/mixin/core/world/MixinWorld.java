@@ -183,7 +183,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;

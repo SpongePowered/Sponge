@@ -35,7 +35,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.common.plugin.SpongePluginContainer;
-import org.spongepowered.common.service.config.SpongeConfigManager;
+import org.spongepowered.common.config.SpongeConfigManager;
 
 import java.io.File;
 import java.nio.file.Path;

@@ -40,7 +40,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.service.persistence.SpongeSerializationManager;
+import org.spongepowered.common.util.persistence.SpongeSerializationManager;
 
 import java.util.Map;
 import java.util.Optional;

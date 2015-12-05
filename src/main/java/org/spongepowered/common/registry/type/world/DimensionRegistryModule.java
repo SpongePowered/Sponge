@@ -32,7 +32,7 @@ import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.configuration.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinWorldProvider;
 import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
