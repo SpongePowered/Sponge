@@ -67,7 +67,7 @@ public abstract class SpongeGame implements Game {
     private final SpongeGameRegistry gameRegistry;
     private final ServiceManager serviceManager;
     private final TeleportHelper teleportHelper;
-    private final ConfigManager configManager =  new SpongeConfigManager(SpongeImpl.getGame().getPluginManager());
+    private final ConfigManager configManager;
 
     protected SpongeGame(PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry, ServiceManager serviceManager,
             TeleportHelper teleportHelper) {
@@ -76,6 +76,7 @@ public abstract class SpongeGame implements Game {
         this.gameRegistry = checkNotNull(gameRegistry, "gameRegistry");
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
+        this.configManager = new SpongeConfigManager(this.pluginManager);
     }
 
     @Override
