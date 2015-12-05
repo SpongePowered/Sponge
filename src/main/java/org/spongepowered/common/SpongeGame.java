@@ -31,6 +31,7 @@ import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.command.SimpleCommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
@@ -42,6 +43,7 @@ import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.util.persistence.SerializationManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
@@ -68,6 +70,7 @@ public abstract class SpongeGame implements Game {
     private final ServiceManager serviceManager;
     private final TeleportHelper teleportHelper;
     private final ConfigManager configManager;
+    private final CommandManager commandManager;
 
     protected SpongeGame(PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry, ServiceManager serviceManager,
             TeleportHelper teleportHelper) {
@@ -77,6 +80,8 @@ public abstract class SpongeGame implements Game {
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
         this.configManager = new SpongeConfigManager(this.pluginManager);
+        this.commandManager = new SimpleCommandManager(this, SpongeBootstrap.slf4jLogger, new SpongeCommandDisambiguator(this));
+
     }
 
     @Override
@@ -101,7 +106,7 @@ public abstract class SpongeGame implements Game {
 
     @Override
     public CommandManager getCommandManager() {
-        return this.serviceManager.provideUnchecked(CommandManager.class);
+        return this.commandManager;
     }
 
     @Override

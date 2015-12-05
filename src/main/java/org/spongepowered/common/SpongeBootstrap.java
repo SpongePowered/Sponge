@@ -61,7 +61,7 @@ import java.util.UUID;
  */
 @NonnullByDefault
 public final class SpongeBootstrap {
-    private static final Logger slf4jLogger = new SLF4JLogger((AbstractLogger) SpongeImpl.getLogger(), SpongeImpl.getLogger().getName());
+    static final Logger slf4jLogger = new SLF4JLogger((AbstractLogger) SpongeImpl.getLogger(), SpongeImpl.getLogger().getName());
 
     public static void initializeServices() {
         registerService(SqlService.class, new SqlServiceImpl());
