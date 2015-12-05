@@ -561,6 +561,10 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(BannerData.class, SpongeBannerData.class, ImmutableBannerData.class,
                 ImmutableSpongeBannerData.class, bannerDataProcessor);
 
+        final AggressiveDataProcessor aggressiveDataProcessor = new AggressiveDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(AggressiveData.class, SpongeAggressiveData.class, ImmutableAggressiveData.class, 
+                ImmutableSpongeAggressiveData.class, aggressiveDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -704,6 +708,7 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.LOCK_TOKEN, new ItemLockTokenValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BANNER_BASE_COLOR, new TileBannerBaseColorValueProcessor());
         dataRegistry.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.ANGRY, new AngryValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

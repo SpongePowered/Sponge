@@ -258,6 +258,7 @@ public class KeyRegistry {
         keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
         keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
         keyMap.put("banner_patterns", new PatternKey());
+        keyMap.put("angry", makeSingleKey(Boolean.class, Value.class, of("Angry")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
