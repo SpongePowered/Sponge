@@ -59,7 +59,7 @@ public class AggressiveDataProcessor extends AbstractEntitySingleDataProcessor<E
 
     @Override
     protected Optional<Boolean> getVal(EntityPigZombie entity) {
-        return Optional.of(entity.isAngry());
+        return Optional.of(((IMixinAggressive)entity).isAngry());
     }
 
     @Override
