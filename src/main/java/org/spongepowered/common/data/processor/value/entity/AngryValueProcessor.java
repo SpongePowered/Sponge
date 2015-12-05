@@ -63,7 +63,7 @@ public class AngryValueProcessor extends AbstractSpongeValueProcessor<EntityPigZ
 
     @Override
     protected Optional<Boolean> getVal(EntityPigZombie container) {
-        return Optional.of(container.isAngry());
+        return Optional.of(((IMixinAggressive) container).isAngry());
     }
 
     @Override
