@@ -86,22 +86,6 @@ public final class SpongeBootstrap {
         }
     }
 
-    public static void preInitializeRegistry() {
-        SpongeImpl.getRegistry().preInit();
-    }
-
-    public static void initializeRegistry() {
-        SpongeImpl.getRegistry().init();
-    }
-
-    public static void postInitializeRegistry() {
-        SpongeImpl.getRegistry().postInit();
-    }
-
-    public static void preGameRegisterAdditionals() {
-        SpongeImpl.getRegistry().registerAdditionals();
-    }
-
     public static void registerWorlds() {
         final File[] directoryListing = DimensionManager.getCurrentSaveRootDirectory().listFiles();
         if (directoryListing == null) {
