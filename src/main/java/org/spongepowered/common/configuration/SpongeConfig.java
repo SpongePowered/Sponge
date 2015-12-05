@@ -97,6 +97,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     // BUNGEECORD
     public static final String BUNGEECORD_IP_FORWARDING = "ip-forwarding";
 
+    // EULA
+    public static final String EULA_SHUTDOWN_SERVER = "shutdown-server";
+
     // GENERAL
     public static final String GENERAL_DISABLE_WARNINGS = "disable-warnings";
     public static final String GENERAL_CHUNK_LOAD_OVERRIDE = "chunk-load-override";
@@ -124,6 +127,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
     public static final String MODULE_BUNGEECORD = "bungeecord";
+    public static final String MODULE_SHUTDOWN_ON_EULA = "shutdown-on-eula";
 
     // WORLD
     public static final String WORLD_INFINITE_WATER_SOURCE = "infinite-water-source";
@@ -250,8 +254,15 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = MODULE_BUNGEECORD)
         private BungeeCordCategory bungeeCord = new BungeeCordCategory();
 
+        @Setting(MODULE_SHUTDOWN_ON_EULA)
+        private ShutdownOnEulaCategory eulaShutdown = new ShutdownOnEulaCategory();
+
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
+        }
+
+        public ShutdownOnEulaCategory getEulaShutdown() {
+            return this.eulaShutdown;
         }
 
         public SqlCategory getSql() {
@@ -552,6 +563,17 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public boolean getIpForwarding() {
             return this.ipForwarding;
+        }
+    }
+
+    @ConfigSerializable
+    public static class ShutdownOnEulaCategory extends Category {
+
+        @Setting(value = EULA_SHUTDOWN_SERVER, comment = "If enabled, shut down the server if the EULA has not been accepted")
+        private boolean shutdownServer = true;
+
+        public boolean shouldShutdownServer() {
+            return this.shutdownServer;
         }
     }
 

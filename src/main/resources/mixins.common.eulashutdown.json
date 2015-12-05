@@ -1,0 +1,10 @@
+{
+  "package": "org.spongepowered.common.mixin.eulashutdown",
+  "refmap": "mixins.common.refmap.json",
+  "plugin": "org.spongepowered.common.mixin.plugin.EulaShutdownPlugin",
+  "mixins": [
+  ],
+  "server": [
+    "MixinDedicatedServer"
+  ]
+}
