@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -52,8 +54,9 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.service.user.UserStorage;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.TeleportHelper;
@@ -250,7 +253,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Random getRandom() {
-        return rand;
+        return this.rand;
     }
 
     public Vector3d getPosition() {
@@ -516,6 +519,16 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void remove() {
         this.isDead = true;
+    }
+
+    @Override
+    public boolean damage(double damage, org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource, Cause cause) {
+        if (!(damageSource instanceof DamageSource)) {
+            SpongeImpl.getLogger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
+            return false;
+        }
+        // todo hook the damage entity event with the cause.
+        return attackEntityFrom((DamageSource) damageSource, (float) damage);
     }
 
     @Override
@@ -821,7 +834,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 return Optional.of((User)player);
             }
             // player is not online, get user from storage if one exists
-            return SpongeImpl.getGame().getServiceManager().provide(UserStorage.class).get().get(uuid);
+            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
         }
     }
 

@@ -28,16 +28,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
-import org.spongepowered.api.GameProfile;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.user.UserStorage;
+import org.spongepowered.api.service.user.UserStorageService;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SpongeUserStorage implements UserStorage {
+public class SpongeUserStorageService implements UserStorageService {
 
     public static final String FAKEPLAYER_UUID = "41C82C87-7AfB-4024-BA57-13D2C99CAE77";
 

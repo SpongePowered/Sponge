@@ -29,7 +29,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
-import org.spongepowered.common.service.profile.SpongeProfileResolver;
+import org.spongepowered.common.service.profile.SpongeProfileManager;
 
 import java.util.UUID;
 
@@ -59,7 +59,7 @@ public class UserCollection extends SpongeSubjectCollection {
     }
 
     private GameProfile uuidToGameProfile(UUID uid) {
-        return (GameProfile) SpongeProfileResolver.getProfile(uid, true);
+        return (GameProfile) SpongeProfileManager.getProfile(uid, true);
     }
 
     @Override

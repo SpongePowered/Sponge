@@ -31,10 +31,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntitySkull;
-import org.spongepowered.api.GameProfile;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
-import org.spongepowered.api.service.profile.GameProfileResolver;
+import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -123,7 +123,7 @@ public class SkullUtils {
             return null;
         }
         // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
-        final GameProfileResolver resolver = SpongeImpl.getGame().getServiceManager().provide(GameProfileResolver.class).get();
+        final GameProfileManager resolver = SpongeImpl.getGame().getServiceManager().provide(GameProfileManager.class).get();
         if (profile.getName() == null || profile.getName().isEmpty()) {
             final ListenableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
             try {

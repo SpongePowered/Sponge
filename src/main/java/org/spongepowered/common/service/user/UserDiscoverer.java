@@ -106,8 +106,8 @@ class UserDiscoverer {
     }
 
     @SuppressWarnings("unchecked")
-    static Collection<org.spongepowered.api.GameProfile> getAllProfiles() {
-        Set<org.spongepowered.api.GameProfile> profiles = Sets.newHashSet();
+    static Collection<org.spongepowered.api.profile.GameProfile> getAllProfiles() {
+        Set<org.spongepowered.api.profile.GameProfile> profiles = Sets.newHashSet();
 
         // Add all cached profiles
         for (User user : userCache.values()) {
@@ -120,21 +120,21 @@ class UserDiscoverer {
         for (String playerUuid : uuids) {
             GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(playerUuid));
             if (profile != null) {
-                profiles.add((org.spongepowered.api.GameProfile) profile);
+                profiles.add((org.spongepowered.api.profile.GameProfile) profile);
             }
         }
 
         // Add all whitelisted users
         UserListWhitelist whiteList = MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
         for (UserListWhitelistEntry entry : (Collection<UserListWhitelistEntry>) whiteList.getValues().values()) {
-            profiles.add((org.spongepowered.api.GameProfile) entry.value);
+            profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
         }
 
         // Add all banned users
         UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
         for (BanEntry entry : (Collection<BanEntry>) banList.getValues().values()) {
             if (entry instanceof UserListBansEntry) {
-                profiles.add((org.spongepowered.api.GameProfile) entry.value);
+                profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
             }
         }
         return profiles;

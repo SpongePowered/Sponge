@@ -27,7 +27,7 @@ package org.spongepowered.common.service.config;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.service.config.ConfigRoot;
+import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;

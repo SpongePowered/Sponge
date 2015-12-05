@@ -29,7 +29,7 @@ import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.source.CommandBlockSource;
+import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;

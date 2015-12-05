@@ -32,10 +32,10 @@ import com.google.common.collect.Iterables;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.CommandMapping;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.dispatcher.Disambiguator;
-import org.spongepowered.api.util.command.dispatcher.SimpleDispatcher;
+import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.dispatcher.Disambiguator;
+import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public class SpongeCommandDisambiguator implements Disambiguator {
                         .getGame().getServer().getConsole().sendMessage(t("Unable to find plugin '" + chosenPlugin + "' for command '" + aliasUsed
                                                                           + "', falling back to default"));
                 } else {
-                    final Set<CommandMapping> ownedCommands = this.game.getCommandDispatcher().getOwnedBy(container.get());
+                    final Set<CommandMapping> ownedCommands = this.game.getCommandManager().getOwnedBy(container.get());
                     final List<CommandMapping> ownedMatchingCommands = ImmutableList.copyOf(Iterables.filter(availableOptions,
                             Predicates.in(ownedCommands)));
                     if (ownedMatchingCommands.isEmpty()) {

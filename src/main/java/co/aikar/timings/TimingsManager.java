@@ -27,7 +27,7 @@ package co.aikar.timings;
 import co.aikar.util.LoadingMap;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.util.command.CommandMapping;
+import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayDeque;

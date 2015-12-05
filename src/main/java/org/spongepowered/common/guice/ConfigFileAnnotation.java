@@ -25,7 +25,7 @@
 package org.spongepowered.common.guice;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.service.config.DefaultConfig;
+import org.spongepowered.api.config.DefaultConfig;
 
 import java.lang.annotation.Annotation;
 

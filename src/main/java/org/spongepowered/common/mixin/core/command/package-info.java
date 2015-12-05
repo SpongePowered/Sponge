@@ -27,17 +27,17 @@
  * The various mixins in this package for command sources mirror the SpongeAPI command source interfaces.
  *
  * <dl>
- * <dt>{@link org.spongepowered.api.util.command.CommandSource}</dt>
+ * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
  * <dd>{@link MixinCommandSource}
- * <dt>{@link org.spongepowered.api.util.command.source.LocatedSource}</dt>
+ * <dt>{@link org.spongepowered.api.command.source.LocatedSource}</dt>
  * <dd>{@link MixinLocatedSource}
- * <dt>{@link org.spongepowered.api.util.command.source.CommandBlockSource}</dt>
+ * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
  * <dd>{@link MixinCommandBlockSource}
  * <dt>{@link org.spongepowered.api.util.command.RconSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.MixinRConConsoleSource}
  * <dt>{@link org.spongepowered.api.util.command.SignSource}</dt>
  * <dd>{@link MixinSignCommandSender}
- * <dt>{@link org.spongepowered.api.util.command.source.ProxySource} via /execute
+ * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
  * <dd>{@link MixinCommandExecuteAtSender}
  * </dl>
  *

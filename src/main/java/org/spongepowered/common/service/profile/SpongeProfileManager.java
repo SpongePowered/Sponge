@@ -34,9 +34,9 @@ import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
-import org.spongepowered.api.GameProfile;
-import org.spongepowered.api.service.profile.GameProfileResolver;
-import org.spongepowered.api.service.profile.ProfileNotFoundException;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.GameProfileManager;
+import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
@@ -49,7 +49,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-public class SpongeProfileResolver implements GameProfileResolver {
+public class SpongeProfileManager implements GameProfileManager {
 
     private static abstract class Query<V> implements Callable<V> {
 

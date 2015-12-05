@@ -39,7 +39,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.api.util.persistence.SerializationManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.data.SpongeDataRegistry;

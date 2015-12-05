@@ -31,8 +31,8 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.scheduler.SchedulerService;
-import org.spongepowered.api.service.scheduler.Task;
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Iterator;
@@ -42,7 +42,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SpongeScheduler implements SchedulerService {
+public class SpongeScheduler implements Scheduler {
 
     private static final SpongeScheduler INSTANCE = new SpongeScheduler();
     public static final int TICK_DURATION = 50;

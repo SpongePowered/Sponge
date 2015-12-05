@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.configuration.SpongeConfig.TimingsCategory;
 

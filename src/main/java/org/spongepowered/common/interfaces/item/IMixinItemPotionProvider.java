@@ -25,7 +25,7 @@
 package org.spongepowered.common.interfaces.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.potion.PotionEffect;
+import org.spongepowered.api.effect.potion.PotionEffect;
 
 import java.util.Set;
 

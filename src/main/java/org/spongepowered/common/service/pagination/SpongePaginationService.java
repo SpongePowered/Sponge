@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import static org.spongepowered.api.util.command.args.GenericArguments.integer;
+import static org.spongepowered.api.command.args.GenericArguments.integer;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.google.common.collect.ImmutableList;
@@ -37,13 +37,13 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.StartsWithPredicate;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.args.ArgumentParseException;
-import org.spongepowered.api.util.command.args.CommandArgs;
-import org.spongepowered.api.util.command.args.CommandContext;
-import org.spongepowered.api.util.command.args.CommandElement;
-import org.spongepowered.api.util.command.spec.CommandSpec;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.ArgumentParseException;
+import org.spongepowered.api.command.args.CommandArgs;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.CommandElement;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
@@ -97,7 +97,7 @@ public class SpongePaginationService implements PaginationService {
 
     void registerCommandOnce() {
         if (this.commandRegistered.compareAndSet(false, true)) {
-            SpongeImpl.getGame().getCommandDispatcher().register(SpongeImpl.getPlugin(), CommandSpec.builder()
+            SpongeImpl.getGame().getCommandManager().register(SpongeImpl.getPlugin(), CommandSpec.builder()
                 .description(t("Helper command for paginations occurring"))
                 .arguments(new ActivePaginationCommandElement(t("pagination-id")))
                 .child(CommandSpec.builder()

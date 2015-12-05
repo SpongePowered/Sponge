@@ -31,7 +31,7 @@ import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
-import org.spongepowered.api.status.Favicon;
+import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;

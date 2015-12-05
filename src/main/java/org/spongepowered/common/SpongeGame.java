@@ -31,20 +31,22 @@ import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.service.command.CommandService;
-import org.spongepowered.api.service.event.EventManager;
-import org.spongepowered.api.service.persistence.SerializationManager;
-import org.spongepowered.api.service.scheduler.SchedulerService;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.service.config.SpongeConfigManager;
 import org.spongepowered.common.service.persistence.SpongeSerializationManager;
 import org.spongepowered.common.service.scheduler.SpongeScheduler;
 
@@ -65,6 +67,7 @@ public abstract class SpongeGame implements Game {
     private final SpongeGameRegistry gameRegistry;
     private final ServiceManager serviceManager;
     private final TeleportHelper teleportHelper;
+    private final ConfigManager configManager =  new SpongeConfigManager(SpongeImpl.getGame().getPluginManager());
 
     protected SpongeGame(PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry, ServiceManager serviceManager,
             TeleportHelper teleportHelper) {
@@ -96,8 +99,8 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public CommandService getCommandDispatcher() {
-        return this.serviceManager.provideUnchecked(CommandService.class);
+    public CommandManager getCommandManager() {
+        return this.serviceManager.provideUnchecked(CommandManager.class);
     }
 
     @Override
@@ -106,7 +109,12 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public SchedulerService getScheduler() {
+    public ConfigManager getConfigManager() {
+        return this.configManager;
+    }
+
+    @Override
+    public Scheduler getScheduler() {
         return SpongeScheduler.getInstance();
     }
 
@@ -119,7 +127,7 @@ public abstract class SpongeGame implements Game {
     public abstract Path getSavesDirectory();
 
     @Override
-    public SerializationManager getSerializationService() {
+    public SerializationManager getSerializationManager() {
         return SpongeSerializationManager.getInstance();
     }
 

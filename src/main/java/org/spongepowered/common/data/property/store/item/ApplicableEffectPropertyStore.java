@@ -27,7 +27,7 @@ package org.spongepowered.common.data.property.store.item;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.ApplicableEffectProperty;
-import org.spongepowered.api.potion.PotionEffect;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 import org.spongepowered.common.interfaces.item.IMixinItemPotionProvider;
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.service.scheduler;
 
-import org.spongepowered.api.service.scheduler.Task;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Set;

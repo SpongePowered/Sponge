@@ -29,7 +29,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 
 import java.util.Optional;
 

@@ -32,8 +32,8 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.service.persistence.InvalidDataException;
-import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.util.persistence.SerializationManager;
 
 import java.util.List;
 import java.util.Optional;

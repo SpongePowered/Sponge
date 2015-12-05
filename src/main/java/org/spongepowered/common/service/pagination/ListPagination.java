@@ -28,8 +28,8 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.command.CommandException;
-import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandSource;
 
 import java.util.ArrayList;
 import java.util.List;

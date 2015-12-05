@@ -32,10 +32,10 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.config.ConfigDir;
-import org.spongepowered.api.service.config.DefaultConfig;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.common.plugin.SpongePluginContainer;
-import org.spongepowered.common.service.config.SpongeConfigService;
+import org.spongepowered.common.service.config.SpongeConfigManager;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -92,7 +92,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return SpongeConfigService.getPrivateRoot(this.container).getDirectory();
+            return SpongeConfigManager.getPrivateRoot(this.container).getDirectory();
         }
     }
 
@@ -107,7 +107,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return SpongeConfigService.getPrivateRoot(this.container).getConfigPath();
+            return SpongeConfigManager.getPrivateRoot(this.container).getConfigPath();
         }
 
     }
@@ -123,7 +123,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return SpongeConfigService.getSharedRoot(this.container).getConfigPath();
+            return SpongeConfigManager.getSharedRoot(this.container).getConfigPath();
         }
 
     }
@@ -139,7 +139,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return SpongeConfigService.getSharedRoot(this.container).getConfig();
+            return SpongeConfigManager.getSharedRoot(this.container).getConfig();
         }
 
     }
@@ -155,7 +155,7 @@ public class SpongePluginGuiceModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return SpongeConfigService.getPrivateRoot(this.container).getConfig();
+            return SpongeConfigManager.getPrivateRoot(this.container).getConfig();
         }
 
     }

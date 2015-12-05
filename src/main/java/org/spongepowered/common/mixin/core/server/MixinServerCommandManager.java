@@ -32,13 +32,13 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.service.command.CommandService;
+import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
@@ -77,7 +77,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         }
 
         CommandSource source = WrapperCommandSource.of(sender);
-        CommandResult result = SpongeImpl.getGame().getCommandDispatcher().process(source, command);
+        CommandResult result = SpongeImpl.getGame().getCommandManager().process(source, command);
         updateStat(sender, CommandResultStats.Type.AFFECTED_BLOCKS, result.getAffectedBlocks());
         updateStat(sender, CommandResultStats.Type.AFFECTED_ENTITIES, result.getAffectedEntities());
         updateStat(sender, CommandResultStats.Type.AFFECTED_ITEMS, result.getAffectedItems());
@@ -102,7 +102,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         } else if (SpongeImpl.getGame() == null) { // TODO: How?
             this.earlyRegisterCommands.add(cmd);
         } else {
-            SpongeImpl.getGame().getCommandDispatcher().register(cmd.getOwner(), cmd, cmd.getNames());
+            SpongeImpl.getGame().getCommandManager().register(cmd.getOwner(), cmd, cmd.getNames());
             registerDefaultPermissions(SpongeImpl.getGame(), cmd);
         }
         return super.registerCommand(command);
@@ -135,7 +135,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         for (Iterator<MinecraftCommandWrapper> it = cmds.iterator(); it.hasNext();) {
             MinecraftCommandWrapper cmd = it.next();
             it.remove();
-            game.getCommandDispatcher().register(cmd.getOwner(), cmd, cmd.getNames());
+            game.getCommandManager().register(cmd.getOwner(), cmd, cmd.getNames());
             registerDefaultPermissions(game, cmd);
         }
     }
@@ -159,7 +159,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
     @Override
     @SuppressWarnings("rawtypes")
     public List getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos) {
-        CommandService service = SpongeImpl.getGame().getCommandDispatcher();
+        CommandManager service = SpongeImpl.getGame().getCommandManager();
         CommandSource source = (CommandSource) sender;
         return service.getSuggestions(source, input);
     }

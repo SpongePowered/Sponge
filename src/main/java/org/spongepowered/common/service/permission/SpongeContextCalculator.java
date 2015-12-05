@@ -34,9 +34,9 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.service.permission.context.ContextCalculator;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.LocatedSource;
-import org.spongepowered.api.util.command.source.RemoteSource;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.LocatedSource;
+import org.spongepowered.api.command.source.RemoteSource;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 

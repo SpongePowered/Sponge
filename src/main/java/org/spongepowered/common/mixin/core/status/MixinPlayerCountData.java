@@ -65,7 +65,7 @@ public abstract class MixinPlayerCountData implements ClientPingServerEvent.Resp
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<org.spongepowered.api.GameProfile> getProfiles() {
+    public List<org.spongepowered.api.profile.GameProfile> getProfiles() {
         if (this.profiles == null) {
             this.profiles = Lists.newArrayList();
         }

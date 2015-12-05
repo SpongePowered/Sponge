@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.command;
 
-import static org.spongepowered.api.util.command.args.GenericArguments.optional;
-import static org.spongepowered.api.util.command.args.GenericArguments.string;
+import static org.spongepowered.api.command.args.GenericArguments.optional;
+import static org.spongepowered.api.command.args.GenericArguments.string;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -37,12 +37,12 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.util.command.CommandCallable;
-import org.spongepowered.api.util.command.CommandException;
-import org.spongepowered.api.util.command.CommandMapping;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.spec.CommandSpec;
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Comparator;
@@ -64,7 +64,7 @@ public class SpongeHelpCommand {
             .executor((src, args) -> {
                 Optional<String> command = args.getOne("command");
                 if (command.isPresent()) {
-                    Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandDispatcher().get(command.get());
+                    Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(command.get());
                     if (mapping.isPresent()) {
                         CommandCallable callable = mapping.get().getCallable();
                         Optional<? extends Text> desc = callable.getHelp(src);
@@ -82,7 +82,7 @@ public class SpongeHelpCommand {
                 builder.title(Texts.builder("Available commands:").color(TextColors.DARK_GREEN).build());
 
                 TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
-                commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandDispatcher().getAll().values(), input -> input.getCallable()
+                commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
                     .testPermission(src)));
                 builder.contents(ImmutableList.copyOf(Collections2.transform(commands, input -> getDescription(src, input))));
                 builder.sendTo(src);

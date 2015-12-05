@@ -26,7 +26,7 @@ package org.spongepowered.common.service.scheduler;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.scheduler.Task;
+import org.spongepowered.api.scheduler.Task;
 
 import java.util.UUID;
 import java.util.function.Consumer;

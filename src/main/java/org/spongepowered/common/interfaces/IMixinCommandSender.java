@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.interfaces;
 
-import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.command.CommandSource;
 
 public interface IMixinCommandSender {
 

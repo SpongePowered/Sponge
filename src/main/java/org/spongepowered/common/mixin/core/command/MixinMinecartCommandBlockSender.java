@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 

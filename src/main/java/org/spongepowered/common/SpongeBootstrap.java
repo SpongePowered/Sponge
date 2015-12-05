@@ -32,34 +32,29 @@ import org.apache.logging.log4j.spi.AbstractLogger;
 import org.slf4j.Logger;
 import org.slf4j.impl.SLF4JLogger;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.data.property.PropertyRegistry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ProviderExistsException;
-import org.spongepowered.api.service.command.CommandService;
-import org.spongepowered.api.service.command.SimpleCommandService;
-import org.spongepowered.api.service.config.ConfigService;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.command.SimpleCommandManager;
+import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.persistence.SerializationManager;
-import org.spongepowered.api.service.profile.GameProfileResolver;
+import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.service.rcon.RconService;
-import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.sql.SqlService;
-import org.spongepowered.api.service.user.UserStorage;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeHelpCommand;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
-import org.spongepowered.common.service.config.SpongeConfigService;
+import org.spongepowered.common.service.config.SpongeConfigManager;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
-import org.spongepowered.common.service.persistence.SpongeSerializationManager;
-import org.spongepowered.common.service.profile.SpongeProfileResolver;
+import org.spongepowered.common.service.profile.SpongeProfileManager;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
-import org.spongepowered.common.service.scheduler.SpongeScheduler;
 import org.spongepowered.common.service.sql.SqlServiceImpl;
-import org.spongepowered.common.service.user.SpongeUserStorage;
+import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.action.SpongeCallbackHolder;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -76,24 +71,20 @@ public final class SpongeBootstrap {
     private static final Logger slf4jLogger = new SLF4JLogger((AbstractLogger) SpongeImpl.getLogger(), SpongeImpl.getLogger().getName());
 
     public static void initializeServices() {
-        SimpleCommandService commandService = new SimpleCommandService(SpongeImpl.getGame(), slf4jLogger,
-                                                                       new SpongeCommandDisambiguator(SpongeImpl.getGame()));
-        if (registerService(CommandService.class, commandService)) {
-            commandService.register(SpongeImpl.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
-            commandService.register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help");
-            commandService.register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
-        }
-
         registerService(SqlService.class, new SqlServiceImpl());
         registerService(PaginationService.class, new SpongePaginationService());
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));
         }
-        registerService(ConfigService.class, new SpongeConfigService(SpongeImpl.getGame().getPluginManager()));
-        registerService(UserStorage.class, new SpongeUserStorage());
-        registerService(GameProfileResolver.class, new SpongeProfileResolver());
+        registerService(UserStorageService.class, new SpongeUserStorageService());
         SpongeImpl.getGame().getServiceManager().potentiallyProvide(PermissionService.class)
                 .executeWhenPresent(input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
+    }
+
+    public static void initializeCommands() {
+        Sponge.getCommandDispatcher().register(SpongeImpl.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
+        Sponge.getCommandDispatcher().register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help");
+        Sponge.getCommandDispatcher().register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
     }
 
     private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {

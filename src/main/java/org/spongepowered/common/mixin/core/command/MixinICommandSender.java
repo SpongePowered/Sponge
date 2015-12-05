@@ -29,8 +29,8 @@ import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.util.command.CommandCallable;
-import org.spongepowered.api.util.command.CommandMapping;
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
@@ -43,7 +43,7 @@ public abstract class MixinICommandSender implements ICommandSender, IMixinComma
 
     @Override
     public boolean canCommandSenderUseCommand(int permissionLevel, String commandName) {
-        Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandDispatcher().get(commandName);
+        Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(commandName);
         if (mapping.isPresent()) {
             CommandCallable callable = mapping.get().getCallable();
             if (callable instanceof MinecraftCommandWrapper) {

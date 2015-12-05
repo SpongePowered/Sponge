@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.GameProfile;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;

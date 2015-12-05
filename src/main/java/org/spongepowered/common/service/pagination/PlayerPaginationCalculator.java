@@ -36,7 +36,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.util.command.CommandMessageFormatting;
+import org.spongepowered.api.command.CommandMessageFormatting;
 
 import java.io.IOException;
 import java.util.List;

@@ -25,16 +25,16 @@
 package org.spongepowered.common.service.pagination;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.util.command.CommandMessageFormatting.error;
+import static org.spongepowered.api.command.CommandMessageFormatting.error;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.service.pagination.PaginationBuilder;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.command.CommandException;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.ProxySource;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ProxySource;
 
 import java.util.List;
 import java.util.Map;

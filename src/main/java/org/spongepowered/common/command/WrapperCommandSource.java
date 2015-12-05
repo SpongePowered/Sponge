@@ -32,9 +32,9 @@ import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.command.CommandMapping;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.LocatedSource;
+import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.LocatedSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -61,7 +61,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
                 Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(1, "@")));
         this.data.setPermission(SubjectData.GLOBAL_CONTEXT, "minecraft.commandblock",
                 Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(2, "")));
-        for (CommandMapping command : SpongeImpl.getGame().getCommandDispatcher().getCommands()) {
+        for (CommandMapping command : SpongeImpl.getGame().getCommandManager().getCommands()) {
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
                 this.data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),

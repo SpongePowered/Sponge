@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinCommandSender;

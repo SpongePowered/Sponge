@@ -30,7 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
 import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.potion.PotionEffect;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongePotionEffectData;
 import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
 

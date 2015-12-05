@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.command;
 
-import static org.spongepowered.api.util.command.args.GenericArguments.dimension;
-import static org.spongepowered.api.util.command.args.GenericArguments.firstParsing;
-import static org.spongepowered.api.util.command.args.GenericArguments.flags;
-import static org.spongepowered.api.util.command.args.GenericArguments.literal;
-import static org.spongepowered.api.util.command.args.GenericArguments.optional;
-import static org.spongepowered.api.util.command.args.GenericArguments.seq;
-import static org.spongepowered.api.util.command.args.GenericArguments.string;
-import static org.spongepowered.api.util.command.args.GenericArguments.world;
+import static org.spongepowered.api.command.args.GenericArguments.dimension;
+import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
+import static org.spongepowered.api.command.args.GenericArguments.flags;
+import static org.spongepowered.api.command.args.GenericArguments.literal;
+import static org.spongepowered.api.command.args.GenericArguments.optional;
+import static org.spongepowered.api.command.args.GenericArguments.seq;
+import static org.spongepowered.api.command.args.GenericArguments.string;
+import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
@@ -45,15 +45,15 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.command.CommandCallable;
-import org.spongepowered.api.util.command.CommandException;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.args.ChildCommandElementExecutor;
-import org.spongepowered.api.util.command.args.CommandContext;
-import org.spongepowered.api.util.command.args.PatternMatchingCommandElement;
-import org.spongepowered.api.util.command.spec.CommandExecutor;
-import org.spongepowered.api.util.command.spec.CommandSpec;
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.PatternMatchingCommandElement;
+import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;

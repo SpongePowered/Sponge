@@ -27,7 +27,7 @@ package org.spongepowered.common.status;
 import com.google.common.base.Objects;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.status.StatusClient;
+import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
 import java.net.InetSocketAddress;

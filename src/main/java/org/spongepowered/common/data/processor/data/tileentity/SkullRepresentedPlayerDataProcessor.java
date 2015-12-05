@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.tileentity.TileEntitySkull;
-import org.spongepowered.api.GameProfile;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;

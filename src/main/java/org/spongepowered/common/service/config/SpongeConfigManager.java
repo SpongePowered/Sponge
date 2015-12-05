@@ -26,8 +26,8 @@ package org.spongepowered.common.service.config;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.service.config.ConfigRoot;
-import org.spongepowered.api.service.config.ConfigService;
+import org.spongepowered.api.config.ConfigRoot;
+import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
@@ -37,11 +37,11 @@ import javax.inject.Inject;
 /**
  * Implementation of service to manage configurations.
  */
-public class SpongeConfigService implements ConfigService {
+public class SpongeConfigManager implements ConfigManager {
     private final PluginManager manager;
 
     @Inject
-    public SpongeConfigService(PluginManager manager) {
+    public SpongeConfigManager(PluginManager manager) {
         this.manager = manager;
     }
 

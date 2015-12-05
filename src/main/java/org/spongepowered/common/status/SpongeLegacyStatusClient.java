@@ -25,7 +25,7 @@
 package org.spongepowered.common.status;
 
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.status.StatusClient;
+import org.spongepowered.api.network.status.StatusClient;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;

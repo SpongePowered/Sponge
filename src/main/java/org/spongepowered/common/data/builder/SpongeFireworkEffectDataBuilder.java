@@ -30,8 +30,8 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
-import org.spongepowered.api.service.persistence.DataBuilder;
-import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.persistence.DataBuilder;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.SpongeFireworkEffect;
 

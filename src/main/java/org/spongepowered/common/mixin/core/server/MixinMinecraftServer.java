@@ -52,15 +52,16 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.world.ChunkLoadService;
+import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.ConsoleSource;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
@@ -85,6 +86,7 @@ import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
+import org.spongepowered.common.service.profile.SpongeProfileManager;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.util.ServerUtils;
 import org.spongepowered.common.world.DimensionManager;
@@ -137,6 +139,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
+    private GameProfileManager profileManager = new SpongeProfileManager();
 
     @Override
     public Optional<World> getWorld(String worldName) {
@@ -698,8 +701,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public ChunkLoadService getChunkLoadService() {
+    public ChunkTicketManager getChunkTicketManager() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public GameProfileManager getGameProfileManager() {
+        return this.profileManager;
     }
 
     @Override
