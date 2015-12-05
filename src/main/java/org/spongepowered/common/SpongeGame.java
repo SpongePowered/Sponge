@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import net.minecraft.server.MinecraftServer;
+import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
@@ -68,7 +70,7 @@ public abstract class SpongeGame implements Game {
     private final CommandManager commandManager;
 
     protected SpongeGame(Platform platform, PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry,
-            ServiceManager serviceManager, TeleportHelper teleportHelper) {
+            ServiceManager serviceManager, TeleportHelper teleportHelper, Logger logger) {
         this.platform = checkNotNull(platform, "platform");
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
         this.eventManager = checkNotNull(eventManager, "eventManager");
@@ -76,7 +78,7 @@ public abstract class SpongeGame implements Game {
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
         this.configManager = new SpongeConfigManager(this.pluginManager);
-        this.commandManager = new SimpleCommandManager(this, SpongeImpl.getSlf4jLogger(), new SpongeCommandDisambiguator(this));
+        this.commandManager = new SimpleCommandManager(this, LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
 
     }
 
