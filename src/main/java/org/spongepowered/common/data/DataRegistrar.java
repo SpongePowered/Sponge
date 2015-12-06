@@ -738,6 +738,12 @@ public class DataRegistrar {
             ImmutableSpongeAngerableData.class, angerableDataProcessor);
         dataManager.registerValueProcessor(Keys.ANGER, angerableDataProcessor);
 
+
+        final RotationalDataProcessor rotationalDataProcessor = new RotationalDataProcessor();
+        dataManager.registerDataProcessorAndImpl(RotationalData.class, SpongeRotationalData.class, ImmutableRotationalData.class,
+            ImmutableSpongeRotationalData.class, rotationalDataProcessor);
+        dataManager.registerValueProcessor(Keys.ROTATION, rotationalDataProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 

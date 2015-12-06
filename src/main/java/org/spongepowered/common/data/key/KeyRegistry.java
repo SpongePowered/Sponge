@@ -94,6 +94,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.awt.Color;
@@ -265,6 +266,7 @@ public class KeyRegistry {
         keyMap.put("moisture", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Moisture")));
         keyMap.put("angry", makeSingleKey(Boolean.class, Value.class, of("Angry")));
         keyMap.put("anger", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Anger")));
+        keyMap.put("rotation", makeSingleKey(Rotation.class, Value.class, of("Rotation")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

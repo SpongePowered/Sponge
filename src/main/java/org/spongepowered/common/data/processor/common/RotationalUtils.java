@@ -22,23 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable;
+package org.spongepowered.common.data.processor.common;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableRotationalData;
-import org.spongepowered.api.data.manipulator.mutable.RotationalData;
 import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.api.util.rotation.Rotations;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRotationalData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.common.SpongeImpl;
 
-public class SpongeRotationalData extends AbstractSingleCatalogData<Rotation, RotationalData, ImmutableRotationalData> implements RotationalData {
+public class RotationalUtils {
 
-    public SpongeRotationalData(Rotation value) {
-        super(RotationalData.class, value, Keys.ROTATION, ImmutableSpongeRotationalData.class);
+    public static Rotation getRotation(int rotation) {
+        return SpongeImpl.getGame().getRegistry().getRotationFromDegree(rotation * 45).get();
     }
 
-    public SpongeRotationalData() {
-        this(Rotations.BOTTOM);
+    public static int getItemRotation(Rotation rotation) {
+        return rotation.getAngle() / 45;
     }
 }
