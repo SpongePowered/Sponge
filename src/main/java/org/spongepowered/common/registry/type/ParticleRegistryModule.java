@@ -32,12 +32,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
-import java.awt.Color;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;

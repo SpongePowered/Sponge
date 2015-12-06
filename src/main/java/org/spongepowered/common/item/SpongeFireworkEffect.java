@@ -34,9 +34,10 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.util.Color;
 
-import java.awt.Color;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SpongeFireworkEffect implements FireworkEffect {
 
@@ -87,18 +88,10 @@ public class SpongeFireworkEffect implements FireworkEffect {
 
     @Override
     public DataContainer toContainer() {
-        List<Integer> colors = Lists.newArrayList();
-        for (Color color : this.colors) {
-            colors.add(color.getRGB());
-        }
-        List<Integer> fades = Lists.newArrayList();
-        for (Color color : this.fades) {
-            fades.add(color.getRGB());
-        }
         return new MemoryDataContainer()
                 .set(TYPE, this.shape.getId())
-                .set(COLORS, colors)
-                .set(FADES, fades)
+                .set(COLORS, this.colors.stream().map(color -> color.asJavaColor().getRGB()).collect(Collectors.toList()))
+                .set(FADES, this.fades.stream().map(color -> color.asJavaColor().getRGB()).collect(Collectors.toList()))
                 .set(TRAILS, this.trails)
                 .set(FLICKERS, this.flicker);
     }

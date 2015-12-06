@@ -32,10 +32,10 @@ import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.ColorUtil;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -224,7 +224,7 @@ public final class NbtDataUtil {
         if (!subCompound.hasKey(ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(new Color(subCompound.getInteger(ITEM_COLOR)));
+        return Optional.of(Color.ofRgb(subCompound.getInteger(ITEM_COLOR)));
     }
 
     public static void removeColorFromNBT(ItemStack stack) {

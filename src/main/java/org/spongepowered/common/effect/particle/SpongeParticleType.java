@@ -27,8 +27,8 @@ package org.spongepowered.common.effect.particle;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.Color;
 
-import java.awt.Color;
 
 public class SpongeParticleType implements ParticleType {
 

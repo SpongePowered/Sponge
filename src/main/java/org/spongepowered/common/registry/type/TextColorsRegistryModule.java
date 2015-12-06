@@ -31,11 +31,11 @@ import com.google.common.collect.Maps;
 import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
-import java.awt.Color;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -59,20 +59,20 @@ public final class TextColorsRegistryModule implements CatalogRegistryModule<Tex
     @Override
     public void registerDefaults() {
         addTextColor(EnumChatFormatting.BLACK, Color.BLACK);
-        addTextColor(EnumChatFormatting.DARK_BLUE, new Color(0x0000AA));
-        addTextColor(EnumChatFormatting.DARK_GREEN, new Color(0x00AA00));
-        addTextColor(EnumChatFormatting.DARK_AQUA, new Color(0x00AAAA));
-        addTextColor(EnumChatFormatting.DARK_RED, new Color(0xAA0000));
-        addTextColor(EnumChatFormatting.DARK_PURPLE, new Color(0xAA00AA));
-        addTextColor(EnumChatFormatting.GOLD, new Color(0xFFAA00));
-        addTextColor(EnumChatFormatting.GRAY, new Color(0xAAAAAA));
-        addTextColor(EnumChatFormatting.DARK_GRAY, new Color(0x555555));
-        addTextColor(EnumChatFormatting.BLUE, new Color(0x5555FF));
-        addTextColor(EnumChatFormatting.GREEN, new Color(0x55FF55));
-        addTextColor(EnumChatFormatting.AQUA, new Color(0x00FFFF));
-        addTextColor(EnumChatFormatting.RED, new Color(0xFF5555));
-        addTextColor(EnumChatFormatting.LIGHT_PURPLE, new Color(0xFF55FF));
-        addTextColor(EnumChatFormatting.YELLOW, new Color(0xFFFF55));
+        addTextColor(EnumChatFormatting.DARK_BLUE, Color.ofRgb(0x0000AA));
+        addTextColor(EnumChatFormatting.DARK_GREEN, Color.ofRgb(0x00AA00));
+        addTextColor(EnumChatFormatting.DARK_AQUA, Color.ofRgb(0x00AAAA));
+        addTextColor(EnumChatFormatting.DARK_RED, Color.ofRgb(0xAA0000));
+        addTextColor(EnumChatFormatting.DARK_PURPLE, Color.ofRgb(0xAA00AA));
+        addTextColor(EnumChatFormatting.GOLD, Color.ofRgb(0xFFAA00));
+        addTextColor(EnumChatFormatting.GRAY, Color.ofRgb(0xAAAAAA));
+        addTextColor(EnumChatFormatting.DARK_GRAY, Color.ofRgb(0x555555));
+        addTextColor(EnumChatFormatting.BLUE, Color.ofRgb(0x5555FF));
+        addTextColor(EnumChatFormatting.GREEN, Color.ofRgb(0x55FF55));
+        addTextColor(EnumChatFormatting.AQUA, Color.ofRgb(0x00FFFF));
+        addTextColor(EnumChatFormatting.RED, Color.ofRgb(0xFF5555));
+        addTextColor(EnumChatFormatting.LIGHT_PURPLE, Color.ofRgb(0xFF55FF));
+        addTextColor(EnumChatFormatting.YELLOW, Color.ofRgb(0xFFFF55));
         addTextColor(EnumChatFormatting.WHITE, Color.WHITE);
         addTextColor(EnumChatFormatting.RESET, Color.WHITE);
 

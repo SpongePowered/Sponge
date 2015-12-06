@@ -26,12 +26,11 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import java.awt.Color;
 
 @Mixin(EnumDyeColor.class)
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
@@ -49,7 +48,7 @@ public abstract class MixinEnumDyeColor {
     }
 
     public Color dye$getColor() {
-        return new Color(((EnumDyeColor) (Object) this).getMapColor().colorValue);
+        return Color.ofRgb(((EnumDyeColor) (Object) this).getMapColor().colorValue);
     }
 
 }

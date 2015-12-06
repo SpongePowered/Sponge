@@ -30,8 +30,9 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
+import org.spongepowered.api.util.Color;
 
-import java.awt.Color;
+import java.util.Collections;
 import java.util.List;
 
 public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
@@ -57,16 +58,14 @@ public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
     @Override
     public SpongeFireworkEffectBuilder color(Color color) {
         checkNotNull(color);
-        this.colors.add(new Color(color.getRGB()));
+        this.colors.add(color);
         return this;
     }
 
     @Override
     public SpongeFireworkEffectBuilder colors(Color... colors) {
         checkNotNull(colors);
-        for (Color color : colors) {
-            this.colors.add(new Color(color.getRGB()));
-        }
+        Collections.addAll(this.colors, colors);
         return this;
     }
 
@@ -74,7 +73,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
     public SpongeFireworkEffectBuilder colors(Iterable<Color> colors) {
         checkNotNull(colors);
         for (Color color : colors) {
-            this.colors.add(new Color(color.getRGB()));
+            this.colors.add(color);
         }
         return this;
     }
@@ -82,16 +81,14 @@ public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
     @Override
     public SpongeFireworkEffectBuilder fade(Color color) {
         checkNotNull(color);
-        this.fades.add(new Color(color.getRGB()));
+        this.fades.add(color);
         return this;
     }
 
     @Override
     public SpongeFireworkEffectBuilder fades(Color... colors) {
         checkNotNull(colors);
-        for (Color color : colors) {
-            this.fades.add(new Color(color.getRGB()));
-        }
+        Collections.addAll(this.fades, colors);
         return this;
     }
 
@@ -99,7 +96,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
     public SpongeFireworkEffectBuilder fades(Iterable<Color> colors) {
         checkNotNull(colors);
         for (Color color : colors) {
-            this.fades.add(new Color(color.getRGB()));
+            this.fades.add(color);
         }
         return this;
     }

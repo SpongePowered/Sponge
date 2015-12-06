@@ -155,7 +155,7 @@ public abstract class SpongeGame implements Game {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("platform", platform)
+                .add("platform", this.platform)
                 .toString();
     }
 

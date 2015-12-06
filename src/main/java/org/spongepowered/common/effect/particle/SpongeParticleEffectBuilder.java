@@ -36,8 +36,8 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ResizableParticle;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.Color;
 
-import java.awt.Color;
 
 public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
 

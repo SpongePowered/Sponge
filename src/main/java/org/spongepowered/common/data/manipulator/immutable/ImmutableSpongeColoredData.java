@@ -28,11 +28,10 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-
-import java.awt.Color;
 
 public class ImmutableSpongeColoredData extends AbstractImmutableSingleData<Color, ImmutableColoredData, ColoredData> implements ImmutableColoredData {
 
@@ -59,6 +58,6 @@ public class ImmutableSpongeColoredData extends AbstractImmutableSingleData<Colo
 
     @Override
     public int compareTo(ImmutableColoredData o) {
-        return o.get(this.usedKey).get().getRGB() - this.getValue().getRGB();
+        return o.get(this.usedKey).get().getRgb() - this.getValue().getRgb();
     }
 }

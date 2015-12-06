@@ -34,9 +34,9 @@ import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 
-import java.awt.Color;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;

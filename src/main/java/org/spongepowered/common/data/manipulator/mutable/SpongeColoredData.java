@@ -30,11 +30,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.awt.Color;
 
 public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, ImmutableColoredData> implements ColoredData {
 
@@ -63,12 +63,12 @@ public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, Im
 
     @Override
     public int compareTo(ColoredData o) {
-        return o.get(Keys.COLOR).get().getRGB() - this.getValue().getRGB();
+        return o.get(Keys.COLOR).get().getRgb() - this.getValue().getRgb();
     }
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.COLOR.getQuery(), this.getValue().getRGB());
+        return new MemoryDataContainer().set(Keys.COLOR.getQuery(), this.getValue().getRgb());
     }
 
     @Override

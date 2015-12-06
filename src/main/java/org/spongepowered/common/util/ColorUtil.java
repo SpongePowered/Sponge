@@ -33,9 +33,9 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
-import java.awt.Color;
 import java.util.Optional;
 
 public final class ColorUtil {
@@ -45,7 +45,7 @@ public final class ColorUtil {
         final Item item = stack.getItem();
         if (item instanceof ItemArmor) {
             final int color = ((ItemArmor) item).getColor(stack);
-            return color == -1 ? Optional.empty() : Optional.of(new Color(color));
+            return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
         return NbtDataUtil.getItemCompound(stack).flatMap(NbtDataUtil::getColorFromNBT);
     }
@@ -73,7 +73,7 @@ public final class ColorUtil {
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
         final int trueGreen = (int) (dyeRgbArray[1] * 255.0F);
         final int trueBlue = (int) (dyeRgbArray[2] * 255.0F);
-        return new Color(trueRed, trueGreen, trueBlue);
+        return Color.ofRgb(trueRed, trueGreen, trueBlue);
     }
 
     public static EnumDyeColor fromColor(Color color) {

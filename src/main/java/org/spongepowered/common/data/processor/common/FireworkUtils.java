@@ -37,12 +37,12 @@ import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeFireworkShape;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 
-import java.awt.Color;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,7 +98,7 @@ public class FireworkUtils {
             List<Color> colors = Lists.newArrayList();
             int[] colorsRaw = effectNbt.getIntArray("Colors");
             for(int color : colorsRaw) {
-                colors.add(new Color(color));
+                colors.add(Color.ofRgb(color));
             }
             builder.colors(colors);
         }
@@ -106,7 +106,7 @@ public class FireworkUtils {
             List<Color> fades = Lists.newArrayList();
             int[] fadesRaw = effectNbt.getIntArray("FadeColors");
             for(int fade : fadesRaw) {
-                fades.add(new Color(fade));
+                fades.add(Color.ofRgb(fade));
             }
             builder.fades(fades);
         }
@@ -122,13 +122,13 @@ public class FireworkUtils {
         int[] colorsArray = new int[effect.getColors().size()];
         List<Color> colors = effect.getColors();
         for (int i = 0; i < colors.size(); i++) {
-            colorsArray[i] = colors.get(i).getRGB();
+            colorsArray[i] = colors.get(i).getRgb();
         }
         tag.setIntArray("Colors", colorsArray);
         int[] fadeArray = new int[effect.getFadeColors().size()];
         List<Color> fades = effect.getFadeColors();
         for (int i = 0; i < fades.size(); i++) {
-            fadeArray[i] = fades.get(i).getRGB();
+            fadeArray[i] = fades.get(i).getRgb();
         }
         tag.setIntArray("FadeColors", fadeArray);
 

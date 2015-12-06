@@ -30,12 +30,12 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.SpongeFireworkEffect;
 
-import java.awt.Color;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -58,11 +58,11 @@ public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffe
 
         List<Integer> intColors = container.getIntegerList(SpongeFireworkEffect.COLORS).get();
         List<Color> colors = Lists.newArrayList();
-        colors.addAll(intColors.stream().map(Color::new).collect(Collectors.toList()));
+        colors.addAll(intColors.stream().map(Color::ofRgb).collect(Collectors.toList()));
 
         List<Integer> intFades = container.getIntegerList(SpongeFireworkEffect.FADES).get();
         List<Color> fades = Lists.newArrayList();
-        fades.addAll(intFades.stream().map(Color::new).collect(Collectors.toList()));
+        fades.addAll(intFades.stream().map(Color::ofRgb).collect(Collectors.toList()));
 
         boolean trails = container.getBoolean(SpongeFireworkEffect.TRAILS).get();
         boolean flickers = container.getBoolean(SpongeFireworkEffect.FLICKERS).get();
