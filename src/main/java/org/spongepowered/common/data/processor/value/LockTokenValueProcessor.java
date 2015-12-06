@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import net.minecraft.world.ILockableContainer;
+import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -38,16 +38,16 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<ILockableContainer, String, Value<String>> {
+public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<TileEntityLockable, String, Value<String>> {
 
     public LockTokenValueProcessor() {
-        super(ILockableContainer.class, Keys.LOCK_TOKEN);
+        super(TileEntityLockable.class, Keys.LOCK_TOKEN);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof ILockableContainer) {
-            set((ILockableContainer) container, "");
+        if (container instanceof TileEntityLockable) {
+            set((TileEntityLockable) container, "");
             return DataTransactionBuilder.successNoData();
         }
         return DataTransactionBuilder.failNoData();
@@ -59,13 +59,16 @@ public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(ILockableContainer container, String value) {
+    protected boolean set(TileEntityLockable container, String value) {
         container.setLockCode(value.length() == 0 ? LockCode.EMPTY_CODE : new LockCode(value));
         return true;
     }
 
     @Override
-    protected Optional<String> getVal(ILockableContainer container) {
+    protected Optional<String> getVal(TileEntityLockable container) {
+        if (container.getLockCode().isEmpty()) {
+            return Optional.empty();
+        }
         return Optional.of(container.getLockCode().getLock());
     }
 
