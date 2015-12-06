@@ -93,6 +93,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.awt.Color;
@@ -258,6 +259,7 @@ public class KeyRegistry {
         keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
         keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
         keyMap.put("banner_patterns", new PatternKey());
+        keyMap.put("rotation", makeSingleKey(Rotation.class, Value.class, of("Rotation")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
