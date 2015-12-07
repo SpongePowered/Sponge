@@ -83,7 +83,7 @@ public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcess
     @Override
     public Optional<BannerData> fill(DataContainer container, BannerData bannerData) {
         if (container.contains(Keys.BANNER_PATTERNS.getQuery()) || container.contains(Keys.BANNER_BASE_COLOR.getQuery())) {
-            List<PatternLayer> layers = container.getSerializableList(Keys.BANNER_PATTERNS.getQuery(), PatternLayer.class, Sponge.getSerializationService()).get();
+            List<PatternLayer> layers = container.getSerializableList(Keys.BANNER_PATTERNS.getQuery(), PatternLayer.class, Sponge.getDataManager()).get();
             String colorId = container.getString(Keys.BANNER_BASE_COLOR.getQuery()).get();
             DyeColor color = Sponge.getRegistry().getType(DyeColor.class, colorId).get();
             bannerData.set(Keys.BANNER_BASE_COLOR, color);

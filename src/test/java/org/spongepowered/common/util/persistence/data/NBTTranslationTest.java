@@ -34,7 +34,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.util.persistence.DataBuilder;
-import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.Optional;
@@ -43,7 +43,7 @@ public class NBTTranslationTest {
 
     @Test
     public void testContainerToNBT() {
-        SerializationManager service = Mockito.mock(SerializationManager.class);
+        DataManager service = Mockito.mock(DataManager.class);
         DataBuilder<FakeSerializable> builder = new FakeBuilder();
         Mockito.stub(service.getBuilder(FakeSerializable.class)).toReturn(Optional.of(builder));
         DataContainer container = new MemoryDataContainer();

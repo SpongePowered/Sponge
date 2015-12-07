@@ -38,8 +38,8 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.List;
 import java.util.Map;
@@ -134,7 +134,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public <E> Optional<I> with(Key<? extends BaseValue<E>> key, E value) {
         // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getImmutableProcessor(this.immutableClass);
+        final Optional<DataProcessor<M, I>> processor = SpongeDataManager.getInstance().getImmutableProcessor(this.immutableClass);
         // We actually need to check that the processor is available, otherwise
         // we throw an IllegalArgumentException, because people don't check for
         // support!!

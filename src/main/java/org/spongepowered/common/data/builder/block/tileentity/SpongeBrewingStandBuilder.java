@@ -61,7 +61,7 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             ((TileEntityBrewingStand) brewingStand).setName(container.getString(NAME_QUERY).get());
         }
 
-        final BrewingStandData brewingData = Sponge.getManipulatorRegistry().getBuilder(BrewingStandData.class).get().create();
+        final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();
         brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
         brewingStand.offer(brewingData);
 

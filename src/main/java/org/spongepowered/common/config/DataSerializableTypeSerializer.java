@@ -33,7 +33,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.util.persistence.DataBuilder;
-import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
@@ -47,7 +47,7 @@ public class DataSerializableTypeSerializer implements TypeSerializer<DataSerial
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
 
-        Optional<SerializationManager> serviceOpt = SpongeImpl.getGame().getServiceManager().provide(SerializationManager.class);
+        Optional<DataManager> serviceOpt = SpongeImpl.getGame().getServiceManager().provide(DataManager.class);
         if (!serviceOpt.isPresent()) {
             throw new ObjectMappingException("No serialization service is present!");
         }

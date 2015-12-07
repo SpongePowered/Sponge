@@ -53,11 +53,11 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.util.persistence.NbtTranslator;
+import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -197,11 +197,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         if (optional.isPresent()) {
             return optional;
         } else { // try harder
-            final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
+            final Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
             if (processorOptional.isPresent()) {
                 if (processorOptional.get().supports(this.entityType)) {
                     return Optional
-                            .of((T) SpongeDataRegistry.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
+                            .of((T) SpongeDataManager.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
                 }
             }
         }
@@ -216,7 +216,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return true;
             }
         }
-        final Optional<DataProcessor> processorOptional = SpongeDataRegistry.getInstance().getWildImmutableProcessor(containerClass);
+        final Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
         return processorOptional.isPresent() && processorOptional.get().supports(this.entityType);
     }
 

@@ -42,7 +42,7 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.util.persistence.InvalidDataException;
-import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -182,15 +182,15 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         checkDataExists(container, DataQueries.BLOCK_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        final SerializationManager serializationManager = SpongeImpl.getGame().getServiceManager().provide(SerializationManager.class).get();
+        final DataManager dataManager = SpongeImpl.getGame().getServiceManager().provide(DataManager.class).get();
         // this is unused for now
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
-        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, serializationManager).get();
+        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, dataManager).get();
         BlockState extendedState = null;
         if (container.contains(DataQueries.BLOCK_EXTENDED_STATE)) {
-            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, serializationManager).get();
+            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, dataManager).get();
         } else {
             extendedState = blockState;
         }

@@ -39,14 +39,13 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
-import org.spongepowered.common.util.persistence.SpongeSerializationManager;
+import org.spongepowered.common.data.SpongeDataManager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -79,9 +78,9 @@ public class ManipulatorTest {
             SpongeGame mockGame = mock(SpongeGame.class);
 
             final ServiceManager mockServiceManager = mock(ServiceManager.class);
-            final SerializationManager serializationManager = SpongeSerializationManager.getInstance();
+            final DataManager dataManager = SpongeDataManager.getInstance();
             Mockito.when(mockGame.getServiceManager()).thenReturn(mockServiceManager);
-            when(mockServiceManager.provide(SerializationManager.class)).thenReturn(Optional.of(serializationManager));
+            when(mockServiceManager.provide(DataManager.class)).thenReturn(Optional.of(dataManager));
             DataRegistrar.setupSerialization(mockGame);
         } catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
@@ -92,8 +91,8 @@ public class ManipulatorTest {
     @Test
     public void testCreateData() {
         try {
-            final SpongeDataRegistry registry = SpongeDataRegistry.getInstance();
-            final Field manipulatorMap = SpongeDataRegistry.class.getDeclaredField("processorMap");
+            final SpongeDataManager registry = SpongeDataManager.getInstance();
+            final Field manipulatorMap = SpongeDataManager.class.getDeclaredField("processorMap");
             manipulatorMap.setAccessible(true);
 
             final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap =
@@ -131,14 +130,14 @@ public class ManipulatorTest {
     @Test
     public void testSerialization() {
         try {
-            final SpongeDataRegistry registry = SpongeDataRegistry.getInstance();
-            final Field manipulatorMap = SpongeDataRegistry.class.getDeclaredField("processorMap");
+            final SpongeDataManager registry = SpongeDataManager.getInstance();
+            final Field manipulatorMap = SpongeDataManager.class.getDeclaredField("processorMap");
             manipulatorMap.setAccessible(true);
 
             final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap =
                 (Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>>) manipulatorMap.get(registry);
 
-            final Field builderMap = SpongeDataRegistry.class.getDeclaredField("builderMap");
+            final Field builderMap = SpongeDataManager.class.getDeclaredField("builderMap");
             builderMap.setAccessible(true);
             final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> manipulatorBuilderMap =
                 (Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>>) builderMap.get(registry);

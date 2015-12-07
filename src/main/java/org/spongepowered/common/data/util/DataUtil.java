@@ -43,7 +43,7 @@ import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.SpongeDataRegistry;
+import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -119,7 +119,7 @@ public class DataUtil {
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
                 final Class<?> clazz = Class.forName(clazzName);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilder((Class) clazz);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataManager.getInstance().getBuilder((Class) clazz);
                 if (optional.isPresent()) {
                     final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
                     if (manipulatorOptional.isPresent()) {
@@ -143,7 +143,7 @@ public class DataUtil {
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
                 final Class<?> clazz = Class.forName(clazzName);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataRegistry.getInstance().getBuilderForImmutable((Class) clazz);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = SpongeDataManager.getInstance().getImmutableManipulatorBuilder((Class) clazz);
                 if (optional.isPresent()) {
                     final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
                     if (manipulatorOptional.isPresent()) {

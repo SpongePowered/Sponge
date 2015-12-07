@@ -154,7 +154,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * Attempts to remove the known keyed data associated with this
      * {@link ValueProcessor} from the provided {@link ValueContainer}. If
      * the result is not possible, the result will be an expected
-     * {@link DataTransactionResult.Type#FAILURE}.
+     * {@link org.spongepowered.api.data.DataTransactionResult.Type#FAILURE}.
      *
      * @param container The value container to remove data from
      * @return The transaction result

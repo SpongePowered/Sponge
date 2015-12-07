@@ -35,23 +35,19 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.command.SimpleCommandManager;
 import org.spongepowered.api.config.ConfigManager;
-import org.spongepowered.api.data.ImmutableDataRegistry;
-import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
-import org.spongepowered.common.data.SpongeDataRegistry;
-import org.spongepowered.common.data.SpongeImmutableRegistry;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.config.SpongeConfigManager;
-import org.spongepowered.common.util.persistence.SpongeSerializationManager;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import javax.inject.Singleton;
@@ -133,23 +129,13 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public SerializationManager getSerializationManager() {
-        return SpongeSerializationManager.getInstance();
+    public DataManager getDataManager() {
+        return SpongeDataManager.getInstance();
     }
 
     @Override
     public PropertyRegistry getPropertyRegistry() {
         return SpongePropertyRegistry.getInstance();
-    }
-
-    @Override
-    public DataManipulatorRegistry getManipulatorRegistry() {
-        return SpongeDataRegistry.getInstance();
-    }
-
-    @Override
-    public ImmutableDataRegistry getImmutableDataRegistry() {
-        return SpongeImmutableRegistry.getInstance();
     }
 
     @Override

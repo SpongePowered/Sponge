@@ -44,10 +44,10 @@ import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.persistence.NbtTranslator;
+import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -138,7 +138,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
     @Override
     public SpongeEntitySnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
-        final Optional<DataProcessor<?, ?>> optional = SpongeDataRegistry.getInstance().getImmutableProcessor((Class) manipulator.getClass());
+        final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getImmutableProcessor((Class) manipulator.getClass());
         if (optional.isPresent()) {
             if (optional.get().supports(this.entityType)) {
                 addManipulator(manipulator);

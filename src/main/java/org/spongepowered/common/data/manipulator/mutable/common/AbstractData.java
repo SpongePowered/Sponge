@@ -40,8 +40,8 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.SpongeDataRegistry;
 import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.Map;
 import java.util.Optional;
@@ -158,7 +158,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     @Override
     public Optional<M> fill(DataHolder dataHolder, MergeFunction overlap) {
         // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
+        final Optional<DataProcessor<M, I>> processor = SpongeDataManager.getInstance().getProcessor(this.manipulatorClass);
         if (!processor.isPresent()) {
             return Optional.empty();
         }
@@ -171,7 +171,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     @Override
     public Optional<M> from(DataContainer container) {
         // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataRegistry.getInstance().getProcessor(this.manipulatorClass);
+        final Optional<DataProcessor<M, I>> processor = SpongeDataManager.getInstance().getProcessor(this.manipulatorClass);
         if (!processor.isPresent()) {
             return Optional.empty();
         }
