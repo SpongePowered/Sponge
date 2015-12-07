@@ -39,19 +39,19 @@ import org.spongepowered.common.util.ReflectionUtil;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-public abstract class AbstractImmutableSingleMapData<K, V, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+public abstract class AbstractImmutableSingleMapData<K, V, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
     extends AbstractImmutableSingleData<Map<K, V>, I, M> {
 
     private final Class<? extends M> mutableClass;
     private final ImmutableMapValue<K, V> mapValue;
 
-    public AbstractImmutableSingleMapData(Class<I> manipulatorClass, Map<K, V> value,
+    public AbstractImmutableSingleMapData(Class<I> immutableClass, Map<K, V> value,
                                           Key<? extends BaseValue<Map<K, V>>> usedKey,
-                                          Class<? extends M> immutableClass) {
-        super(manipulatorClass, ImmutableMap.copyOf(value), usedKey);
-        checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
-        checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
-        this.mutableClass = immutableClass;
+                                          Class<? extends M> manipulatorClass) {
+        super(immutableClass, ImmutableMap.copyOf(value), usedKey);
+        checkArgument(!Modifier.isAbstract(manipulatorClass.getModifiers()), "The immutable class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(manipulatorClass.getModifiers()), "The immutable class cannot be an interface!");
+        this.mutableClass = manipulatorClass;
         this.mapValue = new ImmutableSpongeMapValue<>(this.usedKey, ImmutableMap.copyOf(this.value));
     }
 

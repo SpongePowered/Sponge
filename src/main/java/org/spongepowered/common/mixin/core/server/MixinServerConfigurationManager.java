@@ -63,7 +63,6 @@ import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -83,8 +82,12 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
@@ -144,7 +147,7 @@ public abstract class MixinServerConfigurationManager {
         }
 
         try {
-            logger.info("Disconnecting " + profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText()));
+            logger.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
             netManager.sendPacket(new S40PacketDisconnect(reason));
             netManager.closeChannel(reason);
         } catch (Exception exception) {
@@ -158,6 +161,11 @@ public abstract class MixinServerConfigurationManager {
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
+        // Sponge - save changes to offline User before reading player data
+        SpongeUser user = (SpongeUser) ((IMixinEntityPlayerMP) playerIn).getUserObject();
+        if (SpongeUser.dirtyUsers.contains(user)) {
+            user.save();
+        }
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
         WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
 
@@ -317,7 +325,7 @@ public abstract class MixinServerConfigurationManager {
 
         Player player = (Player) playerIn;
         Transform<World> fromTransform = player.getTransform();
-        Transform<World> toTransform = this.getPlayerRespawnLocation(playerIn, targetDimension);
+        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(playerIn, targetDimension), Vector3d.ZERO, Vector3d.ZERO);
         Location<World> location = toTransform.getLocation();
 
         // Keep players out of blocks
@@ -328,7 +336,6 @@ public abstract class MixinServerConfigurationManager {
             location = location.add(0, 1, 0);
         }
         playerIn.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
-
 
         // ### PHASE 2 ### Remove player from current dimension
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
@@ -343,11 +350,13 @@ public abstract class MixinServerConfigurationManager {
             ((IMixinEntityPlayerMP) playerIn).reset();
         }
         playerIn.setSneaking(false);
-        toTransform = toTransform.setLocation(location); // update to safe location
+        // update to safe location
+        toTransform = toTransform.setLocation(location);
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplFactory.createRespawnPlayerEvent(SpongeImpl.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn, this.tempIsBedSpawn);
+                SpongeImplFactory.createRespawnPlayerEvent(SpongeImpl.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn,
+                        this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
         player.setTransform(event.getToTransform());
@@ -394,15 +403,14 @@ public abstract class MixinServerConfigurationManager {
     }
 
     // Internal. Note: Has side-effects
-    private Transform<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
+    private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, int targetDimension) {
         Location<World> location = ((World) playerIn.worldObj).getSpawnLocation();
         this.tempIsBedSpawn = false;
         WorldServer targetWorld = this.mcServer.worldServerForDimension(targetDimension);
         if (targetWorld == null) { // Target world doesn't exist? Use global
-            return new Transform<>(location, Vector3d.ZERO, Vector3d.ZERO);
+            return location;
         }
 
-        Vector3d spawnPos = VecHelper.toVector(targetWorld.getSpawnPoint()).toDouble();
         Dimension targetDim = (Dimension) targetWorld.provider;
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
@@ -411,14 +419,7 @@ public abstract class MixinServerConfigurationManager {
             targetWorld = this.mcServer.worldServerForDimension(targetDimension);
             targetDim = (Dimension) targetWorld.provider;
         }
-        // Use data attached to the player if possible
-        Optional<RespawnLocationData> optRespawn = ((Player) playerIn).get(RespawnLocationData.class);
-        if (optRespawn.isPresent()) {
-            // API TODO: Make this support multiple world spawn points
-            // TODO Make RespawnLocationData 'shadow' the bed location from below
-            return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
-        }
-
+        Vector3d spawnPos = VecHelper.toVector3d(targetWorld.getSpawnPoint());
         BlockPos bedLoc = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimension);
         if (bedLoc != null) { // Player has a bed
             boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimension);
@@ -438,8 +439,7 @@ public abstract class MixinServerConfigurationManager {
             playerIn.setSpawnPoint(bedLoc, forceBedSpawn);
             playerIn.dimension = prevDim;
         }
-
-        return new Transform<>(new Location<>((World) targetWorld, spawnPos), Vector3d.ZERO, Vector3d.ZERO);
+        return new Location<>((World) targetWorld, spawnPos);
     }
 
     @Overwrite
@@ -464,4 +464,20 @@ public abstract class MixinServerConfigurationManager {
             playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(8, worldIn.getThunderStrength(1.0F)));
         }
     }
+
+    @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"))
+    private void onPlayerLogOut(EntityPlayerMP player, CallbackInfo ci) {
+        // Synchronise with user object
+        NBTTagCompound nbt = new NBTTagCompound();
+        player.writeToNBT(nbt);
+        ((SpongeUser) ((IMixinEntityPlayerMP) player).getUserObject()).readFromNbt(nbt);
+    }
+
+    @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))
+    private void onSaveAllPlayerData(CallbackInfo ci) {
+        for (SpongeUser user : SpongeUser.dirtyUsers) {
+            user.save();
+        }
+    }
+
 }

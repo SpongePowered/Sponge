@@ -26,6 +26,7 @@ package org.spongepowered.common.data.key;
 
 import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
+import static org.spongepowered.api.data.key.KeyFactory.makeMapKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
@@ -258,6 +259,7 @@ public class KeyRegistry {
         keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
         keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
         keyMap.put("banner_patterns", new PatternKey());
+        keyMap.put("respawn_locations", makeMapKey(UUID.class, Vector3d.class, of("RespawnLocations")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

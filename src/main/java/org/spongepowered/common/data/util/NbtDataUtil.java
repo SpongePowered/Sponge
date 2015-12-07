@@ -87,6 +87,13 @@ public final class NbtDataUtil {
 
     public static final String ITEM_UNBREAKABLE = "Unbreakable";
 
+    public static final String USER_SPAWN_X = "SpawnX";
+    public static final String USER_SPAWN_Y = "SpawnY";
+    public static final String USER_SPAWN_Z = "SpawnZ";
+    public static final String USER_SPAWN_FORCED = "SpawnForced";
+    public static final String USER_SPAWN_LIST = "Spawns";
+    public static final String USER_SPAWN_DIM = "Dim";
+
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
     public static final byte TAG_BYTE = 1;
@@ -100,6 +107,7 @@ public final class NbtDataUtil {
     public static final byte TAG_LIST = 9;
     public static final byte TAG_COMPOUND = 10;
     public static final byte TAG_INT_ARRAY = 11;
+    public static final byte TAG_ANY_NUMERIC = 99;
 
     // These are Sponge's NBT tag keys
     public static final String SPONGE_DATA = "SpongeData";

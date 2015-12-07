@@ -28,10 +28,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.common.interfaces.IMixinWorldInfo;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,7 +41,6 @@ public final class WorldPropertyRegistryModule {
 
     private final Map<String, WorldProperties> worldPropertiesNameMappings = Maps.newHashMap();
     private final Map<UUID, WorldProperties> worldPropertiesUuidMappings = Maps.newHashMap();
-
 
     public static WorldPropertyRegistryModule getInstance() {
         return Holder.instance;
@@ -75,8 +76,44 @@ public final class WorldPropertyRegistryModule {
         return Collections.unmodifiableCollection(this.worldPropertiesNameMappings.values());
     }
 
+    /**
+     * Converts a dimension ID to a world UUID.
+     *
+     * @param dim Dim id
+     * @return World uuid, or null
+     */
+    public static UUID dimIdToUuid(int dim) {
+        for (Entry<UUID, WorldProperties> entry : getInstance().worldPropertiesUuidMappings.entrySet()) {
+            WorldProperties props = entry.getValue();
+            if (props instanceof IMixinWorldInfo) {
+                if (((IMixinWorldInfo) props).getDimensionId() == dim) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
 
-    private WorldPropertyRegistryModule() { }
+    /**
+     * Converts world UUID to dimension ID.
+     *
+     * @param uuid World UUID
+     * @return Dimension ID, or MIN_VALUE if not found
+     */
+    public static int uuidToDimId(UUID uuid) {
+        for (Entry<UUID, WorldProperties> entry : getInstance().worldPropertiesUuidMappings.entrySet()) {
+            if (entry.getKey().equals(uuid)) {
+                WorldProperties props = entry.getValue();
+                if (props instanceof IMixinWorldInfo) {
+                    return ((IMixinWorldInfo) props).getDimensionId();
+                }
+            }
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    private WorldPropertyRegistryModule() {
+    }
 
     private static final class Holder {
 

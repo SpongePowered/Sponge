@@ -28,9 +28,7 @@ import com.google.common.base.Objects;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.mutable.entity.AchievementData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
-import org.spongepowered.api.data.manipulator.mutable.entity.StatisticData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -68,16 +66,6 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<CommandSource> getCommandSource() {
         return (Optional) getPlayer();
-    }
-
-    @Override
-    public AchievementData getAchievementData() {
-        throw new UnsupportedOperationException(); // TODO Achievement Data
-    }
-
-    @Override
-    public StatisticData getStatisticData() {
-        throw new UnsupportedOperationException(); // TODO Statistic Data
     }
 
     @Override

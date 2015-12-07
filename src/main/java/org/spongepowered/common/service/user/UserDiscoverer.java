@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.service.user;
 
-import com.google.common.collect.Maps;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -49,13 +50,15 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 class UserDiscoverer {
 
-    private static final Map<UUID, User> userCache = Maps.newHashMap();
+    private static final Cache<UUID, User> userCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(1, TimeUnit.DAYS)
+            .build();
 
     static User create(GameProfile profile) {
         User user = (User) new SpongeUser(profile);
@@ -73,7 +76,7 @@ class UserDiscoverer {
      * @return The user data, or null if not found
      */
     static User findByUuid(UUID uniqueId) {
-        User user = userCache.get(uniqueId);
+        User user = userCache.getIfPresent(uniqueId);
         if (user != null) {
             return user;
         }
@@ -110,7 +113,7 @@ class UserDiscoverer {
         Set<org.spongepowered.api.profile.GameProfile> profiles = Sets.newHashSet();
 
         // Add all cached profiles
-        for (User user : userCache.values()) {
+        for (User user : userCache.asMap().values()) {
             profiles.add(user.getProfile());
         }
 

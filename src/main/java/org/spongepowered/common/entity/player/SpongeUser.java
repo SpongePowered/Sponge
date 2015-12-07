@@ -24,20 +24,40 @@
  */
 package org.spongepowered.common.entity.player;
 
+import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.entity.Tamer;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
+import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.world.DimensionManager;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -48,19 +68,83 @@ import java.util.UUID;
  * <li>MixinSpongeUser</li><li>MixinDataHolder</li><li>MixinSubject</li> </ul>
  *
  * TODO Future note about data: The following data manipulators are always
- * applicable to User: BanData, WhitelistData, JoinData, RespawnLocationData
+ * applicable to User: BanData, WhitelistData, JoinData
  */
-public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier {
+public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, ISpongeUser {
 
+    public static final Set<SpongeUser> dirtyUsers = Sets.newHashSet();
+
+    private final User self = (User) this; // convenient access
     private final GameProfile profile;
+
+    private final Map<UUID, Vector3d> spawnLocations = Maps.newHashMap();
 
     public SpongeUser(GameProfile profile) {
         this.profile = profile;
     }
 
+    private void reset() {
+        this.spawnLocations.clear();
+    }
+
     public void readFromNbt(NBTTagCompound compound) {
-        // TODO Read: inventory, spawn locations, any other data that should be
+        this.reset();
+        // See EntityPlayer#readEntityFromNBT
+        if (compound.hasKey(NbtDataUtil.USER_SPAWN_X, NbtDataUtil.TAG_ANY_NUMERIC)
+                && compound.hasKey(NbtDataUtil.USER_SPAWN_Y, NbtDataUtil.TAG_ANY_NUMERIC)
+                && compound.hasKey(NbtDataUtil.USER_SPAWN_Z, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            Vector3d pos = new Vector3d(compound.getInteger(NbtDataUtil.USER_SPAWN_X),
+                    compound.getInteger(NbtDataUtil.USER_SPAWN_Y),
+                    compound.getInteger(NbtDataUtil.USER_SPAWN_Z));
+            this.spawnLocations.put(WorldPropertyRegistryModule.dimIdToUuid(0), pos);
+        }
+        NBTTagList spawnlist = compound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
+        for (int i = 0; i < spawnlist.tagCount(); i++) {
+            NBTTagCompound spawndata = (NBTTagCompound) spawnlist.getCompoundTagAt(i);
+            UUID uuid = WorldPropertyRegistryModule.dimIdToUuid(spawndata.getInteger(NbtDataUtil.USER_SPAWN_DIM));
+            if (uuid != null) {
+                this.spawnLocations.put(uuid,
+                        new Vector3d(spawndata.getInteger(NbtDataUtil.USER_SPAWN_X),
+                                spawndata.getInteger(NbtDataUtil.USER_SPAWN_Y),
+                                spawndata.getInteger(NbtDataUtil.USER_SPAWN_Z)));
+            }
+        }
+        // TODO Read: inventory, any other data that should be
         // available through data manipulators.
+    }
+
+    public void writeToNbt(NBTTagCompound compound) {
+        // Clear data that we may or may not write back
+        compound.removeTag(NbtDataUtil.USER_SPAWN_X);
+        compound.removeTag(NbtDataUtil.USER_SPAWN_Y);
+        compound.removeTag(NbtDataUtil.USER_SPAWN_Z);
+        compound.removeTag(NbtDataUtil.USER_SPAWN_LIST);
+
+        NBTTagList spawnlist = new NBTTagList();
+        for (Entry<UUID, Vector3d> entry : this.spawnLocations.entrySet()) {
+            int dim = WorldPropertyRegistryModule.uuidToDimId(entry.getKey());
+            if (dim == Integer.MIN_VALUE) {
+                continue;
+            }
+            Vector3d pos = entry.getValue();
+            if (dim == 0) { // Overworld
+                compound.setDouble(NbtDataUtil.USER_SPAWN_X, pos.getX());
+                compound.setDouble(NbtDataUtil.USER_SPAWN_Y, pos.getY());
+                compound.setDouble(NbtDataUtil.USER_SPAWN_Z, pos.getZ());
+                compound.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, false); // No way to know
+            } else {
+                NBTTagCompound spawndata = new NBTTagCompound();
+                spawndata.setInteger(NbtDataUtil.USER_SPAWN_DIM, dim);
+                spawndata.setDouble(NbtDataUtil.USER_SPAWN_X, pos.getX());
+                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Y, pos.getY());
+                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Z, pos.getZ());
+                spawndata.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, false); // No way to know
+                spawnlist.appendTag(spawndata);
+            }
+        }
+        if (!spawnlist.hasNoTags()) {
+            compound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnlist);
+        }
     }
 
     @Override
@@ -77,8 +161,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     public DataContainer toContainer() {
         // TODO More data
         return new MemoryDataContainer()
-                .set(DataQuery.of("UUID"), this.profile.getId())
-                .set(DataQuery.of("name"), this.profile.getName());
+                .set(DataQueries.USER_UUID, this.profile.getId())
+                .set(DataQueries.USER_NAME, this.profile.getName())
+                .set(DataQueries.USER_SPAWNS, this.spawnLocations);
     }
 
     @Override
@@ -154,6 +239,66 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     @Override
     public void setItemInHand(ItemStack itemInHand) {
         throw new UnsupportedOperationException(); // TODO Inventory API
+    }
+
+    @Override
+    public Map<UUID, Vector3d> getBedlocations() {
+        Optional<Player> player = this.self.getPlayer();
+        if (player.isPresent()) {
+            return ((ISpongeUser) player.get()).getBedlocations();
+        }
+        return this.spawnLocations;
+    }
+
+    @Override
+    public boolean setBedLocations(Map<UUID, Vector3d> value) {
+        Optional<Player> player = this.self.getPlayer();
+        if (player.isPresent()) {
+            return ((ISpongeUser) player.get()).setBedLocations(value);
+        }
+        this.spawnLocations.clear();
+        this.spawnLocations.putAll(value);
+        this.markDirty();
+        return true;
+    }
+
+    private void markDirty() {
+        dirtyUsers.add(this);
+    }
+
+    public void save() {
+        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
+        File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
+        NBTTagCompound tag;
+        if (dataFile.isFile()) {
+            try {
+                tag = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
+            } catch (IOException ignored) {
+                // Nevermind
+                tag = new NBTTagCompound();
+            }
+        } else {
+            tag = new NBTTagCompound();
+        }
+        writeToNbt(tag);
+        try {
+            CompressedStreamTools.writeCompressed(tag, new FileOutputStream(dataFile));
+            dirtyUsers.remove(this);
+        } catch (IOException e) {
+            SpongeHooks.logWarning("Failed to save user file {}. {}", dataFile, e);
+        }
+    }
+
+    @Override
+    public ImmutableMap<UUID, Vector3d> removeAllBeds() {
+        Optional<Player> player = this.self.getPlayer();
+        if (player.isPresent()) {
+            return ((ISpongeUser) player.get()).removeAllBeds();
+        }
+        ImmutableMap<UUID, Vector3d> locations = ImmutableMap.copyOf(this.spawnLocations);
+        this.spawnLocations.clear();
+        this.markDirty();
+        return locations;
     }
 
 }
