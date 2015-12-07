@@ -32,7 +32,6 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.MapMaker;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataQuery;
@@ -91,6 +90,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
@@ -261,6 +261,7 @@ public class KeyRegistry {
         keyMap.put("banner_patterns", new PatternKey());
         keyMap.put("respawn_locations", makeMapKey(UUID.class, Vector3d.class, of("RespawnLocations")));
         keyMap.put("expiration_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ExpirationTicks")));
+        keyMap.put("skin", makeSingleKey(UUID.class, Value.class, of("Skin")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

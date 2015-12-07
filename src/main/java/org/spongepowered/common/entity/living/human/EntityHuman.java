@@ -25,8 +25,6 @@
 
 package org.spongepowered.common.entity.living.human;
 
-import static org.spongepowered.api.data.DataTransactionResult.failResult;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -53,15 +51,15 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.ArmorEquipable;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -144,8 +142,11 @@ public class EntityHuman extends EntityCreature {
     @Override
     public void writeEntityToNBT(NBTTagCompound tagCompound) {
         super.writeEntityToNBT(tagCompound);
+        NBTTagCompound spongeData = ((IMixinEntity) this).getSpongeData();
         if (this.skinUuid != null) {
-            ((IMixinEntity) this).getSpongeData().setString("skinUuid", this.skinUuid.toString());
+            spongeData.setString("skinUuid", this.skinUuid.toString());
+        } else {
+            spongeData.removeTag("skinUuid");
         }
     }
 
@@ -290,51 +291,48 @@ public class EntityHuman extends EntityCreature {
         return true;
     }
 
-    public DataTransactionResult setSkinData(SkinData skin) {
+    public void removeFromTabListDelayed(EntityPlayerMP player, S38PacketPlayerListItem removePacket) {
+        int delay = SpongeImpl.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
+        Runnable removeTask = () -> this.pushPackets(player, removePacket);
+        if (delay == 0) {
+            removeTask.run();
+        } else {
+            SpongeImpl.getGame().getScheduler().createTaskBuilder().execute(removeTask).delayTicks(delay).submit(SpongeImpl.getPlugin());
+        }
+    }
+
+    public boolean setSkinUuid(UUID skin) {
         if (!MinecraftServer.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
-            return DataTransactionResult.failResult(skin.skin().asImmutable());
-        }
-        if (skin.skin().get().equals(this.skinUuid)) {
-            return DataTransactionResult.successNoData();
-        }
-        if (!updateFakeProfileWithSkin(skin.skin().get())) {
-            return DataTransactionResult.failResult(skin.skin().asImmutable());
-        }
-        if (this.isAliveAndInWorld()) {
-            this.respawnOnClient();
-        }
-        return DataTransactionResult.successNoData();
-    }
-
-    public Optional<SkinData> getSkinData() {
-        if (this.skinUuid != null) {
-            return Optional.empty(); //Optional.<SkinData>of(new SpongeSkinData(this.skinUuid));
-        }
-        return Optional.empty();
-    }
-
-    public SkinData createSkinData() {
-        return this.getSkinData().orElse(null); //.or(new SpongeSkinData(this.entityUniqueID));
-    }
-
-    public boolean removeSkin() {
-        if (this.skinUuid == null) {
             return false;
         }
-        this.fakeProfile.getProperties().removeAll("textures");
-        this.skinUuid = null;
+        if (skin.equals(this.skinUuid)) {
+            return true;
+        }
+        if (!updateFakeProfileWithSkin(skin)) {
+            return false;
+        }
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
         return true;
     }
 
-    public Optional<SkinData> fillSkinData(SkinData manipulator) {
+    public UUID getSkinUuid() {
+        return this.skinUuid;
+    }
+
+    public DataTransactionResult removeSkin() {
         if (this.skinUuid == null) {
-            return Optional.empty();
+            return DataTransactionResult.successNoData();
         }
-        return Optional.of(manipulator.set(new SpongeValue<>(Keys.SKIN, this.skinUuid)));
+        this.fakeProfile.getProperties().removeAll("textures");
+        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN, this.skinUuid);
+        this.skinUuid = null;
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
+        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
     }
 
     private boolean isAliveAndInWorld() {
@@ -344,7 +342,7 @@ public class EntityHuman extends EntityCreature {
     private void respawnOnClient() {
         this.pushPackets(new S13PacketDestroyEntities(this.getEntityId()), this.createPlayerListPacket(S38PacketPlayerListItem.Action.ADD_PLAYER));
         this.pushPackets(this.createSpawnPacket());
-        this.pushPackets(this.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER));
+        removeFromTabListDelayed(null, this.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**

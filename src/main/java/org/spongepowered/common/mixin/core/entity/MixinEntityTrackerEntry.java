@@ -38,20 +38,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.entity.living.human.RemovePlayerListRunnable;
 
 import java.util.Set;
 
 @Mixin(EntityTrackerEntry.class)
 public abstract class MixinEntityTrackerEntry {
 
-    @Shadow
-    public Entity trackedEntity;
-
-    @Shadow
-    public Set<EntityPlayerMP> trackingPlayers;
+    @Shadow public Entity trackedEntity;
+    @Shadow public Set<EntityPlayerMP> trackingPlayers;
 
     @Shadow
     public abstract void func_151261_b(Packet packetIn);
@@ -74,13 +69,7 @@ public abstract class MixinEntityTrackerEntry {
         if (human.canRemoveFromListImmediately()) {
             thisCtx.sendPacket(removePacket);
         } else {
-            int delay = SpongeImpl.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
-            Runnable removeTask = new RemovePlayerListRunnable(human, playerIn, removePacket);
-            if (delay == 0) {
-                removeTask.run();
-            } else {
-                SpongeImpl.getGame().getScheduler().createTaskBuilder().execute(removeTask).delayTicks(delay).submit(SpongeImpl.getPlugin());
-            }
+            human.removeFromTabListDelayed(playerIn, removePacket);
         }
     }
 

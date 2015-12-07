@@ -117,6 +117,7 @@ public final class DataQueries {
     public static final DataQuery ENTITY_TYPE = of("EntityType");
     public static final DataQuery ENTITY_ROTATION = of("Rotation");
     public static final DataQuery ENTITY_SCALE = of("Scale");
+    public static final DataQuery SKIN_UUID = of("Skin");
 
     // User
     public static final DataQuery USER_UUID = of("UUID");

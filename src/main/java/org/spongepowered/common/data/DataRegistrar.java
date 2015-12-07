@@ -716,6 +716,11 @@ public class DataRegistrar {
             ImmutableSpongeCareerData.class, careerDualProcessor);
         dataManager.registerValueProcessor(Keys.CAREER, careerDualProcessor);
 
+        final SkinDataProcessor skinDataProcessor = new SkinDataProcessor();
+        dataManager.registerDataProcessorAndImpl(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
+                ImmutableSpongeSkinData.class, skinDataProcessor);
+        dataManager.registerValueProcessor(Keys.SKIN, skinDataProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
