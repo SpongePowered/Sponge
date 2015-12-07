@@ -45,6 +45,7 @@ import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.item.EntityFallingBlock;
@@ -139,7 +140,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.service.permission.context.Context;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
@@ -151,6 +151,7 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -676,7 +677,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 SpongeImpl.postEvent(event);
 
                 if (!((Cancellable) event).isCancelled()) {
-                    if (entityIn instanceof net.minecraft.entity.effect.EntityWeatherEffect) {
+                    if (entityIn instanceof EntityWeatherEffect) {
                         return addWeatherEffect(entityIn);
                     }
 
@@ -1147,14 +1148,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         continue;
                     }
                 }
-
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity;
-                int x = MathHelper.floor_double(nmsEntity.posX / 16.0D);
-                int z = MathHelper.floor_double(nmsEntity.posZ / 16.0D);
-                this.getChunkFromChunkCoords(x, z).addEntity(nmsEntity);
-                this.loadedEntityList.add(nmsEntity);
-                this.onEntityAdded(nmsEntity);
-                SpongeHooks.logEntitySpawn(cause, nmsEntity);
+                if (nmsEntity instanceof EntityWeatherEffect) {
+                    addWeatherEffect(nmsEntity);
+                } else {
+                    int x = MathHelper.floor_double(nmsEntity.posX / 16.0D);
+                    int z = MathHelper.floor_double(nmsEntity.posZ / 16.0D);
+                    this.getChunkFromChunkCoords(x, z).addEntity(nmsEntity);
+                    this.loadedEntityList.add(nmsEntity);
+                    this.onEntityAdded(nmsEntity);
+                    SpongeHooks.logEntitySpawn(cause, nmsEntity);
+                }
                 iterator.remove();
             }
         } else {
