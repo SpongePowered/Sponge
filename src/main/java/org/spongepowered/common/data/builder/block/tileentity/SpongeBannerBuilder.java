@@ -56,7 +56,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         if (!container.contains(DataQueries.BASE) || !container.contains(DataQueries.PATTERNS)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
-        final DataManager service = this.game.getDataManager();
+        final DataManager service = this.game.getServiceManager().provide(DataManager.class).get();
 
         final BannerData bannerData = null; // TODO when banner data is implemented.
 

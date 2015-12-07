@@ -182,15 +182,15 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         checkDataExists(container, DataQueries.BLOCK_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        final DataManager dataManager = Sponge.getDataManager();
+        final DataManager dataManager = SpongeImpl.getGame().getServiceManager().provide(DataManager.class).get();
         // this is unused for now
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
-        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class).get();
+        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, dataManager).get();
         BlockState extendedState = null;
         if (container.contains(DataQueries.BLOCK_EXTENDED_STATE)) {
-            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class).get();
+            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, dataManager).get();
         } else {
             extendedState = blockState;
         }
