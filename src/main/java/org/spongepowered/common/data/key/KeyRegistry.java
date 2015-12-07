@@ -255,6 +255,13 @@ public class KeyRegistry {
         keyMap.put("player_created", makeSingleKey(Boolean.class, Value.class, of("PlayerCreated")));
         keyMap.put("item_blockstate", makeSingleKey(BlockState.class, Value.class, of("ItemBlockState")));
         keyMap.put("trade_offers", makeListKey(TradeOffer.class, of("TradeOffers")));
+        keyMap.put("skeleton_type", makeSingleKey(SkeletonType.class, Value.class, of("SkeletonType")));
+        keyMap.put("ocelot_type", makeSingleKey(OcelotType.class, Value.class, of("OcelotType")));
+        keyMap.put("rabbit_type", makeSingleKey(RabbitType.class, Value.class, of("RabbitType")));
+        keyMap.put("lock_token", makeSingleKey(String.class, Value.class, of("Lock")));
+        keyMap.put("banner_base_color", makeSingleKey(DyeColor.class, Value.class, of("BannerBaseColor")));
+        keyMap.put("banner_patterns", new PatternKey());
+        keyMap.put("respawn_locations", makeMapKey(UUID.class, Vector3d.class, of("RespawnLocations")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

@@ -366,8 +366,8 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplFactory.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
-                    (Player) playerIn, this.tempIsBedSpawn);
+                SpongeImplFactory.createRespawnPlayerEvent(SpongeImpl.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn,
+                        this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
         player.setTransform(event.getToTransform());

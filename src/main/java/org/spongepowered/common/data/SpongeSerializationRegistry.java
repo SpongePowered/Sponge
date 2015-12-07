@@ -1220,6 +1220,26 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerDataProcessorAndImpl(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
                 ImmutableSpongeTradeOfferData.class, tradeOfferDataProcessor);
 
+        final SkeletonDataProcessor skeletonDataProcessor = new SkeletonDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class,
+                ImmutableSpongeSkeletonData.class, skeletonDataProcessor);
+
+        final OcelotDataProcessor ocelotDataProcessor = new OcelotDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(OcelotData.class, SpongeOcelotData.class, ImmutableOcelotData.class,
+                ImmutableSpongeOcelotData.class, ocelotDataProcessor);
+
+        final RabbitDataProcessor rabbitDataProcessor = new RabbitDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(RabbitData.class, SpongeRabbitData.class, ImmutableRabbitData.class,
+                ImmutableSpongeRabbitData.class, rabbitDataProcessor);
+
+        final TileEntityBannerDataProcessor bannerDataProcessor = new TileEntityBannerDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(BannerData.class, SpongeBannerData.class, ImmutableBannerData.class,
+                ImmutableSpongeBannerData.class, bannerDataProcessor);
+
+        final RespawnLocationDataProcessor respawnLocationDataProcessor = new RespawnLocationDataProcessor();
+        dataRegistry.registerDataProcessorAndImpl(RespawnLocationData.class, SpongeRespawnLocationData.class, ImmutableRespawnLocation.class,
+                ImmutableSpongeRespawnLocation.class, respawnLocationDataProcessor);
+
         // Values
         dataRegistry.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataRegistry.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -1356,6 +1376,14 @@ public class SpongeSerializationRegistry {
         dataRegistry.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
         dataRegistry.registerValueProcessor(Keys.REPRESENTED_ITEM, new JukeboxValueProcessor());
         dataRegistry.registerValueProcessor(Keys.TRADE_OFFERS, new TradeOffersValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.SKELETON_TYPE, new SkeletonTypeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.OCELOT_TYPE, new OcelotTypeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.RABBIT_TYPE, new RabbitTypeValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.LOCK_TOKEN, new LockTokenValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.LOCK_TOKEN, new ItemLockTokenValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.BANNER_BASE_COLOR, new TileBannerBaseColorValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
+        dataRegistry.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
