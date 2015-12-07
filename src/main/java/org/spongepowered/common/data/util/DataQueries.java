@@ -124,11 +124,6 @@ public final class DataQueries {
     public static final DataQuery USER_NAME = of("Name");
     public static final DataQuery USER_SPAWNS = of("Spawns");
 
-    // User
-    public static final DataQuery USER_UUID = of("UUID");
-    public static final DataQuery USER_NAME = of("Name");
-    public static final DataQuery USER_SPAWNS = of("Spawns");
-
     // ItemStacks
     public static final DataQuery ITEM_COUNT = of("Count");
     public static final DataQuery ITEM_TYPE = of("ItemType");
