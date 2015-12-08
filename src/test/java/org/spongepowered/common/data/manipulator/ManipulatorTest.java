@@ -26,36 +26,45 @@ package org.spongepowered.common.data.manipulator;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.data.DataManager;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.util.PEBKACException;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.data.DataRegistrar;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 @RunWith(Parameterized.class)
 public class ManipulatorTest {
 
-    @SuppressWarnings("unchecked")
-    @BeforeClass
-    public static void setupKeys() {
+    @SuppressWarnings({"unchecked"})
+    @Parameterized.Parameters(name = "{index} Data: {0}")
+    public static Iterable<Object[]> data() {
         try { // Setting up keys
-            Method mapGetter = KeyRegistry.class.getDeclaredMethod("getKeyMap", new Class[0]);
+            Method mapGetter = KeyRegistry.class.getDeclaredMethod("getKeyMap");
             mapGetter.setAccessible(true);
             final Map<String, Key<?>> mapping = (Map<String, Key<?>>) mapGetter.invoke(null);
             for (Field field : Keys.class.getDeclaredFields()) {
@@ -77,133 +86,86 @@ public class ManipulatorTest {
         } catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testCreateData() {
+        final List<Object[]> list = new ArrayList<>();
         try {
             final SpongeDataManager registry = SpongeDataManager.getInstance();
             final Field manipulatorMap = SpongeDataManager.class.getDeclaredField("processorMap");
             manipulatorMap.setAccessible(true);
-
-    @Test
-    public void testValueEquals() {
-        try {
-            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
-            final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
-            final ImmutableDataManipulator<?, ?> immutable = manipulator.asImmutable();
-            final Set<ImmutableValue<?>> manipulatorValues = manipulator.getValues();
-            final Set<ImmutableValue<?>> immutableValues = immutable.getValues();
-            assertThat("The ImmutableDataManipulator is missing values present from the DataManipulator! " + this.dataName,
-                manipulatorValues.containsAll(immutableValues), is(true));
-            assertThat("The DataManipulator is missing values present from the ImmutableDataManipulator! " + this.dataName,
-                immutableValues.containsAll(manipulatorValues), is(true));
-        } catch (NoSuchMethodException e) {
-            throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
-                                                    + "If the manipulator needs to be parametarized, please understand that there needs to "
-                                                    + "be a default at the least.", e);
-        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-            throw new IllegalStateException("Failed to construct manipulator: " + this.dataName, e);
-        }
-    }
-
-    @Test
-    public void testSameKeys() {
-        try {
-            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
-            final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
-            final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
-            final Set<Key<?>> mutableKeys = manipulator.getKeys();
-            final Set<Key<?>> immutableKeys = immutableDataManipulator.getKeys();
-            assertThat("The DataManipulator and ImmutableDataManipulator have differing keys!\n"
-                + "This shouldn't be the case as a DataManipulator is contractually obliged to store the exact same"
-                + "key/values as the ImmutableDataManipulator and vice versa.\n"
-                + "The mutable manipulator in question: " + this.dataName +"\n"
-                + "The immutable manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(),
-                mutableKeys.equals(immutableKeys), is(true));
-        } catch (NoSuchMethodException e) {
-            throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
-                                                    + "If the manipulator needs to be parametarized, please understand that there needs to "
-                                                    + "be a default at the least.", e);
-        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-            throw new IllegalStateException("Failed to construct manipulator: " + this.dataName, e);
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Test
-    public void testGetValues() {
-        try {
-            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
-            final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
-            final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
-            final Set<Key<?>> keys = manipulator.getKeys();
-            for (Key<? extends BaseValue<?>> key : keys) {
-                Optional<?> mutable = manipulator.get((Key) key);
-                Optional<?> immutable = immutableDataManipulator.get((Key) key);
-                assertThat("The DataManipulator failed to retrieve a value that a key was registered for!\n"
-                    + "The manipulator in question: " + this.dataName, mutable.isPresent(), is(true));
-                assertThat("The ImmutableDataManipulator failed to retrieve a value that a key was registered for!\n"
-                    + "The manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(), immutable.isPresent(), is(true));
-                assertThat("The returned values do not equal eachother!\n"
-                    + "DataManipulator: " + this.dataName + "\nImmutableDataManipulator: "
-                    + immutableDataManipulator.getClass().getSimpleName(), mutable.equals(immutable), is(true));
-            }
-        } catch (NoSuchMethodException e) {
-            throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
-                                                    + "If the manipulator needs to be parametarized, please understand that there needs to "
-                                                    + "be a default at the least.", e);
-        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-            throw new IllegalStateException("Failed to construct manipulator: " + this.dataName, e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testSerialization() {
-        try {
-            final SpongeDataManager registry = SpongeDataManager.getInstance();
-            final Field manipulatorMap = SpongeDataManager.class.getDeclaredField("processorMap");
-            manipulatorMap.setAccessible(true);
-
-            final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap =
-                (Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>>) manipulatorMap.get(registry);
 
             final Field builderMap = SpongeDataManager.class.getDeclaredField("builderMap");
             builderMap.setAccessible(true);
             final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> manipulatorBuilderMap =
                 (Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>>) builderMap.get(registry);
 
+            final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap =
+                (Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>>) manipulatorMap.get(registry);
             for (Map.Entry<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> entry : delegateMap.entrySet()) {
                 if (Modifier.isInterface(entry.getKey().getModifiers()) || Modifier.isAbstract(entry.getKey().getModifiers())) {
                     continue;
                 }
-                try {
-                    final Constructor<?> ctor = entry.getKey().getConstructor();
-                    System.out.println("[Serialization]: Found " + entry.getKey().getCanonicalName() + " and will attempt to construct it!");
-                    final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
+                if (entry.getKey().getAnnotation(ImplementationRequiredForTest.class) != null) {
+                    continue;
+                }
+                list.add(new Object[] {entry.getKey().getSimpleName(), entry.getKey(), manipulatorBuilderMap.get(entry.getKey()) });
 
-                    final DataContainer container = manipulator.toContainer();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-                    DataManipulatorBuilder<?, ?> builder = manipulatorBuilderMap.get(manipulator.getClass());
-                    if (builder != null) {
-                        final Optional<DataManipulator<?, ?>> optional = (Optional<DataManipulator<?, ?>>) builder.build(container);
-                        if (!optional.isPresent()) {
-                            System.err.println("[Serialization]: A builder did not deserialize the data manipulator: " + manipulator.getClass().getCanonicalName());
-                            System.err.println("[Serialization]: Providing the DataContainer: " + container.toString());
-                        } else {
-                            final DataManipulator<?, ?> deserialized = builder.build(container).get();
-                            assert manipulator.equals(deserialized);
-                        }
-                    }
-                    System.out.println("[Serialization]: Safely de-serialized!");
-                } catch (NoSuchMethodException | InstantiationException | InvocationTargetException e) {
-                    System.out.println("Exceptions thrown! ");
-//                    e.printStackTrace();
-                } catch (Exception e) {
-                    System.out.println("There was an unknown exception, probably because Sponge was not initialized...");
-//                    e.printStackTrace();
+        return list;
+
+    }
+
+    private String dataName;
+    private Class<? extends DataManipulator<?, ?>> manipulatorClass;
+    private DataManipulatorBuilder<?, ?> builder;
+
+
+    public ManipulatorTest(String simpleName, Class<? extends DataManipulator<?, ?>> manipulatorClass, DataManipulatorBuilder<?, ?> builder) {
+        this.manipulatorClass = manipulatorClass;
+        this.dataName = simpleName;
+        this.builder = builder;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testCreateData() {
+        try {
+            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
+            DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
+            manipulator.asImmutable();
+        } catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
+                + "If the manipulator needs to be parametarized, please understand that there needs to "
+                + "be a default at the least.", e);
+        } catch (InstantiationException | InvocationTargetException e) {
+            throw new IllegalStateException("Failed to construct manipulator: " + this.dataName, e);
+        } catch (Exception e) {
+            throw new RuntimeException("There was an unknown exception, probably with validation of the Immutable copy for: "
+                + this.manipulatorClass.getSimpleName() + ". \n It may be required to use @ImplementationRequiredForTest on "
+                + "the DataManipulator implementation class to avoid testing a DataManipulator dependent on a CatalogType.", e);
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSerialization() {
+        try {
+            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
+            final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
+
+            final DataContainer container = manipulator.toContainer();
+
+            if (this.builder != null) {
+                final Optional<DataManipulator<?, ?>> optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
+                if (!optional.isPresent()) {
+                    throw new IllegalArgumentException("[Serialization]: A builder did not deserialize the data manipulator: "
+                        + this.dataName + "\n[Serialization]: Providing the DataContainer: " + container.toString());
+                } else {
+                    final DataManipulator<?, ?> deserialized = this.builder.build(container).get();
+                    assertThat(manipulator.equals(deserialized), is(true));
                 }
             }
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException e) {
