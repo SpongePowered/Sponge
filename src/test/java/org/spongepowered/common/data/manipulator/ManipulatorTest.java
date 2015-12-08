@@ -38,7 +38,6 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.PEBKACException;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -143,9 +142,6 @@ public class ManipulatorTest {
                     + "The manipulator in question: " + this.dataName, mutable.isPresent(), is(true));
                 assertThat("The ImmutableDataManipulator failed to retrieve a value that a key was registered for!\n"
                     + "The manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(), immutable.isPresent(), is(true));
-                if (this.manipulatorClass.equals(SpongeTameableData.class)) {
-                    System.out.println("foo");
-                }
                 assertThat("The returned values do not equal eachother!\n"
                     + "DataManipulator: " + this.dataName + "\nImmutableDataManipulator: "
                     + immutableDataManipulator.getClass().getSimpleName(), mutable.equals(immutable), is(true));
@@ -185,7 +181,5 @@ public class ManipulatorTest {
                                + ". Probably because the DataManipulator relies on an implementation class.", e);
         }
     }
-
-
 
 }
