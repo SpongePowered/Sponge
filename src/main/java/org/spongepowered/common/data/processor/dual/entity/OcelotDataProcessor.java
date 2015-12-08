@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -53,8 +54,8 @@ public class OcelotDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionResult.failNoData();
+    protected Value<OcelotType> constructValue(OcelotType actualValue) {
+        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.DEFAULT_OCELOT, actualValue);
     }
 
     @Override

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.item.EntityXPOrb;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
@@ -69,7 +68,17 @@ public class ExpOrbDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+        return SpongeValueFactory.boundedBuilder(Keys.CONTAINED_EXPERIENCE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(actualValue)
+            .defaultValue(0)
+            .build();
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

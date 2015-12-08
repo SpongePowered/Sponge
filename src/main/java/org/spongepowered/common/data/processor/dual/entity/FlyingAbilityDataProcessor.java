@@ -49,8 +49,8 @@ public class FlyingAbilityDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionResult.failNoData();
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(Keys.CAN_FLY, false, actualValue);
     }
 
     @Override

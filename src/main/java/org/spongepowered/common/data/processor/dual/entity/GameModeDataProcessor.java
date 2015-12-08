@@ -37,6 +37,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -44,7 +45,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 public class GameModeDataProcessor extends
-        AbstractSingleTargetDualProcessor<EntityPlayerMP, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
+    AbstractSingleTargetDualProcessor<EntityPlayer, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
 
     public GameModeDataProcessor() {
         super(EntityPlayerMP.class, Keys.GAME_MODE);
@@ -72,8 +73,8 @@ public class GameModeDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionResult.failNoData();
+    protected Value<GameMode> constructValue(GameMode actualValue) {
+        return new SpongeValue<>(Keys.GAME_MODE, GameModes.SURVIVAL, actualValue);
     }
 
     @Override

@@ -74,6 +74,8 @@ public final class DataConstants {
     public static final boolean DEFAULT_DISARMED = true;
     public static final boolean DEFAULT_SHOULD_DROP = true;
     public static final boolean DEFAULT_PISTON_EXTENDED = false;
+    public static final DyeColor DEFAULT_BANNER_BASE = DyeColors.BLACK;
+    public static final OcelotType DEFAULT_OCELOT = OcelotTypes.WILD_OCELOT;
 
 
     // A bunch of entity defaults (for use in constructing "default" values)

@@ -418,14 +418,6 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class,
                 ImmutableSignData.class, ImmutableSpongeSignData.class, signDataProcessor);
 
-        final FlyingDataProcessor flyingDataProcessor = new FlyingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FlyingData.class, SpongeFlyingData.class, ImmutableFlyingData.class,
-                ImmutableSpongeFlyingData.class, flyingDataProcessor);
-
-        final FlyingAbilityDataProcessor flyingAbilityDataProcessor = new FlyingAbilityDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FlyingAbilityData.class, SpongeFlyingAbilityData.class, ImmutableFlyingAbilityData.class,
-                ImmutableSpongeFlyingAbilityData.class, flyingAbilityDataProcessor);
-
         final SkullDataProcessor skullDataProcessor = new SkullDataProcessor();
         dataManager.registerDataProcessorAndImpl(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
                 ImmutableSpongeSkullData.class, skullDataProcessor);
@@ -441,10 +433,6 @@ public class DataRegistrar {
         final BreathingDataProcessor breathingDataProcessor = new BreathingDataProcessor();
         dataManager.registerDataProcessorAndImpl(BreathingData.class, SpongeBreathingData.class, ImmutableBreathingData.class,
                 ImmutableSpongeBreathingData.class, breathingDataProcessor);
-
-        final GameModeDataProcessor gameModeDataProcessor = new GameModeDataProcessor();
-        dataManager.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
-                ImmutableSpongeGameModeData.class, gameModeDataProcessor);
 
         final ScreamingDataProcessor screamingDataProcessor = new ScreamingDataProcessor();
         dataManager.registerDataProcessorAndImpl(ScreamingData.class, SpongeScreamingData.class, ImmutableScreamingData.class,
@@ -612,10 +600,6 @@ public class DataRegistrar {
         final PistonDataProcessor pistonDataProcessor = new PistonDataProcessor();
         dataManager.registerDataProcessorAndImpl(PistonData.class, SpongePistonData.class, ImmutablePistonData.class,
                 ImmutableSpongePistonData.class, pistonDataProcessor);
-
-        final ExpOrbDataProcessor expOrbDataProcessor = new ExpOrbDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
-                ImmutableSpongeExpOrbData.class, expOrbDataProcessor);
 
         final PortionDataProcessor portionDataProcessor = new PortionDataProcessor();
         dataManager.registerDataProcessorAndImpl(PortionData.class, SpongePortionData.class, ImmutablePortionData.class,
@@ -812,10 +796,6 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class,
                 ImmutableSpongeSkeletonData.class, skeletonDataProcessor);
 
-        final OcelotDataProcessor ocelotDataProcessor = new OcelotDataProcessor();
-        dataManager.registerDataProcessorAndImpl(OcelotData.class, SpongeOcelotData.class, ImmutableOcelotData.class,
-                ImmutableSpongeOcelotData.class, ocelotDataProcessor);
-
         final RabbitDataProcessor rabbitDataProcessor = new RabbitDataProcessor();
         dataManager.registerDataProcessorAndImpl(RabbitData.class, SpongeRabbitData.class, ImmutableRabbitData.class,
                 ImmutableSpongeRabbitData.class, rabbitDataProcessor);
@@ -844,10 +824,8 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataManager.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_FLYING, new IsFlyingValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_AIR, new MaxAirValueProcessor());
         dataManager.registerValueProcessor(Keys.REMAINING_AIR, new RemainingAirValueProcessor());
-        dataManager.registerValueProcessor(Keys.GAME_MODE, new GameModeValueProcessor());
         dataManager.registerValueProcessor(Keys.IS_SCREAMING, new ScreamingValueProcessor());
         dataManager.registerValueProcessor(Keys.ITEM_ENCHANTMENTS, new ItemEnchantmentValueProcessor());
         dataManager.registerValueProcessor(Keys.HORSE_COLOR, new HorseColorValueProcessor());
@@ -873,7 +851,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.IS_SITTING, new IsSittingValueProcessor());
         dataManager.registerValueProcessor(Keys.IS_SHEARED, new IsShearedValueProcessor());
         dataManager.registerValueProcessor(Keys.PIG_SADDLE, new PigSaddleValueProcessor());
-        dataManager.registerValueProcessor(Keys.CAN_FLY, new CanFlyValueProcessor());
         dataManager.registerValueProcessor(Keys.TAMED_OWNER, new TameableOwnerValueProcessor());
         dataManager.registerValueProcessor(Keys.IS_WET, new ItemWetValueProcessor());
         dataManager.registerValueProcessor(Keys.IS_WET, new EntityWetValueProcessor());
@@ -887,7 +864,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.MAX_BURN_TIME, new MaxBurnTimeValueProcessor());
         dataManager.registerValueProcessor(Keys.PASSED_COOK_TIME, new PassedCookTimeValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_COOK_TIME, new MaxCookTimeValueProcessor());
-        dataManager.registerValueProcessor(Keys.CONTAINED_EXPERIENCE, new ExpOrbValueProcessor());
         dataManager.registerValueProcessor(Keys.REMAINING_BREW_TIME, new RemainingBrewTimeValueProcessor());
         dataManager.registerValueProcessor(Keys.DIRT_TYPE, new DirtTypeValueProcessor());
         dataManager.registerValueProcessor(Keys.STONE_TYPE, new StoneTypeValueProcessor());
@@ -963,7 +939,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
         dataManager.registerValueProcessor(Keys.REPRESENTED_ITEM, new JukeboxValueProcessor());
         dataManager.registerValueProcessor(Keys.SKELETON_TYPE, new SkeletonTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.OCELOT_TYPE, new OcelotTypeValueProcessor());
         dataManager.registerValueProcessor(Keys.RABBIT_TYPE, new RabbitTypeValueProcessor());
         dataManager.registerValueProcessor(Keys.LOCK_TOKEN, new LockTokenValueProcessor());
         dataManager.registerValueProcessor(Keys.LOCK_TOKEN, new ItemLockTokenValueProcessor());
@@ -989,8 +964,34 @@ public class DataRegistrar {
 
         final SkinDataProcessor skinDataProcessor = new SkinDataProcessor();
         dataManager.registerDataProcessorAndImpl(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
-                ImmutableSpongeSkinData.class, skinDataProcessor);
+            ImmutableSpongeSkinData.class, skinDataProcessor);
         dataManager.registerValueProcessor(Keys.SKIN, skinDataProcessor);
+
+        final ExpOrbDataProcessor expOrbDataProcessor = new ExpOrbDataProcessor();
+        dataManager.registerDataProcessorAndImpl(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
+            ImmutableSpongeExpOrbData.class, expOrbDataProcessor);
+        dataManager.registerValueProcessor(Keys.CONTAINED_EXPERIENCE, expOrbDataProcessor);
+
+        final FlyingDataProcessor flyingDataProcessor = new FlyingDataProcessor();
+        dataManager.registerDataProcessorAndImpl(FlyingData.class, SpongeFlyingData.class, ImmutableFlyingData.class,
+            ImmutableSpongeFlyingData.class, flyingDataProcessor);
+        dataManager.registerValueProcessor(Keys.IS_FLYING, flyingDataProcessor);
+
+        final FlyingAbilityDataProcessor flyingAbilityDataProcessor = new FlyingAbilityDataProcessor();
+        dataManager.registerDataProcessorAndImpl(FlyingAbilityData.class, SpongeFlyingAbilityData.class, ImmutableFlyingAbilityData.class,
+            ImmutableSpongeFlyingAbilityData.class, flyingAbilityDataProcessor);
+        dataManager.registerValueProcessor(Keys.CAN_FLY, flyingAbilityDataProcessor);
+
+        final OcelotDataProcessor ocelotDataProcessor = new OcelotDataProcessor();
+        dataManager.registerDataProcessorAndImpl(OcelotData.class, SpongeOcelotData.class, ImmutableOcelotData.class,
+            ImmutableSpongeOcelotData.class, ocelotDataProcessor);
+
+        dataManager.registerValueProcessor(Keys.OCELOT_TYPE, ocelotDataProcessor);
+
+        final GameModeDataProcessor gameModeDataProcessor = new GameModeDataProcessor();
+        dataManager.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
+            ImmutableSpongeGameModeData.class, gameModeDataProcessor);
+        dataManager.registerValueProcessor(Keys.GAME_MODE, gameModeDataProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

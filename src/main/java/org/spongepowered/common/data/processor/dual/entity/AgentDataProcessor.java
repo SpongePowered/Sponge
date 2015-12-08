@@ -68,7 +68,7 @@ public class AgentDataProcessor extends AbstractSingleTargetDualProcessor<Entity
 
     @Override
     protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<Boolean>(Keys.AI_ENABLED, true, actualValue);
+        return new SpongeValue<>(Keys.AI_ENABLED, true, actualValue);
     }
 
     @Override
