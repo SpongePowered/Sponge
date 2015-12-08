@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.entity;
+package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.passive.EntityOcelot;
 import org.spongepowered.api.data.DataHolder;
@@ -32,25 +32,30 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableOcelotDa
 import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeOcelotType;
 
 import java.util.Optional;
 
-public class OcelotDataProcessor extends AbstractEntitySingleDataProcessor<EntityOcelot, OcelotType, Value<OcelotType>, OcelotData, ImmutableOcelotData> {
+public class OcelotDataProcessor extends
+    AbstractSingleTargetDualProcessor<EntityOcelot, OcelotType, Value<OcelotType>, OcelotData, ImmutableOcelotData> {
 
     public OcelotDataProcessor() {
         super(EntityOcelot.class, Keys.OCELOT_TYPE);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionResult.failNoData();
+    protected Value<OcelotType> constructValue(OcelotType actualValue) {
+        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.DEFAULT_OCELOT, actualValue);
     }
 
     @Override
@@ -77,4 +82,8 @@ public class OcelotDataProcessor extends AbstractEntitySingleDataProcessor<Entit
         return new SpongeOcelotData();
     }
 
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 }

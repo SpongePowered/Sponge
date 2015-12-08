@@ -35,9 +35,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import org.spongepowered.api.entity.FallingBlock;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.MinecraftFallingBlockDamageSource;
 
 import java.util.ArrayList;
@@ -53,6 +57,32 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     @Shadow public float fallHurtAmount;
     @Shadow public NBTTagCompound tileEntityData;
     @Shadow public boolean canSetAsBlock;
+
+    private DamageSource original;
+    private boolean isAnvil;
+
+    @Inject(method = "fall(FF)V", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 1))
+    public void beforeFall(float distance, float damageMultipleier, CallbackInfo callbackInfo) {
+        this.isAnvil = this.fallTile.getBlock() == Blocks.anvil;
+        this.original = this.isAnvil ? DamageSource.anvil : DamageSource.fallingBlock;
+        if (this.isAnvil) {
+            DamageSource.anvil = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
+        } else {
+            DamageSource.fallingBlock = new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
+        }
+    }
+
+    @Inject(method = "fall(FF)V", at = @At("RETURN"))
+    public void afterFall(float distance, float damageMultiplier, CallbackInfo ci) {
+        if (this.original == null) {
+            return;
+        }
+        if (this.isAnvil) {
+            DamageSource.anvil = this.original;
+        } else {
+            DamageSource.fallingBlock = this.original;
+        }
+    }
 
     /**
      * @author gabizou - November 22, 2015
@@ -77,7 +107,6 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
                     DamageSource.anvil = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
                 } else {
                     original = DamageSource.fallingBlock;
-                    DamageSource.fallingBlock = new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
 
                 }
                 // Sponge End

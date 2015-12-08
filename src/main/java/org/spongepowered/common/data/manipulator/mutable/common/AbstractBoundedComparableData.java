@@ -33,8 +33,10 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
@@ -70,7 +72,13 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
 
     @Override
     protected MutableBoundedValue<T> getValueGetter() {
-        return new SpongeBoundedValue<>(this.usedKey, this.defaultValue, this.comparator, this.lowerBound, this.upperBound, this.getValue());
+        return SpongeValueFactory.boundedBuilder(((Key<? extends BoundedValue<T>>) this.usedKey))
+            .minimum(this.lowerBound)
+            .maximum(this.upperBound)
+            .defaultValue(this.defaultValue)
+            .comparator(this.comparator)
+            .actualValue(this.getValue())
+            .build();
     }
 
     @Override

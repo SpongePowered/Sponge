@@ -43,6 +43,8 @@ import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.text.Text;
@@ -81,6 +83,7 @@ public final class DataConstants {
     public static final boolean DEFAULT_SHOULD_DROP = true;
     public static final boolean DEFAULT_PISTON_EXTENDED = false;
     public static final DyeColor DEFAULT_BANNER_BASE = DyeColors.BLACK;
+    public static final OcelotType DEFAULT_OCELOT = OcelotTypes.WILD_OCELOT;
 
     private DataConstants() {}
 

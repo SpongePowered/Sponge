@@ -28,9 +28,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.EnumDifficulty;
+import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
+import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +41,7 @@ import java.util.Optional;
 
 public final class DifficultyRegistryModule implements CatalogRegistryModule<Difficulty> {
 
+    @RegisterCatalog(Difficulties.class)
     private final Map<String, Difficulty> difficultyMappings = new HashMap<>();
 
     @Override

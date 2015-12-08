@@ -22,54 +22,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.entity;
+package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class FlyingDataProcessor extends AbstractSingleTargetDualProcessor<Entity, Boolean, Value<Boolean>, FlyingData, ImmutableFlyingData> {
 
-    public IsFlyingValueProcessor() {
+    public FlyingDataProcessor() {
         super(Entity.class, Keys.IS_FLYING);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(Keys.IS_FLYING, actualValue);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(Keys.IS_FLYING, false, defaultValue);
+    protected FlyingData createManipulator() {
+        return new SpongeFlyingData();
     }
 
     @Override
-    protected boolean set(Entity container, Boolean value) {
-        if (container instanceof EntityPlayer) {
-            ((EntityPlayer) container).capabilities.isFlying = value;
+    protected boolean set(Entity entity, Boolean value) {
+        if (entity instanceof EntityPlayer) {
+            ((EntityPlayer) entity).capabilities.isFlying = value;
         } else {
-            container.isAirBorne = value;
+            entity.isAirBorne = value;
         }
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(Entity container) {
-        if (container instanceof EntityPlayer) {
-            return Optional.of(((EntityPlayer) container).capabilities.isFlying);
-        } else {
-            return Optional.of(container.isAirBorne);
+    protected Optional<Boolean> getVal(Entity entity) {
+        if (entity instanceof EntityPlayer) {
+            return Optional.of(((EntityPlayer) entity).capabilities.isFlying);
         }
+        return Optional.of(entity.isAirBorne);
     }
 
     @Override
@@ -77,4 +81,8 @@ public class IsFlyingValueProcessor extends AbstractSpongeValueProcessor<Entity,
         return ImmutableSpongeValue.cachedOf(Keys.IS_FLYING, false, value);
     }
 
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 }

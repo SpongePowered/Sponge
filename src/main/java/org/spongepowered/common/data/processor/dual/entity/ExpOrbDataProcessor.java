@@ -22,26 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.entity;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.item.EntityXPOrb;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
 
 import java.util.Optional;
 
-public class ExpOrbDataProcessor extends AbstractEntitySingleDataProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
+public class ExpOrbDataProcessor extends
+    AbstractSingleTargetDualProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
 
     public ExpOrbDataProcessor() {
         super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
@@ -60,7 +59,7 @@ public class ExpOrbDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.CONTAINED_EXPERIENCE, value, 0, intComparator(), 0, Integer.MAX_VALUE);
+        return constructValue(value).asImmutable();
     }
 
     @Override
@@ -69,7 +68,17 @@ public class ExpOrbDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+        return SpongeValueFactory.boundedBuilder(Keys.CONTAINED_EXPERIENCE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
+            .actualValue(actualValue)
+            .defaultValue(0)
+            .build();
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }
