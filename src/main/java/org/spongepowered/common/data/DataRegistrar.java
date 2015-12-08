@@ -541,6 +541,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, moistureDataProcessor);
 
+        final SplashPotionDataProcessor splashPotionDataProcessor = new SplashPotionDataProcessor();
+        dataManager.registerDataProcessorAndImpl(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class, 
+                ImmutableSpongeSplashPotionData.class, splashPotionDataProcessor);
+
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -679,6 +683,7 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
         dataManager.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
         dataManager.registerValueProcessor(Keys.MOISTURE, new MoistureValueProcessor());
+        dataManager.registerValueProcessor(Keys.IS_SPLASH_POTION, new SplashPotionValueProcessor());
 
         // Dual Processors
         final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();
