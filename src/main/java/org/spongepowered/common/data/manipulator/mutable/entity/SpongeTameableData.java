@@ -96,7 +96,7 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.TAMED_OWNER, SpongeTameableData.this::owner);
+        registerFieldGetter(Keys.TAMED_OWNER, SpongeTameableData.this::getOwner);
         registerFieldSetter(Keys.TAMED_OWNER, SpongeTameableData.this::setOwner);
         registerKeyValue(Keys.TAMED_OWNER, SpongeTameableData.this::owner);
     }

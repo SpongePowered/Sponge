@@ -26,17 +26,19 @@ package org.spongepowered.common.data.manipulator;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.PEBKACException;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -90,10 +92,67 @@ public class ManipulatorTest {
             final ImmutableDataManipulator<?, ?> immutable = manipulator.asImmutable();
             final Set<ImmutableValue<?>> manipulatorValues = manipulator.getValues();
             final Set<ImmutableValue<?>> immutableValues = immutable.getValues();
-            assertTrue("The ImmutableDataManipulator is missing values present from the DataManipulator! " + this.dataName,
-                manipulatorValues.containsAll(immutableValues));
-            assertTrue("The DataManipulator is missing values present from the ImmutableDataManipulator! " + this.dataName,
-                immutableValues.containsAll(manipulatorValues));
+            assertThat("The ImmutableDataManipulator is missing values present from the DataManipulator! " + this.dataName,
+                manipulatorValues.containsAll(immutableValues), is(true));
+            assertThat("The DataManipulator is missing values present from the ImmutableDataManipulator! " + this.dataName,
+                immutableValues.containsAll(manipulatorValues), is(true));
+        } catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
+                                                    + "If the manipulator needs to be parametarized, please understand that there needs to "
+                                                    + "be a default at the least.", e);
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new IllegalStateException("Failed to construct manipulator: " + this.dataName, e);
+        }
+    }
+
+    @Test
+    public void testSameKeys() {
+        try {
+            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
+            final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
+            final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
+            final Set<Key<?>> mutableKeys = manipulator.getKeys();
+            final Set<Key<?>> immutableKeys = immutableDataManipulator.getKeys();
+            assertThat("The DataManipulator and ImmutableDataManipulator have differing keys!\n"
+                + "This shouldn't be the case as a DataManipulator is contractually obliged to store the exact same"
+                + "key/values as the ImmutableDataManipulator and vice versa.\n"
+                + "The mutable manipulator in question: " + this.dataName +"\n"
+                + "The immutable manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(),
+                mutableKeys.equals(immutableKeys), is(true));
+        } catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
+                                                    + "If the manipulator needs to be parametarized, please understand that there needs to "
+                                                    + "be a default at the least.", e);
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new IllegalStateException("Failed to construct manipulator: " + this.dataName, e);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testGetValues() {
+        try {
+            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
+            final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
+            final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
+            final Set<Key<?>> keys = manipulator.getKeys();
+            for (Key<? extends BaseValue<?>> key : keys) {
+                Optional<?> mutable = manipulator.get((Key) key);
+                if (this.manipulatorClass.equals(SpongeTameableData.class)) {
+                    System.out.println("foo");
+                }
+                Optional<?> immutable = immutableDataManipulator.get((Key) key);
+                assertThat("The DataManipulator failed to retrieve a value that a key was registered for!\n"
+                    + "The manipulator in question: " + this.dataName, mutable.isPresent(), is(true));
+                assertThat("The ImmutableDataManipulator failed to retrieve a value that a key was registered for!\n"
+                    + "The manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(), immutable.isPresent(), is(true));
+                if (this.manipulatorClass.equals(SpongeTameableData.class)) {
+                    System.out.println("foo");
+                }
+                assertThat("The returned values do not equal eachother!\n"
+                    + "DataManipulator: " + this.dataName + "\nImmutableDataManipulator: "
+                    + immutableDataManipulator.getClass().getSimpleName(), mutable.equals(immutable), is(true));
+            }
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
                                                     + "If the manipulator needs to be parametarized, please understand that there needs to "

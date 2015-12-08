@@ -43,23 +43,26 @@ import javax.annotation.Nullable;
 
 public class ImmutableSpongeTameableData extends AbstractImmutableData<ImmutableTameableData, TameableData> implements ImmutableTameableData {
 
-    //TODO: Wat
-
-    //Lazily initialized, do not use directly, use create & createValue factory methods instead.
-    @Nullable private static ImmutableSpongeTameableData empty = null;
-    @Nullable private static ImmutableSpongeOptionalValue<UUID> emptyValue = null;
+    private static final ImmutableSpongeOptionalValue<UUID> EMPTY_VALUE = new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.empty());
+    private static final ImmutableSpongeTameableData EMPTY_DATA = new ImmutableSpongeTameableData(null);
 
     @Nullable private final UUID owner;
+    private final ImmutableOptionalValue<UUID> immutableValue;
 
     public ImmutableSpongeTameableData(@Nullable UUID owner) {
         super(ImmutableTameableData.class);
         this.owner = owner;
+        if (this.owner == null) {
+            this.immutableValue = EMPTY_VALUE;
+        } else {
+            this.immutableValue = new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.of(this.owner));
+        }
         registerGetters();
     }
 
     @Override
     public ImmutableOptionalValue<UUID> owner() {
-        return createValue(this.owner);
+        return this.immutableValue;
     }
 
     @Override
@@ -91,39 +94,17 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
         return Optional.ofNullable(this.owner);
     }
 
-    private static ImmutableSpongeTameableData getEmpty() {
-        if (empty == null) {
-            empty = new ImmutableSpongeTameableData(null);
-        }
-        return empty;
-    }
-
-    private static ImmutableSpongeOptionalValue<UUID> getEmptyValue() {
-        if (emptyValue == null) {
-            emptyValue = new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.empty());
-        }
-        return emptyValue;
-    }
-
     public static ImmutableTameableData create(@Nullable UUID owner) {
         if (owner == null) {
-            return getEmpty();
+            return EMPTY_DATA;
         } else {
             return new ImmutableSpongeTameableData(owner);
         }
     }
 
-    public static ImmutableOptionalValue<UUID> createValue(@Nullable UUID owner) {
-        if (owner == null) {
-            return getEmptyValue();
-        } else {
-            return createValue(Optional.of(owner));
-        }
-    }
-
     public static ImmutableSpongeOptionalValue<UUID> createValue(Optional<UUID> owner) {
         if (!owner.isPresent()) {
-            return getEmptyValue();
+            return EMPTY_VALUE;
         } else {
             return new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, owner);
         }
