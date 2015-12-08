@@ -138,9 +138,6 @@ public class ManipulatorTest {
             final Set<Key<?>> keys = manipulator.getKeys();
             for (Key<? extends BaseValue<?>> key : keys) {
                 Optional<?> mutable = manipulator.get((Key) key);
-                if (this.manipulatorClass.equals(SpongeTameableData.class)) {
-                    System.out.println("foo");
-                }
                 Optional<?> immutable = immutableDataManipulator.get((Key) key);
                 assertThat("The DataManipulator failed to retrieve a value that a key was registered for!\n"
                     + "The manipulator in question: " + this.dataName, mutable.isPresent(), is(true));
