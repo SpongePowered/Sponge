@@ -734,9 +734,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                     Optional<User> owner = spongeChunk.getBlockOwner(pos);
                     Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
+                    if (owner.isPresent()) {
+                        cause = cause.with(NamedCause.owner(owner.get()));
+                    }
                     if (notifier.isPresent()) {
                         if (!cause.all().contains(notifier.get())) {
-                            cause = cause.with(NamedCause.notifier(notifier.get()));
+                            Cause newCause = Cause.of(NamedCause.notifier(notifier.get()));
+                            cause = newCause.with(cause.all());
                         }
                     }
                     if (owner.isPresent()) {

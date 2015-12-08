@@ -118,8 +118,7 @@ public class SpongeCommonEventFactory {
         SlotTransaction transaction = new SlotTransaction((org.spongepowered.api.item.inventory.Slot) slot, originalSnapshot, newSnapshot);
         ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(transaction).build();
         ChangeInventoryEvent.Held event =
-                SpongeEventFactory.createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)),
-                    (Inventory) player.inventoryContainer, transactions);
+                SpongeEventFactory.createChangeInventoryEventHeld(SpongeImpl.getGame(), Cause.of(NamedCause.source(player)), (Inventory) player.inventoryContainer, transactions);
         SpongeImpl.postEvent(event);
 
         if (event.isCancelled()) {
@@ -512,13 +511,10 @@ public class SpongeCommonEventFactory {
         net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
         IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
         if (spongeChunk != null) {
-            if (StaticMixinHelper.packetPlayer != null) {
-                cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(StaticMixinHelper.packetPlayer));
-            } else {
-                Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                if (notifier.isPresent()) {
-                    cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(notifier.get()));
-                }
+            Optional<User> owner = spongeChunk.getBlockOwner(pos);
+            Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
+            if (notifier.isPresent()) {
+                cause = cause.with(NamedCause.notifier(notifier.get()));
             }
             Optional<User> owner = spongeChunk.getBlockOwner(pos);
             if (owner.isPresent()) {

@@ -69,7 +69,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -360,8 +360,8 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplFactory.createRespawnPlayerEvent(SpongeImpl.getGame(), Cause.of(playerIn), fromTransform, toTransform, (Player) playerIn,
-                        this.tempIsBedSpawn);
+                SpongeImplFactory.createRespawnPlayerEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
+                    (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
         player.setTransform(event.getToTransform());

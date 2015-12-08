@@ -38,7 +38,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.Text;
@@ -56,8 +56,8 @@ import java.util.Iterator;
  */
 public class SpongeImplFactory {
 
-    public static LoadWorldEvent createLoadWorldEvent(World world) {
-        return SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
+    public static LoadWorldEvent createLoadWorldEvent(Game game, World world) {
+        return SpongeEventFactory.createLoadWorldEvent(game, Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
     }
 
     public static ClientConnectionEvent.Join createClientConnectionEventJoin(Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {

@@ -58,7 +58,7 @@ public abstract class MixinItemFishingRod extends Item {
             EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();
             // only fire event on server-side to avoid crash on client
             if (!player.worldObj.isRemote
-                && SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Cause.of(NamedCause.source(player)),
+                && SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(SpongeImpl.getGame(), Cause.of(NamedCause.source(player)),
                 fishHookSnapshot, (FishHook) fishHook))) {
                 player.fishEntity = null;
                 return itemStack;

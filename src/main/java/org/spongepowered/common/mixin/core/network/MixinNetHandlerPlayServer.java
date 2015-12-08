@@ -174,7 +174,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
         final ChangeSignEvent event =
-                SpongeEventFactory.createChangeSignEvent(Cause.of(NamedCause.source(this.playerEntity)),
+                SpongeEventFactory.createChangeSignEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(this.playerEntity)),
                     changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
         if (!SpongeImpl.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
@@ -378,7 +378,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         sources.add(player);
         MessageSink originalSink = MessageSinks.to(sources);
         ClientConnectionEvent.Disconnect event =
-                SpongeImplFactory.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)), message,
+                SpongeImplFactory.createClientConnectionEventDisconnect(SpongeImpl.getGame(), Cause.of(NamedCause.source(player)), message,
                     newMessage, originalSink, player.getMessageSink(), player);
         this.tmpQuitMessage = null;
         SpongeImpl.postEvent(event);
@@ -485,11 +485,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
     public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
-        if (entityIn instanceof Player && !((World) player.worldObj).getProperties().isPVPEnabled()) {
-            return; // PVP is disabled, ignore
-        }
-
-        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
+        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(SpongeImpl.getGame(),
             Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
