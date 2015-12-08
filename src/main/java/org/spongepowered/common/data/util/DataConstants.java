@@ -87,9 +87,6 @@ public final class DataConstants {
 
     private DataConstants() {}
 
-    // yes... we really can use this ;)
-    public static final int ZERO = 0;
-
     // A bunch of entity defaults (for use in constructing "default" values)
     public static final boolean CAN_FLY_DEFAULT = false;
     public static final Career CAREER_DEFAULT = Careers.FARMER;
@@ -103,9 +100,9 @@ public final class DataConstants {
 
     public static final double DEFAULT_FLYING_SPEED = 0.05D;
 
-    public static final double DEFAULT_EXHAUSTION = ZERO;
-    public static final double MINIMUM_EXHAUSTION = ZERO;
-    public static final double DEFAULT_SATURATION = ZERO;
+    public static final double DEFAULT_EXHAUSTION = 0;
+    public static final double MINIMUM_EXHAUSTION = 0;
+    public static final double DEFAULT_SATURATION = 0;
     public static final int DEFAULT_FOOD_LEVEL = 20;
 
     public static final double DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK = 2D;
@@ -113,7 +110,7 @@ public final class DataConstants {
     public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK = false;
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM = true;
-    public static final int DEFAULT_FALLING_BLOCK_FALL_TIME = 0;
+    public static final int DEFAULT_FALLING_BLOCK_FALL_TIME = 1;
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES = false;
     public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
 
