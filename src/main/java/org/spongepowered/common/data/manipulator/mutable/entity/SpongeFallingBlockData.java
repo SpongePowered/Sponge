@@ -63,7 +63,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
     }
 
     public SpongeFallingBlockData() {
-        this(DataConstants.DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK, DataConstants.DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE, DataConstants
+        this(DataConstants.DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK, DataConstants.DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE, DataConstants.Catalog
                         .DEFAULT_FALLING_BLOCK_BLOCKSTATE, DataConstants.DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK, DataConstants
                         .DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM, DataConstants.DEFAULT_FALLING_BLOCK_FALL_TIME,
                 DataConstants.DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES);
@@ -136,7 +136,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public Value<BlockState> blockState() {
-        return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.DEFAULT_FALLING_BLOCK_BLOCKSTATE, this.blockState);
+        return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, this.blockState);
     }
 
     public void setCanPlaceAsBlock(boolean value) {

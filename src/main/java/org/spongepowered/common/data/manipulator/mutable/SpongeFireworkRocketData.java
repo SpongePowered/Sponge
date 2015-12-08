@@ -39,11 +39,11 @@ public class SpongeFireworkRocketData extends AbstractBoundedComparableData<Inte
     }
 
     public SpongeFireworkRocketData(int value) {
-        this(value, 0, Integer.MAX_VALUE);
+        this(value, 0, Integer.MAX_VALUE, 1);
     }
 
-    public SpongeFireworkRocketData(int value, int minimum, int maximum) {
-        super(FireworkRocketData.class, value, Keys.FIREWORK_FLIGHT_MODIFIER, ComparatorUtil.intComparator(), ImmutableSpongeFireworkRocketData.class, minimum, maximum, 1);
+    public SpongeFireworkRocketData(int value, int minimum, int maximum, int defaultValue) {
+        super(FireworkRocketData.class, value, Keys.FIREWORK_FLIGHT_MODIFIER, ComparatorUtil.intComparator(), ImmutableSpongeFireworkRocketData.class, minimum, maximum, defaultValue);
     }
 
     @Override

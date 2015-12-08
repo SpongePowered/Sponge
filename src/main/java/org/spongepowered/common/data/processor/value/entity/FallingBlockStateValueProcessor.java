@@ -46,7 +46,7 @@ public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Value<BlockState> constructValue(BlockState value) {
-        return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.DEFAULT_FALLING_BLOCK_BLOCKSTATE, value);
+        return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, value);
     }
 
     @Override

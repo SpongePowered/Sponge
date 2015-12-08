@@ -39,6 +39,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -82,7 +83,7 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
     @Override
     public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        DataManager dataManager = SpongeImpl.getGame().getServiceManager().provide(DataManager.class).get();
+        DataManager dataManager = SpongeDataManager.getInstance();
         final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
                                                                                  ItemEnchantment.class,
                                                                                  dataManager).get();

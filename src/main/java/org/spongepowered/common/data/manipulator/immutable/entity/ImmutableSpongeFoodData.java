@@ -55,21 +55,27 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
         this.foodSaturationLevel = foodSaturationLevel;
         this.foodExhaustionLevel = foodExhaustionLevel;
 
-        this.foodLevelValue = ImmutableSpongeBoundedValue.cachedOf(Keys.FOOD_LEVEL, 20, this.foodLevel, intComparator(), 0, 20);
+        this.foodLevelValue = SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
+                .defaultValue(20)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .actualValue(this.foodLevel)
+                .build()
+                .asImmutable();
 
         this.exhaustionValue = SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
                 .actualValue((double) this.foodExhaustionLevel)
                 .defaultValue(0D)
                 .minimum(0D)
-                .maximum(40D)
+                .maximum(Double.MAX_VALUE)
                 .build()
                 .asImmutable();
 
         this.saturationValue = SpongeValueFactory.boundedBuilder(Keys.SATURATION)
                 .actualValue((double) this.foodSaturationLevel)
-                .defaultValue(5D)
+                .defaultValue(20D)
                 .minimum(0D)
-                .maximum((double) this.foodLevel)
+                .maximum(Double.MAX_VALUE)
                 .build()
                 .asImmutable();
 

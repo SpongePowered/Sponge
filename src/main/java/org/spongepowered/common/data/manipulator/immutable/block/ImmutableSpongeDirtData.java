@@ -35,7 +35,7 @@ import org.spongepowered.common.data.util.DataConstants;
 public class ImmutableSpongeDirtData extends AbstractImmutableSingleCatalogData<DirtType, ImmutableDirtData, DirtData> implements ImmutableDirtData {
 
     public ImmutableSpongeDirtData(DirtType value) {
-        super(ImmutableDirtData.class, value, DataConstants.DEFAULT_DIRT_TYPE, Keys.DIRT_TYPE, SpongeDirtData.class);
+        super(ImmutableDirtData.class, value, DataConstants.Catalog.DEFAULT_DIRT_TYPE, Keys.DIRT_TYPE, SpongeDirtData.class);
     }
 
 }

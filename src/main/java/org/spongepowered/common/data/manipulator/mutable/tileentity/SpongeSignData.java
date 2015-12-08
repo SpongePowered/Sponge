@@ -49,7 +49,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     private final List<Text> lines;
 
     public SpongeSignData() {
-        this(Lists.newArrayList(DataConstants.EMPTY_TEXT, DataConstants.EMPTY_TEXT, DataConstants.EMPTY_TEXT, DataConstants.EMPTY_TEXT));
+        this(Lists.newArrayList(Texts.of(), Texts.of(), Texts.of(), Texts.of()));
     }
 
     public SpongeSignData(List<Text> lines) {

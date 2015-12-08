@@ -83,7 +83,7 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
 
         this.expBetweenLevelsValue = boundedBuilder(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
                 .actualValue(this.expBetweenLevels)
-                .defaultValue(this.expBetweenLevels)
+                .defaultValue(0)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .build()

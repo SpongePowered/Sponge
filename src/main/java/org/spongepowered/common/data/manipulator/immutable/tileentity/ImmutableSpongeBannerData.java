@@ -75,7 +75,7 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
 
     @Override
     public ImmutableValue<DyeColor> baseColor() {
-        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.DEFAULT_BANNER_BASE, this.base);
+        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, this.base);
     }
 
     @Override

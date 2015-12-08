@@ -48,7 +48,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     private boolean displays = false;
 
     public SpongeDisplayNameData() {
-        this(DataConstants.EMPTY_TEXT, false);
+        this(Texts.of(), false);
     }
 
     public SpongeDisplayNameData(Text displayName) {
@@ -64,7 +64,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
 
     @Override
     public Value<Text> displayName() {
-        return new SpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, this.displayName);
+        return new SpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), this.displayName);
     }
 
     @Override

@@ -36,6 +36,6 @@ public class ImmutableSpongeDoublePlantData extends AbstractImmutableSingleCatal
     DoublePlantData> implements ImmutableDoublePlantData {
 
     public ImmutableSpongeDoublePlantData(DoublePlantType value) {
-        super(ImmutableDoublePlantData.class, value, DataConstants.DEFAULT_DOUBLE_PLANT, Keys.DOUBLE_PLANT_TYPE, SpongeDoublePlantData.class);
+        super(ImmutableDoublePlantData.class, value, DataConstants.Catalog.DEFAULT_DOUBLE_PLANT, Keys.DOUBLE_PLANT_TYPE, SpongeDoublePlantData.class);
     }
 }

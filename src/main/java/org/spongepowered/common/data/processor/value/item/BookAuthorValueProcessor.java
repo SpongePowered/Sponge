@@ -85,7 +85,7 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<ItemS
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, DataConstants.EMPTY_TEXT, value);
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), value);
     }
 
 }

@@ -42,7 +42,7 @@ public class ImmutableSpongeBlockItemData extends AbstractImmutableSingleData<Bl
 
     public ImmutableSpongeBlockItemData(BlockState value) {
         super(ImmutableBlockItemData.class, value, Keys.ITEM_BLOCKSTATE);
-        this.state = new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.DEFAULT_BLOCK_STATE, value);
+        this.state = new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, value);
     }
 
     @Override

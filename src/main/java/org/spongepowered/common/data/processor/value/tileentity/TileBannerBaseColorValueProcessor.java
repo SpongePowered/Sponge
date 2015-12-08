@@ -47,7 +47,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected Value<DyeColor> constructValue(DyeColor actualValue) {
-        return new SpongeValue<>(Keys.BANNER_BASE_COLOR, DataConstants.DEFAULT_BANNER_BASE, actualValue);
+        return new SpongeValue<>(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, actualValue);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
-        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.DEFAULT_BANNER_BASE, value);
+        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, value);
     }
 
     @Override

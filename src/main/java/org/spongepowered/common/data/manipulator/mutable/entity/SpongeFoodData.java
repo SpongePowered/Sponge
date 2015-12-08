@@ -102,8 +102,8 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public MutableBoundedValue<Double> saturation() {
-        return SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
-            .defaultValue(0D)
+        return SpongeValueFactory.boundedBuilder(Keys.SATURATION)
+            .defaultValue(20D)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)
             .actualValue((double) this.foodSaturationLevel)

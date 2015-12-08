@@ -34,6 +34,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
@@ -182,7 +183,7 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         checkDataExists(container, DataQueries.BLOCK_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        final DataManager dataManager = SpongeImpl.getGame().getServiceManager().provide(DataManager.class).get();
+        final DataManager dataManager = Sponge.getDataManager();
         // this is unused for now
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);

@@ -29,6 +29,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
@@ -44,15 +45,12 @@ import java.util.Optional;
  */
 public class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
 
-        Optional<DataManager> serviceOpt = SpongeImpl.getGame().getServiceManager().provide(DataManager.class);
-        if (!serviceOpt.isPresent()) {
-            throw new ObjectMappingException("No serialization service is present!");
-        }
-        @SuppressWarnings("unchecked") // generics are meanies :(.....
-                Optional<DataBuilder<?>> builderOpt = (Optional) serviceOpt.get().getBuilder(type.getRawType().asSubclass(DataSerializable.class));
+        DataManager serviceOpt = Sponge.getDataManager();
+        Optional<DataBuilder<?>> builderOpt = (Optional) serviceOpt.getBuilder(type.getRawType().asSubclass(DataSerializable.class));
 
         if (!builderOpt.isPresent()) {
             throw new ObjectMappingException("No data builder is registered for " + type);

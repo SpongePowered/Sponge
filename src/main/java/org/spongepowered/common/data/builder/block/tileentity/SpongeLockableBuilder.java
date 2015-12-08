@@ -55,7 +55,7 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
         if (!container.contains(new DataQuery("Contents"))) {
             throw new InvalidDataException("The provided container does not contain the data to make a lockable tile entity!");
         }
-        DataManager service = this.game.getServiceManager().provide(DataManager.class).get();
+        DataManager service = this.game.getDataManager();
         List<DataView> contents = container.getViewList(new DataQuery("Contents")).get();
         for (DataView content: contents) {
             net.minecraft.item.ItemStack stack =

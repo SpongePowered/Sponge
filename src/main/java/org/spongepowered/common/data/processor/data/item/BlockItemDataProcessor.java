@@ -75,7 +75,7 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
 
     @Override
     protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
-        return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.DEFAULT_BLOCK_STATE, value);
+        return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, value);
     }
 
     @Override

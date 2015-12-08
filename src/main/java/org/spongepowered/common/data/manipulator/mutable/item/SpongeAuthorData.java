@@ -47,7 +47,7 @@ public class SpongeAuthorData extends AbstractSingleData<Text, AuthorData, Immut
     }
 
     public SpongeAuthorData() {
-        this(DataConstants.EMPTY_TEXT);
+        this(Texts.of());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class SpongeAuthorData extends AbstractSingleData<Text, AuthorData, Immut
 
     @Override
     public Value<Text> author() {
-        return new SpongeValue<>(Keys.BOOK_AUTHOR, DataConstants.EMPTY_TEXT, this.getValue());
+        return new SpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), this.getValue());
     }
 
     @Override

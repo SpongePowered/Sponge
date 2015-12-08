@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.util;
 
-import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.BigMushroomType;
@@ -47,11 +46,8 @@ import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.text.SpongeTexts;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -67,32 +63,23 @@ import org.spongepowered.common.text.SpongeTexts;
  */
 public final class DataConstants {
 
-    public static final Text EMPTY_TEXT = Texts.of();
-
-    public static final IChatComponent EMPTY_TEXT_COMPONENT = SpongeTexts.toComponent(Texts.of());
-    public static final Axis DEFAULT_AXIS = Axis.X;
-    public static final BigMushroomType DEFAULT_BIG_MUSHROOM_TYPE = BigMushroomTypes.ALL_OUTSIDE;
-    public static final BrickType DEFAULT_BRICK_TYPE = BrickTypes.DEFAULT;
-    public static final ComparatorType DEFAULT_COMPARATOR_TYPE = ComparatorTypes.COMPARE;
-    public static final boolean DEFAULT_DECAYABLE_VALUE = false;
-    public static final Direction DEFAULT_DIRECTION = Direction.NONE;
-    public static final DirtType DEFAULT_DIRT_TYPE = DirtTypes.DIRT;
-    public static final boolean DEFAULT_DISARMED = true;
-    public static final DisguisedBlockType DEFAULT_DISGUISED_BLOCK = DisguisedBlockTypes.STONE;
-    public static final DoublePlantType DEFAULT_DOUBLE_PLANT = DoublePlantTypes.GRASS;
-    public static final boolean DEFAULT_SHOULD_DROP = true;
-    public static final boolean DEFAULT_PISTON_EXTENDED = false;
-    public static final DyeColor DEFAULT_BANNER_BASE = DyeColors.BLACK;
-    public static final OcelotType DEFAULT_OCELOT = OcelotTypes.WILD_OCELOT;
+    public static final int DEFAULT_FIRE_TICKSVALUE = 10;
+    public static final int DEFAULT_FIRE_DAMAGE_DELAY = 20;
 
     private DataConstants() {}
 
+    public static final Axis DEFAULT_AXIS = Axis.X;
+    public static final boolean DEFAULT_DECAYABLE_VALUE = false;
+    public static final Direction DEFAULT_DIRECTION = Direction.NONE;
+    public static final boolean DEFAULT_DISARMED = true;
+    public static final boolean DEFAULT_SHOULD_DROP = true;
+    public static final boolean DEFAULT_PISTON_EXTENDED = false;
+
+
     // A bunch of entity defaults (for use in constructing "default" values)
     public static final boolean CAN_FLY_DEFAULT = false;
-    public static final Career CAREER_DEFAULT = Careers.FARMER;
     public static final boolean ELDER_GUARDIAN_DEFAULT = false;
     public static final boolean IS_WET_DEFAULT = false;
-    public static final GameMode DEFAULT_GAMEMODE = GameModes.NOT_SET;
     public static final boolean DEFAULT_ATTACHED = false;
 
     public static final int DEFAULT_FIRE_TICKS = 10;
@@ -107,12 +94,26 @@ public final class DataConstants {
 
     public static final double DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK = 2D;
     public static final double DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE = 40;
-    public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK = false;
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM = true;
     public static final int DEFAULT_FALLING_BLOCK_FALL_TIME = 1;
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES = false;
-    public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
 
+    public static final class Catalog {
+        private Catalog() {}
+
+        public static final BigMushroomType DEFAULT_BIG_MUSHROOM_TYPE = BigMushroomTypes.ALL_OUTSIDE;
+        public static final BrickType DEFAULT_BRICK_TYPE = BrickTypes.DEFAULT;
+        public static final ComparatorType DEFAULT_COMPARATOR_TYPE = ComparatorTypes.COMPARE;
+        public static final DirtType DEFAULT_DIRT_TYPE = DirtTypes.DIRT;
+        public static final DisguisedBlockType DEFAULT_DISGUISED_BLOCK = DisguisedBlockTypes.STONE;
+        public static final DoublePlantType DEFAULT_DOUBLE_PLANT = DoublePlantTypes.GRASS;
+        public static final DyeColor DEFAULT_BANNER_BASE = DyeColors.BLACK;
+        public static final OcelotType DEFAULT_OCELOT = OcelotTypes.WILD_OCELOT;
+        public static final Career CAREER_DEFAULT = Careers.FARMER;
+        public static final GameMode DEFAULT_GAMEMODE = GameModes.NOT_SET;
+        public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
+        public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
+    }
 
 }

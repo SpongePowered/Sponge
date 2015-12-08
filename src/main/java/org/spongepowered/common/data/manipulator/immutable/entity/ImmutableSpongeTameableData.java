@@ -54,6 +54,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     public ImmutableSpongeTameableData(@Nullable UUID owner) {
         super(ImmutableTameableData.class);
         this.owner = owner;
+        registerGetters();
     }
 
     @Override

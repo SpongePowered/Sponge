@@ -36,7 +36,7 @@ public class ImmutableSpongeBrickData extends AbstractImmutableSingleCatalogData
         implements ImmutableBrickData {
 
     public ImmutableSpongeBrickData(BrickType value) {
-        super(ImmutableBrickData.class, value, DataConstants.DEFAULT_BRICK_TYPE, Keys.BRICK_TYPE, SpongeBrickData.class);
+        super(ImmutableBrickData.class, value, DataConstants.Catalog.DEFAULT_BRICK_TYPE, Keys.BRICK_TYPE, SpongeBrickData.class);
     }
 
 }

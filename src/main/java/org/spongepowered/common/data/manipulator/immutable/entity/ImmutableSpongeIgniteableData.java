@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class ImmutableSpongeIgniteableData extends AbstractImmutableData<ImmutableIgniteableData, IgniteableData> implements ImmutableIgniteableData {
@@ -53,7 +54,7 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
 
         this.fireTicksValue = SpongeValueFactory.boundedBuilder(Keys.FIRE_TICKS)
                 .actualValue(this.fireTicks)
-                .defaultValue(1)
+                .defaultValue(DataConstants.DEFAULT_FIRE_TICKSVALUE)
                 .minimum(1)
                 .maximum(Integer.MAX_VALUE)
                 .build()
@@ -61,7 +62,7 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
 
         this.fireDelayValue = SpongeValueFactory.boundedBuilder(Keys.FIRE_DAMAGE_DELAY)
                 .actualValue(this.fireDelay)
-                .defaultValue(20)
+                .defaultValue(DataConstants.DEFAULT_FIRE_DAMAGE_DELAY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .build()

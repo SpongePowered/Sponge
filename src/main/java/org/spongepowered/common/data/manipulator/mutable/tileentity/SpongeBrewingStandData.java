@@ -39,12 +39,13 @@ public class SpongeBrewingStandData extends AbstractBoundedComparableData<Intege
     }
 
     public SpongeBrewingStandData(int value) {
-        this(value, 0, Integer.MAX_VALUE);
+        this(value, 0, Integer.MAX_VALUE, 400);
     }
 
     // For reflection
-    public SpongeBrewingStandData(int value, int minimum, int maximum) {
-        super(BrewingStandData.class, value, Keys.REMAINING_BREW_TIME, ComparatorUtil.intComparator(), ImmutableSpongeBrewingStandData.class, minimum, maximum, 400);
+    public SpongeBrewingStandData(int value, int minimum, int maximum, int defaultValue) {
+        super(BrewingStandData.class, value, Keys.REMAINING_BREW_TIME, ComparatorUtil.intComparator(), ImmutableSpongeBrewingStandData.class,
+            minimum, maximum, defaultValue);
     }
 
     @Override

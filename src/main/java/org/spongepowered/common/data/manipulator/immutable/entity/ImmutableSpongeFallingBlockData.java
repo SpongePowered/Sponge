@@ -70,7 +70,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
                 .DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK, this.fallDamagePerBlock);
         this.maxFallDamageValue = new ImmutableSpongeValue<>(Keys.MAX_FALL_DAMAGE, DataConstants.DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE, this
                 .maxFallDamage);
-        this.blockStateValue = new ImmutableSpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.DEFAULT_FALLING_BLOCK_BLOCKSTATE, this
+        this.blockStateValue = new ImmutableSpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, this
                 .blockState);
         this.canPlaceAsBlockValue = new ImmutableSpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, DataConstants
                 .DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK, this.canPlaceAsBlock);

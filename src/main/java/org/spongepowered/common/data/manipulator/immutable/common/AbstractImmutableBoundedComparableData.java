@@ -99,7 +99,7 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
 
     @Override
     public M asMutable() {
-        return ReflectionUtil.createInstance(this.mutableClass, this.value, this.lowerBound, this.upperBound);
+        return ReflectionUtil.createInstance(this.mutableClass, this.value, this.lowerBound, this.upperBound, this.defaultValue);
     }
 
     @Override

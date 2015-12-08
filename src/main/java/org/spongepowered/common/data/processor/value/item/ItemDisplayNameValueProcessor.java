@@ -51,7 +51,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Value<Text> constructValue(Text defaultValue) {
-        return new SpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, defaultValue);
+        return new SpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), defaultValue);
     }
 
     @SuppressWarnings("deprecation")
@@ -89,7 +89,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, DataConstants.EMPTY_TEXT, value);
+        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), value);
     }
 
     @Override

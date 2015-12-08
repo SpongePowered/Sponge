@@ -38,7 +38,7 @@ public class ImmutableSpongeExpirableData extends AbstractImmutableBoundedCompar
     implements ImmutableExpirableData{
 
     public ImmutableSpongeExpirableData(int value, int upperBound) {
-        super(ImmutableExpirableData.class, value, Keys.EXPIRATION_TICKS, intComparator(), SpongeExpirableData.class, 0, upperBound, upperBound);
+        super(ImmutableExpirableData.class, value, Keys.EXPIRATION_TICKS, intComparator(), SpongeExpirableData.class, 0, upperBound, 0);
     }
 
     @Override

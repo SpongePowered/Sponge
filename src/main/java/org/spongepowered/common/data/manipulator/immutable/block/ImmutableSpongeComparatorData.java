@@ -36,7 +36,7 @@ public class ImmutableSpongeComparatorData extends AbstractImmutableSingleCatalo
         implements ImmutableComparatorData {
 
     public ImmutableSpongeComparatorData(ComparatorType value) {
-        super(ImmutableComparatorData.class, value, DataConstants.DEFAULT_COMPARATOR_TYPE, Keys.COMPARATOR_TYPE, SpongeComparatorData.class);
+        super(ImmutableComparatorData.class, value, DataConstants.Catalog.DEFAULT_COMPARATOR_TYPE, Keys.COMPARATOR_TYPE, SpongeComparatorData.class);
     }
 
 }

@@ -46,7 +46,7 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
     }
 
     public SpongeBlockItemData() {
-        this(DataConstants.DEFAULT_BLOCK_STATE);
+        this(DataConstants.Catalog.DEFAULT_BLOCK_STATE);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
 
     @Override
     public Value<BlockState> state() {
-        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.DEFAULT_BLOCK_STATE, this.getValue());
+        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, this.getValue());
     }
 
     @Override
