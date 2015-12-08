@@ -67,11 +67,11 @@ public abstract class MixinBlockFarmland extends MixinBlock {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.MOISTURE)) {
-            int layers = (Integer) value;
-            if (layers > 7) {
-                layers = 7;
+            int moisture = (Integer) value;
+            if (moisture > 7) {
+                moisture = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockFarmland.MOISTURE, layers));
+            return Optional.of((BlockState) blockState.withProperty(BlockFarmland.MOISTURE, moisture));
         }
         return super.getStateWithValue(blockState, key, value);
     }

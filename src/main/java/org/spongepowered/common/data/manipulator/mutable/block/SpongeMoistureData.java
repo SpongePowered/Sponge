@@ -44,7 +44,11 @@ public class SpongeMoistureData extends AbstractBoundedComparableData<Integer, M
     }
 
     public SpongeMoistureData(int value, int lowerBound, int upperBound) {
-        super(MoistureData.class, value, Keys.MOISTURE, intComparator(), ImmutableSpongeMoistureData.class, lowerBound, upperBound, 0);
+        this(value, lowerBound, upperBound, 0);
+    }
+
+    public SpongeMoistureData(int value, int lowerBound, int upperBound, int defaultValue) {
+        super(MoistureData.class, value, Keys.MOISTURE, intComparator(), ImmutableSpongeMoistureData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override

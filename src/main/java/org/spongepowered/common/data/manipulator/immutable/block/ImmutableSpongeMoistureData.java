@@ -35,12 +35,20 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeMoistureDat
 
 public class ImmutableSpongeMoistureData extends AbstractImmutableBoundedComparableData<Integer, ImmutableMoistureData, MoistureData> implements ImmutableMoistureData {
 
+    public ImmutableSpongeMoistureData() {
+        this(0);
+    }
+
     public ImmutableSpongeMoistureData(int value) {
         this(value, 0, Integer.MAX_VALUE);
     }
 
     public ImmutableSpongeMoistureData(int value, int lowerBound, int upperBound) {
-        super(ImmutableMoistureData.class, value, Keys.MOISTURE, intComparator(), SpongeMoistureData.class, lowerBound, upperBound, 0);
+        this(value, lowerBound, upperBound, 0);
+    }
+
+    public ImmutableSpongeMoistureData(int value, int lowerBound, int upperBound, int defaultValue) {
+        super(ImmutableMoistureData.class, value, Keys.MOISTURE, intComparator(), SpongeMoistureData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override
