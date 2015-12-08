@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -50,7 +49,7 @@ public class SplashPotionValueProcessor extends AbstractSpongeValueProcessor<Ite
             ItemStack stack = (ItemStack) container;
             
             if (this.supports(stack)) {
-                ImmutableValue<Boolean> previous = constructImmutableValue((stack.getItemDamage() & 16384) != 0);
+                ImmutableValue<Boolean> previous = constructImmutableValue((stack.getItemDamage() & 16384) == 0);
                 ImmutableValue<Boolean> next = constructImmutableValue(false);
                 
                 stack.setItemDamage((stack.getItemDamage() ^ 16384) | 8192);
@@ -82,7 +81,7 @@ public class SplashPotionValueProcessor extends AbstractSpongeValueProcessor<Ite
     @Override
     protected Optional<Boolean> getVal(ItemStack container) {
         if (this.supports(container)) {
-            return Optional.of(ItemPotion.isSplash(container.getMetadata()));
+            return Optional.of((container.getItemDamage() & 16384) != 0);
         }
         
         return Optional.empty();
