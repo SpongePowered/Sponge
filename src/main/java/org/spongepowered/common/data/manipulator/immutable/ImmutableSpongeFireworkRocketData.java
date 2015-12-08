@@ -35,11 +35,12 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 public class ImmutableSpongeFireworkRocketData extends AbstractImmutableBoundedComparableData<Integer, ImmutableFireworkRocketData, FireworkRocketData> implements ImmutableFireworkRocketData {
 
     public ImmutableSpongeFireworkRocketData(int value) {
-        this(value, 0, Integer.MAX_VALUE);
+        this(value, 0, Integer.MAX_VALUE, 1);
     }
 
-    public ImmutableSpongeFireworkRocketData(int value, int minimum, int maximum) {
-        super(ImmutableFireworkRocketData.class, value, Keys.FIREWORK_FLIGHT_MODIFIER, ComparatorUtil.intComparator(), SpongeFireworkRocketData.class, minimum, maximum, 0);
+    public ImmutableSpongeFireworkRocketData(int value, int minimum, int maximum, int defaultValue) {
+        super(ImmutableFireworkRocketData.class, value, Keys.FIREWORK_FLIGHT_MODIFIER, ComparatorUtil.intComparator(),
+            SpongeFireworkRocketData.class, minimum, maximum, defaultValue);
     }
 
     @Override

@@ -37,7 +37,7 @@ public class ImmutableSpongeDirectionalData extends AbstractImmutableSingleEnumD
         ImmutableDirectionalData {
 
     public ImmutableSpongeDirectionalData(Direction direction) {
-        super(ImmutableDirectionalData.class, direction, DataConstants.DEFAULT_DIRECTION, Keys.DIRECTION, SpongeDirectionalData.class);
+        super(ImmutableDirectionalData.class, direction, Direction.NONE, Keys.DIRECTION, SpongeDirectionalData.class);
     }
 
     @Override

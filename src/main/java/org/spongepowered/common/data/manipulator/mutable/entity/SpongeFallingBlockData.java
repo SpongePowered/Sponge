@@ -35,8 +35,10 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFallingBlockData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+@ImplementationRequiredForTest
 public class SpongeFallingBlockData extends AbstractData<FallingBlockData, ImmutableFallingBlockData> implements FallingBlockData {
 
     private double fallDamagePerBlock;

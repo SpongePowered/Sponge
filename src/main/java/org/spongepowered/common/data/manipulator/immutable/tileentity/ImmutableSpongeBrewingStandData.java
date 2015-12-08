@@ -32,11 +32,14 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 
 public class ImmutableSpongeBrewingStandData extends AbstractImmutableBoundedComparableData<Integer, ImmutableBrewingStandData, BrewingStandData>
-    implements
-        ImmutableBrewingStandData {
+    implements ImmutableBrewingStandData {
 
-    public ImmutableSpongeBrewingStandData(Integer value) {
-        super(ImmutableBrewingStandData.class, value, Keys.REMAINING_BREW_TIME, Integer::compare, SpongeBrewingStandData.class, 0, Integer.MAX_VALUE, 400);
+    public ImmutableSpongeBrewingStandData(int value) {
+        this(value, 0, Integer.MAX_VALUE, 400);
+    }
+
+    public ImmutableSpongeBrewingStandData(int value, int lower, int upper, int defaultValue) {
+        super(ImmutableBrewingStandData.class, value, Keys.REMAINING_BREW_TIME, Integer::compare, SpongeBrewingStandData.class, lower, upper, defaultValue);
     }
 
     @Override

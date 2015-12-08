@@ -37,11 +37,13 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ImplementationRequiredForTest
 @NonnullByDefault
 public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> implements SignData {
     private final List<Text> lines;

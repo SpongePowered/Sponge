@@ -22,25 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.item;
+package org.spongepowered.common.data.util;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppleData;
-import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
-import org.spongepowered.api.data.type.GoldenApple;
-import org.spongepowered.api.data.type.GoldenApples;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGoldenAppleData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@ImplementationRequiredForTest
-public class SpongeGoldenAppleData extends AbstractSingleCatalogData<GoldenApple, GoldenAppleData, ImmutableGoldenAppleData> implements GoldenAppleData {
+/**
+ * An annotation for unit testing that prevents the desired manipulator
+ * from being used for testing, at least, until either mixins are usable
+ * in a unit test environment, or the CatalogTypes are all mocked properly,
+ * including the actual catalog class itself.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface ImplementationRequiredForTest {
 
-    public SpongeGoldenAppleData() {
-        this(GoldenApples.GOLDEN_APPLE);
-    }
-
-    public SpongeGoldenAppleData(GoldenApple value) {
-        super(GoldenAppleData.class, value, Keys.GOLDEN_APPLE_TYPE, ImmutableSpongeGoldenAppleData.class);
-    }
 }

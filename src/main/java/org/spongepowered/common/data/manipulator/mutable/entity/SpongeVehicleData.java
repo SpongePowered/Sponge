@@ -37,10 +37,12 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVehicleData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
 import java.lang.ref.WeakReference;
 
+@ImplementationRequiredForTest
 public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicleData> implements VehicleData {
 
     private WeakReference<Entity> vehicle;

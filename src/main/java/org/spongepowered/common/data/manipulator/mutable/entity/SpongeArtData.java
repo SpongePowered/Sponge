@@ -31,7 +31,9 @@ import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeArtData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
+@ImplementationRequiredForTest
 public class SpongeArtData extends AbstractSingleCatalogData<Art, ArtData, ImmutableArtData> implements ArtData {
 
     /**

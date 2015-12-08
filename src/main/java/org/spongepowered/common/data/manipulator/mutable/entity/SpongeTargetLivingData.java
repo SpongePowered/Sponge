@@ -33,8 +33,10 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetLivingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
+@ImplementationRequiredForTest
 public class SpongeTargetLivingData extends AbstractSingleData<Living, TargetLivingData, ImmutableTargetLivingData> implements TargetLivingData {
 
     private final Value<Living> value;

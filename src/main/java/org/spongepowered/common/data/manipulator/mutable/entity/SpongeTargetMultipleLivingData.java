@@ -36,12 +36,14 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetMultipleLivingData;
 import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ImplementationRequiredForTest
 public class SpongeTargetMultipleLivingData extends AbstractSingleListData<Living, TargetMultipleLivingData, ImmutableTargetMultipleLivingData> implements
         TargetMultipleLivingData {
 

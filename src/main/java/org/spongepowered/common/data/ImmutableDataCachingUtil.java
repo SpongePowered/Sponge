@@ -89,7 +89,7 @@ public final class ImmutableDataCachingUtil {
                     throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName() + " with the args: "
                                                             + Arrays.toString(args));
             });
-        } catch (ExecutionException e) {
+        } catch (Throwable e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName(), e);
         }
     }

@@ -37,6 +37,7 @@ import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ImplementationRequiredForTest
 public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerData> implements BannerData {
 
     private DyeColor base;
