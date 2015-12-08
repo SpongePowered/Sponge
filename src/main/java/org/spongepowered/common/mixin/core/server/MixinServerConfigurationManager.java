@@ -65,6 +65,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
@@ -187,7 +188,9 @@ public abstract class MixinServerConfigurationManager {
         Location<World> location = new Location<>((World) worldserver, VecHelper.toVector(playerIn.getPosition()));
         Transform<World> fromTransform = player.getTransform().setLocation(location);
         MessageSink sink = MessageSinks.toAll();
-        ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(SpongeImpl.getGame(), Cause.of((Player) playerIn), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform, (RemoteConnection) netManager, (org.spongepowered.api.profile.GameProfile) gameprofile);
+        ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(SpongeImpl.getGame(), Cause.of(),
+                disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform, (RemoteConnection) netManager,
+                (org.spongepowered.api.profile.GameProfile) gameprofile, (User) user);
         SpongeImpl.postEvent(loginEvent);
         if (kickReason != null || loginEvent.isCancelled()) {
             disconnectClient(netManager, Optional.ofNullable(loginEvent.getMessage()), gameprofile);
