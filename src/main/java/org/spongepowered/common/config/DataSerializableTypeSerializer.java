@@ -49,12 +49,8 @@ public class DataSerializableTypeSerializer implements TypeSerializer<DataSerial
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
 
-        Optional<DataManager> serviceOpt = SpongeImpl.getGame().getServiceManager().provide(DataManager.class);
-        if (!serviceOpt.isPresent()) {
-            throw new ObjectMappingException("No serialization service is present!");
-        }
-        @SuppressWarnings("unchecked") // generics are meanies :(.....
-                Optional<DataBuilder<?>> builderOpt = (Optional) serviceOpt.get().getBuilder(type.getRawType().asSubclass(DataSerializable.class));
+        DataManager serviceOpt = Sponge.getDataManager();
+        Optional<DataBuilder<?>> builderOpt = (Optional) serviceOpt.getBuilder(type.getRawType().asSubclass(DataSerializable.class));
 
         if (!builderOpt.isPresent()) {
             throw new ObjectMappingException("No data builder is registered for " + type);

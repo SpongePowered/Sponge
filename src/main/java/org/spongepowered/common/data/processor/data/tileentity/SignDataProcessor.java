@@ -213,7 +213,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
             }
             try {
                 for (int i = 0; i < 4; i++) {
-                    ((TileEntitySign) dataHolder).signText[i] = DataConstants.EMPTY_TEXT_COMPONENT;
+                    ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(Texts.of());
                 }
                 ((TileEntitySign) dataHolder).markDirty();
             } catch (Exception e) {

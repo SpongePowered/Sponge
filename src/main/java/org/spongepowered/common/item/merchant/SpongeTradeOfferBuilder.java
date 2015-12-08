@@ -36,6 +36,7 @@ import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
@@ -136,7 +137,7 @@ public class SpongeTradeOfferBuilder implements TradeOffer.Builder, DataBuilder<
                 (DataQueries.EXPERIENCE_QUERY) || !container.contains(DataQueries.MAX_QUERY) || !container.contains(DataQueries.USES_QUERY)) {
             throw new InvalidDataException("Not enough information for constructing a TradeOffer!!");
         }
-        final DataManager dataManager = SpongeImpl.getGame().getServiceManager().provide(DataManager.class).get();
+        final DataManager dataManager = SpongeDataManager.getInstance();
         final ItemStack firstItem = container.getSerializable(DataQueries.FIRST_QUERY, ItemStack.class, dataManager).get();
         final ItemStack buyingItem = container.getSerializable(DataQueries.BUYING_QUERY, ItemStack.class, dataManager).get();
         final ItemStack secondItem;

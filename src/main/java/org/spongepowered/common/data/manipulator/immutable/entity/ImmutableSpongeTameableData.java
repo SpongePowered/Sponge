@@ -52,11 +52,6 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     public ImmutableSpongeTameableData(@Nullable UUID owner) {
         super(ImmutableTameableData.class);
         this.owner = owner;
-        if (this.owner == null) {
-            this.immutableValue = EMPTY_VALUE;
-        } else {
-            this.immutableValue = new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.of(this.owner));
-        }
         registerGetters();
     }
 

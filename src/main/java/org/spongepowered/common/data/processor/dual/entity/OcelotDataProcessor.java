@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.passive.EntityOcelot;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableOcelotData;
@@ -36,7 +35,6 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -55,7 +53,7 @@ public class OcelotDataProcessor extends
 
     @Override
     protected Value<OcelotType> constructValue(OcelotType actualValue) {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.DEFAULT_OCELOT, actualValue);
+        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Catalog.DEFAULT_OCELOT, actualValue);
     }
 
     @Override

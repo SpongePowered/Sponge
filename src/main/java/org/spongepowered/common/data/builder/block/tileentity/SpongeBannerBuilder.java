@@ -26,6 +26,7 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
@@ -56,7 +57,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         if (!container.contains(DataQueries.BASE) || !container.contains(DataQueries.PATTERNS)) {
             throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
         }
-        final DataManager service = this.game.getServiceManager().provide(DataManager.class).get();
+        final DataManager service = this.game.getDataManager();
 
         final BannerData bannerData = null; // TODO when banner data is implemented.
 
