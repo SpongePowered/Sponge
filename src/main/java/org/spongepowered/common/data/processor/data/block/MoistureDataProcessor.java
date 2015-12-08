@@ -22,37 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.block;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeMoistureData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 
-public class ImmutableSpongeMoistureData extends AbstractImmutableBoundedComparableData<Integer, ImmutableMoistureData, MoistureData> implements ImmutableMoistureData {
+public class MoistureDataProcessor extends AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>, MoistureData, ImmutableMoistureData> {
 
-    public ImmutableSpongeMoistureData() {
-        this(0);
-    }
-
-    public ImmutableSpongeMoistureData(int value) {
-        this(value, 0, Integer.MAX_VALUE);
-    }
-
-    public ImmutableSpongeMoistureData(int value, int lowerBound, int upperBound) {
-        this(value, lowerBound, upperBound, 0);
-    }
-
-    public ImmutableSpongeMoistureData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(ImmutableMoistureData.class, value, Keys.MOISTURE, intComparator(), SpongeMoistureData.class, lowerBound, upperBound, defaultValue);
+    public MoistureDataProcessor() {
+        super(Keys.MOISTURE);
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> moisture() {
-        return getValueGetter();
+    protected Integer getDefaultValue() {
+        return 0;
+    }
+
+    @Override
+    protected MoistureData createManipulator() {
+        return new SpongeMoistureData(0, 0, 7);
     }
 }

@@ -22,37 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
-
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+package org.spongepowered.common.data.processor.value.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
-import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeMoistureData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
-public class SpongeMoistureData extends AbstractBoundedComparableData<Integer, MoistureData, ImmutableMoistureData> implements MoistureData {
+public class MoistureValueProcessor extends AbstractBlockOnlyValueProcessor<Integer, MutableBoundedValue<Integer>> {
 
-    public SpongeMoistureData() {
-        this(0);
-    }
-
-    public SpongeMoistureData(int value) {
-        this(value, 0, Integer.MAX_VALUE);
-    }
-
-    public SpongeMoistureData(int value, int lowerBound, int upperBound) {
-        this(value, lowerBound, upperBound, 0);
-    }
-
-    public SpongeMoistureData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(MoistureData.class, value, Keys.MOISTURE, intComparator(), ImmutableSpongeMoistureData.class, lowerBound, upperBound, defaultValue);
+    public MoistureValueProcessor() {
+        super(Keys.MOISTURE);
     }
 
     @Override
-    public MutableBoundedValue<Integer> moisture() {
-        return getValueGetter();
+    protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+        return SpongeValueFactory.boundedBuilder(Keys.MOISTURE)
+                .defaultValue(0)
+                .minimum(0)
+                .maximum(7)
+                .actualValue(defaultValue)
+                .build();
     }
+
 }

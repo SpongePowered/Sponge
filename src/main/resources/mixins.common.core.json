@@ -32,6 +32,7 @@
         "block.MixinBlockDoubleWoodSlab",
         "block.MixinBlockEnderChest",
         "block.MixinBlockEndPortalFrame",
+        "block.MixinBlockFarmland",
         "block.MixinBlockFence",
         "block.MixinBlockFenceGate",
         "block.MixinBlockFlower",
