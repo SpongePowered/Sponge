@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -100,17 +101,18 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onConstruct(CallbackInfo ci) {
-        ((IMixinEntityAITasks) tasks).setOwner((EntityLiving) (Object) this);
-        ((IMixinEntityAITasks) tasks).setType(GoalTypes.NORMAL);
-        ((IMixinEntityAITasks) targetTasks).setOwner((EntityLiving) (Object) this);
-        ((IMixinEntityAITasks) targetTasks).setType(GoalTypes.TARGET);
+        ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
+        ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
+        ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
+        ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
     }
 
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(SpongeImpl.getGame(), Cause.of(playerIn), leashedEntity);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(SpongeImpl.getGame(),
+                Cause.of(NamedCause.source(playerIn)), leashedEntity);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -123,7 +125,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!this.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
-            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(SpongeImpl.getGame(), entity == null ? Cause.of() : Cause.of(entity), leashedEntity);
+            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(SpongeImpl.getGame(), entity == null ? Cause.of()
+                : Cause.of(NamedCause.source(entity)), leashedEntity);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -131,12 +134,13 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<Goal<? extends Agent>> getGoal(GoalType type) {
         if (GoalTypes.NORMAL.equals(type)) {
-            return Optional.ofNullable((Goal) tasks);
+            return Optional.ofNullable((Goal) this.tasks);
         } else if (GoalTypes.TARGET.equals(type)) {
-            return Optional.ofNullable((Goal) targetTasks);
+            return Optional.ofNullable((Goal) this.targetTasks);
         }
         return Optional.empty();
     }

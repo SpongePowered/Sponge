@@ -29,6 +29,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,7 +50,7 @@ public abstract class MixinSpawnerAnimals {
 
     @Inject(method = "findChunksForSpawning", at = @At(value = "RETURN"))
     public void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
-        ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(worldServer));
+        ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(NamedCause.source(worldServer)));
         ((IMixinWorld) worldServer).setWorldSpawnerRunning(false);
         ((IMixinWorld) worldServer).setProcessingCaptureCause(false);
     }
@@ -62,7 +63,7 @@ public abstract class MixinSpawnerAnimals {
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(worldServer, biome));
+        ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
         ((IMixinWorld) worldServer).setChunkSpawnerRunning(false);
         ((IMixinWorld) worldServer).setProcessingCaptureCause(true);
     }

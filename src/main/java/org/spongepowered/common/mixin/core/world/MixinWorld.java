@@ -466,7 +466,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.updateTick(worldIn, pos, state, rand);
-        handlePostTickCaptures(Cause.of(this.currentTickBlock));
+        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
         this.currentTickBlock = null;
         this.processingCaptureCause = false;
     }
@@ -481,7 +481,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickEntity = (Entity) entityIn;
         entityIn.onUpdate();
-        handlePostTickCaptures(Cause.of(entityIn));
+        handlePostTickCaptures(Cause.of(NamedCause.source(entityIn)));
         this.currentTickEntity = null;
         this.processingCaptureCause = false;
     }
@@ -496,7 +496,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickTileEntity = (TileEntity) tile;
         tile.update();
-        handlePostTickCaptures(Cause.of(tile));
+        handlePostTickCaptures(Cause.of(NamedCause.source(tile)));
         this.currentTickTileEntity = null;
         this.processingCaptureCause = false;
     }
@@ -511,7 +511,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickEntity = (Entity) entity;
         entity.onUpdate();
-        handlePostTickCaptures(Cause.of(entity));
+        handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
         this.currentTickEntity = null;
         this.processingCaptureCause = false;
     }
@@ -539,7 +539,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return spawnEntity((Entity) entity, Cause.of(this));
+        return spawnEntity((Entity) entity, Cause.of(NamedCause.source(this)));
     }
 
     @Override
@@ -734,11 +734,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     Optional<User> owner = spongeChunk.getBlockOwner(pos);
                     Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
                     if (owner.isPresent()) {
-                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+                        cause = cause.with(NamedCause.owner(owner.get()));
                     }
                     if (notifier.isPresent()) {
                         if (!cause.all().contains(notifier.get())) {
-                            Cause newCause = Cause.of(NamedCause.of(NamedCause.NOTIFIER, notifier.get()));
+                            Cause newCause = Cause.of(NamedCause.notifier(notifier.get()));
                             cause = newCause.with(cause.all());
                         }
                     }
@@ -748,12 +748,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (entity instanceof EntityTameable) {
                     EntityTameable tameable = (EntityTameable) entity;
                     if (tameable.getOwnerEntity() != null) {
-                        cause = cause.with(NamedCause.of(NamedCause.OWNER, tameable.getOwnerEntity()));
+                        cause = cause.with(NamedCause.owner(tameable.getOwnerEntity()));
                     }
                 } else {
                     Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                     if (owner.isPresent()) {
-                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+                        cause = cause.with(NamedCause.owner(owner.get()));
                     }
                 }
             }
@@ -1187,7 +1187,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, (IBlockAccess) this, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
                 if (this.capturedOnBlockAddedItems.size() > 0) {
-                    Cause blockCause = Cause.of(this.currentTickOnBlockAdded);
+                    Cause blockCause = Cause.of(NamedCause.source(this.currentTickOnBlockAdded));
                     if (this.captureTerrainGen) {
                         net.minecraft.world.chunk.Chunk chunk = getChunkFromBlockCoords(pos);
                         if (chunk != null && ((IMixinChunk) chunk).getCurrentPopulateCause() != null) {

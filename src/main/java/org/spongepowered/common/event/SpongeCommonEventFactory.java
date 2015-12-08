@@ -118,7 +118,7 @@ public class SpongeCommonEventFactory {
         SlotTransaction transaction = new SlotTransaction((org.spongepowered.api.item.inventory.Slot) slot, originalSnapshot, newSnapshot);
         ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(transaction).build();
         ChangeInventoryEvent.Held event =
-                SpongeEventFactory.createChangeInventoryEventHeld(SpongeImpl.getGame(), Cause.of(player), (Inventory) player.inventoryContainer, transactions);
+                SpongeEventFactory.createChangeInventoryEventHeld(SpongeImpl.getGame(), Cause.of(NamedCause.source(player)), (Inventory) player.inventoryContainer, transactions);
         SpongeImpl.postEvent(event);
 
         if (event.isCancelled()) {
@@ -461,15 +461,15 @@ public class SpongeCommonEventFactory {
     public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, net.minecraft.entity.Entity sourceEntity, List<net.minecraft.entity.Entity> entities) {
         Cause cause = null;
         if (sourceEntity != null) {
-            cause = Cause.of(sourceEntity);
+            cause = Cause.of(NamedCause.source(sourceEntity));
         } else {
             IMixinWorld spongeWorld = (IMixinWorld) world;
             if (spongeWorld.getCurrentTickTileEntity().isPresent()) {
-                cause = Cause.of(spongeWorld.getCurrentTickTileEntity().get());
+                cause = Cause.of(NamedCause.source(spongeWorld.getCurrentTickTileEntity().get()));
             } else if (spongeWorld.getCurrentTickBlock().isPresent()) {
-                cause = Cause.of(spongeWorld.getCurrentTickBlock().get());
+                cause = Cause.of(NamedCause.source(spongeWorld.getCurrentTickBlock().get()));
             } else if (spongeWorld.getCurrentTickEntity().isPresent()) {
-                cause = Cause.of(spongeWorld.getCurrentTickEntity().get());
+                cause = Cause.of(NamedCause.source(spongeWorld.getCurrentTickEntity().get()));
             }
 
             if (cause == null) {
@@ -502,17 +502,17 @@ public class SpongeCommonEventFactory {
 
         ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
         // Determine cause
-        Cause cause = Cause.of(snapshot);
+        Cause cause = Cause.of(NamedCause.source(snapshot));
         net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
         IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
         if (spongeChunk != null) {
             Optional<User> owner = spongeChunk.getBlockOwner(pos);
             Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
             if (notifier.isPresent()) {
-                cause = cause.with(NamedCause.of(NamedCause.NOTIFIER, notifier.get()));
+                cause = cause.with(NamedCause.notifier(notifier.get()));
             }
             if (owner.isPresent()) {
-                cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+                cause = cause.with(NamedCause.owner(owner.get()));
             }
         }
 

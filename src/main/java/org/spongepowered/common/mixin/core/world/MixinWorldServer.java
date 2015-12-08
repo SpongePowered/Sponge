@@ -42,6 +42,7 @@ import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -126,7 +127,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.processingCaptureCause = true;
         this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.randomTick(worldIn, pos, state, rand);
-        handlePostTickCaptures(Cause.of(this.currentTickBlock));
+        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
         this.currentTickBlock = null;
         this.processingCaptureCause = false;
     }
@@ -141,7 +142,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.processingCaptureCause = true;
         this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.updateTick(worldIn, pos, state, rand);
-        handlePostTickCaptures(Cause.of(this.currentTickBlock));
+        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
         this.currentTickBlock = null;
         this.processingCaptureCause = false;
     }
@@ -157,7 +158,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.processingCaptureCause = true;
         this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.updateTick(worldIn, pos, state, rand);
-        handlePostTickCaptures(Cause.of(this.currentTickBlock));
+        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
         this.currentTickBlock = null;
         this.processingCaptureCause = false;
     }
@@ -208,10 +209,10 @@ public abstract class MixinWorldServer extends MixinWorld {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         this.processingCaptureCause = true;
         this.currentTickBlock = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, event.getPosition()), event.getPosition(), 3);
-        Cause cause = Cause.of(this.currentTickBlock);
+        Cause cause = Cause.of(NamedCause.source(this.currentTickBlock));
         if (this.trackedBlockEvents.get(event.getPosition()) != null) {
             User user = this.trackedBlockEvents.get(event.getPosition());
-            cause = cause.with(user);
+            cause = cause.with(NamedCause.notifier(user));
             StaticMixinHelper.blockEventUser = user;
         }
         boolean result = fireBlockEvent(event);

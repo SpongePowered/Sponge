@@ -67,6 +67,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent.ResourcePackStatus;
@@ -172,8 +173,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
         final ChangeSignEvent event =
-                SpongeEventFactory.createChangeSignEvent(SpongeImpl.getGame(), Cause.of(this.playerEntity), changedSignData.asImmutable(),
-                                                         changedSignData, (Sign) tileentitysign);
+                SpongeEventFactory.createChangeSignEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(this.playerEntity)),
+                    changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
         if (!SpongeImpl.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
         } else {
@@ -371,8 +372,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         sources.add(player);
         MessageSink originalSink = MessageSinks.to(sources);
         ClientConnectionEvent.Disconnect event =
-                SpongeImplFactory.createClientConnectionEventDisconnect(SpongeImpl.getGame(), Cause.of(player), message, newMessage,
-                                                                        originalSink, player.getMessageSink(), player);
+                SpongeImplFactory.createClientConnectionEventDisconnect(SpongeImpl.getGame(), Cause.of(NamedCause.source(player)), message,
+                    newMessage, originalSink, player.getMessageSink(), player);
         this.tmpQuitMessage = null;
         SpongeImpl.postEvent(event);
         event.getSink().sendMessage(event.getMessage());
@@ -477,7 +478,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
     public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
-        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(SpongeImpl.getGame(), Cause.of(this.playerEntity), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
+        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(SpongeImpl.getGame(),
+            Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             player.attackTargetEntityWithCurrentItem(entityIn);

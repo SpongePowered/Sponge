@@ -52,6 +52,7 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -388,7 +389,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
-            SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(this), (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
+            SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(this)),
+                (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
             final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
 
@@ -583,8 +585,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
 
-        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(this), settings, (WorldProperties)
-                worldInfo));
+        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(this)), settings,
+            (WorldProperties) worldInfo));
         return Optional.of((WorldProperties) worldInfo);
     }
 

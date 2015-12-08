@@ -298,7 +298,7 @@ public class DamageEventHandler {
                         DamageModifier enchantmentModifier = DamageModifier.builder()
                             .cause(Cause.of(NamedCause.of("ArmorEnchantment", enchantment),
                                             NamedCause.of("ItemStack", snapshot),
-                                            NamedCause.of(DamageEntityEvent.SOURCE, entityLivingBase)))
+                                            NamedCause.source(entityLivingBase)))
                             .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
                             .build();
                         modifiers.add(new Tuple<>(enchantmentModifier, enchantmentFunction));
@@ -356,19 +356,19 @@ public class DamageEventHandler {
             net.minecraft.entity.Entity source = damageSource.getEntity();
             Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             if (owner.isPresent()) {
-                return Cause.of(NamedCause.of(DamageEntityEvent.SOURCE, damageSource),
+                return Cause.of(NamedCause.source(damageSource),
                                  NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
             } else {
-                return Cause.of(NamedCause.of(DamageEntityEvent.SOURCE, damageSource));
+                return Cause.of(NamedCause.source(damageSource));
             }
         } else if (damageSource instanceof EntityDamageSource) {
             net.minecraft.entity.Entity source = damageSource.getEntity();
             Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             Optional<User> notifier = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
             List<Object> causeObjects = new ArrayList<>();
-            causeObjects.add(NamedCause.of(DamageEntityEvent.SOURCE, damageSource));
+            causeObjects.add(NamedCause.source(damageSource));
             if (notifier.isPresent()) {
-                causeObjects.add(NamedCause.of(DamageEntityEvent.NOTIFIER, notifier.get()));
+                causeObjects.add(NamedCause.notifier(notifier.get()));
             }
             if (owner.isPresent()) {
                 causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
@@ -382,16 +382,16 @@ public class DamageEventHandler {
                 .getChunkFromBlockCoords(blockPos)).getBlockOwner(blockPos);
             Optional<User> notifier = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())
                 .getChunkFromBlockCoords(blockPos)).getBlockNotifier(blockPos);
-            causeObjects.add(NamedCause.of(DamageEntityEvent.SOURCE, damageSource));
+            causeObjects.add(NamedCause.source(damageSource));
             if (notifier.isPresent()) {
-                causeObjects.add(NamedCause.of(DamageEntityEvent.NOTIFIER, notifier.get()));
+                causeObjects.add(NamedCause.notifier(notifier.get()));
             }
             if (owner.isPresent()) {
                 causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
             }
             return Cause.of(causeObjects.toArray());
         } else {
-            return Cause.of(NamedCause.of(DamageEntityEvent.SOURCE, damageSource));
+            return Cause.of(NamedCause.source(damageSource));
         }
     }
 }

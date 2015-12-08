@@ -42,6 +42,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -134,7 +135,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         IMixinWorld world = (IMixinWorld) this.worldObj;
         // Special case for players as sometimes tick capturing won't capture deaths
         if (world.getCapturedEntityItems().size() > 0) {
-            world.handleDroppedItems(Cause.of(this, damageSource), (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null, true);
+            world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.source(damageSource)),
+                (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null, true);
         }
     }
 

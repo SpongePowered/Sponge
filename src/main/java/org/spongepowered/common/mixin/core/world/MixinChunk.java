@@ -51,6 +51,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -350,7 +351,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         IMixinWorld world = (IMixinWorld) this.worldObj;
         world.setProcessingCaptureCause(true);
         world.setCapturingTerrainGen(true);
-        this.populateCause = Cause.of(this, chunkProvider);
+        this.populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         chunkProviderServer.populate(chunkProvider, x, z);
         world.handlePostTickCaptures(this.populateCause);
         world.setCapturingTerrainGen(false);

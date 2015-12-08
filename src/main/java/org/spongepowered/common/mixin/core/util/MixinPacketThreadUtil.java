@@ -35,6 +35,7 @@ import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C13PacketPlayerAbilities;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -82,7 +83,8 @@ public class MixinPacketThreadUtil {
 
             world.setProcessingCaptureCause(true);
             packetIn.processPacket(netHandler);
-            ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj).handlePostTickCaptures(Cause.of(StaticMixinHelper.packetPlayer));
+            ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj)
+                .handlePostTickCaptures(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
             world.setProcessingCaptureCause(false);
             StaticMixinHelper.packetPlayer = null;
             StaticMixinHelper.processingPacket = null;

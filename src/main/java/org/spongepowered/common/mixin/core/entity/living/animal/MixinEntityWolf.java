@@ -32,6 +32,8 @@ import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.TameEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -83,7 +85,9 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     public int onTame(Random rand, int bound, EntityPlayer player) {
         int random = rand.nextInt(bound);
         if (random == 0 && !SpongeImpl
-            .postEvent(SpongeEventFactory.createTameEntityEvent(SpongeImpl.getGame(), Cause.of(player, this.currentItemStack), this))) {
+            .postEvent(SpongeEventFactory.createTameEntityEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(player),
+                NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) this.currentItemStack).createSnapshot())),
+                this))) {
             this.currentItemStack = null;
             return random;
         }

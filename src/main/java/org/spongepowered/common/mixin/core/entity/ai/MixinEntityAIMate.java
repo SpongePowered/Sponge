@@ -31,6 +31,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.BreedEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,12 +46,16 @@ import java.util.Optional;
 @Mixin(EntityAIMate.class)
 public abstract class MixinEntityAIMate {
 
+    private static final String
+        METHOD_INVOKE_ASSIGN =
+        "net/minecraft/entity/passive/EntityAnimal.createChild(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;";
     @Shadow private EntityAnimal theAnimal;
     @Shadow private EntityAnimal targetMate;
 
-    @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/entity/passive/EntityAnimal.createChild(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = METHOD_INVOKE_ASSIGN, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callBreedEvent(CallbackInfo ci, EntityAgeable entityageable) {
-        final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(SpongeImpl.getGame(), Cause.of(this.theAnimal), Optional.<Vector3d>empty(), (Ageable)entityageable, (Ageable)this.targetMate);
+        final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(SpongeImpl.getGame(),
+            Cause.of(NamedCause.source(this.theAnimal)), Optional.<Vector3d>empty(), (Ageable)entityageable, (Ageable)this.targetMate);
         SpongeImpl.postEvent(event);
         if(event.isCancelled()) {
             ci.cancel();
