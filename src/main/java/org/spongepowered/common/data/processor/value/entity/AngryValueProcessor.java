@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.monster.EntityPigZombie;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -47,7 +46,7 @@ public class AngryValueProcessor extends AbstractSpongeValueProcessor<EntityPigZ
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override

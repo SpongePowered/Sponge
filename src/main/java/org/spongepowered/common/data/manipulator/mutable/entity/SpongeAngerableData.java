@@ -33,8 +33,10 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAngerableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
+@ImplementationRequiredForTest
 public class SpongeAngerableData extends AbstractIntData<AngerableData, ImmutableAngerableData> implements AngerableData {
 
     public SpongeAngerableData(int value) {
