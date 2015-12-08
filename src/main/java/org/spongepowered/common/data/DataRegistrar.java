@@ -808,6 +808,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(RespawnLocationData.class, SpongeRespawnLocationData.class, ImmutableRespawnLocation.class,
                 ImmutableSpongeRespawnLocation.class, respawnLocationDataProcessor);
 
+        final MoistureDataProcessor moistureDataProcessor = new MoistureDataProcessor();
+        dataManager.registerDataProcessorAndImpl(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
+                ImmutableSpongeMoistureData.class, moistureDataProcessor);
+
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -945,6 +949,7 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.BANNER_BASE_COLOR, new TileBannerBaseColorValueProcessor());
         dataManager.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
         dataManager.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
+        dataManager.registerValueProcessor(Keys.MOISTURE, new MoistureValueProcessor());
 
         // Dual Processors
         final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();

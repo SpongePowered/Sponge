@@ -264,6 +264,7 @@ public class KeyRegistry {
         keyMap.put("respawn_locations", makeMapKey(UUID.class, Vector3d.class, of("RespawnLocations")));
         keyMap.put("expiration_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ExpirationTicks")));
         keyMap.put("skin", makeSingleKey(UUID.class, Value.class, of("Skin")));
+        keyMap.put("moisture", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Moisture")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
