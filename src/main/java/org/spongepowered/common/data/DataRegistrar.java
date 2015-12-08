@@ -319,6 +319,7 @@ import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
 import org.spongepowered.common.data.processor.dual.entity.*;
+import org.spongepowered.common.data.processor.dual.item.*;
 import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
@@ -1014,6 +1015,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(RotationalData.class, SpongeRotationalData.class, ImmutableRotationalData.class,
             ImmutableSpongeRotationalData.class, rotationalDataProcessor);
         dataManager.registerValueProcessor(Keys.ROTATION, rotationalDataProcessor);
+
+        final SplashPotionDualProcessor splashPotionDualProcessor = new SplashPotionDualProcessor();
+        dataManager.registerDataProcessorAndImpl(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class,
+                ImmutableSpongeSplashPotionData.class, splashPotionDualProcessor);
+        dataManager.registerValueProcessor(Keys.IS_SPLASH_POTION, splashPotionDualProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

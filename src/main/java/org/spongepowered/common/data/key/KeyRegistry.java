@@ -268,6 +268,7 @@ public class KeyRegistry {
         keyMap.put("angry", makeSingleKey(Boolean.class, Value.class, of("Angry")));
         keyMap.put("anger", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Anger")));
         keyMap.put("rotation", makeSingleKey(Rotation.class, Value.class, of("Rotation")));
+        keyMap.put("is_splash_potion", makeSingleKey(Boolean.class, Value.class, of("IsSplashPotion")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
