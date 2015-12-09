@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile.fireball;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
@@ -38,6 +39,8 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 @Mixin(EntityLargeFireball.class)
 public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireball {
 
+    private static final String NEW_EXPLOSION_METHOD =
+        "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;";
     @Shadow public int explosionPower;
 
     private float damage = 6.0f;
@@ -46,6 +49,12 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     protected float onAttackEntityFrom(float amount) {
         return this.damage;
+    }
+
+    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+        at = @At(value = "INVOKE", target = NEW_EXPLOSION_METHOD))
+    protected Entity newExplosion(Entity entityIn) {
+        return (Entity) (Object) this;
     }
 
     public double getDamage() {
