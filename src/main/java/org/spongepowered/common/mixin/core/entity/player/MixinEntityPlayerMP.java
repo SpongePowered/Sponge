@@ -135,7 +135,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         IMixinWorld world = (IMixinWorld) this.worldObj;
         // Special case for players as sometimes tick capturing won't capture deaths
         if (world.getCapturedEntityItems().size() > 0) {
-            world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.source(damageSource)),
+            world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)),
                 (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null, true);
         }
     }
