@@ -22,48 +22,74 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.item;
+package org.spongepowered.common.data.processor.dual.item;
 
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemPotion;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
+import java.util.Optional;
+
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSplashPotionData;
 import org.spongepowered.api.data.manipulator.mutable.item.SplashPotionData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSplashPotionData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.Optional;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemPotion;
+import net.minecraft.item.ItemStack;
 
-public class SplashPotionDataProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, SplashPotionData, ImmutableSplashPotionData> {
+public class SplashPotionDualProcessor extends AbstractSingleTargetDualProcessor<ItemStack, Boolean, Value<Boolean>, SplashPotionData, ImmutableSplashPotionData> {
 
-    public SplashPotionDataProcessor() {
-        super(t -> t.getItem().equals(Items.potionitem), Keys.IS_SPLASH_POTION);
+    public SplashPotionDualProcessor() {
+        super(ItemStack.class, Keys.IS_SPLASH_POTION);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (super.supports(container)) {
+            ItemStack stack = (ItemStack) container;
+            
+            if (this.supports(stack)) {
+                ImmutableValue<Boolean> previous = constructImmutableValue((stack.getItemDamage() & 16384) == 0);
+                ImmutableValue<Boolean> next = constructImmutableValue(false);
+                
+                stack.setItemDamage((stack.getItemDamage() ^ 16384) | 8192);
+                return DataTransactionResult.successReplaceResult(previous, next);
+            }
+        }
+        
         return DataTransactionResult.failNoData();
     }
 
     @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(Keys.IS_SPLASH_POTION, actualValue);
+    }
+
+    @Override
     protected boolean set(ItemStack entity, Boolean value) {
-        if (value) {
-            entity.setItemDamage((entity.getItemDamage() ^ 8192) | 16384);
-        } else if (!value) {
-            entity.setItemDamage((entity.getItemDamage() ^ 16384) | 8192);
+        if (this.supports(entity)) {
+            if (value) {
+                entity.setItemDamage((entity.getItemDamage() ^ 8192) | 16384);
+            } else if (!value) {
+                entity.setItemDamage((entity.getItemDamage() ^ 16384) | 8192);
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
     protected Optional<Boolean> getVal(ItemStack entity) {
-        return Optional.of(ItemPotion.isSplash(entity.getMetadata()));
+        if (this.supports(entity)) {
+            return Optional.of(ItemPotion.isSplash(entity.getMetadata()));
+        }
+        
+        return Optional.empty();
     }
 
     @Override
@@ -76,4 +102,8 @@ public class SplashPotionDataProcessor extends AbstractItemSingleDataProcessor<B
         return new SpongeSplashPotionData();
     }
 
+    @Override
+    protected boolean supports(ItemStack entity) {
+        return entity.getItem().equals(Items.potionitem);
+    }
 }

@@ -77,6 +77,7 @@ import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
 import org.spongepowered.common.data.processor.dual.entity.*;
+import org.spongepowered.common.data.processor.dual.item.*;
 import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
@@ -541,10 +542,6 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, moistureDataProcessor);
 
-        final SplashPotionDataProcessor splashPotionDataProcessor = new SplashPotionDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class, 
-                ImmutableSpongeSplashPotionData.class, splashPotionDataProcessor);
-
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -683,7 +680,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
         dataManager.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
         dataManager.registerValueProcessor(Keys.MOISTURE, new MoistureValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_SPLASH_POTION, new SplashPotionValueProcessor());
 
         // Dual Processors
         final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();
@@ -731,6 +727,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
             ImmutableSpongeGameModeData.class, gameModeDataProcessor);
         dataManager.registerValueProcessor(Keys.GAME_MODE, gameModeDataProcessor);
+
+        final SplashPotionDualProcessor splashPotionDualProcessor = new SplashPotionDualProcessor();
+        dataManager.registerDataProcessorAndImpl(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class, 
+                ImmutableSpongeSplashPotionData.class, splashPotionDualProcessor);
+        dataManager.registerValueProcessor(Keys.IS_SPLASH_POTION, splashPotionDualProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
