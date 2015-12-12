@@ -145,10 +145,6 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         final IChunkProvider chunkProvider = this.getChunkGenerator(mcWorld, settings);
         final WorldChunkManager chunkManager = this.getChunkManager(mcWorld);
 
-        SpongeImpl.getLogger().error("Creating SpongeWorldGenerator for [" + world + "]...");
-        SpongeImpl.getLogger().error("ChunkProvider is going to be [" + chunkProvider + "].");
-        SpongeImpl.getLogger().error("ChunkManager is going to be [" + chunkManager + "].");
-
         return new SpongeWorldGenerator(
                 SpongeBiomeGenerator.of(chunkManager),
                 SpongeGeneratorPopulator.of((WorldServer) world, chunkProvider),
@@ -215,6 +211,24 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         return provider;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + this.getName().hashCode();
+        result = prime * result + this.worldTypeId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof WorldType)) {
+            return false;
+        }
+
+        final WorldType other = (WorldType) obj;
+        return this.getName().equals(other.getWorldTypeName()) && this.worldTypeId == other.getWorldTypeID();
+    }
 
     @Override
     public String toString() {

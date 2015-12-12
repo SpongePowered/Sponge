@@ -66,8 +66,6 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
         this.generatorTypeMappings.put("nether", (GeneratorType) new SpongeWorldTypeNether());
         this.generatorTypeMappings.put("end", (GeneratorType) new SpongeWorldTypeEnd());
         this.generatorTypeMappings.put("overworld", (GeneratorType) new SpongeWorldTypeOverworld());
-
-
     }
 
     @AdditionalRegistration
