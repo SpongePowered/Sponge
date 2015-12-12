@@ -82,7 +82,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.MAX_AIR.getQuery(), this.maxAir)
                 .set(Keys.REMAINING_AIR.getQuery(), this.remainingAir);
     }

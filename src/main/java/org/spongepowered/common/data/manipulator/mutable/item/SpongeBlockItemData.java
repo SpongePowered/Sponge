@@ -56,7 +56,8 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.ITEM_BLOCKSTATE, this.getValue());
+        return super.toContainer()
+            .set(Keys.ITEM_BLOCKSTATE, this.getValue());
     }
 
     @Override

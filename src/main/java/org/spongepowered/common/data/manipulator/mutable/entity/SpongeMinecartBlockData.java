@@ -93,7 +93,7 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.REPRESENTED_BLOCK, this.block)
                 .set(Keys.OFFSET, this.offset);
     }

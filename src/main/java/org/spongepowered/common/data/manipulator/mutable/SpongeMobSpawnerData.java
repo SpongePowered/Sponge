@@ -192,7 +192,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.SPAWNER_REMAINING_DELAY.getQuery(), this.remainingDelay)
             .set(Keys.SPAWNER_MINIMUM_DELAY.getQuery(), this.minimumDelay)
             .set(Keys.SPAWNER_MAXIMUM_DELAY.getQuery(), this.maximumDelay)

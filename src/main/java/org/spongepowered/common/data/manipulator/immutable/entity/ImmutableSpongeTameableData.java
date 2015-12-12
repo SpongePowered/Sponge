@@ -80,7 +80,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     @Override
     public DataContainer toContainer() {
         final String owner = this.owner == null ? "none" : this.owner.toString();
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.TAMED_OWNER.getQuery(), owner);
     }
 

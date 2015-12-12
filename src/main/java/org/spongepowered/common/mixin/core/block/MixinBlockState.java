@@ -41,6 +41,7 @@ import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -318,8 +319,14 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer()
+            .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.BLOCK_TYPE, this.getType().getId())
             .set(DataQueries.BLOCK_STATE_UNSAFE_META, this.getStateMeta());
         final List<DataView> manipulators = DataUtil.getSerializedImmutableManipulatorList(getContainers());

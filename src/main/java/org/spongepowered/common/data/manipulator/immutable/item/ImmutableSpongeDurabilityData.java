@@ -95,7 +95,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.ITEM_DURABILITY, this.durability.get())
                 .set(Keys.UNBREAKABLE, this.unbreakable.get());
     }

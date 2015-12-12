@@ -69,7 +69,7 @@ public class SpongeCriticalHitData extends AbstractSingleData<Boolean, CriticalH
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.CRITICAL_HIT, getValue());
     }
 

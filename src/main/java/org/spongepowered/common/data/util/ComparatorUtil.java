@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.util;
 
+import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.util.persistence.DataContentUpdater;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 
@@ -44,6 +46,12 @@ public class ComparatorUtil {
 
     public static final Comparator<PropertyStore<?>> PROPERTY_STORE_COMPARATOR =
         (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
+
+    public static final Comparator<DataContentUpdater> DATA_CONTENT_UPDATER_COMPARATOR =
+        (o1, o2) -> ComparisonChain.start()
+            .compare(o2.getInputVersion(), o1.getInputVersion())
+            .compare(o2.getOutputVersion(), o1.getOutputVersion())
+            .result();
 
     public static Comparator<Integer> intComparator() {
         return Integer::compareTo;

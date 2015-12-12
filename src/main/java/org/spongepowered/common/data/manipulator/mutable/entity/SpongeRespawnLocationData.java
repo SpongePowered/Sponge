@@ -56,7 +56,8 @@ public class SpongeRespawnLocationData extends AbstractSingleMapData<UUID, Vecto
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.RESPAWN_LOCATIONS, getValue());
+        return super.toContainer()
+            .set(Keys.RESPAWN_LOCATIONS, getValue());
     }
 
     @Override

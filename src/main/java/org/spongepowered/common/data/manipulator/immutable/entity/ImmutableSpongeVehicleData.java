@@ -80,7 +80,7 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.VEHICLE, this.vehicle)
             .set(Keys.BASE_VEHICLE, this.baseVehicle);
     }

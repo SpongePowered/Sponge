@@ -64,12 +64,13 @@ public class SpongeSkinData extends AbstractSingleData<UUID, SkinData, Immutable
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(DataQueries.SKIN_UUID, getValue());
+        return super.toContainer()
+            .set(DataQueries.SKIN_UUID, getValue());
     }
 
     @Override
     public Value<UUID> skinUniqueId() {
-        return new SpongeValue<UUID>(Keys.SKIN_UNIQUE_ID, getValue());
+        return new SpongeValue<>(Keys.SKIN_UNIQUE_ID, getValue());
     }
 
     @Override

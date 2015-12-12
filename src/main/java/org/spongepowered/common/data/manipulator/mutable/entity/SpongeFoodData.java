@@ -74,7 +74,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.FOOD_LEVEL.getQuery(), this.foodLevel)
                 .set(Keys.SATURATION.getQuery(), this.foodSaturationLevel)
                 .set(Keys.EXHAUSTION.getQuery(), this.foodExhaustionLevel);

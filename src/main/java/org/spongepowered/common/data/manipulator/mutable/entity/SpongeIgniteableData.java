@@ -95,7 +95,7 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.FIRE_TICKS, this.fireTicks)
             .set(Keys.FIRE_DAMAGE_DELAY, this.fireDelay);
     }

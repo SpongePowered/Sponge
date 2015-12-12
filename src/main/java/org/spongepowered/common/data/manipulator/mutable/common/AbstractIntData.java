@@ -51,6 +51,7 @@ public abstract class AbstractIntData<M extends DataManipulator<M, I>, I extends
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(this.usedKey, this.getValue());
+        return super.toContainer()
+            .set(this.usedKey, this.getValue());
     }
 }

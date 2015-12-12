@@ -154,9 +154,15 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.manipulators);
         final DataContainer container = new MemoryDataContainer()
+            .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(Queries.WORLD_ID, this.worldUuid.toString())
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
             .createView(DataQueries.SNAPSHOT_WORLD_POSITION)

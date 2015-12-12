@@ -106,8 +106,14 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer()
+            .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(Queries.WORLD_ID, ((World) this.worldObj).getUniqueId().toString())
             .set(Queries.POSITION_X, this.getPos().getX())
             .set(Queries.POSITION_Y, this.getPos().getY())

@@ -78,7 +78,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.EXPERIENCE_LEVEL.getQuery(), this.level)
                 .set(Keys.TOTAL_EXPERIENCE.getQuery(), this.totalExp)
                 .set(Keys.EXPERIENCE_SINCE_LEVEL.getQuery(), this.expSinceLevel);

@@ -42,6 +42,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<ImmutableWireAttachmentData, WireAttachmentData> implements ImmutableWireAttachmentData {
 
@@ -107,8 +109,9 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
-            .set(Keys.WIRE_ATTACHMENTS.getQuery(), this.wireAttachmentMap)
+        return super.toContainer()
+            .set(Keys.WIRE_ATTACHMENTS.getQuery(), this.wireAttachmentMap.entrySet().stream()
+                .collect(Collectors.toMap(k -> k.getKey().name(), v -> v.getValue().getId())))
             .set(Keys.WIRE_ATTACHMENT_NORTH.getQuery(), this.wireAttachmentMap.get(Direction.NORTH).getId())
             .set(Keys.WIRE_ATTACHMENT_EAST.getQuery(), this.wireAttachmentMap.get(Direction.EAST).getId())
             .set(Keys.WIRE_ATTACHMENT_SOUTH.getQuery(), this.wireAttachmentMap.get(Direction.SOUTH).getId())

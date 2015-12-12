@@ -31,6 +31,9 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -209,4 +212,14 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         return Objects.equal(this.immutableClass, other.immutableClass);
     }
 
+    @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+            .set(Queries.CONTENT_VERSION, getContentVersion());
+    }
 }

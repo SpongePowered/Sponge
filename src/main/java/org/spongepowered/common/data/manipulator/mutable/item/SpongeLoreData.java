@@ -78,7 +78,8 @@ public class SpongeLoreData extends AbstractData<LoreData, ImmutableLoreData> im
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.ITEM_LORE.getQuery(), SpongeTexts.asJson(this.lore));
+        return super.toContainer()
+            .set(Keys.ITEM_LORE.getQuery(), SpongeTexts.asJson(this.lore));
     }
 
     public List<Text> getLore() {

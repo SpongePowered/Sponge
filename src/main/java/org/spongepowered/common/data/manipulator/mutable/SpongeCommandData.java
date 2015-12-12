@@ -113,7 +113,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.COMMAND.getQuery(), this.command)
                 .set(Keys.SUCCESS_COUNT.getQuery(), this.success)
                 .set(Keys.TRACKS_OUTPUT.getQuery(), this.tracks)

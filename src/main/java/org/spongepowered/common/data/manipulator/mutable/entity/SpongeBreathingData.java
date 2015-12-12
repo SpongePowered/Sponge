@@ -71,7 +71,7 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.MAX_AIR.getQuery(), this.maxAir)
                 .set(Keys.REMAINING_AIR.getQuery(), this.remainingAir);
     }

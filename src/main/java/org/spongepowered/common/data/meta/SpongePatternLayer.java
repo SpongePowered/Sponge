@@ -26,6 +26,7 @@ package org.spongepowered.common.data.meta;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
@@ -52,8 +53,16 @@ public class SpongePatternLayer implements PatternLayer {
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(DataQueries.BANNER_SHAPE_ID, this.id.getId()).set(DataQueries.BANNER_COLOR, this.color.getName());
+        return new MemoryDataContainer()
+            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(DataQueries.BANNER_SHAPE_ID, this.id.getId())
+            .set(DataQueries.BANNER_COLOR, this.color.getName());
     }
 
 }

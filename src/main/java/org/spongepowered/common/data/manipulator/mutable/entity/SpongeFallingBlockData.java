@@ -218,7 +218,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.FALL_DAMAGE_PER_BLOCK.getQuery(), this.fallDamagePerBlock)
                 .set(Keys.MAX_FALL_DAMAGE.getQuery(), this.maxFallDamage)
                 .set(Keys.FALLING_BLOCK_STATE.getQuery(), this.blockState)

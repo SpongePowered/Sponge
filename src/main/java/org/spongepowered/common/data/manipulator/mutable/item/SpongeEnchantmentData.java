@@ -54,7 +54,7 @@ public class SpongeEnchantmentData extends AbstractSingleListData<ItemEnchantmen
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.ITEM_ENCHANTMENTS.getQuery(), this.getValue());
     }
 

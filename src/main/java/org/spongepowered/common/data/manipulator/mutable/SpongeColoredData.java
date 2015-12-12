@@ -68,7 +68,8 @@ public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, Im
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.COLOR.getQuery(), this.getValue().getRgb());
+        return super.toContainer()
+            .set(Keys.COLOR, this.getValue());
     }
 
     @Override

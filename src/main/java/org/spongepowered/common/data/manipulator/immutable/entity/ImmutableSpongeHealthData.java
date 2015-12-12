@@ -92,7 +92,7 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.HEALTH.getQuery(), this.health)
             .set(Keys.MAX_HEALTH.getQuery(), this.maxHealth);
     }

@@ -57,7 +57,7 @@ public class SpongeAuthorData extends AbstractSingleData<Text, AuthorData, Immut
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.BOOK_AUTHOR.getQuery(), Texts.json().to(this.getValue()));
     }
 

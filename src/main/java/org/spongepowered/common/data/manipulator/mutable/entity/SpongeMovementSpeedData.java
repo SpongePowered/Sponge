@@ -111,7 +111,7 @@ public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, Imm
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.WALKING_SPEED, this.walkSpeed)
                 .set(Keys.FLYING_SPEED, this.flySpeed);
     }

@@ -70,7 +70,7 @@ public class SpongeTargetedLocationData extends AbstractSingleData<Location<Worl
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
-            .set(Keys.TARGETED_LOCATION.getQuery(), this.getValue());
+        return super.toContainer()
+            .set(Keys.TARGETED_LOCATION, this.getValue());
     }
 }

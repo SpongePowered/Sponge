@@ -796,6 +796,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
         final Transform<World> transform = getTransform();
         final NBTTagCompound compound = new NBTTagCompound();
@@ -803,6 +808,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = new MemoryDataContainer()
+            .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
             .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
             .createView(DataQueries.SNAPSHOT_WORLD_POSITION)

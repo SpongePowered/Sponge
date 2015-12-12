@@ -143,7 +143,7 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.PASSED_BURN_TIME, this.passedBurnTime)
                 .set(Keys.MAX_BURN_TIME, this.maxBurnTime)
                 .set(Keys.PASSED_COOK_TIME, this.passedCookTime)

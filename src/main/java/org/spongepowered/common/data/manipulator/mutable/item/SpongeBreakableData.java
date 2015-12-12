@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Booleans;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
@@ -37,8 +35,8 @@ import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
 import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleSetData;
 
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SpongeBreakableData extends AbstractSingleSetData<BlockType, BreakableData, ImmutableBreakableData> implements BreakableData {
     
@@ -58,11 +56,10 @@ public class SpongeBreakableData extends AbstractSingleSetData<BlockType, Breaka
 
     @Override
     public DataContainer toContainer() {
-        List<String> breakableIds = Lists.newArrayListWithExpectedSize(getValue().size());
-        for (BlockType breakable : getValue()) {
-            breakableIds.add(breakable.getId());
-        }
-        return new MemoryDataContainer().set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), breakableIds);
+        return super.toContainer()
+            .set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), getValue().stream()
+                .map(BlockType::getId)
+                .collect(Collectors.toList()));
     }
 
     @SuppressWarnings("unchecked")

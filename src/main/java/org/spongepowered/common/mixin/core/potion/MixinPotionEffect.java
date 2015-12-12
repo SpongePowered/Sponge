@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.potion;
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -74,8 +75,14 @@ public abstract class MixinPotionEffect implements PotionEffect {
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
+                .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(DataQueries.POTION_TYPE, Potion.potionTypes[getPotionID()].getName())
                 .set(DataQueries.POTION_DURATION, this.duration)
                 .set(DataQueries.POTION_AMPLIFIER, this.amplifier)

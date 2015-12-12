@@ -107,7 +107,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.COMMAND, this.storedCommand)
                 .set(Keys.SUCCESS_COUNT, this.success)
                 .set(Keys.TRACKS_OUTPUT, this.tracks)

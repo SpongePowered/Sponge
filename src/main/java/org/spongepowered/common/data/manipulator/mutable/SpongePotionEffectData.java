@@ -54,7 +54,7 @@ public class SpongePotionEffectData extends AbstractSingleListData<PotionEffect,
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.POTION_EFFECTS.getQuery(), this.getValue());
     }
 }

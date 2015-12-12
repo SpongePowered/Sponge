@@ -81,6 +81,7 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(this.usedKey.getQuery(), this.getValue().getId());
+        return super.toContainer()
+            .set(this.usedKey.getQuery(), this.getValue().getId());
     }
 }

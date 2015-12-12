@@ -62,6 +62,7 @@ public class SpongeFireworkEffectData extends AbstractSingleListData<FireworkEff
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.FIREWORK_EFFECTS.getQuery(), this.getValue());
+        return super.toContainer()
+            .set(Keys.FIREWORK_EFFECTS.getQuery(), this.getValue());
     }
 }

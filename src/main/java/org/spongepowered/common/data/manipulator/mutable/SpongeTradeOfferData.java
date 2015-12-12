@@ -56,7 +56,8 @@ public class SpongeTradeOfferData extends AbstractSingleListData<TradeOffer, Tra
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.TRADE_OFFERS.getQuery(), this.offers);
+        return super.toContainer()
+            .set(Keys.TRADE_OFFERS.getQuery(), this.offers);
     }
 
     @Override

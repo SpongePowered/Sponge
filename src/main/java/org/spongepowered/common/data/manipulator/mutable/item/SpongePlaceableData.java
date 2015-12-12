@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Booleans;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
@@ -37,8 +35,8 @@ import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlaceableData;
 import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleSetData;
 
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SpongePlaceableData extends AbstractSingleSetData<BlockType, PlaceableData, ImmutablePlaceableData> implements PlaceableData {
     
@@ -58,11 +56,10 @@ public class SpongePlaceableData extends AbstractSingleSetData<BlockType, Placea
 
     @Override
     public DataContainer toContainer() {
-        List<String> placeableIds = Lists.newArrayListWithExpectedSize(getValue().size());
-        for (BlockType placeable : getValue()) {
-            placeableIds.add(placeable.getId());
-        }
-        return new MemoryDataContainer().set(Keys.PLACEABLE_BLOCKS.getQuery(), placeableIds);
+        return super.toContainer()
+            .set(Keys.PLACEABLE_BLOCKS.getQuery(), getValue().stream()
+                .map(BlockType::getId)
+                .collect(Collectors.toList()));
     }
 
     @SuppressWarnings("unchecked")

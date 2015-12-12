@@ -88,7 +88,9 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.FIRE_TICKS.getQuery(), this.fireTicks).set(Keys.FIRE_DAMAGE_DELAY.getQuery(), this.fireDelay);
+        return super.toContainer()
+            .set(Keys.FIRE_TICKS.getQuery(), this.fireTicks)
+            .set(Keys.FIRE_DAMAGE_DELAY.getQuery(), this.fireDelay);
     }
 
     @Override

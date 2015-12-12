@@ -94,7 +94,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.HEALTH, this.health)
             .set(Keys.MAX_HEALTH, this.maxHealth);
     }

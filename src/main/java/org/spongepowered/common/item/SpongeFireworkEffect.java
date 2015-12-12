@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.util.Color;
@@ -87,8 +88,14 @@ public class SpongeFireworkEffect implements FireworkEffect {
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
+            .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(TYPE, this.shape.getId())
                 .set(COLORS, this.colors.stream().map(color -> color.asJavaColor().getRGB()).collect(Collectors.toList()))
                 .set(FADES, this.fades.stream().map(color -> color.asJavaColor().getRGB()).collect(Collectors.toList()))

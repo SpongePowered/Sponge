@@ -100,7 +100,7 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.CONNECTED_DIRECTIONS.getQuery(), this.directions)
             .set(Keys.CONNECTED_NORTH.getQuery(), this.directions.contains(Direction.NORTH))
             .set(Keys.CONNECTED_SOUTH.getQuery(), this.directions.contains(Direction.SOUTH))

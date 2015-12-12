@@ -108,7 +108,7 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getId())
             .set(Keys.BANNER_PATTERNS, this.layers);
     }

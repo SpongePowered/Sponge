@@ -81,7 +81,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.DISPLAY_NAME.getQuery(), Texts.json().to(this.displayName))
             .set(Keys.SHOWS_DISPLAY_NAME, this.displays);
     }

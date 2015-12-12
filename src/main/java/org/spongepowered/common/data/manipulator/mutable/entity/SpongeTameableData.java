@@ -80,7 +80,7 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
     @Override
     public DataContainer toContainer() {
         final String uuid = this.owner == null ? "none" : this.owner.toString();
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.TAMED_OWNER.getQuery(), uuid);
     }
 

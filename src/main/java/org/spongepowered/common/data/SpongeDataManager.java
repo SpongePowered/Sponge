@@ -46,6 +46,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.util.persistence.DataContentUpdater;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.util.ComparatorUtil;
@@ -54,6 +55,7 @@ import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -100,6 +102,9 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
     private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
 
+    // Content updaters
+    private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap = new IdentityHashMap<>();
+
     private static boolean allowRegistrations = true;
     public static SpongeDataManager getInstance() {
         return instance;
@@ -120,6 +125,48 @@ public final class SpongeDataManager implements DataManager {
         if (!this.builders.containsKey(clazz)) {
             this.builders.put(clazz, builder);
         }
+    }
+
+    @Override
+    public <T extends DataSerializable> void registerContentUpdater(Class<T> clazz, DataContentUpdater updater) {
+        checkNotNull(updater, "DataContentUpdater was null!");
+        if (!this.updatersMap.containsKey(checkNotNull(clazz, "DataSerializable class was null!"))) {
+            this.updatersMap.put(clazz, new ArrayList<>());
+        }
+        final List<DataContentUpdater> updaters = this.updatersMap.get(clazz);
+        updaters.add(updater);
+        Collections.sort(updaters, ComparatorUtil.DATA_CONTENT_UPDATER_COMPARATOR);
+    }
+
+    @Override
+    public <T extends DataSerializable> Optional<DataContentUpdater> getWrappedContentUpdater(Class<T> clazz, final int fromVersion,
+        final int toVersion) {
+        checkArgument(fromVersion != toVersion, "Attempting to convert to the same version!");
+        checkArgument(fromVersion < toVersion, "Attempting to backwards convert data! This isn't supported!");
+        final List<DataContentUpdater> updaters = this.updatersMap.get(checkNotNull(clazz, "DataSerializable class was null!"));
+        if (updaters == null) {
+            return Optional.empty();
+        }
+        ImmutableList.Builder<DataContentUpdater> builder = ImmutableList.builder();
+        int version = fromVersion;
+        for (DataContentUpdater updater : updaters) {
+            if (updater.getInputVersion() == version) {
+                if (updater.getOutputVersion() > toVersion) {
+                    continue;
+                }
+                version = updater.getOutputVersion();
+                builder.add(updater);
+            }
+        }
+        if (version < toVersion || version < toVersion) { // There wasn't a registered updater for the version being requested
+            Exception e = new IllegalStateException("The requested content version for: " + clazz.getSimpleName() + " was requested, "
+                                                    + "\nhowever, the versions supplied: from "+ fromVersion + " to " + toVersion + " is impossible"
+                                                    + "\nas the latest version registered is: " + version+". Please notify the developer of"
+                                                    + "\nthe requested consumed DataSerializable of this error.");
+            e.printStackTrace();
+            return Optional.empty();
+        }
+        return Optional.of(new DataUpdaterDelegate(builder.build(), fromVersion, toVersion));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

@@ -36,6 +36,7 @@ import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
@@ -158,9 +159,15 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
     public DataContainer toContainer() {
         // TODO More data
         return new MemoryDataContainer()
+                .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(DataQueries.USER_UUID, this.profile.getId())
                 .set(DataQueries.USER_NAME, this.profile.getName())
                 .set(DataQueries.USER_SPAWNS, this.spawnLocations);

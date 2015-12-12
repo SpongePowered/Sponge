@@ -108,7 +108,7 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.ITEM_DURABILITY, this.durability)
                 .set(Keys.UNBREAKABLE, this.unbreakable);
     }

@@ -98,7 +98,7 @@ public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicl
     public DataContainer toContainer() {
         checkState(this.vehicle != null);
         checkState(this.baseVehicle != null);
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.VEHICLE, this.vehicle)
             .set(Keys.BASE_VEHICLE, this.baseVehicle);
     }

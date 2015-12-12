@@ -96,6 +96,8 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.WALKING_SPEED.getQuery(), this.walkSpeed).set(Keys.FLYING_SPEED.getQuery(), this.flySpeed);
+        return super.toContainer()
+            .set(Keys.WALKING_SPEED.getQuery(), this.walkSpeed)
+            .set(Keys.FLYING_SPEED.getQuery(), this.flySpeed);
     }
 }

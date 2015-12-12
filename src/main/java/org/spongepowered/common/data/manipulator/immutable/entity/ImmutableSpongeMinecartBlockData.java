@@ -89,7 +89,7 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.REPRESENTED_BLOCK, this.block)
                 .set(Keys.OFFSET, this.offset);
     }

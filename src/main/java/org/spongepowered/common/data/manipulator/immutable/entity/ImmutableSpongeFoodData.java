@@ -98,10 +98,10 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
-                .set(Keys.FOOD_LEVEL.getQuery(), this.foodLevel)
-                .set(Keys.SATURATION.getQuery(), this.foodSaturationLevel)
-                .set(Keys.EXHAUSTION.getQuery(), this.foodExhaustionLevel);
+        return super.toContainer()
+                .set(Keys.FOOD_LEVEL, this.foodLevel)
+                .set(Keys.SATURATION, (double) this.foodSaturationLevel)
+                .set(Keys.EXHAUSTION, (double) this.foodExhaustionLevel);
     }
 
     @Override

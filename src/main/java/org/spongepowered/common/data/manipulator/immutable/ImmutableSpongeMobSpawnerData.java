@@ -253,7 +253,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.SPAWNER_REMAINING_DELAY, this.remaining)
             .set(Keys.SPAWNER_MINIMUM_DELAY, this.minSpawnDelay)
             .set(Keys.SPAWNER_MAXIMUM_DELAY, this.maxSpawnDelay)

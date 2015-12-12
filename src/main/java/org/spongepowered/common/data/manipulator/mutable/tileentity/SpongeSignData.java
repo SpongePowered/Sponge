@@ -65,9 +65,10 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
 
     @Override
     public DataContainer toContainer() {
-        List<String> jsonLines = Lists.newArrayListWithExpectedSize(4);
-        jsonLines.addAll(this.lines.stream().map(line -> Texts.json().to(line)).collect(Collectors.toList()));
-        return new MemoryDataContainer().set(Keys.SIGN_LINES.getQuery(), jsonLines);
+        return super.toContainer()
+            .set(Keys.SIGN_LINES.getQuery(), this.lines.stream()
+                .map(line -> Texts.json().to(line))
+                .collect(Collectors.toList()));
     }
 
     @Override

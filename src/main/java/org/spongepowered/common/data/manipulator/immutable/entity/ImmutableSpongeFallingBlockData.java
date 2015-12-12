@@ -114,7 +114,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableValue<Double> fallDamagePerBlock() {
-        return fallDamagePerBlockValue;
+        return this.fallDamagePerBlockValue;
     }
 
     public double getMaxFallDamage() {
@@ -123,7 +123,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableValue<Double> maxFallDamage() {
-        return maxFallDamageValue;
+        return this.maxFallDamageValue;
     }
 
     public BlockState getBlockState() {
@@ -132,7 +132,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableValue<BlockState> blockState() {
-        return blockStateValue;
+        return this.blockStateValue;
     }
 
     public boolean getCanPlaceAsBlock() {
@@ -141,7 +141,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableValue<Boolean> canPlaceAsBlock() {
-        return canPlaceAsBlockValue;
+        return this.canPlaceAsBlockValue;
     }
 
     public boolean getCanDropAsItem() {
@@ -150,7 +150,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableValue<Boolean> canDropAsItem() {
-        return canDropAsItemValue;
+        return this.canDropAsItemValue;
     }
 
     public int getFallTime() {
@@ -159,7 +159,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableValue<Integer> fallTime() {
-        return fallTimeValue;
+        return this.fallTimeValue;
     }
 
     public boolean getCanHurtEntities() {
@@ -168,7 +168,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public ImmutableValue<Boolean> canHurtEntities() {
-        return canHurtEntitiesValue;
+        return this.canHurtEntitiesValue;
     }
 
     @Override
@@ -192,7 +192,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.FALL_DAMAGE_PER_BLOCK.getQuery(), this.fallDamagePerBlock)
                 .set(Keys.MAX_FALL_DAMAGE.getQuery(), this.maxFallDamage)
                 .set(Keys.FALLING_BLOCK_STATE.getQuery(), this.blockState)
