@@ -263,6 +263,7 @@ public class KeyRegistry {
         keyMap.put("expiration_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ExpirationTicks")));
         keyMap.put("skin", makeSingleKey(UUID.class, Value.class, of("Skin")));
         keyMap.put("moisture", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Moisture")));
+        keyMap.put("is_splash_potion", makeSingleKey(Boolean.class, Value.class, of("IsSplashPotion")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
