@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.command.SimpleCommandManager;
+import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.plugin.PluginManager;
@@ -74,7 +74,7 @@ public abstract class SpongeGame implements Game {
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
         this.configManager = new SpongeConfigManager();
-        this.commandManager = new SimpleCommandManager(LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
+        this.commandManager = new SpongeCommandManager(this, LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
 
     }
 

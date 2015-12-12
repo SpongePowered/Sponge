@@ -39,12 +39,15 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Iterator;
 import java.util.List;
@@ -159,8 +162,10 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
     @Override
     @SuppressWarnings("rawtypes")
     public List getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos) {
-        CommandManager service = SpongeImpl.getGame().getCommandManager();
-        CommandSource source = (CommandSource) sender;
-        return service.getSuggestions(source, input);
+        Location<World> location = null;
+        if (pos != null) {
+            location = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector(pos));
+        }
+        return SpongeImpl.getGame().getCommandManager().getSuggestions((CommandSource) sender, input, location);
     }
 }
