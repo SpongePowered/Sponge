@@ -528,7 +528,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
             DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(SpongeImpl.getGame(), Cause.of(this), originalMessage, message, originalSink, sink, (Entity) entityIn);
             SpongeImpl.getGame().getEventManager().post(event);
             Text returned = Texts.format(event.getMessage());
-            event.getSink().sendMessage(returned);
+            if (returned != Texts.of()) {
+                event.getSink().sendMessage(returned);
+            }
         }
     }
 
@@ -938,7 +940,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(SpongeImpl.getGame(), cause, Texts.of(), Texts.of(), originalSink, sink, (Entity) entity);
                     SpongeImpl.getGame().getEventManager().post(event);
                     Text returned = Texts.format(event.getMessage());
-                    event.getSink().sendMessage(returned);
+                    if (returned != Texts.of()) {
+                        event.getSink().sendMessage(returned);
+                    }
+
                     StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
                 }
             }
