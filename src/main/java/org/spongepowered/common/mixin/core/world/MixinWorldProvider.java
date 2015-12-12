@@ -155,11 +155,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public int getAverageGroundLevel() {
-        if (this.terrainType.equals(GeneratorTypes.END)) {
-            return 50;
-        } else {
-            return ((IMixinWorldType) this.terrainType).getMinimumSpawnHeight(this.worldObj);
-        }
+        return ((IMixinWorldType) this.terrainType).getMinimumSpawnHeight(this.worldObj);
     }
 
     @Override

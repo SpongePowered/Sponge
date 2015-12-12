@@ -24,18 +24,9 @@
  */
 package org.spongepowered.common.world.type;
 
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderGenerate;
-
 public class SpongeWorldTypeOverworld extends SpongeWorldType {
 
     public SpongeWorldTypeOverworld() {
-        super("OVERWORLD");
-    }
-
-    public IChunkProvider getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(),
-                generatorOptions);
+        super("overworld");
     }
 }

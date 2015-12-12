@@ -34,7 +34,8 @@ import net.minecraft.world.gen.ChunkProviderHell;
 public class SpongeWorldTypeNether extends SpongeWorldType {
 
     public SpongeWorldTypeNether() {
-        super("NETHER");
+        super("nether");
+        setNotificationData();
     }
 
     public WorldChunkManager getChunkManager(World world) {

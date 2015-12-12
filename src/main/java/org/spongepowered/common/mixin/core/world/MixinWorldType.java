@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -35,26 +38,34 @@ import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderDebug;
+import net.minecraft.world.gen.ChunkProviderEnd;
 import net.minecraft.world.gen.ChunkProviderFlat;
 import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.GeneratorPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.SpongeBiomeGenerator;
 import org.spongepowered.common.world.gen.SpongeGeneratorPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
+import java.io.BufferedWriter;
+import java.io.StringWriter;
 import java.util.Optional;
 
 @NonnullByDefault
@@ -81,7 +92,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         // a serialized JSON string
         if ((Object) this == WorldType.FLAT) {
             String defaultSettings = FlatGeneratorInfo.getDefaultFlatGenerator().toString();
-            return new MemoryDataContainer().set(STRING_VALUE, defaultSettings);
+            return new MemoryDataContainer().set(CUSTOM_SETTINGS, defaultSettings);
         }
         if ((Object) this == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to
@@ -111,21 +122,32 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         // This string can be a JSON string, or be a string of a custom format
 
         // Try to convert to custom format
-        Optional<String> asString = settings.getString(STRING_VALUE);
-        if (asString.isPresent()) {
-            return this.createGeneratorFromString(world, asString.get());
+        Optional<String> optCustomSettings = settings.getString(CUSTOM_SETTINGS);
+        if (optCustomSettings.isPresent()) {
+            return this.createGeneratorFromString(world, optCustomSettings.get());
         }
 
-        // Convert to JSON
-        String json = ""; // TODO how to convert datacontainer to JSON?
-        return this.createGeneratorFromString(world, json);
+        final StringWriter writer = new StringWriter();
+        try {
+            HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().
+                    translateData(settings));
+        } catch (Exception e) {
+            SpongeImpl.getLogger().warn("Failed to convert settings contained in [" + settings + "] for type [" + this + "] for world [" + world +
+                    "].", e);
+        }
+
+        return this.createGeneratorFromString(world, writer.toString());
     }
 
     @Override
     public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
-        net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
-        IChunkProvider chunkProvider = this.getChunkGenerator(mcWorld, settings);
-        WorldChunkManager chunkManager = this.getChunkManager(mcWorld);
+        final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
+        final IChunkProvider chunkProvider = this.getChunkGenerator(mcWorld, settings);
+        final WorldChunkManager chunkManager = this.getChunkManager(mcWorld);
+
+        SpongeImpl.getLogger().error("Creating SpongeWorldGenerator for [" + world + "]...");
+        SpongeImpl.getLogger().error("ChunkProvider is going to be [" + chunkProvider + "].");
+        SpongeImpl.getLogger().error("ChunkManager is going to be [" + chunkManager + "].");
 
         return new SpongeWorldGenerator(
                 SpongeBiomeGenerator.of(chunkManager),
@@ -134,53 +156,72 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
                 ImmutableList.<Populator> of());
     }
 
+    @Override
+    public int getMinimumSpawnHeight(net.minecraft.world.World world) {
+        int spawnHeight = 64;
+
+        if (world.getWorldType() == WorldType.FLAT) {
+            spawnHeight = 4;
+        } else if (world.getWorldType() == GeneratorTypes.END) {
+            spawnHeight = 50;
+        }
+        return spawnHeight;
+    }
+
     public WorldChunkManager getChunkManager(net.minecraft.world.World world) {
+        // For the Vanilla End and Nether dimensions, we cannot change their WorldType from DEFAULT (we would break mods) but, for Sponge, we need
+        // to return the correct ChunkManager. This compromise maximizes compatibility (even if getting the generator of a Vanilla NETHER won't return
+        // GeneratorTypes.NETHER in Sponge (for example, blame mods and Mojang)
+
+        final WorldChunkManager manager;
+
         if ((Object) this == WorldType.FLAT) {
             final FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(world.getWorldInfo().getGeneratorOptions());
-            return new WorldChunkManagerHell(
+            manager = new WorldChunkManagerHell(
                     BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), BiomeGenBase.field_180279_ad), 0.5F);
+        } else if ((Object) this == WorldType.DEBUG_WORLD) {
+            manager = new WorldChunkManagerHell(BiomeGenBase.plains, 0.0F);
+        } else if (world.provider instanceof WorldProviderHell) {
+            manager = world.getWorldChunkManager();
+        } else if (world.provider instanceof WorldProviderEnd) {
+            manager = new WorldChunkManagerHell(BiomeGenBase.sky, 0f);
+        } else {
+            manager = new WorldChunkManager(world);
         }
-        else if ((Object) this == WorldType.DEBUG_WORLD) {
-            return new WorldChunkManagerHell(BiomeGenBase.plains, 0.0F);
-        }
-        else {
-            return new WorldChunkManager(world);
-        }
+
+        return manager;
     }
 
     public IChunkProvider getChunkGenerator(net.minecraft.world.World world, String generatorOptions) {
+        // For the Vanilla End and Nether dimensions, we cannot change their WorldType from DEFAULT (we would break mods) but, for Sponge, we need
+        // to return the correct ChunkProvider. This compromise maximizes compatibility (even if getting the generator of a Vanilla NETHER won't
+        // return GeneratorTypes.NETHER in Sponge (for example, blame mods and Mojang)
+
+        final IChunkProvider provider;
+
         if ((Object) this == WorldType.FLAT) {
-            return new ChunkProviderFlat(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(),
+            provider = new ChunkProviderFlat(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(),
                     generatorOptions);
-        }
-        if ((Object) this == WorldType.DEBUG_WORLD) {
-            return new ChunkProviderDebug(world);
-        }
-        return new ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + this.getName().hashCode();
-        result = prime * result + this.worldTypeId;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof WorldType)) {
-            return false;
+        } else if ((Object) this == WorldType.DEBUG_WORLD) {
+            provider = new ChunkProviderDebug(world);
+        } else if (world.provider instanceof WorldProviderHell) {
+            provider = new ChunkProviderHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
+        } else if (world.provider instanceof WorldProviderEnd) {
+            provider = new ChunkProviderEnd(world, world.getSeed());
+        } else {
+            provider = new ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
         }
 
-        final WorldType other = (WorldType) obj;
-        return this.getName().equals(other.getWorldTypeName()) && this.worldTypeId == other.getWorldTypeID();
-
+        return provider;
     }
+
 
     @Override
     public String toString() {
-        return this.getName();
+        return Objects.toStringHelper(this)
+                .add("id", getId())
+                .add("name", getName())
+                .add("settings", getGeneratorSettings())
+                .toString();
     }
 }

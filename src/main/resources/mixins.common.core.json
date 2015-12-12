@@ -322,8 +322,6 @@
         "world.MixinWorld",
         "world.MixinWorldBorder",
         "world.MixinWorldProvider",
-        "world.MixinWorldProviderEnd",
-        "world.MixinWorldProviderHell",
         "world.MixinWorldServer",
         "world.MixinWorldServerMulti",
         "world.MixinWorldSettings",

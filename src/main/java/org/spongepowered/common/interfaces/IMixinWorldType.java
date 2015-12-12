@@ -31,7 +31,7 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 public interface IMixinWorldType {
 
-    DataQuery STRING_VALUE = DataQuery.of("customSettings");
+    DataQuery CUSTOM_SETTINGS = DataQuery.of("customSettings");
 
     SpongeWorldGenerator createGenerator(World world, DataContainer settings);
 
