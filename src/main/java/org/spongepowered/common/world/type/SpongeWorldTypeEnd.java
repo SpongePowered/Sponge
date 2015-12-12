@@ -34,7 +34,7 @@ import net.minecraft.world.gen.ChunkProviderEnd;
 public class SpongeWorldTypeEnd extends SpongeWorldType {
 
     public SpongeWorldTypeEnd() {
-        super("the_end");
+        super("end");
         setNotificationData();
     }
 

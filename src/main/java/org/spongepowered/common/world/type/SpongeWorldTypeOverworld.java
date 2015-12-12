@@ -28,6 +28,5 @@ public class SpongeWorldTypeOverworld extends SpongeWorldType {
 
     public SpongeWorldTypeOverworld() {
         super("overworld");
-        this.setCanBeCreated(false);
     }
 }

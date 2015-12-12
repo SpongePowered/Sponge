@@ -63,13 +63,14 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
     @DelayedRegistration(RegistrationPhase.POST_INIT)
     public void registerDefaults() {
         this.generatorTypeMappings.put("amplified", (GeneratorType) WorldType.AMPLIFIED);
-        this.generatorTypeMappings.put("debug", (GeneratorType) WorldType.DEBUG_WORLD);
         this.generatorTypeMappings.put("default", (GeneratorType) WorldType.DEFAULT);
         this.generatorTypeMappings.put("the_end", (GeneratorType) new SpongeWorldTypeEnd());
         this.generatorTypeMappings.put("flat", (GeneratorType) WorldType.FLAT);
         this.generatorTypeMappings.put("large_biomes", (GeneratorType) WorldType.LARGE_BIOMES);
         this.generatorTypeMappings.put("nether", (GeneratorType) new SpongeWorldTypeNether());
         this.generatorTypeMappings.put("overworld", (GeneratorType) new SpongeWorldTypeOverworld());
+
+
     }
 
     @AdditionalRegistration
