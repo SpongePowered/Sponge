@@ -26,9 +26,12 @@ package org.spongepowered.common.effect.particle;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.effect.particle.BlockParticle;
 import org.spongepowered.api.effect.particle.ColoredParticle;
 import org.spongepowered.api.effect.particle.ItemParticle;
 import org.spongepowered.api.effect.particle.NoteParticle;
@@ -260,6 +263,50 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
             return (BuilderMaterial) super.reset();
         }
 
+    }
+
+    public static class BuilderBlock extends SpongeParticleEffectBuilder implements BlockParticle.Builder {
+
+        private BlockState blockState;
+
+        @Override
+        public BuilderBlock block(BlockState blockState) {
+            this.blockState = checkNotNull(blockState);
+            return this;
+        }
+
+        @Override
+        public BuilderBlock type(ParticleType particleType) {
+            return (BuilderBlock) super.type(particleType);
+        }
+
+        @Override
+        public BuilderBlock motion(Vector3d motion) {
+            return (BuilderBlock) super.motion(motion);
+        }
+
+        @Override
+        public BuilderBlock offset(Vector3d offset) {
+            return (BuilderBlock) super.offset(offset);
+        }
+
+        @Override
+        public BuilderBlock count(int count) {
+            return (BuilderBlock) super.count(count);
+        }
+
+        @Override
+        public SpongeParticleEffect.Block build() {
+            checkState(this.blockState != null, "BlockState cannot be null!");
+            return new SpongeParticleEffect.Block(this.type, this.motion, this.offset, this.count, this.blockState);
+        }
+
+        @Override
+        public BuilderBlock reset() {
+            super.reset();
+            this.blockState = null;
+            return this;
+        }
     }
 
 }

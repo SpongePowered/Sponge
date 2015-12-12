@@ -25,7 +25,9 @@
 package org.spongepowered.common.effect.particle;
 
 import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.effect.particle.BlockParticle;
 import org.spongepowered.api.effect.particle.ColoredParticle;
 import org.spongepowered.api.effect.particle.ItemParticle;
 import org.spongepowered.api.effect.particle.NoteParticle;
@@ -133,6 +135,21 @@ public class SpongeParticleEffect implements ParticleEffect {
             return this.item;
         }
 
+    }
+
+    public static class Block extends SpongeParticleEffect implements BlockParticle {
+
+        private BlockState blockState;
+
+        public Block(SpongeParticleType type, Vector3d motion, Vector3d offset, int count, BlockState blockState) {
+            super(type, motion, offset, count);
+            this.blockState = blockState;
+        }
+
+        @Override
+        public BlockState getBlockState() {
+            return this.blockState;
+        }
     }
 
 }

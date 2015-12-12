@@ -27,15 +27,18 @@ package org.spongepowered.common.effect.particle;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.EnumParticleTypes;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.type.SpongeNotePitch;
+import org.spongepowered.common.mixin.core.block.MixinBlockState;
 
 import java.util.Collections;
 import java.util.List;
@@ -87,12 +90,6 @@ public final class SpongeParticleHelper {
             if (internal == EnumParticleTypes.ITEM_CRACK) {
                 id = Item.itemRegistry.getIDForObject(itemType);
                 data = ((net.minecraft.item.ItemStack) item).getItemDamage();
-            } else if (internal == EnumParticleTypes.BLOCK_CRACK || internal == EnumParticleTypes.BLOCK_DUST) {
-                // Only block types are allowed
-                if (itemType instanceof ItemBlock) {
-                    id = Block.blockRegistry.getIDForObject(((ItemBlock) itemType).getBlock());
-                    data = ((net.minecraft.item.ItemStack) item).getItemDamage();
-                }
             }
 
             if (id == 0) {
@@ -100,6 +97,17 @@ public final class SpongeParticleHelper {
             }
 
             extra = new int[] {id, data};
+        }
+
+        if (effect instanceof SpongeParticleEffect.Block) {
+            IBlockState blockState = (IBlockState) ((SpongeParticleEffect.Block) effect).getBlockState();
+            Block block = blockState.getBlock();
+            if (internal == EnumParticleTypes.BLOCK_CRACK || internal == EnumParticleTypes.BLOCK_DUST) {
+                // Only block types are allowed
+                int id = Block.blockRegistry.getIDForObject(block);
+                int data = block.damageDropped(blockState);
+                extra = new int[] {id, data};
+            }
         }
 
         if (effect instanceof SpongeParticleEffect.Resized) {

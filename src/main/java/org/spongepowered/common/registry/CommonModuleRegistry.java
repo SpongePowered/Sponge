@@ -68,6 +68,7 @@ import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.WallType;
+import org.spongepowered.api.effect.particle.BlockParticle;
 import org.spongepowered.api.effect.particle.ColoredParticle;
 import org.spongepowered.api.effect.particle.ItemParticle;
 import org.spongepowered.api.effect.particle.NoteParticle;
@@ -297,7 +298,9 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(FindNearestAttackableTargetAITask.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
             .registerBuilderSupplier(AttackLivingAITask.Builder.class, SpongeAttackLivingAIBuilder::new)
             .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new);
+            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new)
+            .registerBuilderSupplier(BlockParticle.Builder.class, SpongeParticleEffectBuilder.BuilderBlock::new)
+            ;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -372,7 +375,8 @@ public final class CommonModuleRegistry {
             .registerModule(TreeType.class, new TreeTypeRegistryModule())
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
-            .registerModule(Weather.class, new WeatherRegistryModule());
+            .registerModule(Weather.class, new WeatherRegistryModule())
+            ;
     }
 
     private CommonModuleRegistry() { }
