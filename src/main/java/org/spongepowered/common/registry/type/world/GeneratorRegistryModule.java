@@ -69,8 +69,6 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
         this.generatorTypeMappings.put("large_biomes", (GeneratorType) WorldType.LARGE_BIOMES);
         this.generatorTypeMappings.put("nether", (GeneratorType) new SpongeWorldTypeNether());
         this.generatorTypeMappings.put("overworld", (GeneratorType) new SpongeWorldTypeOverworld());
-
-
     }
 
     @AdditionalRegistration
