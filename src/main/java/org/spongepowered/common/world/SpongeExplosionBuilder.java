@@ -41,6 +41,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private Vector3d origin;
     private boolean canCauseFire;
     private boolean shouldBreakBlocks;
+    private boolean shouldSmoke;
 
     public SpongeExplosionBuilder() {
         reset();
@@ -77,6 +78,12 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
+    public Explosion.Builder shouldPlaySmoke(boolean smoke) {
+        this.shouldSmoke = smoke;
+        return this;
+    }
+
+    @Override
     public Explosion.Builder shouldBreakBlocks(boolean destroy) {
         this.shouldBreakBlocks = destroy;
         return this;
@@ -90,6 +97,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.origin = null;
         this.canCauseFire = false;
         this.shouldBreakBlocks = false;
+        this.shouldSmoke = false;
         return this;
     }
 
@@ -99,8 +107,10 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         checkState(this.world != null, "World is null!");
         checkState(this.origin != null, "Origin is null!");
 
-        return (Explosion) new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
+        final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
                 (Entity) this.sourceExplosive, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
                 this.canCauseFire, this.shouldBreakBlocks);
+        explosion.isSmoking = this.shouldSmoke;
+        return (Explosion) explosion;
     }
 }

@@ -35,7 +35,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,18 +69,8 @@ public abstract class MixinExplosion implements Explosion {
     }
 
     @Override
-    public void setWorld(World world) {
-        this.worldObj = (net.minecraft.world.World) world;
-    }
-
-    @Override
     public Optional<Explosive> getSourceExplosive() {
         return Optional.ofNullable((Explosive) this.exploder);
-    }
-
-    @Override
-    public void setSourceExplosive(Explosive source) {
-        this.exploder = (Entity) source;
     }
 
     @Override
@@ -90,22 +79,8 @@ public abstract class MixinExplosion implements Explosion {
     }
 
     @Override
-    public void setRadius(float radius) {
-        this.explosionSize = radius;
-    }
-
-    @Override
     public Vector3d getOrigin() {
         return this.origin;
-    }
-
-    @Override
-    public void setOrigin(Vector3d origin) {
-        this.position = VecHelper.toVector(origin);
-        this.origin = origin;
-        this.explosionX = origin.getX();
-        this.explosionY = origin.getY();
-        this.explosionZ = origin.getZ();
     }
 
     @Override
@@ -114,18 +89,13 @@ public abstract class MixinExplosion implements Explosion {
     }
 
     @Override
-    public void canCauseFire(boolean fire) {
-        this.isFlaming = fire;
-    }
-
-    @Override
-    public boolean shouldBreakBlocks() {
+    public boolean shouldPlaySmoke() {
         return this.isSmoking;
     }
 
     @Override
-    public void shouldBreakBlocks(boolean destroy) {
-        this.isSmoking = destroy;
+    public boolean shouldBreakBlocks() {
+        return this.isSmoking; // TODO this needs to be fixed.
     }
 
 }
