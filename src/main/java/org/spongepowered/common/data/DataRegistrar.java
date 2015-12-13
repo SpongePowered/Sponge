@@ -541,6 +541,14 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, moistureDataProcessor);
 
+        final AggressiveDataProcessor aggressiveDataProcessor = new AggressiveDataProcessor();
+        dataManager.registerDataProcessorAndImpl(AggressiveData.class, SpongeAggressiveData.class, ImmutableAggressiveData.class, 
+                ImmutableSpongeAggressiveData.class, aggressiveDataProcessor);
+
+        final AngerableDataProcessor angerableDataProcessor = new AngerableDataProcessor();
+        dataManager.registerDataProcessorAndImpl(AngerableData.class, SpongeAngerableData.class, ImmutableAngerableData.class, 
+                ImmutableSpongeAngerableData.class, angerableDataProcessor);
+
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -679,6 +687,8 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
         dataManager.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
         dataManager.registerValueProcessor(Keys.MOISTURE, new MoistureValueProcessor());
+        dataManager.registerValueProcessor(Keys.ANGRY, new AngryValueProcessor());
+        dataManager.registerValueProcessor(Keys.ANGER, new AngerValueProcessor());
 
         // Dual Processors
         final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();
