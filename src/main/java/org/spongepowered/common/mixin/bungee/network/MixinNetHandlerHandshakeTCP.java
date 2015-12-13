@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.bungee.network;
 import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
 import com.mojang.util.UUIDTypeAdapter;
+import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.server.S00PacketDisconnect;
@@ -49,9 +50,9 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
     @Shadow private NetworkManager networkManager;
 
-    @Inject(method = "processHandshake", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/NetworkManager;setNetHandler(Lnet/minecraft/network/INetHandler;)V", ordinal = 0), cancellable = true)
-    public void onProcessHandshakeEnd(C00Handshake packetIn, CallbackInfo ci) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()) {
+    @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
+    public void onProcessHandshakeStart(C00Handshake packetIn, CallbackInfo ci) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(EnumConnectionState.LOGIN)) {
             String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
@@ -59,16 +60,15 @@ public abstract class MixinNetHandlerHandshakeTCP {
                 ((IMixinNetworkManager) this.networkManager).setRemoteAddress(new InetSocketAddress(split[1],
                         ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
                 ((IMixinNetworkManager) this.networkManager).setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
+
+                if (split.length == 4) {
+                    ((IMixinNetworkManager) this.networkManager).setSpoofedProfile(gson.fromJson(split[3], Property[].class));
+                }
             } else {
                 ChatComponentText chatcomponenttext =
                         new ChatComponentText("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
                 this.networkManager.sendPacket(new S00PacketDisconnect(chatcomponenttext));
                 this.networkManager.closeChannel(chatcomponenttext);
-                return;
-            }
-
-            if (split.length == 4) {
-                ((IMixinNetworkManager) this.networkManager).setSpoofedProfile(gson.fromJson(split[3], Property[].class));
             }
         }
     }
