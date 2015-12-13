@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.interfaces;
 
+import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.entity.living.player.User;
+
+import javax.annotation.Nullable;
 
 public interface IMixinEntityPlayerMP {
 
@@ -33,5 +36,7 @@ public interface IMixinEntityPlayerMP {
     boolean usesCustomClient();
 
     User getUserObject();
+    
+    void setVelocityOverride(@Nullable Vector3d velocity);
 
 }

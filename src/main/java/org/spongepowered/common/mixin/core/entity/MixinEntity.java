@@ -117,6 +117,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public double motionX;
     @Shadow public double motionY;
     @Shadow public double motionZ;
+    @Shadow public boolean velocityChanged;
     @Shadow public double prevPosX;
     @Shadow public double prevPosY;
     @Shadow public double prevPosZ;
@@ -849,5 +850,18 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             getSpongeData().getCompoundTag(nbtKey).setLong("uuid_least", uuid.getLeastSignificantBits());
             getSpongeData().getCompoundTag(nbtKey).setLong("uuid_most", uuid.getMostSignificantBits());
         }
+    }
+    
+    @Override
+    public Vector3d getVelocity() {
+        return new Vector3d(this.motionX, this.motionY, this.motionZ);
+    }
+    
+    @Override
+    public void setVelocity(Vector3d velocity) {
+        this.motionX = velocity.getX();
+        this.motionY = velocity.getY();
+        this.motionZ = velocity.getZ();
+        this.velocityChanged = true;
     }
 }

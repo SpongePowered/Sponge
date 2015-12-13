@@ -93,6 +93,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
@@ -309,6 +310,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 // Correct the new rotation to match the old rotation
                 torot = fromrot;
             }
+            
+            ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(to.getPosition().sub(from.getPosition()));
 
             double deltaSquared = to.getPosition().distanceSquared(from.getPosition());
             double deltaAngleSquared = fromrot.distanceSquared(torot);
@@ -324,15 +327,18 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 if (event.isCancelled()) {
                     player.setTransform(fromTransform);
                     this.lastMoveLocation = from;
+                    ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
                     ci.cancel();
                 } else if (!event.getToTransform().equals(toTransform)) {
                     player.setTransform(event.getToTransform());
                     this.lastMoveLocation = event.getToTransform().getLocation();
+                    ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
                     ci.cancel();
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {
                     this.lastMoveLocation = player.getLocation();
                     // Prevent teleports during the move event from causing odd behaviors
                     this.justTeleported = false;
+                    ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
                     ci.cancel();
                 } else {
                     this.lastMoveLocation = event.getToTransform().getLocation();

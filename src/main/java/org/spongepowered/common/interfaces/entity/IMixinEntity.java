@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.entity;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -76,5 +77,9 @@ public interface IMixinEntity {
      * @param compound The SpongeData compound to write to
      */
     void writeToNbt(NBTTagCompound compound);
+    
+    Vector3d getVelocity();
+    
+    void setVelocity(Vector3d velocity);
 
 }

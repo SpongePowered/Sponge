@@ -32,9 +32,9 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.processor.data.entity.VelocityDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
@@ -51,17 +51,13 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Entity,
 
     @Override
     protected boolean set(Entity container, Vector3d value) {
-        container.motionX = value.getX();
-        container.motionY = value.getY();
-        container.motionZ = value.getZ();
-        container.velocityChanged = true;
+        ((IMixinEntity) container).setVelocity(value);
         return true;
     }
 
     @Override
     protected Optional<Vector3d> getVal(Entity container) {
-        final double velY = container.motionY == VelocityDataProcessor.ENTITY_REST_Y_VEL ? 0 : container.motionY;
-        return Optional.of(new Vector3d(container.motionX, velY, container.motionZ));
+        return Optional.of(((IMixinEntity) container).getVelocity());
     }
 
     @Override
