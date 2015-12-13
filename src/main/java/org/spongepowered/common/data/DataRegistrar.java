@@ -789,10 +789,6 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
                                                   ImmutableSpongeFallingBlockData.class, fallingBlockDataProcessor);
 
-        final TradeOfferDataProcessor tradeOfferDataProcessor = new TradeOfferDataProcessor();
-        dataManager.registerDataProcessorAndImpl(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
-                ImmutableSpongeTradeOfferData.class, tradeOfferDataProcessor);
-
         final SkeletonDataProcessor skeletonDataProcessor = new SkeletonDataProcessor();
         dataManager.registerDataProcessorAndImpl(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class,
                 ImmutableSpongeSkeletonData.class, skeletonDataProcessor);
@@ -1026,6 +1022,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(AffectsSpawningData.class, SpongeAffectsSpawningData.class, ImmutableAffectsSpawningData.class,
             ImmutableSpongeAffectsSpawningData.class, affectsSpawningDataProcessor);
         dataManager.registerValueProcessor(Keys.AFFECTS_SPAWNING, affectsSpawningDataProcessor);
+
+        final TradeOfferDataProcessor tradeOfferDataProcessor = new TradeOfferDataProcessor();
+        dataManager.registerDataProcessorAndImpl(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
+                ImmutableSpongeTradeOfferData.class, tradeOfferDataProcessor);
+        dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDataProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
