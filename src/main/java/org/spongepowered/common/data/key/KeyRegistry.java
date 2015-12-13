@@ -267,6 +267,7 @@ public class KeyRegistry {
         keyMap.put("angry", makeSingleKey(Boolean.class, Value.class, of("Angry")));
         keyMap.put("anger", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Anger")));
         keyMap.put("rotation", makeSingleKey(Rotation.class, Value.class, of("Rotation")));
+        keyMap.put("affects_spawning", makeSingleKey(Boolean.class, Value.class, of("AffectsSpawning")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

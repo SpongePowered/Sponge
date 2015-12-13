@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -39,6 +40,8 @@ import org.spongepowered.common.config.SpongeConfig;
 
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public interface IMixinWorld {
 
@@ -99,5 +102,13 @@ public interface IMixinWorld {
     void setWeatherStartTime(long weatherStartTime);
 
     void notifyBlockOfStateChange(BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos);
+
+    @Nullable
+    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double distance);
+
+    @Nullable
+    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+
+    boolean isAnyPlayerWithinRangeAtWhoAffectsSpawning(double x, double y, double z, double range);
 
 }
