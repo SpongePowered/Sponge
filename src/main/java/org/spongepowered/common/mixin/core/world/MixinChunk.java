@@ -38,6 +38,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ClassInheritanceMultiMap;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -115,6 +117,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow private World worldObj;
     @Shadow public int xPosition;
     @Shadow public int zPosition;
+    @Shadow private long inhabitedTime;
     @Shadow private boolean isChunkLoaded;
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
@@ -183,6 +186,34 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         return chunk != null;
+    }
+
+    @Override
+    public int getInhabittedTime() {
+        return (int) this.inhabitedTime;
+    }
+
+    @Override
+    public double getRegionalDifficultyFactor() {
+        final boolean flag = this.worldObj.getDifficulty() == EnumDifficulty.HARD;
+        float moon = this.worldObj.getCurrentMoonPhaseFactor();
+        float f2 = MathHelper.clamp_float(((float)this.worldObj.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        float f3 = 0.0F;
+        f3 += MathHelper.clamp_float((float)this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
+        f3 += MathHelper.clamp_float(moon * 0.25F, 0.0F, f2);
+        return f3;
+    }
+
+    @Override
+    public double getRegionalDifficultyPercentage() {
+        final double region = getRegionalDifficultyFactor();
+        if (region < 2) {
+            return 0;
+        } else if (region > 4) {
+            return 1.0;
+        } else {
+            return (region - 2.0)/ 2.0;
+        }
     }
 
     @Override
