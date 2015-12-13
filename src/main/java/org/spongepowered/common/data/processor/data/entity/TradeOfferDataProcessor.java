@@ -89,6 +89,6 @@ public class TradeOfferDataProcessor
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 }
