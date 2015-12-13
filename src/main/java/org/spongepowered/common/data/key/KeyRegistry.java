@@ -254,7 +254,6 @@ public class KeyRegistry {
         keyMap.put("delay", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Delay")));
         keyMap.put("player_created", makeSingleKey(Boolean.class, Value.class, of("PlayerCreated")));
         keyMap.put("item_blockstate", makeSingleKey(BlockState.class, Value.class, of("ItemBlockState")));
-        keyMap.put("trade_offers", makeListKey(TradeOffer.class, of("TradeOffers")));
         keyMap.put("skeleton_type", makeSingleKey(SkeletonType.class, Value.class, of("SkeletonType")));
         keyMap.put("ocelot_type", makeSingleKey(OcelotType.class, Value.class, of("OcelotType")));
         keyMap.put("rabbit_type", makeSingleKey(RabbitType.class, Value.class, of("RabbitType")));
@@ -270,7 +269,6 @@ public class KeyRegistry {
         keyMap.put("rotation", makeSingleKey(Rotation.class, Value.class, of("Rotation")));
         keyMap.put("is_splash_potion", makeSingleKey(Boolean.class, Value.class, of("IsSplashPotion")));
         keyMap.put("affects_spawning", makeSingleKey(Boolean.class, Value.class, of("AffectsSpawning")));
-        keyMap.put("trade_offers", makeListKey(TradeOffer.class, of("TradeOffers")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
