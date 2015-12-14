@@ -185,6 +185,7 @@ import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -194,6 +195,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinWorld;
+import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -270,7 +272,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean keepSpawnLoaded;
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
-    public SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
+    public SpongeConfig<WorldConfig> worldConfig;
     @Nullable private volatile Context worldContext;
     private ImmutableList<Populator> populators;
     private ImmutableList<GeneratorPopulator> generatorPopulators;
@@ -334,12 +336,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
                                             : DimensionRegistryModule.getInstance().getWorldFolder(providerIn.getDimensionId())))
                                     .resolve("world.conf"),
                             SpongeImpl.ECOSYSTEM_ID);
+            ((IMixinWorldInfo) info).setWorldConfig(this.worldConfig.getConfig());
+            this.keepSpawnLoaded = ((WorldProperties) info).doesKeepSpawnLoaded();
         }
 
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             this.worldBorder.addListener(new PlayerBorderListener());
         }
-        this.keepSpawnLoaded = ((WorldProperties) info).doesKeepSpawnLoaded();
+
         // Turn on capturing
         this.captureBlocks = true;
         this.captureEntitySpawns = true;

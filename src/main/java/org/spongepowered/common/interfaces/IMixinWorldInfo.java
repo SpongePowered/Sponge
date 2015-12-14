@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -44,6 +45,8 @@ public interface IMixinWorldInfo {
 
     boolean getIsMod();
 
+    WorldConfig getWorldConfig();
+
     void setDimensionId(int id);
 
     void setSpongeRootLevelNBT(NBTTagCompound nbt);
@@ -59,4 +62,6 @@ public interface IMixinWorldInfo {
     void readSpongeNbt(NBTTagCompound spongeNbt);
 
     void setIsMod(boolean isMod);
+
+    void setWorldConfig(WorldConfig config);
 }

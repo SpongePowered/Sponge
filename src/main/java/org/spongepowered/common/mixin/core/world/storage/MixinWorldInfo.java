@@ -63,10 +63,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.util.persistence.NbtTranslator;
+import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
 import java.util.ArrayList;
@@ -83,10 +85,7 @@ import java.util.UUID;
 public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo {
 
     private UUID uuid;
-    private boolean worldEnabled;
     private DimensionType dimensionType;
-    private boolean loadOnStartup;
-    private boolean keepSpawnLoaded;
     private boolean isMod;
     private ImmutableCollection<String> generatorModifiers;
     private NBTTagCompound spongeRootLevelNbt;
@@ -95,6 +94,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
+    private WorldConfig worldConfig;
 
     @Shadow private long randomSeed;
     @Shadow private WorldType terrainType;
@@ -136,7 +136,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
-        this.worldEnabled = true;
         this.spongeRootLevelNbt = new NBTTagCompound();
         this.spongeNbt = new NBTTagCompound();
         this.playerUniqueIdNbt = new NBTTagList();
@@ -163,10 +162,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         onConstruction(ci);
 
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
-        this.worldEnabled = info.worldEnabled;
         this.dimensionType = info.dimensionType;
-        this.loadOnStartup = info.loadOnStartup;
-        this.keepSpawnLoaded = info.keepSpawnLoaded;
         this.isMod = info.isMod;
         this.generatorModifiers = info.generatorModifiers;
     }
@@ -451,32 +447,41 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean isEnabled() {
-        return this.worldEnabled;
+        if (!this.worldConfig.isConfigEnabled()) {
+            return DimensionManager.getWorldFromDimId(this.dimension) != null;
+        }
+        return this.worldConfig.getWorld().isWorldEnabled();
     }
 
     @Override
-    public void setEnabled(boolean state) {
-        this.worldEnabled = state;
+    public void setEnabled(boolean enabled) {
+        this.worldConfig.getWorld().setWorldEnabled(enabled);
     }
 
     @Override
     public boolean loadOnStartup() {
-        return this.loadOnStartup;
+        if (!this.worldConfig.isConfigEnabled()) {
+            return DimensionManager.isDimensionRegistered(this.dimension);
+        }
+        return this.worldConfig.getWorld().loadOnStartup();
     }
 
     @Override
     public void setLoadOnStartup(boolean state) {
-        this.loadOnStartup = state;
+        this.worldConfig.getWorld().setLoadOnStartup(state);
     }
 
     @Override
     public boolean doesKeepSpawnLoaded() {
-        return this.keepSpawnLoaded;
+        if (!this.worldConfig.isConfigEnabled()) {
+            return DimensionManager.shouldLoadSpawn(this.dimension);
+        }
+        return this.worldConfig.getWorld().getKeepSpawnLoaded();
     }
 
     @Override
-    public void setKeepSpawnLoaded(boolean state) {
-        this.keepSpawnLoaded = state;
+    public void setKeepSpawnLoaded(boolean loaded) {
+        this.worldConfig.getWorld().setKeepSpawnLoaded(loaded);
     }
 
     @Override
@@ -492,6 +497,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean getIsMod() {
         return this.isMod;
+    }
+
+    @Override
+    public WorldConfig getWorldConfig() {
+        return this.worldConfig;
+    }
+
+    @Override
+    public void setWorldConfig(WorldConfig config) {
+        this.worldConfig = config;
     }
 
     @Override
@@ -590,12 +605,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public void readSpongeNbt(NBTTagCompound nbt) {
         this.dimension = nbt.getInteger("dimensionId");
         this.uuid = new UUID(nbt.getLong("uuid_most"), nbt.getLong("uuid_least"));
-        this.worldEnabled = nbt.getBoolean("enabled");
-        this.keepSpawnLoaded = nbt.getBoolean("keepSpawnLoaded");
-        this.loadOnStartup = nbt.getBoolean("loadOnStartup");
         this.isMod = nbt.getBoolean("isMod");
         for (DimensionType type : DimensionRegistryModule.getInstance().dimensionClassMappings.values()) {
-            if (type.getDimensionClass().getCanonicalName().equalsIgnoreCase(nbt.getString("dimensionType"))) {
+            if (type.getId().equalsIgnoreCase(nbt.getString("dimensionType"))) {
                 this.dimensionType = type;
             }
         }
@@ -622,15 +634,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         }
         this.spongeNbt.setInteger("dimensionId", this.dimension);
         if (this.dimensionType != null) {
-            this.spongeNbt.setString("dimensionType", this.dimensionType.getDimensionClass().getName());
+            this.spongeNbt.setString("dimensionType", this.dimensionType.getId());
         }
         if (this.uuid != null) {
             this.spongeNbt.setLong("uuid_most", this.uuid.getMostSignificantBits());
             this.spongeNbt.setLong("uuid_least", this.uuid.getLeastSignificantBits());
         }
-        this.spongeNbt.setBoolean("enabled", this.worldEnabled);
-        this.spongeNbt.setBoolean("keepSpawnLoaded", this.keepSpawnLoaded);
-        this.spongeNbt.setBoolean("loadOnStartup", this.loadOnStartup);
+
         if (this.isMod) {
             this.spongeNbt.setBoolean("isMod", this.isMod);
         }

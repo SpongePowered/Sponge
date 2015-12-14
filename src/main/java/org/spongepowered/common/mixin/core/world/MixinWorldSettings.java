@@ -51,6 +51,7 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     private boolean worldEnabled;
     private boolean loadOnStartup;
     private boolean keepSpawnLoaded;
+    private boolean pvpEnabled;
     private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
     // internal use only
     private int dimId;
@@ -153,6 +154,16 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     @Override
     public void setKeepSpawnLoaded(boolean keepSpawnLoaded) {
         this.keepSpawnLoaded = keepSpawnLoaded;
+    }
+
+    @Override
+    public boolean isPVPEnabled() {
+        return this.pvpEnabled;
+    }
+
+    @Override
+    public void setPVPEnabled(boolean enabled) {
+        this.pvpEnabled = enabled;
     }
 
     @Override

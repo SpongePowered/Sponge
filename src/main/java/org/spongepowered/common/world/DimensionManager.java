@@ -96,13 +96,13 @@ public class DimensionManager {
         String worldType;
         switch (id) {
             case -1:
-                worldType = "NETHER";
+                worldType = "nether";
                 break;
             case 0:
-                worldType = "OVERWORLD";
+                worldType = "overworld";
                 break;
             case 1:
-                worldType = "END";
+                worldType = "the_end";
                 break;
             default: // modded
                 worldType = provider.getSimpleName().toLowerCase();
@@ -308,7 +308,7 @@ public class DimensionManager {
         if (!((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
             if (((Dimension) worldserver.provider).getType().equals(DimensionTypes.NETHER)) {
                 dim = -1;
-            } else if (((Dimension) worldserver.provider).getType().equals(DimensionTypes.END)) {
+            } else if (((Dimension) worldserver.provider).getType().equals(DimensionTypes.THE_END)) {
                 dim = 1;
             } else {
                 dim = 0;

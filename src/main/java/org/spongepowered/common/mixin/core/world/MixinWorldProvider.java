@@ -82,7 +82,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     }
 
     public boolean canCoordinateBeSpawn(int x, int z) {
-        if (this.terrainType.equals(GeneratorTypes.END)) {
+        if (this.terrainType.equals(GeneratorTypes.THE_END)) {
             return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
         }
         else {

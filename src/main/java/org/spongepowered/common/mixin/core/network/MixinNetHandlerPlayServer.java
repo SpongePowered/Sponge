@@ -484,6 +484,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
     public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
+        if (entityIn instanceof Player && !((World) player.worldObj).getProperties().isPVPEnabled()) {
+            return; // PVP is disabled, ignore
+        }
+
         InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(SpongeImpl.getGame(),
             Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);

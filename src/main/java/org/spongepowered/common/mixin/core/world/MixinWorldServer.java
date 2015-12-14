@@ -86,7 +86,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
-        if (generatorType != null && generatorType.equals(GeneratorTypes.END)) {
+        if (generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) {
             this.worldInfo.setSpawn(new BlockPos(55, 60, 0));
             ci.cancel();
         }

@@ -158,7 +158,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
 
         if (world.getWorldType() == WorldType.FLAT) {
             spawnHeight = 4;
-        } else if (world.getWorldType() == GeneratorTypes.END) {
+        } else if (world.getWorldType() == GeneratorTypes.THE_END) {
             spawnHeight = 50;
         }
         return spawnHeight;

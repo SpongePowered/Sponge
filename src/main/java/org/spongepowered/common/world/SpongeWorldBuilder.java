@@ -65,6 +65,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
     private boolean loadOnStartup;
     private boolean keepSpawnLoaded;
     private boolean isMod;
+    private boolean pvpEnabled;
     private int dimensionId; // internal use only
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
@@ -85,6 +86,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
         this.worldEnabled = settings.isEnabled();
         this.loadOnStartup = settings.loadOnStartup();
         this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
+        this.pvpEnabled = settings.isPVPEnabled();
     }
 
     public SpongeWorldBuilder(WorldProperties properties) {
@@ -99,6 +101,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
         this.worldEnabled = properties.isEnabled();
         this.loadOnStartup = properties.loadOnStartup();
         this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        this.pvpEnabled = properties.isPVPEnabled();
     }
 
     @Override
@@ -114,6 +117,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
         this.worldEnabled = settings.isEnabled();
         this.loadOnStartup = settings.loadOnStartup();
         this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
+        this.pvpEnabled = settings.isPVPEnabled();
         return this;
     }
 
@@ -130,6 +134,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
         this.worldEnabled = properties.isEnabled();
         this.loadOnStartup = properties.loadOnStartup();
         this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        this.pvpEnabled = properties.isPVPEnabled();
         return this;
     }
 
@@ -224,6 +229,12 @@ public class SpongeWorldBuilder implements WorldBuilder {
     }
 
     @Override
+    public WorldBuilder pvpEnabled(boolean enabled) {
+        this.pvpEnabled = enabled;
+        return this;
+    }
+
+    @Override
     public Optional<World> build() throws IllegalStateException {
         final WorldCreationSettings settings = buildSettings();
         ((Server) MinecraftServer.getServer()).createWorld(settings);
@@ -246,6 +257,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
             ((IMixinWorldSettings) (Object) settings).setDimensionId(this.dimensionId);
             ((IMixinWorldSettings) (Object) settings).setIsMod(this.isMod);
         }
+        ((IMixinWorldSettings) (Object) settings).setPVPEnabled(this.pvpEnabled);
         return (WorldCreationSettings) (Object) settings;
     }
 
@@ -265,6 +277,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
         this.generatorModifiers = ImmutableList.of();
         this.dimensionId = 0;
         this.isMod = false;
+        this.pvpEnabled = true;
         return this;
     }
 

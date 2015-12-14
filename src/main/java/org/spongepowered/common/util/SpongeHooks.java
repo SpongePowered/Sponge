@@ -54,6 +54,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfig.DimensionConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -67,6 +68,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
@@ -401,6 +403,21 @@ public class SpongeHooks {
         } else {
             return SpongeImpl.getGlobalConfig();
         }
+    }
+
+    public static SpongeConfig<?> getActiveConfig(String dimFolder, String worldFolder) {
+        Path configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimFolder).resolve(worldFolder).resolve("world.conf");
+        Path configPath2 = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimFolder).resolve("dimension.conf");
+        SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, configPath, SpongeImpl.ECOSYSTEM_ID);
+        SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, configPath2, SpongeImpl.ECOSYSTEM_ID);
+        if (worldConfig != null && dimConfig != null) {
+            if (worldConfig.getConfig().isConfigEnabled()) {
+                return worldConfig;
+            } else if (dimConfig.getConfig().isConfigEnabled()) {
+                return dimConfig;
+            } 
+        }
+        return SpongeImpl.getGlobalConfig();
     }
 
     public static void setBlockState(World world, int x, int y, int z, BlockState state) {

@@ -32,6 +32,10 @@ import java.util.Collection;
 
 public interface IMixinWorldSettings {
 
+    int getDimensionId();
+
+    boolean getIsMod();
+
     void setDimensionType(DimensionType type);
 
     void setGeneratorSettings(DataContainer generatorSettings);
@@ -46,9 +50,7 @@ public interface IMixinWorldSettings {
 
     void setDimensionId(int id);
 
-    int getDimensionId();
-
     void setIsMod(boolean isMod);
 
-    boolean getIsMod();
+    void setPVPEnabled(boolean enabled);
 }
