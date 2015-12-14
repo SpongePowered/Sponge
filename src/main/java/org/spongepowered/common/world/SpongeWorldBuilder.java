@@ -229,7 +229,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
     }
 
     @Override
-    public WorldBuilder pvpEnabled(boolean enabled) {
+    public WorldBuilder pvp(boolean enabled) {
         this.pvpEnabled = enabled;
         return this;
     }
