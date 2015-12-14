@@ -485,6 +485,20 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public boolean isPVPEnabled() {
+        if (!this.worldConfig.isConfigEnabled()) {
+            return true;
+        }
+
+        return this.worldConfig.getWorld().getPVPEnabled();
+    }
+
+    @Override
+    public void setPVPEnabled(boolean enabled) {
+        this.worldConfig.getWorld().setPVPEnabled(enabled);
+    }
+
+    @Override
     public void setUUID(UUID uuid) {
         this.uuid = uuid;
     }
