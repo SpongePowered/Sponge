@@ -24,14 +24,18 @@
  */
 package org.spongepowered.common.config;
 
+import com.google.inject.Injector;
+import ninja.leaping.configurate.objectmapping.DefaultObjectMapperFactory;
+import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
+import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.plugin.SpongePluginContainer;
 
 import java.util.Optional;
-
 import javax.inject.Inject;
 
 /**
@@ -66,13 +70,22 @@ public class SpongeConfigManager implements ConfigManager {
 
     public static ConfigRoot getSharedRoot(PluginContainer container) {
         final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(name, SpongeImpl.getConfigDir());
-
+        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeImpl.getConfigDir());
     }
 
     public static ConfigRoot getPrivateRoot(PluginContainer container) {
         final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(name, SpongeImpl.getConfigDir().resolve(name));
+        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeImpl.getConfigDir().resolve(name));
+    }
+
+    private static ObjectMapperFactory getMapperFactory(PluginContainer container) {
+        if (container instanceof SpongePluginContainer) {
+            Injector injector = ((SpongePluginContainer) container).getInjector();
+            if (injector != null) {
+                return injector.getInstance(GuiceObjectMapperFactory.class);
+            }
+        }
+        return DefaultObjectMapperFactory.getInstance();
     }
 
 }

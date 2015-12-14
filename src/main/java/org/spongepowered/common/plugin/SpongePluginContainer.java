@@ -25,6 +25,8 @@
 package org.spongepowered.common.plugin;
 
 import com.google.common.base.Objects;
+import com.google.inject.Injector;
+import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import org.spongepowered.api.plugin.PluginContainer;
 
 public abstract class SpongePluginContainer implements PluginContainer {
@@ -41,4 +43,5 @@ public abstract class SpongePluginContainer implements PluginContainer {
                 .toString();
     }
 
+    public abstract Injector getInjector();
 }

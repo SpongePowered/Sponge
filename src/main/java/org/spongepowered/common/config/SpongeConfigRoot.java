@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.config;
 
+import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.SpongeImpl;
 
@@ -38,10 +40,12 @@ import java.nio.file.Path;
  * Root for sponge configurations.
  */
 public class SpongeConfigRoot implements ConfigRoot {
+    private final ObjectMapperFactory mapperFactory;
     private final String pluginName;
     private final Path baseDir;
 
-    public SpongeConfigRoot(String pluginName, Path baseDir) {
+    public SpongeConfigRoot(ObjectMapperFactory mapperFactory, String pluginName, Path baseDir) {
+        this.mapperFactory = mapperFactory;
         this.pluginName = pluginName;
         this.baseDir = baseDir;
     }
@@ -61,6 +65,7 @@ public class SpongeConfigRoot implements ConfigRoot {
     public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
         return HoconConfigurationLoader.builder()
                 .setPath(getConfigPath())
+                .setDefaultOptions(ConfigurationOptions.defaults().setObjectMapperFactory(mapperFactory))
                 .build();
     }
 
