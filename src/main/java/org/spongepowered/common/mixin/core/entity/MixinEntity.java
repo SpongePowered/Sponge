@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -295,6 +296,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     public boolean setLocation(Location<World> location, boolean forced) {
+        checkNotNull(location, "The location was null!");
         if (isRemoved()) {
             return false;
         }
@@ -459,6 +461,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public void setTransform(Transform<World> transform) {
+        checkNotNull(transform, "The transform cannot be null!");
         setLocation(transform.getLocation());
         setRotation(transform.getRotation());
         setScale(transform.getScale());
@@ -466,6 +469,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public boolean transferToWorld(String worldName, Vector3d position) {
+        checkNotNull(worldName, "World name was null!");
+        checkNotNull(position, "Position was null!");
         Optional<WorldProperties> props = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
         if (props.isPresent()) {
             if (props.get().isEnabled()) {
@@ -481,6 +486,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public boolean transferToWorld(UUID uuid, Vector3d position) {
+        checkNotNull(uuid, "The world uuid cannot be null!");
+        checkNotNull(position, "The position cannot be null!");
         return transferToWorld(DimensionRegistryModule.getInstance().getWorldFolder(uuid), position);
     }
 
@@ -491,6 +498,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public void setRotation(Vector3d rotation) {
+        checkNotNull(rotation, "Rotation was null!");
         if (((Entity) this) instanceof EntityPlayerMP) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),

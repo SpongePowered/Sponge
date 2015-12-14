@@ -288,6 +288,9 @@ public final class NbtDataUtil {
             final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
             final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+            if (enchantment == null) {
+                continue;
+            }
             enchantments.add(new ItemEnchantment(enchantment, level));
         }
         return enchantments;
