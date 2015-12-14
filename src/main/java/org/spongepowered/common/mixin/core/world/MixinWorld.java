@@ -39,7 +39,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityHanging;
@@ -208,6 +207,7 @@ import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.SpongeChunkPreGenerate;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
@@ -1689,6 +1689,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public WorldBorder getWorldBorder() {
         return (WorldBorder) shadow$getWorldBorder();
+    }
+
+    @Override
+    public WorldBorder.ChunkPreGenerate newChunkPreGenerate(Vector3d center, double diameter) {
+        return new SpongeChunkPreGenerate(this, center, diameter);
     }
 
     @Override
