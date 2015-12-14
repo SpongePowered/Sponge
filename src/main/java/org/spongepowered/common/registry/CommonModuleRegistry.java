@@ -104,6 +104,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
@@ -221,6 +222,7 @@ import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
@@ -300,6 +302,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
             .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new)
             .registerBuilderSupplier(BlockParticle.Builder.class, SpongeParticleEffectBuilder.BuilderBlock::new)
+            .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
             ;
     }
 
