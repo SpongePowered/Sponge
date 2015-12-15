@@ -27,6 +27,9 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.block.properties.PropertyHelper;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.util.Functional;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
@@ -34,14 +37,15 @@ import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import java.util.function.Predicate;
 
 @Mixin(value = PropertyHelper.class)
+@Implements(@Interface(iface = BlockTrait.class, prefix = "trait$"))
 public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
 
     protected String propertyName;
     protected String idString;
 
     @Shadow private String name;
-    @SuppressWarnings("rawtypes")
-    @Shadow private Class valueClass;
+    @Shadow(prefix = "shadow$")
+    public abstract Class<T> shadow$getValueClass();
 
     @Override
     public String getId() {
@@ -53,9 +57,9 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
         return this.name;
     }
 
-    @SuppressWarnings("unchecked")
-    public Class<T> getTraitValueClass() {
-        return this.valueClass;
+    @Intrinsic
+    public Class<T> trait$getValueClass() {
+        return this.shadow$getValueClass();
     }
 
     @Override
