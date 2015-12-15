@@ -1,0 +1,87 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.data.processor.value.tileentity;
+
+import net.minecraft.potion.Potion;
+import net.minecraft.tileentity.TileEntityBeacon;
+import org.spongepowered.api.data.DataTransactionBuilder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.potion.PotionEffectType;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
+import org.spongepowered.common.interfaces.tileentity.IMixinTileEntityBeacon;
+
+import java.util.Optional;
+
+public class BeaconSecondaryEffectValueProcessor extends AbstractSpongeValueProcessor<TileEntityBeacon, Optional<PotionEffectType>, OptionalValue<PotionEffectType>> {
+
+    public BeaconSecondaryEffectValueProcessor() {
+        super(TileEntityBeacon.class, Keys.BEACON_SECONDARY_EFFECT);
+    }
+
+    @Override
+    protected OptionalValue<PotionEffectType> constructValue(Optional<PotionEffectType> defaultValue) {
+        return new SpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, defaultValue);
+    }
+
+    @Override
+    protected boolean set(TileEntityBeacon container, Optional<PotionEffectType> value) {
+        ((IMixinTileEntityBeacon) container).setPrimaryEffect(((Potion) value.get()).getId());
+        return true;
+    }
+
+    @Override
+    protected Optional<Optional<PotionEffectType>> getVal(TileEntityBeacon container) {
+        return Optional.of(Optional.of((PotionEffectType) Potion.potionTypes[((IMixinTileEntityBeacon) container).getSecondaryEffect()]));
+    }
+
+    @Override
+    protected ImmutableValue<Optional<PotionEffectType>> constructImmutableValue(Optional<PotionEffectType> value) {
+        return new ImmutableSpongeValue<>(Keys.BEACON_SECONDARY_EFFECT, value);
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (container instanceof TileEntityBeacon) {
+            final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+            final Optional<Optional<PotionEffectType>> oldData = getValueFromContainer(container);
+            if (oldData.isPresent()) {
+                final ImmutableOptionalValue<PotionEffectType> effectType =
+                        new ImmutableSpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, oldData.get());
+                builder.replace(effectType);
+            }
+            ((IMixinTileEntityBeacon) container).setSecondaryEffect(-1);
+            return builder.result(DataTransactionResult.Type.SUCCESS).build();
+        }
+        return DataTransactionBuilder.failNoData();
+    }
+}
