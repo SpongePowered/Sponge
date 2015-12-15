@@ -28,14 +28,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Throwables;
 import net.minecraft.network.ServerStatusResponse;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -56,6 +61,11 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     private ServerStatusResponse.PlayerCountData playerBackup;
     private Favicon faviconHandle;
 
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onInit(CallbackInfo ci) {
+        setServerDescription(null);
+    }
+
     @Override
     public Text getDescription() {
         return this.description;
@@ -68,9 +78,14 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     }
 
     @Overwrite
-    public void setServerDescription(IChatComponent motd) {
-        this.serverMotd = checkNotNull(motd, "motd");
-        this.description = SpongeTexts.toText(motd);
+    public void setServerDescription(@Nullable IChatComponent motd) {
+        if (motd != null) {
+            this.serverMotd = motd;
+            this.description = SpongeTexts.toText(motd);
+        } else {
+            this.serverMotd = new ChatComponentText("");
+            this.description = Texts.of();
+        }
     }
 
     @Override

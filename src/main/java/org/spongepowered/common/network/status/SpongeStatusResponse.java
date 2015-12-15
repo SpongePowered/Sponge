@@ -86,14 +86,22 @@ public final class SpongeStatusResponse {
     }
 
     private static ServerStatusResponse.PlayerCountData clone(ServerStatusResponse.PlayerCountData original) {
-        ServerStatusResponse.PlayerCountData clone = new ServerStatusResponse.PlayerCountData(original.getMaxPlayers(),
-                original.getOnlinePlayerCount());
-        clone.setPlayers(original.getPlayers());
-        return clone;
+        if (original != null) {
+            ServerStatusResponse.PlayerCountData clone = new ServerStatusResponse.PlayerCountData(original.getMaxPlayers(),
+                    original.getOnlinePlayerCount());
+            clone.setPlayers(original.getPlayers());
+            return clone;
+        } else {
+            return null;
+        }
     }
 
     private static ServerStatusResponse.MinecraftProtocolVersionIdentifier clone(ServerStatusResponse.MinecraftProtocolVersionIdentifier original) {
-        return new ServerStatusResponse.MinecraftProtocolVersionIdentifier(original.getName(), original.getProtocol());
+        if (original != null) {
+            return new ServerStatusResponse.MinecraftProtocolVersionIdentifier(original.getName(), original.getProtocol());
+        } else {
+            return null;
+        }
     }
 
     private static String getFirstLine(String s) {

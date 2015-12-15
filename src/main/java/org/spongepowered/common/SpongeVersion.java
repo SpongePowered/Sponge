@@ -33,7 +33,7 @@ import java.util.Optional;
 public final class SpongeVersion {
 
     // TODO: Keep up to date
-    public static final MinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
 
     public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), SpongeImpl.API_NAME);
     public static final String API_VERSION = firstNonNull(getPackage().getSpecificationVersion(), "DEV");
