@@ -63,6 +63,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -73,7 +74,6 @@ import org.spongepowered.common.registry.util.RegistryModuleLoader;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.TopologicalOrder;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
@@ -195,13 +195,6 @@ public class SpongeGameRegistry implements GameRegistry {
         if (registryModule == null) {
             return Optional.empty();
         } else {
-            if (BlockType.class.isAssignableFrom(typeClass) || ItemType.class.isAssignableFrom(typeClass)
-                || EntityType.class.isAssignableFrom(typeClass)) {
-                if (!id.contains(":")) {
-                    id = "minecraft:" + id; // assume vanilla
-                }
-            }
-
             return registryModule.getById(id.toLowerCase());
         }
     }

@@ -31,6 +31,29 @@ import org.spongepowered.api.text.translation.Translation;
 
 public class SpongeEntityType implements EntityType {
 
+    public static final EntityType UNKNOWN = new EntityType() {
+
+        @Override
+        public Translation getTranslation() {
+            throw new UnsupportedOperationException("Unknown entity type has no translation");
+        }
+
+        @Override
+        public String getName() {
+            return "Unknown";
+        }
+
+        @Override
+        public String getId() {
+            return "unknown:unknown";
+        }
+
+        @Override
+        public Class<? extends org.spongepowered.api.entity.Entity> getEntityClass() {
+            throw new UnsupportedOperationException("Unknown entity type has no entity class");
+        }
+    };
+
     public final int entityTypeId;
     public final String entityName;
     public final String modId;
@@ -58,10 +81,6 @@ public class SpongeEntityType implements EntityType {
 
     @Override
     public String getName() {
-        return this.entityName;
-    }
-
-    public String getEntityName() {
         return this.entityName;
     }
 

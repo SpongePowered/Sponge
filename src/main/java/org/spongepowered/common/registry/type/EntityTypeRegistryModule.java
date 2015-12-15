@@ -141,7 +141,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("wolf", newEntityTypeFromName("Wolf"));
         this.entityTypeMappings.put("mushroom_cow", newEntityTypeFromName("MushroomCow"));
         this.entityTypeMappings.put("snowman", newEntityTypeFromName("SnowMan"));
-        this.entityTypeMappings.put("ocelot", newEntityTypeFromName("Ozelot"));
+        this.entityTypeMappings.put("ocelot", newEntityTypeFromName("Ocelot", "Ozelot"));
         this.entityTypeMappings.put("iron_golem", newEntityTypeFromName("VillagerGolem"));
         this.entityTypeMappings.put("horse", newEntityTypeFromName("EntityHorse"));
         this.entityTypeMappings.put("rabbit", newEntityTypeFromName("Rabbit"));
@@ -159,7 +159,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     @SuppressWarnings("unchecked")
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
         return new SpongeEntityType((Integer) EntityList.stringToIDMapping.get(mcName), spongeName,
-                                    (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName));
+                (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName));
     }
 
     private SpongeEntityType newEntityTypeFromName(String name) {
@@ -179,21 +179,17 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         registerDefaults();
         RegistryHelper.mapFields(EntityTypes.class, fieldName -> {
             if (fieldName.equals("UNKNOWN")) {
-                // TODO Something for Unknown?
-                return null;
+                return SpongeEntityType.UNKNOWN;
             }
             EntityType entityType = this.entityTypeMappings.get(fieldName.toLowerCase());
-            if (entityType == null) {
-                return entityType;
-            }
-            this.entityClassToTypeMappings
-                .put(((SpongeEntityType) entityType).entityClass, entityType);
+            this.entityClassToTypeMappings.put(((SpongeEntityType) entityType).entityClass, entityType);
             // remove old mapping
             this.entityTypeMappings.remove(fieldName.toLowerCase());
             // add new mapping with minecraft id
             this.entityTypeMappings.put(entityType.getId(), entityType);
             return entityType;
         });
+        this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
 
         RegistryHelper.mapFields(SkeletonTypes.class, SpongeEntityConstants.SKELETON_TYPES);
         RegistryHelper.mapFields(HorseColors.class, SpongeEntityConstants.HORSE_COLORS);
@@ -219,9 +215,11 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         return this.entityClassToTypeMappings.get(clazz);
     }
 
-    private EntityTypeRegistryModule() { }
+    private EntityTypeRegistryModule() {
+    }
 
     private static final class Holder {
+
         private static final EntityTypeRegistryModule INSTANCE = new EntityTypeRegistryModule();
     }
 
