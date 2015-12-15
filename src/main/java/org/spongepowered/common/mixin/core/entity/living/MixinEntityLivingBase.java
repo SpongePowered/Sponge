@@ -503,7 +503,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             }
             final Cause cause = DamageEventHandler.generateCauseFor(damageSource);
 
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getGame(), cause, originalFunctions,
+            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(cause, originalFunctions,
                          (Entity) this.nmsEntityLiving, originalDamage);
             Sponge.getEventManager().post(event);
             if (event.isCancelled()) {

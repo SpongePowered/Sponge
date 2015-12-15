@@ -233,7 +233,7 @@ public class ProjectileLauncher {
     }
 
     private static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile, Cause cause) {
-        LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(SpongeImpl.getGame(), cause, projectile);
+        LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(cause, projectile);
         SpongeImpl.getGame().getEventManager().post(event);
         if (!event.isCancelled() && extent.spawnEntity(projectile, cause)) {
             return Optional.of(projectile);

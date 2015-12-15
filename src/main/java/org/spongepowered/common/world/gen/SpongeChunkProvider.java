@@ -267,8 +267,8 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         List<Populator> populators = Lists.newArrayList(this.pop);
         populators.addAll(this.biomeSettings.get(biome).getPopulators());
         // Non-biome populators come after the biome populators
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(Sponge.getGame(), populateCause, populators, chunk));
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getGame(), populateCause, chunk));
+        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(populateCause, populators, chunk));
+        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, chunk));
 
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
@@ -289,7 +289,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         world.setProcessingCaptureCause(false);
 
         PopulateChunkEvent.Post event =
-                SpongeEventFactory.createPopulateChunkEventPost(SpongeImpl.getGame(), populateCause,
+                SpongeEventFactory.createPopulateChunkEventPost(populateCause,
                         ImmutableMap.copyOf(world.getCapturedPopulatorChanges()),
                         chunk);
         SpongeImpl.postEvent(event);

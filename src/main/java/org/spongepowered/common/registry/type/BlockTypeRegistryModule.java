@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -66,7 +67,7 @@ public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<
 
     @Override
     public Collection<BlockType> getAll() {
-        return ImmutableList.copyOf(this.blockTypeMappings.values());
+        return ImmutableSet.copyOf(this.blockTypeMappings.values());
     }
 
     @Override

@@ -450,30 +450,28 @@ public class SpongeHooks {
 
     public static String getFriendlyCauseName(Cause cause) {
         String causedBy = "Unknown";
-        if (cause.root().isPresent()) {
-            Object rootCause = cause.root().get();
-            if (rootCause instanceof User) {
-                User user = (User) rootCause;
-                causedBy = user.getName();
-            } else if (rootCause instanceof EntityItem) {
-                EntityItem item = (EntityItem) rootCause;
-                causedBy = item.getEntityItem().getDisplayName();
-            }
-            else if (rootCause instanceof Entity) {
-                Entity causeEntity = (Entity) rootCause;
-                causedBy = causeEntity.getCommandSenderName();
-            }else if (rootCause instanceof BlockSnapshot) {
-                BlockSnapshot snapshot = (BlockSnapshot) rootCause;
-                causedBy = snapshot.getState().getType().getId();
-            } else if (rootCause instanceof CatalogType) {
-                CatalogType type = (CatalogType) rootCause;
-                causedBy = type.getId();
-            } else if (rootCause instanceof PluginContainer) {
-                PluginContainer plugin = (PluginContainer) rootCause;
-                causedBy = plugin.getId();
-            } else {
-                causedBy = rootCause.getClass().getName();
-            }
+        Object rootCause = cause.root();
+        if (rootCause instanceof User) {
+            User user = (User) rootCause;
+            causedBy = user.getName();
+        } else if (rootCause instanceof EntityItem) {
+            EntityItem item = (EntityItem) rootCause;
+            causedBy = item.getEntityItem().getDisplayName();
+        }
+        else if (rootCause instanceof Entity) {
+            Entity causeEntity = (Entity) rootCause;
+            causedBy = causeEntity.getCommandSenderName();
+        }else if (rootCause instanceof BlockSnapshot) {
+            BlockSnapshot snapshot = (BlockSnapshot) rootCause;
+            causedBy = snapshot.getState().getType().getId();
+        } else if (rootCause instanceof CatalogType) {
+            CatalogType type = (CatalogType) rootCause;
+            causedBy = type.getId();
+        } else if (rootCause instanceof PluginContainer) {
+            PluginContainer plugin = (PluginContainer) rootCause;
+            causedBy = plugin.getId();
+        } else {
+            causedBy = rootCause.getClass().getName();
         }
         return causedBy;
     }

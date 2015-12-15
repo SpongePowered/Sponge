@@ -109,7 +109,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         )
     public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
         EntitySnapshot fishHookSnapshot = this.createSnapshot();
-        FishingEvent.HookEntity event = SpongeEventFactory.createFishingEventHookEntity(SpongeImpl.getGame(),
+        FishingEvent.HookEntity event = SpongeEventFactory.createFishingEventHookEntity(
             Cause.of(NamedCause.source(this.angler)), this.createSnapshot(), this, (Entity) entity);
         if (!SpongeImpl.postEvent(event)) {
             if (this.getShooter() instanceof Entity) {
@@ -157,7 +157,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             transaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
         }
 
-        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(SpongeImpl.getGame(), Cause.of(NamedCause.source(this.angler)), exp, exp,
+        FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), exp, exp,
             fishHookSnapshot, this, transaction, (Player) this.angler);
         if (!SpongeImpl.postEvent(event)) {
             // Sponge end

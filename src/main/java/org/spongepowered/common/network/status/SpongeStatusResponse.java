@@ -30,6 +30,8 @@ import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.api.network.status.StatusResponse;
@@ -61,7 +63,7 @@ public final class SpongeStatusResponse {
     }
 
     private static ServerStatusResponse call(ServerStatusResponse response, StatusClient client) {
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createClientPingServerEvent(client,
+        if (!SpongeImpl.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(NamedCause.source(client)), client,
                                                                                  (ClientPingServerEvent.Response) response))) {
             return response;
         } else {

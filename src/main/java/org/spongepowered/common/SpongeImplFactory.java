@@ -34,13 +34,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.Text;
@@ -58,20 +57,20 @@ import java.util.Iterator;
  */
 public class SpongeImplFactory {
 
-    public static LoadWorldEvent createLoadWorldEvent(Game game, World world) {
-        return SpongeEventFactory.createLoadWorldEvent(game, Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
+    public static LoadWorldEvent createLoadWorldEvent(World world) {
+        return SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
     }
 
-    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
-        return SpongeEventFactory.createClientConnectionEventJoin(game, cause, originalMessage, message, originalSink, sink, targetEntity);
+    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventJoin(cause, originalMessage, message, originalSink, sink, targetEntity);
     }
 
-    public static RespawnPlayerEvent createRespawnPlayerEvent(Game game, Cause cause, Transform<World> fromTransform, Transform<World> toTransform, Player targetEntity, boolean bedSpawn) {
-        return SpongeEventFactory.createRespawnPlayerEvent(game, cause, fromTransform, toTransform, targetEntity, bedSpawn);
+    public static RespawnPlayerEvent createRespawnPlayerEvent(Cause cause, Transform<World> fromTransform, Transform<World> toTransform, Player targetEntity, boolean bedSpawn) {
+        return SpongeEventFactory.createRespawnPlayerEvent(cause, fromTransform, toTransform, targetEntity, bedSpawn);
     }
 
-    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(Game game, Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
-        return SpongeEventFactory.createClientConnectionEventDisconnect(game, cause, originalMessage, message, originalSink, sink, targetEntity);
+    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventDisconnect(cause, originalMessage, message, originalSink, sink, targetEntity);
     }
 
     public static boolean blockHasTileEntity(Block block, IBlockState state) {

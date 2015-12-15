@@ -28,12 +28,14 @@ import com.google.common.base.Objects;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -116,8 +118,8 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     @Overwrite
     public void addTask(int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal) (Object) this);
-        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(SpongeImpl.getGame(), priority, priority, (Goal) (Object) this, (Agent)
-            this.owner, (AITask) base);
+        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(Sponge.getGame()), priority, priority,
+            (Goal) (Object) this, (Agent) this.owner, (AITask) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ((IMixinEntityAIBase) base).setGoal(null);
@@ -156,7 +158,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             final EntityAIBase otherAiBase = entityaitaskentry.action;
 
             if (otherAiBase.equals(aiBase)) {
-                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(SpongeImpl.getGame(),
+                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(Sponge.getGame()),
                     (Goal) (Object) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {

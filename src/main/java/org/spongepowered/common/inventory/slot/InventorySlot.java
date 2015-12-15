@@ -31,7 +31,6 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.transaction.InventoryTransactionBuilder;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
@@ -88,11 +87,11 @@ public interface InventorySlot extends org.spongepowered.api.item.inventory.Slot
         final net.minecraft.item.ItemStack passedNmsStack = (net.minecraft.item.ItemStack) stack;
         if (!(net.minecraft.item.ItemStack.areItemsEqual(nmsStack, passedNmsStack) &&
                 net.minecraft.item.ItemStack.areItemStackTagsEqual(nmsStack, passedNmsStack))) {
-            return InventoryTransactionBuilder.failNoTransactions();
+            return InventoryTransactionResult.failNoTransactions();
         }
         boolean canIncrease = getMaxStackSize() != nmsStack.stackSize;
         if (!canIncrease) {
-            return InventoryTransactionBuilder.failNoTransactions();
+            return InventoryTransactionResult.failNoTransactions();
         }
         int remaining = getMaxStackSize() - nmsStack.stackSize;
         int toBeOffered = stack.getQuantity();
@@ -105,7 +104,7 @@ public interface InventorySlot extends org.spongepowered.api.item.inventory.Slot
             stack.setQuantity(0);
         }
         getNMSInventory().markDirty();
-        return InventoryTransactionBuilder.successNoTransactions();
+        return InventoryTransactionResult.successNoTransactions();
     }
 
     @Override
@@ -114,7 +113,7 @@ public interface InventorySlot extends org.spongepowered.api.item.inventory.Slot
         if (stack.getQuantity() <= getMaxStackSize()) {
             getNMSInventory().setInventorySlotContents(getSlotNumber(), (net.minecraft.item.ItemStack) stack.copy());
         }
-        return InventoryTransactionBuilder.successNoTransactions();
+        return InventoryTransactionResult.successNoTransactions();
     }
 
     @Override

@@ -267,7 +267,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean chunkSpawnerRunning;
     public SpongeConfig<WorldConfig> worldConfig;
     @Nullable private volatile Context worldContext;
-    
+
     private SpongeChunkProvider spongegen;
 
     protected SpongeScoreboard spongeScoreboard = new SpongeScoreboard();
@@ -311,7 +311,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
-    
+
     private final net.minecraft.world.World nmsWorld = (net.minecraft.world.World)(Object) this;
 
     // @formatter:on
@@ -524,7 +524,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
 
-            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(SpongeImpl.getGame(), Cause.of(this), originalMessage, message, originalSink, sink, (Entity) entityIn);
+            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.of(NamedCause.source(this)), originalMessage, message,
+                originalSink, sink, (Entity) entityIn);
             SpongeImpl.getGame().getEventManager().post(event);
             Text returned = Texts.format(event.getMessage());
             if (returned != Texts.of()) {
@@ -668,11 +669,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (entityIn instanceof EntityItem) {
                     this.capturedEntityItems.add((Item) entityIn);
                     event =
-                            SpongeEventFactory.createDropItemEventCustom(SpongeImpl.getGame(), cause, (List<Entity>) (List<?>) this.capturedEntityItems,
+                            SpongeEventFactory.createDropItemEventCustom(cause, (List<Entity>) (List<?>) this.capturedEntityItems,
                                                                          entitySnapshotBuilder.build(), (World) (Object) this);
                 } else {
                     event =
-                            SpongeEventFactory.createSpawnEntityEventCustom(SpongeImpl.getGame(), cause, this.capturedEntities,
+                            SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
                                                                             entitySnapshotBuilder.build(), (World) (Object) this);
                 }
                 SpongeImpl.postEvent(event);
@@ -701,7 +702,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     @SuppressWarnings("unchecked")
     public void handlePostTickCaptures(Cause cause) {
-        if (this.isRemote || this.restoringBlocks || cause == null || cause.isEmpty()) {
+        if (this.isRemote || this.restoringBlocks || cause == null) {
             return;
         } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockBreaks.size() == 0
                 && this.capturedSpongeBlockModifications.size() == 0 && this.capturedSpongeBlockPlaces.size() == 0
@@ -782,13 +783,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     ChangeBlockEvent event = null;
 
                     if (captureType == CaptureType.BREAK) {
-                        event = SpongeEventFactory.createChangeBlockEventBreak(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
+                        event = SpongeEventFactory.createChangeBlockEventBreak(cause, (World) world, blockTransactions);
                     } else if (captureType == CaptureType.DECAY) {
-                        event = SpongeEventFactory.createChangeBlockEventDecay(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
+                        event = SpongeEventFactory.createChangeBlockEventDecay(cause, (World) world, blockTransactions);
                     } else if (captureType == CaptureType.MODIFY) {
-                        event = SpongeEventFactory.createChangeBlockEventModify(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
+                        event = SpongeEventFactory.createChangeBlockEventModify(cause, (World) world, blockTransactions);
                     } else if (captureType == CaptureType.PLACE) {
-                        event = SpongeEventFactory.createChangeBlockEventPlace(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
+                        event = SpongeEventFactory.createChangeBlockEventPlace(cause, (World) world, blockTransactions);
                     }
 
                     SpongeImpl.postEvent(event);
@@ -828,8 +829,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                                              if (hanging instanceof EntityItemFrame) {
                                                  EntityItemFrame itemFrame = (EntityItemFrame) hanging;
                                                  net.minecraft.entity.Entity dropCause = null;
-                                                 if (cause.root().get() instanceof net.minecraft.entity.Entity) {
-                                                     dropCause = (net.minecraft.entity.Entity) cause.root().get();
+                                                 if (cause.root() instanceof net.minecraft.entity.Entity) {
+                                                     dropCause = (net.minecraft.entity.Entity) cause.root();
                                                  }
 
                                                  itemFrame.dropItemOrSelf(dropCause, true);
@@ -896,7 +897,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     MessageSink originalSink = spongePlayer.getMessageSink();
                     MessageSink sink = spongePlayer.getMessageSink();
 
-                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(SpongeImpl.getGame(), cause, Texts.of(), Texts.of(), originalSink, sink, (Entity) entity);
+                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, Texts.of(), Texts.of(), originalSink, sink, (Entity) entity);
                     SpongeImpl.getGame().getEventManager().post(event);
                     Text returned = Texts.format(event.getMessage());
                     if (returned != Texts.of()) {
@@ -988,7 +989,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
                 Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent()) {
-                    if (!cause.any(NamedCause.OWNER)) {
+                    if (!cause.containsNamed(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
@@ -1000,9 +1001,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         DropItemEvent event = null;
 
         if (destructItems) {
-            event = SpongeEventFactory.createDropItemEventDestruct(SpongeImpl.getGame(), cause, entities, entitySnapshotBuilder.build(), (World) this);
+            event = SpongeEventFactory.createDropItemEventDestruct(cause, entities, entitySnapshotBuilder.build(), (World) this);
         } else {
-            event = SpongeEventFactory.createDropItemEventDispense(SpongeImpl.getGame(), cause, entities, entitySnapshotBuilder.build(), (World) this);
+            event = SpongeEventFactory.createDropItemEventDispense(cause, entities, entitySnapshotBuilder.build(), (World) this);
         }
 
         if (!(SpongeImpl.postEvent(event))) {
@@ -1049,7 +1050,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 iterator.remove();
             }
         } else {
-            if (cause.root().get() == StaticMixinHelper.packetPlayer) {
+            if (cause.root() == StaticMixinHelper.packetPlayer) {
                 sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
             }
             this.capturedEntityItems.clear();
@@ -1082,16 +1083,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (this.worldSpawnerRunning) {
             event =
-                    SpongeEventFactory.createSpawnEntityEventSpawner(SpongeImpl.getGame(), cause, entities, entitySnapshotBuilder.build(),
+                    SpongeEventFactory.createSpawnEntityEventSpawner(cause, entities, entitySnapshotBuilder.build(),
                                                                      (World) (Object) this);
         } else if (this.chunkSpawnerRunning) {
             event =
-                    SpongeEventFactory.createSpawnEntityEventChunkLoad(SpongeImpl.getGame(), cause, entities, entitySnapshotBuilder.build(),
+                    SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, entities, entitySnapshotBuilder.build(),
                                                                        (World) (Object) this);
         } else {
             event =
                     SpongeEventFactory
-                            .createSpawnEntityEvent(SpongeImpl.getGame(), cause, entities, entitySnapshotBuilder.build(), (World) (Object) this);
+                            .createSpawnEntityEvent(cause, entities, entitySnapshotBuilder.build(), (World) (Object) this);
         }
 
         if (!(SpongeImpl.postEvent(event))) {
@@ -1834,7 +1835,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
             ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
         }
-        
+
         // Re-apply all world generator modifiers
         WorldCreationSettings creationSettings = this.getCreationSettings();
 
@@ -1850,7 +1851,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
-        
+
         ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
         chunkProviderServer.serverChunkGenerator = this.spongegen;
     }
@@ -1927,7 +1928,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean containsBlock(int x, int y, int z) {
         return VecHelper.inBounds(x, y, z, BLOCK_MIN, BLOCK_MAX);
     }
-    
+
     private void checkBiomeBounds(int x, int z) {
         if (!containsBiome(x, z)) {
             throw new PositionOutOfBoundsException(new Vector2i(x, z), BIOME_MIN, BIOME_MAX);

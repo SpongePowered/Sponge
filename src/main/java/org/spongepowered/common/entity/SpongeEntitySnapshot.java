@@ -49,6 +49,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -394,7 +395,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity.get();
             nmsEntity.readFromNBT(this.compound);
 
-            boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of());
+            boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of(NamedCause.source(world.get())));
             if (spawnResult) {
                 return Optional.of((Entity) nmsEntity);
             }

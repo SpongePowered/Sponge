@@ -70,7 +70,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent.ResourcePackStatus;
+import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -174,7 +174,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
         final ChangeSignEvent event =
-                SpongeEventFactory.createChangeSignEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(this.playerEntity)),
+                SpongeEventFactory.createChangeSignEvent(Cause.of(NamedCause.source(this.playerEntity)),
                     changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
         if (!SpongeImpl.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
@@ -322,7 +322,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
                 DisplaceEntityEvent.Move.TargetPlayer event =
-                        SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(SpongeImpl.getGame(), fromTransform, toTransform, player);
+                        SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
                     player.setTransform(fromTransform);
@@ -378,7 +378,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         sources.add(player);
         MessageSink originalSink = MessageSinks.to(sources);
         ClientConnectionEvent.Disconnect event =
-                SpongeImplFactory.createClientConnectionEventDisconnect(SpongeImpl.getGame(), Cause.of(NamedCause.source(player)), message,
+                SpongeImplFactory.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)), message,
                     newMessage, originalSink, player.getMessageSink(), player);
         this.tmpQuitMessage = null;
         SpongeImpl.postEvent(event);
@@ -388,20 +388,20 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
     public void onResourcePackStatus(C19PacketResourcePackStatus packet, CallbackInfo ci) {
         String hash = packet.hash;
-        ResourcePackStatus status;
+        ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack = this.sentResourcePacks.get(hash);
         switch (packet.status) {
             case ACCEPTED:
-                status = ResourcePackStatus.ACCEPTED;
+                status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
                 break;
             case DECLINED:
-                status = ResourcePackStatus.DECLINED;
+                status = ResourcePackStatusEvent.ResourcePackStatus.DECLINED;
                 break;
             case SUCCESSFULLY_LOADED:
-                status = ResourcePackStatus.SUCCESSFULLY_LOADED;
+                status = ResourcePackStatusEvent.ResourcePackStatus.SUCCESSFULLY_LOADED;
                 break;
             case FAILED_DOWNLOAD:
-                status = ResourcePackStatus.FAILED;
+                status = ResourcePackStatusEvent.ResourcePackStatus.FAILED;
                 break;
             default:
                 throw new AssertionError();
@@ -409,7 +409,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         if (status.wasSuccessful().isPresent()) {
             this.sentResourcePacks.remove(hash);
         }
-        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(SpongeImpl.getGame(), pack, (Player)this.playerEntity, status));
+        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Cause.of(NamedCause.source(SpongeImpl.getGame())), pack,
+            (Player)this.playerEntity, status));
     }
 
     @Inject(method = "sendPacket", at = @At("HEAD"))
@@ -488,7 +489,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             return; // PVP is disabled, ignore
         }
 
-        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(SpongeImpl.getGame(),
+        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
             Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
