@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.plugin;
 
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.spongepowered.common.SpongeImpl;
@@ -35,6 +36,11 @@ import java.util.Optional;
 public final class SpongeApiContainer extends SpongePluginContainer {
 
     protected SpongeApiContainer() {
+    }
+
+    @Override
+    public Injector getInjector() {
+        return SpongeImpl.getInjector();
     }
 
     @Override
