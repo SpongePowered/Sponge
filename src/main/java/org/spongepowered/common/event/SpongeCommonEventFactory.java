@@ -506,11 +506,15 @@ public class SpongeCommonEventFactory {
         net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
         IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
         if (spongeChunk != null) {
-            Optional<User> owner = spongeChunk.getBlockOwner(pos);
-            Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-            if (notifier.isPresent()) {
-                cause = cause.with(NamedCause.notifier(notifier.get()));
+            if (StaticMixinHelper.packetPlayer != null) {
+                cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(StaticMixinHelper.packetPlayer));
+            } else {
+                Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
+                if (notifier.isPresent()) {
+                    cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(notifier.get()));
+                }
             }
+            Optional<User> owner = spongeChunk.getBlockOwner(pos);
             if (owner.isPresent()) {
                 cause = cause.with(NamedCause.owner(owner.get()));
             }

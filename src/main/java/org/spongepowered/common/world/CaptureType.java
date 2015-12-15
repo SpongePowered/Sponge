@@ -29,7 +29,6 @@ public enum CaptureType {
 
     BREAK,
     DECAY,
-    FLUID,
     MODIFY,
     PLACE,
     POPULATE
