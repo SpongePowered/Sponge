@@ -782,17 +782,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     ChangeBlockEvent event = null;
 
                     if (captureType == CaptureType.BREAK) {
-                        if (player != null && packetIn instanceof C07PacketPlayerDigging) {
-                            C07PacketPlayerDigging digPacket = (C07PacketPlayerDigging) packetIn;
-                            if (digPacket.getStatus() == C07PacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                                destructDrop = true;
-                                // make the first destroyed block root cause
-                                Cause newCause = Cause.of(blockTransactions.get(0).getOriginal());
-                                newCause = newCause.with(cause.all());
-                                cause = newCause;
-                            }
-                        }
-
                         event = SpongeEventFactory.createChangeBlockEventBreak(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
                     } else if (captureType == CaptureType.DECAY) {
                         event = SpongeEventFactory.createChangeBlockEventDecay(SpongeImpl.getGame(), cause, (World) world, blockTransactions);
