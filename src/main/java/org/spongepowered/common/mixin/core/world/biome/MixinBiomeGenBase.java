@@ -83,10 +83,6 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator theBiomeDecorator;
 
-    @Inject(method = "<init>(IZ)V", at = @At("RETURN") )
-    private void onConstructed(int id, boolean register, CallbackInfo ci) {
-    }
-
     @Override
     public BiomeGenerationSettings initPopulators(World world) {
         SpongeBiomeGenerationSettings gensettings = new SpongeBiomeGenerationSettings();
