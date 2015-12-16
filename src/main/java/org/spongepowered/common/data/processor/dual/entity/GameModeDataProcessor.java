@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.data.processor.dual.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldSettings;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
@@ -37,9 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -47,10 +43,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 public class GameModeDataProcessor extends
-    AbstractSingleTargetDualProcessor<EntityPlayer, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
+        AbstractSingleTargetDualProcessor<EntityPlayerMP, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
 
     public GameModeDataProcessor() {
-        super(EntityPlayer.class, Keys.GAME_MODE);
+        super(EntityPlayerMP.class, Keys.GAME_MODE);
     }
 
     @Override
@@ -59,20 +55,14 @@ public class GameModeDataProcessor extends
     }
 
     @Override
-    protected boolean set(EntityPlayer entity, GameMode value) {
-        if (SpongeImpl.getGame().getPlatform().getType().isServer()) {
-            entity.setGameType((WorldSettings.GameType) (Object) value);
-            return true;
-        }
-        return false;
+    protected boolean set(EntityPlayerMP entity, GameMode value) {
+        entity.setGameType((WorldSettings.GameType) (Object) value);
+        return true;
     }
 
     @Override
-    protected Optional<GameMode> getVal(EntityPlayer entity) {
-        if (entity instanceof EntityPlayerMP) {
-            return Optional.of((GameMode) (Object) ((EntityPlayerMP) entity).theItemInWorldManager.getGameType());
-        }
-        return Optional.empty();
+    protected Optional<GameMode> getVal(EntityPlayerMP entity) {
+        return Optional.of((GameMode) (Object) entity.theItemInWorldManager.getGameType());
     }
 
     @Override
