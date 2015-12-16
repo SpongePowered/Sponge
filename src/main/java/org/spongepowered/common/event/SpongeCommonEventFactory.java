@@ -419,6 +419,11 @@ public class SpongeCommonEventFactory {
             player.inventory.setItemStack(cursor);
             player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
 
+            if (clickEvent instanceof ClickInventoryEvent.Double) {
+                clickEvent.getTransactions().clear();
+                return;
+            }
+
             // Restore target slots
             Iterator<SlotTransaction> iterator = clickEvent.getTransactions().iterator();
             while (iterator.hasNext()) {
