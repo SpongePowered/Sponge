@@ -770,6 +770,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(AffectsSpawningData.class, SpongeAffectsSpawningData.class, ImmutableAffectsSpawningData.class,
             ImmutableSpongeAffectsSpawningData.class, affectsSpawningDataProcessor);
         dataManager.registerValueProcessor(Keys.AFFECTS_SPAWNING, affectsSpawningDataProcessor);
+        
+        final GenerationDualProcessor generationDualProcessor = new GenerationDualProcessor();
+        dataManager.registerDataProcessorAndImpl(GenerationData.class, SpongeGenerationData.class,
+                ImmutableGenerationData.class, ImmutableSpongeGenerationData.class, generationDualProcessor);
+        dataManager.registerValueProcessor(Keys.GENERATION, generationDualProcessor);
 
         final CriticalHitDualProcessor criticalHitDualProcessor = new CriticalHitDualProcessor();
         dataManager.registerDataProcessorAndImpl(CriticalHitData.class, SpongeCriticalHitData.class, ImmutableCriticalHitData.class,
