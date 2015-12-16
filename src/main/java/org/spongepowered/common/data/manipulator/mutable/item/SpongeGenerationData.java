@@ -22,49 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.entity;
+package org.spongepowered.common.data.manipulator.mutable.item;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAngerableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
+import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAngerableData;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGenerationData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
-@ImplementationRequiredForTest
-public class SpongeAngerableData extends AbstractIntData<AngerableData, ImmutableAngerableData> implements AngerableData {
+public final class SpongeGenerationData extends AbstractIntData<GenerationData, ImmutableGenerationData> implements GenerationData {
 
-    public SpongeAngerableData(int value) {
-        super(AngerableData.class, value, Keys.ANGER);
-    }
-
-    public SpongeAngerableData() {
+    public SpongeGenerationData() {
         this(0);
+    }
+    
+    public SpongeGenerationData(int value) {
+        super(GenerationData.class, value, Keys.GENERATION);
     }
 
     @Override
-    public MutableBoundedValue<Integer> angerLevel() {
-        return SpongeValueFactory.boundedBuilder(Keys.ANGER)
-                .actualValue(getValue())
+    public MutableBoundedValue<Integer> generation() {
+        return SpongeValueFactory.boundedBuilder(Keys.GENERATION)
+                .actualValue(this.getValue())
                 .defaultValue(0)
-                .minimum(Integer.MIN_VALUE)
-                .maximum(Integer.MAX_VALUE)
+                .minimum(0)
+                .maximum(DataConstants.MAXIMUM_GENERATION)
                 .build();
     }
 
     @Override
     protected Value<?> getValueGetter() {
-        return angerLevel();
+        return generation();
     }
 
     @Override
-    public ImmutableAngerableData asImmutable() {
-        return new ImmutableSpongeAngerableData(getValue());
+    public ImmutableGenerationData asImmutable() {
+        return new ImmutableSpongeGenerationData(this.getValue());
     }
-
 }
