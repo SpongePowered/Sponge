@@ -84,11 +84,7 @@ public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryMo
     }
 
     private void setItemNone() {
-        try {
-            RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE.createSnapshot());
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+        RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE.createSnapshot());
     }
 
     private ItemTypeRegistryModule() {
