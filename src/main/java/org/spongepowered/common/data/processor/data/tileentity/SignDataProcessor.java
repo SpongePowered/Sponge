@@ -205,22 +205,7 @@ public class SignDataProcessor extends AbstractSpongeDataProcessor<SignData, Imm
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        if (dataHolder instanceof TileEntitySign) {
-            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<SignData> oldData = from(dataHolder);
-            if (oldData.isPresent()) {
-                builder.replace(oldData.get().getValues());
-            }
-            try {
-                for (int i = 0; i < 4; i++) {
-                    ((TileEntitySign) dataHolder).signText[i] = SpongeTexts.toComponent(Texts.of());
-                }
-                ((TileEntitySign) dataHolder).markDirty();
-            } catch (Exception e) {
-                return builder.result(DataTransactionResult.Type.ERROR).build();
-            }
-            return builder.result(DataTransactionResult.Type.SUCCESS).build();
-        } else if (dataHolder instanceof ItemStack) {
+        if (dataHolder instanceof ItemStack) {
             if (!((ItemStack) dataHolder).getItem().equals(Items.sign)) {
                 return DataTransactionResult.failNoData();
             } else {
