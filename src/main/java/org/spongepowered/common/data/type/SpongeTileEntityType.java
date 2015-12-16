@@ -32,9 +32,11 @@ public class SpongeTileEntityType implements TileEntityType {
 
     private final Class<? extends TileEntity> clazz;
     private final String id;
+    private final String name;
 
-    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String id) {
+    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id) {
         this.clazz = clazz;
+        this.name = name;
         this.id = id;
     }
 
@@ -50,12 +52,12 @@ public class SpongeTileEntityType implements TileEntityType {
 
     @Override
     public String getName() {
-        return this.id;
+        return this.name;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.clazz, this.id);
+        return Objects.hashCode(this.clazz, this.name, this.id);
     }
 
     @Override
@@ -68,13 +70,15 @@ public class SpongeTileEntityType implements TileEntityType {
         }
         final SpongeTileEntityType other = (SpongeTileEntityType) obj;
         return Objects.equal(this.clazz, other.clazz)
+               && Objects.equal(this.name, other.name)
                && Objects.equal(this.id, other.id);
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("clazz", this.clazz)
+        return Objects.toStringHelper("TileEntityType")
+            .add("TileEntityClass", this.clazz)
+            .add("name", this.name)
             .add("id", this.id)
             .toString();
     }

@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockStoneSlab;
+import net.minecraft.block.BlockStoneSlabNew;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
@@ -50,6 +51,7 @@ public final class SlabTypeRegistryModule implements CatalogRegistryModule<SlabT
         .put("smooth_brick", (SlabType) (Object) BlockStoneSlab.EnumType.SMOOTHBRICK)
         .put("stone", (SlabType) (Object) BlockStoneSlab.EnumType.STONE)
         .put("wood", (SlabType) (Object) BlockStoneSlab.EnumType.WOOD)
+        .put("red_sand", (SlabType) (Object) BlockStoneSlabNew.EnumType.RED_SANDSTONE)
         .build();
 
     @Override

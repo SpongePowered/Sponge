@@ -27,8 +27,10 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityMobSpawner;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
@@ -39,6 +41,25 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity> {
+
+
+    private static final Map<String, String> NAME_TO_ID_MAPPING = ImmutableMap.<String, String>builder()
+        .put("Cauldron", "brewing_stand")
+        .put("Control", "command_block")
+        .put("DLDetector", "daylight_detector")
+        .put("Trap", "dispenser")
+        .put("EnchantTable", "enchantment_table")
+        .put("EnderChest", "ender_chest")
+        .put("AirPortal", "end_portal")
+        .put("FlowerPot", "flower_pot")
+        .put("RecordPlayer", "jukebox")
+        .put("MobSpawner", "mob_spawner")
+        .put("Music", "note")
+        .build();
+
+    public static TileEntityTypeRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
 
     public final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newHashMap();
 
@@ -81,5 +102,17 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getIdForName(String name) {
+        final String id = NAME_TO_ID_MAPPING.get(name);
+        return id == null ? name : id;
+    }
+
+
+    private TileEntityTypeRegistryModule() { }
+
+    private static final class Holder {
+        private static final TileEntityTypeRegistryModule INSTANCE = new TileEntityTypeRegistryModule();
     }
 }

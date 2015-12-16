@@ -55,6 +55,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.registry.type.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
@@ -94,7 +95,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
-        final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name);
+        final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
+        final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name, id);
         SpongeImpl.getRegistry().registerAdditionalType(TileEntityType.class, tileEntityType);
     }
 
