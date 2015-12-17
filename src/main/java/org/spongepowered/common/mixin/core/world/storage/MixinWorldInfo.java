@@ -67,8 +67,8 @@ import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.persistence.NbtTranslator;
-import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
 import java.util.ArrayList;
@@ -450,7 +450,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean isEnabled() {
         if (!this.worldConfig.isConfigEnabled()) {
-            return DimensionManager.getWorldFromDimId(this.dimension) != null;
+            return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().isWorldEnabled();
         }
         return this.worldConfig.getWorld().isWorldEnabled();
     }
@@ -463,7 +463,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean loadOnStartup() {
         if (!this.worldConfig.isConfigEnabled()) {
-            return DimensionManager.isDimensionRegistered(this.dimension);
+            return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().loadOnStartup();
         }
         return this.worldConfig.getWorld().loadOnStartup();
     }
@@ -476,7 +476,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean doesKeepSpawnLoaded() {
         if (!this.worldConfig.isConfigEnabled()) {
-            return DimensionManager.shouldLoadSpawn(this.dimension);
+            return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().getKeepSpawnLoaded();
         }
         return this.worldConfig.getWorld().getKeepSpawnLoaded();
     }
