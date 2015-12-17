@@ -68,7 +68,7 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
         ((IMixinWorld) worldServer).setChunkSpawnerRunning(false);
-        ((IMixinWorld) worldServer).setProcessingCaptureCause(true);
+        ((IMixinWorld) worldServer).setProcessingCaptureCause(false);
     }
 
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
