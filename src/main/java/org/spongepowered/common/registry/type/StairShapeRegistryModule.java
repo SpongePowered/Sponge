@@ -45,8 +45,8 @@ public final class StairShapeRegistryModule implements CatalogRegistryModule<Sta
         .put("straight", (StairShape) (Object) BlockStairs.EnumShape.STRAIGHT)
         .put("inner_left", (StairShape) (Object) BlockStairs.EnumShape.INNER_LEFT)
         .put("inner_right", (StairShape) (Object) BlockStairs.EnumShape.INNER_RIGHT)
-        .put("outher_left", (StairShape) (Object) BlockStairs.EnumShape.OUTER_LEFT)
-        .put("outher_right", (StairShape) (Object) BlockStairs.EnumShape.OUTER_RIGHT)
+        .put("outer_left", (StairShape) (Object) BlockStairs.EnumShape.OUTER_LEFT)
+        .put("outer_right", (StairShape) (Object) BlockStairs.EnumShape.OUTER_RIGHT)
         .build();
 
     @Override

@@ -461,7 +461,7 @@ public final class CommonModuleRegistry {
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TextColor.class, new TextColorsRegistryModule())
             .registerModule(new TextStyleRegistryModule())
-            .registerModule(TileEntityType.class, new TileEntityTypeRegistryModule())
+            .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())
             .registerModule(TreeType.class, new TreeTypeRegistryModule())
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())

@@ -32,7 +32,9 @@ import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
+import org.spongepowered.common.registry.util.CustomCatalogRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
@@ -57,15 +59,23 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
     @Override
     public void registerDefaults() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            this.artMappings.put(((Art) (Object) art).getId().toLowerCase(), (Art) (Object) art);
+            this.artMappings.put(((Art) (Object) art).getId().toLowerCase().replace("_", ""), (Art) (Object) art);
         }
+    }
+
+    @CustomCatalogRegistration
+    public void customRegistration() {
+        RegistryHelper.mapFields(Arts.class, field -> {
+            String name = field.replace("_", "");
+            return this.artMappings.get(name.toLowerCase());
+        });
     }
 
     @AdditionalRegistration
     public void registerAdditionals() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
             if (!this.artMappings.containsValue((Art) (Object) art)) {
-                this.artMappings.put(((Art) (Object) art).getId().toLowerCase(), (Art) (Object) art);
+                this.artMappings.put(((Art) (Object) art).getId().toLowerCase().replace("_", ""), (Art) (Object) art);
             }
         }
     }
