@@ -77,7 +77,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.registry.type.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.List;
 import java.util.Map;

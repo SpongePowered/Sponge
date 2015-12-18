@@ -28,9 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
-import org.spongepowered.api.data.type.ArmorType;
-import org.spongepowered.api.data.type.ArmorTypes;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.ToolTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;

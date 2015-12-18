@@ -32,7 +32,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.registry.type.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.lang.reflect.Method;
 import java.util.Map;

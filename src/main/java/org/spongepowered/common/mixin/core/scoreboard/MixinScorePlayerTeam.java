@@ -42,8 +42,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinTeam;
-import org.spongepowered.common.registry.type.TextColorsRegistryModule;
-import org.spongepowered.common.registry.type.VisibilityRegistryModule;
+import org.spongepowered.common.registry.type.text.TextColorsRegistryModule;
+import org.spongepowered.common.registry.type.scoreboard.VisibilityRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.Collection;

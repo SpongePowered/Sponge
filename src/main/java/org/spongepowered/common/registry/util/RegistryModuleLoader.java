@@ -38,10 +38,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.registry.type.AITaskTypeModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
-import org.spongepowered.common.registry.type.GoalTypeModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
+import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
+import org.spongepowered.common.registry.type.entity.GoalTypeModule;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

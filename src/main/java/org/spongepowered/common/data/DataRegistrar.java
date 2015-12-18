@@ -46,7 +46,6 @@ import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.block.*;
 import org.spongepowered.api.data.property.entity.*;
 import org.spongepowered.api.data.property.item.*;
-import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
