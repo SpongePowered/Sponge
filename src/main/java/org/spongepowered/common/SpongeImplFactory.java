@@ -86,7 +86,7 @@ public class SpongeImplFactory {
     }
 
     public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
-        return true;
+        return oldState.getBlock() != newState.getBlock();
     }
 
     public static TileEntity createTileEntity(Block block, net.minecraft.world.World world, IBlockState state) {
