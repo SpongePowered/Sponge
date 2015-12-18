@@ -108,7 +108,7 @@ public class KeyRegistry {
 
     public static void registerKeys() {
         generateKeyMap();
-        RegistryHelper.mapFields(Keys.class, keyMap);
+        RegistryHelper.mapFieldsIgnoreWarning(Keys.class, keyMap);
     }
 
     private static void generateKeyMap() {

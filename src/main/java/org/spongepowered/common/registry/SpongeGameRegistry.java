@@ -132,6 +132,7 @@ public class SpongeGameRegistry implements GameRegistry {
         this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
 
         registerModulePhase();
+        DataRegistrar.setupSerialization(SpongeImpl.getGame());
     }
 
     /**
@@ -357,6 +358,7 @@ public class SpongeGameRegistry implements GameRegistry {
             final RegistryModule module = this.classMap.get(moduleClass);
             RegistryModuleLoader.tryModulePhaseRegistration(module);
         }
+        registerAdditionalPhase();
     }
 
     private void registerAdditionalPhase() {
@@ -378,9 +380,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void preInit() {
         this.phase = RegistrationPhase.PRE_INIT;
-        DataRegistrar.setupSerialization(SpongeImpl.getGame());
         registerModulePhase();
-
     }
 
     public void init() {

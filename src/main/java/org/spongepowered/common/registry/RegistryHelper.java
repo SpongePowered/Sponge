@@ -51,12 +51,20 @@ public class RegistryHelper {
         return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase()));
     }
 
+    public static boolean mapFieldsIgnoreWarning(Class<?> apiClass, Map<String, ?> mapping) {
+        return mapFields(apiClass, fieldname -> mapping.get(fieldname.toLowerCase()), true);
+    }
+
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction) {
+        return mapFields(apiClass, mapFunction, false);
+    }
+
+    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, boolean ignore) {
         boolean mappingSuccess = true;
         for (Field f : apiClass.getDeclaredFields()) {
             try {
                 Object value = mapFunction.apply(f.getName());
-                if (value == null) {
+                if (value == null && !ignore) {
                     logger.warn("Skipping {}.{}", f.getDeclaringClass().getName(), f.getName());
                     continue;
                 }
