@@ -81,9 +81,4 @@ public abstract class MixinSpawnerAnimals {
         return player.isSpectator();
     }
 
-    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isAnyPlayerWithinRangeAt(DDDD)Z"))
-    public boolean onFindChunksForSpawningWithinRange(WorldServer world, double x, double y, double z, double range) {
-        return ((IMixinWorld) world).isAnyPlayerWithinRangeAtWhoAffectsSpawning(x, y, z, range);
-    }
-
 }

@@ -2440,22 +2440,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return result;
     }
 
-    @Override
-    public boolean isAnyPlayerWithinRangeAtWhoAffectsSpawning(double x, double y, double z, double range) {
-        for (Object entity : this.playerEntities) {
-            EntityPlayer player = (EntityPlayer) entity;
-            if (player == null || player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) {
-                continue;
-            }
-
-            double distance = player.getDistanceSq(x, y, z);
-
-            if (range < 0.0D || distance < range * range) {
-                return true;
-            }
+    @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target="Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z"))
+    public boolean onIsAnyPlayerWithinRangePredicate(com.google.common.base.Predicate<EntityPlayer> predicate, Object object) {
+        EntityPlayer player = (EntityPlayer) object;
+        if (player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) {
+            return false;
         }
 
-        return false;
+        return predicate.apply(player);
     }
 
     @Override
