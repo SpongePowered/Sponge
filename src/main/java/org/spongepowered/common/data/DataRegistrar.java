@@ -46,6 +46,7 @@ import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.block.*;
 import org.spongepowered.api.data.property.entity.*;
 import org.spongepowered.api.data.property.item.*;
+import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -788,6 +789,8 @@ public class DataRegistrar {
         propertyRegistry.register(HarvestingProperty.class, new HarvestingPropertyStore());
         propertyRegistry.register(SaturationProperty.class, new SaturationPropertyStore());
         propertyRegistry.register(UseLimitProperty.class, new UseLimitPropertyStore());
+        propertyRegistry.register(ToolTypeProperty.class, new ToolTypePropertyStore());
+        propertyRegistry.register(ArmorTypeProperty.class, new ArmorTypePropertyStore());
 
         // Entities
         propertyRegistry.register(EyeLocationProperty.class, new EyeLocationPropertyStore());

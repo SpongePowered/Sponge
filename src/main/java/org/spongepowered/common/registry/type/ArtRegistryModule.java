@@ -59,12 +59,13 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
     @Override
     public void registerDefaults() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            this.artMappings.put(((Art) (Object) art).getId().toLowerCase().replace("_", ""), (Art) (Object) art);
+            this.artMappings.put(((Art) (Object) art).getId().toLowerCase(), (Art) (Object) art);
         }
     }
 
     @CustomCatalogRegistration
     public void customRegistration() {
+        registerDefaults();
         RegistryHelper.mapFields(Arts.class, field -> {
             String name = field.replace("_", "");
             return this.artMappings.get(name.toLowerCase());
@@ -75,7 +76,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
     public void registerAdditionals() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
             if (!this.artMappings.containsValue((Art) (Object) art)) {
-                this.artMappings.put(((Art) (Object) art).getId().toLowerCase().replace("_", ""), (Art) (Object) art);
+                this.artMappings.put(((Art) (Object) art).getId().toLowerCase(), (Art) (Object) art);
             }
         }
     }

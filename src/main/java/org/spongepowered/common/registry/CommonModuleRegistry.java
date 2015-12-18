@@ -32,6 +32,7 @@ import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BigMushroomType;
@@ -66,6 +67,7 @@ import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StoneType;
+import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.effect.particle.BlockParticle;
@@ -253,6 +255,8 @@ import org.spongepowered.common.registry.type.WeatherRegistryModule;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
+import org.spongepowered.common.registry.type.item.ArmorTypeRegistryModule;
+import org.spongepowered.common.registry.type.item.ToolTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
@@ -394,6 +398,7 @@ public final class CommonModuleRegistry {
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
+            .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
             .registerModule(Art.class, new ArtRegistryModule())
             .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
             .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
@@ -462,6 +467,7 @@ public final class CommonModuleRegistry {
             .registerModule(TextColor.class, new TextColorsRegistryModule())
             .registerModule(new TextStyleRegistryModule())
             .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())
+            .registerModule(ToolType.class, new ToolTypeRegistryModule())
             .registerModule(TreeType.class, new TreeTypeRegistryModule())
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
