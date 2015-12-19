@@ -79,6 +79,7 @@ public final class NbtDataUtil {
     public static final String ITEM_BOOK_TITLE = "title";
     public static final String ITEM_BOOK_AUTHOR = "author";
     public static final String ITEM_BOOK_RESOLVED = "resolved";
+    public static final String ITEM_BOOK_GENERATION = "generation";
 
     public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";
     public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";

@@ -22,35 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.common;
+package org.spongepowered.common.data.manipulator.immutable.item;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.common.util.ReflectionUtil;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
+import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
+import org.spongepowered.common.data.util.ComparatorUtil;
+import org.spongepowered.common.data.util.DataConstants;
 
-public abstract class AbstractIntData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleData<Integer, M, I> {
+public class ImmutableSpongeGenerationData extends AbstractImmutableBoundedComparableData<Integer, ImmutableGenerationData, GenerationData> implements ImmutableGenerationData {
 
-    protected AbstractIntData(Class<M> manipulatorClass, int value, Key<? extends BaseValue<Integer>> usedKey) {
-        super(manipulatorClass, value, usedKey);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public M copy() {
-        return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue());
+    public ImmutableSpongeGenerationData(int value) {
+        super(ImmutableGenerationData.class, value, Keys.GENERATION, ComparatorUtil.intComparator(), SpongeGenerationData.class, 0, DataConstants.MAXIMUM_GENERATION, 0);
     }
 
     @Override
-    public int compareTo(M o) {
-        return o.get(this.usedKey).get() - this.getValue();
+    public ImmutableBoundedValue<Integer> generation() {
+        return this.getValueGetter();
     }
 
-    @Override
-    public DataContainer toContainer() {
-        return new MemoryDataContainer().set(this.usedKey, this.getValue());
-    }
 }

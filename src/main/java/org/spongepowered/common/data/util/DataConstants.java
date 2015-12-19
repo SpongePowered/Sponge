@@ -101,6 +101,9 @@ public final class DataConstants {
     public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
     
     public static final boolean ANGRY_DEFAULT = false;
+    
+    // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
+    public static final int MAXIMUM_GENERATION = 3;
 
     public static final class Catalog {
         private Catalog() {}
