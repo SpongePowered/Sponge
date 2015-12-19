@@ -189,11 +189,17 @@ public abstract class MixinServerConfigurationManager {
         Location<World> location = new Location<>((World) worldserver, VecHelper.toVector(playerIn.getPosition()));
         Transform<World> fromTransform = player.getTransform().setLocation(location);
         MessageSink sink = MessageSinks.toAll();
+
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
             Cause.of(NamedCause.source(user)), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform,
             (RemoteConnection) netManager, (org.spongepowered.api.profile.GameProfile) gameprofile, (User) user);
+
+        if (kickReason != null) {
+            loginEvent.setCancelled(true);
+        }
+
         SpongeImpl.postEvent(loginEvent);
-        if (kickReason != null || loginEvent.isCancelled()) {
+        if (loginEvent.isCancelled()) {
             disconnectClient(netManager, Optional.ofNullable(loginEvent.getMessage()), gameprofile);
             return;
         }

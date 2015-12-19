@@ -74,6 +74,8 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.selector.SelectorType;
+import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
@@ -88,6 +90,7 @@ import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
@@ -228,6 +231,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Shrub.Builder.class, ShrubBuilder::new)
             .registerBuilderSupplier(Vine.Builder.class, VineBuilder::new)
             .registerBuilderSupplier(WaterLily.Builder.class, WaterLilyBuilder::new)
+            .registerBuilderSupplier(Ban.Builder.class, SpongeBanBuilder::new)
         ;
     }
 
@@ -237,6 +241,7 @@ public final class CommonModuleRegistry {
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
             .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
             .registerModule(Art.class, new ArtRegistryModule())
+            .registerModule(BanType.class, new BanTypeRegistryModule())
             .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
             .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
             .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())

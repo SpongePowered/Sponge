@@ -31,21 +31,25 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ProviderExistsException;
+import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.rcon.RconService;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
 import org.spongepowered.common.service.sql.SqlServiceImpl;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
+import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.text.action.SpongeCallbackHolder;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
@@ -68,6 +72,8 @@ public final class SpongeBootstrap {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));
         }
         registerService(UserStorageService.class, new SpongeUserStorageService());
+        registerService(BanService.class, new SpongeBanService());
+        registerService(WhitelistService.class, new SpongeWhitelistService());
         SpongeImpl.getGame().getServiceManager().potentiallyProvide(PermissionService.class)
                 .executeWhenPresent(input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
     }

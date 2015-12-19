@@ -42,15 +42,15 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.data.manipulator.mutable.entity.BanData;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -62,7 +62,6 @@ import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -323,11 +322,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         this.keepsLevel = false;
-    }
-
-    @Override
-    public BanData getBanData() {
-        return this.user.getBanData();
     }
 
     @Override
