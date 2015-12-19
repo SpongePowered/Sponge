@@ -59,7 +59,7 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
         List<DataView> contents = container.getViewList(new DataQuery("Contents")).get();
         for (DataView content: contents) {
             net.minecraft.item.ItemStack stack =
-                    (net.minecraft.item.ItemStack) content.getSerializable(new DataQuery("Item"), ItemStack.class, service).get();
+                    (net.minecraft.item.ItemStack) content.getSerializable(new DataQuery("Item"), ItemStack.class).get();
             ((IInventory) lockable).setInventorySlotContents(content.getInt(new DataQuery("Slot")).get(), stack);
         }
         if (container.contains(Keys.LOCK_TOKEN.getQuery())) {

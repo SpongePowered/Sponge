@@ -47,7 +47,6 @@ import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -188,10 +187,10 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
-        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class, dataManager).get();
+        final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class).get();
         BlockState extendedState = null;
         if (container.contains(DataQueries.BLOCK_EXTENDED_STATE)) {
-            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class, dataManager).get();
+            extendedState = container.getSerializable(DataQueries.BLOCK_EXTENDED_STATE, BlockState.class).get();
         } else {
             extendedState = blockState;
         }

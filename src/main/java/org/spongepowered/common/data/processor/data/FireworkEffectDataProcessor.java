@@ -45,7 +45,6 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectDat
 import org.spongepowered.common.data.processor.common.AbstractSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +88,7 @@ public class FireworkEffectDataProcessor extends AbstractSingleDataProcessor<Lis
     public Optional<FireworkEffectData> fill(DataContainer container, FireworkEffectData fireworkEffectData) {
         DataUtil.checkDataExists(container, Keys.FIREWORK_EFFECTS.getQuery());
         List<FireworkEffect> effects = container.getSerializableList(Keys.FIREWORK_EFFECTS.getQuery(),
-                                                                     FireworkEffect.class, SpongeDataManager.getInstance()).get();
+                                                                     FireworkEffect.class).get();
 
         return Optional.of(fireworkEffectData.set(Keys.FIREWORK_EFFECTS, effects));
     }

@@ -234,11 +234,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public void setEyeHeight(Double value) {
-        this.modifiedEyeHeight = value;
-    }
-
-    @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         // Until mixin can resolve it's funkyness with default methods.
     }

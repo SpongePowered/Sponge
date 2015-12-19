@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
@@ -69,7 +68,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
         bannerData.baseColor().set(colorOptional.get());
 
         // Now we have to get the patterns list
-        final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.PATTERNS, PatternLayer.class, service).get();
+        final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.PATTERNS, PatternLayer.class).get();
         final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
         patternsList.forEach(patternLayers::add);
         bannerData.set(patternLayers);

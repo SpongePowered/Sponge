@@ -38,7 +38,6 @@ import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -81,8 +80,8 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
         DataManager dataManager = SpongeDataManager.getInstance();
         final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
-                                                                                 ItemEnchantment.class,
-                                                                                 dataManager).get();
+                                                                                 ItemEnchantment.class
+        ).get();
         return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
     }
 }
