@@ -85,7 +85,7 @@ public final class DataQueries {
     public static final DataQuery SUCCESS_COUNT = of("SuccessCount");
     public static final DataQuery DOES_TRACK_OUTPUT = of("DoesTrackOutput");
     public static final DataQuery STORED_COMMAND = of("StoredCommand");
-
+    public static final DataQuery TRACKED_OUTPUT = of("TrackedOutput");
 
     // General DataQueries
     public static final DataQuery UNSAFE_NBT = of("UnsafeData");

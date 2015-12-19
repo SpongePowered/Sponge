@@ -542,6 +542,13 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, moistureDataProcessor);
 
+        final EntityCommandDataProcessor entityCommandDataProcessor = new EntityCommandDataProcessor();
+        final TileEntityCommandDataProcessor tileEntityCommandDataProcessor = new TileEntityCommandDataProcessor();
+        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class, 
+                ImmutableSpongeCommandData.class, entityCommandDataProcessor);
+        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class, 
+                ImmutableSpongeCommandData.class, tileEntityCommandDataProcessor);
+
 
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -681,6 +688,14 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
         dataManager.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
         dataManager.registerValueProcessor(Keys.MOISTURE, new MoistureValueProcessor());
+        dataManager.registerValueProcessor(Keys.LAST_COMMAND_OUTPUT, new EntityLastCommandOutputValueProcessor());
+        dataManager.registerValueProcessor(Keys.LAST_COMMAND_OUTPUT, new TileEntityLastCommandOutputValueProcessor());
+        dataManager.registerValueProcessor(Keys.COMMAND, new EntityCommandValueProcessor());
+        dataManager.registerValueProcessor(Keys.COMMAND, new TileEntityCommandValueProcessor());
+        dataManager.registerValueProcessor(Keys.SUCCESS_COUNT, new EntitySuccessCountValueProcessor());
+        dataManager.registerValueProcessor(Keys.SUCCESS_COUNT, new TileEntitySuccessCountValueProcessor());
+        dataManager.registerValueProcessor(Keys.TRACKS_OUTPUT, new EntityTracksOutputValueProcessor());
+        dataManager.registerValueProcessor(Keys.TRACKS_OUTPUT, new TileEntityTracksOutputValueProcessor());
 
         // Dual Processors
         final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();

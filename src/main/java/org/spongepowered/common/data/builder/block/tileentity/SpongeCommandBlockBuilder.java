@@ -24,12 +24,15 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
+import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
@@ -52,14 +55,14 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
                 || !container.contains(DataQueries.DOES_TRACK_OUTPUT)) {
             throw new InvalidDataException("The provided container does not contain the data to make a CommandBlock!");
         }
-        // TODO Write CommandBlockData
-//        commandblock.setStoredCommand(container.getString(new DataQuery("StoredCommand")).get());
-//        commandblock.setSuccessCount(container.getInt(new DataQuery("SuccessCount")).get());
-//        commandblock.shouldTrackOutput(container.getBoolean(new DataQuery("DoesTrackOutput")).get());
-//        if (commandblock.doesTrackOutput()) {
-//            commandblock.setLastOutput(Texts.fromLegacy(container.getString(new DataQuery("TrackedOutput")).get()));
-//        }
-        ((TileEntityCommandBlock) commandblock).validate();
+        CommandBlockLogic cmdBlockLogic = ((TileEntityCommandBlock) commandblock).getCommandBlockLogic();
+        cmdBlockLogic.setCommand(container.getString(DataQueries.STORED_COMMAND).get());
+        cmdBlockLogic.successCount = container.getInt(DataQueries.SUCCESS_COUNT).get();
+        cmdBlockLogic.setTrackOutput(container.getBoolean(DataQueries.DOES_TRACK_OUTPUT).get());
+        if (cmdBlockLogic.shouldTrackOutput()) {
+            cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(Texts.legacy().fromUnchecked(container.getString(DataQueries.TRACKED_OUTPUT).get())));
+        }
+        ((TileEntityCommandBlock)commandblock).validate();
         return Optional.of(commandblock);
     }
 }
