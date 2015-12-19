@@ -29,10 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.Team;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.Map;

@@ -30,15 +30,15 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.BooleanTraits;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class BooleanTraitRegistryModule implements AdditionalCatalogRegistryModule<BooleanTrait> {
+public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<BooleanTrait> {
 
     @RegisterCatalog(BooleanTraits.class)
     private Map<String, BooleanTrait> booleanTraitMap = new HashMap<>();

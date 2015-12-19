@@ -29,12 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.world.biome.BiomeGenBase;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
-import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.ArrayList;
 import java.util.Collection;

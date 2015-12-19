@@ -1,5 +1,5 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of SpongeAPI, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -25,10 +25,10 @@
 package org.spongepowered.common.registry;
 
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 
-import java.util.Map;
+public interface SpongeAdditionalCatalogRegistryModule<T extends CatalogType> extends AdditionalCatalogRegistryModule<T> {
 
-public interface AlternateCatalogRegistryModule<T extends CatalogType> extends CatalogRegistryModule<T> {
+    boolean allowsApiRegistration();
 
-    Map<String, T> provideCatalogMap();
 }

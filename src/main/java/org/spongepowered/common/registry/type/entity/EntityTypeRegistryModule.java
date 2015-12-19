@@ -44,22 +44,23 @@ import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
+import org.spongepowered.api.registry.util.CustomCatalogRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.util.CustomCatalogRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity> {
+public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
 
     @RegisterCatalog(EntityTypes.class)
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();

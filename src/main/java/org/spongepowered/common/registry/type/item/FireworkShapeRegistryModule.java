@@ -29,9 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;

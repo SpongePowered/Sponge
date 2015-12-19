@@ -42,6 +42,12 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
+import org.spongepowered.api.registry.RegistrationPhase;
+import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.statistic.BlockStatistic;
@@ -51,7 +57,6 @@ import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticGroup;
 import org.spongepowered.api.statistic.TeamStatistic;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.serializer.TextSerializerFactory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
@@ -68,7 +73,6 @@ import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
-import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
 import org.spongepowered.common.text.selector.SpongeSelectorFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
@@ -138,46 +142,80 @@ public class SpongeGameRegistry implements GameRegistry {
         DataRegistrar.setupSerialization(SpongeImpl.getGame());
     }
 
-    /**
-     * Registers the {@link CatalogRegistryModule} for handling the registry stuffs.
-     *
-     * @param catalogClass
-     * @param registryModule
-     * @param <T>
-     */
+
+    @Override
     public <T extends CatalogType> SpongeGameRegistry registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
         checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
+        if (this.phase != RegistrationPhase.PRE_REGISTRY) {
+            if (catalogClass.getName().contains("org.spongepowered.api")) {
+                throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
+            }
+            syncModules();
+        }
         this.catalogRegistryMap.put(catalogClass, registryModule);
         return this;
     }
 
+    @Override
     public SpongeGameRegistry registerModule(RegistryModule module) {
+        checkArgument(!this.registryModules.contains(module));
         this.registryModules.add(checkNotNull(module));
+        if (this.phase != RegistrationPhase.PRE_REGISTRY) {
+            syncModules();
+        }
         return this;
     }
 
+    private void syncModules() {
+        final DirectedGraph<Class<? extends RegistryModule>> graph = new DirectedGraph<>();
+        for (RegistryModule aModule : this.registryModules) {
+            if (!this.classMap.containsKey(aModule.getClass())) {
+                this.classMap.put(aModule.getClass(), aModule);
+            }
+            addToGraph(aModule, graph);
+        }
+        // Now we need ot do the catalog ones
+        for (CatalogRegistryModule<?> aModule : this.catalogRegistryMap.values()) {
+            if (!this.classMap.containsKey(aModule.getClass())) {
+                this.classMap.put(aModule.getClass(), aModule);
+            }
+            addToGraph(aModule, graph);
+        }
+        this.orderedModules.clear();
+        this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+        this.orderedModules.forEach(temp -> SpongeImpl.getLogger().info("Registered: " + temp.getSimpleName()));
+    }
+
+    @Override
     public <T> SpongeGameRegistry registerBuilderSupplier(Class<T> builderClass, Supplier<? extends T> supplier) {
         checkArgument(!this.builderSupplierMap.containsKey(builderClass), "Already registered a builder supplier!");
         this.builderSupplierMap.put(builderClass, supplier);
         return this;
     }
 
+    /**
+     * Gets the desired {@link CatalogRegistryModule} for the desired {@link CatalogType} class.
+     *
+     * @param catalogClass The catalog class
+     * @param <T> The type of catalog type
+     * @return The catalog registry module
+     */
     @SuppressWarnings("unchecked")
-    public <T extends CatalogType> CatalogRegistryModule<T> getRegistryModuleFor(Class<T> catalogClass) {
+    public <T extends CatalogType> Optional<CatalogRegistryModule<T>> getRegistryModuleFor(Class<T> catalogClass) {
         checkNotNull(catalogClass);
-        return (CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass);
+        return Optional.of((CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <TUnknown, T extends CatalogType> boolean isAdditionalRegistered(Class<TUnknown> clazz, Class<T> catalogType) {
-        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogType);
+        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogType).orElse(null);
         checkArgument(module instanceof ExtraClassCatalogRegistryModule);
         ExtraClassCatalogRegistryModule<T, ?> classModule = (ExtraClassCatalogRegistryModule<T, ?>) module;
         return classModule.hasRegistrationFor((Class) clazz);
     }
 
     public <TUnknown, T extends CatalogType> T getTranslated(Class<TUnknown> clazz, Class<T> catalogClazz) {
-        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClazz);
+        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClazz).orElse(null);
         checkArgument(module instanceof ExtraClassCatalogRegistryModule);
         ExtraClassCatalogRegistryModule<T, TUnknown> classModule = (ExtraClassCatalogRegistryModule<T, TUnknown>) module;
         return classModule.getForClass(clazz);
@@ -186,7 +224,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Optional<T> getType(Class<T> typeClass, String id) {
-        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass);
+        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Optional.empty();
         } else {
@@ -197,7 +235,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
-        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass);
+        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Collections.emptyList();
         } else {
@@ -216,15 +254,18 @@ public class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> void register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
-        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type);
+        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {
             throw new UnsupportedOperationException("Failed to find a RegistryModule for that type");
         } else {
-            if(registryModule instanceof AdditionalCatalogRegistryModule) {
-                if(((AdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
-                    ((AdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
+            if (registryModule instanceof SpongeAdditionalCatalogRegistryModule) {
+                if(((SpongeAdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
+                    ((SpongeAdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
                     return;
                 }
+            } else if (registryModule instanceof AdditionalCatalogRegistryModule) {
+                ((AdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
+                return;
             }
             throw new UnsupportedOperationException("This catalog type does not support additional registration");
         }

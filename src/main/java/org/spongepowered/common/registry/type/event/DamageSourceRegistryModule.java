@@ -26,8 +26,8 @@ package org.spongepowered.common.registry.type.event;
 
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
-import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.registry.util.RegistrationDependency;
+import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 
 @RegistrationDependency(DamageTypeRegistryModule.class)
 public final class DamageSourceRegistryModule implements RegistryModule {

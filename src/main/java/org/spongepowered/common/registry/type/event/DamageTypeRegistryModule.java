@@ -30,9 +30,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.SpongeDamageType;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.Optional;

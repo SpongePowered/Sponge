@@ -32,17 +32,17 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
+public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
 
     public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
     public static final ItemStack NONE = (ItemStack) new net.minecraft.item.ItemStack(ItemTypeRegistryModule.NONE_ITEM);

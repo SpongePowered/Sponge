@@ -40,10 +40,10 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLike
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.ai.SpongeAITaskType;
-import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -115,11 +115,9 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
         return newType;
     }
 
-    private AITaskTypeModule() {
-    }
+    private AITaskTypeModule() {}
 
     private static final class Holder {
-
         private static final AITaskTypeModule INSTANCE = new AITaskTypeModule();
     }
 }

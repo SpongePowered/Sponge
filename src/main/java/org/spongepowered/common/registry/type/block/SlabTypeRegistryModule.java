@@ -32,8 +32,8 @@ import net.minecraft.block.BlockStoneSlab;
 import net.minecraft.block.BlockStoneSlabNew;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.Map;

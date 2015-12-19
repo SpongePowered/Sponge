@@ -31,15 +31,14 @@ import com.google.common.collect.Maps;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.Map;

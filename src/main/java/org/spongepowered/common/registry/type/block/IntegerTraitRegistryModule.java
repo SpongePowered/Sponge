@@ -30,15 +30,15 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.block.trait.IntegerTraits;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class IntegerTraitRegistryModule implements AdditionalCatalogRegistryModule<IntegerTrait> {
+public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<IntegerTrait> {
 
     @RegisterCatalog(IntegerTraits.class)
     private Map<String, IntegerTrait> integerTraitMap = new HashMap<>();

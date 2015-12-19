@@ -30,12 +30,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
-import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
@@ -46,12 +46,12 @@ import java.util.Optional;
 @RegistrationDependency(TextColorRegistryModule.class)
 public final class DisplaySlotRegistryModule implements CatalogRegistryModule<DisplaySlot> {
 
-    @RegisterCatalog(DisplaySlots.class)
-    public final Map<String, SpongeDisplaySlot> displaySlotMappings = Maps.newLinkedHashMap();
-
     public static DisplaySlotRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
+
+    @RegisterCatalog(DisplaySlots.class)
+    public final Map<String, SpongeDisplaySlot> displaySlotMappings = Maps.newLinkedHashMap();
 
     public Optional<DisplaySlot> getForIndex(int id) {
         return Optional.ofNullable(Iterables.get(this.displaySlotMappings.values(), id, null));
@@ -77,6 +77,9 @@ public final class DisplaySlotRegistryModule implements CatalogRegistryModule<Di
             this.displaySlotMappings.put(entry.getValue().getId(),
                                          new SpongeDisplaySlot(entry.getValue().getId(), entry.getValue(), entry.getKey().getColorIndex() + 3));
         }
+    }
+
+    private DisplaySlotRegistryModule() {
     }
 
     private static final class Holder {

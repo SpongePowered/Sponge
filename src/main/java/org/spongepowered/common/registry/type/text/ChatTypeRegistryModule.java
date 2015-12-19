@@ -25,10 +25,10 @@
 package org.spongepowered.common.registry.type.text;
 
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.text.chat.SpongeChatType;
 
 public final class ChatTypeRegistryModule implements RegistryModule {

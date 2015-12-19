@@ -31,8 +31,8 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockRailBase;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.RailDirections;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.Map;

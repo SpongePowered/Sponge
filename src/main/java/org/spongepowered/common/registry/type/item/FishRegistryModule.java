@@ -30,9 +30,9 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.Fishes;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;

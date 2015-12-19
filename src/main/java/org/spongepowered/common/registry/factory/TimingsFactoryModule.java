@@ -27,7 +27,7 @@ package org.spongepowered.common.registry.factory;
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import co.aikar.timings.TimingsFactory;
-import org.spongepowered.common.registry.FactoryRegistry;
+import org.spongepowered.api.registry.FactoryRegistry;
 
 public class TimingsFactoryModule implements FactoryRegistry<TimingsFactory, Timings> {
 

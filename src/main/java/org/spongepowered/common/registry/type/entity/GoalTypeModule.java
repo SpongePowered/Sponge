@@ -33,11 +33,10 @@ import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.ai.SpongeGoalType;
-import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -76,9 +75,6 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
         return ImmutableList.copyOf(this.goalTypes.values());
     }
 
-    private GoalTypeModule() {
-    }
-
     @Override
     public void registerDefaults() {
         createGoalType(SpongeImpl.getMinecraftPlugin(), "normal", "Normal");
@@ -95,6 +91,9 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
         final SpongeGoalType newType = new SpongeGoalType(combinedId, name, (Class<Goal<?>>) (Class<?>) EntityAITasks.class);
         this.goalTypes.put(combinedId, newType);
         return newType;
+    }
+
+    private GoalTypeModule() {
     }
 
     private static final class Holder {

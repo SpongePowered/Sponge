@@ -27,10 +27,10 @@ package org.spongepowered.common.registry.type.text;
 import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.text.serializer.JsonTextSerializer;
 import org.spongepowered.common.text.serializer.PlainTextSerializer;
 import org.spongepowered.common.text.serializer.SpongeFormattingCodeTextSerializer;

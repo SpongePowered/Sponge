@@ -29,11 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.Enchantments;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;

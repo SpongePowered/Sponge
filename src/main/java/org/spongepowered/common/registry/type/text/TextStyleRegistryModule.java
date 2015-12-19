@@ -26,10 +26,10 @@ package org.spongepowered.common.registry.type.text;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.text.format.SpongeTextStyle;
 
 public final class TextStyleRegistryModule implements RegistryModule {

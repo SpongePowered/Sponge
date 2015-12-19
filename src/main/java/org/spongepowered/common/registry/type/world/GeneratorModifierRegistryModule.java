@@ -31,12 +31,12 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.extra.skylands.SkylandsWorldGeneratorModifier;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,7 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class GeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier>, AdditionalCatalogRegistryModule<WorldGeneratorModifier> {
+public class GeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier>,
+        SpongeAdditionalCatalogRegistryModule<WorldGeneratorModifier> {
 
     public static GeneratorModifierRegistryModule getInstance() {
         return Holder.INSTANCE;

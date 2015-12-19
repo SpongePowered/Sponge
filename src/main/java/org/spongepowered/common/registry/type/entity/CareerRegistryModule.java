@@ -30,10 +30,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
+import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.entity.SpongeCareer;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.util.RegistrationDependency;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegistrationDependency(ProfessionRegistryModule.class)
-public class CareerRegistryModule implements AdditionalCatalogRegistryModule<Career> {
+public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModule<Career> {
 
     public static CareerRegistryModule getInstance() {
         return Holder.INSTANCE;

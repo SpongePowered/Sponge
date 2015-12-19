@@ -27,17 +27,19 @@ package org.spongepowered.common.registry.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.RegistrationPhase;
+import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
+import org.spongepowered.api.registry.util.CustomCatalogRegistration;
+import org.spongepowered.api.registry.util.DelayedRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.RegistryModule;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 public final class RegistryModuleLoader {

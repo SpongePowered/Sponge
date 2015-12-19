@@ -24,32 +24,30 @@
  */
 package org.spongepowered.common.registry.type;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<BlockType>, AlternateCatalogRegistryModule<BlockType> {
+public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<BlockType>, AlternateCatalogRegistryModule<BlockType> {
 
     public static BlockTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -111,11 +109,9 @@ public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<
         }
     }
 
-    private BlockTypeRegistryModule() {
-    }
+    private BlockTypeRegistryModule() { }
 
     private static final class Holder {
-
         private static final BlockTypeRegistryModule INSTANCE = new BlockTypeRegistryModule();
     }
 }

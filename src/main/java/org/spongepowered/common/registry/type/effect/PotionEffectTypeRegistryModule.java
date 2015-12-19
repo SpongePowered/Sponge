@@ -31,9 +31,9 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
-import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.ArrayList;
 import java.util.Collection;

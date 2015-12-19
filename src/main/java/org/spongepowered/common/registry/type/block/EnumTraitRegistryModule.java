@@ -30,15 +30,15 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.EnumTraits;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EnumTraitRegistryModule implements AdditionalCatalogRegistryModule<EnumTrait<?>> {
+public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<EnumTrait<?>> {
 
     @RegisterCatalog(EnumTraits.class)
     private Map<String, EnumTrait<?>> enumTraitMap = new HashMap<>();

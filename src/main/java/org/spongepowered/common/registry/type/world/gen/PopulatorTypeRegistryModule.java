@@ -68,12 +68,12 @@ import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenVines;
 import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import net.minecraft.world.gen.feature.WorldGeneratorBonusChest;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.util.CustomCatalogRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.util.CustomCatalogRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 
@@ -90,7 +90,8 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
 
     public final Map<Class<?>, PopulatorType> populatorClassToTypeMappings = Maps.newHashMap();
 
-    @RegisterCatalog(PopulatorTypes.class) protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
+    @RegisterCatalog(PopulatorTypes.class)
+    protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
 
     public Function<Class<?>, PopulatorType> customTypeFunction;
 
@@ -147,7 +148,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorTypeMappings.put("snow", new SpongePopulatorType("snow"));
         this.populatorTypeMappings.put("structure", new SpongePopulatorType("structure"));
         this.populatorTypeMappings.put("unknown", new SpongePopulatorType("unknown"));
-        
+
         this.populatorClassToTypeMappings.put(WorldGenBigMushroom.class, this.populatorTypeMappings.get("big_mushroom"));
         this.populatorClassToTypeMappings.put(WorldGenBigTree.class, this.populatorTypeMappings.get("forest"));
         this.populatorClassToTypeMappings.put(WorldGenBlockBlob.class, this.populatorTypeMappings.get("block_blob"));
@@ -187,11 +188,6 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorClassToTypeMappings.put(WorldGenVines.class, this.populatorTypeMappings.get("vine"));
         this.populatorClassToTypeMappings.put(WorldGenWaterlily.class, this.populatorTypeMappings.get("water_lily"));
         this.populatorClassToTypeMappings.put(GeneratorBushFeature.class, this.populatorTypeMappings.get("mushroom"));
-    }
-
-    @Override
-    public boolean allowsApiRegistration() {
-        return true;
     }
 
     @Override

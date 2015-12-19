@@ -32,14 +32,16 @@ import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
-import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity> {
+public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity>,
+        SpongeAdditionalCatalogRegistryModule<TileEntityType> {
 
 
     private static final Map<String, String> NAME_TO_ID_MAPPING = ImmutableMap.<String, String>builder()

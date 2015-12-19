@@ -30,10 +30,10 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeProfession;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ProfessionRegistryModule implements AdditionalCatalogRegistryModule<Profession> {
+public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistryModule<Profession> {
 
     public static final Profession FARMER = new SpongeProfession(0, "farmer");
     public static final Profession LIBRARIAN = new SpongeProfession(1, "librarian");

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.registry.type.text;
 
+import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.text.translation.locale.Locales;
-import org.spongepowered.common.registry.RegistryModule;
 import org.spongepowered.common.util.LanguageUtil;
 
 import java.lang.reflect.Field;

@@ -28,15 +28,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import net.minecraft.world.WorldProvider;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 
@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public final class DimensionRegistryModule implements AdditionalCatalogRegistryModule<DimensionType> {
+public final class DimensionRegistryModule implements SpongeAdditionalCatalogRegistryModule<DimensionType> {
 
     @RegisterCatalog(DimensionTypes.class)
     private final Map<String, DimensionType> dimensionTypeMappings = Maps.newHashMap();
