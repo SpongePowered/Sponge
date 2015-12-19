@@ -1,0 +1,3 @@
+[submodule "SpongeAPI"]
+	path = SpongeAPI
+	url = https://github.com/OpenSponge/SpongeAPI.git
