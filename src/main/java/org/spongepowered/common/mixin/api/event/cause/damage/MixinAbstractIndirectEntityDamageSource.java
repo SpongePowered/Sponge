@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -44,7 +45,7 @@ import org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSou
  * but still retain the sanity of the proper "damage type" for mods and native
  * Minecraft damage source.
  */
-@Mixin(AbstractEntityDamageSource.class)
+@Mixin(AbstractIndirectEntityDamageSource.class)
 public abstract class MixinAbstractIndirectEntityDamageSource implements IndirectEntityDamageSource {
 
     @Inject(method = "<init>", at = @At("RETURN"))

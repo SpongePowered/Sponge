@@ -3,6 +3,9 @@
     "refmap": "mixins.common.refmap.json",
     "mixins": [
         "ai.MixinAbstractAITask",
+        "event.cause.damage.MixinAbstractDamageSource",
+        "event.cause.damage.MixinAbstractEntityDamageSource",
+        "event.cause.damage.MixinAbstractIndirectEntityDamageSource",
         "text.MixinText",
         "text.MixinTextLiteral",
         "text.MixinTextPlaceholder",
