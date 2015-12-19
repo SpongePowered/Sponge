@@ -81,6 +81,23 @@ jar {
     }
 }
 
+sourceSets {
+    java6 {
+        compileClasspath += main.compileClasspath + main.output
+    }
+}
+
+// Java 6 source set for compatibility checking
+
+jar {
+    from sourceSets.java6.output
+}
+
+compileJava6Java {
+    sourceCompatibility = '1.6'
+    targetCompatibility = '1.6'
+}
+
 // Use checkstyle suppressions from Common
 checkstyle {
     configProperties['suppressions'] = common.file('checkstyle-suppressions.xml')
