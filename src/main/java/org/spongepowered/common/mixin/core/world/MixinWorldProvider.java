@@ -84,8 +84,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     public boolean canCoordinateBeSpawn(int x, int z) {
         if (this.terrainType.equals(GeneratorTypes.THE_END)) {
             return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
-        }
-        else {
+        } else {
             return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)) == Blocks.grass;
         }
     }
@@ -111,7 +110,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public DimensionType getType() {
-        return DimensionRegistryModule.getInstance().getForClass(this.getClass());
+        return DimensionRegistryModule.getInstance().fromProviderId(this.dimensionId);
     }
 
     @Override
@@ -143,7 +142,6 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         return this.dimContext;
     }
 
-    @SuppressWarnings("unchecked")
     @Overwrite
     public static WorldProvider getProviderForDimension(int dimension) {
         WorldProvider provider = DimensionManager.createProviderFor(dimension);

@@ -26,7 +26,6 @@ package org.spongepowered.common;
 
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -74,7 +73,7 @@ public class SpongeImplFactory {
     }
 
     public static boolean blockHasTileEntity(Block block, IBlockState state) {
-        return block instanceof BlockContainer;
+        return block instanceof ITileEntityProvider;
     }
 
     public static int getBlockLightValue(Block block, BlockPos pos, IBlockAccess world) {

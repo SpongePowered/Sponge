@@ -146,12 +146,12 @@ public final class SpongeBootstrap {
                     }
                     if (spongeData.hasKey("dimensionId") && activeConfig.getConfig().getWorld().isWorldEnabled()) {
                         int dimension = spongeData.getInteger("dimensionId");
-                        DimensionRegistryModule.getInstance().dimensionClassMappings.entrySet().forEach(mapEntry -> {
-                            if (mapEntry.getValue().getId().equalsIgnoreCase(spongeData.getString("dimensionType"))) {
+                        DimensionRegistryModule.getInstance().getAll().forEach(dimensionType -> {
+                            if (dimensionType.getId().equalsIgnoreCase(spongeData.getString("dimensionType"))) {
                                 DimensionRegistryModule.getInstance().registerWorldDimensionId(dimension, child.getName());
                                 if (!DimensionManager.isDimensionRegistered(dimension)) {
                                     DimensionManager.registerDimension(dimension,
-                                                                       ((SpongeDimensionType) mapEntry.getValue()).getDimensionTypeId());
+                                                                       ((SpongeDimensionType) dimensionType).getDimensionTypeId());
                                 }
                             }
                         });

@@ -617,7 +617,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.dimension = nbt.getInteger("dimensionId");
         this.uuid = new UUID(nbt.getLong("uuid_most"), nbt.getLong("uuid_least"));
         this.isMod = nbt.getBoolean("isMod");
-        for (DimensionType type : DimensionRegistryModule.getInstance().dimensionClassMappings.values()) {
+        for (DimensionType type : DimensionRegistryModule.getInstance().getAll()) {
             if (type.getId().equalsIgnoreCase(nbt.getString("dimensionType"))) {
                 this.dimensionType = type;
             }

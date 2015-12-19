@@ -64,7 +64,6 @@ import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
@@ -368,21 +367,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
                 worldInfo = new WorldInfo(newWorldSettings, worldFolder);
                 ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
-                if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
-                    if (dim != 0) {
-                        ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
-                    }
-                }
             } else {
                 if (((WorldProperties) worldInfo).getUniqueId() == null || ((WorldProperties) worldInfo).getUniqueId().equals
                         (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
-
-                    if (dim == 0 || dim == -1 || dim == 1) {// if vanilla dimension
-                        if (dim != 0) {
-                            ((WorldProperties) worldInfo).setGeneratorType(GeneratorTypes.DEFAULT);
-                        }
-                    }
                 }
                 worldInfo.setWorldName(levelName);
                 newWorldSettings = new WorldSettings(worldInfo);
@@ -476,7 +464,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (optExisting.isPresent()) {
             return optExisting;
         }
-        
+
         if (!getAllowNether() && !worldName.equals(getFolderName())) {
             SpongeImpl.getLogger().error("Unable to load world " + worldName + ". Multiworld is disabled via allow-nether.");
             return Optional.empty();
@@ -551,7 +539,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (optExisting.isPresent()) {
             return Optional.of(optExisting.get().getProperties());
         }
-        
+
         if (!getAllowNether()) {
             SpongeImpl.getLogger().error("Unable to create world " + worldName + ". Multiworld is disabled via allow-nether.");
             return Optional.empty();

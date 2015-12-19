@@ -28,16 +28,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
+import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.util.DelayedRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -45,34 +47,34 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public final class DimensionRegistryModule implements ExtraClassCatalogRegistryModule<DimensionType, Dimension> {
+public final class DimensionRegistryModule implements AdditionalCatalogRegistryModule<DimensionType> {
 
     @RegisterCatalog(DimensionTypes.class)
     private final Map<String, DimensionType> dimensionTypeMappings = Maps.newHashMap();
-    private final Map<Class<? extends WorldProvider>, SpongeConfig<SpongeConfig.DimensionConfig>> dimensionConfigs = Maps.newHashMap();
-    public final Map<Class<? extends Dimension>, DimensionType> dimensionClassMappings = Maps.newHashMap();
+    private final Map<Integer, SpongeConfig<SpongeConfig.DimensionConfig>> dimensionConfigs = Maps.newHashMap();
+    private final Map<Integer, DimensionType> providerIdMappings = Maps.newHashMap();
     private final Map<Integer, String> worldFolderDimensionIdMappings = Maps.newHashMap();
-    public final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
-
+    private final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
 
     public static DimensionRegistryModule getInstance() {
         return Holder.instance;
     }
 
     @Override
-    public void registerAdditionalCatalog(DimensionType extraCatalog) {
-        this.dimensionTypeMappings.put(extraCatalog.getName().toLowerCase(), extraCatalog);
-        this.dimensionClassMappings.put(extraCatalog.getDimensionClass(), extraCatalog);
+    public void registerAdditionalCatalog(DimensionType dimType) {
+        this.dimensionTypeMappings.put(dimType.getName().toLowerCase(), dimType);
+        this.providerIdMappings.put(((SpongeDimensionType) dimType).getDimensionTypeId(), dimType);
     }
 
-    @Override
-    public boolean hasRegistrationFor(Class<? extends Dimension> mappedClass) {
-        return this.dimensionClassMappings.containsKey(mappedClass);
+    public DimensionType fromProviderId(int id) {
+        return this.providerIdMappings.get(id);
     }
 
-    @Override
-    public DimensionType getForClass(Class<? extends Dimension> clazz) {
-        return this.dimensionClassMappings.get(checkNotNull(clazz));
+    public void unregisterProvider(int id) {
+        DimensionType dimType = this.providerIdMappings.remove(id);
+        if (dimType != null) {
+            this.dimensionTypeMappings.remove(dimType.getName().toLowerCase());
+        }
     }
 
     @Override
@@ -86,6 +88,7 @@ public final class DimensionRegistryModule implements ExtraClassCatalogRegistryM
     }
 
     @Override
+    @DelayedRegistration(RegistrationPhase.POST_INIT)
     public void registerDefaults() {
         DimensionManager.init();
         RegistryHelper.mapFields(DimensionTypes.class, this.dimensionTypeMappings);
@@ -107,31 +110,33 @@ public final class DimensionRegistryModule implements ExtraClassCatalogRegistryM
         this.worldFolderUniqueIdMappings.put(uuid, folderName);
     }
 
-    public boolean isConfigRegistered(Class<? extends WorldProvider> clazz) {
-        return this.dimensionConfigs.containsKey(clazz);
+    public boolean isConfigRegistered(int id) {
+        return this.dimensionConfigs.containsKey(id);
     }
 
-    public void registerConfig(Class<? extends WorldProvider> dimension, SpongeConfig<SpongeConfig.DimensionConfig> config) {
-        this.dimensionConfigs.put(dimension, config);
+    public void registerConfig(int id, SpongeConfig<SpongeConfig.DimensionConfig> config) {
+        this.dimensionConfigs.put(id, config);
     }
 
-    public SpongeConfig<SpongeConfig.DimensionConfig> getConfig(Class<? extends WorldProvider> aClass) {
-        return this.dimensionConfigs.get(aClass);
+    public SpongeConfig<SpongeConfig.DimensionConfig> getConfig(int id) {
+        return this.dimensionConfigs.get(id);
     }
 
     public void validateProvider(WorldProvider provider) {
         if (((IMixinWorldProvider) provider).getDimensionConfig() == null) {
-            if (!isConfigRegistered(provider.getClass())) {
+            int providerId = provider.getDimensionId();
+            if (!isConfigRegistered(providerId)) {
                 String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
                 SpongeConfig<SpongeConfig.DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
-                    SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
-                registerConfig(provider.getClass(), config);
+                        SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
+                registerConfig(providerId, config);
             }
-            ((IMixinWorldProvider) provider).setDimensionConfig(getConfig(provider.getClass()));
+            ((IMixinWorldProvider) provider).setDimensionConfig(getConfig(providerId));
         }
     }
 
-    private DimensionRegistryModule() { }
+    private DimensionRegistryModule() {
+    }
 
     private static final class Holder {
 
