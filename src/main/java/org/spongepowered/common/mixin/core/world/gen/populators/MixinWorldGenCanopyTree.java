@@ -32,7 +32,6 @@ import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
@@ -42,10 +41,6 @@ public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree imple
     public MixinWorldGenCanopyTree(boolean p_i45448_1_) {
         super(p_i45448_1_);
     }
-
-    @Override
-    @Shadow
-    public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
@@ -83,12 +78,11 @@ public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree imple
 
             if (!flag) {
                 return false;
-            } else {
-                Block block = worldIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
+            }
+            Block block = worldIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
 
-                if ((block == Blocks.grass || block == Blocks.dirt) && y < 256 - i - 1) {
-                    return true;
-                }
+            if ((block == Blocks.grass || block == Blocks.dirt) && y < 256 - i - 1) {
+                return true;
             }
         }
         return false;

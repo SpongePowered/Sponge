@@ -107,7 +107,7 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
         {
             position = position.down();
         }
-        if (!field_175913_a.matchesState(worldIn.getBlockState(position))) {
+        if (!field_175913_a.apply(worldIn.getBlockState(position))) {
             return false;
         }
         int i;

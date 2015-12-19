@@ -24,22 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenHugeTrees;
-import net.minecraft.world.gen.feature.WorldGenMegaJungle;
+import java.util.Random;
+
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Random;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.gen.feature.WorldGenHugeTrees;
+import net.minecraft.world.gen.feature.WorldGenMegaJungle;
 
 @Mixin(WorldGenMegaJungle.class)
 public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implements PopulatorObject {
 
-    @Override
-    @Shadow
-    public abstract boolean generate(net.minecraft.world.World worldIn, Random p_180709_2_, BlockPos p_180709_3_);
+    public MixinWorldGenMegaJungle(boolean a, int b, int c, IBlockState d, IBlockState e) {
+        super(a, b, c, d, e);
+    }
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
@@ -53,10 +54,6 @@ public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implemen
         if (generate((net.minecraft.world.World) world, random, pos)) {
             func_180711_a((net.minecraft.world.World) world, random, pos);
         }
-    }
-
-    public MixinWorldGenMegaJungle(boolean p_i45458_1_, int p_i45458_2_, int p_i45458_3_, int p_i45458_4_, int p_i45458_5_) {
-        super(p_i45458_1_, p_i45458_2_, p_i45458_3_, p_i45458_4_, p_i45458_5_);
     }
 
 }

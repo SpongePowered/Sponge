@@ -413,6 +413,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         if (groundcover.isEmpty()) {
             return;
         }
+        int seaLevel = worldIn.getSeaLevel();
         IBlockState currentPlacement = null;
         int k = -1;
         int relativeX = x & 15;
@@ -436,7 +437,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                         continue;
                     }
 
-                    if (currentY >= 62) {
+                    if (currentY >= seaLevel-1) {
                         chunk.setBlockState(relativeZ, currentY, relativeX, currentPlacement);
                         ++i;
                         if (i < groundcover.size()) {
@@ -444,7 +445,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                             k = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                         }
-                    } else if (currentY < 56 - k) {
+                    } else if (currentY < seaLevel - 7 - k) {
                         k = 0;
                         chunk.setBlockState(relativeZ, currentY, relativeX, Blocks.gravel.getDefaultState());
                     } else {

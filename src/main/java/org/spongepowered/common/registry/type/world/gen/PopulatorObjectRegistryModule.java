@@ -27,7 +27,13 @@ package org.spongepowered.common.registry.type.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockOldLeaf;
+import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
@@ -81,20 +87,21 @@ public class PopulatorObjectRegistryModule implements CatalogRegistryModule<Popu
         this.populatorObjectMappings.put("pointy_taiga", (PopulatorObject) new WorldGenTaiga1());
         this.populatorObjectMappings.put("mega_tall_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, true));
         this.populatorObjectMappings.put("mega_pointy_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, false));
-        IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, BlockPlanks.EnumType.JUNGLE.getMetadata(),
-                BlockPlanks.EnumType.JUNGLE.getMetadata(), true);
+        IBlockState jlog = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+        IBlockState jleaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState leaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
         this.populatorObjectMappings.put("jungle", (PopulatorObject) trees);
-        this.populatorObjectMappings.put("mega_jungle", (PopulatorObject) new WorldGenMegaJungle(false, 10, 20,
-                BlockPlanks.EnumType.JUNGLE.getMetadata(), BlockPlanks.EnumType.JUNGLE.getMetadata()));
-        WorldGenShrub bush = new WorldGenShrub(BlockPlanks.EnumType.JUNGLE.getMetadata(), BlockPlanks.EnumType.OAK.getMetadata());
+        this.populatorObjectMappings.put("mega_jungle", (PopulatorObject) new WorldGenMegaJungle(false, 10, 20, jlog, jleaf));
+        WorldGenShrub bush = new WorldGenShrub(jlog, leaf);
         this.populatorObjectMappings.put("jungle_bush", (PopulatorObject) bush);
         this.populatorObjectMappings.put("savanna", (PopulatorObject) new WorldGenSavannaTree(false));
         this.populatorObjectMappings.put("canopy", (PopulatorObject) new WorldGenCanopyTree(false));
         this.populatorObjectMappings.put("swamp", (PopulatorObject) new WorldGenSwamp());
 
         // Mushrooms
-        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(0));
-        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(1));
+        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.brown_mushroom));
+        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.red_mushroom));
     }
 }
