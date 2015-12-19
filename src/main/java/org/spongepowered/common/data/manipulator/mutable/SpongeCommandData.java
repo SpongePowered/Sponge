@@ -41,6 +41,7 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCommandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -49,6 +50,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+@ImplementationRequiredForTest
 public class SpongeCommandData extends AbstractData<CommandData, ImmutableCommandData> implements CommandData {
 
     private String command;
@@ -153,7 +155,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
         return Optional.ofNullable(this.lastOutput);
     }
 
-    public CommandData setLastOutput(Text message) {
+    public SpongeCommandData setLastOutput(Text message) {
         if (checkNotNull(message, "Null message! Use empty text instead!").toString().isEmpty()) {
             this.lastOutput = null;
         } else {
@@ -179,6 +181,10 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
         registerFieldGetter(Keys.TRACKS_OUTPUT, SpongeCommandData.this::tracksOutput);
         registerFieldSetter(Keys.TRACKS_OUTPUT, this::shouldTrackOutput);
         registerKeyValue(Keys.TRACKS_OUTPUT, SpongeCommandData.this::doesTrackOutput);
+
         // Keys.LAST_COMMAND_OUTPUT
+        registerFieldGetter(Keys.LAST_COMMAND_OUTPUT, SpongeCommandData.this::getLastOutput);
+        registerFieldSetter(Keys.LAST_COMMAND_OUTPUT, optional -> this.setLastOutput(optional.orElse(Texts.of())));
+        registerKeyValue(Keys.LAST_COMMAND_OUTPUT, SpongeCommandData.this::lastOutput);
     }
 }
