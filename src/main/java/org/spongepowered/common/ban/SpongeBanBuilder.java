@@ -59,7 +59,7 @@ public class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder profile(org.spongepowered.api.profile.GameProfile profile) {
         checkNotNull(profile, "Profile cannot be null!");
-        checkState(banType == BanTypes.PROFILE, "Cannot set a GameProfile if the BanType is not BanType.USER_BAN!");
+        checkState(banType == BanTypes.PROFILE, "Cannot set a GameProfile if the BanType is not BanTypes.PROFILE!");
         this.profile = profile;
         return this;
     }
@@ -67,7 +67,7 @@ public class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder address(InetAddress address) {
         checkNotNull(address, "Address cannot be null!");
-        checkState(banType == BanTypes.IP, "Cannot set an InetAddress if the BanType is not BanType.IP_BAN!");
+        checkState(banType == BanTypes.IP, "Cannot set an InetAddress if the BanType is not BanTypes.IP!");
         this.address = address;
         return this;
     }

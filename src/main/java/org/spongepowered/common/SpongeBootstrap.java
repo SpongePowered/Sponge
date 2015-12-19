@@ -60,8 +60,7 @@ import java.io.FileInputStream;
 import java.util.UUID;
 
 /**
- * Used to setup the ecosyst
- * em.
+ * Used to setup the ecosystem.
  */
 @NonnullByDefault
 public final class SpongeBootstrap {
@@ -73,8 +72,8 @@ public final class SpongeBootstrap {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));
         }
         registerService(UserStorageService.class, new SpongeUserStorageService());
-        //registerService(BanService.class, new SpongeBanService());
-        //registerService(WhitelistService.class, new SpongeWhitelistService());
+        registerService(BanService.class, new SpongeBanService());
+        registerService(WhitelistService.class, new SpongeWhitelistService());
         SpongeImpl.getGame().getServiceManager().potentiallyProvide(PermissionService.class)
                 .executeWhenPresent(input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
     }
