@@ -27,11 +27,8 @@ package org.spongepowered.common.world;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldSettings.GameType;
 import net.minecraft.world.WorldType;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -41,18 +38,15 @@ import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.TeleporterAgent;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.WorldBuilder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
-import java.util.Optional;
 import java.util.Random;
 
-public class SpongeWorldBuilder implements WorldBuilder {
+public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings.Builder {
 
     private String name;
     private long seed;
@@ -70,11 +64,11 @@ public class SpongeWorldBuilder implements WorldBuilder {
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
 
-    public SpongeWorldBuilder() {
+    public SpongeWorldCreationSettingsBuilder() {
         reset();
     }
 
-    public SpongeWorldBuilder(WorldCreationSettings settings) {
+    public SpongeWorldCreationSettingsBuilder(WorldCreationSettings settings) {
         this.name = settings.getWorldName();
         this.seed = settings.getSeed();
         this.gameMode = settings.getGameMode();
@@ -89,7 +83,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
         this.pvpEnabled = settings.isPVPEnabled();
     }
 
-    public SpongeWorldBuilder(WorldProperties properties) {
+    public SpongeWorldCreationSettingsBuilder(WorldProperties properties) {
         this.name = properties.getWorldName();
         this.seed = properties.getSeed();
         this.gameMode = properties.getGameMode();
@@ -105,7 +99,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
     }
 
     @Override
-    public WorldBuilder fill(WorldCreationSettings settings) {
+    public SpongeWorldCreationSettingsBuilder fill(WorldCreationSettings settings) {
         checkNotNull(settings);
         this.name = settings.getWorldName();
         this.seed = settings.getSeed();
@@ -122,7 +116,7 @@ public class SpongeWorldBuilder implements WorldBuilder {
     }
 
     @Override
-    public WorldBuilder fill(WorldProperties properties) {
+    public SpongeWorldCreationSettingsBuilder fill(WorldProperties properties) {
         checkNotNull(properties);
         this.name = properties.getWorldName();
         this.seed = properties.getSeed();
@@ -139,130 +133,103 @@ public class SpongeWorldBuilder implements WorldBuilder {
     }
 
     @Override
-    public WorldBuilder name(String name) {
+    public SpongeWorldCreationSettingsBuilder name(String name) {
         this.name = name;
         return this;
     }
 
     @Override
-    public WorldBuilder seed(long seed) {
+    public SpongeWorldCreationSettingsBuilder seed(long seed) {
         this.seed = seed;
         return this;
     }
 
     @Override
-    public WorldBuilder gameMode(GameMode gameMode) {
+    public SpongeWorldCreationSettingsBuilder gameMode(GameMode gameMode) {
         this.gameMode = gameMode;
         return this;
     }
 
     @Override
-    public WorldBuilder generator(GeneratorType type) {
+    public SpongeWorldCreationSettingsBuilder generator(GeneratorType type) {
         this.generatorType = type;
         return this;
     }
 
     @Override
-    public WorldBuilder dimensionType(DimensionType type) {
+    public SpongeWorldCreationSettingsBuilder dimension(DimensionType type) {
         this.dimensionType = type;
         return this;
     }
 
     @Override
-    public WorldBuilder usesMapFeatures(boolean enabled) {
+    public SpongeWorldCreationSettingsBuilder usesMapFeatures(boolean enabled) {
         this.mapFeaturesEnabled = enabled;
         return this;
     }
 
     @Override
-    public WorldBuilder hardcore(boolean enabled) {
+    public SpongeWorldCreationSettingsBuilder hardcore(boolean enabled) {
         this.hardcore = enabled;
         return this;
     }
 
     @Override
-    public WorldBuilder enabled(boolean state) {
+    public SpongeWorldCreationSettingsBuilder enabled(boolean state) {
         this.worldEnabled = state;
         return this;
     }
 
     @Override
-    public WorldBuilder loadsOnStartup(boolean state) {
+    public SpongeWorldCreationSettingsBuilder loadsOnStartup(boolean state) {
         this.loadOnStartup = state;
         return this;
     }
 
     @Override
-    public WorldBuilder keepsSpawnLoaded(boolean state) {
+    public SpongeWorldCreationSettingsBuilder keepsSpawnLoaded(boolean state) {
         this.keepSpawnLoaded = state;
         return this;
     }
 
     @Override
-    public WorldBuilder generatorSettings(DataContainer settings) {
+    public SpongeWorldCreationSettingsBuilder generatorSettings(DataContainer settings) {
         this.generatorSettings = settings;
         return this;
     }
 
     @Override
-    public WorldBuilder generatorModifiers(WorldGeneratorModifier... modifiers) {
+    public SpongeWorldCreationSettingsBuilder generatorModifiers(WorldGeneratorModifier... modifiers) {
         ImmutableList<WorldGeneratorModifier> defensiveCopy = ImmutableList.copyOf(modifiers);
         WorldGeneratorRegistry.getInstance().checkAllRegistered(defensiveCopy);
         this.generatorModifiers = defensiveCopy;
         return this;
     }
 
-    public SpongeWorldBuilder dimensionId(int id) {
+    public SpongeWorldCreationSettingsBuilder dimensionId(int id) {
         this.dimensionId = id;
         return this;
     }
 
-    public SpongeWorldBuilder isMod(boolean flag) {
+    public SpongeWorldCreationSettingsBuilder isMod(boolean flag) {
         this.isMod = flag;
         return this;
     }
 
     @Override
-    public WorldBuilder teleporterAgent(TeleporterAgent agent) {
+    public SpongeWorldCreationSettingsBuilder teleporterAgent(TeleporterAgent agent) {
         // TODO
         return null;
     }
 
     @Override
-    public WorldBuilder pvp(boolean enabled) {
+    public SpongeWorldCreationSettingsBuilder pvp(boolean enabled) {
         this.pvpEnabled = enabled;
         return this;
     }
 
     @Override
-    public Optional<World> build() throws IllegalStateException {
-        final WorldCreationSettings settings = buildSettings();
-        ((Server) MinecraftServer.getServer()).createWorld(settings);
-        return ((Server) MinecraftServer.getServer()).loadWorld(settings.getWorldName());
-    }
-
-    @Override
-    public WorldCreationSettings buildSettings() throws IllegalStateException {
-        final WorldSettings settings =
-                new WorldSettings(this.seed, (GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
-                        (WorldType) this.generatorType);
-        settings.setWorldName(this.name);
-        ((IMixinWorldSettings) (Object) settings).setDimensionType(this.dimensionType);
-        ((IMixinWorldSettings) (Object) settings).setGeneratorSettings(this.generatorSettings);
-        ((IMixinWorldSettings) (Object) settings).setGeneratorModifiers(this.generatorModifiers);
-        ((IMixinWorldSettings) (Object) settings).setEnabled(this.worldEnabled);
-        ((IMixinWorldSettings) (Object) settings).setKeepSpawnLoaded(this.keepSpawnLoaded);
-        ((IMixinWorldSettings) (Object) settings).setLoadOnStartup(this.loadOnStartup);
-        if (this.dimensionId != 0) {
-            ((IMixinWorldSettings) (Object) settings).setDimensionId(this.dimensionId);
-            ((IMixinWorldSettings) (Object) settings).setIsMod(this.isMod);
-        }
-        ((IMixinWorldSettings) (Object) settings).setPVPEnabled(this.pvpEnabled);
-        return (WorldCreationSettings) (Object) settings;
-    }
-
-    @Override
-    public WorldBuilder reset() {
+    public SpongeWorldCreationSettingsBuilder reset() {
         this.name = "spongeworld";
         this.seed = new Random().nextLong();
         this.gameMode = GameModes.SURVIVAL;
@@ -281,4 +248,23 @@ public class SpongeWorldBuilder implements WorldBuilder {
         return this;
     }
 
+    @Override
+    public WorldCreationSettings build() {
+        final WorldSettings settings =
+                new WorldSettings(this.seed, (WorldSettings.GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
+                        (WorldType) this.generatorType);
+        settings.setWorldName(this.name);
+        ((IMixinWorldSettings) (Object) settings).setDimensionType(this.dimensionType);
+        ((IMixinWorldSettings) (Object) settings).setGeneratorSettings(this.generatorSettings);
+        ((IMixinWorldSettings) (Object) settings).setGeneratorModifiers(this.generatorModifiers);
+        ((IMixinWorldSettings) (Object) settings).setEnabled(this.worldEnabled);
+        ((IMixinWorldSettings) (Object) settings).setKeepSpawnLoaded(this.keepSpawnLoaded);
+        ((IMixinWorldSettings) (Object) settings).setLoadOnStartup(this.loadOnStartup);
+        if (this.dimensionId != 0) {
+            ((IMixinWorldSettings) (Object) settings).setDimensionId(this.dimensionId);
+            ((IMixinWorldSettings) (Object) settings).setIsMod(this.isMod);
+        }
+        ((IMixinWorldSettings) (Object) settings).setPVPEnabled(this.pvpEnabled);
+        return (WorldCreationSettings) (Object) settings;
+    }
 }

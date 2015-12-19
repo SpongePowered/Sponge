@@ -77,7 +77,7 @@ import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.WorldBuilder;
+import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -125,7 +125,7 @@ import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
-import org.spongepowered.common.world.SpongeWorldBuilder;
+import org.spongepowered.common.world.SpongeWorldCreationSettingsBuilder;
 import org.spongepowered.common.world.gen.builders.*;
 
 import java.lang.reflect.Field;
@@ -182,7 +182,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
             .registerBuilderSupplier(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
             .registerBuilderSupplier(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
-            .registerBuilderSupplier(WorldBuilder.class, SpongeWorldBuilder::new)
+            .registerBuilderSupplier(WorldCreationSettings.Builder.class, SpongeWorldCreationSettingsBuilder::new)
             .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
             .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)

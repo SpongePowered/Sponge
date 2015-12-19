@@ -544,7 +544,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public Optional<WorldProperties> createWorld(WorldCreationSettings settings) {
+    public Optional<WorldProperties> createWorldProperties(WorldCreationSettings settings) {
         String worldName = settings.getWorldName();
         final Optional<World> optExisting = getWorld(worldName);
         if (optExisting.isPresent()) {
