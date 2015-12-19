@@ -73,8 +73,8 @@ public abstract class SpongeGame implements Game {
         this.gameRegistry = checkNotNull(gameRegistry, "gameRegistry");
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
-        this.configManager = new SpongeConfigManager(this.pluginManager);
-        this.commandManager = new SimpleCommandManager(this, LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
+        this.configManager = new SpongeConfigManager();
+        this.commandManager = new SimpleCommandManager(LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
 
     }
 

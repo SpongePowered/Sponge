@@ -113,8 +113,8 @@ public class CommandSponge {
                         INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins"))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
-                        .valueFlag(world(Texts.of("world"), SpongeImpl.getGame()), "-world", "w")
-                        .valueFlag(dimension(Texts.of("dimension"), SpongeImpl.getGame()), "-dimension", "d")
+                        .valueFlag(world(Texts.of("world")), "-world", "w")
+                        .valueFlag(dimension(Texts.of("dimension")), "-dimension", "d")
                         .buildWith(flagChildren)))
                 .executor(nonFlagChildren)
                 .build();

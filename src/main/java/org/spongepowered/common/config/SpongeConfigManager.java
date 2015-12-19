@@ -28,26 +28,19 @@ import com.google.inject.Injector;
 import ninja.leaping.configurate.objectmapping.DefaultObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.config.ConfigRoot;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigManager;
+import org.spongepowered.api.config.ConfigRoot;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.plugin.SpongePluginContainer;
 
 import java.util.Optional;
-import javax.inject.Inject;
 
 /**
  * Implementation of service to manage configurations.
  */
 public class SpongeConfigManager implements ConfigManager {
-    private final PluginManager manager;
-
-    @Inject
-    public SpongeConfigManager(PluginManager manager) {
-        this.manager = manager;
-    }
 
     @Override
     public ConfigRoot getSharedConfig(Object instance) {
@@ -60,7 +53,7 @@ public class SpongeConfigManager implements ConfigManager {
     }
 
     private PluginContainer containerFromInstance(Object instance) {
-        Optional<PluginContainer> container = this.manager.fromInstance(instance);
+        Optional<PluginContainer> container = Sponge.getPluginManager().fromInstance(instance);
         if (container.isPresent()) {
             return container.get();
         } else {
