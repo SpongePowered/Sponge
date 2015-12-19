@@ -1843,9 +1843,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             modifier.modifyWorldGenerator(creationSettings, generatorSettings, newGenerator);
         }
 
-        SpongeImpl.getLogger().debug(String.format("Setting up %s generator with base %s and biome %s", getName(),
-                newGenerator.getBaseGenerationPopulator(), newGenerator.getBiomeGenerator()));
-
         this.spongegen = new SpongeChunkProvider((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
                 newGenerator.getBiomeGenerator());
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
