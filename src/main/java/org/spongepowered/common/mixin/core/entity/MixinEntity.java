@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -42,8 +43,10 @@ import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -55,10 +58,14 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
@@ -68,6 +75,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
@@ -82,8 +90,10 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayDeque;
@@ -866,5 +876,75 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         this.motionY = velocity.getY();
         this.motionZ = velocity.getZ();
         this.velocityChanged = true;
+    }
+
+    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+    public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
+        if (block == Blocks.air) {
+            return;
+        } else if (world.isRemote) {
+            block.onEntityCollidedWithBlock(world, pos, entity);
+            return;
+        }
+
+        if (entity instanceof EntityPlayer) {
+            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
+        }
+
+        // TODO: Add target side support
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
+        SpongeImpl.postEvent(event);
+
+        if (!event.isCancelled()) {
+            block.onEntityCollidedWithBlock(world, pos, entity);
+        }
+        StaticMixinHelper.collidePlayer = null;
+    }
+
+    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
+    public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
+        if (block == Blocks.air) {
+            return;
+        } else if (world.isRemote) {
+            block.onEntityCollidedWithBlock(world, pos, state, entity);
+            return;
+        }
+
+        if (entity instanceof EntityPlayer) {
+            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
+        }
+
+        // TODO: Add target side support
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent( Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
+        SpongeImpl.postEvent(event);
+
+        if (!event.isCancelled()) {
+            block.onEntityCollidedWithBlock(world, pos, state, entity);
+        }
+
+        StaticMixinHelper.collidePlayer = null;
+    }
+
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
+    public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
+        if (block == Blocks.air) {
+            return;
+        } else if (world.isRemote) {
+            block.onFallenUpon(world, pos, entity, fallDistance);
+            return;
+        }
+
+        if (entity instanceof EntityPlayer) {
+            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
+        }
+
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.UP);
+        SpongeImpl.postEvent(event);
+
+        if (!event.isCancelled()) {
+            block.onFallenUpon(world, pos, entity, fallDistance);
+        }
+
+        StaticMixinHelper.collidePlayer = null;
     }
 }
