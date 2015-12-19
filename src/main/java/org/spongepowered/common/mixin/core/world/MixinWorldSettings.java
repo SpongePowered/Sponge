@@ -38,7 +38,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
+import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 
 import java.util.Collection;
 
@@ -169,7 +169,7 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     @Override
     public void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers) {
         ImmutableList<WorldGeneratorModifier> defensiveCopy = ImmutableList.copyOf(modifiers);
-        WorldGeneratorRegistry.getInstance().checkAllRegistered(defensiveCopy);
+        GeneratorModifierRegistryModule.getInstance().checkAllRegistered(defensiveCopy);
         this.generatorModifiers = defensiveCopy;
     }
 

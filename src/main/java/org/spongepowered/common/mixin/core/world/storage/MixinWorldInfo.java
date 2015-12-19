@@ -37,7 +37,6 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
@@ -69,7 +68,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.persistence.NbtTranslator;
-import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,7 +85,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private UUID uuid;
     private DimensionType dimensionType;
     private boolean isMod;
-    private ImmutableCollection<String> generatorModifiers;
+    private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
     private NBTTagList playerUniqueIdNbt;
@@ -151,7 +149,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
         WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
         this.dimensionType = creationSettings.getDimensionType();
-        this.generatorModifiers = WorldGeneratorRegistry.getInstance().toIds(creationSettings.getGeneratorModifiers());
+        this.generatorModifiers = ImmutableList.copyOf(creationSettings.getGeneratorModifiers());
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )
@@ -527,17 +525,14 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
-        if (this.generatorModifiers == null) {
-            return ImmutableList.of();
-        }
-        return WorldGeneratorRegistry.getInstance().toModifiers(this.generatorModifiers);
+        return this.generatorModifiers;
     }
 
     @Override
     public void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers) {
         checkNotNull(modifiers, "modifiers");
 
-        this.generatorModifiers = WorldGeneratorRegistry.getInstance().toIds(modifiers);
+        this.generatorModifiers = ImmutableList.copyOf(modifiers);
     }
 
     @Override
@@ -627,14 +622,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                 this.dimensionType = type;
             }
         }
-
-        // Read generator modifiers
-        NBTTagList generatorModifiersNbt = nbt.getTagList("generatorModifiers", 8);
-        ImmutableList.Builder<String> ids = ImmutableList.builder();
-        for (int i = 0; i < generatorModifiersNbt.tagCount(); i++) {
-            ids.add(generatorModifiersNbt.getStringTagAt(i));
-        }
-        this.generatorModifiers = ids.build();
         this.trackedUniqueIdCount = 0;
         for (int i = 0; i < this.playerUniqueIdNbt.tagCount(); i++) {
             NBTTagCompound valueNbt = this.playerUniqueIdNbt.getCompoundTagAt(i);
@@ -659,14 +646,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
         if (this.isMod) {
             this.spongeNbt.setBoolean("isMod", this.isMod);
-        }
-
-        if (this.generatorModifiers != null) {
-            NBTTagList generatorModifierNbt = new NBTTagList();
-            for (String generatorModifierId : this.generatorModifiers) {
-                generatorModifierNbt.appendTag(new NBTTagString(generatorModifierId));
-            }
-            this.spongeNbt.setTag("generatorModifiers", generatorModifierNbt);
         }
 
         Iterator<UUID> iterator = this.pendingUniqueIds.iterator();

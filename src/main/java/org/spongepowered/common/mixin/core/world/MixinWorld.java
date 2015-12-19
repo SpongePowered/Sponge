@@ -197,6 +197,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -210,7 +211,6 @@ import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
-import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
@@ -332,8 +332,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             SpongeImpl.ECOSYSTEM_ID);
             ((IMixinWorldInfo) info).setWorldConfig(this.worldConfig.getConfig());
             this.keepSpawnLoaded = ((WorldProperties) info).doesKeepSpawnLoaded();
-            List<String> genModifiers = this.worldConfig.getConfig().getWorld().getWorldGenModifiers();
-            this.getProperties().setGeneratorModifiers(WorldGeneratorRegistry.getInstance().toModifiers(genModifiers));
+            Collection<WorldGeneratorModifier> genModifiers = GeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
+            this.getProperties().setGeneratorModifiers(genModifiers);
         }
 
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {

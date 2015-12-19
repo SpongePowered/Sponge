@@ -42,7 +42,7 @@ import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
+import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 
 import java.util.Random;
 
@@ -201,7 +201,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     @Override
     public SpongeWorldCreationSettingsBuilder generatorModifiers(WorldGeneratorModifier... modifiers) {
         ImmutableList<WorldGeneratorModifier> defensiveCopy = ImmutableList.copyOf(modifiers);
-        WorldGeneratorRegistry.getInstance().checkAllRegistered(defensiveCopy);
+        GeneratorModifierRegistryModule.getInstance().checkAllRegistered(defensiveCopy);
         this.generatorModifiers = defensiveCopy;
         return this;
     }

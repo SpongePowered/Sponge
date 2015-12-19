@@ -86,6 +86,7 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.populator.*;
+import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.weather.Weather;
@@ -314,7 +315,8 @@ public final class CommonModuleRegistry {
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
-        ;
+            .registerModule(WorldGeneratorModifier.class, GeneratorModifierRegistryModule.getInstance())
+            ;
     }
 
     private CommonModuleRegistry() { }

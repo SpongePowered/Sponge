@@ -34,6 +34,8 @@ import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AITaskTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -42,6 +44,7 @@ import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 import org.spongepowered.common.registry.type.entity.GoalTypeModule;
+import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -93,6 +96,12 @@ public final class RegistryModuleLoader {
                             goalMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
                         }
                         RegistryHelper.mapFields(GoalTypes.class, goalMap);
+                    } else if (module instanceof GeneratorModifierRegistryModule) {
+                        Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
+                        for (Map.Entry<String, WorldGeneratorModifier> entry : ((Map<String, WorldGeneratorModifier>) map).entrySet()) {
+                            modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
+                        }
+                        RegistryHelper.mapFields(WorldGeneratorModifiers.class, modifierMap);
                     } else {
                         RegistryHelper.mapFields(getCatalogClass(module), map);
                     }

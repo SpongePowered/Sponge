@@ -68,13 +68,13 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
+import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.TopologicalOrder;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
-import org.spongepowered.common.world.gen.WorldGeneratorRegistry;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -240,7 +240,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public void registerWorldGeneratorModifier(WorldGeneratorModifier modifier) {
-        WorldGeneratorRegistry.getInstance().registerModifier(modifier);
+        GeneratorModifierRegistryModule.getInstance().registerModifier(modifier);
     }
 
     @Override

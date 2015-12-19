@@ -322,6 +322,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                 value = CONFIG_ENABLED,
                 comment = "Enabling config will override Dimension and Global.")
         protected boolean configEnabled = true;
+        
+        @Setting(value = WORLD_GEN_MODIFIERS, comment = "WorldGenerationModifiers to apply to the world")
+        private List<String> worldModifiers = new ArrayList<>();
 
         public WorldConfig() {
             this.configEnabled = false;
@@ -333,6 +336,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setConfigEnabled(boolean configEnabled) {
             this.configEnabled = configEnabled;
+        }
+        
+        public List<String> getWorldGenModifiers() {
+            return this.worldModifiers;
         }
     }
 
@@ -850,9 +857,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         
         @Setting(value = WORLD_PVP_ENABLED, comment = "Enable if this world allows PVP combat.")
         protected boolean pvpEnabled = true;
-        
-        @Setting(value = WORLD_GEN_MODIFIERS, comment = "WorldGenerationModifiers to apply to the world")
-        private List<String> worldModifiers = new ArrayList<>();
 
         public boolean hasInfiniteWaterSource() {
             return this.infiniteWaterSource;
@@ -900,10 +904,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPVPEnabled(boolean allow) {
             this.pvpEnabled = allow;
-        }
-        
-        public List<String> getWorldGenModifiers() {
-            return this.worldModifiers;
         }
     }
 

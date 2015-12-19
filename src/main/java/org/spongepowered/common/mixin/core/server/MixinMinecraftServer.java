@@ -49,6 +49,8 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -56,13 +58,11 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
@@ -86,10 +86,11 @@ import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
-import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.util.ServerUtils;
 import org.spongepowered.common.util.SpongeHooks;
@@ -567,10 +568,19 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true);
         }
 
-        WorldConfig worldConfig =
-                new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD, SpongeImpl.getSpongeConfigDir().resolve("worlds")
-                        .resolve(settings.getDimensionType().getId()).resolve(worldName).resolve("world.conf"),
-                        SpongeImpl.ECOSYSTEM_ID).getConfig();
+        SpongeConfig<SpongeConfig.WorldConfig> spongeConfig = new SpongeConfig<SpongeConfig.WorldConfig>(SpongeConfig.Type.WORLD, SpongeImpl.getSpongeConfigDir().resolve("worlds")
+                .resolve(settings.getDimensionType().getId()).resolve(worldName).resolve("world.conf"),
+                SpongeImpl.ECOSYSTEM_ID);
+        WorldConfig worldConfig = spongeConfig.getConfig();
+        
+        if (!settings.getGeneratorModifiers().isEmpty()) {
+            worldConfig.setConfigEnabled(true);
+            worldConfig.getWorldGenModifiers().clear();
+            worldConfig.getWorldGenModifiers().addAll(GeneratorModifierRegistryModule.getInstance().toIds(settings.getGeneratorModifiers()));
+            System.out.println(worldName + " " + worldConfig.getWorldGenModifiers().size() + " " + worldConfig.getWorldGenModifiers());
+            spongeConfig.save();
+        }
+
         WorldInfo worldInfo = savehandler.loadWorldInfo();
 
         if (worldInfo != null) {
