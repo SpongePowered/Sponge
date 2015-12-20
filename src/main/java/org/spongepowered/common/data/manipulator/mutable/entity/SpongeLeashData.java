@@ -1,6 +1,5 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -19,25 +18,18 @@ public class SpongeLeashData extends AbstractSingleData<Entity, LeashData, Immut
         super(LeashData.class, value, Keys.LEASH_HOLDER);
     }
 
-    public SpongeLeashData() {
-        this(null);
-    }
-
     @Override
     public LeashData copy() {
-        checkState(getValue() != null);
         return new SpongeLeashData(getValue());
     }
 
     @Override
     public ImmutableLeashData asImmutable() {
-        checkState(getValue() != null);
         return new ImmutableSpongeLeashData(getValue());
     }
 
     @Override
     public int compareTo(LeashData o) {
-        checkState(getValue() != null);
         return ComparisonChain.start()
                 .compare(getValue().getType().getId(), o.leashHolder().get().getType().getId())
                 .result();
@@ -45,13 +37,11 @@ public class SpongeLeashData extends AbstractSingleData<Entity, LeashData, Immut
 
     @Override
     public Value<Entity> leashHolder() {
-        checkState(getValue() != null);
         return SpongeValueFactory.getInstance().createValue(Keys.LEASH_HOLDER, getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        checkState(getValue() != null);
         return new MemoryDataContainer()
                 .set(Keys.LEASH_HOLDER, getValue());
     }

@@ -14,8 +14,11 @@ import org.spongepowered.common.data.value.immutable.common.ImmutableSpongeEntit
 
 public class ImmutableSpongeLeashData extends AbstractImmutableSingleData<Entity, ImmutableLeashData, LeashData> implements ImmutableLeashData {
 
+    private final ImmutableSpongeEntityValue value;
+
     public ImmutableSpongeLeashData(Entity value) {
         super(ImmutableLeashData.class, value, Keys.LEASH_HOLDER);
+        this.value = new ImmutableSpongeEntityValue<>(Keys.LEASH_HOLDER, value);
     }
 
     @Override
@@ -25,7 +28,7 @@ public class ImmutableSpongeLeashData extends AbstractImmutableSingleData<Entity
 
     @Override
     public ImmutableValue<Entity> leashHolder() {
-        return new ImmutableSpongeEntityValue<>(Keys.LEASH_HOLDER, getValue());
+        return this.value;
     }
 
     @Override

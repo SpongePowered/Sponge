@@ -44,7 +44,7 @@ public class LeashDualProcessor extends AbstractSingleTargetDualProcessor<Entity
 
     @Override
     protected LeashData createManipulator() {
-        return new SpongeLeashData();
+        return new SpongeLeashData(null);
     }
 
     @Override
