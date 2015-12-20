@@ -1,6 +1,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.google.common.collect.ComparisonChain;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCriticalHitData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CriticalHitData;
@@ -31,6 +33,12 @@ public class ImmutableSpongeCriticalHitData extends AbstractImmutableSingleData<
         return ComparisonChain.start()
                 .compare(getValue(), o.criticalHit().get())
                 .result();
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+                .set(Keys.CRITICAL_HIT, getValue());
     }
 
     @Override
