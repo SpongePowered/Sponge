@@ -110,7 +110,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public DimensionType getType() {
-        return DimensionRegistryModule.getInstance().fromProviderId(this.dimensionId);
+        return DimensionRegistryModule.getInstance().fromProviderId(DimensionManager.getProviderType(this.dimensionId));
     }
 
     @Override
