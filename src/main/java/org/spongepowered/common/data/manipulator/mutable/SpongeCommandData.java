@@ -41,6 +41,7 @@ import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCommandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -49,6 +50,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+@ImplementationRequiredForTest
 public class SpongeCommandData extends AbstractData<CommandData, ImmutableCommandData> implements CommandData {
 
     private String command;
