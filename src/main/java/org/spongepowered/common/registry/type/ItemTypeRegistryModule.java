@@ -46,13 +46,21 @@ public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryMo
     public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
     public static final ItemStack NONE = (ItemStack) new net.minecraft.item.ItemStack(ItemTypeRegistryModule.NONE_ITEM);
 
-
     public static ItemTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
     @RegisterCatalog(ItemTypes.class)
     private final Map<String, ItemType> itemTypeMappings = new HashMap<>();
+
+    @Override
+    public Map<String, ItemType> provideCatalogMap(Map<String, ItemType> mapping) {
+        Map<String, ItemType> itemTypeMap = new HashMap<>();
+        for (Map.Entry<String, ItemType> entry : mapping.entrySet()) {
+            itemTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return itemTypeMap;
+    }
 
     @Override
     public Optional<ItemType> getById(String id) {

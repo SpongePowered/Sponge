@@ -49,7 +49,7 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         .put("Trap", "dispenser")
         .put("EnchantTable", "enchantment_table")
         .put("EnderChest", "ender_chest")
-        .put("AirPortal", "end_portal")
+        .put("Airportal", "end_portal")
         .put("FlowerPot", "flower_pot")
         .put("RecordPlayer", "jukebox")
         .put("MobSpawner", "mob_spawner")

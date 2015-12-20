@@ -53,20 +53,30 @@ public class GoalTypeModule implements CatalogRegistryModule<GoalType> {
     private final Map<String, GoalType> goalTypes = new HashMap<>();
 
     @Override
+    public Map<String, GoalType> provideCatalogMap(Map<String, GoalType> mapping) {
+        Map<String, GoalType> goalMap = new HashMap<>();
+        for (Map.Entry<String, GoalType> entry : mapping.entrySet()) {
+            goalMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return goalMap;
+    }
+
+    @Override
     public Optional<GoalType> getById(String id) {
         checkNotNull(id);
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(goalTypes.get(id.toLowerCase()));
+        return Optional.ofNullable(this.goalTypes.get(id.toLowerCase()));
     }
 
     @Override
     public Collection<GoalType> getAll() {
-        return ImmutableList.copyOf(goalTypes.values());
+        return ImmutableList.copyOf(this.goalTypes.values());
     }
 
-    private GoalTypeModule() {}
+    private GoalTypeModule() {
+    }
 
     @Override
     public void registerDefaults() {
@@ -80,12 +90,14 @@ public class GoalTypeModule implements CatalogRegistryModule<GoalType> {
         final PluginContainer pluginContainer = optPluginContainer.get();
         final String combinedId = pluginContainer.getId().toLowerCase() + ":" + id;
 
-        final SpongeGoalType newType = new SpongeGoalType(combinedId, name, (Class<Goal<?>>) (Class) EntityAITasks.class);
-        goalTypes.put(combinedId, newType);
+        @SuppressWarnings("unchecked")
+        final SpongeGoalType newType = new SpongeGoalType(combinedId, name, (Class<Goal<?>>) (Class<?>) EntityAITasks.class);
+        this.goalTypes.put(combinedId, newType);
         return newType;
     }
 
     private static final class Holder {
+
         private static final GoalTypeModule INSTANCE = new GoalTypeModule();
     }
 }

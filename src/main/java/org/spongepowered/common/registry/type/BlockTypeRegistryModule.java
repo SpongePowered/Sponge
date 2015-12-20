@@ -42,6 +42,7 @@ import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,6 +55,14 @@ public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<
     @RegisterCatalog(BlockTypes.class)
     private final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
 
+    @Override
+    public Map<String, BlockType> provideCatalogMap(Map<String, BlockType> mapping) {
+        Map<String, BlockType> blockMap = new HashMap<>();
+        for (Map.Entry<String, BlockType> entry : mapping.entrySet()) {
+            blockMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return blockMap;
+    }
 
     @Override
     public Optional<BlockType> getById(String id) {
@@ -94,9 +103,11 @@ public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<
         }
     }
 
-    private BlockTypeRegistryModule() { }
+    private BlockTypeRegistryModule() {
+    }
 
     private static final class Holder {
+
         private static final BlockTypeRegistryModule INSTANCE = new BlockTypeRegistryModule();
     }
 }

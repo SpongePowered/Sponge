@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import org.spongepowered.api.CatalogType;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 public interface CatalogRegistryModule<T extends CatalogType> extends RegistryModule {
@@ -34,5 +35,9 @@ public interface CatalogRegistryModule<T extends CatalogType> extends RegistryMo
     Optional<T> getById(String id);
 
     Collection<T> getAll();
+
+    default Map<String, T> provideCatalogMap(Map<String, T> mapping) {
+        return mapping;
+    }
 
 }

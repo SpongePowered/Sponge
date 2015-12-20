@@ -26,37 +26,22 @@ package org.spongepowered.common.registry.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.entity.ai.GoalType;
-import org.spongepowered.api.entity.ai.GoalTypes;
-import org.spongepowered.api.entity.ai.task.AITaskType;
-import org.spongepowered.api.entity.ai.task.AITaskTypes;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
-import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
-import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
-import org.spongepowered.common.registry.type.entity.GoalTypeModule;
-import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 public final class RegistryModuleLoader {
 
-    private RegistryModuleLoader() { }
+    private RegistryModuleLoader() {
+    }
 
-    @SuppressWarnings("unchecked")
     public static void tryModulePhaseRegistration(RegistryModule module) {
         try {
             if (requiresCustomRegistration(module)) {
@@ -72,39 +57,7 @@ public final class RegistryModuleLoader {
                     if (map.isEmpty()) {
                         return;
                     }
-                    if (module instanceof ItemTypeRegistryModule) {
-                        Map<String, ItemType> itemTypeMap = new HashMap<>();
-                        for (Map.Entry<String, ItemType> entry : ((Map<String, ItemType>) map).entrySet()) {
-                            itemTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-                        }
-                        RegistryHelper.mapFields(ItemTypes.class, itemTypeMap);
-                    } else if (module instanceof BlockTypeRegistryModule) {
-                        Map<String, BlockType> blockMap = new HashMap<>();
-                        for (Map.Entry<String, BlockType> entry : ((Map<String, BlockType>) map).entrySet()) {
-                            blockMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-                        }
-                        RegistryHelper.mapFields(BlockTypes.class, blockMap);
-                    } else if (module instanceof AITaskTypeModule) {
-                        Map<String, AITaskType> aiMap = new HashMap<>();
-                        for (Map.Entry<String, AITaskType> entry : ((Map<String, AITaskType>) map).entrySet()) {
-                            aiMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-                        }
-                        RegistryHelper.mapFields(AITaskTypes.class, aiMap);
-                    } else if (module instanceof GoalTypeModule) {
-                        Map<String, GoalType> goalMap = new HashMap<>();
-                        for (Map.Entry<String, GoalType> entry : ((Map<String, GoalType>) map).entrySet()) {
-                            goalMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-                        }
-                        RegistryHelper.mapFields(GoalTypes.class, goalMap);
-                    } else if (module instanceof GeneratorModifierRegistryModule) {
-                        Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
-                        for (Map.Entry<String, WorldGeneratorModifier> entry : ((Map<String, WorldGeneratorModifier>) map).entrySet()) {
-                            modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
-                        }
-                        RegistryHelper.mapFields(WorldGeneratorModifiers.class, modifierMap);
-                    } else {
-                        RegistryHelper.mapFields(getCatalogClass(module), map);
-                    }
+                    RegistryHelper.mapFields(getCatalogClass(module), map);
                 }
             }
         } catch (Exception e) {
@@ -131,7 +84,6 @@ public final class RegistryModuleLoader {
         }
         return false;
     }
-
 
     private static boolean hasCatalogRegistration(RegistryModule module) {
         for (Field field : module.getClass().getDeclaredFields()) {
@@ -173,15 +125,18 @@ public final class RegistryModuleLoader {
         return false;
     }
 
-
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Map<String, ?> getCatalogMap(RegistryModule module) {
         for (Field field : module.getClass().getDeclaredFields()) {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
             if (annotation != null) {
                 try {
                     field.setAccessible(true);
-                    return (Map<String, ?>) field.get(module);
+                    Map<String, ?> map = (Map<String, ?>) field.get(module);
+                    if (module instanceof CatalogRegistryModule) {
+                        return ((CatalogRegistryModule) module).provideCatalogMap(map);
+                    }
+                    return map;
                 } catch (Exception e) {
                     SpongeImpl.getLogger().error("Failed to retrieve a registry field from module: " + module.getClass().getCanonicalName());
                 }
@@ -207,7 +162,7 @@ public final class RegistryModuleLoader {
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
             SpongeImpl.getLogger().error("Error when calling custom catalog registration for module: "
-                                         + module.getClass().getCanonicalName(), e);
+                    + module.getClass().getCanonicalName(), e);
         }
     }
 

@@ -46,13 +46,22 @@ public final class CookedFishRegistryModule implements CatalogRegistryModule<Coo
     private final Map<String, CookedFish> fishMap = new HashMap<>();
 
     @Override
+    public Map<String, CookedFish> provideCatalogMap(Map<String, CookedFish> mapping) {
+        Map<String, CookedFish> fishMap = new HashMap<>();
+        for (Map.Entry<String, CookedFish> entry : mapping.entrySet()) {
+            fishMap.put(entry.getKey().replace("cooked.", ""), entry.getValue());
+        }
+        return fishMap;
+    }
+
+    @Override
     public Optional<CookedFish> getById(String id) {
         return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
     public Collection<CookedFish> getAll() {
-       return ImmutableList.copyOf(this.fishMap.values());
+        return ImmutableList.copyOf(this.fishMap.values());
     }
 
     @Override
@@ -74,6 +83,5 @@ public final class CookedFishRegistryModule implements CatalogRegistryModule<Coo
             }
         }
     }
-
 
 }

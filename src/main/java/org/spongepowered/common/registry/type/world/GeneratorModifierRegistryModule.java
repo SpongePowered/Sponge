@@ -44,12 +44,22 @@ import java.util.Map;
 import java.util.Optional;
 
 public class GeneratorModifierRegistryModule implements CatalogRegistryModule<WorldGeneratorModifier> {
-    
+
     public static GeneratorModifierRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(WorldGeneratorModifiers.class) private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
+    @RegisterCatalog(WorldGeneratorModifiers.class)
+    private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
+
+    @Override
+    public Map<String, WorldGeneratorModifier> provideCatalogMap(Map<String, WorldGeneratorModifier> mapping) {
+        Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
+        for (Map.Entry<String, WorldGeneratorModifier> entry : mapping.entrySet()) {
+            modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
+        }
+        return modifierMap;
+    }
 
     @Override
     public Optional<WorldGeneratorModifier> getById(String id) {
@@ -80,11 +90,9 @@ public class GeneratorModifierRegistryModule implements CatalogRegistryModule<Wo
 
     /**
      * Checks that all modifiers are registered.
-     * 
-     * @param modifiers
-     *            The modifiers
-     * @throws IllegalArgumentException
-     *             If a modifier is not registered
+     *
+     * @param modifiers The modifiers
+     * @throws IllegalArgumentException If a modifier is not registered
      */
     public void checkAllRegistered(Collection<WorldGeneratorModifier> modifiers) {
         // We simply call toIds, that checks all world generators
@@ -132,6 +140,7 @@ public class GeneratorModifierRegistryModule implements CatalogRegistryModule<Wo
     }
 
     private static final class Holder {
+
         private static final GeneratorModifierRegistryModule INSTANCE = new GeneratorModifierRegistryModule();
     }
 }

@@ -60,21 +60,30 @@ public class AITaskTypeModule implements CatalogRegistryModule<AITaskType> {
     private final Map<String, AITaskType> aiTaskTypes = new HashMap<>();
 
     @Override
+    public Map<String, AITaskType> provideCatalogMap(Map<String, AITaskType> mapping) {
+        Map<String, AITaskType> aiMap = new HashMap<>();
+        for (Map.Entry<String, AITaskType> entry : mapping.entrySet()) {
+            aiMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return aiMap;
+    }
+
+    @Override
     public Optional<AITaskType> getById(String id) {
         checkNotNull(id);
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(aiTaskTypes.get(id.toLowerCase()));
+        return Optional.ofNullable(this.aiTaskTypes.get(id.toLowerCase()));
     }
 
     @Override
     public Collection<AITaskType> getAll() {
-        return ImmutableList.copyOf(aiTaskTypes.values());
+        return ImmutableList.copyOf(this.aiTaskTypes.values());
     }
 
-    public Optional<AITaskType> getByAIClass(Class clazz) {
-        for (AITaskType type : aiTaskTypes.values()) {
+    public Optional<AITaskType> getByAIClass(Class<?> clazz) {
+        for (AITaskType type : this.aiTaskTypes.values()) {
             if (type.getAIClass().isAssignableFrom(clazz)) {
                 return Optional.of(type);
             }
@@ -95,21 +104,22 @@ public class AITaskTypeModule implements CatalogRegistryModule<AITaskType> {
         createAITaskType(SpongeImpl.getMinecraftPlugin(), "attack_living", "Attack Living", AttackLivingAITask.class);
     }
 
-    public AITaskType createAITaskType(Object plugin, String id, String name, Class<? extends AITask<? extends
-            Agent>> aiClass) {
+    public AITaskType createAITaskType(Object plugin, String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
         final Optional<PluginContainer> optPluginContainer = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         Preconditions.checkArgument(optPluginContainer.isPresent());
         final PluginContainer pluginContainer = optPluginContainer.get();
         final String combinedId = pluginContainer.getId().toLowerCase() + ":" + id;
 
         final SpongeAITaskType newType = new SpongeAITaskType(combinedId, name, aiClass);
-        aiTaskTypes.put(combinedId, newType);
+        this.aiTaskTypes.put(combinedId, newType);
         return newType;
     }
 
-    private AITaskTypeModule() {}
+    private AITaskTypeModule() {
+    }
 
     private static final class Holder {
+
         private static final AITaskTypeModule INSTANCE = new AITaskTypeModule();
     }
 }
