@@ -65,7 +65,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos spawnChunk;
     @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
-    private boolean affectsSpawning = true;
+    private boolean affectsSpawning;
 
     // utility method for getting the total experience at an arbitrary level
     // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()
@@ -120,7 +120,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         if (self.isPlayerSleeping()) {
             if (!this.worldObj.isRemote) {
                 SpongeImpl.postEvent(SpongeEventFactory.
-                        createSleepingEventTick(Cause.of(NamedCause.source(this)),
+                        createSleepingEventTick(SpongeImpl.getGame(), Cause.of(NamedCause.source(this)),
                                                 this.getWorld().createSnapshot(VecHelper.toVector(this.playerLocation)), this));
             }
             return true;

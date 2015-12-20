@@ -26,6 +26,7 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;

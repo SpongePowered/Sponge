@@ -22,11 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.mixin.core.block.tiles;
 
-public class SpongeWorldTypeOverworld extends SpongeWorldType {
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.IMixinWorld;
 
-    public SpongeWorldTypeOverworld() {
-        super("overworld");
+@Mixin(MobSpawnerBaseLogic.class)
+public class MixinMobSpawnerBaseLogic {
+
+    @Redirect(method = "isActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAnyPlayerWithinRangeAt(DDDD)Z"))
+    public boolean onIsActivated(World world, double x, double y, double z, double range) {
+        return ((IMixinWorld) world).isAnyPlayerWithinRangeAtWhoAffectsSpawning(x, y, z, range);
     }
+
 }

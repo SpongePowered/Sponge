@@ -101,6 +101,7 @@
         "block.properties.MixinPropertyEnum",
         "block.properties.MixinPropertyHelper",
         "block.properties.MixinPropertyInteger",
+        "block.tiles.MixinMobSpawnerBaseLogic",
         "block.tiles.MixinTileEntity",
         "block.tiles.MixinTileEntityBanner",
         "block.tiles.MixinTileEntityBeacon",

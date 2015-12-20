@@ -31,11 +31,50 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
-import org.spongepowered.api.data.meta.*;
-import org.spongepowered.api.data.type.*;
-import org.spongepowered.api.effect.particle.*;
-import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.type.BannerPatternShape;
+import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BrickType;
+import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.CoalType;
+import org.spongepowered.api.data.type.ComparatorType;
+import org.spongepowered.api.data.type.CookedFish;
+import org.spongepowered.api.data.type.DirtType;
+import org.spongepowered.api.data.type.DisguisedBlockType;
+import org.spongepowered.api.data.type.DoublePlantType;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.Fish;
+import org.spongepowered.api.data.type.GoldenApple;
+import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.LogAxis;
+import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.PistonType;
+import org.spongepowered.api.data.type.PlantType;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PrismarineType;
+import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.SandType;
+import org.spongepowered.api.data.type.SandstoneType;
+import org.spongepowered.api.data.type.ShrubType;
+import org.spongepowered.api.data.type.SkeletonType;
+import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.data.type.SlabType;
+import org.spongepowered.api.data.type.StairShape;
+import org.spongepowered.api.data.type.StoneType;
+import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.data.type.WallType;
+import org.spongepowered.api.effect.particle.BlockParticle;
+import org.spongepowered.api.effect.particle.ColoredParticle;
+import org.spongepowered.api.effect.particle.ItemParticle;
+import org.spongepowered.api.effect.particle.NoteParticle;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.particle.ResizableParticle;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -205,35 +244,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
             .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new)
             .registerBuilderSupplier(BlockParticle.Builder.class, SpongeParticleEffectBuilder.BuilderBlock::new)
-            .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
-            .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
-            .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
-            .registerBuilderSupplier(Cactus.Builder.class, CactusBuilder::new)
-            .registerBuilderSupplier(DeadBush.Builder.class, DeadBushBuilder::new)
-            .registerBuilderSupplier(DesertWell.Builder.class, DesertWellBuilder::new)
-            .registerBuilderSupplier(DoublePlant.Builder.class, DoublePlantBuilder::new)
-            .registerBuilderSupplier(Dungeon.Builder.class, DungeonBuilder::new)
-            .registerBuilderSupplier(EnderCrystalPlatform.Builder.class, EnderCrystalPlatformBuilder::new)
-            .registerBuilderSupplier(Flower.Builder.class, FlowerBuilder::new)
-            .registerBuilderSupplier(Forest.Builder.class, ForestBuilder::new)
-            .registerBuilderSupplier(Glowstone.Builder.class, GlowstoneBuilder::new)
-            .registerBuilderSupplier(IcePath.Builder.class, IcePathBuilder::new)
-            .registerBuilderSupplier(IceSpike.Builder.class, IceSpikeBuilder::new)
-            .registerBuilderSupplier(Lake.Builder.class, LakeBuilder::new)
-            .registerBuilderSupplier(Melon.Builder.class, MelonBuilder::new)
-            .registerBuilderSupplier(Mushroom.Builder.class, MushroomBuilder::new)
-            .registerBuilderSupplier(NetherFire.Builder.class, NetherFireBuilder::new)
-            .registerBuilderSupplier(Ore.Builder.class, OreBuilder::new)
-            .registerBuilderSupplier(Pumpkin.Builder.class, PumpkinBuilder::new)
-            .registerBuilderSupplier(RandomBlock.Builder.class, RandomBlockBuilder::new)
-            .registerBuilderSupplier(RandomObject.Builder.class, RandomObjectBuilder::new)
-            .registerBuilderSupplier(Reed.Builder.class, ReedBuilder::new)
-            .registerBuilderSupplier(SeaFloor.Builder.class, SeaFloorBuilder::new)
-            .registerBuilderSupplier(Shrub.Builder.class, ShrubBuilder::new)
-            .registerBuilderSupplier(Vine.Builder.class, VineBuilder::new)
-            .registerBuilderSupplier(WaterLily.Builder.class, WaterLilyBuilder::new)
-            .registerBuilderSupplier(Ban.Builder.class, SpongeBanBuilder::new)
-        ;
+            ;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -315,7 +326,6 @@ public final class CommonModuleRegistry {
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
-            .registerModule(WorldGeneratorModifier.class, GeneratorModifierRegistryModule.getInstance())
             ;
     }
 

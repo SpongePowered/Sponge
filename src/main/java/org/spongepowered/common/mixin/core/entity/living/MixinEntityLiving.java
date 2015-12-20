@@ -51,7 +51,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.IMixinWorld;
 
 import java.util.Optional;
 
@@ -113,7 +113,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), leashedEntity);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(SpongeImpl.getGame(),
+                Cause.of(NamedCause.source(playerIn)), leashedEntity);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -126,7 +127,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!this.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
-            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(entity == null ? Cause.of(NamedCause.of("Self", leashedEntity))
+            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(SpongeImpl.getGame(), entity == null ? Cause.of()
                 : Cause.of(NamedCause.source(entity)), leashedEntity);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {

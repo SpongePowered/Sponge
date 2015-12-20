@@ -385,7 +385,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
-            SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)),
+            SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(this)),
                 (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
             final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
@@ -607,7 +607,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
 
-        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)), settings,
+        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(SpongeImpl.getGame(), Cause.of(NamedCause.source(this)), settings,
             (WorldProperties) worldInfo));
         return Optional.of((WorldProperties) worldInfo);
     }

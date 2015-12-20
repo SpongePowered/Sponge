@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
@@ -56,7 +57,7 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.world.IMixinWorldType;
+import org.spongepowered.common.interfaces.IMixinWorldType;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
@@ -142,9 +143,11 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         final IChunkProvider chunkProvider = this.getChunkGenerator(mcWorld, settings);
         final WorldChunkManager chunkManager = this.getChunkManager(mcWorld);
 
-        return new SpongeWorldGenerator((net.minecraft.world.World) world,
-                (BiomeGenerator) chunkManager,
-                SpongeGenerationPopulator.of((WorldServer) world, chunkProvider));
+        return new SpongeWorldGenerator(
+                SpongeBiomeGenerator.of(chunkManager),
+                SpongeGeneratorPopulator.of((WorldServer) world, chunkProvider),
+                ImmutableList.<GeneratorPopulator> of(),
+                ImmutableList.<Populator> of());
     }
 
     @Override
@@ -153,7 +156,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
 
         if (world.getWorldType() == WorldType.FLAT) {
             spawnHeight = 4;
-        } else if (world.getWorldType() == GeneratorTypes.THE_END) {
+        } else if (world.getWorldType() == GeneratorTypes.END) {
             spawnHeight = 50;
         }
         return spawnHeight;
@@ -189,6 +192,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         // return GeneratorTypes.NETHER in Sponge (for example, blame mods and Mojang)
 
         final IChunkProvider provider;
+
         if ((Object) this == WorldType.FLAT) {
             provider = new ChunkProviderFlat(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(),
                     generatorOptions);
