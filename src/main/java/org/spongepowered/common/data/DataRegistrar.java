@@ -761,6 +761,11 @@ public class DataRegistrar {
                 ImmutableSpongeCriticalHitData.class, criticalHitDualProcessor);
         dataManager.registerValueProcessor(Keys.CRITICAL_HIT, criticalHitDualProcessor);
 
+        final TradeOfferDualProcessor tradeOfferDualProcessor = new TradeOfferDualProcessor();
+        dataManager.registerDataProcessorAndImpl(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
+                ImmutableSpongeTradeOfferData.class, tradeOfferDualProcessor);
+        dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDualProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 

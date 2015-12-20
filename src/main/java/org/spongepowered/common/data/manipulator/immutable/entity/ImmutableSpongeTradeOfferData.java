@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
@@ -35,11 +37,17 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeTradeOfferData;
 import java.util.List;
 
 public class ImmutableSpongeTradeOfferData extends AbstractImmutableSingleListData<TradeOffer, ImmutableTradeOfferData, TradeOfferData>
-    implements ImmutableTradeOfferData {
+        implements ImmutableTradeOfferData {
 
     public ImmutableSpongeTradeOfferData(List<TradeOffer> offers) {
         super(ImmutableTradeOfferData.class, offers, Keys.TRADE_OFFERS, SpongeTradeOfferData.class);
         registerGetters();
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+                .set(Keys.TRADE_OFFERS, getValue());
     }
 
     @Override
