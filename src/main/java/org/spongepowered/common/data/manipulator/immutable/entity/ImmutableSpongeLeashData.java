@@ -1,6 +1,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.google.common.collect.ComparisonChain;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableLeashData;
 import org.spongepowered.api.data.manipulator.mutable.entity.LeashData;
@@ -31,6 +33,12 @@ public class ImmutableSpongeLeashData extends AbstractImmutableSingleData<Entity
         return ComparisonChain.start()
                 .compare(getValue().getType().getId(), o.leashHolder().get().getType().getId())
                 .result();
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+                .set(Keys.LEASH_HOLDER, getValue());
     }
 
     @Override
