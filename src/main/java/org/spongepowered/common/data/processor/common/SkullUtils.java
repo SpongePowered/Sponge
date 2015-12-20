@@ -125,7 +125,7 @@ public class SkullUtils {
         }
         // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
         final GameProfileManager resolver = Sponge.getGame().getServer().getGameProfileManager();
-        if (profile.getName() == null || profile.getName().isEmpty()) {
+        if (!profile.getName().isPresent() || profile.getName().get().isEmpty()) {
             final ListenableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
             try {
                 return future.get();
@@ -134,7 +134,7 @@ public class SkullUtils {
                 return null;
             }
         } else if (profile.getUniqueId() == null) {
-            final ListenableFuture<GameProfile> future = resolver.get(profile.getName());
+            final ListenableFuture<GameProfile> future = resolver.get(profile.getName().get());
             try {
                 return future.get();
             } catch (InterruptedException | ExecutionException e) {
