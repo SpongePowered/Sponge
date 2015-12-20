@@ -34,9 +34,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.util.DelayedRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -88,7 +86,6 @@ public final class DimensionRegistryModule implements AdditionalCatalogRegistryM
     }
 
     @Override
-    @DelayedRegistration(RegistrationPhase.POST_INIT)
     public void registerDefaults() {
         DimensionManager.init();
         RegistryHelper.mapFields(DimensionTypes.class, this.dimensionTypeMappings);
