@@ -56,6 +56,11 @@ public abstract class MixinIPBanList extends UserList {
 
     @Override
     public boolean hasEntry(Object object) {
+        String entry = (String) object;
+        if (entry.equals("local")) { // Check for single player
+            return false;
+        }
+
         try {
             return Sponge.getServiceManager().provideUnchecked(BanService.class).isBanned(InetAddress.getByName((String) object));
         } catch (UnknownHostException e) {
@@ -65,6 +70,11 @@ public abstract class MixinIPBanList extends UserList {
 
     @Override
     public UserListEntry getEntry(Object object) {
+        String entry = (String) object;
+        if (entry.equals("local")) { // Check for single player
+            return null;
+        }
+
         try {
             return (UserListEntry) Sponge.getServiceManager().provideUnchecked(BanService.class).getBanFor(InetAddress.getByName((String) object)).orElse(null);
         } catch (UnknownHostException e) {
@@ -74,6 +84,11 @@ public abstract class MixinIPBanList extends UserList {
 
     @Override
     public void removeEntry(Object object) {
+        String entry = (String) object;
+        if (entry.equals("local")) { // Check for single player
+            return;
+        }
+
         try {
             Sponge.getServiceManager().provideUnchecked(BanService.class).pardon(InetAddress.getByName((String) object));
         } catch (UnknownHostException e) {
