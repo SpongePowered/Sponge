@@ -41,7 +41,6 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
@@ -98,7 +97,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 @Singleton
@@ -298,11 +296,6 @@ public class SpongeGameRegistry implements GameRegistry {
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public GameProfile createGameProfile(UUID uuid, String name) {
-        return (GameProfile) new com.mojang.authlib.GameProfile(uuid, name);
     }
 
     @Override
