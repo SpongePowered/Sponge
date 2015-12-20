@@ -40,10 +40,12 @@ import org.spongepowered.api.world.gen.type.MushroomType;
 
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public class MushroomBuilder implements Mushroom.Builder {
 
     private ChanceTable<MushroomType> types;
-    private Function<Location<Chunk>, MushroomType> override;
+    @Nullable private Function<Location<Chunk>, MushroomType> override;
     private VariableAmount count;
 
     public MushroomBuilder() {
@@ -72,9 +74,18 @@ public class MushroomBuilder implements Mushroom.Builder {
     }
 
     @Override
-    public Builder supplier(Function<Location<Chunk>, MushroomType> override) {
+    public Builder supplier(@Nullable Function<Location<Chunk>, MushroomType> override) {
         this.override = override;
         return this;
+    }
+
+    @Override
+    public Builder from(Mushroom value) {
+        ChanceTable<MushroomType> table = new ChanceTable<>();
+        table.addAll(value.getTypes());
+        return types(table)
+            .mushroomsPerChunk(value.getMushroomsPerChunk())
+            .supplier(value.getSupplierOverride().orElse(null));
     }
 
     @Override
@@ -88,7 +99,7 @@ public class MushroomBuilder implements Mushroom.Builder {
     @Override
     public Mushroom build() throws IllegalStateException {
         Mushroom populator = (Mushroom) new GeneratorBushFeature(Blocks.brown_mushroom);
-        populator.getType().addAll(this.types);
+        populator.getTypes().addAll(this.types);
         populator.setMushroomsPerChunk(this.count);
         populator.setSupplierOverride(this.override);
         return populator;

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.util.AxisAlignedBB;
@@ -50,7 +51,7 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
 
     @Override
     public Class<? extends Living> getTargetClass() {
-        return targetClass;
+        return this.targetClass;
     }
 
     @Override
@@ -61,7 +62,7 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
 
     @Override
     public int getChance() {
-        return targetChance;
+        return this.targetChance;
     }
 
     @Override
@@ -76,8 +77,13 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
         return this;
     }
 
+    @Override
+    public java.util.function.Predicate<Living> getFilter() {
+        return this.targetEntitySelector == null ? GuavaJavaUtils.asJavaPredicate(Predicates.alwaysTrue()) : GuavaJavaUtils.asJavaPredicate(this.targetEntitySelector);
+    }
+
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABB(Ljava/lang/Class;"
-            + "Lnet/minecraft/util/AxisAlignedBB;Lcom/google/common/base/Predicate;)Ljava/util/List;"))
+                                                                            + "Lnet/minecraft/util/AxisAlignedBB;Lcom/google/common/base/Predicate;)Ljava/util/List;"))
     public List<Entity> onGetEntitiesWithinAABB(World world, Class clazz, AxisAlignedBB aabb, Predicate predicate) {
         List<Entity> entities = new ArrayList<>();
         for (Entity entity : (List<Entity>) world.getEntities(this.targetClass, predicate)) {

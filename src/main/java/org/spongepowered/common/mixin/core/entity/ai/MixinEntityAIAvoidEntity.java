@@ -33,6 +33,7 @@ import org.spongepowered.common.util.GuavaJavaUtils;
 
 import java.util.function.Predicate;
 
+@SuppressWarnings("rawtypes")
 @Mixin(EntityAIAvoidEntity.class)
 public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase implements AvoidEntityAITask {
 
@@ -40,6 +41,12 @@ public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase impleme
     @Shadow private double nearSpeed;
     @Shadow private float avoidDistance;
     @Shadow private com.google.common.base.Predicate avoidTargetSelector;
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Predicate<Entity> getTargetSelector() {
+        return GuavaJavaUtils.asJavaPredicate(this.avoidTargetSelector);
+    }
 
     @Override
     public AvoidEntityAITask setTargetSelector(Predicate<Entity> predicate) {
@@ -49,7 +56,7 @@ public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase impleme
 
     @Override
     public float getSearchDistance() {
-        return avoidDistance;
+        return this.avoidDistance;
     }
 
     @Override
@@ -60,7 +67,7 @@ public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase impleme
 
     @Override
     public double getCloseRangeSpeed() {
-        return nearSpeed;
+        return this.nearSpeed;
     }
 
     @Override
@@ -71,7 +78,7 @@ public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase impleme
 
     @Override
     public double getFarRangeSpeed() {
-        return farSpeed;
+        return this.farSpeed;
     }
 
     @Override

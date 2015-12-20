@@ -68,6 +68,14 @@ public class GlowstoneBuilder implements Glowstone.Builder {
     }
 
     @Override
+    public Builder from(Glowstone value) {
+        return perChunk(value.getClustersPerChunk())
+            .blocksPerCluster(value.getAttemptsPerCluster())
+            .clusterHeight(value.getClusterHeight())
+            .height(value.getHeight());
+    }
+
+    @Override
     public Builder reset() {
         this.count = VariableAmount.baseWithRandomAddition(1, 10);
         this.attempts = VariableAmount.fixed(1500);

@@ -35,6 +35,7 @@ import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.ai.SpongeGoalType;
+import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -43,7 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class GoalTypeModule implements CatalogRegistryModule<GoalType> {
+public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> {
 
     public static GoalTypeModule getInstance() {
         return Holder.INSTANCE;
@@ -53,9 +54,9 @@ public class GoalTypeModule implements CatalogRegistryModule<GoalType> {
     private final Map<String, GoalType> goalTypes = new HashMap<>();
 
     @Override
-    public Map<String, GoalType> provideCatalogMap(Map<String, GoalType> mapping) {
+    public Map<String, GoalType> provideCatalogMap() {
         Map<String, GoalType> goalMap = new HashMap<>();
-        for (Map.Entry<String, GoalType> entry : mapping.entrySet()) {
+        for (Map.Entry<String, GoalType> entry : this.goalTypes.entrySet()) {
             goalMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
         return goalMap;

@@ -42,53 +42,16 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
 
 
-public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
+public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<ParticleEffect, ParticleEffect.Builder> implements ParticleEffect.Builder {
 
-    protected SpongeParticleType type;
 
-    protected Vector3d motion = Vector3d.ZERO;
-    protected Vector3d offset = Vector3d.ZERO;
-
-    protected int count = 1;
-
-    @Override
-    public ParticleEffect.Builder type(ParticleType particleType) {
-        this.type = (SpongeParticleType) particleType;
-        return this;
-    }
-
-    @Override
-    public SpongeParticleEffectBuilder motion(Vector3d motion) {
-        checkNotNull(motion, "The motion vector cannot be null! Use Vector3d.ZERO instead!");
-        this.motion = motion;
-        return this;
-    }
-
-    @Override
-    public SpongeParticleEffectBuilder offset(Vector3d offset) {
-        checkNotNull(offset, "The offset vector cannot be null! Use Vector3d.ZERO instead!");
-        this.offset = offset;
-        return this;
-    }
-
-    @Override
-    public SpongeParticleEffectBuilder count(int count) throws IllegalArgumentException {
-        checkArgument(count > 0, "The count has to be greater then zero!");
-        this.count = count;
-        return this;
-    }
 
     @Override
     public SpongeParticleEffect build() throws IllegalStateException {
         return new SpongeParticleEffect(this.type, this.motion, this.offset, this.count);
     }
 
-    @Override
-    public SpongeParticleEffectBuilder reset() {
-        return this;
-    }
-
-    public static class BuilderColorable extends SpongeParticleEffectBuilder implements ColoredParticle.Builder {
+    public static class BuilderColorable extends AbstractParticleEffectBuilder<ColoredParticle, ColoredParticle.Builder> implements ColoredParticle.Builder {
 
         private Color color;
 
@@ -99,26 +62,6 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
             return this;
         }
 
-        @Override
-        public BuilderColorable type(ParticleType particleType) {
-            checkArgument(particleType instanceof ParticleType.Colorable);
-            return (BuilderColorable) super.type(particleType);
-        }
-
-        @Override
-        public BuilderColorable motion(Vector3d motion) {
-            return (BuilderColorable) super.motion(motion);
-        }
-
-        @Override
-        public BuilderColorable offset(Vector3d motion) {
-            return (BuilderColorable) super.offset(motion);
-        }
-
-        @Override
-        public BuilderColorable count(int count) {
-            return (BuilderColorable) super.count(count);
-        }
 
         @Override
         public SpongeParticleEffect.Colored build() {
@@ -127,12 +70,14 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
 
         @Override
         public BuilderColorable reset() {
+            super.reset();
+            this.color = null;
             return (BuilderColorable) super.reset();
         }
 
     }
 
-    public static class BuilderResizable extends SpongeParticleEffectBuilder implements ResizableParticle.Builder {
+    public static class BuilderResizable extends AbstractParticleEffectBuilder<ResizableParticle, ResizableParticle.Builder> implements ResizableParticle.Builder {
 
         private float size;
 
@@ -145,39 +90,19 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
         }
 
         @Override
-        public BuilderResizable type(ParticleType particleType) {
-            checkArgument(particleType instanceof ParticleType.Resizable);
-            return (BuilderResizable) super.type(particleType);
-        }
-
-        @Override
-        public BuilderResizable motion(Vector3d motion) {
-            return (BuilderResizable) super.motion(motion);
-        }
-
-        @Override
-        public BuilderResizable offset(Vector3d offset) {
-            return (BuilderResizable) super.offset(offset);
-        }
-
-        @Override
-        public BuilderResizable count(int count) {
-            return (BuilderResizable) super.count(count);
-        }
-
-        @Override
         public SpongeParticleEffect.Resized build() {
             return new SpongeParticleEffect.Resized(this.type, this.motion, this.offset, this.size, this.count);
         }
 
         @Override
         public BuilderResizable reset() {
+            this.size = 0;
             return (BuilderResizable) super.reset();
         }
 
     }
 
-    public static class BuilderNote extends SpongeParticleEffectBuilder implements NoteParticle.Builder {
+    public static class BuilderNote extends AbstractParticleEffectBuilder<NoteParticle, NoteParticle.Builder> implements NoteParticle.Builder {
 
         private NotePitch note;
 
@@ -194,19 +119,10 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
             return (BuilderNote) super.type(particleType);
         }
 
-        @Override
-        public BuilderNote motion(Vector3d motion) {
-            return (BuilderNote) super.motion(motion);
-        }
 
         @Override
-        public BuilderNote offset(Vector3d offset) {
-            return (BuilderNote) super.offset(offset);
-        }
-
-        @Override
-        public BuilderNote count(int count) {
-            return (BuilderNote) super.count(count);
+        public NoteParticle.Builder from(NoteParticle value) {
+            return super.from(value);
         }
 
         @Override
@@ -214,14 +130,16 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
             return new SpongeParticleEffect.Note(this.type, this.motion, this.offset, this.note, this.count);
         }
 
+
         @Override
         public BuilderNote reset() {
+            this.note = null;
             return (BuilderNote) super.reset();
         }
 
     }
 
-    public static class BuilderMaterial extends SpongeParticleEffectBuilder implements ItemParticle.Builder {
+    public static class BuilderMaterial extends AbstractParticleEffectBuilder<ItemParticle, ItemParticle.Builder> implements ItemParticle.Builder {
 
         private ItemStackSnapshot item;
 
@@ -238,20 +156,6 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
             return (BuilderMaterial) super.type(particleType);
         }
 
-        @Override
-        public BuilderMaterial motion(Vector3d motion) {
-            return (BuilderMaterial) super.motion(motion);
-        }
-
-        @Override
-        public BuilderMaterial offset(Vector3d offset) {
-            return (BuilderMaterial) super.offset(offset);
-        }
-
-        @Override
-        public BuilderMaterial count(int count) {
-            return (BuilderMaterial) super.count(count);
-        }
 
         @Override
         public SpongeParticleEffect.Materialized build() {
@@ -260,12 +164,13 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
 
         @Override
         public BuilderMaterial reset() {
+            this.item = null;
             return (BuilderMaterial) super.reset();
         }
 
     }
 
-    public static class BuilderBlock extends SpongeParticleEffectBuilder implements BlockParticle.Builder {
+    public static class BuilderBlock extends AbstractParticleEffectBuilder<BlockParticle, BlockParticle.Builder> implements BlockParticle.Builder {
 
         private BlockState blockState;
 
@@ -277,22 +182,8 @@ public class SpongeParticleEffectBuilder implements ParticleEffect.Builder {
 
         @Override
         public BuilderBlock type(ParticleType particleType) {
+            checkArgument(particleType instanceof ParticleType.Material);
             return (BuilderBlock) super.type(particleType);
-        }
-
-        @Override
-        public BuilderBlock motion(Vector3d motion) {
-            return (BuilderBlock) super.motion(motion);
-        }
-
-        @Override
-        public BuilderBlock offset(Vector3d offset) {
-            return (BuilderBlock) super.offset(offset);
-        }
-
-        @Override
-        public BuilderBlock count(int count) {
-            return (BuilderBlock) super.count(count);
         }
 
         @Override

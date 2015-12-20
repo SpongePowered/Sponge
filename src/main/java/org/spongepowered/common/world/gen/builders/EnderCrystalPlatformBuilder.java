@@ -64,6 +64,13 @@ public class EnderCrystalPlatformBuilder implements EnderCrystalPlatform.Builder
     }
 
     @Override
+    public Builder from(EnderCrystalPlatform value) {
+        return chance(value.getSpawnProbability())
+            .height(value.getHeight())
+            .radius(value.getRadius());
+    }
+
+    @Override
     public Builder reset() {
         this.chance = 0.2;
         this.radius = VariableAmount.baseWithRandomAddition(1, 4);

@@ -59,7 +59,7 @@ public class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder profile(org.spongepowered.api.profile.GameProfile profile) {
         checkNotNull(profile, "Profile cannot be null!");
-        checkState(banType == BanTypes.PROFILE, "Cannot set a GameProfile if the BanType is not BanTypes.PROFILE!");
+        checkState(this.banType == BanTypes.PROFILE, "Cannot set a GameProfile if the BanType is not BanTypes.PROFILE!");
         this.profile = profile;
         return this;
     }
@@ -67,7 +67,7 @@ public class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder address(InetAddress address) {
         checkNotNull(address, "Address cannot be null!");
-        checkState(banType == BanTypes.IP, "Cannot set an InetAddress if the BanType is not BanTypes.IP!");
+        checkState(this.banType == BanTypes.IP, "Cannot set an InetAddress if the BanType is not BanTypes.IP!");
         this.address = address;
         return this;
     }
@@ -131,8 +131,14 @@ public class SpongeBanBuilder implements Ban.Builder {
 
             // This *should* be a static method, but apparently not...
             BanList ipBans = MinecraftServer.getServer().getConfigurationManager().getBannedIPs();
-            return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(address, 0)), this.start, sourceName, this.end, Texts.legacy().to(this.reason));
+            return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), this.start, sourceName, this.end, Texts.legacy().to(this.reason));
         }
+    }
+
+    @Override
+    public Ban.Builder from(Ban value) {
+        reset();
+        return this;
     }
 
     @Override

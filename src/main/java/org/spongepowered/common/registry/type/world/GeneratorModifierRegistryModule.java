@@ -34,6 +34,7 @@ import org.spongepowered.api.extra.skylands.SkylandsWorldGeneratorModifier;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -43,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class GeneratorModifierRegistryModule implements CatalogRegistryModule<WorldGeneratorModifier> {
+public class GeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier> {
 
     public static GeneratorModifierRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -53,9 +54,9 @@ public class GeneratorModifierRegistryModule implements CatalogRegistryModule<Wo
     private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
 
     @Override
-    public Map<String, WorldGeneratorModifier> provideCatalogMap(Map<String, WorldGeneratorModifier> mapping) {
+    public Map<String, WorldGeneratorModifier> provideCatalogMap() {
         Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
-        for (Map.Entry<String, WorldGeneratorModifier> entry : mapping.entrySet()) {
+        for (Map.Entry<String, WorldGeneratorModifier> entry : this.modifierMappings.entrySet()) {
             modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
         }
         return modifierMap;

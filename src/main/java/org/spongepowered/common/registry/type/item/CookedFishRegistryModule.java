@@ -31,6 +31,7 @@ import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.common.data.type.SpongeCookedFish;
+import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
@@ -40,15 +41,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class CookedFishRegistryModule implements CatalogRegistryModule<CookedFish> {
+public final class CookedFishRegistryModule implements AlternateCatalogRegistryModule<CookedFish> {
 
     @RegisterCatalog(CookedFishes.class)
     private final Map<String, CookedFish> fishMap = new HashMap<>();
 
     @Override
-    public Map<String, CookedFish> provideCatalogMap(Map<String, CookedFish> mapping) {
+    public Map<String, CookedFish> provideCatalogMap() {
         Map<String, CookedFish> fishMap = new HashMap<>();
-        for (Map.Entry<String, CookedFish> entry : mapping.entrySet()) {
+        for (Map.Entry<String, CookedFish> entry : this.fishMap.entrySet()) {
             fishMap.put(entry.getKey().replace("cooked.", ""), entry.getValue());
         }
         return fishMap;

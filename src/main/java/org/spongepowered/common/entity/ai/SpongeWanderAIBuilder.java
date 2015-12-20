@@ -47,6 +47,12 @@ public final class SpongeWanderAIBuilder implements WanderAITask.Builder {
     }
 
     @Override
+    public WanderAITask.Builder from(WanderAITask value) {
+        return speed(value.getSpeed())
+            .executionChance(value.getExecutionChance());
+    }
+
+    @Override
     public WanderAITask.Builder reset() {
         this.speed = 1;
         this.executionChance = 1;

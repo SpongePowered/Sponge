@@ -39,10 +39,12 @@ import org.spongepowered.api.world.gen.populator.DoublePlant.Builder;
 
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public class DoublePlantBuilder implements DoublePlant.Builder {
 
     private WeightedTable<DoublePlantType> types;
-    private Function<Location<Chunk>, DoublePlantType> override;
+    @Nullable private Function<Location<Chunk>, DoublePlantType> override;
     private VariableAmount count;
 
     public DoublePlantBuilder() {
@@ -71,8 +73,18 @@ public class DoublePlantBuilder implements DoublePlant.Builder {
     }
 
     @Override
-    public Builder supplier(Function<Location<Chunk>, DoublePlantType> override) {
+    public Builder supplier(@Nullable Function<Location<Chunk>, DoublePlantType> override) {
         this.override = override;
+        return this;
+    }
+
+    @Override
+    public Builder from(DoublePlant value) {
+        WeightedTable<DoublePlantType> table = new WeightedTable<>();
+        table.addAll(value.getPossibleTypes());
+        types(table);
+        perChunk(value.getPlantsPerChunk());
+        supplier(value.getSupplierOverride().orElse(null));
         return this;
     }
 

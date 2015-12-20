@@ -113,6 +113,15 @@ public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
     }
 
     @Override
+    public FireworkEffect.Builder from(FireworkEffect value) {
+        return trail(value.hasTrail())
+            .colors(value.getColors())
+            .fades(value.getFadeColors())
+            .shape(value.getShape())
+            .flicker(value.flickers());
+    }
+
+    @Override
     public SpongeFireworkEffectBuilder reset() {
         this.trail = false;
         this.flicker = false;

@@ -36,6 +36,7 @@ import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
@@ -46,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<BlockType> {
+public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<BlockType>, AlternateCatalogRegistryModule<BlockType> {
 
     public static BlockTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -56,9 +57,9 @@ public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<
     private final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
 
     @Override
-    public Map<String, BlockType> provideCatalogMap(Map<String, BlockType> mapping) {
+    public Map<String, BlockType> provideCatalogMap() {
         Map<String, BlockType> blockMap = new HashMap<>();
-        for (Map.Entry<String, BlockType> entry : mapping.entrySet()) {
+        for (Map.Entry<String, BlockType> entry : this.blockTypeMappings.entrySet()) {
             blockMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
         return blockMap;

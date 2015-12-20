@@ -41,6 +41,11 @@ public final class SpongeSwimmingAIBuilder implements SwimmingAITask.Builder {
     }
 
     @Override
+    public SwimmingAITask.Builder from(SwimmingAITask value) {
+        return swimChance(value.getSwimChance());
+    }
+
+    @Override
     public SwimmingAITask.Builder reset() {
         this.chance = 0.8f;
         return this;

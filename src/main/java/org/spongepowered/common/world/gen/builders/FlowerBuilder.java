@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 public class FlowerBuilder implements Flower.Builder {
 
     private WeightedTable<PlantType> flowers;
-    private Function<Location<Chunk>, PlantType> override;
+    @Nullable private Function<Location<Chunk>, PlantType> override;
     private VariableAmount count;
 
     public FlowerBuilder() {
@@ -77,6 +77,15 @@ public class FlowerBuilder implements Flower.Builder {
     public Builder supplier(@Nullable Function<Location<Chunk>, PlantType> override) {
         this.override = override;
         return this;
+    }
+
+    @Override
+    public Builder from(Flower value) {
+        WeightedTable<PlantType> table = new WeightedTable<>();
+        table.addAll(value.getFlowerTypes());
+        return perChunk(value.getFlowersPerChunk())
+            .types(table)
+            .supplier(value.getSupplierOverride().orElse(null));
     }
 
     @Override

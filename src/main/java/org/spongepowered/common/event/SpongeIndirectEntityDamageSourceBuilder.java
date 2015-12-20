@@ -27,56 +27,16 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 
 import java.lang.ref.WeakReference;
 
-public class SpongeIndirectEntityDamageSourceBuilder extends SpongeEntityDamageSourceBuilder implements IndirectEntityDamageSource.Builder {
+public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder>
+    implements IndirectEntityDamageSource.Builder {
 
+    protected WeakReference<Entity> reference = null;
     private WeakReference<Entity> proxy = null;
-
-    @Override
-    public IndirectEntityDamageSource.Builder scalesWithDifficulty() {
-        super.scalesWithDifficulty();
-        return this;
-    }
-
-    @Override
-    public IndirectEntityDamageSource.Builder bypassesArmor() {
-        super.bypassesArmor();
-        return this;
-    }
-
-    @Override
-    public IndirectEntityDamageSource.Builder explosion() {
-        super.explosion();
-        return this;
-    }
-
-    @Override
-    public IndirectEntityDamageSource.Builder absolute() {
-        super.absolute();
-        return this;
-    }
-
-    @Override
-    public IndirectEntityDamageSource.Builder magical() {
-        super.magical();
-        return this;
-    }
-
-    @Override
-    public IndirectEntityDamageSource.Builder creative() {
-        super.creative();
-        return this;
-    }
-
-    @Override
-    public IndirectEntityDamageSource.Builder type(DamageType damageType) {
-        super.type(damageType);
-        return this;
-    }
 
     @Override
     public IndirectEntityDamageSource.Builder proxySource(Entity projectile) {
@@ -118,6 +78,14 @@ public class SpongeIndirectEntityDamageSourceBuilder extends SpongeEntityDamageS
             damageSource.setExplosion();
         }
         return (IndirectEntityDamageSource) damageSource;
+    }
+
+    @Override
+    public IndirectEntityDamageSource.Builder from(IndirectEntityDamageSource value) {
+        super.from(value);
+        this.reference = new WeakReference<>(value.getSource());
+        this.proxy = new WeakReference<>(value.getIndirectSource());
+        return this;
     }
 
     @Override

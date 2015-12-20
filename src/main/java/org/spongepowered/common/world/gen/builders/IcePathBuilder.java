@@ -54,6 +54,12 @@ public class IcePathBuilder implements IcePath.Builder {
     }
 
     @Override
+    public Builder from(IcePath value) {
+        return radius(value.getRadius())
+            .perChunk(value.getSectionsPerChunk());
+    }
+
+    @Override
     public Builder reset() {
         this.radius = VariableAmount.baseWithRandomAddition(2, 2);
         this.count = VariableAmount.fixed(2);

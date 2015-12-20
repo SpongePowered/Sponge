@@ -53,6 +53,12 @@ public class ReedBuilder implements Reed.Builder {
     }
 
     @Override
+    public Builder from(Reed value) {
+        return perChunk(value.getReedsPerChunk())
+            .reedHeight(value.getReedHeight());
+    }
+
+    @Override
     public Builder reset() {
         this.count = VariableAmount.fixed(20);
         this.height = VariableAmount.baseWithRandomAddition(2, VariableAmount.baseWithRandomAddition(1, 3));

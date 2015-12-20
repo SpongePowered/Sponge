@@ -42,7 +42,7 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.ai.SpongeAITaskType;
-import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
@@ -50,7 +50,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class AITaskTypeModule implements CatalogRegistryModule<AITaskType> {
+public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskType> {
 
     public static AITaskTypeModule getInstance() {
         return Holder.INSTANCE;
@@ -60,9 +60,9 @@ public class AITaskTypeModule implements CatalogRegistryModule<AITaskType> {
     private final Map<String, AITaskType> aiTaskTypes = new HashMap<>();
 
     @Override
-    public Map<String, AITaskType> provideCatalogMap(Map<String, AITaskType> mapping) {
+    public Map<String, AITaskType> provideCatalogMap() {
         Map<String, AITaskType> aiMap = new HashMap<>();
-        for (Map.Entry<String, AITaskType> entry : mapping.entrySet()) {
+        for (Map.Entry<String, AITaskType> entry : this.aiTaskTypes.entrySet()) {
             aiMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
         return aiMap;

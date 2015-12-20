@@ -55,6 +55,13 @@ public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Bui
     }
 
     @Override
+    public AttackLivingAITask.Builder from(AttackLivingAITask value) {
+        return target(value.getTargetClass())
+            .speed(value.getSpeed())
+            .longMemory();
+    }
+
+    @Override
     public AttackLivingAITask.Builder reset() {
         this.targetClass = null;
         this.speed = 0;
@@ -65,7 +72,7 @@ public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Bui
     @Override
     public AttackLivingAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        Preconditions.checkNotNull(targetClass);
-        return (AttackLivingAITask) new EntityAIAttackOnCollide((EntityCreature) owner, targetClass, speed, longMemory);
+        Preconditions.checkNotNull(this.targetClass);
+        return (AttackLivingAITask) new EntityAIAttackOnCollide((EntityCreature) owner, this.targetClass, this.speed, this.longMemory);
     }
 }

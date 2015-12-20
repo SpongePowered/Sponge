@@ -32,9 +32,7 @@ import net.minecraft.world.WorldType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.DelayedRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
 import org.spongepowered.common.world.type.SpongeWorldTypeNether;
@@ -60,7 +58,6 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
     }
 
     @Override
-    @DelayedRegistration(RegistrationPhase.POST_INIT)
     public void registerDefaults() {
         this.generatorTypeMappings.put("amplified", (GeneratorType) WorldType.AMPLIFIED);
         this.generatorTypeMappings.put("debug", (GeneratorType) WorldType.DEBUG_WORLD);

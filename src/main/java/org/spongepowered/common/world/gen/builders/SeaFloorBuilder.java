@@ -78,6 +78,16 @@ public class SeaFloorBuilder implements SeaFloor.Builder {
     }
 
     @Override
+    public Builder from(SeaFloor value) {
+        this.block(value.getBlock())
+            .perChunk(value.getDiscsPerChunk())
+            .radius(value.getRadius())
+            .depth(value.getDepth())
+            .replace(value.getValidBlocksToReplace());
+        return this;
+    }
+
+    @Override
     public Builder reset() {
         this.check = WorldGenConstants.DIRT_OR_GRASS;
         this.block = (BlockState) Blocks.sand.getDefaultState();

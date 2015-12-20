@@ -102,7 +102,7 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
     }
 
     @Override
-    public WeightedTable<ShrubType> getType() {
+    public WeightedTable<ShrubType> getTypes() {
         return this.types;
     }
 

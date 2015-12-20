@@ -36,8 +36,4 @@ public interface CatalogRegistryModule<T extends CatalogType> extends RegistryMo
 
     Collection<T> getAll();
 
-    default Map<String, T> provideCatalogMap(Map<String, T> mapping) {
-        return mapping;
-    }
-
 }

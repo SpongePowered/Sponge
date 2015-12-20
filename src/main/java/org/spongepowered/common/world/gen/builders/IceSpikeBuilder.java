@@ -70,6 +70,13 @@ public class IceSpikeBuilder implements IceSpike.Builder {
     }
 
     @Override
+    public Builder from(IceSpike value) {
+        return height(value.getHeight())
+            .spikesPerChunk(value.getSpikesPerChunk())
+            .extremeSpikeIncrease(value.getExtremeSpikeIncrease());
+    }
+
+    @Override
     public Builder reset() {
         this.height = VariableAmount.baseWithRandomAddition(7, 4);
         this.count = VariableAmount.fixed(3);

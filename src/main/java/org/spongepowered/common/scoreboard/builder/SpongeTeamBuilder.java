@@ -116,7 +116,22 @@ public class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team.Builder members(Set<Text> members) {
-        this.members = checkNotNull(members, "Members cannot be null!");
+        this.members = new HashSet<>(checkNotNull(members, "Members cannot be null!"));
+        return this;
+    }
+
+    @Override
+    public Team.Builder from(Team value) {
+        this.name(value.getName())
+            .displayName(value.getDisplayName())
+            .prefix(value.getPrefix())
+            .color(value.getColor())
+            .allowFriendlyFire(value.allowFriendlyFire())
+            .canSeeFriendlyInvisibles(value.canSeeFriendlyInvisibles())
+            .suffix(value.getSuffix())
+            .nameTagVisibility(value.getNameTagVisibility())
+            .deathTextVisibility(value.getDeathTextVisibility())
+            .members(value.getMembers());
         return this;
     }
 

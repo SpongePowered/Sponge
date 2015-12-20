@@ -57,6 +57,12 @@ public class PumpkinBuilder implements Pumpkin.Builder {
     }
 
     @Override
+    public Builder from(Pumpkin value) {
+        return perChunk(value.getPumpkinsPerChunk())
+            .chance(value.getPumpkinChance());
+    }
+
+    @Override
     public Builder reset() {
         this.chance = 1 / 32d;
         this.count = VariableAmount.fixed(64);

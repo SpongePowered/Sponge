@@ -178,7 +178,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Objective.Builder.class, SpongeObjectiveBuilder::new)
             .registerBuilderSupplier(Team.Builder.class, SpongeTeamBuilder::new)
             .registerBuilderSupplier(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
-            .registerBuilderSupplier(Statistic.Builder.class, () -> {
+            .registerBuilderSupplier(Statistic.StatisticBuilder.class, () -> {
                 throw new UnsupportedOperationException();
             })
             .registerBuilderSupplier(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)

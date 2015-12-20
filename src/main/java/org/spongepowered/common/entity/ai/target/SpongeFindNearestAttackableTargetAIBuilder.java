@@ -61,21 +61,28 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
     }
 
     @Override
+    public FindNearestAttackableTargetAITask.Builder from(FindNearestAttackableTargetAITask value) {
+        return target(value.getTargetClass())
+            .chance(value.getChance())
+            .filter(value.getFilter());
+    }
+
+    @Override
     public FindNearestAttackableTargetAITask.Builder reset() {
-        checkSight = false;
-        onlyNearby = false;
-        searchDelay = 0;
-        interruptTargetUnseenTicks = 0;
-        targetClass = null;
-        predicate = null;
+        this.checkSight = false;
+        this.onlyNearby = false;
+        this.searchDelay = 0;
+        this.interruptTargetUnseenTicks = 0;
+        this.targetClass = null;
+        this.predicate = null;
         return this;
     }
 
     @Override
     public FindNearestAttackableTargetAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        Preconditions.checkNotNull(targetClass);
-        return (FindNearestAttackableTargetAITask) new EntityAINearestAttackableTarget((EntityCreature) owner, targetClass, chance, checkSight,
-                onlyNearby, predicate == null ? Predicates.alwaysTrue() : GuavaJavaUtils.asGuavaPredicate(predicate));
+        Preconditions.checkNotNull(this.targetClass);
+        return (FindNearestAttackableTargetAITask) new EntityAINearestAttackableTarget((EntityCreature) owner, this.targetClass, this.chance, this.checkSight,
+            this.onlyNearby, this.predicate == null ? Predicates.alwaysTrue() : GuavaJavaUtils.asGuavaPredicate(this.predicate));
     }
 }

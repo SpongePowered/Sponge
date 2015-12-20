@@ -65,6 +65,15 @@ public class BlockBlobBuilder implements BlockBlob.Builder {
     }
 
     @Override
+    public Builder from(BlockBlob value) {
+        checkNotNull(value, "BlockBlob cannot be null!");
+        this.block = checkNotNull(value.getBlock(), "BlockState cannot be null!");
+        this.radius = checkNotNull(value.getRadius(), "Radius cannot be null!");
+        this.count = checkNotNull(value.getCount(), "Count cannot be null!");
+        return this;
+    }
+
+    @Override
     public Builder reset() {
         this.radius = VariableAmount.baseWithVariance(0, 2);
         this.count = VariableAmount.baseWithVariance(0, 3);

@@ -212,7 +212,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ResettableBuilder<? super T>> T createBuilder(Class<T> builderClass) {
+    public <T extends ResettableBuilder<?, ? super T>> T createBuilder(Class<T> builderClass) {
         checkNotNull(builderClass, "Builder class was null!");
         checkArgument(this.builderSupplierMap.containsKey(builderClass), "Could not find a Supplier for the provided class: " + builderClass.getCanonicalName());
         return (T) this.builderSupplierMap.get(builderClass).get();

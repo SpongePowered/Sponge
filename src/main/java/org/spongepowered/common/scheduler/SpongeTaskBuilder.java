@@ -124,6 +124,17 @@ public class SpongeTaskBuilder implements Task.Builder {
     }
 
     @Override
+    public Task.Builder from(Task value) {
+        this.syncType = value.isAsynchronous() ? ScheduledTask.TaskSynchronicity.ASYNCHRONOUS : ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
+        this.consumer = value.getConsumer();
+        this.interval = value.getInterval();
+        this.delay = value.getDelay();
+        this.delayIsTicks = false;
+        this.name = value.getName();
+        return this;
+    }
+
+    @Override
     public Task.Builder reset() {
         this.syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
         this.consumer = null;

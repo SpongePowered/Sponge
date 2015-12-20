@@ -26,54 +26,10 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 
-public class SpongeDamageSourceBuilder implements DamageSource.Builder {
-
-    protected boolean scales = false;
-    protected boolean bypasses = false;
-    protected boolean explosion = false;
-    protected boolean absolute = false;
-    protected boolean magical = false;
-    protected boolean creative = false;
-    protected DamageType damageType = null;
-
-
-    @Override
-    public DamageSource.Builder scalesWithDifficulty() {
-        return this;
-    }
-
-    @Override
-    public DamageSource.Builder bypassesArmor() {
-        return this;
-    }
-
-    @Override
-    public DamageSource.Builder explosion() {
-        return this;
-    }
-
-    @Override
-    public DamageSource.Builder absolute() {
-        return this;
-    }
-
-    @Override
-    public DamageSource.Builder magical() {
-        return this;
-    }
-
-    @Override
-    public DamageSource.Builder creative() {
-        return this;
-    }
-
-    @Override
-    public DamageSource.Builder type(DamageType damageType) {
-        return this;
-    }
+public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<DamageSource, DamageSource.Builder> implements DamageSource.Builder {
 
     @Override
     public DamageSource build() throws IllegalStateException {
@@ -100,8 +56,4 @@ public class SpongeDamageSourceBuilder implements DamageSource.Builder {
         return (DamageSource) source;
     }
 
-    @Override
-    public DamageSource.Builder reset() {
-        return this;
-    }
 }

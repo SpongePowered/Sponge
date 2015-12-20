@@ -39,11 +39,13 @@ import org.spongepowered.common.world.gen.populators.ForestPopulator;
 
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public class ForestBuilder implements Forest.Builder {
     
     private VariableAmount count;
     private WeightedTable<PopulatorObject> types;
-    private Function<Location<Chunk>, PopulatorObject> override;
+    @Nullable private Function<Location<Chunk>, PopulatorObject> override;
     
     public ForestBuilder() {
         reset();
@@ -71,9 +73,18 @@ public class ForestBuilder implements Forest.Builder {
     }
 
     @Override
-    public Builder supplier(Function<Location<Chunk>, PopulatorObject> override) {
+    public Builder supplier(@Nullable Function<Location<Chunk>, PopulatorObject> override) {
         this.override = override;
         return this;
+    }
+
+    @Override
+    public Builder from(Forest value) {
+        WeightedTable<PopulatorObject> table = new WeightedTable<>();
+        table.addAll(value.getTypes());
+        return perChunk(value.getTreesPerChunk())
+            .types(table)
+            .supplier(value.getSupplierOverride().orElse(null));
     }
 
     @Override

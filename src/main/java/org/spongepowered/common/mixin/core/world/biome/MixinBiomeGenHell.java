@@ -84,7 +84,7 @@ public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
         types.add(new EmptyObject<>(1));
         HellMushroomPopulator smallMushroom = new HellMushroomPopulator();
         smallMushroom.setMushroomsPerChunk(1);
-        smallMushroom.getType().addAll(types);
+        smallMushroom.getTypes().addAll(types);
         gensettings.getPopulators().add(smallMushroom);
 
         ChanceTable<MushroomType> types2 = new ChanceTable<MushroomType>();
@@ -92,7 +92,7 @@ public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
         types.add(new EmptyObject<>(1));
         HellMushroomPopulator smallMushroom2 = new HellMushroomPopulator();
         smallMushroom2.setMushroomsPerChunk(1);
-        smallMushroom2.getType().addAll(types2);
+        smallMushroom2.getTypes().addAll(types2);
         gensettings.getPopulators().add(smallMushroom2);
 
         Ore quartz = Ore.builder()

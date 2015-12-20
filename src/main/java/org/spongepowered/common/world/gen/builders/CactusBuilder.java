@@ -53,6 +53,13 @@ public class CactusBuilder implements Cactus.Builder {
     }
 
     @Override
+    public Builder from(Cactus value) {
+        cactiPerChunk(value.getCactiPerChunk());
+        height(value.getHeight());
+        return this;
+    }
+
+    @Override
     public Builder reset() {
         this.count = VariableAmount.fixed(10);
         this.height = VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithRandomAddition(1, 3));

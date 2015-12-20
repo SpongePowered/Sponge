@@ -61,8 +61,8 @@ public abstract class MixinBiomeGenJungle extends MixinBiomeGenBase {
             Populator next = it.next();
             if (next instanceof Shrub) {
                 Shrub s = (Shrub) next;
-                if (s.getType().size() == 1) {
-                    TableEntry<ShrubType> entry = s.getType().getEntries().get(0);
+                if (s.getTypes().size() == 1) {
+                    TableEntry<ShrubType> entry = s.getTypes().getEntries().get(0);
                     if (entry instanceof WeightedObject && ((WeightedObject<ShrubType>) entry).get() == ShrubTypes.TALL_GRASS) {
                         it.remove();
                     }

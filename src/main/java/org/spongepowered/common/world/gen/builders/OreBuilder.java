@@ -79,6 +79,15 @@ public class OreBuilder implements Ore.Builder {
     }
 
     @Override
+    public Builder from(Ore value) {
+        return ore(value.getOreBlock())
+            .size(value.getDepositSize())
+            .perChunk(value.getDepositsPerChunk())
+            .height(value.getHeight())
+            .placementCondition(value.getPlacementCondition());
+    }
+
+    @Override
     public Builder reset() {
         this.block = (BlockState) Blocks.iron_ore.getDefaultState();
         this.size = VariableAmount.fixed(9);

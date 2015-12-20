@@ -29,6 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.Enchantments;
+import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
@@ -38,7 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EnchantmentRegistryModule implements CatalogRegistryModule<Enchantment> {
+public final class EnchantmentRegistryModule implements AlternateCatalogRegistryModule<Enchantment> {
 
     @RegisterCatalog(Enchantments.class)
     private final Map<String, Enchantment> enchantmentMappings = new HashMap<>();
@@ -51,6 +53,15 @@ public final class EnchantmentRegistryModule implements CatalogRegistryModule<En
     @Override
     public Collection<Enchantment> getAll() {
         return ImmutableList.copyOf(this.enchantmentMappings.values());
+    }
+
+    @Override
+    public Map<String, Enchantment> provideCatalogMap() {
+        Map<String, Enchantment> newMap = new HashMap<>();
+        for (Map.Entry<String, Enchantment> entry : this.enchantmentMappings.entrySet()) {
+            newMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return newMap;
     }
 
     @Override

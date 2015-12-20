@@ -112,7 +112,7 @@ public abstract class MixinGeneratorBushFeature implements Mushroom {
     }
 
     @Override
-    public ChanceTable<MushroomType> getType() {
+    public ChanceTable<MushroomType> getTypes() {
         return this.types;
     }
 

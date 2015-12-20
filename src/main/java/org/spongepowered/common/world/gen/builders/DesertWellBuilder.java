@@ -57,6 +57,13 @@ public class DesertWellBuilder implements DesertWell.Builder {
     }
 
     @Override
+    public Builder from(DesertWell value) {
+        probability(value.getSpawnProbability());
+        wellObject(value.getWellObject());
+        return this;
+    }
+
+    @Override
     public Builder reset() {
         this.p = 0.001;
         return this;

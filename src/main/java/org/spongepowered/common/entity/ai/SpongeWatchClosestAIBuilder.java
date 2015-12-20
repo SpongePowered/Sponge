@@ -60,6 +60,13 @@ public class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
     }
 
     @Override
+    public WatchClosestAITask.Builder from(WatchClosestAITask value) {
+        return watch(value.getWatchedClass())
+            .maxDistance(value.getMaxDistance())
+            .chance(value.getChance());
+    }
+
+    @Override
     public WatchClosestAITask.Builder reset() {
         this.watchedClass = null;
         this.maxDistance = 8;
@@ -70,6 +77,6 @@ public class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
     @Override
     public WatchClosestAITask build(Agent owner) {
         Preconditions.checkNotNull(this.watchedClass);
-        return (WatchClosestAITask) new EntityAIWatchClosest((EntityLiving) owner, watchedClass, this.maxDistance, this.chance);
+        return (WatchClosestAITask) new EntityAIWatchClosest((EntityLiving) owner, this.watchedClass, this.maxDistance, this.chance);
     }
 }

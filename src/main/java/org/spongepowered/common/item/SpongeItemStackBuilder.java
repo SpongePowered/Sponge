@@ -206,6 +206,11 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     }
 
     @Override
+    public ItemStack.Builder from(ItemStack value) {
+        return fromItemStack(value);
+    }
+
+    @Override
     public ItemStack.Builder reset() {
         this.type = null;
         this.quantity = 1;

@@ -46,6 +46,12 @@ public class WaterLilyBuilder implements WaterLily.Builder {
     }
 
     @Override
+    public Builder from(WaterLily value) {
+        this.count = value.getWaterLilyPerChunk();
+        return this;
+    }
+
+    @Override
     public Builder reset() {
         this.count = VariableAmount.fixed(10);
         return this;

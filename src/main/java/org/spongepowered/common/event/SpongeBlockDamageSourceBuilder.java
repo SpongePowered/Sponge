@@ -28,57 +28,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-public class SpongeBlockDamageSourceBuilder extends SpongeDamageSourceBuilder implements BlockDamageSource.Builder {
+public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
 
     private Location<World> location;
     private BlockSnapshot blockSnapshot;
-
-    @Override
-    public BlockDamageSource.Builder scalesWithDifficulty() {
-        this.scales = true;
-        return this;
-    }
-
-    @Override
-    public BlockDamageSource.Builder bypassesArmor() {
-        super.bypassesArmor();
-        return this;
-    }
-
-    @Override
-    public BlockDamageSource.Builder explosion() {
-        super.explosion();
-        return this;
-    }
-
-    @Override
-    public BlockDamageSource.Builder absolute() {
-        super.absolute();
-        return this;
-    }
-
-    @Override
-    public BlockDamageSource.Builder magical() {
-        super.magical();
-        return this;
-    }
-
-    @Override
-    public BlockDamageSource.Builder creative() {
-        super.creative();
-        return this;
-    }
-
-    @Override
-    public BlockDamageSource.Builder type(DamageType damageType) {
-        super.type(damageType);
-        return this;
-    }
 
     @Override
     public BlockDamageSource.Builder block(Location<World> location) {

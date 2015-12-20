@@ -27,59 +27,18 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 
 import java.lang.ref.WeakReference;
 
-public class SpongeEntityDamageSourceBuilder extends SpongeDamageSourceBuilder implements EntityDamageSource.Builder {
+public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<EntityDamageSource, EntityDamageSource.Builder>
+    implements EntityDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
 
     @Override
-    public EntityDamageSource.Builder scalesWithDifficulty() {
-        super.scalesWithDifficulty();
-        return this;
-    }
-
-    @Override
-    public EntityDamageSource.Builder bypassesArmor() {
-        super.bypassesArmor();
-        return this;
-    }
-
-    @Override
-    public EntityDamageSource.Builder explosion() {
-        super.explosion();
-        return this;
-    }
-
-    @Override
-    public EntityDamageSource.Builder absolute() {
-        super.absolute();
-        return this;
-    }
-
-    @Override
-    public EntityDamageSource.Builder magical() {
-        super.magical();
-        return this;
-    }
-
-    @Override
-    public EntityDamageSource.Builder creative() {
-        super.creative();
-        return this;
-    }
-
-    @Override
-    public EntityDamageSource.Builder type(DamageType damageType) {
-        super.type(damageType);
-        return this;
-    }
-
-    @Override
-    public EntityDamageSource.Builder entity(Entity entity) {
+    public SpongeEntityDamageSourceBuilder entity(Entity entity) {
         this.reference = new WeakReference<>(entity);
         return this;
     }
@@ -111,7 +70,14 @@ public class SpongeEntityDamageSourceBuilder extends SpongeDamageSourceBuilder i
     }
 
     @Override
-    public EntityDamageSource.Builder reset() {
+    public EntityDamageSource.Builder from(EntityDamageSource value) {
+        super.from(value);
+        this.reference = new WeakReference<>(value.getSource());
+        return this;
+    }
+
+    @Override
+    public SpongeEntityDamageSourceBuilder reset() {
         super.reset();
         this.reference = null;
         return this;

@@ -71,6 +71,14 @@ public class RandomObjectBuilder implements RandomObject.Builder {
     }
 
     @Override
+    public Builder from(RandomObject value) {
+        return perChunk(value.getAttemptsPerChunk())
+            .height(value.getHeightRange())
+            .object(value.getObject())
+            .spawnChance(value.getSpawnChance());
+    }
+
+    @Override
     public Builder reset() {
         this.count = null;
         this.height = VariableAmount.baseWithRandomAddition(0, 128);

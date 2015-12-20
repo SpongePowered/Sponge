@@ -74,6 +74,15 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
     }
 
     @Override
+    public Objective.Builder from(Objective value) {
+        name(value.getName())
+            .criterion(value.getCriterion())
+            .displayName(value.getDisplayName())
+            .objectiveDisplayMode(value.getDisplayMode());
+        return this;
+    }
+
+    @Override
     public SpongeObjectiveBuilder reset() {
         this.name = null;
         this.displayName = null;

@@ -90,6 +90,18 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
+    public Explosion.Builder from(Explosion value) {
+        this.world = value.getWorld();
+        this.sourceExplosive = value.getSourceExplosive().orElse(null);
+        this.radius = value.getRadius();
+        this.origin = value.getOrigin();
+        this.canCauseFire = value.canCauseFire();
+        this.shouldBreakBlocks = value.shouldBreakBlocks();
+        this.shouldSmoke = value.shouldPlaySmoke();
+        return this;
+    }
+
+    @Override
     public SpongeExplosionBuilder reset() {
         this.world = null;
         this.sourceExplosive = null;

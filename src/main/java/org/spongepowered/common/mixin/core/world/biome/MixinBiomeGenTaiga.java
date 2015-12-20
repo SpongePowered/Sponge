@@ -92,8 +92,8 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
         }
         for (Iterator<Shrub> it = gensettings.getPopulators(Shrub.class).iterator(); it.hasNext();) {
             Shrub next = it.next();
-            if (next.getType().size() == 1) {
-                TableEntry<ShrubType> entry = next.getType().getEntries().get(0);
+            if (next.getTypes().size() == 1) {
+                TableEntry<ShrubType> entry = next.getTypes().getEntries().get(0);
                 if (entry instanceof WeightedObject && ((WeightedObject<ShrubType>) entry).get() == ShrubTypes.TALL_GRASS) {
                     it.remove();
                 }

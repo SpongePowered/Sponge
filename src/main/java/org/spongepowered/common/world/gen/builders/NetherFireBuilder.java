@@ -53,6 +53,12 @@ public class NetherFireBuilder implements NetherFire.Builder {
     }
 
     @Override
+    public NetherFire.Builder from(NetherFire value) {
+        return perChunk(value.getClustersPerChunk())
+            .perCluster(value.getFirePerCluster());
+    }
+
+    @Override
     public NetherFire.Builder reset() {
         this.cluster = VariableAmount.fixed(64);
         this.count = VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithRandomAddition(1, 10));

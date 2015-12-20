@@ -39,11 +39,13 @@ import org.spongepowered.api.world.gen.populator.Shrub.Builder;
 
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public class ShrubBuilder implements Shrub.Builder {
 
     private VariableAmount count;
     private WeightedTable<ShrubType> types;
-    private Function<Location<Chunk>, ShrubType> override;
+    @Nullable private Function<Location<Chunk>, ShrubType> override;
 
     public ShrubBuilder() {
         reset();
@@ -70,15 +72,24 @@ public class ShrubBuilder implements Shrub.Builder {
     }
 
     @Override
-    public Builder supplier(Function<Location<Chunk>, ShrubType> override) {
+    public Builder supplier(@Nullable Function<Location<Chunk>, ShrubType> override) {
         this.override = override;
         return this;
     }
 
     @Override
+    public Builder from(Shrub value) {
+        WeightedTable<ShrubType> table = new WeightedTable<>();
+        table.addAll(value.getTypes());
+        return perChunk(value.getShrubsPerChunk())
+            .types(table)
+            .supplier(value.getSupplierOverride().orElse(null));
+    }
+
+    @Override
     public Builder reset() {
         if (this.types == null) {
-            this.types = new WeightedTable<ShrubType>();
+            this.types = new WeightedTable<>();
         } else {
             this.types.clear();
         }
@@ -90,8 +101,8 @@ public class ShrubBuilder implements Shrub.Builder {
     @Override
     public Shrub build() throws IllegalStateException {
         Shrub pop = (Shrub) new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
-        pop.getType().clear();
-        pop.getType().addAll(this.types);
+        pop.getTypes().clear();
+        pop.getTypes().addAll(this.types);
         pop.setShrubsPerChunk(this.count);
         pop.setSupplierOverride(this.override);
         return pop;

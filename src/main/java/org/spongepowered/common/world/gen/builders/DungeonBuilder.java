@@ -107,6 +107,15 @@ public class DungeonBuilder implements Dungeon.Builder {
     }
 
     @Override
+    public Builder from(Dungeon value) {
+        attempts(value.getAttemptsPerChunk());
+        mobSpawnerData(value.getSpawnerData());
+        this.items = new LootTable<>();
+        this.items.addAll(value.getPossibleContents());
+        return this;
+    }
+
+    @Override
     public Builder reset() {
         this.attempts = VariableAmount.fixed(8);
         //TODO pending mobspawnerdata

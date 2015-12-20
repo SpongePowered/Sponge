@@ -43,6 +43,11 @@ public class VineBuilder implements Vine.Builder {
     }
 
     @Override
+    public Builder from(Vine value) {
+        return perChunk(value.getVinesPerChunk());
+    }
+
+    @Override
     public Builder reset() {
         this.count = VariableAmount.fixed(50);
         return this;

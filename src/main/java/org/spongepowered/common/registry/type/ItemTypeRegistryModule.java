@@ -33,6 +33,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -41,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryModule<ItemType> {
+public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
 
     public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
     public static final ItemStack NONE = (ItemStack) new net.minecraft.item.ItemStack(ItemTypeRegistryModule.NONE_ITEM);
@@ -54,9 +55,9 @@ public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryMo
     private final Map<String, ItemType> itemTypeMappings = new HashMap<>();
 
     @Override
-    public Map<String, ItemType> provideCatalogMap(Map<String, ItemType> mapping) {
+    public Map<String, ItemType> provideCatalogMap() {
         Map<String, ItemType> itemTypeMap = new HashMap<>();
-        for (Map.Entry<String, ItemType> entry : mapping.entrySet()) {
+        for (Map.Entry<String, ItemType> entry : this.itemTypeMappings.entrySet()) {
             itemTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
         return itemTypeMap;

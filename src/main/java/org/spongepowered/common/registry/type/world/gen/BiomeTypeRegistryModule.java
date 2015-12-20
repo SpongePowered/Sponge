@@ -32,9 +32,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.RegistrationPhase;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
-import org.spongepowered.common.registry.util.DelayedRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.ArrayList;
@@ -61,7 +59,6 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
     }
 
     @Override
-    @DelayedRegistration(RegistrationPhase.POST_INIT)
     public void registerDefaults() {
         BiomeGenBase[] biomeArray = BiomeGenBase.getBiomeGenArray();
         for (BiomeGenBase biome : biomeArray) {

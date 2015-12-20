@@ -105,6 +105,11 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
     }
 
     @Override
+    public WorldBorder.ChunkPreGenerate from(Task value) {
+        return null;
+    }
+
+    @Override
     public WorldBorder.ChunkPreGenerate reset() {
         this.plugin = null;
         this.logger = null;

@@ -22,46 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.gen.builders;
+package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.CatalogType;
 
-import net.minecraft.world.gen.feature.WorldGenMelon;
-import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.Melon;
-import org.spongepowered.api.world.gen.populator.Melon.Builder;
+import java.util.Map;
 
+public interface AlternateCatalogRegistryModule<T extends CatalogType> extends CatalogRegistryModule<T> {
 
-public class MelonBuilder implements Melon.Builder {
-
-    private VariableAmount count;
-
-    public MelonBuilder() {
-        reset();
-    }
-
-    @Override
-    public Builder perChunk(VariableAmount count) {
-        this.count = checkNotNull(count, "count");
-        return this;
-    }
-
-    @Override
-    public Builder from(Melon value) {
-        return perChunk(value.getMelonsPerChunk());
-    }
-
-    @Override
-    public Builder reset() {
-        this.count = VariableAmount.fixed(64);
-        return this;
-    }
-
-    @Override
-    public Melon build() throws IllegalStateException {
-        Melon pop = (Melon) new WorldGenMelon();
-        pop.setMelonsPerChunk(this.count);
-        return pop;
-    }
-
+    Map<String, T> provideCatalogMap();
 }

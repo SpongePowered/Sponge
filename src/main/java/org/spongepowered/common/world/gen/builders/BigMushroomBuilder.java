@@ -39,10 +39,12 @@ import org.spongepowered.api.world.gen.populator.BigMushroom.Builder;
 
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public class BigMushroomBuilder implements BigMushroom.Builder {
 
     private WeightedTable<PopulatorObject> types;
-    private Function<Location<Chunk>, PopulatorObject> override;
+    @Nullable private Function<Location<Chunk>, PopulatorObject> override;
     private VariableAmount count;
 
     public BigMushroomBuilder() {
@@ -60,7 +62,7 @@ public class BigMushroomBuilder implements BigMushroom.Builder {
     public Builder type(PopulatorObject type, double weight) {
         checkNotNull(type);
         checkArgument(weight > 0);
-        this.types.add(new WeightedObject<PopulatorObject>(type, weight));
+        this.types.add(new WeightedObject<>(type, weight));
         return this;
     }
 
@@ -71,8 +73,16 @@ public class BigMushroomBuilder implements BigMushroom.Builder {
     }
 
     @Override
-    public Builder supplier(Function<Location<Chunk>, PopulatorObject> override) {
+    public Builder supplier(@Nullable Function<Location<Chunk>, PopulatorObject> override) {
         this.override = override;
+        return this;
+    }
+
+    @Override
+    public Builder from(BigMushroom value) {
+        this.types = value.getTypes();
+        this.override = value.getSupplierOverride().orElse(null);
+        this.count = value.getMushroomsPerChunk();
         return this;
     }
 

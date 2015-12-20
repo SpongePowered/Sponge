@@ -80,7 +80,7 @@ public class HellMushroomPopulator implements Populator, Mushroom {
                 Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector(height));
                 type = this.featureM.getSupplierOverride().get().apply(pos2);
             } else {
-                result = this.featureM.getType().get(random);
+                result = this.featureM.getTypes().get(random);
                 if (result.isEmpty()) {
                     continue;
                 }
@@ -97,8 +97,8 @@ public class HellMushroomPopulator implements Populator, Mushroom {
     }
 
     @Override
-    public ChanceTable<MushroomType> getType() {
-        return this.featureM.getType();
+    public ChanceTable<MushroomType> getTypes() {
+        return this.featureM.getTypes();
     }
 
     @Override

@@ -30,4 +30,8 @@ public class GuavaJavaUtils {
     public static <T> Predicate<T> asGuavaPredicate(java.util.function.Predicate<T> predicate) {
         return predicate::test;
     }
+
+    public static <T> java.util.function.Predicate<T> asJavaPredicate(Predicate<T> predicate) {
+        return predicate::apply;
+    }
 }

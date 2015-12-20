@@ -68,8 +68,16 @@ public class RandomBlockBuilder implements RandomBlock.Builder {
 
     @Override
     public Builder height(VariableAmount height) {
-
+        this.height = checkNotNull(height, "height");
         return this;
+    }
+
+    @Override
+    public Builder from(RandomBlock value) {
+        return block(value.getBlock())
+            .perChunk(value.getAttemptsPerChunk())
+            .placementTarget(value.getPlacementTarget())
+            .height(value.getHeightRange());
     }
 
     @Override

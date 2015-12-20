@@ -42,6 +42,7 @@ import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.mixin.core.world.MixinWorldSettings;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 
 import java.util.Random;
@@ -225,6 +226,26 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     @Override
     public SpongeWorldCreationSettingsBuilder pvp(boolean enabled) {
         this.pvpEnabled = enabled;
+        return this;
+    }
+
+    @Override
+    public WorldCreationSettings.Builder from(WorldCreationSettings value) {
+        this.name = value.getWorldName();
+        this.seed = value.getSeed();
+        this.gameMode = value.getGameMode();
+        this.generatorType = value.getGeneratorType();
+        this.dimensionType = value.getDimensionType();
+        this.mapFeaturesEnabled = value.usesMapFeatures();
+        this.hardcore = value.isHardcore();
+        this.worldEnabled = value.isEnabled();
+        this.loadOnStartup = value.loadOnStartup();
+        this.keepSpawnLoaded = value.doesKeepSpawnLoaded();
+        this.generatorSettings = value.getGeneratorSettings().copy();
+        this.generatorModifiers = ImmutableList.copyOf(value.getGeneratorModifiers());
+        this.dimensionId = ((IMixinWorldSettings) value).getDimensionId();
+        this.isMod = ((IMixinWorldSettings) value).getIsMod();
+        this.pvpEnabled = value.isPVPEnabled();
         return this;
     }
 
