@@ -761,6 +761,11 @@ public class DataRegistrar {
                 leashDualProcessor);
         dataManager.registerValueProcessor(Keys.LEASH_HOLDER, leashDualProcessor);
 
+        final CriticalHitDualProcessor criticalHitDualProcessor = new CriticalHitDualProcessor();
+        dataManager.registerDataProcessorAndImpl(CriticalHitData.class, SpongeCriticalHitData.class, ImmutableCriticalHitData.class,
+                ImmutableSpongeCriticalHitData.class, criticalHitDualProcessor);
+        dataManager.registerValueProcessor(Keys.CRITICAL_HIT, criticalHitDualProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
