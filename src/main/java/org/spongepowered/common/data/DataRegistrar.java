@@ -756,6 +756,11 @@ public class DataRegistrar {
             ImmutableSpongeAffectsSpawningData.class, affectsSpawningDataProcessor);
         dataManager.registerValueProcessor(Keys.AFFECTS_SPAWNING, affectsSpawningDataProcessor);
 
+        final CriticalHitDualProcessor criticalHitDualProcessor = new CriticalHitDualProcessor();
+        dataManager.registerDataProcessorAndImpl(CriticalHitData.class, SpongeCriticalHitData.class, ImmutableCriticalHitData.class,
+                ImmutableSpongeCriticalHitData.class, criticalHitDualProcessor);
+        dataManager.registerValueProcessor(Keys.CRITICAL_HIT, criticalHitDualProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
