@@ -51,10 +51,11 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
 
     @Override
     public Optional<CommandData> fill(DataContainer container, CommandData commandData) {
-        if (container.contains(Keys.LAST_COMMAND_OUTPUT.getQuery()) || 
-            container.contains(Keys.SUCCESS_COUNT.getQuery()) || 
-            container.contains(Keys.COMMAND.getQuery()) ||
-            container.contains(Keys.TRACKS_OUTPUT.getQuery())) {
+        if (!container.contains(
+                Keys.LAST_COMMAND_OUTPUT.getQuery(), 
+                Keys.SUCCESS_COUNT.getQuery(), 
+                Keys.COMMAND.getQuery(),
+                Keys.TRACKS_OUTPUT.getQuery())) {
             return Optional.empty();
         }
         @SuppressWarnings("unchecked")
