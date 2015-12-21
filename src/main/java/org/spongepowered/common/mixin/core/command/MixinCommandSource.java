@@ -24,24 +24,21 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntityCommandBlock;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.text.sink.MessageSinks;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 
 import java.util.Optional;
 
@@ -49,7 +46,7 @@ import java.util.Optional;
         targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinCommandSource implements IMixinCommandSource, CommandSource {
 
-    private MessageSink sink = SpongeMessageSinkFactory.TO_ALL;
+    private MessageChannel channel = MessageChannel.TO_ALL;
 
     @Override
     public String getName() {
@@ -58,33 +55,18 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
 
     @Override
     public void sendMessage(Text message) {
+        checkNotNull(message, "message");
         this.asICommandSender().addChatMessage(SpongeTexts.toComponent(message));
     }
 
     @Override
-    public void sendMessages(Text... messages) {
-        for (Text message : messages) {
-            this.asICommandSender().addChatMessage(SpongeTexts.toComponent(message));
-        }
+    public MessageChannel getMessageChannel() {
+        return this.channel;
     }
 
     @Override
-    public void sendMessages(Iterable<Text> messages) {
-        for (Text message : messages) {
-            this.asICommandSender().addChatMessage(SpongeTexts.toComponent(message));
-        }
-    }
-
-    @Override
-    public MessageSink getMessageSink() {
-        return this.sink;
-
-    }
-
-    @Override
-    public void setMessageSink(MessageSink sink) {
-        Preconditions.checkNotNull(sink, "sink");
-        this.sink = sink;
+    public void setMessageChannel(MessageChannel channel) {
+        this.channel = checkNotNull(channel, "channel");
     }
 
     @Override

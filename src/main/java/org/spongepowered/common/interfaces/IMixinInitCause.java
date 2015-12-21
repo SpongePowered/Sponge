@@ -22,23 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.factory;
+package org.spongepowered.common.interfaces;
 
-import org.spongepowered.api.registry.FactoryRegistry;
-import org.spongepowered.api.text.sink.MessageSinkFactory;
-import org.spongepowered.api.text.sink.MessageSinks;
-import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
+import org.spongepowered.api.event.cause.Cause;
 
-public class MessageSinkFactoryModule implements FactoryRegistry<MessageSinkFactory, MessageSinks> {
+public interface IMixinInitCause {
 
-    @Override
-    public Class<MessageSinks> getFactoryOwner() {
-        return MessageSinks.class;
-    }
-
-    @Override
-    public MessageSinkFactory provideFactory() {
-        return SpongeMessageSinkFactory.INSTANCE;
-    }
-
+    void initCause(Cause cause);
 }

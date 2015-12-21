@@ -51,7 +51,6 @@ import net.minecraft.network.play.server.S40PacketDisconnect;
 import net.minecraft.network.play.server.S41PacketServerDifficulty;
 import net.minecraft.network.play.server.S44PacketWorldBorder;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -78,8 +77,7 @@ import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.text.sink.MessageSinks;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -125,7 +123,7 @@ public abstract class MixinServerConfigurationManager {
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(IChatComponent component);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
-    @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
+    @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
 
     /**
      * Bridge methods to proxy modified method in Vanilla, nothing in Forge
@@ -180,19 +178,20 @@ public abstract class MixinServerConfigurationManager {
         }
 
         // Sponge start - fire login event
-        String kickReason = allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
-        Text disconnectMessage = Text.of("You are not allowed to log in to this server.");
+        @Nullable String kickReason = allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
+        Optional<Text> disconnectMessage;
         if (kickReason != null) {
-            disconnectMessage = Text.of(kickReason);
+            disconnectMessage = Optional.of(Text.of(kickReason));
+        } else {
+            disconnectMessage = Optional.of(Text.of("You are not allowed to log in to this server."));
         }
 
         Player player = (Player) playerIn;
         Location<World> location = new Location<>((World) worldserver, VecHelper.toVector(playerIn.getPosition()));
         Transform<World> fromTransform = player.getTransform().setLocation(location);
-        MessageSink sink = MessageSinks.toAll();
 
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
-            Cause.of(NamedCause.source(user)), disconnectMessage, disconnectMessage, sink, sink, fromTransform, fromTransform,
+            Cause.of(NamedCause.source(user)), disconnectMessage, disconnectMessage, fromTransform, fromTransform,
             (RemoteConnection) netManager, (org.spongepowered.api.profile.GameProfile) gameprofile, (User) user);
 
         if (kickReason != null) {
@@ -201,7 +200,7 @@ public abstract class MixinServerConfigurationManager {
 
         SpongeImpl.postEvent(loginEvent);
         if (loginEvent.isCancelled()) {
-            disconnectClient(netManager, Optional.ofNullable(loginEvent.getMessage()), gameprofile);
+            disconnectClient(netManager, loginEvent.getMessage(), gameprofile);
             return;
         }
 
@@ -303,14 +302,13 @@ public abstract class MixinServerConfigurationManager {
         }
 
         // Fire PlayerJoinEvent
-        Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
-        Text message = SpongeTexts.toText(chatcomponenttranslation);
-        MessageSink originalSink = MessageSinks.toAll();
-        final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)),
-            originalMessage, message, originalSink, player.getMessageSink(), player);
+        Optional<Text> originalMessage = Optional.of(SpongeTexts.toText(chatcomponenttranslation));
+        MessageChannel originalChannel = player.getMessageChannel();
+        final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
+                Optional.of(originalChannel), originalMessage, originalMessage, player);
         SpongeImpl.postEvent(event);
-        // Send to the sink
-        event.getSink().sendMessage(event.getMessage());
+        // Send to the channel
+        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
         // Sponge end
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {

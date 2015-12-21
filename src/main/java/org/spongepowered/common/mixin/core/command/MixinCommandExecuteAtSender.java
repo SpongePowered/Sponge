@@ -26,16 +26,16 @@ package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ProxySource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ProxySource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.command.WrapperCommandSource;
@@ -134,13 +134,13 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
     }
 
     @Override
-    public void setMessageSink(MessageSink sink) {
-        getOriginalSource().setMessageSink(sink);
+    public MessageChannel getMessageChannel() {
+        return getOriginalSource().getMessageChannel();
     }
 
     @Override
-    public MessageSink getMessageSink() {
-        return getOriginalSource().getMessageSink();
+    public void setMessageChannel(MessageChannel channel) {
+        getOriginalSource().setMessageChannel(channel);
     }
 
     @Override

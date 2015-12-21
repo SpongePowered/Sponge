@@ -149,7 +149,6 @@ public final class CommonModuleRegistry {
 
     private void registerFactories() {
         final List<FactoryRegistry<?, ?>> factoryRegistries = new ArrayList<>();
-        factoryRegistries.add(new MessageSinkFactoryModule());
         factoryRegistries.add(new ResourcePackFactoryModule());
         factoryRegistries.add(new TimingsFactoryModule());
 

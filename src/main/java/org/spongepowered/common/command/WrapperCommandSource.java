@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.command;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.command.ICommandSender;
+import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.LocatedSource;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandMapping;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.LocatedSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -98,30 +100,17 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public void sendMessage(Text message) {
+        checkNotNull(message, "message");
         this.sender.addChatMessage(SpongeTexts.toComponent(message));
     }
 
     @Override
-    public void sendMessages(Text... messages) {
-        for (Text text : messages) {
-            this.sender.addChatMessage(SpongeTexts.toComponent(text));
-        }
+    public MessageChannel getMessageChannel() {
+        return SpongeImpl.getGame().getServer().getBroadcastChannel();
     }
 
     @Override
-    public void sendMessages(Iterable<Text> messages) {
-        for (Text text : messages) {
-            this.sender.addChatMessage(SpongeTexts.toComponent(text));
-        }
-    }
-
-    @Override
-    public MessageSink getMessageSink() {
-        return SpongeImpl.getGame().getServer().getBroadcastSink();
-    }
-
-    @Override
-    public void setMessageSink(MessageSink sink) {
+    public void setMessageChannel(MessageChannel channel) {
         // TODO Should I throw an exception here?
     }
 
