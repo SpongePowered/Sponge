@@ -35,6 +35,8 @@ import net.minecraft.world.gen.ChunkProviderSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.EmptyObject;
@@ -63,13 +65,14 @@ import org.spongepowered.api.world.gen.type.MushroomTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 
 @NonnullByDefault
 @Mixin(BiomeGenBase.class)
-public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
+public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase, TextRepresentable {
 
     @Shadow public String biomeName;
     @Shadow public float temperature;
@@ -338,4 +341,10 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
     public double getHumidity() {
         return this.rainfall;
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

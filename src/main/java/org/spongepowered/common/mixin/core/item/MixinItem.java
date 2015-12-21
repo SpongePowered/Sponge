@@ -34,7 +34,11 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,13 +46,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
 import java.util.Optional;
 
 @Mixin(Item.class)
-public abstract class MixinItem implements ItemType, IMixinItem {
+@Implements(@Interface(iface = ItemType.class, prefix = "item$"))
+public abstract class MixinItem implements ItemType, IMixinItem, TextRepresentable {
 
     public Optional<BlockType> blockType = Optional.empty();
 
@@ -118,4 +124,10 @@ public abstract class MixinItem implements ItemType, IMixinItem {
     protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {
         return ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(manipulatorClass).get();
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

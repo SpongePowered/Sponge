@@ -26,17 +26,21 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(WorldSettings.GameType.class)
 @Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
-public abstract class MixinGameType {
+public abstract class MixinGameType implements GameMode, TextRepresentable {
+
     @Shadow String name;
 
     public String getId() {
@@ -51,4 +55,10 @@ public abstract class MixinGameType {
     public Translation getTranslation() {
         return new SpongeTranslation("gameMode." + this.name.toLowerCase());
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

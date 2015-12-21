@@ -26,9 +26,12 @@ package org.spongepowered.common.data.type;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.common.data.processor.common.NoteUtils;
+import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeNotePitch implements NotePitch {
+public class SpongeNotePitch implements NotePitch, TextRepresentable {
 
     private final byte id;
     private final String name;
@@ -74,4 +77,18 @@ public class SpongeNotePitch implements NotePitch {
         return Objects.equal(this.id, other.id)
                && Objects.equal(this.name, other.name);
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
@@ -46,9 +48,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -64,6 +63,7 @@ import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
 import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.persistence.NbtTranslator;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
@@ -92,6 +92,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow(prefix = "shadow$")
     public abstract Item shadow$getItem();
+    @Shadow(prefix = "shadow$")
+    public abstract IChatComponent shadow$getChatComponent();
 
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
@@ -194,20 +196,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public Text toText() {
-        TextBuilder builder;
-        Optional<DisplayNameData> optName = get(DisplayNameData.class);
-        if (optName.isPresent()) {
-            Value<Text> displayName = optName.get().displayName();
-            if (displayName.exists()) {
-                builder = displayName.get().builder();
-            } else {
-                builder = Texts.builder(getTranslation());
-            }
-        } else {
-            builder = Texts.builder(getTranslation());
-        }
-        builder.onHover(TextActions.showItem(this));
-        return builder.build();
+        return SpongeTexts.toText(shadow$getChatComponent());
     }
 
     @Override

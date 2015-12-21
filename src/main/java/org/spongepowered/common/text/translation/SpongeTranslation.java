@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.text.translation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Objects;
 import net.minecraft.util.StatCollector;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -36,7 +39,7 @@ public class SpongeTranslation implements Translation {
     private final String id;
 
     public SpongeTranslation(String id) {
-        this.id = id;
+        this.id = checkNotNull(id, "id");
     }
 
     @Override
@@ -52,6 +55,36 @@ public class SpongeTranslation implements Translation {
     @Override
     public String get(Locale locale, Object... args) {
         return StatCollector.translateToLocalFormatted(this.id, args);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SpongeTranslation other = (SpongeTranslation) obj;
+        if (!this.id.equals(other.id)) {
+            return false;
+        }
+        return true;
     }
 
 }

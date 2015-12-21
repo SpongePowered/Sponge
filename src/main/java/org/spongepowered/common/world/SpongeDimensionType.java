@@ -28,10 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import net.minecraft.world.WorldProvider;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeDimensionType implements DimensionType {
+public class SpongeDimensionType implements DimensionType, TextRepresentable {
 
     private String name;
     private int dimensionTypeId;
@@ -77,6 +80,11 @@ public class SpongeDimensionType implements DimensionType {
                 .add("keepLoaded", this.keepLoaded)
                 .add("class", this.dimensionClass.getName())
                 .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
     }
 
     @Override

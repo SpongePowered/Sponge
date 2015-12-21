@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.text.chat;
 
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeChatType implements ChatType {
+public class SpongeChatType implements ChatType, TextRepresentable {
 
     private final byte id;
 
@@ -47,4 +50,10 @@ public class SpongeChatType implements ChatType {
     public byte getByteId() {
         return this.id;
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

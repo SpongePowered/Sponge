@@ -24,13 +24,17 @@
  */
 package org.spongepowered.common.effect.particle;
 
+import com.google.common.base.Objects;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.text.SpongeTexts;
 
 
-public class SpongeParticleType implements ParticleType {
+public class SpongeParticleType implements ParticleType, TextRepresentable {
 
     private EnumParticleTypes type;
     private boolean motion;
@@ -57,6 +61,20 @@ public class SpongeParticleType implements ParticleType {
     @Override
     public boolean hasMotion() {
         return this.motion;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("type", this.type)
+                .add("name", getName())
+                .add("motion", this.motion)
+                .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
     }
 
     public static class Colorable extends SpongeParticleType implements ParticleType.Colorable {

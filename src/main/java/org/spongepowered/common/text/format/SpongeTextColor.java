@@ -27,13 +27,16 @@ package org.spongepowered.common.text.format;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.registry.type.text.TextColorsRegistryModule;
+import org.spongepowered.common.text.SpongeTexts;
 
 @NonnullByDefault
-public class SpongeTextColor implements TextColor {
+public class SpongeTextColor implements TextColor, TextRepresentable {
 
     private final EnumChatFormatting handle;
     private final Color color;
@@ -65,6 +68,13 @@ public class SpongeTextColor implements TextColor {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toTextBuilder(this)
+                .color(this)
+                .toText();
     }
 
     public static SpongeTextColor of(EnumChatFormatting color) {

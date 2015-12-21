@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.text.selector;
 
+import com.google.common.base.Objects;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.common.text.SpongeTexts;
 
 @NonnullByDefault
-public class SpongeSelectorType implements SelectorType {
+public class SpongeSelectorType implements SelectorType, TextRepresentable {
 
     private final String id;
 
@@ -44,6 +48,18 @@ public class SpongeSelectorType implements SelectorType {
     @Override
     public String getName() {
         return getId();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
     }
 
 }

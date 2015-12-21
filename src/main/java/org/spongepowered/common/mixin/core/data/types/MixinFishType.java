@@ -27,17 +27,24 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
 @Mixin(ItemFishFood.FishType.class)
-public abstract class MixinFishType implements Fish {
+public abstract class MixinFishType implements Fish, TextRepresentable {
 
     @Shadow private String unlocalizedName;
     @Shadow private boolean cookable;
+
+    private Translation translation;
 
     @Override
     public String getId() {
@@ -59,4 +66,19 @@ public abstract class MixinFishType implements Fish {
         }
         return Optional.empty();
     }
+
+    @Override
+    public Translation getTranslation() {
+        // Maybe move this to a @Inject at the end of the constructor
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.fish." + this.unlocalizedName + ".raw.name");
+        }
+        return this.translation;
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

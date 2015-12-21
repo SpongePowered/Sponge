@@ -43,6 +43,8 @@ import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
@@ -57,6 +59,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
@@ -67,7 +70,7 @@ import java.util.Random;
 
 @NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
-public abstract class MixinBlock implements BlockType, IMixinBlock {
+public abstract class MixinBlock implements BlockType, IMixinBlock, TextRepresentable {
 
     @Shadow private boolean needsRandomTick;
 
@@ -184,4 +187,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             return;
         }
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

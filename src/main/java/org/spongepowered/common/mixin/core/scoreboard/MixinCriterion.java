@@ -27,14 +27,17 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.scoreboard.GoalColor;
 import net.minecraft.scoreboard.ScoreDummyCriteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.text.SpongeTexts;
 
 @Mixin(value = {GoalColor.class, ScoreDummyCriteria.class})
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
-public abstract class MixinCriterion implements Criterion { // Trick to allow avoid shadowing, since multiple targets are used
+public abstract class MixinCriterion implements Criterion, TextRepresentable { // Trick to allow avoid shadowing, since multiple targets are used
 
     @Intrinsic
     public String criterion$getName() {
@@ -44,4 +47,10 @@ public abstract class MixinCriterion implements Criterion { // Trick to allow av
     public String criterion$getId() {
         return this.getName();
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

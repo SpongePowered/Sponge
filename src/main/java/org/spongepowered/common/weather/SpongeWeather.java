@@ -26,11 +26,14 @@ package org.spongepowered.common.weather;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.common.text.SpongeTexts;
 
 @NonnullByDefault
-public class SpongeWeather implements Weather {
+public class SpongeWeather implements Weather, TextRepresentable {
 
     private final String id;
 
@@ -47,4 +50,10 @@ public class SpongeWeather implements Weather {
     public String getName() {
         return this.id;
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }
