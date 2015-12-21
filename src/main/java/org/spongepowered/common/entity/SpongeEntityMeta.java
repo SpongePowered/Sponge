@@ -30,8 +30,11 @@ import com.google.common.base.Objects;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeEntityMeta implements CatalogType {
+public class SpongeEntityMeta implements CatalogType, TextRepresentable {
 
     public final int type;
     public final String name;
@@ -78,6 +81,11 @@ public class SpongeEntityMeta implements CatalogType {
                 .add("type", this.type)
                 .add("name", this.name)
                 .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
     }
 
     @Override

@@ -26,11 +26,14 @@ package org.spongepowered.common.scoreboard;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class SpongeDisplaySlot implements DisplaySlot {
+public class SpongeDisplaySlot implements DisplaySlot, TextRepresentable {
 
     private String name;
     private Optional<TextColor> textColor;
@@ -60,6 +63,20 @@ public class SpongeDisplaySlot implements DisplaySlot {
     public int getIndex() {
         return this.id;
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("name", this.name)
+                .add("color", this.textColor)
+                .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

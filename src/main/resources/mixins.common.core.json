@@ -208,6 +208,7 @@
         "entity.living.animal.MixinEntityRabbit",
         "entity.living.animal.MixinEntitySheep",
         "entity.living.animal.MixinEntitySquid",
+        "entity.living.animal.MixinEntityTameable",
         "entity.living.animal.MixinEntityWolf",
         "entity.living.complex.MixinEntityDragon",
         "entity.living.complex.MixinEntityDragonPart",

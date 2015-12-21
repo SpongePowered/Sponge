@@ -26,11 +26,14 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.SpongeTexts;
 
 @Mixin(EntityPainting.EnumArt.class)
-public abstract class MixinArtType implements Art {
+public abstract class MixinArtType implements Art, TextRepresentable {
 
     private static final int PIXELS_PER_BLOCK = 16;
 
@@ -58,5 +61,9 @@ public abstract class MixinArtType implements Art {
         return this.sizeX / PIXELS_PER_BLOCK;
     }
 
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
 
 }

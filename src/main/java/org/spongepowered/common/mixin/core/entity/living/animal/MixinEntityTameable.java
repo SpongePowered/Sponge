@@ -22,36 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity;
 
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Profession;
+package org.spongepowered.common.mixin.core.entity.living.animal;
+
+import net.minecraft.entity.passive.EntityTameable;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
-public class SpongeProfession extends SpongeEntityMeta implements Profession {
+@Mixin(EntityTameable.class)
+public abstract class MixinEntityTameable extends MixinEntityAnimal {
 
-    private final List<Career> careers = new ArrayList<>();
+    @Shadow(prefix = "shadow$")
+    public abstract boolean shadow$isTamed();
 
-    public SpongeProfession(int id, String name) {
-        super(id, name);
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public List<Career> getCareers() {
-        return ImmutableList.copyOf(this.careers);
-    }
-
-    public List<Career> getUnderlyingCareers() {
-        return this.careers;
-    }
 }

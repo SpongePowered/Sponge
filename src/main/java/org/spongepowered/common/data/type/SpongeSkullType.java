@@ -26,16 +26,38 @@ package org.spongepowered.common.data.type;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeSkullType implements SkullType {
+public class SpongeSkullType implements SkullType, TextRepresentable {
 
     private final byte id;
     private final String name;
+    private final Translation translation;
 
     public SpongeSkullType(byte id, String name) {
         this.id = id;
         this.name = name;
+        this.translation = translate(name);
+    }
+
+    protected Translation translate(String name) {
+        if (name.equalsIgnoreCase("SKELETON")) {
+            return new SpongeTranslation("item.skull.skeleton.name");
+        } else if (name.equalsIgnoreCase("WITHER_SKELETON")) {
+            return new SpongeTranslation("item.skull.wither.name");
+        } else if (name.equalsIgnoreCase("ZOMBIE")) {
+            return new SpongeTranslation("item.skull.zombie.name");
+        } else if (name.equalsIgnoreCase("PLAYER")) {
+            return new SpongeTranslation("item.skull.char.name");
+        } else if (name.equalsIgnoreCase("CREEPER")) {
+            return new SpongeTranslation("item.skull.creeper.name");
+        } else {
+            throw new IllegalArgumentException("Unsupported Skull Type \"" + name + "\"!");
+        }
     }
 
     @Override
@@ -50,7 +72,7 @@ public class SpongeSkullType implements SkullType {
 
     @Override
     public Translation getTranslation() {
-        return null;
+        return this.translation;
     }
 
     public byte getByteId() {
@@ -74,4 +96,18 @@ public class SpongeSkullType implements SkullType {
         return Objects.equal(this.id, other.id)
                && Objects.equal(this.name, other.name);
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

@@ -47,6 +47,8 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -58,6 +60,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.util.persistence.NbtTranslator;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
@@ -67,7 +70,7 @@ import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
-public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
+public abstract class MixinWorldType implements GeneratorType, IMixinWorldType, TextRepresentable {
 
     @Shadow private String worldType;
     @Shadow private int worldTypeId;
@@ -232,4 +235,10 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
                 .add("settings", getGeneratorSettings())
                 .toString();
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

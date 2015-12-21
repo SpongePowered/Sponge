@@ -25,16 +25,20 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockRailBase;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.SpongeTexts;
 
 @Mixin(BlockRailBase.EnumRailDirection.class)
 @Implements(@Interface(iface = RailDirection.class, prefix = "shadow$"))
-public abstract class MixinBlockRailBaseEnumRailDirection {
+public abstract class MixinBlockRailBaseEnumRailDirection implements TextRepresentable {
 
     @Shadow
     public abstract String getName();
@@ -60,4 +64,10 @@ public abstract class MixinBlockRailBaseEnumRailDirection {
         }
         return (RailDirection) (Object) BlockRailBase.EnumRailDirection.byMetadata(meta);
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText((CatalogType) this);
+    }
+
 }

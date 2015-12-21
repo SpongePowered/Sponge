@@ -24,10 +24,14 @@
  */
 package org.spongepowered.common.scoreboard;
 
+import com.google.common.base.Objects;
 import net.minecraft.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeVisibility implements Visibility {
+public class SpongeVisibility implements Visibility, TextRepresentable {
 
     private Team.EnumVisible handle;
 
@@ -48,4 +52,18 @@ public class SpongeVisibility implements Visibility {
     public Team.EnumVisible getHandle() {
         return this.handle;
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", getId())
+                .add("name", getName())
+                .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

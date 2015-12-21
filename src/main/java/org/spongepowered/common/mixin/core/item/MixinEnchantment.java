@@ -29,21 +29,31 @@ import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
-public abstract class MixinEnchantment implements Enchantment {
+@Implements(value = @Interface(iface = Enchantment.class, prefix = "enchantment$") )
+public abstract class MixinEnchantment implements Enchantment, TextRepresentable {
 
     @Shadow protected String name;
     @Shadow private int weight;
 
+    @Shadow public abstract String getName();
     @Shadow public abstract int getMinLevel();
     @Shadow public abstract int getMaxLevel();
     @Shadow public abstract int getMinEnchantability(int level);
@@ -52,15 +62,26 @@ public abstract class MixinEnchantment implements Enchantment {
     @Shadow(prefix = "minecraft$") public abstract String minecraft$getName();
 
     private String id = "";
+    private Translation translation;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(int id, ResourceLocation resLoc, int weight, EnumEnchantmentType type, CallbackInfo ci) {
         this.id = resLoc.toString();
+        this.translation = new SpongeTranslation(getName());
+    }
+
+    @Inject(method = "setName", at = @At("RETURN") )
+    public void setName(String name, CallbackInfoReturnable<Enchantment> cir) {
+        this.translation = new SpongeTranslation(getName());
     }
 
     @Override
     public String getId() {
         return this.id;
+    }
+
+    public String enchantment$getName() {
+        return getName();
     }
 
     @Override
@@ -104,10 +125,21 @@ public abstract class MixinEnchantment implements Enchantment {
     }
 
     @Override
+    public Translation getTranslation() {
+        return translation;
+    }
+
+    @Override
     public String toString() {
         return Objects.toStringHelper("Enchantment")
-            .add("Name", shadow$getName())
-            .add("Id", getId())
-            .toString();
+                .add("id", getId())
+                .add("name", shadow$getName())
+                .toString();
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

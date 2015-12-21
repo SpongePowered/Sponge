@@ -27,15 +27,21 @@ package org.spongepowered.common.entity;
 import com.google.common.base.Objects;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeEntityType implements EntityType {
+public class SpongeEntityType implements EntityType, TextRepresentable {
 
     public static final EntityType UNKNOWN = new EntityType() {
 
+        private final Translation translation = new SpongeTranslation("entity.generic.name");
+
         @Override
         public Translation getTranslation() {
-            throw new UnsupportedOperationException("Unknown entity type has no translation");
+            return translation;
         }
 
         @Override
@@ -58,20 +64,26 @@ public class SpongeEntityType implements EntityType {
     public final String entityName;
     public final String modId;
     public final Class<? extends Entity> entityClass;
+    private final Translation translation;
     // currently not used
     public int trackingRange;
     public int updateFrequency;
     public boolean sendsVelocityUpdates;
 
-    public SpongeEntityType(int id, String name, Class<? extends Entity> clazz) {
-        this(id, name.toLowerCase(), "minecraft", clazz);
+    public SpongeEntityType(int id, String name, Class<? extends Entity> clazz, Translation translation) {
+        this(id, name.toLowerCase(), "minecraft", clazz, translation);
     }
 
-    public SpongeEntityType(int id, String name, String modId, Class<? extends Entity> clazz) {
+    public SpongeEntityType(int id, String name, String modId, Class<? extends Entity> clazz, Translation translation) {
         this.entityTypeId = id;
         this.entityName = name.toLowerCase();
         this.entityClass = clazz;
         this.modId = modId.toLowerCase();
+        if (translation == null) {
+            this.translation = UNKNOWN.getTranslation();
+        } else {
+            this.translation = translation;
+        }
     }
 
     @Override
@@ -130,6 +142,12 @@ public class SpongeEntityType implements EntityType {
 
     @Override
     public Translation getTranslation() {
-        return null;
+        return this.translation;
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

@@ -29,16 +29,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeCookedFish implements CookedFish {
+public class SpongeCookedFish implements CookedFish, TextRepresentable {
 
     private final String id;
     private final String name;
+    private final Translation translation;
     public final ItemFishFood.FishType fish;
 
-    public SpongeCookedFish(String id, String name, ItemFishFood.FishType fish) {
+    public SpongeCookedFish(String id, String name, Translation translation, ItemFishFood.FishType fish) {
         this.id = checkNotNull(id);
         this.name = checkNotNull(name);
+        this.translation = checkNotNull(translation, "translation");
         this.fish = checkNotNull(fish);
     }
 
@@ -53,7 +59,18 @@ public class SpongeCookedFish implements CookedFish {
     }
 
     @Override
+    public Translation getTranslation() {
+        return this.translation;
+    }
+
+    @Override
     public Fish getRawFish() {
         return (Fish) (Object) this.fish;
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

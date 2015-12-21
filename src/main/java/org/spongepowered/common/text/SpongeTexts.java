@@ -28,9 +28,16 @@ import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextFormat;
+import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.api.text.translation.Translatable;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
 
@@ -123,4 +130,27 @@ public final class SpongeTexts {
         }
         return legacy;
     }
+
+    public static TextBuilder toTextBuilder(CatalogType type) {
+        final TextBuilder builder;
+        if (type instanceof Translatable) {
+            final Translation translation = ((Translatable) type).getTranslation();
+            if (translation == null) { // Not yet fully implemented?
+                builder = Texts.builder(type.getName());
+            } else {
+                builder = Texts.builder(translation);
+            }
+        } else {
+            builder = Texts.builder(type.getName());
+        }
+        builder.format(new TextFormat(TextStyles.BOLD, TextColors.AQUA));
+        builder.onHover(TextActions.showText(Texts.of("Id: " + type.getId() + "\nName: " + type.getName())));
+        builder.onShiftClick(TextActions.insertText(type.getId()));
+        return builder;
+    }
+
+    public static Text toText(CatalogType type) {
+        return toTextBuilder(type).toText();
+    }
+
 }

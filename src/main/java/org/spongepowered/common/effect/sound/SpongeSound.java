@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.effect.sound;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeSound implements SoundType {
+public class SpongeSound implements SoundType, TextRepresentable {
 
     private final String name;
     private final String id;
@@ -45,4 +49,17 @@ public class SpongeSound implements SoundType {
     public String getName() {
         return this.name;
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("name", this.name)
+                .toString();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(this);
+    }
+
 }

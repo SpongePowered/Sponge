@@ -34,6 +34,7 @@ import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.util.RegistrationDependency;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -93,22 +94,32 @@ public class CareerRegistryModule implements AdditionalCatalogRegistryModule<Car
 
     @Override
     public void registerDefaults() {
-        this.careerMap.put("farmer", registerCareer(new SpongeCareer(0, "farmer", ProfessionRegistryModule.LIBRARIAN)));
-        this.careerMap.put("fisherman", registerCareer(new SpongeCareer(1, "fisherman", ProfessionRegistryModule.FARMER)));
+        this.careerMap.put("farmer",
+                registerCareer(new SpongeCareer(0, "farmer", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.farmer"))));
+        this.careerMap.put("fisherman", registerCareer(
+                new SpongeCareer(1, "fisherman", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.fisherman"))));
+        this.careerMap.put("shepherd",
+                registerCareer(new SpongeCareer(2, "shepherd", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.shepherd"))));
+        this.careerMap.put("fletcher",
+                registerCareer(new SpongeCareer(3, "fletcher", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.fletcher"))));
 
-        this.careerMap.put("farmer", registerCareer(new SpongeCareer(0, "farmer", ProfessionRegistryModule.FARMER)));
-        this.careerMap.put("fisherman", registerCareer(new SpongeCareer(1, "fisherman", ProfessionRegistryModule.FARMER)));
-        this.careerMap.put("shepherd", registerCareer(new SpongeCareer(2, "shepherd", ProfessionRegistryModule.FARMER)));
-        this.careerMap.put("fletcher", registerCareer(new SpongeCareer(3, "fletcher", ProfessionRegistryModule.FARMER)));
+        this.careerMap.put("librarian", registerCareer(
+                new SpongeCareer(0, "librarian", ProfessionRegistryModule.LIBRARIAN, new SpongeTranslation("entity.Villager.librarian"))));
 
-        this.careerMap.put("cleric",  registerCareer(new SpongeCareer(0, "cleric", ProfessionRegistryModule.PRIEST)));
+        this.careerMap.put("cleric",
+                registerCareer(new SpongeCareer(0, "cleric", ProfessionRegistryModule.PRIEST, new SpongeTranslation("entity.Villager.cleric"))));
 
-        this.careerMap.put("armorer", registerCareer(new SpongeCareer(0, "armorer", ProfessionRegistryModule.BLACKSMITH)));
-        this.careerMap.put("weapon_smith", registerCareer(new SpongeCareer(1, "weapon_smith", ProfessionRegistryModule.BLACKSMITH)));
-        this.careerMap.put("tool_smith", registerCareer(new SpongeCareer(2, "tool_smith", ProfessionRegistryModule.BLACKSMITH)));
+        this.careerMap.put("armorer",
+                registerCareer(new SpongeCareer(0, "armorer", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.armor"))));
+        this.careerMap.put("weapon_smith", registerCareer(
+                new SpongeCareer(1, "weapon_smith", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.weapon"))));
+        this.careerMap.put("tool_smith", registerCareer(
+                new SpongeCareer(2, "tool_smith", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.tool"))));
 
-        this.careerMap.put("butcher", registerCareer(new SpongeCareer(0, "butcher", ProfessionRegistryModule.BUTCHER)));
-        this.careerMap.put("leatherworker", registerCareer(new SpongeCareer(1, "leatherworker", ProfessionRegistryModule.BUTCHER)));
+        this.careerMap.put("butcher",
+                registerCareer(new SpongeCareer(0, "butcher", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.butcher"))));
+        this.careerMap.put("leatherworker", registerCareer(
+                new SpongeCareer(1, "leatherworker", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.leather"))));
     }
 
     private CareerRegistryModule() { }

@@ -34,6 +34,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.TameEntityEvent;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,13 +44,14 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
 import java.util.Random;
 
 @NonnullByDefault
 @Mixin(EntityOcelot.class)
-public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Ocelot {
+public abstract class MixinEntityOcelot extends MixinEntityTameable implements Ocelot {
 
     private ItemStack currentItemStack;
 
@@ -86,6 +88,15 @@ public abstract class MixinEntityOcelot extends MixinEntityAnimal implements Oce
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
         manipulators.add(getOcelotData());
+    }
+
+    @Override
+    public Translation getTranslation() {
+        if (shadow$isTamed()) {
+            return new SpongeTranslation("entity.Cat.name");
+        } else {
+            return super.getTranslation();
+        }
     }
 
 }
