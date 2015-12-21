@@ -49,6 +49,7 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.difficulty.Difficulty;
@@ -141,6 +142,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.playerUniqueIdNbt = new NBTTagList();
         this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
         this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+        this.dimensionType = DimensionTypes.OVERWORLD;
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )

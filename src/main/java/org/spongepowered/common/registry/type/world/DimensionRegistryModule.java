@@ -35,6 +35,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -88,6 +89,11 @@ public final class DimensionRegistryModule implements AdditionalCatalogRegistryM
     @Override
     public void registerDefaults() {
         DimensionManager.init();
+    }
+
+    @AdditionalRegistration
+    public void reApplyDimensionTypes() {
+        // Re-map fields in case mods have changed vanilla providers
         RegistryHelper.mapFields(DimensionTypes.class, this.dimensionTypeMappings);
     }
 
@@ -121,7 +127,7 @@ public final class DimensionRegistryModule implements AdditionalCatalogRegistryM
 
     public void validateProvider(WorldProvider provider) {
         if (((IMixinWorldProvider) provider).getDimensionConfig() == null) {
-            int providerId = provider.getDimensionId();
+            int providerId = DimensionManager.getProviderType(provider.getDimensionId());
             if (!isConfigRegistered(providerId)) {
                 String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
                 SpongeConfig<SpongeConfig.DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,

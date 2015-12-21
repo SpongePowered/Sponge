@@ -32,6 +32,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
@@ -127,7 +128,6 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
         this.biomeTypeMappings.put("extreme_hills_mountains", (BiomeType) biomeArray[BiomeGenBase.extremeHills.biomeID + 128]);
         this.biomeTypeMappings.put("extreme_hills_plus_mountains", (BiomeType) biomeArray[BiomeGenBase.extremeHillsPlus.biomeID + 128]);
         this.biomeTypeMappings.put("mega_spruce_taiga_hills", (BiomeType) biomeArray[BiomeGenBase.megaTaigaHills.biomeID + 128]);
-
     }
 
     @AdditionalRegistration
@@ -139,5 +139,7 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
                 this.biomeTypeMappings.put(biome.biomeName.toLowerCase(), (BiomeType) biome);
             }
         }
+        // Re-map fields in case mods have changed vanilla world types
+        RegistryHelper.mapFields(BiomeTypes.class, this.biomeTypeMappings);
     }
 }

@@ -406,16 +406,22 @@ public class SpongeHooks {
     }
 
     public static SpongeConfig<?> getActiveConfig(String dimFolder, String worldFolder) {
-        Path configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimFolder).resolve(worldFolder).resolve("world.conf");
-        Path configPath2 = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimFolder).resolve("dimension.conf");
-        SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, configPath, SpongeImpl.ECOSYSTEM_ID);
-        SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, configPath2, SpongeImpl.ECOSYSTEM_ID);
-        if (worldConfig != null && dimConfig != null) {
+        if (dimFolder == null) {
+            return SpongeImpl.getGlobalConfig();
+        }
+        Path dimFolderPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimFolder);
+        Path dimConfPath = dimFolderPath.resolve("dimension.conf");
+
+        if (worldFolder != null) {
+            Path worldConfPath = dimFolderPath.resolve(worldFolder).resolve("world.conf");
+            SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID);
             if (worldConfig.getConfig().isConfigEnabled()) {
                 return worldConfig;
-            } else if (dimConfig.getConfig().isConfigEnabled()) {
-                return dimConfig;
-            } 
+            }
+        }
+        SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID);
+        if (dimConfig.getConfig().isConfigEnabled()) {
+            return dimConfig;
         }
         return SpongeImpl.getGlobalConfig();
     }

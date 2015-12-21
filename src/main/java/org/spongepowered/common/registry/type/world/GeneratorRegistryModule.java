@@ -32,6 +32,7 @@ import net.minecraft.world.WorldType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.common.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
@@ -76,5 +77,7 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
                 this.generatorTypeMappings.put(worldType.getWorldTypeName().toLowerCase(), (GeneratorType) worldType);
             }
         }
+        // Re-map fields in case mods have changed vanilla world types
+        RegistryHelper.mapFields(GeneratorTypes.class, this.generatorTypeMappings);
     }
 }
