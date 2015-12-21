@@ -78,10 +78,8 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.text.sink.MessageSinks;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -105,7 +103,6 @@ import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -370,42 +367,16 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    private ChatComponentTranslation tmpQuitMessage;
-
-    /**
-     * @author Simon816
-     *
-     * Store the quit message and ServerConfigurationManager instance for use in
-     * {@link #onDisconnectPlayer}.
-     */
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendChatMsg(Lnet/minecraft/util/IChatComponent;)V"))
-    public void onSendChatMsgCall(ServerConfigurationManager thisCtx, IChatComponent chatcomponenttranslation) {
-        this.tmpQuitMessage = (ChatComponentTranslation) chatcomponenttranslation;
-    }
-
-    /**
-     * @author Simon816
-     *
-     * Fire the PlayerQuitEvent before playerLoggedOut is called in order for
-     * event handlers to change the quit message captured from
-     * {@link #onSendChatMsgCall}.
-     */
-    @Inject(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V"))
-    public void onDisconnectPlayer(IChatComponent reason, CallbackInfo ci) {
-        Text message = SpongeTexts.toText(this.tmpQuitMessage);
-        Text newMessage = Text.of(message);
-        Player player = (Player) this.playerEntity;
-        Set<CommandSource> sources = new HashSet<>();
-        sources.add(player);
-        MessageSink originalSink = MessageSinks.to(sources);
-        ClientConnectionEvent.Disconnect event =
-                SpongeImplFactory.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)), message,
-                    newMessage, originalSink, player.getMessageSink(), player);
-        this.tmpQuitMessage = null;
+    public void onDisconnectHandler(ServerConfigurationManager this$0, IChatComponent component) {
+        final Player player = ((Player) this.playerEntity);
+        final Optional<Text> message = Optional.ofNullable(SpongeTexts.toText(component));
+        final MessageChannel originalChannel = player.getMessageChannel();
+        final ClientConnectionEvent.Disconnect event = SpongeImplFactory.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)),
+                originalChannel, Optional.of(originalChannel), message, message, player);
         SpongeImpl.postEvent(event);
-        event.getSink().sendMessage(event.getMessage());
+        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
     }
 
     @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))

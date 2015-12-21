@@ -140,9 +140,8 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -482,20 +481,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
     public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        MessageSink sink = MessageSinks.toNone();
-        MessageSink originalSink = MessageSinks.toNone();
-        Text originalMessage = Text.of();
-        Text message = Text.of();
-
         if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
+            MessageChannel originalChannel = MessageChannel.TO_NONE;
 
-            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.of(NamedCause.source(this)), originalMessage, message,
-                originalSink, sink, (Entity) entityIn);
+            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.of(NamedCause.source(this)), originalChannel,
+                    Optional.of(originalChannel), Optional.empty(), Optional.empty(),
+                (Entity) entityIn);
             SpongeImpl.getGame().getEventManager().post(event);
-            Text returned = event.getMessage();
-            if (returned != Text.of()) {
-                event.getSink().sendMessage(returned);
-            }
+            event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
         }
     }
 
@@ -945,15 +938,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.nmsWorld);
                 if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
                     Player spongePlayer = (Player) player;
-                    MessageSink originalSink = spongePlayer.getMessageSink();
-                    MessageSink sink = spongePlayer.getMessageSink();
+                    MessageChannel originalChannel = spongePlayer.getMessageChannel();
 
-                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, Text.of(), Text.of(), originalSink, sink, (Entity) entity);
+                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, originalChannel, Optional.of(originalChannel),
+                            Optional.empty(), Optional.empty(), (Entity) entity);
                     SpongeImpl.getGame().getEventManager().post(event);
-                    Text returned = event.getMessage();
-                    if (returned != Text.of()) {
-                        event.getSink().sendMessage(returned);
-                    }
+                    event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
 
                     StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
                 }

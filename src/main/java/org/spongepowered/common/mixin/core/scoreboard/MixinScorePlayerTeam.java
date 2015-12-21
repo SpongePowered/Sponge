@@ -27,17 +27,14 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumChatFormatting;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -53,8 +50,6 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -295,51 +290,29 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     }
 
     @SuppressWarnings("rawtypes")
-    public MessageSink getSink() {
-        Set<CommandSource> sources = new HashSet<>();
-
-        Collection collection = getMembershipCollection();
-        Iterator iterator = collection.iterator();
-
-        while (iterator.hasNext()) {
-            String s = (String)iterator.next();
-            EntityPlayerMP teamPlayer = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(s);
-            if (teamPlayer != null) {
-                sources.add((Player) teamPlayer);
-            }
-        }
-        return MessageSinks.to(sources);
+    public MessageChannel getChannel() {
+        return MessageChannel.fixed(((Collection<String>) this.getMembershipCollection()).stream()
+                .map(name -> Sponge.getGame().getServer().getPlayer(name))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet()));
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public MessageSink getSinkForPlayer(EntityPlayerMP player) {
-        Set<CommandSource> sources = new HashSet<>();
-
-        Collection collection = getMembershipCollection();
-        Iterator iterator = collection.iterator();
-
-        while (iterator.hasNext()) {
-            String s = (String)iterator.next();
-            EntityPlayerMP teamPlayer = player.mcServer.getConfigurationManager().getPlayerByUsername(s);
-            if (teamPlayer != null && player != teamPlayer) {
-                sources.add((Player) teamPlayer);
-            }
-        }
-        return MessageSinks.to(sources);
+    public MessageChannel getTeamChannel(EntityPlayerMP player) {
+        return MessageChannel.fixed(((Collection<String>) this.getMembershipCollection()).stream()
+                .map(name -> Sponge.getGame().getServer().getPlayer(name))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(member -> member != player)
+                .collect(Collectors.toSet()));
     }
 
     @Override
-    public MessageSink getNonTeamSink() {
-        Set<CommandSource> sources = new HashSet<>();
-
-        for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i) {
-            EntityPlayerMP player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);
-
-            if (player.getTeam() != this) {
-                sources.add((Player) player);
-            }
-        }
-        return MessageSinks.to(sources);
+    public MessageChannel getNonTeamChannel() {
+        return MessageChannel.fixed(Sponge.getGame().getServer().getOnlinePlayers().stream()
+                .filter(player -> ((EntityPlayerMP) player).getTeam() != this)
+                .collect(Collectors.toSet()));
     }
 }

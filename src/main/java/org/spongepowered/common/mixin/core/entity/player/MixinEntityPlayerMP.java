@@ -57,14 +57,11 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -88,7 +85,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
-import org.spongepowered.common.world.DimensionManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -330,22 +326,23 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public MessageSink getDeathMessageSink() {
+    public MessageChannel getDeathMessageChannel() {
         EntityPlayerMP player = (EntityPlayerMP) (Object) this;
         if (player.worldObj.getGameRules().getGameRuleBooleanValue("showDeathMessages")) {
-            Team team = player.getTeam();
+            @Nullable Team team = player.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                    return ((IMixinTeam) team).getSinkForPlayer(player);
+                    return ((IMixinTeam) team).getTeamChannel(player);
                 } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                    return ((IMixinTeam) team).getNonTeamSink();
+                    return ((IMixinTeam) team).getNonTeamChannel();
                 }
             } else {
-                return this.getMessageSink();
+                return this.getMessageChannel();
             }
         }
-        return MessageSinks.toNone();
+
+        return MessageChannel.TO_NONE;
     }
 
     @Override

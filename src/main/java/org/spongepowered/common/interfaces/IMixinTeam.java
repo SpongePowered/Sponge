@@ -25,11 +25,11 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.channel.MessageChannel;
 
 public interface IMixinTeam {
 
-    MessageSink getSinkForPlayer(EntityPlayerMP player);
+    MessageChannel getTeamChannel(EntityPlayerMP player);
 
-    MessageSink getNonTeamSink();
+    MessageChannel getNonTeamChannel();
 }
