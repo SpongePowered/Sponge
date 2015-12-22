@@ -270,6 +270,7 @@ public class KeyRegistry {
         keyMap.put("is_splash_potion", makeSingleKey(Boolean.class, Value.class, of("IsSplashPotion")));
         keyMap.put("affects_spawning", makeSingleKey(Boolean.class, Value.class, of("AffectsSpawning")));
         keyMap.put("critical_hit", makeSingleKey(Boolean.class, Value.class, of("CriticalHit")));
+        keyMap.put("leash_holder", makeSingleKey(Entity.class, Value.class, of("LeashHolder")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {

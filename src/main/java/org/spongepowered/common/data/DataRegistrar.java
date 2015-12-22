@@ -756,6 +756,11 @@ public class DataRegistrar {
             ImmutableSpongeAffectsSpawningData.class, affectsSpawningDataProcessor);
         dataManager.registerValueProcessor(Keys.AFFECTS_SPAWNING, affectsSpawningDataProcessor);
 
+        final LeashDualProcessor leashDualProcessor = new LeashDualProcessor();
+        dataManager.registerDataProcessorAndImpl(LeashData.class, SpongeLeashData.class, ImmutableLeashData.class, ImmutableSpongeLeashData.class,
+                leashDualProcessor);
+        dataManager.registerValueProcessor(Keys.LEASH_HOLDER, leashDualProcessor);
+
         final CriticalHitDualProcessor criticalHitDualProcessor = new CriticalHitDualProcessor();
         dataManager.registerDataProcessorAndImpl(CriticalHitData.class, SpongeCriticalHitData.class, ImmutableCriticalHitData.class,
                 ImmutableSpongeCriticalHitData.class, criticalHitDualProcessor);
