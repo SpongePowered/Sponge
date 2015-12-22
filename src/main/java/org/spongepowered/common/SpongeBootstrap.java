@@ -130,20 +130,16 @@ public final class SpongeBootstrap {
                         }
                     }
 
-                    if (!activeConfig.getConfig().getWorld().getKeepSpawnLoaded()) {
-                        SpongeImpl.getLogger().info("World 'keepSpawnLoaded' {} is currently disabled. Skipping world load...", child.getName());
-                            continue;
-                        }
-
                     if (!activeConfig.getConfig().getWorld().loadOnStartup()) {
-                        SpongeImpl.getLogger().info("World {} 'loadOnStartup' is disabled.. Skipping world load...", child.getName());
+                        SpongeImpl.getLogger().warn("World {} [loadOnStartup] is disabled.. Skipping world load...", child.getName());
                             continue;
-                        }
+                    }
 
                     if (spongeData.hasKey("uuid_most") && spongeData.hasKey("uuid_least")) {
                         UUID uuid = new UUID(spongeData.getLong("uuid_most"), spongeData.getLong("uuid_least"));
                         DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, child.getName());
                     }
+
                     if (spongeData.hasKey("dimensionId") && activeConfig.getConfig().getWorld().isWorldEnabled()) {
                         int dimension = spongeData.getInteger("dimensionId");
                         DimensionRegistryModule.getInstance().getAll().forEach(dimensionType -> {

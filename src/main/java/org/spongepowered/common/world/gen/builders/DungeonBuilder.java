@@ -84,7 +84,7 @@ public class DungeonBuilder implements Dungeon.Builder {
 
     @Override
     public Builder requiredPlayerRange(short range) {
-        this.data.set(Keys.SPAWNER_REQURED_PLAYER_RANGE, range);
+        this.data.set(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, range);
         return this;
     }
 

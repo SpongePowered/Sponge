@@ -137,7 +137,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     public MutableBoundedValue<Short> requiredPlayerRange() {
-        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REQURED_PLAYER_RANGE)
+        return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REQUIRED_PLAYER_RANGE)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue((short) 16)
@@ -198,7 +198,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
             .set(Keys.SPAWNER_MAXIMUM_DELAY.getQuery(), this.maximumDelay)
             .set(Keys.SPAWNER_SPAWN_COUNT.getQuery(), this.count)
             .set(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES.getQuery(), this.maximumEntities)
-            .set(Keys.SPAWNER_REQURED_PLAYER_RANGE.getQuery(), this.playerRange)
+            .set(Keys.SPAWNER_REQUIRED_PLAYER_RANGE.getQuery(), this.playerRange)
             .set(Keys.SPAWNER_SPAWN_RANGE.getQuery(), this.spawnRange)
             .set(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN.getQuery(), this.nextEntityToSpawn)
             .set(Keys.SPAWNER_ENTITIES.getQuery(), this.entities);
@@ -285,7 +285,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         registerKeyValue(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::maximumSpawnDelay);
         registerKeyValue(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::spawnCount);
         registerKeyValue(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::maximumNearbyEntities);
-        registerKeyValue(Keys.SPAWNER_REQURED_PLAYER_RANGE, SpongeMobSpawnerData.this::requiredPlayerRange);
+        registerKeyValue(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, SpongeMobSpawnerData.this::requiredPlayerRange);
         registerKeyValue(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::spawnRange);
         registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::nextEntityToSpawn);
         registerKeyValue(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::possibleEntitiesToSpawn);
@@ -295,7 +295,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::getMaximumDelay);
         registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::getCount);
         registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::getMaximumEntities);
-        registerFieldGetter(Keys.SPAWNER_REQURED_PLAYER_RANGE, SpongeMobSpawnerData.this::getPlayerRange);
+        registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, SpongeMobSpawnerData.this::getPlayerRange);
         registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::getSpawnRange);
         registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::getNextEntityToSpawn);
         registerFieldGetter(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::getEntities);
@@ -305,7 +305,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         registerFieldSetter(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::setMaximumDelay);
         registerFieldSetter(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::setCount);
         registerFieldSetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::setMaximumEntities);
-        registerFieldSetter(Keys.SPAWNER_REQURED_PLAYER_RANGE, SpongeMobSpawnerData.this::setPlayerRange);
+        registerFieldSetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, SpongeMobSpawnerData.this::setPlayerRange);
         registerFieldSetter(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::setSpawnRange);
         registerFieldSetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::setNextEntityToSpawn);
         registerFieldSetter(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::setEntities);
