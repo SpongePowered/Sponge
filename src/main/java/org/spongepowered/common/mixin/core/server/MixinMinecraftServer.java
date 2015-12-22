@@ -558,19 +558,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true);
         }
 
-        SpongeConfig<SpongeConfig.WorldConfig> spongeConfig =
+        final SpongeConfig<SpongeConfig.WorldConfig> spongeConfig =
                 new SpongeConfig<>(SpongeConfig.Type.WORLD, SpongeImpl.getSpongeConfigDir().resolve("worlds")
                         .resolve(settings.getDimensionType().getId()).resolve(worldName).resolve("world.conf"),
                         SpongeImpl.ECOSYSTEM_ID);
-        WorldConfig worldConfig = spongeConfig.getConfig();
+        final WorldConfig worldConfig = spongeConfig.getConfig();
 
         if (!settings.getGeneratorModifiers().isEmpty()) {
             worldConfig.setConfigEnabled(true);
             worldConfig.getWorldGenModifiers().clear();
             worldConfig.getWorldGenModifiers().addAll(GeneratorModifierRegistryModule.getInstance().toIds(settings.getGeneratorModifiers()));
         }
-
-        spongeConfig.save();
 
         WorldInfo worldInfo = savehandler.loadWorldInfo();
 
